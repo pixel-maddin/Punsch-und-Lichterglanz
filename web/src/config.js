@@ -328,6 +328,10 @@ export const EILIG_ANTEIL = 0.12;   // so viele Gäste haben es eilig (ab dem 30
 export const EILIG_GEDULD = 0.55;   // … und so viel weniger Geduld
 export const EILIG_MULT = 2;        // … dafür zahlen sie doppelt
 export const ERSTER_SONDERGAST = 150; // s nach Sitzungsbeginn kommt garantiert der erste
+// Besondere Gäste erst, wenn das Spiel etwas läuft: ab so vielen Getränken im
+// Angebot, und dann frühestens SONDER_NACH s später (der erste kommt garantiert)
+export const SONDER_AB_PRODUKTE = 3;
+export const SONDER_NACH = 60;
 
 // Deko, die es NUR im Adventskalender gibt
 export const KALENDER_DEKO = {

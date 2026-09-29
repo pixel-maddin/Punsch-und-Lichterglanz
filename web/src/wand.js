@@ -9,7 +9,7 @@
  *
  * Nicht erreichte Socken sind dunkle Schattenrisse.
  */
-import { r, p } from './pixel.js?v=20260929k';
+import { r, p } from './pixel.js?v=20260929l';
 
 export const W = 160, H = 150;
 const REIHEN = [11, 38, 65];            // y der drei Schnüre

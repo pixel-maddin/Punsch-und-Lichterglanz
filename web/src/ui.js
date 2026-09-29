@@ -5,17 +5,17 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260929k';
-import * as S from './spiel.js?v=20260929k';
-import * as Z from './zeit.js?v=20260929k';
-import * as T from './ton.js?v=20260929k';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929k';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929k';
-import { nochmal as nochmalLernen } from './lernen.js?v=20260929k';
-import * as A from './auftraege.js?v=20260929k';
-import * as E from './erfolge.js?v=20260929k';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929k';
-import { alleSymbole } from './symbole.js?v=20260929k';
+import * as C from './config.js?v=20260929l';
+import * as S from './spiel.js?v=20260929l';
+import * as Z from './zeit.js?v=20260929l';
+import * as T from './ton.js?v=20260929l';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929l';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929l';
+import { nochmal as nochmalLernen, fuehrung } from './lernen.js?v=20260929l';
+import * as A from './auftraege.js?v=20260929l';
+import * as E from './erfolge.js?v=20260929l';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929l';
+import { alleSymbole } from './symbole.js?v=20260929l';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -128,6 +128,9 @@ export function schliesseBlatt() {
  * Schaltknöpfe gemischt in denselben Zeilen - bei 70 Artikeln unübersichtlich.
  */
 export function oeffneLaden(tab, zeigeId, modus) {
+  // Einführung „erstes Getränk / erste Deko": gleich zur richtigen Zeile
+  const f = !tab && !zeigeId && !modus && fuehrung();
+  if (f) { tab = f.tab; zeigeId = f.id; }
   if (tab) ladenTab = tab;
   if (modus) ladenModus = modus; else if (tab || zeigeId) ladenModus = 'kaufen';
   oeffneBlatt('laden', ladenModus === 'haus' ? 'Mein Haus' : 'Einkaufen');
@@ -160,6 +163,7 @@ export function oeffneLaden(tab, zeigeId, modus) {
   if (z) {
     z.z.scrollIntoView({ block: 'center' });
     z.z.classList.add('blitz'); setTimeout(() => z.z.classList.remove('blitz'), 900);
+    if (f) { z.z.classList.add('fuehrung'); z.txt.appendChild(el('span', 'fuehr-pfeil', 'Tippe hier auf Kaufen ▸')); }
   }
 }
 

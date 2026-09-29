@@ -493,3 +493,8 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   display: block; margin: 0 auto calc(var(--px) * 2);
   width: calc(var(--px) * 30); height: calc(var(--px) * 36); image-rendering: pixelated;
 }
+
+/* Einführung im Laden: die Zeile, zu der geführt wird */
+.zeile.fuehrung { outline: calc(var(--px) * 0.8) solid var(--gold); outline-offset: calc(var(--px) * -0.4); background: #fff3c4; animation: fuehrung 1.2s ease-in-out infinite; }
+@keyframes fuehrung { 50% { outline-color: #ffcf40; background: #ffe89a; } }
+.zeile .txt .fuehr-pfeil { display: block; margin-top: calc(var(--px) * 1); font: bold calc(var(--px) * 4.4) var(--schrift); color: var(--rot2); }

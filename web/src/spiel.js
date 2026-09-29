@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260929k';
-import * as Z from './zeit.js?v=20260929k';
-import { neueFarben } from './pixel.js?v=20260929k';
+import * as C from './config.js?v=20260929l';
+import * as Z from './zeit.js?v=20260929l';
+import { neueFarben } from './pixel.js?v=20260929l';
 
 const SCHLUESSEL = 'adventshaus.v1';
 
@@ -103,6 +103,7 @@ function resetLauf() {
     grossAb: C.GROSS_ERST,          // frühestens dann die nächste Großbestellung
     gefuellt: {},                   // Nachfüll-Wichtel ist gerade fertig (Abgang)
     schlitten: null, schlittenAb: C.SCHLITTEN_ERST,   // der Nikolaus am Himmel
+    sonderSeit: null,               // seit wann besondere Gäste kommen dürften (sonderBereit)
     t: 0,
   });
 }
@@ -387,11 +388,21 @@ function spezialMoeglich() {
   return m;
 }
 
+/**
+ * Dürfen besondere Gäste kommen? Erst ab SONDER_AB_PRODUKTE Getränken, und
+ * dann SONDER_NACH Sekunden später - am Anfang gibt es genug anderes zu lernen.
+ */
+function sonderBereit() {
+  if (produkteFrei().length < C.SONDER_AB_PRODUKTE) return false;
+  if (lauf.sonderSeit == null) lauf.sonderSeit = lauf.t;
+  return lauf.t >= lauf.sonderSeit + (st.ersterSonder ? 0 : C.SONDER_NACH);
+}
+
 function waehleTyp(erlaubeSpezial) {
   // Besondere Gäste: selten, und nie zwei kurz hintereinander
   // Sie kommen nur, wenn DU am Stand bist - die Wichtel bedienen sie nicht,
   // und wer weg ist, soll nicht vom Grummel bestohlen werden.
-  if (erlaubeSpezial && chefAktiv() && lauf.t >= lauf.spezialAb && Math.random() < C.SPEZIAL_CHANCE) {
+  if (erlaubeSpezial && chefAktiv() && sonderBereit() && lauf.t >= lauf.spezialAb && Math.random() < C.SPEZIAL_CHANCE) {
     const m = spezialMoeglich();
     if (m.length) { lauf.spezialAb = lauf.t + C.SPEZIAL_PAUSE; return zufallGewichtet(m, (x) => x[1])[0]; }
   }
@@ -684,7 +695,7 @@ export function update(dt) {
 
   // Der erste Sondergast kommt garantiert früh - die erste Überraschung
   // soll nicht erst nach 20 Minuten kommen
-  if (!st.ersterSonder && st.lernen >= 99 && chefAktiv() && lauf.t > C.ERSTER_SONDERGAST && wartende().length < C.SCHLANGE_MAX) {
+  if (!st.ersterSonder && st.lernen >= 99 && chefAktiv() && sonderBereit() && lauf.t > C.ERSTER_SONDERGAST && wartende().length < C.SCHLANGE_MAX) {
     st.ersterSonder = true; neuerGast('rentier');
   }
 
