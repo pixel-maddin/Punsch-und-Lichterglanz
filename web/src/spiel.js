@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260929j';
-import * as Z from './zeit.js?v=20260929j';
-import { neueFarben } from './pixel.js?v=20260929j';
+import * as C from './config.js?v=20260929k';
+import * as Z from './zeit.js?v=20260929k';
+import { neueFarben } from './pixel.js?v=20260929k';
 
 const SCHLUESSEL = 'adventshaus.v1';
 

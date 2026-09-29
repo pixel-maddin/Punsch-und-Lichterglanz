@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260929j';
-import * as C from './config.js?v=20260929j';
-import * as S from './spiel.js?v=20260929j';
-import * as Z from './zeit.js?v=20260929j';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260929k';
+import * as C from './config.js?v=20260929k';
+import * as S from './spiel.js?v=20260929k';
+import * as Z from './zeit.js?v=20260929k';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -473,6 +473,22 @@ function extraHinweis(c, x, y, extra, t) {
   else { r(c, x + 4, y + 3, 2, 1, '#ffffff'); r(c, x + 3, y + 4, 4, 2, '#f4f4f4'); r(c, x + 3, y + 6, 4, 1, '#d8d8d8'); p(c, x + 5, y + 2, '#ff8a20'); }
 }
 
+/** Produktsymbol als einfarbiger Schattenriss (11 x 11), einmal gerechnet. */
+const risse = {};
+function schattenriss(id) {
+  if (risse[id]) return risse[id];
+  const cv = document.createElement('canvas');
+  cv.width = 11; cv.height = 11;
+  const k = cv.getContext('2d');
+  icon(k, id, 1, 1, 0, true);   // „roh": ohne Sahne und Zimt, die sind Handarbeit
+  // Dampf über den Tassen gehört nicht zur Form - nur Apfel (Blatt) und Feuerzange (Zange) behalten ihren Kopf
+  if (C.PRODUKT[id].art === 'topf' && id !== 'apfel' && id !== 'feuerzange') k.clearRect(0, 0, 11, 4);
+  k.globalCompositeOperation = 'source-in';
+  k.fillStyle = '#23150b';
+  k.fillRect(0, 0, 11, 11);
+  return (risse[id] = cv);
+}
+
 function glas(c, x, y) {
   r(c, x, y, 7, 8, '#e8e4dc'); r(c, x, y, 1, 8, '#c4bfb4'); r(c, x + 1, y + 7, 6, 1, '#b8b2a6');
   r(c, x + 7, y + 2, 2, 1, '#e8e4dc'); r(c, x + 8, y + 3, 1, 2, '#e8e4dc'); r(c, x + 7, y + 5, 2, 1, '#e8e4dc');
@@ -495,12 +511,13 @@ function zelle(c, i, x, y, t) {
   const W = C.T_ZELLE_B, H = C.T_ZELLE_H;
   r(c, x + 1, y + 1, W - 2, H - 3, '#5a3a22');
   if (!S.hat(p0.id)) {
-    // Gesperrt: Schloss
+    // Gesperrt: Schattenriss des Getränks bzw. Essens, doppelt groß
+    // (vorher ein Schloss - so sieht man, was hier einmal steht)
     r(c, x + 1, y + 1, W - 2, H - 3, '#3a2616');
-    const wz = S.lauf.wackel['z' + p0.id];   // angetippt: das Schloss wackelt
-    const lx = x + W / 2 - 3 + (wz ? Math.round(Math.sin(wz * 60) * 2) : 0), ly = y + 12;   // mittig in der Zelle
-    r(c, lx + 1, ly - 4, 4, 1, '#8a7a6a'); r(c, lx, ly - 3, 1, 3, '#8a7a6a'); r(c, lx + 5, ly - 3, 1, 3, '#8a7a6a');
-    r(c, lx - 1, ly, 8, 6, '#8a7a6a'); p(c, lx + 3, ly + 2, '#3a2616'); p(c, lx + 3, ly + 3, '#3a2616');
+    const wz = S.lauf.wackel['z' + p0.id];   // angetippt: der Schattenriss wackelt
+    const sx = x + W / 2 - 10 + (wz ? Math.round(Math.sin(wz * 60) * 2) : 0);
+    c.imageSmoothingEnabled = false;
+    c.drawImage(schattenriss(p0.id), sx, y + 3, 22, 22);
     if (S.freiErfuellt(p0.id) && S.st.geld >= p0.kosten) { // Man KÖNNTE es kaufen: kleines Funkeln
       if (Math.floor(t * 2) % 2) p(c, x + W - 5, y + 4, '#ffe060');
       p(c, x + W - 6, y + 5, '#ffe060');
