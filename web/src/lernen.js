@@ -14,10 +14,10 @@
  * der erste Gast los, bevor man den Satz zu Ende gelesen hatte.
  * Handlungs-Blasen („tippe auf die Gläser") lassen das Spiel laufen.
  */
-import * as C from './config.js?v=20260929i';
-import * as S from './spiel.js?v=20260929i';
-import * as A from './auftraege.js?v=20260929i';
-import * as E from './erfolge.js?v=20260929i';
+import * as C from './config.js?v=20260929j';
+import * as S from './spiel.js?v=20260929j';
+import * as A from './auftraege.js?v=20260929j';
+import * as E from './erfolge.js?v=20260929j';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
