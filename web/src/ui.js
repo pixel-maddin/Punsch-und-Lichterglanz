@@ -5,17 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260929n';
-import * as S from './spiel.js?v=20260929n';
-import * as Z from './zeit.js?v=20260929n';
-import * as T from './ton.js?v=20260929n';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929n';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929n';
-import { nochmal as nochmalLernen, fuehrung } from './lernen.js?v=20260929n';
-import * as A from './auftraege.js?v=20260929n';
-import * as E from './erfolge.js?v=20260929n';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929n';
-import { alleSymbole } from './symbole.js?v=20260929n';
+import * as C from './config.js?v=20260929q';
+import * as S from './spiel.js?v=20260929q';
+import * as Z from './zeit.js?v=20260929q';
+import * as T from './ton.js?v=20260929q';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929q';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929q';
+import { nochmal as nochmalLernen, fuehrung } from './lernen.js?v=20260929q';
+import * as A from './auftraege.js?v=20260929q';
+import * as E from './erfolge.js?v=20260929q';
+import * as ZL from './ziele.js?v=20260929q';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929q';
+import { alleSymbole } from './symbole.js?v=20260929q';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -50,6 +51,28 @@ export function hud() {
   const b = $('#kalBadge');
   b.textContent = k; b.classList.toggle('versteckt', k === 0);
   $('#btnKalender').classList.toggle('lockt', k > 0);
+}
+
+// ---------------------------------------------------------------------------
+// Startziele: eine Leiste unter der Kopfzeile (ziele.js)
+// ---------------------------------------------------------------------------
+let letztesZiel = '';
+export function zielLeiste() {
+  const z = ZL.aktuell();
+  const k = z && ZL.kaufziel();
+  const bereit = !!(k && k.leisten);
+  const sig = z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}` : '';
+  if (sig === letztesZiel) return;
+  letztesZiel = sig;
+  const b = $('#ziel');
+  $('#huelle').classList.toggle('mit-ziel', !!z);
+  if (!z) { b.classList.add('versteckt'); return; }
+  const zahl = z.ziel > 1 ? ` <i>${z.stand()}/${z.ziel}</i>` : '';
+  const nochNicht = k && !bereit ? `<small>noch ${S.formatGeld(k.kosten - S.st.geld)}</small>` : '';
+  b.innerHTML = `<span class="nr">Ziel ${ZL.nummer()}/${ZL.ZIELE.length}</span><span class="was">${z.text}${zahl}</span>`
+    + (bereit ? '<span class="los">Los ▸</span>' : nochNicht || `<span class="lohn">+${z.lohn} ★</span>`);
+  b.classList.toggle('bereit', bereit);
+  b.classList.remove('versteckt');
 }
 
 // ---------------------------------------------------------------------------
@@ -163,7 +186,7 @@ export function oeffneLaden(tab, zeigeId, modus) {
   if (z) {
     z.z.scrollIntoView({ block: 'center' });
     z.z.classList.add('blitz'); setTimeout(() => z.z.classList.remove('blitz'), 900);
-    if (f) { z.z.classList.add('fuehrung'); z.txt.appendChild(el('span', 'fuehr-pfeil', 'Tippe hier auf Kaufen ▸')); }
+    if (f) { z.z.classList.add('fuehrung'); z.txt.appendChild(el('span', 'fuehr-pfeil', f.leisten === false ? 'Dein nächstes Ziel - noch etwas sparen' : 'Tippe hier auf Kaufen ▸')); }
   }
 }
 
@@ -1058,6 +1081,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
 // ---------------------------------------------------------------------------
 export function verdrahte() {
   alleSymbole();
+  $('#ziel').onclick = () => { T.spiele('klick'); offen === 'laden' ? schliesseBlatt() : oeffneLaden(); };
   $('#btnLaden').onclick = () => { T.spiele('klick'); offen === 'laden' ? schliesseBlatt() : oeffneLaden(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };

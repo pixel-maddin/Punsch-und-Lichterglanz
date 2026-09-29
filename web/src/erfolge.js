@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=20260929n';
-import * as S from './spiel.js?v=20260929n';
+import * as C from './config.js?v=20260929q';
+import * as S from './spiel.js?v=20260929q';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;
@@ -19,8 +19,8 @@ const WICHTEL = ['spuel', 'nachfuell', 'servier'];
 
 // Reihenfolge = Platz an der Wand (oben links nach unten rechts), grob von leicht nach schwer
 export const ERFOLGE = [
-  // id bleibt 'bedient1' (alte Spielstände), das Ziel sind seit 29.09. zehn Gäste
-  { id: 'bedient1',    name: 'Die ersten Becher',      text: 'Bediene deine ersten 10 Gäste.',              ziel: 10,   wert: () => zahl('bedient') },
+  // id bleibt 'bedient1' (alte Spielstände), das Ziel sind seit 29.09. 15 Gäste
+  { id: 'bedient1',    name: 'Die ersten Becher',      text: 'Bediene deine ersten 15 Gäste.',              ziel: 15,   wert: () => zahl('bedient') },
   { id: 'schwung',     name: 'In Schwung',             text: 'Erreiche vollen Schwung (×1,40).',            ziel: 1,    wert: () => zahl('schwungVoll') },
   { id: 'bedient100',  name: 'Stammkundschaft',        text: 'Bediene 100 Gäste.',                          ziel: 100,  wert: () => zahl('bedient') },
   { id: 'sonder1',     name: 'Hoher Besuch',           text: 'Bediene einen besonderen Gast.',              ziel: 1,    wert: () => SONDER.reduce((a, t) => a + typ(t), 0) },

@@ -23,10 +23,11 @@
  * der erste Gast los, bevor man den Satz zu Ende gelesen hatte.
  * Handlungs-Blasen („tippe auf die Gläser") lassen das Spiel laufen.
  */
-import * as C from './config.js?v=20260929n';
-import * as S from './spiel.js?v=20260929n';
-import * as A from './auftraege.js?v=20260929n';
-import * as E from './erfolge.js?v=20260929n';
+import * as C from './config.js?v=20260929q';
+import * as S from './spiel.js?v=20260929q';
+import * as A from './auftraege.js?v=20260929q';
+import * as E from './erfolge.js?v=20260929q';
+import * as Z from './ziele.js?v=20260929q';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -39,10 +40,21 @@ const HINWEIS_PAUSE_SOFORT = 4; // s für Hinweise, deren Lage gleich vorbei ist
 const NACH_EINFUEHRUNG = 40;    // s nach „Geschafft!", bevor der erste Hinweis kommt
 let ruheT = 0;                  // s seit dem letzten Hinweis (zählt nur, wenn nichts offen ist)
 
-/** Läuft gerade eine Führung zum Laden? Dann { tab, id } für ui.js. */
+/**
+ * Wohin soll der Laden springen, wenn man ihn öffnet? Erst eine laufende
+ * Führung (Hinweis mit `laden`), sonst das aktuelle Startziel (ziele.js).
+ */
 export function fuehrung() {
-  return aktuell && aktuell.h.laden && !aktuell.h.fertig() ? aktuell.h.laden : null;
+  if (aktuell && aktuell.h.laden && !aktuell.h.fertig()) return aktuell.h.laden;
+  return Z.kaufziel();
 }
+const istZiel = (id) => { const z = Z.aktuell(); return !!z && z.id === id; };
+/**
+ * Führung zu einem Startziel: sobald es dran und bezahlbar ist - oder
+ * nachträglich, wenn man über die Zielleiste schneller gekauft hat, als die
+ * Erklärung kam (dann nur die Erklärung, der Zeiger entfällt).
+ */
+const zielDran = (ziel, id) => (istZiel(ziel) && kannKaufen(id)) || !!(S.st.zielFertig && S.st.zielFertig[ziel]);
 
 export function layout(g, h) { G = g; H = h; }
 
@@ -125,14 +137,14 @@ const HINWEISE = [
     text: () => 'Deine Hände sind voll. Leere sie im AUSGUSS.',
     ziel: ausgussZiel, fertig: () => S.lauf.hand.length < S.handMax() },
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
-  { id: 'laden', wann: () => kannKaufen('kinderpunsch'),
+  { id: 'laden', sofort: true, wann: () => zielDran('getraenk', 'kinderpunsch'),
     info: () => 'Neues Getränk! Du hast genug Sterne für Kinderpunsch. Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und weil Kinderpunsch ohne Alkohol ist, kommen dann auch Kinder an deinen Stand.',
     text: () => 'Tippe auf LADEN - ich zeige dir, wo es Kinderpunsch gibt.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
   { id: 'laden_danach', sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
     text: () => 'Prima! Kinderpunsch steht jetzt im Regal. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn aus dem neuen Topf. Weitere Getränke findest du später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
-  { id: 'deko', wann: () => kannKaufen('kranz'),
+  { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
     info: () => 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen. Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus der Straße werden!',
     text: () => 'Tippe auf LADEN - im Weihnachtsmarkt wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
@@ -145,13 +157,29 @@ const HINWEISE = [
   { id: 'schwung', wann: () => S.lauf.schwung >= 3,
     text: () => 'Schwung! Wenn du zügig hintereinander servierst, gibt es mehr Sterne (bis ×1,40).',
     ziel: () => ({ x: 140, y: G + 2 }), dauer: 5 },
-  { id: 'wichtel', wann: () => S.status(S.ARTIKEL_MAP.servier).leisten && !S.hat('servier'),
-    text: () => 'Tipp: Der Servier-Wichtel bedient Gäste von allein - sogar wenn die App zu ist. Unter LADEN → Wichtel.',
-    ziel: ladenZiel, fertig: () => S.hat('servier'), dauer: 8 },
-  // Wer alle drei Wichtel hat, soll wissen, dass sie auch ohne ihn weiterarbeiten
-  { id: 'wichtel_weg', wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
-    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher (bis zu ${C.OFFLINE_MAX_H} Stunden).`,
-    ziel: null, dauer: 10 },
+  // Die drei ersten Wichtel (Startziele 3-5): erst erklären, was sie tun, dann zum Laden
+  { id: 'w_spuel', sofort: true, wann: () => zielDran('spuel', 'spuel'),
+    info: () => 'Zeit für Hilfe! Wichtel nehmen dir am Stand Arbeit ab. Der erste ist der SPÜL-WICHTEL: Er stellt dir laufend saubere Gläser aufs Tablett - dann musst du nicht jedes Mal auf die Gläser tippen.',
+    text: () => 'Tippe auf LADEN - unter Wichtel wartet er schon.',
+    ziel: ladenZiel, fertig: () => S.hat('spuel'), laden: { tab: 'wichtel', id: 'spuel' }, lang: true },
+  { id: 'w_nachfuell', sofort: true, wann: () => zielDran('nachfuell', 'nachfuell'),
+    info: () => 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Glühwein ausgeht.',
+    text: () => 'Tippe auf LADEN - unter Wichtel findest du ihn.',
+    ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, lang: true },
+  { id: 'w_servier', sofort: true, wann: () => zielDran('servier', 'servier'),
+    info: () => 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand dann von selbst - sogar wenn du nicht da bist.',
+    text: () => 'Tippe auf LADEN - unter Wichtel wartet der Servier-Wichtel.',
+    ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
+  // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
+  { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
+    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher (bis zu ${C.OFFLINE_MAX_H} Stunden). Solange du selbst mit anpackst, sind sie schneller.`,
+    ziel: null, dauer: 12 },
+  { id: 'herz_ziel', wann: () => istZiel('herz'),
+    text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
+    ziel: () => ({ x: 90, y: 10 }), dauer: 10 },
+  { id: 'ziele_fertig', sofort: true, wann: () => Z.fertig() && S.st.tipps.wichtel_weg,
+    text: () => 'Deine ersten Schritte sind geschafft! Wie es weitergeht: Unter AUFTRÄGE gibt es jeden Tag drei Aufgaben mit Belohnung, und an der Erfolgswand sammelst du Socken.',
+    ziel: auftragZiel, dauer: 10 },
   // Besondere Gäste stellen sich hinten an und gehen, wenn es zu lange
   // dauert - das muss man einmal gesagt bekommen (gemeldet: Rentier war weg)
   { id: 'sonder_schlange', sofort: true, wann: () => S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.platz == null && !g.gehen && !g.laeuft),
@@ -222,10 +250,11 @@ function hinweise(dt) {
   if (aktuell) {
     aktuell.t += dt;
     const h = aktuell.h;
+    // Erst die Erklärung mit „Weiter ▸" (das Spiel steht so lange), dann der
+    // Zeiger - die Erklärung kommt auch, wenn schon gekauft ist
+    if (h.info && !aktuell.gelesen) { const a = aktuell; a.t = 0; return { text: h.info(), ziel: null, weiter: () => { a.gelesen = true; a.t = 0; } }; }
     const fertig = h.fertig ? h.fertig() : aktuell.t > (h.dauer || 6);
     if (fertig || (!h.lang && aktuell.t > 20)) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
-    // Erst die Erklärung mit „Weiter ▸" (das Spiel steht so lange), dann der Zeiger
-    if (h.info && !aktuell.gelesen) { const a = aktuell; a.t = 0; return { text: h.info(), ziel: null, weiter: () => { a.gelesen = true; a.t = 0; } }; }
     return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
   }
   ruheT += dt;
@@ -276,7 +305,7 @@ function zeige(z) {
     const px = Math.max(12, Math.min(168, z.ziel.x));
     tipp.style.setProperty('--pfeil-x', `calc(var(--px) * ${px - 12})`);
   } else {
-    tipp.style.top = `calc(var(--px) * 24)`; tipp.style.bottom = '';
+    tipp.style.top = `calc(var(--px) * ${document.getElementById('huelle').classList.contains('mit-ziel') ? 36 : 24})`; tipp.style.bottom = '';
     tipp.dataset.pfeil = '';
     // Läuft gerade eine Einblendung oben, rutscht sie unter die Blase
     const toast = document.getElementById('toast');

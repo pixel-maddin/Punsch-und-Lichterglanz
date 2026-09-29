@@ -4,17 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260929n';
-import * as S from './spiel.js?v=20260929n';
-import * as Z from './zeit.js?v=20260929n';
-import * as T from './ton.js?v=20260929n';
-import * as UI from './ui.js?v=20260929n';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260929n';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260929n';
-import * as Lernen from './lernen.js?v=20260929n';
-import { zeigeAdvent } from './ereignis.js?v=20260929n';
-import * as A from './auftraege.js?v=20260929n';
-import * as E from './erfolge.js?v=20260929n';
+import * as C from './config.js?v=20260929q';
+import * as S from './spiel.js?v=20260929q';
+import * as Z from './zeit.js?v=20260929q';
+import * as T from './ton.js?v=20260929q';
+import * as UI from './ui.js?v=20260929q';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20260929q';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260929q';
+import * as Lernen from './lernen.js?v=20260929q';
+import { zeigeAdvent } from './ereignis.js?v=20260929q';
+import * as A from './auftraege.js?v=20260929q';
+import * as E from './erfolge.js?v=20260929q';
+import * as ZL from './ziele.js?v=20260929q';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -203,6 +204,12 @@ setInterval(() => {
     UI.toast(neu.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neu[0].id)}!` : `${neu.length} neue Dinge im Laden!`, 'neu');
     S.speichere();
   }
+  const ziel = ZL.pruefe();
+  if (ziel) {
+    T.spiele('kauf');
+    UI.toast(`Ziel ${ZL.nummer() - 1} geschafft! +${ziel.lohn} Sterne`, 'neu');
+  }
+  UI.zielLeiste();
   const erfolge = E.pruefe();
   if (erfolge.length) {
     T.spiele('spezial');
@@ -221,6 +228,7 @@ const q = new URLSearchParams(S.ENTWICKLUNG ? location.search : '');
 if (q.get('datum')) Z.setzeZeit(new Date(q.get('datum')), Number(q.get('tempo')) || 1);
 else if (q.get('tempo')) Z.setzeZeit(null, Number(q.get('tempo')));
 
+ZL.nachholen();
 UI.verdrahte();
 if (!S.st.intro) {
   UI.frageName(false, () => UI.waehleModus((modus) => {

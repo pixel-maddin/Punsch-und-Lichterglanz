@@ -39,6 +39,13 @@ einmal, mit Zeitlimit - schafft man alle, gibt es richtig viele Sterne.
 anderthalbmal so schnell. Besondere Gäste und Großbestellungen bedienst
 nur du.
 
+## Erste Schritte
+
+Nach der Einführung zeigt eine Leiste oben immer das nächste Ziel: ein
+neues Getränk, drei Deko-Teile, die drei ersten Wichtel, ein drittes
+Getränk und 15 ♥ Stimmung. Antippen führt direkt zur richtigen Stelle im
+Laden, jedes Ziel bringt ein paar Sterne.
+
 ## Aufträge und Erfolgswand
 
 Jeden Tag drei Aufträge (leicht, mittel, schwer) mit Belohnung. Der schwere
