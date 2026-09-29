@@ -23,10 +23,10 @@
  * der erste Gast los, bevor man den Satz zu Ende gelesen hatte.
  * Handlungs-Blasen („tippe auf die Gläser") lassen das Spiel laufen.
  */
-import * as C from './config.js?v=20260929m';
-import * as S from './spiel.js?v=20260929m';
-import * as A from './auftraege.js?v=20260929m';
-import * as E from './erfolge.js?v=20260929m';
+import * as C from './config.js?v=20260929n';
+import * as S from './spiel.js?v=20260929n';
+import * as A from './auftraege.js?v=20260929n';
+import * as E from './erfolge.js?v=20260929n';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -126,13 +126,15 @@ const HINWEISE = [
     ziel: ausgussZiel, fertig: () => S.lauf.hand.length < S.handMax() },
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
   { id: 'laden', wann: () => kannKaufen('kinderpunsch'),
-    text: () => 'Du hast genug Sterne für dein erstes neues Getränk! Tippe auf LADEN - ich zeige dir, wo es Kinderpunsch gibt.',
+    info: () => 'Neues Getränk! Du hast genug Sterne für Kinderpunsch. Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und weil Kinderpunsch ohne Alkohol ist, kommen dann auch Kinder an deinen Stand.',
+    text: () => 'Tippe auf LADEN - ich zeige dir, wo es Kinderpunsch gibt.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
   { id: 'laden_danach', sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
-    text: () => 'Prima! Kinderpunsch steht jetzt im Regal - und weil er ohne Alkohol ist, kommen ab jetzt auch Kinder. Jedes neue Getränk bringt mehr Sterne.',
+    text: () => 'Prima! Kinderpunsch steht jetzt im Regal. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn aus dem neuen Topf. Weitere Getränke findest du später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
   { id: 'deko', wann: () => kannKaufen('kranz'),
-    text: () => 'Du kannst dir deine erste Deko leisten! Tippe auf LADEN und schmücke dein Haus - ich zeige dir den Türkranz.',
+    info: () => 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen. Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus der Straße werden!',
+    text: () => 'Tippe auf LADEN - im Weihnachtsmarkt wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
     text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung (oben neben den Sternen) - je mehr Stimmung, desto mehr Gäste, und sie zahlen mehr.',
@@ -222,13 +224,15 @@ function hinweise(dt) {
     const h = aktuell.h;
     const fertig = h.fertig ? h.fertig() : aktuell.t > (h.dauer || 6);
     if (fertig || (!h.lang && aktuell.t > 20)) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
+    // Erst die Erklärung mit „Weiter ▸" (das Spiel steht so lange), dann der Zeiger
+    if (h.info && !aktuell.gelesen) { const a = aktuell; a.t = 0; return { text: h.info(), ziel: null, weiter: () => { a.gelesen = true; a.t = 0; } }; }
     return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
   }
   ruheT += dt;
   for (const h of HINWEISE) {
     if (st.tipps[h.id] || ruheT < (h.sofort ? HINWEIS_PAUSE_SOFORT : HINWEIS_PAUSE) || !h.wann()) continue;
     aktuell = { h, t: 0 };
-    return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
+    return hinweise(0);
   }
   return null;
 }
