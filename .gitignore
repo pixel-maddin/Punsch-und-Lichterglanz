@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Original der Musik (Suno-Download) - im Spiel liegt die umgewandelte Fassung in web/audio/
+musik-quelle/
+
+# Arbeitsnotizen für die Entwicklung: verraten Werkstatt, Dev-Modus und Testwege
+CLAUDE.md
+
+# Python
+__pycache__/

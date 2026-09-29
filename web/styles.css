@@ -1,0 +1,494 @@
+/*
+ * styles.css — alles außerhalb des Canvas.
+ *
+ * Maße hängen an --px (ein logischer Spielpixel in CSS-Pixeln, gesetzt
+ * von main.js). So wachsen Kopfzeile und Leiste genau mit dem Bild mit.
+ * Optik: Pergament, dunkles Holz, Weihnachtsrot — wie ein Menü in einem
+ * Bauernhof-Pixelspiel.
+ */
+:root {
+  --px: 2px;
+  --papier: #f7e9c8;
+  --papier2: #eed9ae;
+  --holz: #6b3e1f;
+  --holz2: #4a2a14;
+  --tinte: #3a2414;
+  --hinweis: #1e1e22;   /* Hinweisblase und Einblendungen: fast schwarz, fett */
+  --rot: #b83a2e;
+  --rot2: #8a241c;
+  --gruen: #3f7a3a;
+  --gruen2: #2a5626;
+  --gold: #e8b030;
+  --schrift: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden;
+  background: #120c22;
+  font-family: var(--schrift);
+  color: var(--tinte);
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+}
+#buehne {
+  position: fixed;
+  top: env(safe-area-inset-top); bottom: env(safe-area-inset-bottom);
+  left: env(safe-area-inset-left); right: env(safe-area-inset-right);
+  display: flex; align-items: center; justify-content: center;
+}
+#huelle { position: relative; overflow: hidden; }
+#cv {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+  touch-action: none;
+}
+.versteckt { display: none !important; }
+
+/* ---------------------------------------------------------------- Kopf */
+#hud {
+  position: absolute; left: 0; right: 0; top: 0;
+  height: calc(var(--px) * 20);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 calc(var(--px) * 3);
+  gap: calc(var(--px) * 2);
+  pointer-events: none;
+  font-weight: bold;
+  font-size: calc(var(--px) * 5.6);   /* eine Größe für alle drei Kästen */
+  color: #fff;
+  /* Kein Umriss: Die Kästen haben ihren eigenen dunklen Grund */
+}
+#hud > div {
+  /* Alle drei Kästen gleich hoch, Inhalt senkrecht mittig */
+  box-sizing: border-box;
+  height: calc(var(--px) * 11);
+  display: flex; align-items: center;
+  background: rgba(40, 20, 10, 0.55);
+  border: calc(var(--px) * 0.8) solid rgba(255, 230, 180, 0.35);
+  border-radius: calc(var(--px) * 2);
+  padding: calc(var(--px) * 1.2) calc(var(--px) * 3);
+  white-space: nowrap;
+}
+#geld { color: #ffe27a; }
+/* Pixelsymbole (symbole.js): 1:1 im Spielraster, pixelgenau hochgezogen */
+.hud-ico {
+  width: calc(var(--px) * 7); height: calc(var(--px) * 7);
+  image-rendering: pixelated;
+  margin-right: calc(var(--px) * 1.5);
+}
+/* Stern 20 % kleiner; Herz eine Spielpixelreihe tiefer, auf Höhe der Zahl */
+#geld .hud-ico { width: calc(var(--px) * 5.6); height: calc(var(--px) * 5.6); }
+#stimmung .hud-ico { position: relative; top: calc(var(--px) * 1); }
+
+/* ---------------------------------------------------------------- Leiste */
+#leiste {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: calc(var(--px) * 26);
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  /* Nachtblau: hebt sich klar vom Holz des Tresens ab */
+  background: linear-gradient(#2a3a64, #16203c);
+  border-top: calc(var(--px) * 1) solid #5a70a8;
+  box-shadow: 0 calc(var(--px) * -1) 0 #0c1226;
+  z-index: 5;
+}
+#leiste button {
+  position: relative;
+  appearance: none; border: 0; background: none;
+  color: var(--papier);
+  font: bold calc(var(--px) * 5.2) var(--schrift);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: calc(var(--px) * 0.5);
+  border-right: calc(var(--px) * 0.5) solid rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+#leiste button:last-child { border-right: 0; }
+#leiste button { transition: transform 0.08s, background 0.08s; }
+#leiste button:active { background: rgba(255, 220, 150, 0.25); transform: scale(0.92); }
+.tab:active, .tuer:active, #blattZu:active { transform: scale(0.94); filter: brightness(1.15); }
+#leiste .sym { width: calc(var(--px) * 11); height: calc(var(--px) * 9); image-rendering: pixelated; }
+#kalBadge, #aufBadge, #ladenBadge {
+  position: absolute; top: calc(var(--px) * 1.5); right: 22%;
+  min-width: calc(var(--px) * 7); height: calc(var(--px) * 7);
+  border-radius: calc(var(--px) * 4);
+  background: var(--rot); color: #fff;
+  font-size: calc(var(--px) * 4.6);
+  display: flex; align-items: center; justify-content: center;
+  border: calc(var(--px) * 0.6) solid #fff;
+}
+#ladenBadge { animation: pulsieren 1.2s infinite; }
+.tab.neu::after { content: ' ●'; color: var(--gold); }
+.neuTag { font-style: normal; font-size: 0.7em; background: var(--gold); color: var(--tinte); padding: 0 calc(var(--px) * 1.2); border-radius: calc(var(--px) * 1); vertical-align: middle; }
+.zeile.neu { background: linear-gradient(90deg, #fff3c4, transparent 70%); }
+.zeile.verdeckt b { color: #8a7a66; letter-spacing: 0.1em; }
+.zeile.verdeckt span { font-style: italic; }
+#toast.neu { background: #fff4c8; border-color: var(--gold); box-shadow: 0 calc(var(--px) * 1.2) 0 #a87a1a; font-size: calc(var(--px) * 6.2); }
+#btnKalender.lockt .sym, #btnAuftraege.lockt .sym, #btnLaden.lockt .sym { animation: wackeln 1.4s infinite; }
+@keyframes wackeln { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-12deg); } 90% { transform: rotate(10deg); } 95% { transform: rotate(-6deg); } }
+
+/* ---------------------------------------------------------------- Einblendung */
+#toast {
+  position: absolute; left: 50%; top: calc(var(--px) * 24);
+  transform: translate(-50%, calc(var(--px) * -6)); opacity: 0;
+  max-width: 88%;
+  background: var(--papier); color: var(--hinweis);
+  border: calc(var(--px) * 1) solid var(--holz);
+  border-radius: calc(var(--px) * 2);
+  box-shadow: 0 calc(var(--px) * 1.2) 0 var(--holz2);
+  padding: calc(var(--px) * 2.5) calc(var(--px) * 4);
+  font-weight: bold; font-size: calc(var(--px) * 5.6);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 8;
+}
+#toast.zeigen { opacity: 1; transform: translate(-50%, 0); }
+#toast.spezial { background: #fff4c8; border-color: var(--gold); box-shadow: 0 calc(var(--px) * 1.2) 0 #a87a1a; }
+#toast.gut { background: #e4f4d8; border-color: var(--gruen); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--gruen2); }
+#toast.boese { background: #f8dcd4; border-color: var(--rot); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--rot2); }
+#toast.hinweis { font-size: calc(var(--px) * 5); }
+
+#pause { color: #fff; }
+/* Solange Laden, Kalender oder Menü offen sind, erscheinen Einblendungen
+   unten über der Leiste - oben lägen sie auf Titel und Kontostand. */
+.blatt-offen #toast { top: auto !important; bottom: calc(var(--px) * 30); transform: translate(-50%, calc(var(--px) * 6)); }
+.blatt-offen #toast.zeigen { transform: translate(-50%, 0); }
+
+/* ---------------------------------------------------------------- Knöpfe */
+.k {
+  appearance: none;
+  font: bold calc(var(--px) * 5.4) var(--schrift);
+  color: #fff;
+  background: linear-gradient(#d24a3c, var(--rot));
+  border: calc(var(--px) * 0.8) solid var(--rot2);
+  border-radius: calc(var(--px) * 2);
+  box-shadow: 0 calc(var(--px) * 1.2) 0 var(--rot2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.25);
+  padding: calc(var(--px) * 2) calc(var(--px) * 4);
+  min-height: calc(var(--px) * 15);
+  cursor: pointer;
+  text-shadow: 0 calc(var(--px) * 0.5) 0 rgba(0, 0, 0, 0.35);
+}
+.k:active:not(:disabled) { transform: translateY(calc(var(--px) * 1)); box-shadow: 0 calc(var(--px) * 0.2) 0 var(--rot2); }
+.k:disabled { filter: grayscale(0.85) brightness(1.05); opacity: 0.6; cursor: default; }
+.k--neben { background: linear-gradient(#8a6a4a, #6b4a2c); border-color: var(--holz2); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--holz2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.2); }
+.k--kauf { background: linear-gradient(#5a9a4a, var(--gruen)); border-color: var(--gruen2); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--gruen2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.25); }
+.k--kauf small { display: block; font-size: 0.72em; opacity: 0.85; font-weight: normal; }
+.k--wahl { background: linear-gradient(#8a6a4a, #6b4a2c); border-color: var(--holz2); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--holz2); }
+.k--wahl.gewaehlt { background: linear-gradient(#f0c848, #c8962a); color: var(--tinte); text-shadow: none; border-color: #8a6414; box-shadow: 0 calc(var(--px) * 1.2) 0 #8a6414; }
+.k--fertig, .k--zu { background: none; border-color: transparent; box-shadow: none; color: var(--gruen); }
+.k--fertig:disabled, .k--zu:disabled { opacity: 1; filter: none; }
+.haken { color: var(--gruen); font-size: calc(var(--px) * 8); }
+
+/* ---------------------------------------------------------------- Blatt */
+#blatt {
+  position: absolute; left: calc(var(--px) * 3); right: calc(var(--px) * 3);
+  top: calc(var(--px) * 21); bottom: calc(var(--px) * 27);
+  background: var(--papier);
+  border: calc(var(--px) * 1.5) solid var(--holz);
+  border-radius: calc(var(--px) * 3);
+  box-shadow: 0 0 0 calc(var(--px) * 0.8) #c89a5a inset, 0 calc(var(--px) * 2) 0 rgba(0, 0, 0, 0.4);
+  display: flex; flex-direction: column;
+  z-index: 6;
+  animation: rein 0.18s ease-out;
+}
+@keyframes rein { from { transform: translateY(calc(var(--px) * 12)); opacity: 0; } }
+#blatt header {
+  display: flex; align-items: center; gap: calc(var(--px) * 3);
+  padding: calc(var(--px) * 3) calc(var(--px) * 3) calc(var(--px) * 2) calc(var(--px) * 5);
+  border-bottom: calc(var(--px) * 0.8) solid #d8b880;
+}
+#blatt h1 { margin: 0; font-size: calc(var(--px) * 8); flex: 1; color: var(--rot2); }
+#blattGeld { font-weight: bold; font-size: calc(var(--px) * 6); color: var(--holz); }
+#blattZu {
+  appearance: none; border: 0; cursor: pointer;
+  width: calc(var(--px) * 15); height: calc(var(--px) * 15);
+  border-radius: calc(var(--px) * 2);
+  background: var(--holz); color: var(--papier);
+  font-size: calc(var(--px) * 7);
+}
+#blattTabs { display: flex; flex-direction: column; gap: calc(var(--px) * 2); padding: calc(var(--px) * 2) calc(var(--px) * 3) 0; }
+#blattTabs .reiter { display: flex; gap: calc(var(--px) * 1); }
+/* Oberster Umschalter im Laden: Einkaufen | Mein Haus */
+.modi {
+  display: flex; padding: calc(var(--px) * 0.8);
+  background: #e8d4a8; border-radius: calc(var(--px) * 3);
+  border: calc(var(--px) * 0.6) solid #c89a5a;
+}
+.modus-k {
+  flex: 1; appearance: none; cursor: pointer; border: 0; background: none;
+  font: bold calc(var(--px) * 5.4) var(--schrift); color: var(--holz);
+  padding: calc(var(--px) * 4.6) 0; border-radius: calc(var(--px) * 2.4);
+  position: relative;
+}
+.modus-k.aktiv { background: #fffaf0; color: var(--rot2); box-shadow: 0 calc(var(--px) * 0.6) 0 #c89a5a; }
+.modus-k.neu::after { content: ' ●'; color: var(--gold); }
+#blatt[data-modus="haus"] #blattInhalt { margin-top: calc(var(--px) * 2); border-radius: calc(var(--px) * 2); }
+
+/* Mein Haus: Auswahl aus Punkten (Aus / Weiß / Bunt, Aus / An, Anstrich) */
+.zeile.haus .txt b { font-size: calc(var(--px) * 5.4); }
+.punktwahl { flex: none; display: flex; gap: calc(var(--px) * 1); }
+.pw {
+  appearance: none; cursor: pointer;
+  min-width: calc(var(--px) * 16);
+  display: flex; flex-direction: column; align-items: center; gap: calc(var(--px) * 1);
+  padding: calc(var(--px) * 1.6) calc(var(--px) * 1) calc(var(--px) * 1.2);
+  background: var(--papier2); color: #7a5a44;
+  border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2);
+  font: bold calc(var(--px) * 4) var(--schrift);
+}
+.pw.aktiv { background: #fff3c4; color: var(--tinte); border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 0.6) var(--gold); }
+.pw:active { transform: scale(0.94); }
+.punkt {
+  display: block; width: calc(var(--px) * 6); height: calc(var(--px) * 6); border-radius: 50%;
+  border: calc(var(--px) * 0.6) solid rgba(0, 0, 0, 0.25);
+}
+.p-aus { background: #3a3440; }
+.p-an { background: #6ad06a; }
+.p-weiss { background: #fff2cc; box-shadow: 0 0 calc(var(--px) * 2) #ffd98a; }
+.p-bunt { background: conic-gradient(#ff4a4a, #ffd040, #5aff6a, #4a8aff, #ff6adf, #ff4a4a); }
+.pw.aktiv .punkt { border-color: rgba(0, 0, 0, 0.45); }
+/* Anstrich: eine eigene Reihe unter dem Titel, darf umbrechen */
+.gruppe + .punktwahl { flex-wrap: wrap; margin: calc(var(--px) * 1) 0 calc(var(--px) * 2); }
+.tab {
+  flex: 1; appearance: none; cursor: pointer;
+  font: bold calc(var(--px) * 4.6) var(--schrift);
+  color: var(--holz);
+  background: var(--papier2);
+  border: calc(var(--px) * 0.8) solid #c89a5a; border-bottom: 0;
+  border-radius: calc(var(--px) * 2) calc(var(--px) * 2) 0 0;
+  padding: calc(var(--px) * 6.2) calc(var(--px) * 0.5);   /* höher: gut mit dem Finger zu treffen (~40 px) */
+  font-size: calc(var(--px) * 4.9);
+  line-height: 1.1;
+}
+.tab.aktiv { background: #fffaf0; color: var(--rot2); }
+#blattInhalt {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: calc(var(--px) * 2) calc(var(--px) * 3) calc(var(--px) * 4);
+  background: #fffaf0;
+  margin: 0 calc(var(--px) * 3) calc(var(--px) * 3);
+  border: calc(var(--px) * 0.8) solid #c89a5a;
+  border-radius: 0 0 calc(var(--px) * 2) calc(var(--px) * 2);
+  -webkit-user-select: none;
+}
+#blatt[data-art="kalender"] #blattInhalt, #blatt[data-art="auftraege"] #blattInhalt, #blatt[data-art="menue"] #blattInhalt { margin-top: calc(var(--px) * 3); border-radius: calc(var(--px) * 2); }
+.gruppe {
+  font-weight: bold; font-size: calc(var(--px) * 5); text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--holz); opacity: 0.7;
+  margin: calc(var(--px) * 3) 0 calc(var(--px) * 1);
+}
+.zeile {
+  display: flex; align-items: center; gap: calc(var(--px) * 3);
+  padding: calc(var(--px) * 2.5) 0;
+  border-bottom: calc(var(--px) * 0.5) dashed #e0c898;
+}
+.zeile.blitz { animation: blitz 0.9s; }
+@keyframes blitz { 0% { background: #fff0a0; } 100% { background: transparent; } }
+.zeile .ico {
+  width: calc(var(--px) * 18); height: calc(var(--px) * 18); flex: none;
+  image-rendering: pixelated;
+  background: var(--papier2); border-radius: calc(var(--px) * 2);
+  border: calc(var(--px) * 0.6) solid #d8b880;
+}
+.zeile .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--px) * 0.5); }
+.zeile b { font-size: calc(var(--px) * 5.8); }
+.zeile span { font-size: calc(var(--px) * 4.8); color: #6a4a34; line-height: 1.25; }
+.zeile .bonus, p.bonus { font-style: normal; font-size: calc(var(--px) * 4.4); color: #b0304a; font-weight: bold; }
+.zeile .grund { font-size: calc(var(--px) * 4.4); color: #8a6a4a; }
+.zeile.besessen .txt b::after { content: ''; }
+.zeile.gesperrt .ico { filter: grayscale(0.7); opacity: 0.7; }
+.knopfplatz { flex: none; min-width: calc(var(--px) * 40); display: flex; justify-content: flex-end; }
+.knopfplatz .k { min-width: calc(var(--px) * 40); padding-left: calc(var(--px) * 2); padding-right: calc(var(--px) * 2); font-size: calc(var(--px) * 5); }
+
+#blatt.kurz-weg { opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+.klein-schalter { min-width: calc(var(--px) * 22) !important; margin-left: calc(var(--px) * 2); font-size: calc(var(--px) * 4.4) !important; }
+.knopfplatz { gap: 0; }
+
+/* ---------------------------------------------------------------- Aufträge */
+.auftrag { display: flex; align-items: center; gap: calc(var(--px) * 3); padding: calc(var(--px) * 3) 0; border-bottom: calc(var(--px) * 0.5) dashed #e0c898; }
+.auftrag .stufe { flex: none; width: calc(var(--px) * 12); height: calc(var(--px) * 12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; font-size: calc(var(--px) * 5); }
+.auftrag .stufe.s0 { background: #6a9a4a; } .auftrag .stufe.s1 { background: #d8942a; } .auftrag .stufe.s2 { background: #b83a2e; }
+.auftrag .mitte { flex: 1; min-width: 0; }
+.auftrag b { font-size: calc(var(--px) * 5.6); display: block; }
+.auftrag .balken, #modal .balken { height: calc(var(--px) * 3); background: #e8d8b8; border-radius: calc(var(--px) * 2); margin: calc(var(--px) * 1.5) 0; overflow: hidden; }
+.auftrag .balken i, #modal .balken i { display: block; height: 100%; background: linear-gradient(90deg, #e8b030, #f0d060); }
+.auftrag small { font-size: calc(var(--px) * 4.4); color: #7a5a44; }
+.auftrag .k { min-width: calc(var(--px) * 34); font-size: calc(var(--px) * 5); }
+.auftrag.erledigt { opacity: 0.55; }
+.sammlung { display: flex; gap: calc(var(--px) * 2); flex-wrap: wrap; margin-top: calc(var(--px) * 2); }
+.sammlung span { background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2); padding: calc(var(--px) * 1.5) calc(var(--px) * 3); font-size: calc(var(--px) * 4.6); }
+.sammlung span.hat { background: #fff3c4; border-color: var(--gold); font-weight: bold; }
+
+/* ---------------------------------------------------------------- Kalender */
+.kalender {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--px) * 2);
+  padding: calc(var(--px) * 2);
+  background: linear-gradient(135deg, #2a5626, #1f4020);
+  border-radius: calc(var(--px) * 2);
+  border: calc(var(--px) * 1) solid #173016;
+}
+.tuer {
+  appearance: none; cursor: pointer;
+  aspect-ratio: 1;
+  background: linear-gradient(#c84a3c, #9a2c22);
+  border: calc(var(--px) * 0.8) dashed #f0d090;
+  border-radius: calc(var(--px) * 1.5);
+  color: #fff4d8; font: bold calc(var(--px) * 8) Georgia, serif;
+  text-shadow: 0 calc(var(--px) * 0.6) 0 #5a1810;
+}
+.tuer.gross { background: linear-gradient(#e8b030, #b8841a); color: #5a3a08; text-shadow: none; }
+.tuer.bereit { animation: pulsieren 1.2s infinite; border-style: solid; border-color: #fff; }
+@keyframes pulsieren { 50% { transform: scale(1.06); box-shadow: 0 0 calc(var(--px) * 4) #ffe8a0; } }
+.tuer.auf { background: #173016; border: calc(var(--px) * 0.8) solid #2a5626; color: #8ad07a; font-size: calc(var(--px) * 7); animation: none; }
+p.hinweis, p.klein { font-size: calc(var(--px) * 5); line-height: 1.35; }
+p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
+
+/* ---------------------------------------------------------------- Menü */
+.statistik { display: grid; gap: calc(var(--px) * 3); margin: calc(var(--px) * 3) 0 calc(var(--px) * 7); }
+.statistik div { display: flex; justify-content: space-between; gap: calc(var(--px) * 4); font-size: calc(var(--px) * 5.2); border-bottom: calc(var(--px) * 0.5) dashed #e0c898; padding-bottom: calc(var(--px) * 2.5); }
+.statistik span { color: #7a5a44; }
+.regler { display: flex; align-items: center; gap: calc(var(--px) * 2.5); margin: calc(var(--px) * 5) 0; }
+.regler .rname { font-weight: bold; font-size: calc(var(--px) * 5.6); min-width: calc(var(--px) * 26); }
+.regler .rk { min-height: calc(var(--px) * 13); min-width: calc(var(--px) * 13); padding: 0; font-size: calc(var(--px) * 7); }
+.regler input { flex: 1; accent-color: var(--rot); height: calc(var(--px) * 8); }
+.regler .rwert { min-width: calc(var(--px) * 12); text-align: center; font-size: calc(var(--px) * 6); }
+.schalter { display: flex; gap: calc(var(--px) * 3); flex-wrap: wrap; margin: calc(var(--px) * 3) 0; }
+.schalter .k { flex: 1; }
+
+/* ---------------------------------------------------------------- Fenster */
+#modal {
+  position: absolute; inset: 0; z-index: 9;
+  background: rgba(10, 6, 20, 0.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--px) * 8);
+}
+#modal .box {
+  width: 100%; max-height: 100%; overflow-y: auto;
+  background: var(--papier);
+  border: calc(var(--px) * 1.5) solid var(--holz);
+  border-radius: calc(var(--px) * 3);
+  box-shadow: 0 0 0 calc(var(--px) * 0.8) #c89a5a inset, 0 calc(var(--px) * 2) 0 rgba(0, 0, 0, 0.5);
+  padding: calc(var(--px) * 6) calc(var(--px) * 6) calc(var(--px) * 5);
+  text-align: center;
+  animation: aufploppen 0.22s ease-out;
+}
+@keyframes aufploppen { from { transform: scale(0.85); opacity: 0; } }
+#modal h2 { margin: 0 0 calc(var(--px) * 3); color: var(--rot2); font-size: calc(var(--px) * 8.5); }
+#modal .inhalt { font-size: calc(var(--px) * 5.6); line-height: 1.4; }
+#modal .inhalt p { margin: calc(var(--px) * 2) 0; }
+#modal .summe { font-size: calc(var(--px) * 11); font-weight: bold; color: var(--gruen); margin: calc(var(--px) * 1) 0; }
+#modal .gross-ico { font-size: calc(var(--px) * 20); line-height: 1.1; }
+#modal .knoepfe { display: flex; flex-wrap: wrap; gap: calc(var(--px) * 3); margin-top: calc(var(--px) * 5); }
+#modal .knoepfe .k { flex: 1 1 40%; font-size: calc(var(--px) * 6); }
+#modal label { display: block; text-align: left; font-weight: bold; margin: calc(var(--px) * 3) 0; }
+#modal input, #modal select {
+  width: 100%; margin-top: calc(var(--px) * 1.5);
+  font: calc(var(--px) * 6) var(--schrift);
+  padding: calc(var(--px) * 2.5);
+  border: calc(var(--px) * 0.8) solid var(--holz); border-radius: calc(var(--px) * 1.5);
+  background: #fffaf0; color: var(--tinte);
+  -webkit-user-select: text; user-select: text;
+}
+#modal input[type="number"], #modal select { width: calc(var(--px) * 40); margin-left: calc(var(--px) * 2); }
+.modus {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  margin: calc(var(--px) * 3) 0; padding: calc(var(--px) * 4);
+  background: #fffaf0; color: var(--tinte);
+  border: calc(var(--px) * 1) solid #c89a5a; border-radius: calc(var(--px) * 2.5);
+  box-shadow: 0 calc(var(--px) * 1.2) 0 #c89a5a;
+  font-family: var(--schrift);
+}
+.modus:active { transform: translateY(calc(var(--px) * 1)); box-shadow: none; }
+.modus b { display: block; font-size: calc(var(--px) * 7); color: var(--rot2); margin-bottom: calc(var(--px) * 1.5); }
+.modus span { font-size: calc(var(--px) * 5.2); line-height: 1.35; }
+.ziel { text-align: left; list-style: none; padding: 0; margin: calc(var(--px) * 3) 0; }
+.ziel li { margin: calc(var(--px) * 2) 0; }
+.hilfe { text-align: left; padding-left: calc(var(--px) * 8); }
+.hilfe li { margin: calc(var(--px) * 1.5) 0; }
+.ereignisbild { width: 100%; image-rendering: pixelated; border-radius: calc(var(--px) * 1.5); border: calc(var(--px) * 1) solid var(--holz); }
+#modal .zeile-gross { font-size: calc(var(--px) * 7.5); font-weight: bold; color: var(--gruen2); margin-top: calc(var(--px) * 3); }
+.kartenbild { width: 100%; image-rendering: pixelated; border-radius: calc(var(--px) * 1.5); box-shadow: 0 calc(var(--px) * 1) 0 rgba(0, 0, 0, 0.3); }
+
+/* ---------------------------------------------------------------- Einführung */
+#tipp {
+  position: absolute; left: calc(var(--px) * 6); right: calc(var(--px) * 6);
+  z-index: 7; pointer-events: auto; cursor: pointer;
+  background: #fffaf0; color: var(--hinweis);
+  border: calc(var(--px) * 1) solid var(--gold);
+  border-radius: calc(var(--px) * 2.5);
+  box-shadow: 0 calc(var(--px) * 1.2) 0 #a87a1a, 0 0 calc(var(--px) * 6) rgba(0, 0, 0, 0.35);
+  padding: calc(var(--px) * 3) calc(var(--px) * 4);
+  font-weight: bold; font-size: calc(var(--px) * 5.8); line-height: 1.35;
+  text-align: center;
+  animation: aufploppen 0.2s ease-out;
+}
+#tipp::before {
+  content: '✕'; position: absolute; top: calc(var(--px) * 1); right: calc(var(--px) * 2.5);
+  font-size: calc(var(--px) * 4.5); color: #a88a6a;
+}
+#tipp .weiter {
+  display: block; width: fit-content; margin: calc(var(--px) * 2.5) auto 0;
+  background: linear-gradient(#5a9a4a, var(--gruen)); color: #fff;
+  border: calc(var(--px) * 0.8) solid var(--gruen2); border-radius: calc(var(--px) * 2);
+  box-shadow: 0 calc(var(--px) * 1) 0 var(--gruen2);
+  padding: calc(var(--px) * 1.5) calc(var(--px) * 6); font-size: calc(var(--px) * 5.4); font-weight: bold;
+  animation: pulsieren 1.4s infinite;
+}
+#tipp.mit-weiter::before { display: none; }
+#tipp[data-pfeil]::after {
+  content: ''; position: absolute; left: var(--pfeil-x);
+  border: calc(var(--px) * 6) solid transparent;
+}
+#tipp[data-pfeil="unten"]::after { top: 100%; border-top-color: var(--gold); }
+#tipp[data-pfeil="oben"]::after { bottom: 100%; border-bottom-color: var(--gold); }
+#tipp[data-pfeil=""]::after { display: none; }
+#zeiger {
+  position: absolute; z-index: 7; pointer-events: none;
+  width: calc(var(--px) * 26); height: calc(var(--px) * 26);
+  margin: calc(var(--px) * -13) 0 0 calc(var(--px) * -13);
+  border: calc(var(--px) * 1.5) solid #ffe060;
+  border-radius: 50%;
+  box-shadow: 0 0 calc(var(--px) * 4) #ffe060, inset 0 0 calc(var(--px) * 4) #ffe060;
+  animation: zeigen 1s ease-in-out infinite;
+}
+@keyframes zeigen { 50% { transform: scale(0.75); opacity: 0.7; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Handy quer: Das Spiel wäre dann winzig. Hinweis statt Spielfeld. */
+#quer { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  #quer {
+    display: flex; position: fixed; inset: 0; z-index: 50;
+    align-items: center; justify-content: center; text-align: center;
+    background: #120c22; color: var(--papier); font-size: 18px; line-height: 1.5;
+  }
+  #quer div { font-size: 40px; }
+  #quer b { font-size: 20px; }
+  #quer small { font-size: 14px; opacity: 0.7; }
+}
+
+/* Neustart im Menü: abgesetzt vom Rest */
+.neustart { margin-top: calc(var(--px) * 8); padding-top: calc(var(--px) * 5); border-top: calc(var(--px) * 0.6) dashed rgba(106, 74, 58, 0.4); justify-content: center; }
+
+.version { text-align: center; opacity: 0.6; margin-top: calc(var(--px) * 4); }
+
+/* Unauffälliger Knopf (Neu anfangen): grau statt rot */
+.k--leise { background: linear-gradient(#b8b0a4, #948a7c); border-color: #6e665a; box-shadow: 0 calc(var(--px) * 1.2) 0 #6e665a, inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.25); color: #fffaf0; }
+/* Menü: mehr Luft zwischen den Blöcken */
+#blatt[data-art="menue"] .schalter { margin: calc(var(--px) * 5) 0; gap: calc(var(--px) * 3); }
+#blatt[data-art="menue"] .neustart { margin-top: calc(var(--px) * 12); padding-top: calc(var(--px) * 8); }
+
+/* Erfolgswand: Pixelbild in Spielpixeln, Socken zum Antippen */
+.wand {
+  display: block; width: 100%; max-width: calc(var(--px) * 160); margin: calc(var(--px) * 1) auto 0;
+  image-rendering: pixelated; border-radius: calc(var(--px) * 1.5);
+  border: calc(var(--px) * 0.8) solid #4a2c16; cursor: pointer;
+}
+.wand-zeile { text-align: center; margin: calc(var(--px) * 2) 0 0; font-size: calc(var(--px) * 4.6); }
+.wand-zeile + .klein { text-align: center; }
+#modal .socke-gross {
+  display: block; margin: 0 auto calc(var(--px) * 2);
+  width: calc(var(--px) * 30); height: calc(var(--px) * 36); image-rendering: pixelated;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1030">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Adventshaus">
+  <title>Mein Adventshaus</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css?v=20260929h">
+</head>
+<body>
+  <div id="buehne">
+    <div id="huelle">
+      <canvas id="cv" width="180" height="320"></canvas>
+
+      <div id="hud">
+        <div id="geld"><canvas class="hud-ico" data-ico="stern"></canvas><span id="geldZahl">0 Sterne</span></div>
+        <div id="stimmung"><canvas class="hud-ico" data-ico="herz"></canvas><span id="stimmungZahl"></span></div>
+        <div id="pause" class="versteckt">⏸ Pause</div>
+        <div id="uhr"></div>
+      </div>
+
+      <div id="zeiger" class="versteckt"></div>
+      <div id="tipp" class="versteckt"></div>
+      <div id="toast"></div>
+
+      <nav id="leiste">
+        <button id="btnLaden"><canvas class="sym" data-ico="laden"></canvas>Laden<b id="ladenBadge" class="versteckt">0</b></button>
+        <button id="btnAuftraege"><canvas class="sym" data-ico="auftraege"></canvas>Aufträge<b id="aufBadge" class="versteckt">0</b></button>
+        <button id="btnKalender"><canvas class="sym" data-ico="kalender"></canvas>Kalender<b id="kalBadge" class="versteckt">0</b></button>
+        <button id="btnKarte"><canvas class="sym" data-ico="karte"></canvas>Karte</button>
+        <button id="btnMenue"><canvas class="sym" data-ico="menue"></canvas>Menü</button>
+      </nav>
+
+      <section id="blatt" class="versteckt">
+        <header>
+          <h1 id="blattTitel">Einkaufen</h1>
+          <span id="blattGeld"></span>
+          <button id="blattZu" aria-label="Schließen">✕</button>
+        </header>
+        <div id="blattTabs"></div>
+        <div id="blattInhalt"></div>
+      </section>
+
+      <div id="modal" class="versteckt"></div>
+    </div>
+    <div id="quer"><div>📱<br><b>Bitte hochkant halten</b><br><small>Das Spiel ist fürs Hochformat gemacht.</small></div></div>
+  </div>
+  <script type="module" src="src/main.js?v=20260929h"></script>
+</body>
+</html>
