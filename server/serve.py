@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-serve.py - Liefert "Mein Adventshaus" im lokalen Netzwerk aus.
+serve.py - Liefert "Punsch & Lichterglanz" im lokalen Netzwerk aus.
 
     python3 server/serve.py            # nur starten
     python3 server/serve.py --open     # starten und Browser oeffnen
@@ -94,7 +94,7 @@ class Server(socketserver.ThreadingTCPServer):
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Mein Adventshaus - Spielserver")
+    ap = argparse.ArgumentParser(description="Punsch & Lichterglanz - Spielserver")
     # Ohne -p gilt die Umgebungsvariable PORT, sonst 8060. Das brauchen
     # Werkzeuge, die sich selbst einen freien Port suchen; von Hand
     # gestartet bleibt es bei 8060 wie in README und CLAUDE.md.

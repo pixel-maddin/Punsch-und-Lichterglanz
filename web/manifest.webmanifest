@@ -1,6 +1,6 @@
 {
-  "name": "Mein Adventshaus",
-  "short_name": "Adventshaus",
+  "name": "Punsch & Lichterglanz",
+  "short_name": "Lichterglanz",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",

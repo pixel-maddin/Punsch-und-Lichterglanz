@@ -1,5 +1,5 @@
 /*
- * config.js - ALLE Stellschrauben von „Mein Adventshaus".
+ * config.js - ALLE Stellschrauben von „Punsch & Lichterglanz".
  *
  * Wer an der Balance dreht, dreht hier. Preise, Kosten, Stimmung und
  * Boni stehen nur an dieser einen Stelle; Shop, Tresen und Szene lesen

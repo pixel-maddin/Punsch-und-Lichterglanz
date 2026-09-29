@@ -1,4 +1,4 @@
-# Mein Adventshaus
+# Punsch & Lichterglanz
 
 Ein kleines Clicker-Spiel fürs Handy (hochkant) im Pixel-Look. Der Herbst
 ist grau, das Haus ist kahl - bis Weihnachten soll es das schönste der

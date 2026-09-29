@@ -5,17 +5,17 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260929h';
-import * as S from './spiel.js?v=20260929h';
-import * as Z from './zeit.js?v=20260929h';
-import * as T from './ton.js?v=20260929h';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929h';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929h';
-import { nochmal as nochmalLernen } from './lernen.js?v=20260929h';
-import * as A from './auftraege.js?v=20260929h';
-import * as E from './erfolge.js?v=20260929h';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929h';
-import { alleSymbole } from './symbole.js?v=20260929h';
+import * as C from './config.js?v=20260929i';
+import * as S from './spiel.js?v=20260929i';
+import * as Z from './zeit.js?v=20260929i';
+import * as T from './ton.js?v=20260929i';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929i';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929i';
+import { nochmal as nochmalLernen } from './lernen.js?v=20260929i';
+import * as A from './auftraege.js?v=20260929i';
+import * as E from './erfolge.js?v=20260929i';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929i';
+import { alleSymbole } from './symbole.js?v=20260929i';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -675,7 +675,7 @@ export function oeffneKalender() {
 // ---------------------------------------------------------------------------
 let titelTipps = 0;
 export function oeffneMenue() {
-  oeffneBlatt('menue', 'Mein Adventshaus');
+  oeffneBlatt('menue', 'Punsch & Lichterglanz');
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -991,7 +991,7 @@ function kartenText(nr, ohneLeute, gruss) {
   fenster('Text der Karte', `
     <label>Gruß<br><input type="text" id="ktGruss" maxlength="32" value="${esc(k.gruss || gruss)}"></label>
     <label>Grußzeile (dahinter steht euer Hausname)<br><input type="text" id="ktVon" maxlength="30" value="${esc(k.von || VON_VORGABE)}"></label>
-    <p class="klein">… ${esc(S.st.name || 'uns')} · Datum und „Mein Adventshaus" stehen immer darunter.</p>`, [
+    <p class="klein">… ${esc(S.st.name || 'uns')} · Datum und „Punsch &amp; Lichterglanz" stehen immer darunter.</p>`, [
     { text: 'Übernehmen', aktion: (box) => {
       const g = box.querySelector('#ktGruss').value.trim(), v = box.querySelector('#ktVon').value.trim();
       S.st.karteText = { gruss: g || null, von: v || null };
@@ -1029,7 +1029,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   c.textAlign = 'center';
   kartenSchrift(c, gruss, mx, y0 + 72, 52, 'bold italic', R.titel, R.umriss, maxB);
   kartenSchrift(c, von, mx, y0 + 122, 30, '', R.text, R.umriss, maxB);
-  kartenSchrift(c, `${Z.datumLang()} · Mein Adventshaus`, mx, y0 + 158, 20, '', R.text, R.umriss, maxB);
+  kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + 158, 20, '', R.text, R.umriss, maxB);
 
   const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
   const datei = new File([blob], 'weihnachtskarte.png', { type: 'image/png' });
