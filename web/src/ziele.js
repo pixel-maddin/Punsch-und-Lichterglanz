@@ -14,7 +14,7 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=20260929q';
+import * as S from './spiel.js?v=20260929t';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -23,21 +23,21 @@ export const START_WICHTEL = ['spuel', 'nachfuell', 'servier'];
 const dekoZahl = () => Object.keys(S.st.besitz).filter((id) => S.ARTIKEL_MAP[id] && S.istDeko(S.ARTIKEL_MAP[id])).length;
 
 export const ZIELE = [
-  { id: 'getraenk', text: 'Kaufe ein neues Getränk: Kinderpunsch', lohn: 5,
+  { id: 'getraenk', text: 'Kaufe ein neues Getränk: Kinderpunsch', lohn: 50,
     stand: () => (S.hat('kinderpunsch') ? 1 : 0), ziel: 1, kauf: () => 'kinderpunsch' },
-  { id: 'deko', text: 'Schmücke dein Haus: kaufe 3 Deko-Teile', lohn: 15,
+  { id: 'deko', text: 'Schmücke dein Haus: kaufe 3 Deko-Teile', lohn: 150,
     stand: () => Math.min(3, dekoZahl()), ziel: 3,
     kauf: () => START_DEKO.find((id) => !S.hat(id) && !S.status(S.ARTIKEL_MAP[id]).versteckt) || null },
-  { id: 'spuel', text: 'Hol dir den Spül-Wichtel', lohn: 10,
+  { id: 'spuel', text: 'Hol dir den Spül-Wichtel', lohn: 100,
     stand: () => (S.hat('spuel') ? 1 : 0), ziel: 1, kauf: () => 'spuel' },
-  { id: 'nachfuell', text: 'Hol dir den Nachfüll-Wichtel', lohn: 15,
+  { id: 'nachfuell', text: 'Hol dir den Nachfüll-Wichtel', lohn: 150,
     stand: () => (S.hat('nachfuell') ? 1 : 0), ziel: 1, kauf: () => 'nachfuell' },
-  { id: 'servier', text: 'Hol dir den Servier-Wichtel', lohn: 25,
+  { id: 'servier', text: 'Hol dir den Servier-Wichtel', lohn: 250,
     stand: () => (S.hat('servier') ? 1 : 0), ziel: 1, kauf: () => 'servier' },
   // Danach nicht wieder ins Leere: ein drittes Getränk und die erste Stimmungsmarke
-  { id: 'apfel', text: 'Biete ein drittes Getränk an: Heißer Apfel', lohn: 20,
+  { id: 'apfel', text: 'Biete ein drittes Getränk an: Heißer Apfel', lohn: 200,
     stand: () => (S.hat('apfel') ? 1 : 0), ziel: 1, kauf: () => 'apfel' },
-  { id: 'herz', text: 'Erreiche 15 ♥ Stimmung mit mehr Deko', lohn: 30,
+  { id: 'herz', text: 'Erreiche 15 ♥ Stimmung mit mehr Deko', lohn: 300,
     stand: () => Math.min(15, S.stimmung()), ziel: 15, kauf: billigsteDeko },
 ];
 

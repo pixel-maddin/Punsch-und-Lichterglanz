@@ -530,3 +530,9 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #ziel:active { transform: scale(0.97); }
 /* Einblendungen rutschen unter die Leiste */
 .mit-ziel #toast { top: calc(var(--px) * 36); }
+
+/* Die Kiste beim Zurückkommen (zeigeKiste in ui.js) */
+#modal .kiste {
+  display: block; margin: 0 auto calc(var(--px) * 2);
+  width: calc(var(--px) * 48); height: calc(var(--px) * 40); image-rendering: pixelated;
+}

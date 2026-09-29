@@ -23,11 +23,11 @@
  * der erste Gast los, bevor man den Satz zu Ende gelesen hatte.
  * Handlungs-Blasen („tippe auf die Gläser") lassen das Spiel laufen.
  */
-import * as C from './config.js?v=20260929q';
-import * as S from './spiel.js?v=20260929q';
-import * as A from './auftraege.js?v=20260929q';
-import * as E from './erfolge.js?v=20260929q';
-import * as Z from './ziele.js?v=20260929q';
+import * as C from './config.js?v=20260929t';
+import * as S from './spiel.js?v=20260929t';
+import * as A from './auftraege.js?v=20260929t';
+import * as E from './erfolge.js?v=20260929t';
+import * as Z from './ziele.js?v=20260929t';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -131,7 +131,7 @@ const HINWEISE = [
     text: () => 'Der Topf ist leer! Tippe ihn 4-mal an, dann ist er wieder voll.',
     ziel: () => zellZiel(leererTopf()), fertig: () => leererTopf() < 0 },
   { id: 'falsch', sofort: true, wann: () => S.lauf.fehlGast > 0,
-    text: () => 'Das war das falsche Getränk! Der Gast hat es abgelehnt, und es hat dich etwas gekostet. Schau genau aufs Bläschen.',
+    text: () => 'Das war das falsche Getränk! Der Gast hat es abgelehnt - das Glas ist weg, sonst passiert nichts. Schau genau aufs Bläschen.',
     ziel: () => gastZiel(0), dauer: 6 },
   { id: 'voll', sofort: true, wann: () => S.lauf.hand.length >= S.handMax() && !S.lauf.hand.some((h) => h.art === 'glas') && !gastWillWasInHand() && gastAmTresen(),
     text: () => 'Deine Hände sind voll. Leere sie im AUSGUSS.',
@@ -174,6 +174,10 @@ const HINWEISE = [
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
     text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher (bis zu ${C.OFFLINE_MAX_H} Stunden). Solange du selbst mit anpackst, sind sie schneller.`,
     ziel: null, dauer: 12 },
+  // Ein-Tipp-Service: ab dem Servier-Wichtel reicht ein Tipp auf den Gast
+  { id: 'schnell', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg,
+    text: () => `Neu: Ab jetzt reicht EIN Tipp auf einen Gast - du servierst direkt aus dem Topf. Glas und Topf brauchst du nur noch für Extras wie Sahne (+${Math.round(C.EXTRA_BONUS * 100)} %).`,
+    ziel: () => gastZiel(0), dauer: 10 },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },

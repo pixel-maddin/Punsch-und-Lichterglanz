@@ -81,10 +81,9 @@ export function text(c, s, x, y, f, schatten = '#2a1810') {
     cx += g[0].length + 1;
   }
 }
-/** Kurze Geldschreibweise für die 3x5-Schrift: 3,40 · 240 · 1,2k · 3,4M */
+/** Kurze Geldschreibweise für die 3x5-Schrift: 34 · 240 · 1,2k · 3,4M */
 export function kurzGeld(n) {
-  if (n < 100) return n.toFixed(2).replace('.', ',');
-  if (n < 1000) return String(Math.round(n));
+  if (n < 1000) return String(Math.round(n));   // ganze Sterne (seit 29.09.)
   if (n < 1e6) return (n / 1000).toFixed(n < 1e4 ? 1 : 0).replace('.', ',') + 'k';
   return (n / 1e6).toFixed(1).replace('.', ',') + 'M';
 }

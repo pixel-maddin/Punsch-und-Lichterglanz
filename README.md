@@ -26,8 +26,17 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
    und Feuerzangenbowle das fertige Glas auf dem Tablett antippen (Sahne,
    Zimtstange, Zuckerhut anzünden). Dann zahlt der Gast 30 % mehr.
 
-Falsch geliefert kostet ein paar Sterne. Falsch Eingeschenktes kippt man
-besser in den Ausguss rechts.
+Falsch geliefert kostet nur das Glas. Falsch Eingeschenktes kippt man in
+den Ausguss rechts. **Sobald der Servier-Wichtel da ist, reicht ein Tipp auf
+den Gast** - Glas und Topf braucht man dann nur noch für Extras.
+
+**Während du weg bist**, arbeiten die Wichtel weiter (die ersten 5 Minuten
+voll, danach mit 40 %, höchstens 8 Stunden) und legen alles in eine Kiste,
+die du beim Zurückkommen öffnest.
+
+**Luxus-Stücke** (✦ Extra für Profis: Lichtershow, Festbeleuchtung, Stand
+Stufe 3) braucht man fürs schönste Haus nicht - mit 10 bis 15 Minuten am
+Tag ist bis Heiligabend alles andere geschafft.
 
 **Schwung:** Wer zügig hintereinander bedient, bekommt bis zu 40 % mehr.
 **Stoßzeit:** Wer ein paar Minuten am Stück spielt, bekommt Besuch von

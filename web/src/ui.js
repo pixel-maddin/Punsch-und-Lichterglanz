@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260929q';
-import * as S from './spiel.js?v=20260929q';
-import * as Z from './zeit.js?v=20260929q';
-import * as T from './ton.js?v=20260929q';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929q';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929q';
-import { nochmal as nochmalLernen, fuehrung } from './lernen.js?v=20260929q';
-import * as A from './auftraege.js?v=20260929q';
-import * as E from './erfolge.js?v=20260929q';
-import * as ZL from './ziele.js?v=20260929q';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929q';
-import { alleSymbole } from './symbole.js?v=20260929q';
+import * as C from './config.js?v=20260929t';
+import * as S from './spiel.js?v=20260929t';
+import * as Z from './zeit.js?v=20260929t';
+import * as T from './ton.js?v=20260929t';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929t';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929t';
+import { nochmal as nochmalLernen, fuehrung } from './lernen.js?v=20260929t';
+import * as A from './auftraege.js?v=20260929t';
+import * as E from './erfolge.js?v=20260929t';
+import * as ZL from './ziele.js?v=20260929t';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929t';
+import { alleSymbole } from './symbole.js?v=20260929t';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -199,7 +199,7 @@ function baueLaden() {
   const artikel = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => a.tab === ladenTab));
   let gruppe = null;
   if (ladenTab === 'super') {
-    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Glühwein</b><span>Den gibt es von Anfang an. Gäste zahlen 1 Stern.</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
+    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Glühwein</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
     zeichneIcon(liste.lastChild.querySelector('canvas'), { id: 'gluehwein', produkt: true });
   }
   const neu = S.st.neu || {};
@@ -371,6 +371,9 @@ function bonusText(a) {
   if (a.id === 'topf') teile.push(`Portionen: ${C.TOPF_PORTIONEN.join(' → ')}`);
   if (a.id === 'servier') teile.push(`alle ${C.SERVIER_TAKT.slice(1).map((x) => String(x).replace('.', ',')).join(' → ')} s`);
   if (a.id === 'nachfuell') teile.push(`nach ${C.NACHFUELL_ZEIT.slice(1).map((x) => String(x).replace('.', ',')).join(' → ')} s`);
+  // Luxus: kaufbar, aber fürs „schönste Haus" nicht nötig
+  if (a.luxus) teile.push('✦ Extra für Profis');
+  if (a.luxusAb) teile.push(`✦ Stufe ${a.luxusAb}: Extra für Profis`);
   return teile.join(' · ');
 }
 
@@ -607,6 +610,46 @@ function zeigeErfolg(i) {
 }
 
 // ---------------------------------------------------------------------------
+// Die Kiste: was die Wichtel verdient haben, während man weg war
+// ---------------------------------------------------------------------------
+export function zeigeKiste(sek, weiter) {
+  const h = Math.floor(sek / 3600), m = Math.round((sek % 3600) / 60);
+  const dauer = sek ? (h ? `${h} Std. ${m} Min.` : `${m} Min.`) : '';
+  const gaeste = (S.st.kisteGaeste || 0).toLocaleString('de-DE');
+  const box = fenster('Während du weg warst …',
+    `<canvas class="kiste" width="24" height="20"></canvas>
+     <p>${dauer ? `In ${dauer} haben deine Wichtel` : 'Deine Wichtel haben'} <b>${gaeste}</b> Gäste bedient und alles in diese Kiste gelegt.</p>
+     ${sek >= C.OFFLINE_MAX_H * 3600 ? `<p class="klein">Länger als ${C.OFFLINE_MAX_H} Stunden arbeiten sie nicht allein.</p>` : ''}`,
+    [{ text: 'Kiste öffnen', aktion: (b) => {
+      const betrag = S.oeffneKiste();
+      T.spiele('spezialKasse');
+      zeichneKiste(b.querySelector('canvas'), true);
+      b.querySelector('.knoepfe').innerHTML = `<p class="summe">+ ${S.formatGeld(betrag)}</p>`;
+      setTimeout(() => { schliesseFenster(); weiter(); }, 1300);
+      return false;
+    } }]);
+  zeichneKiste(box.querySelector('canvas'), false);
+}
+
+/** Pixelkiste 24 × 20, zu oder offen mit Sternen. */
+function zeichneKiste(cv, offen) {
+  const c = cv.getContext('2d');
+  c.clearRect(0, 0, 24, 20);
+  const holz = '#8a5230', dunkel = '#5a3219', gold = '#e8b030';
+  if (offen) {
+    // Deckel nach hinten, Sterne quellen heraus
+    r(c, 3, 2, 18, 4, dunkel); r(c, 4, 3, 16, 2, holz);
+    for (const [x, y] of [[6, 7], [10, 5], [14, 6], [17, 8], [8, 9], [12, 8], [15, 10]]) { p(c, x, y, '#fff4b0'); p(c, x + 1, y, gold); p(c, x, y + 1, gold); }
+  } else {
+    r(c, 3, 5, 18, 5, holz); r(c, 3, 5, 18, 1, '#a8683e'); r(c, 3, 9, 18, 1, dunkel);
+  }
+  r(c, 3, 10, 18, 9, holz); r(c, 3, 18, 18, 1, dunkel);
+  r(c, 3, 13, 18, 1, dunkel);
+  r(c, 2, 10, 1, 9, gold); r(c, 21, 10, 1, 9, gold);   // Beschläge
+  r(c, 11, offen ? 10 : 8, 2, 3, gold); p(c, 11, offen ? 11 : 9, dunkel);   // Schloss
+}
+
+// ---------------------------------------------------------------------------
 // Tagesaufträge
 // ---------------------------------------------------------------------------
 let auftragReiter = 'heute';   // 'heute' | 'erfolge'
@@ -823,7 +866,7 @@ function werkstatt() {
       <button class="k k--neben" id="wsDevAus">Dev aus</button>
     </div>
     <div class="schalter">
-      <button class="k k--neben" id="wsPlus">+2.000 Sterne</button>
+      <button class="k k--neben" id="wsPlus">+20.000 Sterne</button>
       <button class="k k--neben" id="wsEcht">Echte Zeit</button>
       <button class="k k--neben" id="wsWeg">Spielstand löschen</button>
     </div>`, [
@@ -846,7 +889,7 @@ function werkstatt() {
     S.setzeDev({ geld: 1, tempo: 1, tage: 0 });
     if (tage) { S.speichere(); location.reload(); } else { schliesseFenster(); letzteHud = ''; toast('Dev-Modus aus', 'hinweis'); }
   };
-  $('#wsPlus').onclick = () => { S.verdiene(2000); toast('+2.000 Sterne', 'gut'); };
+  $('#wsPlus').onclick = () => { S.verdiene(20000); toast('+20.000 Sterne', 'gut'); };
   $('#wsEcht').onclick = () => { Z.setzeZeit(null, 1); schliesseFenster(); toast('Wieder echte Zeit', 'hinweis'); };
   $('#wsWeg').onclick = (e) => {
     if (e.target.dataset.sicher) { S.allesLoeschen(); schliesseFenster(); schliesseBlatt(); location.reload(); }

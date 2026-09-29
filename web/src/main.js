@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260929q';
-import * as S from './spiel.js?v=20260929q';
-import * as Z from './zeit.js?v=20260929q';
-import * as T from './ton.js?v=20260929q';
-import * as UI from './ui.js?v=20260929q';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260929q';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260929q';
-import * as Lernen from './lernen.js?v=20260929q';
-import { zeigeAdvent } from './ereignis.js?v=20260929q';
-import * as A from './auftraege.js?v=20260929q';
-import * as E from './erfolge.js?v=20260929q';
-import * as ZL from './ziele.js?v=20260929q';
+import * as C from './config.js?v=20260929t';
+import * as S from './spiel.js?v=20260929t';
+import * as Z from './zeit.js?v=20260929t';
+import * as T from './ton.js?v=20260929t';
+import * as UI from './ui.js?v=20260929t';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20260929t';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260929t';
+import * as Lernen from './lernen.js?v=20260929t';
+import { zeigeAdvent } from './ereignis.js?v=20260929t';
+import * as A from './auftraege.js?v=20260929t';
+import * as E from './erfolge.js?v=20260929t';
+import * as ZL from './ziele.js?v=20260929t';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -130,11 +130,9 @@ function ankommen(erstesMal) {
   if (off && off.betrag > 0 && off.sek < C.OFFLINE_FENSTER) {
     // Kurz weg (Handy gesperrt, App gewechselt): kein Fenster, nur ein Hinweis
     UI.toast(`Die Wichtel haben weitergearbeitet: +${S.formatGeld(off.betrag)}`, 'gut');
-  } else if (off && off.betrag > 0) {
-    const h = Math.floor(off.sek / 3600), m = Math.round((off.sek % 3600) / 60);
-    const dauer = h ? `${h} Std. ${m} Min.` : `${m} Min.`;
-    meldungen.push(['Die Wichtel waren fleißig', `<p>Während du ${dauer} weg warst, haben sie <b>${off.portionen}</b> Gäste bedient.</p><p class="summe">+ ${S.formatGeld(off.betrag)}</p>${off.sek >= C.OFFLINE_MAX_H * 3600 ? `<p class="klein">Länger als ${C.OFFLINE_MAX_H} Stunden arbeiten sie nicht allein.</p>` : ''}`]);
   }
+  // Länger weg: die Kiste (auch eine, die beim letzten Mal ungeöffnet blieb)
+  if (S.st.kiste > 0) meldungen.push(['kiste', off && off.sek >= C.OFFLINE_FENSTER ? off.sek : 0]);
   if (Z.schnee() > 0 && !S.st.ersterSchnee) {
     S.st.ersterSchnee = true;
     meldungen.push(['Der erste Schnee!', '<p>Über Nacht ist alles weiß geworden. Im Weihnachtsmarkt gibt es jetzt Schneemänner.</p>']);
@@ -148,6 +146,7 @@ function ankommen(erstesMal) {
     const m = meldungen.shift();
     if (!m) return;
     if (m[0] === 'advent') zeigeAdvent(m[1], zeige);
+    else if (m[0] === 'kiste') UI.zeigeKiste(m[1], () => setTimeout(zeige, 60));
     else UI.fenster(m[0], m[1], [{ text: 'Weiter', aktion: () => { setTimeout(zeige, 60); } }]);
   };
   zeige();

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260929q';
-import * as Z from './zeit.js?v=20260929q';
-import { neueFarben } from './pixel.js?v=20260929q';
+import * as C from './config.js?v=20260929t';
+import * as Z from './zeit.js?v=20260929t';
+import { neueFarben } from './pixel.js?v=20260929t';
 
 const SCHLUESSEL = 'adventshaus.v1';
 
@@ -34,14 +34,22 @@ function neuerStand(name = '', andenken = 0) {
     stats: { bedient: 0, verpasst: 0, spezial: 0 },
     ersterSchnee: false, intro: false, lernen: 0, tipps: {},
     gemeldet: null, neu: {},
-    modus: 'echt', versatzTage: 0,   // 'echt' = echter Kalender, 'eigen' = Start eine Woche vor dem 1.12.   // Freischaltungen: schon angesagt / noch nicht angesehen
+    modus: 'echt', versatzTage: 0,
+    sterne10: true,                  // Beträge in ganzen Sternen (seit 29.09. alles ×10)   // 'echt' = echter Kalender, 'eigen' = Start eine Woche vor dem 1.12.   // Freischaltungen: schon angesagt / noch nicht angesehen
   };
 }
 
 function laden() {
   try {
     const roh = localStorage.getItem(SCHLUESSEL);
-    if (roh) return Object.assign(neuerStand(), JSON.parse(roh));
+    if (roh) {
+      const alt = JSON.parse(roh);
+      const stand = Object.assign(neuerStand(), alt);
+      // Falle: neuerStand() trägt sterne10 schon - ein alter Stand OHNE die
+      // Marke wäre sonst nie umgerechnet worden (so beim ersten Test passiert)
+      if (!('sterne10' in alt)) stand.sterne10 = false;
+      return stand;
+    }
   } catch (e) { /* kaputter Spielstand: neu anfangen */ }
   return neuerStand();
 }
@@ -52,6 +60,14 @@ export let st = laden();
 if (st.lichtfarbe === 'bunt' && !st.bunt) st.bunt = { dach: true };
 // Die Bunt-Artikel gibt es nicht mehr (Farbe ist frei wählbar): ihre NEU-Marken aufräumen
 if (st.neu) for (const k of Object.keys(st.neu)) if (!C.ARTIKEL.some((x) => x.id === k) && !/^(kal|auf)_/.test(k)) delete st.neu[k];
+// Alte Spielstände: Seit 29.09. gibt es ganze Sterne, alle Beträge ×10 -
+// Kasse, Verdientes und der heutige Auftragslohn werden einmal umgerechnet
+if (!st.sterne10) {
+  st.geld = Math.round(st.geld * 10);
+  st.gesamt = Math.round(st.gesamt * 10);
+  if (st.auftraege) for (const a of st.auftraege.liste || []) a.lohn = Math.round(a.lohn * 10);
+  st.sterne10 = true;
+}
 // Alte Spielstände: Musik war ein Schalter (true/false), jetzt eine Stufe
 if (typeof st.ton.musik === 'boolean') st.ton.musik = st.ton.musik ? 3 : 0;
 
@@ -281,6 +297,14 @@ export function status(a) {
   return { stufe: s, max, fertig, kosten, grund, versteckt, leisten: !versteckt && kosten != null && st.geld >= kosten };
 }
 
+/** Fertig im Sinne von „schönstes Haus": Luxus-Stücke zählen nicht (luxus/luxusAb in config.js). */
+export function fertigOhneLuxus(a) {
+  if (a.luxus) return true;
+  if (a.luxusAb) return stufe(a.id) >= a.luxusAb - 1;
+  return status(a).fertig;
+}
+export const zumZiel = () => C.ARTIKEL.filter((a) => !a.luxus);
+
 export function kaufe(id) {
   const a = ARTIKEL_MAP[id];
   if (!a) return false;
@@ -340,18 +364,18 @@ export function setzeDev(neu) {
 export const devAn = () => dev.geld !== 1 || dev.tempo !== 1 || dev.tage !== 0;
 
 export function verdiene(betrag) {
+  betrag = Math.round(betrag);   // ganze Sterne
   st.geld += betrag;
   st.gesamt += betrag;
   hooks.geld();
 }
 
 export function formatGeld(n) {
-  // Die Währung heißt STERNE (vorher „Geld", davor „Taler"). Ab 100 ganze
-  // Beträge, darunter mit zwei Nachkommastellen. Im Code bleibt es `geld`.
+  // Die Währung heißt STERNE (vorher „Geld", davor „Taler"), seit 29.09. nur
+  // ganze Zahlen. Im Code bleibt es `geld`.
   if (n >= 1e6) return (n / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' Mio. Sterne';
-  if (n === 1) return '1 Stern';
-  if (n >= 100 || Number.isInteger(n)) return Math.floor(n).toLocaleString('de-DE') + ' Sterne';
-  return n.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' Sterne';
+  n = Math.floor(n);
+  return n === 1 ? '1 Stern' : n.toLocaleString('de-DE') + ' Sterne';
 }
 
 // ---------------------------------------------------------------------------
@@ -462,11 +486,15 @@ function gehe(g, froh) {
 
 /** Wer den Grummel warten lässt, dem greift er in die Kasse. */
 function grummelStreich(g) {
+  if (C.GRUMMEL_ANTEIL <= 0) {   // seit 29.09.: er brummelt nur noch
+    hooks.toast('Der Grummel ist brummelnd weitergezogen.', 'hinweis');
+    return;
+  }
   const betrag = Math.min(st.geld, Math.max(C.GRUMMEL_MIN, Math.round(st.geld * C.GRUMMEL_ANTEIL)));
   if (betrag <= 0) return;
   st.geld -= betrag;
   hooks.geld();
-  lauf.texte.push({ platz: null, x: g.x, text: '-' + (betrag < 100 ? betrag.toFixed(2).replace('.', ',') : Math.round(betrag)), t: 0, boese: true });
+  lauf.texte.push({ platz: null, x: g.x, text: '-' + Math.round(betrag), t: 0, boese: true });
   hooks.toast(`Der Grummel hat ${formatGeld(betrag)} aus der Kasse geklaut!`, 'boese');
   hooks.ton('falsch');
 }
@@ -562,14 +590,17 @@ export function tippeGast(platz) {
       lauf.wackel['g' + g.id] = 0.2; hooks.toast('Noch einen Moment - es ist gleich fertig!', 'hinweis');
       return;
     }
-    // Falsch geliefert: Der Gast lehnt ab, das Getränk ist hin und kostet etwas
+    // Ein Tipp genügt, sobald der Servier-Wichtel da ist: direkt aus dem Topf
+    if (hat('servier') && schnellServieren(g)) return;
+    // Falsch geliefert: Der Gast lehnt ab, das Getränk ist hin (seit 29.09.
+    // kostet es keine Sterne mehr - FALSCH_ANTEIL 0 -, nur das Glas)
     const k = lauf.hand.findIndex(bereit);
     if (k >= 0) {
       const p = C.PRODUKT[lauf.hand[k].id];
       lauf.hand.splice(k, 1);
-      const minus = Math.min(st.geld, Math.max(0.5, p.preis * C.FALSCH_ANTEIL));
-      st.geld -= minus; hooks.geld();
-      if (minus > 0) lauf.texte.push({ platz: g.platz, x: g.x, text: '-' + minus.toFixed(2).replace('.', ','), t: 0, boese: true });
+      const minus = Math.min(st.geld, Math.round(p.preis * C.FALSCH_ANTEIL));
+      if (minus > 0) { st.geld -= minus; hooks.geld(); lauf.texte.push({ platz: g.platz, x: g.x, text: '-' + minus, t: 0, boese: true }); }
+      else hooks.toast('Das war das falsche Getränk - schau aufs Bläschen.', 'hinweis');
       lauf.wackel['g' + g.id] = 0.35; hooks.ton('falsch');
       lauf.fehlGast++;
       lauf.schwung = 0; lauf.schwungT = 0;
@@ -581,6 +612,27 @@ export function tippeGast(platz) {
   const faktor = h.extraFertig ? 1 + C.EXTRA_BONUS : 1;
   if (g.gross) return liefereGross(g, faktor);
   bediene(g, false, faktor);
+}
+
+/**
+ * Ein-Tipp-Service (seit 29.09., sobald der Servier-Wichtel da ist): Tipp auf
+ * den Gast = Glas, Topf und Servieren in einem, ohne Zubereitungszeit. Dafür
+ * ohne Extra - Sahne, Zimt und Zuckerhut gibt es nur über Glas und Topf
+ * (+30 %). Crêpes brauchen weiter die Platte. Gibt false zurück, wenn es
+ * nicht geht (dann gilt das alte Verhalten).
+ */
+function schnellServieren(g) {
+  const p = C.PRODUKT[g.wunsch];
+  if (p.art === 'platte') return false;
+  if ((st.toepfe[p.id] || 0) <= 0) {
+    lauf.wackel['z' + p.id] = 0.3; hooks.ton('falsch');
+    hooks.toast(`${p.name} ist leer - erst nachfüllen!`, 'hinweis');
+    return true;
+  }
+  st.toepfe[p.id]--;
+  lauf.schnell = (lauf.schnell || 0) + 1;
+  if (g.gross) liefereGross(g, 1); else bediene(g, false, 1);
+  return true;
 }
 
 /** Ein Glas an die Großbestellung. Bezahlt wird erst, wenn alles da ist. */
@@ -634,7 +686,7 @@ function bediene(g, auto, faktor = 1) {
   verdiene(betrag);
   st.stats.bedient++;
   zaehleBedient(g, auto, faktor, schwungVorher);
-  lauf.texte.push({ platz: g.platz, x: g.x, text: '+' + (betrag < 100 ? betrag.toFixed(2).replace('.', ',') : Math.round(betrag)), t: 0, gross: !!def.spezial || g.eilig });
+  lauf.texte.push({ platz: g.platz, x: g.x, text: '+' + Math.round(betrag), t: 0, gross: !!def.spezial || g.eilig });
   hooks.bedient(g, auto, lauf.t < lauf.stossBis);
   lauf.herzen.push({ x: g.x, t: 0 });
   if (auto) lauf.elfen.push({ platz: g.platz, t: 0 });
@@ -851,6 +903,15 @@ export function durchschnittsPreis() {
   return w ? s / w : 0;
 }
 
+/** Die Kiste öffnen: alles, was die Wichtel verdient haben. Gibt den Betrag zurück. */
+export function oeffneKiste() {
+  const b = st.kiste || 0;
+  st.kiste = 0; st.kisteGaeste = 0;
+  if (b > 0) verdiene(b);
+  speichere();
+  return b;
+}
+
 /**
  * Grobe Einnahmen je Minute, als Maßstab für Belohnungen (Aufträge,
  * Nikolaus, Großbestellung). Früher mit Gastabstand mindestens 2,2 s
@@ -885,8 +946,14 @@ export function offlineAbrechnen() {
     if (n >= vorrat) { n = vorrat; for (const p of produkteFrei()) if (p.art !== 'platte') st.toepfe[p.id] = 0; }
   }
   n = Math.floor(n);
-  const betrag = n * durchschnittsPreis() * preisFaktor() * (1 + C.TRINKGELD_MAX * 0.5) * dev.geld;
-  if (betrag > 0) verdiene(betrag);
+  const betrag = Math.round(n * durchschnittsPreis() * preisFaktor() * (1 + C.TRINKGELD_MAX * 0.5) * dev.geld);
+  // Kurz weg: gleich gutschreiben. Länger weg: in die Kiste - die öffnet man
+  // selbst (der Moment „ich komme zurück, und es ist viel passiert"). Sie
+  // bleibt gespeichert, falls man die App vorher wieder zumacht.
+  if (betrag > 0) {
+    if (sek < C.OFFLINE_FENSTER) verdiene(betrag);
+    else { st.kiste = (st.kiste || 0) + betrag; st.kisteGaeste = (st.kisteGaeste || 0) + n; }
+  }
   st.stats.bedient += n;
   return { sek, betrag, portionen: n };
 }

@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=20260929q';
-import * as S from './spiel.js?v=20260929q';
+import * as C from './config.js?v=20260929t';
+import * as S from './spiel.js?v=20260929t';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;
@@ -43,7 +43,7 @@ export const ERFOLGE = [
   { id: 'bedient5000', name: 'Punschlegende',          text: 'Bediene 5.000 Gäste.',                        ziel: 5000, wert: () => zahl('bedient') },
   { id: 'herz300',     name: 'Schöne Bescherung',      text: 'Erreiche 300 ♥ Stimmung.',                    ziel: 300,  wert: () => S.stimmung() },
   { id: 'kalender',    name: 'Türchen um Türchen',     text: 'Öffne alle 24 Türchen im Adventskalender.',   ziel: 24,   wert: () => Object.keys(S.st.kalender || {}).length },
-  { id: 'alles',       name: 'Das schönste Haus im Dorf', text: 'Kaufe alles, was es im Laden gibt.',       ziel: C.ARTIKEL.length, wert: () => C.ARTIKEL.filter((a) => S.status(a).fertig).length },
+  { id: 'alles',       name: 'Das schönste Haus im Dorf', text: 'Kaufe alles, was es im Laden gibt - bis auf die ✦ Extras für Profis.', ziel: S.zumZiel().length, wert: () => S.zumZiel().filter(S.fertigOhneLuxus).length },
 ];
 
 /** Was die Wand ab wie vielen Socken zeigt - für den Hinweis unter dem Bild. */
