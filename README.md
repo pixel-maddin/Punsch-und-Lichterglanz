@@ -22,9 +22,12 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
 3. **Kurz warten**, bis das Glas voll ist - teure Getränke brauchen länger.
 4. **Servieren** - auf den Gast tippen. Je schneller, desto mehr Trinkgeld.
 5. **Leerer Topf** - ein paarmal antippen, dann ist er wieder voll.
-6. **Der letzte Handgriff** - bei Schokolade, Herzwärmer, Zimtwolke
-   und Feuerzauber das fertige Glas auf dem Tablett antippen (Sahne,
-   Zimtstange, Zuckerhut anzünden). Dann zahlt der Gast 30 % mehr.
+6. **Handgriffe** - fast jedes Getränk hat seinen eigenen: Zuckerstange
+   (Kinderpunsch), dreimal umrühren (Apfel), Zuckerguss (Lebkuchen), Sahne
+   (Schokolade), Sahne und Zimt (Herzwärmer), Milchschaum und Zimtstange
+   (Zimtwolke), Zuckerhut anzünden (Feuerzauber). Das fertige Glas auf dem
+   Tablett antippen - die goldene Blase zeigt, was fehlt. Dann zahlt der Gast
+   20 bis 50 % mehr.
 
 Falsch geliefert kostet nur das Glas. Falsch Eingeschenktes kippt man in
 den Ausguss rechts. **Sobald der Servier-Wichtel da ist, reicht ein Tipp auf

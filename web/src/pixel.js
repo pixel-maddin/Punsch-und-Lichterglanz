@@ -95,11 +95,15 @@ export function kurzGeld(n) {
 // auf dem Tablett, bis man es antippt.
 export function icon(c, id, x, y, t = 0, roh = false) {
   x = Math.round(x); y = Math.round(y);
+  // roh: true = noch kein Handgriff gemacht, false = alle fertig (Laden, Regal),
+  // Liste = diese Handgriffe sind schon erledigt (Tablett, seit 30.09.)
+  const hat = (g) => roh === false || (Array.isArray(roh) && roh.includes(g));
   if (id === 'lebkuchen') {
     const b = '#9a5a2a', k = '#fff4e6';
     r(c, x + 1, y + 2, 3, 4, b); r(c, x + 5, y + 2, 3, 4, b); r(c, x, y + 3, 9, 3, b);
     r(c, x + 1, y + 6, 7, 1, b); r(c, x + 2, y + 7, 5, 1, b); r(c, x + 3, y + 8, 3, 1, b);
-    p(c, x + 2, y + 3, k); p(c, x + 6, y + 3, k); r(c, x + 3, y + 5, 3, 1, k); p(c, x + 4, y + 6, '#d83a3a');
+    if (hat('guss')) { p(c, x + 2, y + 3, k); p(c, x + 6, y + 3, k); r(c, x + 3, y + 5, 3, 1, k); p(c, x + 4, y + 6, '#d83a3a'); }
+    else p(c, x + 4, y + 6, '#d83a3a');
     return;
   }
   if (id === 'crepe') {
@@ -119,23 +123,32 @@ export function icon(c, id, x, y, t = 0, roh = false) {
   r(c, x + 1, y + 3, 6, 1, ton(f, 0.35));
   if (id === 'weisser') {
     r(c, x + 1, y + 3, 6, 1, '#d4a82c'); p(c, x + 4, y + 6, '#d4a82c');
-    if (!roh) { p(c, x + 5, y + 2, '#8a4a1e'); p(c, x + 6, y + 1, '#8a4a1e'); p(c, x + 6, y, '#a8602a'); }   // Zimtstange
+    if (hat('schaum')) { r(c, x + 1, y + 2, 6, 2, '#fffaf2'); p(c, x + 2, y + 1, '#fffaf2'); p(c, x + 4, y + 1, '#fffaf2'); }   // Milchschaum
+    if (hat('zimt')) { p(c, x + 5, y + 2, '#8a4a1e'); p(c, x + 6, y + 1, '#8a4a1e'); p(c, x + 6, y, '#a8602a'); }   // Zimtstange
   }
   if (id === 'gluehwein') {   // Sternenpunsch: fünfzackiger goldener Stern (ein Kreuz las sich als Erste Hilfe)
     const g = '#ffd040';
     p(c, x + 4, y + 4, g); r(c, x + 2, y + 5, 5, 1, g); r(c, x + 3, y + 6, 3, 1, g); p(c, x + 3, y + 7, g); p(c, x + 5, y + 7, g); p(c, x + 4, y + 5, '#fff4b0');
   }
-  if (id === 'kinderpunsch') { p(c, x + 4, y + 5, '#fff'); p(c, x + 3, y + 6, '#fff'); p(c, x + 5, y + 6, '#fff'); p(c, x + 4, y + 7, '#fff'); }
-  if (id === 'apfel') { p(c, x + 4, y + 1, '#3a8a2a'); p(c, x + 5, y + 0, '#3a8a2a'); r(c, x + 3, y + 6, 3, 2, '#d83a2a'); }
-  if ((id === 'schoko' || id === 'eierpunsch') && !roh) { r(c, x + 2, y + 1, 4, 2, '#fffaf2'); p(c, x + 3, y, '#fffaf2'); if (id === 'schoko') p(c, x + 4, y + 1, '#6b3a22'); }
+  if (id === 'kinderpunsch') {
+    p(c, x + 4, y + 5, '#fff'); p(c, x + 3, y + 6, '#fff'); p(c, x + 5, y + 6, '#fff'); p(c, x + 4, y + 7, '#fff');
+    if (hat('zuckerstange')) { p(c, x + 5, y, '#d83a3a'); p(c, x + 6, y, '#fff'); p(c, x + 6, y + 1, '#d83a3a'); p(c, x + 6, y + 2, '#fff'); }
+  }
+  if (id === 'apfel') {
+    p(c, x + 4, y + 1, '#3a8a2a'); p(c, x + 5, y + 0, '#3a8a2a'); r(c, x + 3, y + 6, 3, 2, '#d83a2a');
+    if (hat('ruehren')) { p(c, x + 2, y, '#d0d4dc'); p(c, x + 2, y + 1, '#b8bcc6'); p(c, x + 3, y + 2, '#b8bcc6'); }   // Löffel
+  }
+  const sahne = (id === 'schoko' || id === 'eierpunsch') && hat('sahne');
+  if (sahne) { r(c, x + 2, y + 1, 4, 2, '#fffaf2'); p(c, x + 3, y, '#fffaf2'); if (id === 'schoko') p(c, x + 4, y + 1, '#6b3a22'); }
+  if (id === 'eierpunsch' && hat('zimtpulver')) { p(c, x + 3, y + 1, '#a8602a'); p(c, x + 5, y + 2, '#8a4a1e'); p(c, x + 4, y, '#a8602a'); }
   if (id === 'jaegertee') { p(c, x + 3, y + 6, '#e0c060'); p(c, x + 4, y + 5, '#e0c060'); p(c, x + 5, y + 6, '#e0c060'); }
-  if (id === 'feuerzange' && roh) {
+  if (id === 'feuerzange' && !hat('zucker')) {
     r(c, x + 2, y + 2, 4, 1, '#e8e8e8'); r(c, x + 3, y, 2, 2, '#fffaf2');   // Zange mit Zuckerhut, noch kalt
   } else if (id === 'feuerzange') {
     const fl = Math.floor(t * 8) % 2;
     r(c, x + 2, y + 2, 4, 1, '#e8e8e8'); // Zuckerhut-Zange
     p(c, x + 3 + fl, y, '#ffd040'); r(c, x + 3, y + 1, 2, 1, '#ff8a20'); p(c, x + 4 - fl, y, '#6ab0ff');
-  } else if ((roh || (id !== 'schoko' && id !== 'eierpunsch')) && id !== 'apfel') {
+  } else if (!sahne && !(id === 'weisser' && hat('schaum')) && id !== 'apfel') {
     // Dampf
     const s = Math.floor(t * 3) % 2;
     p(c, x + 3 + s, y + 1, '#ffffff'); p(c, x + 4 - s, y, '#e8eef4');

@@ -40,25 +40,36 @@ export const T_ZELLE_H = 27;   // Regal: 2 Reihen
 // wird dadurch nichts. Alte Spielstände werden in spiel.js umgerechnet.
 export const PRODUKTE = [
   { id: 'gluehwein',    name: 'Sternenpunsch',    preis: 10, zeit: 0.4,  kosten: 0,     art: 'topf',   farbe: '#8a1830', alk: false },
-  { id: 'kinderpunsch', name: 'Kinderpunsch',     preis: 12, zeit: 0.5,  kosten: 200,    art: 'topf',   farbe: '#ee6d9a', alk: false },
-  { id: 'apfel',        name: 'Heißer Apfel',     preis: 14, zeit: 0.7,  kosten: 600,    art: 'topf',   farbe: '#e8942e', alk: false },
-  { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false },
-  { id: 'schoko',       name: 'Heiße Schokolade', preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, extra: 'sahne' },
-  { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 20, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, extra: 'sahne' },
+  { id: 'kinderpunsch', name: 'Kinderpunsch',     preis: 12, zeit: 0.5,  kosten: 200,    art: 'topf',   farbe: '#ee6d9a', alk: false, griffe: ['zuckerstange'], bonus: 0.20 },
+  { id: 'apfel',        name: 'Heißer Apfel',     preis: 14, zeit: 0.7,  kosten: 600,    art: 'topf',   farbe: '#e8942e', alk: false, griffe: ['ruehren'], bonus: 0.25 },
+  { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false, griffe: ['guss'], bonus: 0.25 },
+  { id: 'schoko',       name: 'Heiße Schokolade', preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, griffe: ['sahne'], bonus: 0.30 },
+  { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 20, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, griffe: ['sahne', 'zimtpulver'], bonus: 0.40 },
   { id: 'jaegertee',    name: 'Waldtee',          preis: 24, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false },
   { id: 'crepe',        name: 'Crêpe',            preis: 28, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false },
-  { id: 'weisser',      name: 'Zimtwolke',        preis: 32, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: false, extra: 'zimt' },
-  { id: 'feuerzange',   name: 'Feuerzauber',      preis: 40, zeit: 2.4, kosten: 220000, art: 'topf',   farbe: '#a01818', alk: false, extra: 'zucker' },
+  { id: 'weisser',      name: 'Zimtwolke',        preis: 32, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: false, griffe: ['schaum', 'zimt'], bonus: 0.45 },
+  { id: 'feuerzange',   name: 'Feuerzauber',      preis: 40, zeit: 2.4, kosten: 220000, art: 'topf',   farbe: '#a01818', alk: false, griffe: ['zucker'], bonus: 0.50 },
 ];
-// extra: der letzte Handgriff, den nur DU machst - nach dem Einschenken das
-// Glas auf dem Tablett antippen. Fertig zahlt der Gast mehr; die Wichtel
-// servieren ohne (sie sollen die Hand nicht ersetzen, nur entlasten).
-export const EXTRA = {
-  sahne:  { name: 'Sahne',      satz: 'Sahne drauf' },
-  zimt:   { name: 'Zimtstange', satz: 'eine Zimtstange rein' },
-  zucker: { name: 'Zuckerhut',  satz: 'den Zuckerhut anzünden' },
+// griffe: die Handgriffe, die nur DU machst - nach dem Einschenken das Glas
+// auf dem Tablett antippen, in dieser Reihenfolge (je `n`-mal). Fertig zahlt
+// der Gast `bonus` mehr; ohne zahlt er den normalen Preis (keine Strafe).
+// Wichtel und der Ein-Tipp-Service lassen sie weg - sie sind der Grund,
+// selbst am Tresen zu stehen. Seit 30.09. bringt JEDES neue Getränk eine neue
+// Art Handgriff mit (Nutzerwunsch: „immer schwieriger in der Zubereitung"):
+// 1 Tipp → mehrfach tippen → Reihenfolge. Timing-Griffe (Waldtee, Crêpe)
+// sind als zweiter Schritt geplant.
+export const HANDGRIFF = {
+  zuckerstange: { name: 'Zuckerstange', satz: 'eine Zuckerstange rein', n: 1 },
+  ruehren:      { name: 'Umrühren',     satz: 'dreimal umrühren', n: 3 },
+  guss:         { name: 'Zuckerguss',   satz: 'Zuckerguss drauf', n: 1 },
+  sahne:        { name: 'Sahne',        satz: 'Sahne drauf', n: 1 },
+  zimtpulver:   { name: 'Zimt',         satz: 'Zimt darüberstreuen', n: 1 },
+  schaum:       { name: 'Milchschaum',  satz: 'Milch aufschäumen (2-mal tippen)', n: 2 },
+  zimt:         { name: 'Zimtstange',   satz: 'eine Zimtstange rein', n: 1 },
+  zucker:       { name: 'Zuckerhut',    satz: 'den Zuckerhut anzünden', n: 1 },
 };
-export const EXTRA_BONUS = 0.30;   // so viel mehr zahlt der Gast mit Extra
+export const EXTRA = HANDGRIFF;    // alter Name
+export const EXTRA_BONUS = 0.30;   // Rückfall, wenn ein Getränk keinen eigenen `bonus` hat
 export const ZUCKER_ZEIT = 1.2;    // s, die der Zuckerhut brennt
 export const PRODUKT = Object.fromEntries(PRODUKTE.map((p) => [p.id, p]));
 
@@ -248,7 +259,7 @@ for (const p of PRODUKTE) {
   if (p.kosten === 0) continue;
   ARTIKEL.push({
     id: p.id, tab: 'super', gruppe: 'Zutaten', name: p.name, kosten: p.kosten, stimmung: 0,
-    produkt: true, text: `Gäste zahlen ${String(p.preis).replace('.', ',')} Sterne${p.zeit ? ` · Zubereitung ${String(p.zeit).replace('.', ',')} s` : ''}${p.id === 'kinderpunsch' ? ' · lockt Kinder an' : ''}${p.extra ? ` · mit ${EXTRA[p.extra].name} +${Math.round(EXTRA_BONUS * 100)} %` : ''}.`,
+    produkt: true, text: `Gäste zahlen ${String(p.preis).replace('.', ',')} Sterne${p.zeit ? ` · Zubereitung ${String(p.zeit).replace('.', ',')} s` : ''}${p.id === 'kinderpunsch' ? ' · lockt Kinder an' : ''}${p.griffe ? ` · mit ${p.griffe.map((g) => HANDGRIFF[g].name).join(' + ')} +${Math.round((p.bonus || EXTRA_BONUS) * 100)} %` : ''}.`,
   });
 }
 

@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=20260930b';
-import * as S from './spiel.js?v=20260930b';
+import * as C from './config.js?v=20260930d';
+import * as S from './spiel.js?v=20260930d';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;
@@ -29,7 +29,7 @@ export const ERFOLGE = [
   { id: 'nikolaus1',   name: 'Ho ho ho!',              text: 'Tippe den Nikolaus an, wenn er über den Himmel fliegt.', ziel: 1, wert: () => zahl('nikolaus') },
   { id: 'wichtel',     name: 'Wichtelwerkstatt',       text: 'Hol dir Spül-, Nachfüll- und Servier-Wichtel.', ziel: 3,  wert: () => WICHTEL.filter((w) => S.hat(w)).length },
   { id: 'gross1',      name: 'Großer Durst',           text: 'Schaffe eine Großbestellung.',                ziel: 1,    wert: () => zahl('gross') },
-  { id: 'extras',      name: 'Mit Sahnehäubchen',      text: 'Serviere 50 Getränke mit Extra (Sahne, Zimt oder Zuckerhut).', ziel: 50, wert: () => zahl('extras') },
+  { id: 'extras',      name: 'Mit Sahnehäubchen',      text: 'Serviere 50 Getränke mit allen Handgriffen (Zuckerstange, Umrühren, Sahne …).', ziel: 50, wert: () => zahl('extras') },
   { id: 'eilig',       name: 'Flinke Hände',           text: 'Bediene 25 eilige Gäste.',                    ziel: 25,   wert: () => zahl('eilig') },
   { id: 'auftraege',   name: 'Fleißbienchen',          text: 'Hole 10 Aufträge ab.',                        ziel: 10,   wert: () => zahl('auftraege') },
   { id: 'herz100',     name: 'Gemütlich',              text: 'Erreiche 100 ♥ Stimmung.',                    ziel: 100,  wert: () => S.stimmung() },

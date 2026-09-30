@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930b';
-import * as C from './config.js?v=20260930b';
-import * as S from './spiel.js?v=20260930b';
-import * as Z from './zeit.js?v=20260930b';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930d';
+import * as C from './config.js?v=20260930d';
+import * as S from './spiel.js?v=20260930d';
+import * as Z from './zeit.js?v=20260930d';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -443,14 +443,15 @@ function brett(c, y, t) {
       else if (Math.floor(t * 4) % 2) p(c, x + 9, by - 19, '#eef2f6');
     }
     else {
-      const roh = h.extra && !h.extraFertig;
+      // Offene Handgriffe: nur die erledigten zeichnen (Liste), fertig = alles
+      const roh = h.griffe && !h.extraFertig ? h.griffe.slice(0, h.schritt) : false;
       gross(c, x, by - 19 - hoch, (k) => icon(k, h.id, 0, 0, t, roh));
       if (h.brennT > 0) {
         // Der Zuckerhut brennt: große, flackernde Flamme
         const fl = Math.floor(t * 12) % 2;
         r(c, x + 6, by - 22, 4, 3, '#ff8a20'); r(c, x + 7 - fl, by - 25, 2, 3, '#ffd040');
         p(c, x + 7 + fl, by - 26, '#6ab0ff'); p(c, x + 5 + fl * 4, by - 21, '#ffd040');
-      } else if (roh) extraHinweis(c, x + 13, by - 30, h.extra, t);
+      } else if (roh) extraHinweis(c, x + 13, by - 30, h.extra, t, C.HANDGRIFF[h.extra].n - h.tipps);
     }
   }
 
@@ -461,8 +462,11 @@ function brett(c, y, t) {
   if (S.lauf.hand.length) { p(c, ax + 8, y + 1, '#9ab8d8'); p(c, ax + 9, y + 2, '#9ab8d8'); }
 }
 
-/** Kleine Blase über einem Glas: „hier fehlt noch Sahne / Zimt / Zucker". */
-function extraHinweis(c, x, y, extra, t) {
+/**
+ * Kleine Blase über einem Glas: der nächste Handgriff als Bildchen, bei
+ * mehreren Tipps (Umrühren, Milchschaum) rechts daneben, wie oft noch.
+ */
+function extraHinweis(c, x, y, extra, t, noch = 1) {
   const hoch = Math.floor(t * 3) % 2;
   y -= hoch;
   r(c, x + 1, y, 8, 9, '#e8b030'); r(c, x, y + 1, 10, 7, '#e8b030');
@@ -470,7 +474,24 @@ function extraHinweis(c, x, y, extra, t) {
   p(c, x + 2, y + 9, '#e8b030');
   if (extra === 'sahne') { r(c, x + 3, y + 4, 4, 2, '#f4ecdc'); r(c, x + 4, y + 3, 2, 1, '#f4ecdc'); r(c, x + 3, y + 5, 4, 1, '#d8ccb8'); }
   else if (extra === 'zimt') { p(c, x + 3, y + 6, '#8a4a1e'); p(c, x + 4, y + 5, '#8a4a1e'); p(c, x + 5, y + 4, '#a8602a'); p(c, x + 6, y + 3, '#a8602a'); }
+  else if (extra === 'zuckerstange') {   // rot-rosa gestreift, weiß ginge auf der hellen Blase unter
+    for (let k = 0; k < 5; k++) p(c, x + 5, y + 2 + k, k % 2 ? '#f09aa0' : '#d83a3a');
+    p(c, x + 4, y + 1, '#d83a3a'); p(c, x + 3, y + 2, '#f09aa0'); p(c, x + 3, y + 3, '#d83a3a');
+  }
+  else if (extra === 'ruehren') {   // Löffel mit Wirbel
+    p(c, x + 6, y + 2, '#b8bcc6'); p(c, x + 5, y + 3, '#b8bcc6'); r(c, x + 3, y + 5, 4, 1, '#e8942e'); p(c, x + 2, y + 6, '#e8942e'); p(c, x + 7, y + 4, '#e8942e'); p(c, x + 4, y + 4, '#b8bcc6');
+  }
+  else if (extra === 'guss') {   // Lebkuchen mit weißem Guss, der herunterläuft
+    r(c, x + 2, y + 3, 6, 4, '#9a5a2a'); r(c, x + 2, y + 3, 6, 1, '#ffffff'); p(c, x + 3, y + 4, '#ffffff'); p(c, x + 6, y + 4, '#ffffff'); p(c, x + 6, y + 5, '#ffffff');
+  }
+  else if (extra === 'zimtpulver') { p(c, x + 3, y + 3, '#a8602a'); p(c, x + 6, y + 4, '#8a4a1e'); p(c, x + 4, y + 5, '#a8602a'); p(c, x + 5, y + 3, '#8a4a1e'); p(c, x + 3, y + 6, '#8a4a1e'); }
+  else if (extra === 'schaum') {   // Tassenrand mit Schaumhaube, grau umrandet
+    r(c, x + 2, y + 5, 6, 2, '#c8a870'); r(c, x + 3, y + 3, 4, 2, '#ffffff'); p(c, x + 4, y + 2, '#ffffff');
+    p(c, x + 2, y + 4, '#a89a88'); p(c, x + 7, y + 4, '#a89a88'); p(c, x + 3, y + 2, '#a89a88'); p(c, x + 5, y + 2, '#a89a88');
+  }
   else { r(c, x + 4, y + 3, 2, 1, '#ffffff'); r(c, x + 3, y + 4, 4, 2, '#f4f4f4'); r(c, x + 3, y + 6, 4, 1, '#d8d8d8'); p(c, x + 5, y + 2, '#ff8a20'); }
+  // Mehrere Tipps: kleine Zahl in einem roten Punkt rechts oben
+  if (noch > 1) { r(c, x + 7, y - 2, 5, 5, '#c83a2e'); text(c, String(noch), x + 8, y - 1, '#ffffff'); }
 }
 
 /** Produktsymbol als einfarbiger Schattenriss (11 x 11), einmal gerechnet. */

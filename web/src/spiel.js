@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260930b';
-import * as Z from './zeit.js?v=20260930b';
-import { neueFarben } from './pixel.js?v=20260930b';
+import * as C from './config.js?v=20260930d';
+import * as Z from './zeit.js?v=20260930d';
+import { neueFarben } from './pixel.js?v=20260930d';
 
 const SCHLUESSEL = 'adventshaus.v1';
 
@@ -557,26 +557,46 @@ export function tippeZelle(i) {
   }
   if (p.art === 'dose') {
     if (!platzFuerEssen()) { hooks.ton('falsch'); lauf.wackel.hand = 0.3; return; }
-    hand.push({ art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit });
+    hand.push({ art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit, ...neueGriffe(p) });
     st.toepfe[p.id]--;
     hooks.ton('greifen');
     return;
   }
   // Topf: braucht ein leeres Glas. Dann dauert das Zubereiten ein wenig.
   const glas = hand.findIndex((h) => h.art === 'glas');
-  if (glas >= 0) hand[glas] = { art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit, extra: p.extra || null, extraFertig: false, brennT: 0 };
+  if (glas >= 0) hand[glas] = { art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit, ...neueGriffe(p) };
   else { hooks.ton('falsch'); lauf.wackel['z' + p.id] = 0.3; hooks.toast(hand.length >= handMax() ? 'Das Tablett ist voll.' : 'Erst ein Glas holen!', 'hinweis'); return; }
   st.toepfe[p.id]--;
   hooks.ton('giessen');
 }
 
-/** Etwas auf dem Tablett angetippt: der letzte Handgriff (Sahne, Zimt, Zuckerhut). */
+/**
+ * Handgriffe eines frisch eingeschenkten Glases: `griffe` in der Reihenfolge
+ * aus config.js, `schritt` = wie viele schon erledigt, `tipps` = Tipps im
+ * aktuellen (Umrühren braucht drei). `extra` ist der gerade fällige Griff.
+ */
+function neueGriffe(p) {
+  return { griffe: p.griffe || null, schritt: 0, tipps: 0, extra: p.griffe ? p.griffe[0] : null, extraFertig: false, brennT: 0 };
+}
+/** Nächster Handgriff dran - oder alle fertig. */
+function griffWeiter(h) {
+  h.schritt++; h.tipps = 0;
+  h.extra = h.griffe[h.schritt] || null;
+  if (!h.extra) h.extraFertig = true;
+}
+
+/** Etwas auf dem Tablett angetippt: der nächste Handgriff (Zuckerstange, Umrühren, Sahne …). */
 export function tippeHand(i) {
   const h = lauf.hand[i];
   if (!h || h.art !== 'voll' || !h.extra || h.extraFertig || h.brennT > 0) return;
   if (h.rest > 0) { lauf.wackel.hand = 0.2; hooks.toast('Erst fertig einschenken lassen!', 'hinweis'); return; }
   if (h.extra === 'zucker') { h.brennT = C.ZUCKER_ZEIT; hooks.ton('brutzeln'); }
-  else { h.extraFertig = true; hooks.ton('greifen'); }
+  else {
+    h.tipps++;
+    const fertig = h.tipps >= C.HANDGRIFF[h.extra].n;
+    hooks.ton(fertig ? 'greifen' : 'klick');
+    if (fertig) griffWeiter(h);
+  }
   lauf.neuInHand = i; lauf.neuInHandT = 0.15;
 }
 
@@ -611,7 +631,7 @@ export function tippeGast(platz) {
   }
   const h = lauf.hand[i];
   lauf.hand.splice(i, 1);
-  const faktor = h.extraFertig ? 1 + C.EXTRA_BONUS : 1;
+  const faktor = h.extraFertig ? 1 + (C.PRODUKT[h.id].bonus || C.EXTRA_BONUS) : 1;
   if (g.gross) return liefereGross(g, faktor);
   bediene(g, false, faktor);
 }
@@ -809,7 +829,7 @@ export function update(dt) {
   // Zubereitung auf dem Tablett
   for (const h of lauf.hand) {
     if (h.rest > 0) { h.rest -= dt; if (h.rest <= 0) hooks.ton('fertig'); }
-    if (h.brennT > 0) { h.brennT -= dt; if (h.brennT <= 0) { h.brennT = 0; h.extraFertig = true; hooks.ton('fertig'); } }
+    if (h.brennT > 0) { h.brennT -= dt; if (h.brennT <= 0) { h.brennT = 0; griffWeiter(h); hooks.ton('fertig'); } }
   }
   // Spül-Wichtel: stellt nach und nach saubere Gläser aufs Tablett
   if (hat('spuel') && lauf.hand.length < handMax()) {

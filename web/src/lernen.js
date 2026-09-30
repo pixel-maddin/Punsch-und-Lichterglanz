@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20260930b';
-import * as S from './spiel.js?v=20260930b';
-import * as A from './auftraege.js?v=20260930b';
-import * as E from './erfolge.js?v=20260930b';
-import * as Z from './ziele.js?v=20260930b';
+import * as C from './config.js?v=20260930d';
+import * as S from './spiel.js?v=20260930d';
+import * as A from './auftraege.js?v=20260930d';
+import * as E from './erfolge.js?v=20260930d';
+import * as Z from './ziele.js?v=20260930d';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -176,7 +176,7 @@ const HINWEISE = [
     ziel: null, dauer: 12 },
   // Ein-Tipp-Service: ab dem Servier-Wichtel reicht ein Tipp auf den Gast
   { id: 'schnell', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg,
-    text: () => `Neu: Ab jetzt reicht EIN Tipp auf einen Gast - du servierst direkt aus dem Topf. Glas und Topf brauchst du nur noch für Extras wie Sahne (+${Math.round(C.EXTRA_BONUS * 100)} %).`,
+    text: () => `Neu: Ab jetzt reicht EIN Tipp auf einen Gast - du servierst direkt aus dem Topf. Glas und Topf brauchst du nur noch für die Handgriffe wie Zuckerstange oder Sahne - die bringen bis zu ${Math.round(Math.max(...C.PRODUKTE.map((p) => p.bonus || 0)) * 100)} % mehr.`,
     ziel: () => gastZiel(0), dauer: 10 },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
@@ -194,10 +194,13 @@ const HINWEISE = [
     text: () => 'Schade - der besondere Gast hat zu lange gewartet und ist gegangen. Beim nächsten Mal schneller bedienen, damit er rechtzeitig drankommt!',
     ziel: null, dauer: 7 },
   // Der letzte Handgriff: Sahne, Zimt, Zuckerhut
-  { id: 'extra', sofort: true, wann: () => extraOffen() >= 0,
-    text: () => { const h = S.lauf.hand[extraOffen()]; const e = h ? C.EXTRA[h.extra] : C.EXTRA.sahne;
-      return `Tippe das Glas auf dem Tablett an: ${e.satz.charAt(0).toUpperCase() + e.satz.slice(1)}! Dann zahlt der Gast ${Math.round(C.EXTRA_BONUS * 100)} % mehr. Das kannst nur du - die Wichtel lassen es weg.`; },
-    ziel: () => handZiel(Math.max(0, extraOffen())), fertig: () => extraOffen() < 0, dauer: 12 },
+  // Handgriffe (Zuckerstange, Umrühren, Zuckerguss, Sahne …): jede Art
+  // einmal erklären, sobald sie zum ersten Mal auf dem Tablett fällig ist.
+  // Sahne behält die alte id 'extra' - wer sie kennt, sieht sie nicht noch mal.
+  ...Object.keys(C.HANDGRIFF).map((k) => ({
+    id: k === 'sahne' ? 'extra' : 'griff_' + k, sofort: true, wann: () => griffOffen(k) >= 0,
+    text: () => griffText(k), ziel: () => handZiel(Math.max(0, griffOffen(k))), fertig: () => griffOffen(k) < 0,
+  })),
   { id: 'gross', sofort: true, wann: () => S.lauf.gaeste.some((g) => g.gross && g.am && !g.bedient),
     text: () => { const g = S.lauf.gaeste.find((x) => x.gross); return g ? `Großbestellung! ${g.gross.name} will ${g.gross.n} × ${C.PRODUKT[g.gross.id].name}. Bring alle, bevor die Zeit abläuft - das gibt richtig viele Sterne. Die Wichtel trauen sich da nicht ran.` : ''; },
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.gross && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 9 },
@@ -230,6 +233,21 @@ function kannKaufen(id) {
   if (S.hat(id)) return false;
   const st = S.ARTIKEL_MAP[id] ? S.status(a) : null;
   return st ? !st.versteckt && st.leisten : S.st.geld >= a.kosten;
+}
+
+/** Welches Glas auf dem Tablett wartet gerade auf Handgriff k? (-1 = keins) */
+function griffOffen(k) {
+  return S.lauf.hand.findIndex((h) => h.art === 'voll' && h.extra === k && !h.extraFertig && !(h.rest > 0) && !(h.brennT > 0));
+}
+function griffText(k) {
+  const h = S.lauf.hand[griffOffen(k)];
+  const g = C.HANDGRIFF[k], p = h ? C.PRODUKT[h.id] : null;
+  const bonus = Math.round(((p && p.bonus) || C.EXTRA_BONUS) * 100);
+  const satz = g.satz.charAt(0).toUpperCase() + g.satz.slice(1);
+  return `${p ? p.name + ': ' : ''}Tippe das Glas auf dem Tablett an - ${satz}!`
+    + (g.n > 1 ? ' Die Zahl über dem Glas zeigt, wie oft noch.' : '')
+    + (h && h.schritt > 0 ? ' Manche Getränke brauchen zwei Handgriffe nacheinander.' : '')
+    + ` Fertig zahlt der Gast ${bonus} % mehr. Das kannst nur du - die Wichtel lassen es weg.`;
 }
 
 function extraOffen() {

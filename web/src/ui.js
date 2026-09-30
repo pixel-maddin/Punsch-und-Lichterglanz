@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260930b';
-import * as S from './spiel.js?v=20260930b';
-import * as Z from './zeit.js?v=20260930b';
-import * as T from './ton.js?v=20260930b';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930b';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930b';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930b';
-import * as A from './auftraege.js?v=20260930b';
-import * as E from './erfolge.js?v=20260930b';
-import * as ZL from './ziele.js?v=20260930b';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930b';
-import { alleSymbole } from './symbole.js?v=20260930b';
+import * as C from './config.js?v=20260930d';
+import * as S from './spiel.js?v=20260930d';
+import * as Z from './zeit.js?v=20260930d';
+import * as T from './ton.js?v=20260930d';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930d';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930d';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930d';
+import * as A from './auftraege.js?v=20260930d';
+import * as E from './erfolge.js?v=20260930d';
+import * as ZL from './ziele.js?v=20260930d';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930d';
+import { alleSymbole } from './symbole.js?v=20260930d';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -963,7 +963,7 @@ export function zeigeHilfe() {
       <li><b>Glas holen</b> - links auf dem Tresen.</li>
       <li><b>Abfüllen</b> - auf den passenden Topf tippen. Das Symbol im Bläschen des Gastes ist dasselbe wie auf dem Topf.</li>
       <li><b>Servieren</b> - auf den Gast tippen. Je schneller, desto mehr Trinkgeld.</li>
-      <li><b>Sahne, Zimt, Zuckerhut</b> - bei manchen Getränken das fertige Glas auf dem Tablett antippen. Dann zahlt der Gast ${Math.round(C.EXTRA_BONUS * 100)} % mehr.</li>
+      <li><b>Handgriffe</b> - Zuckerstange, Umrühren, Zuckerguss, Sahne, Zimt, Milchschaum, Zuckerhut: das fertige Glas auf dem Tablett antippen (die goldene Blase zeigt, was fehlt). Dann zahlt der Gast mehr, je nach Getränk 20 bis 50 %. Wichtel lassen sie weg.</li>
       <li><b>Leerer Topf?</b> Ein paarmal antippen, dann ist er wieder voll.</li>
       <li><b>Zu langsam?</b> Nicht schlimm - dann geht der Gast eben weiter. Nur besondere Gäste solltest du nicht verpassen - wer das ist, merkst du schon.</li>
     </ol>
