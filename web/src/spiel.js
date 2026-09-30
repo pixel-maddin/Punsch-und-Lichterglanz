@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260930j';
-import * as Z from './zeit.js?v=20260930j';
-import { neueFarben } from './pixel.js?v=20260930j';
+import * as C from './config.js?v=20260930k';
+import * as Z from './zeit.js?v=20260930k';
+import { neueFarben } from './pixel.js?v=20260930k';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -653,6 +653,7 @@ export function tippeGast(platz) {
   }
   const h = lauf.hand[i];
   lauf.hand.splice(i, 1);
+  if (h.vonWichtel) lauf.wichtelSelbst = (lauf.wichtelSelbst || 0) + 1;
   const faktor = h.extraFertig ? 1 + (C.PRODUKT[h.id].bonus || C.EXTRA_BONUS) : 1;
   if (g.gross) return liefereGross(g, faktor);
   bediene(g, false, faktor);
@@ -679,16 +680,28 @@ function wichtelEinschenken(g) {
     hooks.toast(`${p.name} ist leer - erst nachfüllen!`, 'hinweis');
     return true;
   }
-  if (lauf.hand.length >= handMax()) {
+  if (!wichtelGlas(g)) {
     lauf.wackel.hand = 0.3; hooks.ton('falsch');
     hooks.toast('Das Tablett ist voll - erst servieren oder in den Ausguss.', 'hinweis');
     return true;
   }
+  lauf.bestellt = (lauf.bestellt || 0) + 1;
+  return true;
+}
+
+/**
+ * Der Wichtel stellt ein Glas mit dem Wunsch von g aufs Tablett und gießt ein
+ * (ein leeres Glas vom Spül-Wichtel wird dafür genommen). false = kein Platz.
+ */
+function wichtelGlas(g) {
+  const p = C.PRODUKT[g.wunsch];
+  if (p.art === 'platte' || (st.toepfe[p.id] || 0) <= 0) return false;
+  let i = lauf.hand.findIndex((h) => h.art === 'glas');
+  if (i < 0) { if (lauf.hand.length >= handMax()) return false; i = lauf.hand.length; }
   st.toepfe[p.id]--;
   const zeit = p.zeit + C.WICHTEL_EINSCHENKEN;
-  lauf.hand.push({ art: 'voll', id: p.id, rest: zeit, dauer: zeit, vonWichtel: true, fuer: g.id, ...neueGriffe(p) });
-  lauf.neuInHand = lauf.hand.length - 1; lauf.neuInHandT = 0.15;
-  lauf.bestellt = (lauf.bestellt || 0) + 1;
+  lauf.hand[i] = { art: 'voll', id: p.id, rest: zeit, dauer: zeit, vonWichtel: true, fuer: g.id, wartetT: 0, ...neueGriffe(p) };
+  lauf.neuInHand = i; lauf.neuInHandT = 0.15;
   hooks.ton('giessen');
   return true;
 }
@@ -905,20 +918,39 @@ export function update(dt) {
     if (cr.backT >= C.CREPE_ZEIT) { cr.backT = -1; cr.fertig = true; hooks.ton('fertig'); }
   } else if (!cr.fertig && hat('crepe_w') && hat('crepe')) { cr.backT = 0; cr.gewendet = false; cr.verpasst = false; }
 
-  // Servier-Wichtel
+  // Servier-Wichtel. Bist du am Stand, bedient er nicht sofort, sondern
+  // schenkt sichtbar auf dein Tablett ein - dann hast du Zeit für den
+  // Handgriff und servierst selbst. Holst du es nicht ab, serviert er es nach
+  // WICHTEL_WARTEN selbst (ohne Bonus, außer du hast den Handgriff gemacht).
+  // Bist du weg oder ist das Tablett voll, bedient er wie früher direkt.
+  // (Gemeldet 30.09.: „Man sieht nicht, dass die Wichtel einfüllen, es wird
+  // gleich bedient" - vorher bediente er jeden Gast sofort, ohne Glas.)
   const sv = stufe('servier');
   if (sv) {
+    for (let i = lauf.hand.length - 1; i >= 0; i--) {
+      const h = lauf.hand[i];
+      if (!h.vonWichtel || h.rest > 0 || h.brennT > 0) continue;
+      const g = G.find((x) => x.id === h.fuer && x.am && !x.bedient && !x.gehen);
+      if (!g) { h.fuer = null; continue; }   // Gast weg: das Glas bleibt, passt vielleicht zum nächsten
+      h.wartetT = (h.wartetT || 0) + dt;
+      if (h.wartetT >= C.WICHTEL_WARTEN || !chefAktiv()) {
+        lauf.hand.splice(i, 1);
+        bediene(g, true, h.extraFertig ? 1 + (C.PRODUKT[h.id].bonus || C.EXTRA_BONUS) : 1);
+      }
+    }
     lauf.servierT += wt;
     if (lauf.servierT >= C.SERVIER_TAKT[sv]) {
       // Besondere Gäste und Großbestellungen sind Sache des Chefs
-      // … und Gäste, für die DU gerade einschenken lässt, bedienst du selbst
+      // … und wer schon ein Glas auf dem Tablett hat, wartet darauf
       const g = G.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
         && !lauf.hand.some((h) => h.fuer === x.id))
         .sort((a, b) => a.geduld - b.geduld)[0];
       if (g) {
-        const p = C.PRODUKT[g.wunsch];
-        if (p.art === 'platte') lauf.crepe.fertig = false; else st.toepfe[p.id]--;
-        bediene(g, true);
+        if (!(chefAktiv() && wichtelGlas(g))) {
+          const p = C.PRODUKT[g.wunsch];
+          if (p.art === 'platte') lauf.crepe.fertig = false; else st.toepfe[p.id]--;
+          bediene(g, true);
+        }
         lauf.servierT = 0;
       }
     }

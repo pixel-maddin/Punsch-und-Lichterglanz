@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930j';
-import * as C from './config.js?v=20260930j';
-import * as S from './spiel.js?v=20260930j';
-import * as Z from './zeit.js?v=20260930j';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930k';
+import * as C from './config.js?v=20260930k';
+import * as S from './spiel.js?v=20260930k';
+import * as Z from './zeit.js?v=20260930k';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -457,6 +457,15 @@ function brett(c, y, t) {
       } else if (h.extra) {
         extraHinweis(c, x + 13, by - 30, h.extra, t, C.HANDGRIFF[h.extra].n - h.tipps);
         if (h.extra === 'beutel') { const tm = C.HANDGRIFF.beutel.timing; zeitBalken(c, x + 1, by - 23, 18, h.ziehT / tm.dauer, tm); }
+      }
+      // Vom Wichtel eingeschenkt und fertig: er steht daneben und wartet; der
+      // hellblaue Balken zeigt, wann er selbst serviert
+      if (h.vonWichtel && h.fuer != null) {
+        wichtelKlein(c, x + 1, by, t);
+        if (!(h.flammeT > 0) && h.extra !== 'beutel') {
+          const a = Math.max(0, 1 - (h.wartetT || 0) / C.WICHTEL_WARTEN);
+          r(c, x + 1, by - 23, 18, 2, '#2a3a64'); r(c, x + 1, by - 23, Math.max(1, Math.round(18 * a)), 2, '#7ab8ff');
+        }
       }
       // Feuerzauber brennt: Balken schrumpft - so lange gibt es den Bonus
       if (h.flammeT > 0) {

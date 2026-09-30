@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260930j';
-import * as S from './spiel.js?v=20260930j';
-import * as Z from './zeit.js?v=20260930j';
-import * as T from './ton.js?v=20260930j';
-import * as UI from './ui.js?v=20260930j';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260930j';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930j';
-import * as Lernen from './lernen.js?v=20260930j';
-import { zeigeAdvent } from './ereignis.js?v=20260930j';
-import * as A from './auftraege.js?v=20260930j';
-import * as E from './erfolge.js?v=20260930j';
-import * as ZL from './ziele.js?v=20260930j';
+import * as C from './config.js?v=20260930k';
+import * as S from './spiel.js?v=20260930k';
+import * as Z from './zeit.js?v=20260930k';
+import * as T from './ton.js?v=20260930k';
+import * as UI from './ui.js?v=20260930k';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20260930k';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930k';
+import * as Lernen from './lernen.js?v=20260930k';
+import { zeigeAdvent } from './ereignis.js?v=20260930k';
+import * as A from './auftraege.js?v=20260930k';
+import * as E from './erfolge.js?v=20260930k';
+import * as ZL from './ziele.js?v=20260930k';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -304,7 +304,7 @@ function demo(art) {
   }
   // Alle Hinweise als gelesen, damit keine Blase im Bild steht
   for (const k of ['leer', 'falsch', 'voll', 'laden', 'laden_danach', 'deko', 'deko_danach', 'gegangen', 'schwung', 'w_spuel', 'w_nachfuell', 'w_servier',
-    'wichtel_weg', 'bestellen', 'herz_ziel', 'ziele_fertig', 'sonder_schlange', 'sonder_weg', 'extra', 'gross', 'chef', 'schild', 'eilig', 'auftrag',
+    'wichtel_weg', 'bestellen2', 'herz_ziel', 'ziele_fertig', 'sonder_schlange', 'sonder_weg', 'extra', 'gross', 'chef', 'schild', 'eilig', 'auftrag',
     'auftraege_neu', 'erfolge', 'kalender', ...Object.keys(C.HANDGRIFF).map((g) => 'griff_' + g)]) st.tipps[k] = true;
   if (art === 'start') delete st.tipps.laden;
   S.lauf.lernen = false;

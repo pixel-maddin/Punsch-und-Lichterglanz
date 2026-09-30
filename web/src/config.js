@@ -86,6 +86,7 @@ export const TRESEN = [1, 2, 3];                 // Gäste gleichzeitig am Trese
 export const CREPE_ZEIT = 3.5;                   // Backzeit (s)
 export const SPUEL_ZEIT = 1.5;                   // Spül-Wichtel: alle so viele s ein Glas aufs Tablett
 export const WICHTEL_EINSCHENKEN = 0.8;          // s, die der Wichtel länger braucht als du (Glas holen, eingießen)
+export const WICHTEL_WARTEN = 4;               // s, die ein eingeschenktes Glas auf dich wartet, bevor der Wichtel selbst serviert
 export const FALSCH_ANTEIL = 0;                  // falsch geliefert: nur das Glas ist weg, keine Sterne (seit 29.09., verzeihender)
 export const JUBEL_ZEIT = 0.375;                 // s Freudensprung, wenn du selbst bedienst (20 % flotter als 0,45)
 

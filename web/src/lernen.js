@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20260930j';
-import * as S from './spiel.js?v=20260930j';
-import * as A from './auftraege.js?v=20260930j';
-import * as E from './erfolge.js?v=20260930j';
-import * as Z from './ziele.js?v=20260930j';
+import * as C from './config.js?v=20260930k';
+import * as S from './spiel.js?v=20260930k';
+import * as A from './auftraege.js?v=20260930k';
+import * as E from './erfolge.js?v=20260930k';
+import * as Z from './ziele.js?v=20260930k';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -176,9 +176,9 @@ const HINWEISE = [
     ziel: null, dauer: 12 },
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
-  { id: 'bestellen', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg && !!gastAmTresen(),
-    text: () => 'Neu: Tippe einen Gast an - dann schenkt dir ein Wichtel sein Getränk aufs Tablett ein. Wenn es fertig ist (gern mit Handgriff wie Zuckerstange), tippst du den Gast nochmal an und servierst.',
-    ziel: () => gastZiel(gastAmTresen().platz), fertig: () => (S.lauf.bestellt || 0) > 0 },
+  { id: 'bestellen2', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg && S.lauf.hand.some((h) => h.vonWichtel && !(h.rest > 0)),
+    text: () => 'Siehst du den kleinen Wichtel am Tablett? Solange du am Stand bist, schenkt er für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - dann gibt es den Bonus. Sonst serviert er es nach ein paar Sekunden selbst (blauer Balken). Du kannst auch selbst einen Gast antippen, dann schenkt er für ihn ein.',
+    ziel: () => handZiel(Math.max(0, S.lauf.hand.findIndex((h) => h.vonWichtel))), fertig: () => (S.lauf.wichtelSelbst || 0) > 0 || !S.lauf.hand.some((h) => h.vonWichtel) },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },

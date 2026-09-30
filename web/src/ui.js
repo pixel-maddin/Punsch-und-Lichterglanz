@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260930j';
-import * as S from './spiel.js?v=20260930j';
-import * as Z from './zeit.js?v=20260930j';
-import * as T from './ton.js?v=20260930j';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930j';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930j';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930j';
-import * as A from './auftraege.js?v=20260930j';
-import * as E from './erfolge.js?v=20260930j';
-import * as ZL from './ziele.js?v=20260930j';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930j';
-import { alleSymbole } from './symbole.js?v=20260930j';
+import * as C from './config.js?v=20260930k';
+import * as S from './spiel.js?v=20260930k';
+import * as Z from './zeit.js?v=20260930k';
+import * as T from './ton.js?v=20260930k';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930k';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930k';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930k';
+import * as A from './auftraege.js?v=20260930k';
+import * as E from './erfolge.js?v=20260930k';
+import * as ZL from './ziele.js?v=20260930k';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930k';
+import { alleSymbole } from './symbole.js?v=20260930k';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
