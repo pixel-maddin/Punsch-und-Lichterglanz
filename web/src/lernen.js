@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20260930h';
-import * as S from './spiel.js?v=20260930h';
-import * as A from './auftraege.js?v=20260930h';
-import * as E from './erfolge.js?v=20260930h';
-import * as Z from './ziele.js?v=20260930h';
+import * as C from './config.js?v=20260930j';
+import * as S from './spiel.js?v=20260930j';
+import * as A from './auftraege.js?v=20260930j';
+import * as E from './erfolge.js?v=20260930j';
+import * as Z from './ziele.js?v=20260930j';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -174,10 +174,11 @@ const HINWEISE = [
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
     text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher (bis zu ${C.OFFLINE_MAX_H} Stunden). Solange du selbst mit anpackst, sind sie schneller.`,
     ziel: null, dauer: 12 },
-  // Ein-Tipp-Service: ab dem Servier-Wichtel reicht ein Tipp auf den Gast
-  { id: 'schnell', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg,
-    text: () => `Neu: Ab jetzt reicht EIN Tipp auf einen Gast - du servierst direkt aus dem Topf. Glas und Topf brauchst du nur noch für die Handgriffe wie Zuckerstange oder Sahne - die bringen bis zu ${Math.round(Math.max(...C.PRODUKTE.map((p) => p.bonus || 0)) * 100)} % mehr.`,
-    ziel: () => gastZiel(0), dauer: 10 },
+  // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
+  // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
+  { id: 'bestellen', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg && !!gastAmTresen(),
+    text: () => 'Neu: Tippe einen Gast an - dann schenkt dir ein Wichtel sein Getränk aufs Tablett ein. Wenn es fertig ist (gern mit Handgriff wie Zuckerstange), tippst du den Gast nochmal an und servierst.',
+    ziel: () => gastZiel(gastAmTresen().platz), fertig: () => (S.lauf.bestellt || 0) > 0 },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },
@@ -297,6 +298,9 @@ function hinweise(dt) {
     if (aktuell.erledigt) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
     const fertig = h.fertig ? h.fertig() : aktuell.t > (h.dauer || 6);
     if (fertig || (!h.lang && aktuell.t > 20)) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
+    // Nach „Weiter": Hatte die Blase schon den Handlungstext, bleibt nur der
+    // Zeiger - derselbe Satz ein zweites Mal ohne Knopf wirkte doppelt (gemeldet)
+    if (!h.info) return { text: '', ziel: h.ziel ? h.ziel() : null };
     return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
   }
   ruheT += dt;
@@ -325,6 +329,13 @@ export function update(dt, blockiert) {
 
 function zeige(z) {
   if (!z) { tipp.classList.add('versteckt'); zeiger.classList.add('versteckt'); letzterText = ''; return; }
+  // Nur ein Zeiger, keine Blase (nach „Weiter" bei Handlungshinweisen)
+  if (!z.text) {
+    tipp.classList.add('versteckt'); letzterText = '';
+    if (z.ziel) { zeiger.classList.remove('versteckt'); zeiger.style.left = `calc(var(--px) * ${z.ziel.x})`; zeiger.style.top = `calc(var(--px) * ${z.ziel.y})`; }
+    else zeiger.classList.add('versteckt');
+    return;
+  }
   if (z.text !== letzterText) {
     tipp.textContent = z.text;
     if (z.weiter) { const w = document.createElement('span'); w.className = 'weiter'; w.textContent = 'Weiter ▸'; tipp.appendChild(w); }

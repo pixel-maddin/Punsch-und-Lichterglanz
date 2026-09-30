@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260930h';
-import * as S from './spiel.js?v=20260930h';
-import * as Z from './zeit.js?v=20260930h';
-import * as T from './ton.js?v=20260930h';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930h';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930h';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930h';
-import * as A from './auftraege.js?v=20260930h';
-import * as E from './erfolge.js?v=20260930h';
-import * as ZL from './ziele.js?v=20260930h';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930h';
-import { alleSymbole } from './symbole.js?v=20260930h';
+import * as C from './config.js?v=20260930j';
+import * as S from './spiel.js?v=20260930j';
+import * as Z from './zeit.js?v=20260930j';
+import * as T from './ton.js?v=20260930j';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930j';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930j';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930j';
+import * as A from './auftraege.js?v=20260930j';
+import * as E from './erfolge.js?v=20260930j';
+import * as ZL from './ziele.js?v=20260930j';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930j';
+import { alleSymbole } from './symbole.js?v=20260930j';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -948,9 +948,9 @@ export function zeigeZiel(modus, fertig) {
     <div class="gross-ico">🏡✨</div>
     <p><b>Mach dein Haus bis Heiligabend zum schönsten der Straße!</b></p>
     <ul class="ziel">
-      <li>🍷 Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
+      <li>☕ Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
       <li>🛒 Kaufe mit den Sternen Lichter, Deko, Farbe und Helfer.</li>
-      <li>🔓 Schalte bis zum 24. Dezember alles frei.</li>
+      <li>🎄 Schmücke es bis zum 24. Dezember Stück für Stück.</li>
       <li>📷 Zeig dein Haus als Weihnachtskarte.</li>
     </ul>
     <p class="klein">${start} Ab dem 1. Dezember geht jeden Tag ein Türchen auf, und jeder Advent bringt eine Überraschung.</p>`,

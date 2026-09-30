@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930h';
-import * as C from './config.js?v=20260930h';
-import * as S from './spiel.js?v=20260930h';
-import * as Z from './zeit.js?v=20260930h';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930j';
+import * as C from './config.js?v=20260930j';
+import * as S from './spiel.js?v=20260930j';
+import * as Z from './zeit.js?v=20260930j';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -438,6 +438,8 @@ function brett(c, y, t) {
       gross(c, x, by - 17, (k) => glas(k, 0, 1));
       const f = C.PRODUKT[h.id].farbe, hFl = Math.round(12 * a);
       r(c, x + 3, by - 3 - hFl, 11, hFl, f);
+      // Vom Servier-Wichtel bestellt: er steht daneben und gießt ein
+      if (h.vonWichtel) { wichtelKlein(c, x + 1, by, t); p(c, x + 3, by - 13 + (Math.floor(t * 8) % 2), f); }
       r(c, x + 1, by - 22, 18, 2, '#3a2a20'); r(c, x + 1, by - 22, Math.round(18 * a), 2, '#ffd040');
       if (h.id === 'feuerzange') { const fl = Math.floor(t * 9) % 2; p(c, x + 8 + fl, by - 20, '#6ab0ff'); p(c, x + 9, by - 19, '#ff8a20'); }
       else if (Math.floor(t * 4) % 2) p(c, x + 9, by - 19, '#eef2f6');

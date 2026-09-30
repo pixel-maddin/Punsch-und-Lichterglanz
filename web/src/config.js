@@ -53,7 +53,7 @@ export const PRODUKTE = [
 // griffe: die Handgriffe, die nur DU machst - nach dem Einschenken das Glas
 // auf dem Tablett antippen, in dieser Reihenfolge (je `n`-mal). Fertig zahlt
 // der Gast `bonus` mehr; ohne zahlt er den normalen Preis (keine Strafe).
-// Wichtel und der Ein-Tipp-Service lassen sie weg - sie sind der Grund,
+// Der Servier-Wichtel macht sie nie selbst (auch nicht, was er dir einschenkt) - sie sind der Grund,
 // selbst am Tresen zu stehen. Seit 30.09. bringt JEDES neue Getränk eine neue
 // Art Handgriff mit (Nutzerwunsch: „immer schwieriger in der Zubereitung"):
 // 1 Tipp → mehrfach tippen → Reihenfolge → Timing. `timing`: der Griff hat
@@ -85,6 +85,7 @@ export const TABLETT = [1, 2, 3];                // Dinge gleichzeitig in der Ha
 export const TRESEN = [1, 2, 3];                 // Gäste gleichzeitig am Tresen
 export const CREPE_ZEIT = 3.5;                   // Backzeit (s)
 export const SPUEL_ZEIT = 1.5;                   // Spül-Wichtel: alle so viele s ein Glas aufs Tablett
+export const WICHTEL_EINSCHENKEN = 0.8;          // s, die der Wichtel länger braucht als du (Glas holen, eingießen)
 export const FALSCH_ANTEIL = 0;                  // falsch geliefert: nur das Glas ist weg, keine Sterne (seit 29.09., verzeihender)
 export const JUBEL_ZEIT = 0.375;                 // s Freudensprung, wenn du selbst bedienst (20 % flotter als 0,45)
 

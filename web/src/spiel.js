@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260930h';
-import * as Z from './zeit.js?v=20260930h';
-import { neueFarben } from './pixel.js?v=20260930h';
+import * as C from './config.js?v=20260930j';
+import * as Z from './zeit.js?v=20260930j';
+import { neueFarben } from './pixel.js?v=20260930j';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -634,8 +634,8 @@ export function tippeGast(platz) {
       lauf.wackel['g' + g.id] = 0.2; hooks.toast('Noch einen Moment - es ist gleich fertig!', 'hinweis');
       return;
     }
-    // Ein Tipp genügt, sobald der Servier-Wichtel da ist: direkt aus dem Topf
-    if (hat('servier') && schnellServieren(g)) return;
+    // Mit Servier-Wichtel: Tipp auf den Gast = der Wichtel schenkt ihm ein
+    if (hat('servier') && wichtelEinschenken(g)) return;
     // Falsch geliefert: Der Gast lehnt ab, das Getränk ist hin (seit 29.09.
     // kostet es keine Sterne mehr - FALSCH_ANTEIL 0 -, nur das Glas)
     const k = lauf.hand.findIndex(bereit);
@@ -659,13 +659,19 @@ export function tippeGast(platz) {
 }
 
 /**
- * Ein-Tipp-Service (seit 29.09., sobald der Servier-Wichtel da ist): Tipp auf
- * den Gast = Glas, Topf und Servieren in einem, ohne Zubereitungszeit. Dafür
- * ohne Extra - Sahne, Zimt und Zuckerhut gibt es nur über Glas und Topf
- * (+30 %). Crêpes brauchen weiter die Platte. Gibt false zurück, wenn es
- * nicht geht (dann gilt das alte Verhalten).
+ * Wichtel-Bestellung (seit 30.09., sobald der Servier-Wichtel da ist): Ein Tipp
+ * auf den Gast heißt „Wichtel, schenk ihm ein". Ein Glas mit seinem Wunsch
+ * kommt aufs Tablett und füllt sich sichtbar (kleiner Wichtel daneben, etwas
+ * länger als von Hand). Serviert wird wie immer mit einem Tipp auf den Gast,
+ * sobald es fertig ist - dazwischen ist Zeit für die Handgriffe.
+ *
+ * Vorher (29.09.) servierte der Tipp sofort, ohne Glas und ohne Zeit.
+ * Gemeldet: Man verstand nicht, wann man den Gast direkt antippen kann und
+ * wann alles von Hand geht, man sah den Wichtel nicht, und für Zuckerstange &
+ * Co. blieb keine Zeit. Jetzt gibt es nur noch EINEN Weg zum Servieren.
+ * Crêpes brauchen weiter die Platte. Gibt false zurück, wenn es nicht geht.
  */
-function schnellServieren(g) {
+function wichtelEinschenken(g) {
   const p = C.PRODUKT[g.wunsch];
   if (p.art === 'platte') return false;
   if ((st.toepfe[p.id] || 0) <= 0) {
@@ -673,9 +679,17 @@ function schnellServieren(g) {
     hooks.toast(`${p.name} ist leer - erst nachfüllen!`, 'hinweis');
     return true;
   }
+  if (lauf.hand.length >= handMax()) {
+    lauf.wackel.hand = 0.3; hooks.ton('falsch');
+    hooks.toast('Das Tablett ist voll - erst servieren oder in den Ausguss.', 'hinweis');
+    return true;
+  }
   st.toepfe[p.id]--;
-  lauf.schnell = (lauf.schnell || 0) + 1;
-  if (g.gross) liefereGross(g, 1); else bediene(g, false, 1);
+  const zeit = p.zeit + C.WICHTEL_EINSCHENKEN;
+  lauf.hand.push({ art: 'voll', id: p.id, rest: zeit, dauer: zeit, vonWichtel: true, fuer: g.id, ...neueGriffe(p) });
+  lauf.neuInHand = lauf.hand.length - 1; lauf.neuInHandT = 0.15;
+  lauf.bestellt = (lauf.bestellt || 0) + 1;
+  hooks.ton('giessen');
   return true;
 }
 
@@ -897,7 +911,9 @@ export function update(dt) {
     lauf.servierT += wt;
     if (lauf.servierT >= C.SERVIER_TAKT[sv]) {
       // Besondere Gäste und Großbestellungen sind Sache des Chefs
-      const g = G.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch))
+      // … und Gäste, für die DU gerade einschenken lässt, bedienst du selbst
+      const g = G.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
+        && !lauf.hand.some((h) => h.fuer === x.id))
         .sort((a, b) => a.geduld - b.geduld)[0];
       if (g) {
         const p = C.PRODUKT[g.wunsch];

@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260930h';
-import * as S from './spiel.js?v=20260930h';
-import * as Z from './zeit.js?v=20260930h';
-import * as T from './ton.js?v=20260930h';
-import * as UI from './ui.js?v=20260930h';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260930h';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930h';
-import * as Lernen from './lernen.js?v=20260930h';
-import { zeigeAdvent } from './ereignis.js?v=20260930h';
-import * as A from './auftraege.js?v=20260930h';
-import * as E from './erfolge.js?v=20260930h';
-import * as ZL from './ziele.js?v=20260930h';
+import * as C from './config.js?v=20260930j';
+import * as S from './spiel.js?v=20260930j';
+import * as Z from './zeit.js?v=20260930j';
+import * as T from './ton.js?v=20260930j';
+import * as UI from './ui.js?v=20260930j';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20260930j';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930j';
+import * as Lernen from './lernen.js?v=20260930j';
+import { zeigeAdvent } from './ereignis.js?v=20260930j';
+import * as A from './auftraege.js?v=20260930j';
+import * as E from './erfolge.js?v=20260930j';
+import * as ZL from './ziele.js?v=20260930j';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -29,6 +29,10 @@ let H = 320, G = 166;
 // ---------------------------------------------------------------------------
 // Größe: 180 Pixel breit, Höhe folgt dem Bildschirm
 // ---------------------------------------------------------------------------
+// Sparsames Zeichnen (siehe frame): Takt und „muss neu gezeichnet werden"
+const BILD_ABSTAND = 1000 / 30;   // ms zwischen zwei gezeichneten Bildern
+let letzteZeichnung = 0, zeichenDt = 0, standGezeichnet = false, bildVeraltet = true;
+
 function groesse() {
   const vw = buehne.clientWidth, vh = buehne.clientHeight;
   // Unsichtbares Fenster (0 x 0): NICHT neu messen. Sonst wird die Höhe NaN,
@@ -39,6 +43,7 @@ function groesse() {
   if (H < C.H_MIN) { skala = vh / C.H_MIN; H = C.H_MIN; }
   if (H > C.H_MAX) H = C.H_MAX;
   cv.width = C.B; cv.height = H;
+  bildVeraltet = true;   // neue Größe = leere Leinwand, auch in der Pause neu zeichnen
   const w = C.B * skala, h = H * skala;
   document.documentElement.style.setProperty('--px', skala + 'px');
   const huelle = document.getElementById('huelle');
@@ -57,6 +62,7 @@ groesse();
 // ---------------------------------------------------------------------------
 cv.addEventListener('pointerdown', (e) => {
   e.preventDefault();
+  bildVeraltet = true;   // auch in der Pause neu zeichnen (z. B. Topf nachfüllen unter einer Blase)
   T.init();
   if (UI.fensterOffen()) return;
   if (UI.panelOffen()) { UI.schliesseBlatt(); return; }
@@ -111,7 +117,9 @@ document.addEventListener('dblclick', (e) => e.preventDefault());
 // Ein Tonfehler darf NIE die Spiellogik abbrechen - genau so ist das
 // Nachfüllen einmal kaputtgegangen (der Topf wurde nie voll).
 S.hooks.ton = (n) => { try { T.spiele(n); } catch (e) { console.warn('Ton', n, e); } };
-S.hooks.toast = (t, a) => UI.toast(t, a);
+// Während der Einführung führt die Blase - Hinweis-Einblendungen wie „Erst ein
+// Glas holen!" wären dasselbe noch einmal (gemeldet als doppelte Tipps)
+S.hooks.toast = (t, a) => { if (a === 'hinweis' && S.st.lernen < 99) return; UI.toast(t, a); };
 S.hooks.geld = () => UI.aktualisiereLaden();
 S.hooks.bedient = (g, auto, stoss) => A.bedient(g, auto, stoss);
 A.beiErfuellt((a) => { T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
@@ -181,11 +189,22 @@ function frame(jetzt) {
   // beim Zeichnen darf die Schleife nie anhalten.
   requestAnimationFrame(frame);
   if (!cv.height) groesse();
-  try {
-    c.clearRect(0, 0, C.B, H);
-    const w = zeichneWelt(c, G, tSek, dt);
-    zeichneTresen(c, G, tSek, w);
-  } catch (e) { console.warn('Zeichnen', e); }
+  // Sparsam zeichnen (gemeldet: „Handy wird warm"): höchstens 30 Bilder je
+  // Sekunde - für Pixelgrafik reicht das, die Spiellogik rechnet weiter in
+  // jedem Takt. Und solange alles steht, nur ein Bild und dann erst wieder,
+  // wenn man etwas antippt (bildVeraltet).
+  zeichenDt += dt;
+  if (!steht) standGezeichnet = false;
+  const faellig = jetzt - letzteZeichnung >= BILD_ABSTAND - 2;
+  if (faellig && !(steht && standGezeichnet && !bildVeraltet)) {
+    try {
+      c.clearRect(0, 0, C.B, H);
+      const w = zeichneWelt(c, G, tSek, zeichenDt);
+      zeichneTresen(c, G, tSek, w);
+    } catch (e) { console.warn('Zeichnen', e); }
+    zeichenDt = 0; letzteZeichnung = jetzt;
+    standGezeichnet = steht; bildVeraltet = false;
+  }
   UI.hud();
   Lernen.update(dt, UI.fensterOffen() || !!UI.panelOffen());
 }
@@ -285,7 +304,7 @@ function demo(art) {
   }
   // Alle Hinweise als gelesen, damit keine Blase im Bild steht
   for (const k of ['leer', 'falsch', 'voll', 'laden', 'laden_danach', 'deko', 'deko_danach', 'gegangen', 'schwung', 'w_spuel', 'w_nachfuell', 'w_servier',
-    'wichtel_weg', 'schnell', 'herz_ziel', 'ziele_fertig', 'sonder_schlange', 'sonder_weg', 'extra', 'gross', 'chef', 'schild', 'eilig', 'auftrag',
+    'wichtel_weg', 'bestellen', 'herz_ziel', 'ziele_fertig', 'sonder_schlange', 'sonder_weg', 'extra', 'gross', 'chef', 'schild', 'eilig', 'auftrag',
     'auftraege_neu', 'erfolge', 'kalender', ...Object.keys(C.HANDGRIFF).map((g) => 'griff_' + g)]) st.tipps[k] = true;
   if (art === 'start') delete st.tipps.laden;
   S.lauf.lernen = false;

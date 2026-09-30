@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText } from './pixel.js?v=20260930h';
-import * as Z from './zeit.js?v=20260930h';
-import * as S from './spiel.js?v=20260930h';
-import { FASSADEN } from './config.js?v=20260930h';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText } from './pixel.js?v=20260930j';
+import * as Z from './zeit.js?v=20260930j';
+import * as S from './spiel.js?v=20260930j';
+import { FASSADEN } from './config.js?v=20260930j';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1077,12 +1077,11 @@ function lichter(c, L, dunkel) {
     if (a <= 0.02) continue;
     const cx = l.rect ? l.rect[0] + l.rect[2] / 2 : l.x + 0.5;
     const cy = l.rect ? l.rect[1] + l.rect[3] / 2 : l.y + 0.5;
-    const grd = c.createRadialGradient(cx, cy, 0, cx, cy, l.halo);
-    grd.addColorStop(0, hexA(l.f, 0.45 * a));
-    grd.addColorStop(1, hexA(l.f, 0));
-    c.fillStyle = grd;
-    c.fillRect(cx - l.halo, cy - l.halo, l.halo * 2, l.halo * 2);
+    // Vorberechneter Schein, nur noch gestempelt (siehe scheinBild)
+    c.globalAlpha = Math.min(1, a);
+    c.drawImage(scheinBild(l.f, l.halo), cx - l.halo, cy - l.halo, l.halo * 2, l.halo * 2);
   }
+  c.globalAlpha = 1;
   c.restore();
   // Die Birnen selbst in voller Farbe (nicht abgedunkelt). Leuchtflächen
   // wie Fenster werden nur AUFGEHELLT, sonst verschwänden Vorhang und
@@ -1104,7 +1103,45 @@ function lichter(c, L, dunkel) {
   }
   c.globalAlpha = 1;
 }
+/**
+ * Weicher Lichtschein als fertiges Bildchen je Farbe und Größe. Vorher wurde
+ * für JEDES Licht in JEDEM Bild ein neuer Farbverlauf angelegt - bei voll
+ * geschmücktem Haus nachts hunderte, gemeldet als „Handy wird warm".
+ * Gezeichnet in 4-facher Auflösung, damit der Verlauf beim Verkleinern weich bleibt.
+ */
+const scheine = new Map();
+function scheinBild(farbe, halo) {
+  const k = farbe + '|' + halo;
+  let b = scheine.get(k);
+  if (b) return b;
+  if (scheine.size > 300) scheine.clear();   // wechselnde Farben (Lichtershow) sollen den Vorrat nicht endlos füllen
+  const n = Math.max(2, Math.ceil(halo * 2 * 4));
+  b = document.createElement('canvas'); b.width = b.height = n;
+  const g = b.getContext('2d'), m = n / 2;
+  const grd = g.createRadialGradient(m, m, 0, m, m, m);
+  grd.addColorStop(0, hexA(farbe, 0.45)); grd.addColorStop(1, hexA(farbe, 0));
+  g.fillStyle = grd; g.fillRect(0, 0, n, n);
+  scheine.set(k, b);
+  return b;
+}
 function pixel(e, G) { return e.getImageData(0, 0, 180, G).data; }
+/** Gemerkte Verdeckung je Licht (Schlüssel = Position), zuletzt geprüft zur Zeit t. */
+const DECKUNG_TAKT = 0.2;   // s
+const deckung = { t: -99, n: -1, nNeu: -2, je: new Map() };
+const lichtSchluessel = (l) => (l.rect ? 'r' + l.rect.map(Math.round).join(',') : Math.round(l.x) + ',' + Math.round(l.y));
+function deckungMerken(L, t) {
+  deckung.je.clear();
+  for (const l of L) if (!l.fleck && (l.verdeckt || l.maske)) deckung.je.set(lichtSchluessel(l), { verdeckt: l.verdeckt, maske: l.maske, sichtbar: l.sichtbar });
+  deckung.t = t; deckung.n = L.length;
+}
+function deckungNehmen(L) {
+  if (!deckung.je.size) return;
+  for (const l of L) {
+    if (l.fleck) continue;
+    const d = deckung.je.get(lichtSchluessel(l));
+    if (d) { l.verdeckt = d.verdeckt; l.maske = d.maske; l.sichtbar = d.sichtbar; }
+  }
+}
 /**
  * Markiert Lichter, vor denen inzwischen etwas steht. Punktlichter fallen
  * ganz weg; Leuchtflächen (Fenster) behalten nur ihre freien Pixel
@@ -1191,7 +1228,9 @@ function zeichneFunkeln(c, GW) {
 /** Wo ist der Schlitten gerade? `sl.y` ist ein Anteil des freien Himmels. */
 export function schlittenPos(sl, G) {
   const k = sl.t / sl.dauer;
-  return { x: -46 + k * 240, y: 30 + sl.y * Math.max(0, G - 130) + Math.sin(sl.t * 2.2) * 3 };
+  // Unterhalb von Kopfzeile und Zielleiste (bis ~42), sonst war er dahinter
+  // versteckt und nicht anzutippen (gemeldet 30.09.)
+  return { x: -46 + k * 240, y: 52 + sl.y * Math.max(0, G - 150) + Math.sin(sl.t * 2.2) * 3 };
 }
 function nikolausSchlitten(c, sl, t, G) {
   const { x, y } = schlittenPos(sl, G);
@@ -1251,7 +1290,11 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Tiefenstufe; hat sich das Pixel eines Lichts bis zum Schluss verändert,
   // steht etwas davor.
   const pruefen = w.dunkel >= 0.05;   // Lichter sieht man nur bei Dämmerung und Nacht
-  const stufen = pruefen ? [{ bis: L.length, bild: pixel(e, G) }] : null;
+  // Die Schnappschüsse sind teuer (gemessen 4,8 von 8 ms je Bild) - und die
+  // Verdeckung ändert sich kaum. Also nur 5-mal je Sekunde neu prüfen und
+  // dazwischen das gemerkte Ergebnis je Licht übernehmen (deckungMerken/-Nehmen)
+  const neuPruefen = pruefen && (opts.karte || Math.abs(t - deckung.t) >= DECKUNG_TAKT || deckung.n !== deckung.nNeu);
+  const stufen = neuPruefen ? [{ bis: L.length, bild: pixel(e, G) }] : null;
   // Was an der Hauswand steht (ganz hinten im Garten), kommt zuerst - Tanne,
   // Schneefamilie, Zaun und Laternen stehen davor
   if (S.zeigt('auf_geschenke')) geschenke(e, 37, GW - 24);   // linke Hausecke, zwischen Tanne und Schneemann
@@ -1274,9 +1317,11 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Kopf auf halber Dachhöhe über dem Stand steht
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
-  if (pruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
+  if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t);
-  if (pruefen) verdecke(L, stufen, pixel(e, G));
+  if (neuPruefen) { verdecke(L, stufen, pixel(e, G)); if (!opts.karte) deckungMerken(L, t); }
+  else if (pruefen) deckungNehmen(L);
+  if (!opts.karte) deckung.nNeu = L.length;
 
   // Nacht und Dämmerung - nur auf dem, was auf der Ebene steht
   if (w.dunkel > 0) {

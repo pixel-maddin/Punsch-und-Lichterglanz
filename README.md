@@ -32,8 +32,9 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
    den Feuerzauber servieren, solange der Zuckerhut brennt.
 
 Falsch geliefert kostet nur das Glas. Falsch Eingeschenktes kippt man in
-den Ausguss rechts. **Sobald der Servier-Wichtel da ist, reicht ein Tipp auf
-den Gast** - Glas und Topf braucht man dann nur noch für Extras.
+den Ausguss rechts. **Sobald der Servier-Wichtel da ist,** schenkt er für dich ein: Gast
+antippen, ein Wichtel stellt das Getränk aufs Tablett, dann (gern mit
+Handgriff) den Gast nochmal antippen zum Servieren.
 
 **Während du weg bist**, arbeiten die Wichtel weiter (die ersten 5 Minuten
 voll, danach mit 40 %, höchstens 8 Stunden) und legen alles in eine Kiste,
