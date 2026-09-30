@@ -144,10 +144,9 @@ nur lokal, eigener Speicherplatz). Das Vorstellungsbild kommt aus
 > alkoholfrei.
 
 **Kategorie:** Spiele → Gelegenheitsspiele (Casual)
-**Kontakt-E-Mail:** (deine öffentliche Adresse)
+**Kontakt-E-Mail:** pixelmaddin@gmail.com
 **Datenschutzerklärung:** `https://pixel-maddin.github.io/Punsch-und-Lichterglanz/datenschutz.html`
-→ **vorher in `web/datenschutz.html` Name und E-Mail eintragen** (gelb
-markierte Lücken).
+(Kontakt dort: Martin Weiske, pixelmaddin@gmail.com)
 
 ## 7. App-Inhalte (Fragebögen in der Play Console)
 
