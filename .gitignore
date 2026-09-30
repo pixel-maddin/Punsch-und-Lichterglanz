@@ -9,3 +9,11 @@ CLAUDE.md
 
 # Python
 __pycache__/
+
+# Android-Paket (PWABuilder): Schlüssel NIE ins öffentliche Repo
+*.keystore
+*.jks
+signing-key-info.txt
+*.aab
+*.apk
+store/werkzeug/profil_*

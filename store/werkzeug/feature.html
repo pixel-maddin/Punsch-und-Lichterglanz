@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1024px; height: 500px; overflow: hidden; background: linear-gradient(#141a3e, #26306a); }
+  .bild {
+    position: absolute; inset: 0;
+    background: url(../1_haus.png) no-repeat;
+    /* Ausschnitt: Haus, Stand und Straße aus dem 1080x1920-Bild */
+    /* Haus und Stand (y 250-950 im Original) füllen die Höhe, rechts bündig */
+    background-size: 771px auto; background-position: right 0 top -178px;
+    image-rendering: pixelated;
+  }
+  .schleier { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,26,62,1) 0%, rgba(20,26,62,1) 26%, rgba(20,26,62,0.7) 36%, rgba(20,26,62,0) 55%); }
+  .titel {
+    position: absolute; left: 40px; top: 120px; width: 440px;
+    font-family: Georgia, serif; color: #ffe27a;
+    text-shadow: 0 3px 0 #6b1f18, 0 0 18px rgba(255, 190, 90, 0.55);
+  }
+  h1 { margin: 0; font-size: 64px; line-height: 1.02; font-style: italic; }
+  p { margin: 18px 0 0; font: bold 24px "Trebuchet MS", sans-serif; color: #fff4dc; text-shadow: 0 2px 0 #1a1030; }
+</style></head>
+<body>
+  <div class="bild"></div>
+  <div class="schleier"></div>
+  <div class="titel">
+    <h1>Punsch &amp;<br>Lichterglanz</h1>
+    <p>Dein gemütlicher Punschstand -<br>schmücke dein Haus bis Heiligabend</p>
+  </div>
+</body></html>

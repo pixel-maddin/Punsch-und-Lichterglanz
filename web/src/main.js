@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260930e';
-import * as S from './spiel.js?v=20260930e';
-import * as Z from './zeit.js?v=20260930e';
-import * as T from './ton.js?v=20260930e';
-import * as UI from './ui.js?v=20260930e';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260930e';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930e';
-import * as Lernen from './lernen.js?v=20260930e';
-import { zeigeAdvent } from './ereignis.js?v=20260930e';
-import * as A from './auftraege.js?v=20260930e';
-import * as E from './erfolge.js?v=20260930e';
-import * as ZL from './ziele.js?v=20260930e';
+import * as C from './config.js?v=20260930g';
+import * as S from './spiel.js?v=20260930g';
+import * as Z from './zeit.js?v=20260930g';
+import * as T from './ton.js?v=20260930g';
+import * as UI from './ui.js?v=20260930g';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20260930g';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930g';
+import * as Lernen from './lernen.js?v=20260930g';
+import { zeigeAdvent } from './ereignis.js?v=20260930g';
+import * as A from './auftraege.js?v=20260930g';
+import * as E from './erfolge.js?v=20260930g';
+import * as ZL from './ziele.js?v=20260930g';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -229,7 +229,8 @@ else if (q.get('tempo')) Z.setzeZeit(null, Number(q.get('tempo')));
 
 ZL.nachholen();
 UI.verdrahte();
-if (!S.st.intro) {
+if (S.DEMO) demo(S.DEMO);
+else if (!S.st.intro) {
   UI.frageName(false, () => UI.waehleModus((modus) => {
     S.st.modus = modus;
     S.st.versatzTage = modus === 'eigen' ? Z.versatzFuerEigenenStart() : 0;
@@ -246,6 +247,54 @@ requestAnimationFrame(frame);
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ---------------------------------------------------------------------------
+// Vorführmodus für Store-Screenshots (?demo=haus|tresen|laden|wand|karte|start)
+// Nur lokal, eigener Speicherplatz (S.DEMO). Baut ein geschmücktes Haus ohne
+// Blasen, Fenster und Einblendungen; die Szene wählt der Wert.
+// ---------------------------------------------------------------------------
+function demo(art) {
+  const st = S.st;
+  S.hooks.toast = () => {};
+  st.intro = true;
+  st.name = 'Haus Schneeflocke'; st.standName = 'LICHTERGLANZ';
+  st.adventGesehen = 4; st.ersterSchnee = true; st.kiste = 0;
+  st.tipps = {}; st.ziel = 99;
+  if (art === 'start') {
+    // Ganz am Anfang: Startziel oben, das Haus noch kahl
+    st.lernen = 99; st.ziel = 1; st.besitz.kinderpunsch = 1; st.geld = 60; st.gesamt = 260;
+    for (let i = 0; i < 8; i++) st.tipps['x' + i] = true;
+  } else {
+    st.lernen = 99;
+    for (const a of C.ARTIKEL) st.besitz[a.id] = Array.isArray(a.kosten) ? a.kosten.length : 1;
+    for (const p of C.PRODUKTE) st.toepfe[p.id] = S.topfMax();
+    for (const d of Object.values(C.KALENDER_DEKO)) st.kalDeko[d.id] = true;
+    for (const d of C.AUFTRAG_DEKO) st.kalDeko[d.id] = true;
+    st.fassade = 'rot'; st.geld = 1284650; st.gesamt = 6500000;
+    for (let n = 1; n <= Z.dezemberTag(); n++) st.kalender[n] = true;
+    st.stats.bedient = 8421;
+    st.erfolge = {}; for (const x of E.ERFOLGE.slice(0, art === 'wand' ? 21 : 24)) st.erfolge[x.id] = Date.now();
+    st.erfolgNeu = {};
+  }
+  // Alle Hinweise als gelesen, damit keine Blase im Bild steht
+  for (const k of ['leer', 'falsch', 'voll', 'laden', 'laden_danach', 'deko', 'deko_danach', 'gegangen', 'schwung', 'w_spuel', 'w_nachfuell', 'w_servier',
+    'wichtel_weg', 'schnell', 'herz_ziel', 'ziele_fertig', 'sonder_schlange', 'sonder_weg', 'extra', 'gross', 'chef', 'schild', 'eilig', 'auftrag',
+    'auftraege_neu', 'erfolge', 'kalender', ...Object.keys(C.HANDGRIFF).map((g) => 'griff_' + g)]) st.tipps[k] = true;
+  if (art === 'start') delete st.tipps.laden;
+  S.lauf.lernen = false;
+  // Etwas Betrieb am Stand
+  for (let i = 0; i < 60 * 25; i++) { S.update(1 / 60); S.lauf.chefT = 0; }
+  if (art === 'tresen') {
+    S.lauf.hand = [];
+    const gib = (id, tipps) => { const i = C.PRODUKTE.findIndex((p) => p.id === id); S.tippeGlaeser(); S.tippeZelle(i); return tipps; };
+    gib('schoko'); gib('apfel'); gib('kinderpunsch');
+    for (let i = 0; i < 90; i++) S.update(1 / 60);
+    S.tippeHand(0); S.tippeHand(1);
+  }
+  if (art === 'laden') UI.oeffneLaden('markt');
+  if (art === 'wand') UI.oeffneAuftraege('erfolge');
+  if (art === 'karte') UI.karte(0);
 }
 
 // ---------------------------------------------------------------------------

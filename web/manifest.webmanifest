@@ -1,6 +1,9 @@
 {
+  "id": "./",
   "name": "Punsch & Lichterglanz",
   "short_name": "Lichterglanz",
+  "description": "Gemütliches Pixel-Spiel: Punsch servieren, Wichtel einstellen und dein Haus bis Heiligabend schmücken.",
+  "categories": ["games", "entertainment"],
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",

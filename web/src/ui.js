@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260930e';
-import * as S from './spiel.js?v=20260930e';
-import * as Z from './zeit.js?v=20260930e';
-import * as T from './ton.js?v=20260930e';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930e';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930e';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930e';
-import * as A from './auftraege.js?v=20260930e';
-import * as E from './erfolge.js?v=20260930e';
-import * as ZL from './ziele.js?v=20260930e';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930e';
-import { alleSymbole } from './symbole.js?v=20260930e';
+import * as C from './config.js?v=20260930g';
+import * as S from './spiel.js?v=20260930g';
+import * as Z from './zeit.js?v=20260930g';
+import * as T from './ton.js?v=20260930g';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930g';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930g';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930g';
+import * as A from './auftraege.js?v=20260930g';
+import * as E from './erfolge.js?v=20260930g';
+import * as ZL from './ziele.js?v=20260930g';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930g';
+import { alleSymbole } from './symbole.js?v=20260930g';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -44,7 +44,7 @@ export function hud() {
   letzteHud = sig;
   $('#geldZahl').textContent = g;
   $('#stimmungZahl').textContent = s;
-  $('#uhr').textContent = u + (Z.zeitVerstellt() || S.devAn() ? ' ⚙' : '');
+  $('#uhr').textContent = u + ((Z.zeitVerstellt() || S.devAn()) && !S.DEMO ? ' ⚙' : '');
   const ab = A.abholbar() + E.neuZahl();
   const bA = $('#aufBadge'); bA.textContent = ab; bA.classList.toggle('versteckt', ab === 0);
   $('#btnAuftraege').classList.toggle('lockt', ab > 0);
@@ -814,7 +814,7 @@ export function oeffneMenue() {
   // Welche Fassung läuft? Kommt aus der Adresse dieser Datei (?v=…) - so
   // sieht man auf dem Handy sofort, ob ein Update wirklich angekommen ist
   const version = new URL(import.meta.url).searchParams.get('v') || 'lokal';
-  liste.appendChild(el('p', 'klein version', `Version ${version}`));
+  liste.appendChild(el('p', 'klein version', `Version ${version} · <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutz</a>`));
 
   const kopf = $('#blattTitel');
   // Die Werkstatt gibt es nur lokal - Spieler sollen sie nicht finden

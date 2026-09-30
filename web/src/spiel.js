@@ -7,11 +7,15 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260930e';
-import * as Z from './zeit.js?v=20260930e';
-import { neueFarben } from './pixel.js?v=20260930e';
+import * as C from './config.js?v=20260930g';
+import * as Z from './zeit.js?v=20260930g';
+import { neueFarben } from './pixel.js?v=20260930g';
 
-const SCHLUESSEL = 'adventshaus.v1';
+// Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
+// Screenshots nie den echten Spielstand anfassen
+export const DEMO = typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+  ? new URLSearchParams(location.search).get('demo') : null;
+const SCHLUESSEL = DEMO ? 'adventshaus.demo' : 'adventshaus.v1';
 
 export const hooks = { ton() {}, toast() {}, geld() {}, musik() {}, bedient() {} };
 
