@@ -121,6 +121,10 @@ export function icon(c, id, x, y, t = 0, roh = false) {
     r(c, x + 1, y + 3, 6, 1, '#d4a82c'); p(c, x + 4, y + 6, '#d4a82c');
     if (!roh) { p(c, x + 5, y + 2, '#8a4a1e'); p(c, x + 6, y + 1, '#8a4a1e'); p(c, x + 6, y, '#a8602a'); }   // Zimtstange
   }
+  if (id === 'gluehwein') {   // Sternenpunsch: fünfzackiger goldener Stern (ein Kreuz las sich als Erste Hilfe)
+    const g = '#ffd040';
+    p(c, x + 4, y + 4, g); r(c, x + 2, y + 5, 5, 1, g); r(c, x + 3, y + 6, 3, 1, g); p(c, x + 3, y + 7, g); p(c, x + 5, y + 7, g); p(c, x + 4, y + 5, '#fff4b0');
+  }
   if (id === 'kinderpunsch') { p(c, x + 4, y + 5, '#fff'); p(c, x + 3, y + 6, '#fff'); p(c, x + 5, y + 6, '#fff'); p(c, x + 4, y + 7, '#fff'); }
   if (id === 'apfel') { p(c, x + 4, y + 1, '#3a8a2a'); p(c, x + 5, y + 0, '#3a8a2a'); r(c, x + 3, y + 6, 3, 2, '#d83a2a'); }
   if ((id === 'schoko' || id === 'eierpunsch') && !roh) { r(c, x + 2, y + 1, 4, 2, '#fffaf2'); p(c, x + 3, y, '#fffaf2'); if (id === 'schoko') p(c, x + 4, y + 1, '#6b3a22'); }

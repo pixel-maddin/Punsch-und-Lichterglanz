@@ -511,17 +511,17 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   position: absolute; left: calc(var(--px) * 3); right: calc(var(--px) * 3); top: calc(var(--px) * 19);
   display: flex; align-items: center; gap: calc(var(--px) * 2);
   appearance: none; cursor: pointer; text-align: left;
-  padding: calc(var(--px) * 1.8) calc(var(--px) * 2.4);
-  background: rgba(247, 233, 200, 0.94); color: var(--hinweis);
+  padding: calc(var(--px) * 2.6) calc(var(--px) * 3);
+  background: rgba(247, 233, 200, 0.95); color: var(--hinweis);
   border: calc(var(--px) * 0.8) solid var(--holz); border-radius: calc(var(--px) * 2);
   box-shadow: 0 calc(var(--px) * 0.8) 0 var(--holz2);
-  font: bold calc(var(--px) * 4.9) var(--schrift); line-height: 1.15;
+  font: bold calc(var(--px) * 5.8) var(--schrift); line-height: 1.2;
   z-index: 3;
 }
-#ziel .nr { flex: none; background: var(--rot); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.6) calc(var(--px) * 1.6); font-size: calc(var(--px) * 4.2); }
+#ziel .nr { flex: none; background: var(--rot); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.8) calc(var(--px) * 1.8); font-size: calc(var(--px) * 4.8); }
 #ziel .was { flex: 1; min-width: 0; }
 #ziel .was i { font-style: normal; color: var(--rot2); white-space: nowrap; }
-#ziel .lohn, #ziel small, #ziel .los { flex: none; white-space: nowrap; font-size: calc(var(--px) * 4.3); }
+#ziel .lohn, #ziel small, #ziel .los { flex: none; white-space: nowrap; font-size: calc(var(--px) * 5); }
 #ziel .lohn { color: #9a6a10; }
 #ziel small { color: #7a5a44; font-weight: normal; }
 #ziel .los { background: var(--gruen); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.8) calc(var(--px) * 2); }
@@ -529,7 +529,8 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 @keyframes zielPuls { 50% { box-shadow: 0 0 0 calc(var(--px) * 1.2) rgba(232, 176, 48, 0.55), 0 calc(var(--px) * 0.8) 0 var(--holz2); } }
 #ziel:active { transform: scale(0.97); }
 /* Einblendungen rutschen unter die Leiste */
-.mit-ziel #toast { top: calc(var(--px) * 36); }
+/* Die Leiste kann zweizeilig werden - ui.js misst ihre Unterkante (--ziel-unten) */
+.mit-ziel #toast { top: calc(var(--ziel-unten, calc(var(--px) * 36)) + var(--px) * 3); }
 
 /* Die Kiste beim Zurückkommen (zeigeKiste in ui.js) */
 #modal .kiste {

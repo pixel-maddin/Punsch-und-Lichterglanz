@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260929t';
-import * as S from './spiel.js?v=20260929t';
-import * as Z from './zeit.js?v=20260929t';
-import * as T from './ton.js?v=20260929t';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260929t';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260929t';
-import { nochmal as nochmalLernen, fuehrung } from './lernen.js?v=20260929t';
-import * as A from './auftraege.js?v=20260929t';
-import * as E from './erfolge.js?v=20260929t';
-import * as ZL from './ziele.js?v=20260929t';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260929t';
-import { alleSymbole } from './symbole.js?v=20260929t';
+import * as C from './config.js?v=20260930b';
+import * as S from './spiel.js?v=20260930b';
+import * as Z from './zeit.js?v=20260930b';
+import * as T from './ton.js?v=20260930b';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930b';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930b';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930b';
+import * as A from './auftraege.js?v=20260930b';
+import * as E from './erfolge.js?v=20260930b';
+import * as ZL from './ziele.js?v=20260930b';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930b';
+import { alleSymbole } from './symbole.js?v=20260930b';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -73,6 +73,8 @@ export function zielLeiste() {
     + (bereit ? '<span class="los">Los ▸</span>' : nochNicht || `<span class="lohn">+${z.lohn} ★</span>`);
   b.classList.toggle('bereit', bereit);
   b.classList.remove('versteckt');
+  // Unterkante merken: Einblendungen und Hinweisblasen rutschen darunter
+  $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
 }
 
 // ---------------------------------------------------------------------------
@@ -199,7 +201,7 @@ function baueLaden() {
   const artikel = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => a.tab === ladenTab));
   let gruppe = null;
   if (ladenTab === 'super') {
-    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Glühwein</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
+    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
     zeichneIcon(liste.lastChild.querySelector('canvas'), { id: 'gluehwein', produkt: true });
   }
   const neu = S.st.neu || {};
@@ -791,8 +793,15 @@ export function oeffneMenue() {
   nm.onclick = () => frageName(true);
   const hilfe = el('button', 'k k--neben', 'So geht’s');
   hilfe.onclick = () => zeigeHilfe();
-  const neu = el('button', 'k k--neben', 'Einführung nochmal');
-  neu.onclick = () => { nochmalLernen(); schliesseBlatt(); };
+  // Solange die Einführung (samt Startzielen) läuft: überspringen, sonst nochmal
+  const neu = el('button', 'k k--neben', lernenLaeuft() ? 'Einführung überspringen' : 'Einführung nochmal');
+  neu.onclick = () => {
+    if (!lernenLaeuft()) { nochmalLernen(); schliesseBlatt(); return; }
+    fenster('Einführung überspringen?', '<p>Die Erklärblasen und die Startziele oben werden ausgeblendet. Im Menü kannst du die Einführung jederzeit wieder starten.</p>', [
+      { text: 'Überspringen', aktion: () => { ueberspringen(); schliesseBlatt(); zielLeiste(); toast('Einführung übersprungen - viel Spaß!', 'gut'); } },
+      { text: 'Abbrechen', neben: true },
+    ]);
+  };
   zeile.appendChild(nm); zeile.appendChild(hilfe); zeile.appendChild(neu);
   liste.appendChild(zeile);
 
@@ -1082,7 +1091,9 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   const rand = 44, unten = 190;
   const cv = document.createElement('canvas');
   cv.width = 180 * SK + rand * 2; cv.height = WG * SK + rand + unten;
-  const c = cv.getContext('2d');
+  // Im Hauptspeicher malen, nicht auf der Grafikkarte: Fürs PNG muss das Bild
+  // sonst erst zurückgelesen werden - auf manchen Android-Geräten spürbar langsam
+  const c = cv.getContext('2d', { willReadFrequently: true });
   const nr = rahmenNr ?? Math.floor(Math.random() * RAHMEN.length);
   const R = RAHMEN[nr];
   R.male(c, cv.width, cv.height);
@@ -1101,22 +1112,33 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   kartenSchrift(c, von, mx, y0 + 122, 30, '', R.text, R.umriss, maxB);
   kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + 158, 20, '', R.text, R.umriss, maxB);
 
-  const blob = await new Promise((res) => cv.toBlob(res, 'image/png'));
-  const datei = new File([blob], 'weihnachtskarte.png', { type: 'image/png' });
-  const url = URL.createObjectURL(blob);
-  fenster('Deine Weihnachtskarte', `<img class="kartenbild" src="${url}" alt="Weihnachtskarte">`, [
-    { text: 'Teilen', aktion: () => {
-      if (navigator.canShare && navigator.canShare({ files: [datei] })) {
-        navigator.share({ files: [datei], title: gruss, text: `${gruss} ${von}` }).catch(() => {});
-      } else {
-        const a = document.createElement('a'); a.href = url; a.download = 'weihnachtskarte.png'; a.click();
-      }
+  // Gemeldet: auf Android dauerte es „ewig" bis zur Karte. Das Fenster zeigt
+  // jetzt SOFORT das gemalte Bild selbst; die PNG-Datei fürs Teilen entsteht
+  // danach im Hintergrund und ist meist fertig, bevor man „Teilen" tippt.
+  const box = fenster('Deine Weihnachtskarte', '', [
+    { text: 'Teilen', aktion: (b) => {
+      const knopf = b.querySelector('.knoepfe .k');
+      knopf.textContent = 'Moment …';
+      datei.then(({ file, url }) => {
+        knopf.textContent = 'Teilen';
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: gruss, text: `${gruss} ${von}` }).catch(() => {});
+        } else {
+          const a = document.createElement('a'); a.href = url; a.download = 'weihnachtskarte.png'; a.click();
+        }
+      });
+      return false;   // Fenster bleibt offen
     } },
     { text: 'Andere Karte', neben: true, aktion: () => { setTimeout(() => karte((nr + 1) % RAHMEN.length, ohneLeute), 30); } },
     { text: ohneLeute ? 'Mit Gästen' : 'Ohne Gäste', neben: true, aktion: () => { setTimeout(() => karte(nr, !ohneLeute, gruss), 30); } },
     { text: 'Text ändern', neben: true, aktion: () => { setTimeout(() => kartenText(nr, ohneLeute, gruss), 30); } },
     { text: 'Schließen', neben: true },
   ]);
+  cv.className = 'kartenbild';
+  box.querySelector('.inhalt').appendChild(cv);
+  const datei = new Promise((res) => setTimeout(() => cv.toBlob((blob) => {
+    res({ file: new File([blob], 'weihnachtskarte.png', { type: 'image/png' }), url: URL.createObjectURL(blob) });
+  }, 'image/png'), 50));
 }
 
 // ---------------------------------------------------------------------------

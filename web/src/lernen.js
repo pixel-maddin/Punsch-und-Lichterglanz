@@ -18,16 +18,16 @@
  * (ui.js fragt `fuehrung()`). Nach dem Kauf erklärt ein Folgehinweis,
  * was es gebracht hat.
  *
- * Erklär-Blasen mit „Weiter ▸" (die ersten der Einführung und das
- * „Geschafft!") HALTEN DAS SPIEL AN, bis man sie antippt - sonst lief
- * der erste Gast los, bevor man den Satz zu Ende gelesen hatte.
- * Handlungs-Blasen („tippe auf die Gläser") lassen das Spiel laufen.
+ * Erklär-Blasen mit „Weiter ▸" HALTEN DAS SPIEL AN, bis man sie antippt -
+ * in der Einführung die ersten und das „Geschafft!", bei den Hinweisen
+ * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
+ * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20260929t';
-import * as S from './spiel.js?v=20260929t';
-import * as A from './auftraege.js?v=20260929t';
-import * as E from './erfolge.js?v=20260929t';
-import * as Z from './ziele.js?v=20260929t';
+import * as C from './config.js?v=20260930b';
+import * as S from './spiel.js?v=20260930b';
+import * as A from './auftraege.js?v=20260930b';
+import * as E from './erfolge.js?v=20260930b';
+import * as Z from './ziele.js?v=20260930b';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -138,7 +138,7 @@ const HINWEISE = [
     ziel: ausgussZiel, fertig: () => S.lauf.hand.length < S.handMax() },
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
   { id: 'laden', sofort: true, wann: () => zielDran('getraenk', 'kinderpunsch'),
-    info: () => 'Neues Getränk! Du hast genug Sterne für Kinderpunsch. Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und weil Kinderpunsch ohne Alkohol ist, kommen dann auch Kinder an deinen Stand.',
+    info: () => 'Neues Getränk! Du hast genug Sterne für Kinderpunsch. Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
     text: () => 'Tippe auf LADEN - ich zeige dir, wo es Kinderpunsch gibt.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
   { id: 'laden_danach', sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
@@ -163,7 +163,7 @@ const HINWEISE = [
     text: () => 'Tippe auf LADEN - unter Wichtel wartet er schon.',
     ziel: ladenZiel, fertig: () => S.hat('spuel'), laden: { tab: 'wichtel', id: 'spuel' }, lang: true },
   { id: 'w_nachfuell', sofort: true, wann: () => zielDran('nachfuell', 'nachfuell'),
-    info: () => 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Glühwein ausgeht.',
+    info: () => 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.',
     text: () => 'Tippe auf LADEN - unter Wichtel findest du ihn.',
     ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, lang: true },
   { id: 'w_servier', sofort: true, wann: () => zielDran('servier', 'servier'),
@@ -182,8 +182,8 @@ const HINWEISE = [
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },
   { id: 'ziele_fertig', sofort: true, wann: () => Z.fertig() && S.st.tipps.wichtel_weg,
-    text: () => 'Deine ersten Schritte sind geschafft! Wie es weitergeht: Unter AUFTRÄGE gibt es jeden Tag drei Aufgaben mit Belohnung, und an der Erfolgswand sammelst du Socken.',
-    ziel: auftragZiel, dauer: 10 },
+    text: () => 'Alle sieben Ziele geschafft - jetzt weißt du alles Wichtige! Genieße die Weihnachtszeit und schmücke dein Haus, wie es dir gefällt. Schau jeden Tag mal rein: Es gibt neue Aufträge, ein Türchen im Adventskalender und besondere Ereignisse.',
+    ziel: null, dauer: 10 },
   // Besondere Gäste stellen sich hinten an und gehen, wenn es zu lange
   // dauert - das muss man einmal gesagt bekommen (gemeldet: Rentier war weg)
   { id: 'sonder_schlange', sofort: true, wann: () => S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.platz == null && !g.gehen && !g.laeuft),
@@ -254,9 +254,18 @@ function hinweise(dt) {
   if (aktuell) {
     aktuell.t += dt;
     const h = aktuell.h;
-    // Erst die Erklärung mit „Weiter ▸" (das Spiel steht so lange), dann der
-    // Zeiger - die Erklärung kommt auch, wenn schon gekauft ist
-    if (h.info && !aktuell.gelesen) { const a = aktuell; a.t = 0; return { text: h.info(), ziel: null, weiter: () => { a.gelesen = true; a.t = 0; } }; }
+    // JEDE Blase hält das Spiel an, bis man „Weiter ▸" tippt (Nutzerwunsch
+    // 30.09.: in Ruhe lesen). Erst die Erklärung (`info`, sonst der Text selbst,
+    // dann schon mit Zeiger) - sie kommt auch, wenn schon gekauft ist.
+    // Danach bleibt nur, wo man etwas TUN soll (fertig + ziel), der Zeiger
+    // stehen, ohne Pause, bis es erledigt ist; alles andere ist damit gelesen.
+    if (!aktuell.gelesen) {
+      const a = aktuell; a.t = 0;
+      const handeln = !!(h.fertig && h.ziel);
+      return { text: h.info ? h.info() : h.text(), ziel: !h.info && h.ziel ? h.ziel() : null,
+        weiter: () => { a.gelesen = true; a.t = 0; if (!h.info && !handeln) a.erledigt = true; } };
+    }
+    if (aktuell.erledigt) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
     const fertig = h.fertig ? h.fertig() : aktuell.t > (h.dauer || 6);
     if (fertig || (!h.lang && aktuell.t > 20)) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
     return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
@@ -309,7 +318,9 @@ function zeige(z) {
     const px = Math.max(12, Math.min(168, z.ziel.x));
     tipp.style.setProperty('--pfeil-x', `calc(var(--px) * ${px - 12})`);
   } else {
-    tipp.style.top = `calc(var(--px) * ${document.getElementById('huelle').classList.contains('mit-ziel') ? 36 : 24})`; tipp.style.bottom = '';
+    const zl = document.getElementById('ziel');
+    tipp.style.top = document.getElementById('huelle').classList.contains('mit-ziel') ? `${zl.offsetTop + zl.offsetHeight + 8}px` : 'calc(var(--px) * 24)';
+    tipp.style.bottom = '';
     tipp.dataset.pfeil = '';
     // Läuft gerade eine Einblendung oben, rutscht sie unter die Blase
     const toast = document.getElementById('toast');
@@ -317,5 +328,22 @@ function zeige(z) {
   }
 }
 
+/** Läuft noch etwas von der Einführung (Schritte, Startziele)? Für das Menü. */
+export const laeuft = () => S.st.lernen < 99 || !Z.fertig();
+/**
+ * Einführung überspringen (Menü, Nutzerwunsch 30.09.): Schritte, alle
+ * Hinweise und die Startziele gelten als erledigt, nichts blendet sich
+ * mehr ein. „Einführung nochmal" holt alles zurück.
+ */
+export function ueberspringen() {
+  const st = S.st;
+  st.lernen = 99; st.lernInfo = 2; S.lauf.lernen = false;
+  st.tipps = st.tipps || {};
+  for (const h of HINWEISE) st.tipps[h.id] = true;
+  st.ziel = Z.ZIELE.length;
+  aktuell = null; aktuelleBlase = null; zeige(null);
+  S.speichere();
+}
+
 /** Einführung neu starten (Menü). */
-export function nochmal() { S.st.lernen = 0; S.st.lernInfo = 0; S.st.tipps = {}; aktuell = null; }
+export function nochmal() { S.st.lernen = 0; S.st.lernInfo = 0; S.st.tipps = {}; S.st.ziel = null; Z.nachholen(); aktuell = null; }

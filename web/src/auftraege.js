@@ -9,15 +9,15 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=20260929t';
-import * as S from './spiel.js?v=20260929t';
-import * as Z from './zeit.js?v=20260929t';
+import * as C from './config.js?v=20260930b';
+import * as S from './spiel.js?v=20260930b';
+import * as Z from './zeit.js?v=20260930b';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
   bediene:  { stufen: [25, 50, 90],  text: (n) => `Bediene ${n} Gäste` },
   produkt:  { stufen: [8, 15, 25],   text: (n, p) => `Verkaufe ${n} × ${C.PRODUKT[p].name}`, geht: () => S.produkteFrei().length > 1 },
-  kinder:   { stufen: [5, 10, 18],   text: (n) => `Bediene ${n} Kinder`, geht: () => S.produkteFrei().some((p) => !p.alk) },
+  kinder:   { stufen: [5, 10, 18],   text: (n) => `Bediene ${n} Kinder`, geht: () => S.hat('kinderpunsch') },
   omas:     { stufen: [4, 8, 14],    text: (n) => `Bediene ${n} Omas und Opas` },
   eilig:    { stufen: [2, 4, 7],     text: (n) => `Bediene ${n} eilige Gäste`, geht: () => S.st.stats.bedient >= 30 },
   schwung:  { stufen: [1, 1, 3],     text: (n) => n > 1 ? `Erreiche ${n}-mal vollen Schwung` : 'Erreiche vollen Schwung (×1,40)' },

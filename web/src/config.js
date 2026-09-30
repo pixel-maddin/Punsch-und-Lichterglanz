@@ -31,21 +31,24 @@ export const T_ZELLE_H = 27;   // Regal: 2 Reihen
 // art: 'topf'   = Glas holen, abfüllen, Topf leert sich
 //      'dose'   = direkt greifen (kein Glas), Dose leert sich
 //      'platte' = backen lassen, dann greifen
-// alk: Kinder bestellen nur, was false ist.
+// alk: Kinder bestellen nur, was false ist. Seit 30.09. ist ALLES alkoholfrei
+//      (Nutzerwunsch, auch für den Play Store): fiktive Namen statt Glühwein,
+//      Eierpunsch, Jägertee, Weißer Glühwein, Feuerzangenbowle. Die IDs bleiben
+//      (Spielstände!). Kinder kommen ab dem Kinderpunsch (spiel.js).
 // Beträge in GANZEN Sternen: seit 29.09. alles ×10 (vorher 1,20 Sterne für
 // Kinderpunsch, jetzt 12) - ganze Zahlen fühlen sich großzügiger an, schwerer
 // wird dadurch nichts. Alte Spielstände werden in spiel.js umgerechnet.
 export const PRODUKTE = [
-  { id: 'gluehwein',    name: 'Glühwein',         preis: 10, zeit: 0.4,  kosten: 0,     art: 'topf',   farbe: '#8a1830', alk: true },
+  { id: 'gluehwein',    name: 'Sternenpunsch',    preis: 10, zeit: 0.4,  kosten: 0,     art: 'topf',   farbe: '#8a1830', alk: false },
   { id: 'kinderpunsch', name: 'Kinderpunsch',     preis: 12, zeit: 0.5,  kosten: 200,    art: 'topf',   farbe: '#ee6d9a', alk: false },
   { id: 'apfel',        name: 'Heißer Apfel',     preis: 14, zeit: 0.7,  kosten: 600,    art: 'topf',   farbe: '#e8942e', alk: false },
   { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false },
   { id: 'schoko',       name: 'Heiße Schokolade', preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, extra: 'sahne' },
-  { id: 'eierpunsch',   name: 'Eierpunsch',       preis: 20, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: true, extra: 'sahne' },
-  { id: 'jaegertee',    name: 'Jägertee',         preis: 24, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: true },
+  { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 20, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, extra: 'sahne' },
+  { id: 'jaegertee',    name: 'Waldtee',          preis: 24, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false },
   { id: 'crepe',        name: 'Crêpe',            preis: 28, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false },
-  { id: 'weisser',      name: 'Weißer Glühwein',  preis: 32, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: true, extra: 'zimt' },
-  { id: 'feuerzange',   name: 'Feuerzangenbowle', preis: 40, zeit: 2.4, kosten: 220000, art: 'topf',   farbe: '#a01818', alk: true, extra: 'zucker' },
+  { id: 'weisser',      name: 'Zimtwolke',        preis: 32, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: false, extra: 'zimt' },
+  { id: 'feuerzange',   name: 'Feuerzauber',      preis: 40, zeit: 2.4, kosten: 220000, art: 'topf',   farbe: '#a01818', alk: false, extra: 'zucker' },
 ];
 // extra: der letzte Handgriff, den nur DU machst - nach dem Einschenken das
 // Glas auf dem Tablett antippen. Fertig zahlt der Gast mehr; die Wichtel
@@ -240,12 +243,12 @@ export const ARTIKEL = [
   { id: 'kasse',     tab: 'wichtel', gruppe: 'Helfer', name: 'Kassen-Wichtel',   kosten: 240000, stimmung: 0, bonus: { preis: 0.10 }, text: 'Rundet freundlich auf.' },
 ];
 
-// Supermarkt: je Produkt ein Artikel (Glühwein hat man von Anfang an)
+// Supermarkt: je Produkt ein Artikel (Sternenpunsch hat man von Anfang an)
 for (const p of PRODUKTE) {
   if (p.kosten === 0) continue;
   ARTIKEL.push({
     id: p.id, tab: 'super', gruppe: 'Zutaten', name: p.name, kosten: p.kosten, stimmung: 0,
-    produkt: true, text: `Gäste zahlen ${String(p.preis).replace('.', ',')} Sterne${p.zeit ? ` · Zubereitung ${String(p.zeit).replace('.', ',')} s` : ''}${p.alk ? '' : ' · auch für Kinder'}${p.extra ? ` · mit ${EXTRA[p.extra].name} +${Math.round(EXTRA_BONUS * 100)} %` : ''}.`,
+    produkt: true, text: `Gäste zahlen ${String(p.preis).replace('.', ',')} Sterne${p.zeit ? ` · Zubereitung ${String(p.zeit).replace('.', ',')} s` : ''}${p.id === 'kinderpunsch' ? ' · lockt Kinder an' : ''}${p.extra ? ` · mit ${EXTRA[p.extra].name} +${Math.round(EXTRA_BONUS * 100)} %` : ''}.`,
   });
 }
 

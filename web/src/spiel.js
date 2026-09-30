@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260929t';
-import * as Z from './zeit.js?v=20260929t';
-import { neueFarben } from './pixel.js?v=20260929t';
+import * as C from './config.js?v=20260930b';
+import * as Z from './zeit.js?v=20260930b';
+import { neueFarben } from './pixel.js?v=20260930b';
 
 const SCHLUESSEL = 'adventshaus.v1';
 
@@ -430,7 +430,9 @@ function waehleTyp(erlaubeSpezial) {
     const m = spezialMoeglich();
     if (m.length) { lauf.spezialAb = lauf.t + C.SPEZIAL_PAUSE; return zufallGewichtet(m, (x) => x[1])[0]; }
   }
-  const kinderGehen = produkteFrei().some((p) => !p.alk);
+  // Kinder kommen, sobald es Kinderpunsch gibt (alles ist alkoholfrei, der
+  // Kinderpunsch bleibt trotzdem ihr Grund, vorbeizuschauen)
+  const kinderGehen = hat('kinderpunsch');
   const typen = ['erwachsen', 'oma', 'opa'].concat(kinderGehen ? ['kind'] : []);
   return zufallGewichtet(typen, (t) => C.GAESTE[t].gewicht);
 }

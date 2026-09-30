@@ -22,8 +22,8 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
 3. **Kurz warten**, bis das Glas voll ist - teure Getränke brauchen länger.
 4. **Servieren** - auf den Gast tippen. Je schneller, desto mehr Trinkgeld.
 5. **Leerer Topf** - ein paarmal antippen, dann ist er wieder voll.
-6. **Der letzte Handgriff** - bei Schokolade, Eierpunsch, Weißem Glühwein
-   und Feuerzangenbowle das fertige Glas auf dem Tablett antippen (Sahne,
+6. **Der letzte Handgriff** - bei Schokolade, Herzwärmer, Zimtwolke
+   und Feuerzauber das fertige Glas auf dem Tablett antippen (Sahne,
    Zimtstange, Zuckerhut anzünden). Dann zahlt der Gast 30 % mehr.
 
 Falsch geliefert kostet nur das Glas. Falsch Eingeschenktes kippt man in
@@ -70,7 +70,7 @@ je Erfolg. Mit jeder Socke wird das Wohnzimmer weihnachtlicher.
 |---|---|
 | **Weihnachtsmarkt** | Deko fürs Haus (Lichterketten, Stern, Schwibbogen, Nussknacker, Eiszapfen, Nikolaus auf dem Dach, Lichtershow), den Garten (Tanne mit Lichtern, Kugeln, Stern, Schneemann-Familie, Lichter-Rentier, Schlitten, Lichterbogen) und den Stand (Girlande, Zuckerstangen, Licht, Schild, Musikbox, Heizpilz, Bierbänke - jeweils mit Bonus) |
 | **Baumarkt** | Längerer Tresen, größere Töpfe, Tablett; Holzstapel, neue Tür, Zaun, **Kaminofen** (die Fenster leuchten), Laternen; vier Anstriche: Winterweiß, Schwedenrot, Lebkuchenhaus, Alpenchalet |
-| **Supermarkt** | Zutaten: Kinderpunsch, heißer Apfel, Lebkuchen, heiße Schokolade, Eierpunsch, Jägertee, Crêpe, weißer Glühwein, Feuerzangenbowle |
+| **Supermarkt** | Zutaten: Kinderpunsch (lockt Kinder an), heißer Apfel, Lebkuchen, heiße Schokolade, Herzwärmer, Waldtee, Crêpe, Zimtwolke, Feuerzauber - alles alkoholfrei |
 | **Wichtel** | Spül-, Servier-, Nachfüll-, Crêpe- und Kassen-Wichtel. Der Servier-Wichtel arbeitet auch, wenn die App zu ist (bis 8 Stunden) |
 
 Hausdeko bringt **Stimmung** (♥). Je mehr Stimmung, desto mehr Gäste -
