@@ -27,7 +27,9 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
    (Schokolade), Sahne und Zimt (Herzwärmer), Milchschaum und Zimtstange
    (Zimtwolke), Zuckerhut anzünden (Feuerzauber). Das fertige Glas auf dem
    Tablett antippen - die goldene Blase zeigt, was fehlt. Dann zahlt der Gast
-   20 bis 50 % mehr.
+   20 bis 50 % mehr. Drei brauchen Timing: beim Waldtee den Beutel im grünen
+   Moment herausziehen, den Crêpe auf der Platte im grünen Moment wenden, und
+   den Feuerzauber servieren, solange der Zuckerhut brennt.
 
 Falsch geliefert kostet nur das Glas. Falsch Eingeschenktes kippt man in
 den Ausguss rechts. **Sobald der Servier-Wichtel da ist, reicht ein Tipp auf

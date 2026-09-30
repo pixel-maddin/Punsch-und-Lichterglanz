@@ -141,7 +141,10 @@ export function icon(c, id, x, y, t = 0, roh = false) {
   const sahne = (id === 'schoko' || id === 'eierpunsch') && hat('sahne');
   if (sahne) { r(c, x + 2, y + 1, 4, 2, '#fffaf2'); p(c, x + 3, y, '#fffaf2'); if (id === 'schoko') p(c, x + 4, y + 1, '#6b3a22'); }
   if (id === 'eierpunsch' && hat('zimtpulver')) { p(c, x + 3, y + 1, '#a8602a'); p(c, x + 5, y + 2, '#8a4a1e'); p(c, x + 4, y, '#a8602a'); }
-  if (id === 'jaegertee') { p(c, x + 3, y + 6, '#e0c060'); p(c, x + 4, y + 5, '#e0c060'); p(c, x + 5, y + 6, '#e0c060'); }
+  if (id === 'jaegertee') {
+    p(c, x + 3, y + 6, '#e0c060'); p(c, x + 4, y + 5, '#e0c060'); p(c, x + 5, y + 6, '#e0c060');
+    if (!hat('beutel')) { p(c, x + 2, y + 2, '#d8d0b0'); p(c, x + 2, y + 1, '#d8d0b0'); r(c, x + 1, y, 2, 1, '#e8d8a8'); }   // Teebeutel hängt noch drin
+  }
   if (id === 'feuerzange' && !hat('zucker')) {
     r(c, x + 2, y + 2, 4, 1, '#e8e8e8'); r(c, x + 3, y, 2, 2, '#fffaf2');   // Zange mit Zuckerhut, noch kalt
   } else if (id === 'feuerzange') {

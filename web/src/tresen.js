@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930d';
-import * as C from './config.js?v=20260930d';
-import * as S from './spiel.js?v=20260930d';
-import * as Z from './zeit.js?v=20260930d';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930e';
+import * as C from './config.js?v=20260930e';
+import * as S from './spiel.js?v=20260930e';
+import * as Z from './zeit.js?v=20260930e';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -444,14 +444,23 @@ function brett(c, y, t) {
     }
     else {
       // Offene Handgriffe: nur die erledigten zeichnen (Liste), fertig = alles
-      const roh = h.griffe && !h.extraFertig ? h.griffe.slice(0, h.schritt) : false;
+      // Verpasst (Timing): wie „roh" zeichnen - Zuckerhut aus, Beutel noch drin
+      const roh = h.verpasst ? true : h.griffe && !h.extraFertig ? h.griffe.slice(0, h.schritt) : false;
       gross(c, x, by - 19 - hoch, (k) => icon(k, h.id, 0, 0, t, roh));
       if (h.brennT > 0) {
         // Der Zuckerhut brennt: große, flackernde Flamme
         const fl = Math.floor(t * 12) % 2;
         r(c, x + 6, by - 22, 4, 3, '#ff8a20'); r(c, x + 7 - fl, by - 25, 2, 3, '#ffd040');
         p(c, x + 7 + fl, by - 26, '#6ab0ff'); p(c, x + 5 + fl * 4, by - 21, '#ffd040');
-      } else if (roh) extraHinweis(c, x + 13, by - 30, h.extra, t, C.HANDGRIFF[h.extra].n - h.tipps);
+      } else if (h.extra) {
+        extraHinweis(c, x + 13, by - 30, h.extra, t, C.HANDGRIFF[h.extra].n - h.tipps);
+        if (h.extra === 'beutel') { const tm = C.HANDGRIFF.beutel.timing; zeitBalken(c, x + 1, by - 23, 18, h.ziehT / tm.dauer, tm); }
+      }
+      // Feuerzauber brennt: Balken schrumpft - so lange gibt es den Bonus
+      if (h.flammeT > 0) {
+        const a = h.flammeT / C.FEUER_FENSTER;
+        r(c, x + 1, by - 23, 18, 2, '#3a2a20'); r(c, x + 1, by - 23, Math.max(1, Math.round(18 * a)), 2, a > 0.3 ? '#ff8a20' : '#f04a3a');
+      }
     }
   }
 
@@ -460,6 +469,17 @@ function brett(c, y, t) {
   r(c, ax, y + 5, 18, 14, '#6a6a72'); r(c, ax + 1, y + 6, 16, 3, '#3a3a44'); r(c, ax - 1, y + 4, 20, 2, '#8a8a92');
   r(c, ax + 2, y + 10, 14, 1, '#7a7a82'); r(c, ax + 2, y + 14, 14, 1, '#7a7a82');
   if (S.lauf.hand.length) { p(c, ax + 8, y + 1, '#9ab8d8'); p(c, ax + 9, y + 2, '#9ab8d8'); }
+}
+
+/**
+ * Zeitbalken für Timing-Handgriffe: dunkler Grund, grüne Zone, weißer Strich
+ * für „jetzt". `a` = Anteil 0..1, `tm` = { von, bis }.
+ */
+function zeitBalken(c, x, y, b, a, tm) {
+  r(c, x, y, b, 3, '#3a2a20');
+  r(c, x + Math.round(b * tm.von), y, Math.round(b * (tm.bis - tm.von)), 3, '#4ac05a');
+  const m = x + Math.min(b - 1, Math.round(b * a));
+  r(c, m, y - 1, 1, 5, '#ffffff');
 }
 
 /**
@@ -485,6 +505,9 @@ function extraHinweis(c, x, y, extra, t, noch = 1) {
     r(c, x + 2, y + 3, 6, 4, '#9a5a2a'); r(c, x + 2, y + 3, 6, 1, '#ffffff'); p(c, x + 3, y + 4, '#ffffff'); p(c, x + 6, y + 4, '#ffffff'); p(c, x + 6, y + 5, '#ffffff');
   }
   else if (extra === 'zimtpulver') { p(c, x + 3, y + 3, '#a8602a'); p(c, x + 6, y + 4, '#8a4a1e'); p(c, x + 4, y + 5, '#a8602a'); p(c, x + 5, y + 3, '#8a4a1e'); p(c, x + 3, y + 6, '#8a4a1e'); }
+  else if (extra === 'beutel') {   // Teebeutel am Faden
+    p(c, x + 5, y + 2, '#8a6a4a'); p(c, x + 5, y + 3, '#8a6a4a'); r(c, x + 3, y + 4, 4, 3, '#e8d8a8'); r(c, x + 4, y + 5, 2, 1, '#3f7a3a');
+  }
   else if (extra === 'schaum') {   // Tassenrand mit Schaumhaube, grau umrandet
     r(c, x + 2, y + 5, 6, 2, '#c8a870'); r(c, x + 3, y + 3, 4, 2, '#ffffff'); p(c, x + 4, y + 2, '#ffffff');
     p(c, x + 2, y + 4, '#a89a88'); p(c, x + 7, y + 4, '#a89a88'); p(c, x + 3, y + 2, '#a89a88'); p(c, x + 5, y + 2, '#a89a88');
@@ -580,8 +603,12 @@ function zelle(c, i, x, y, t) {
     const cr = S.lauf.crepe;
     if (cr.backT >= 0) {
       const a = cr.backT / C.CREPE_ZEIT;
-      r(c, tx + 5, ty - 4, 16, 2, mische('#f4e4b0', '#e0a850', a));
-      r(c, tx + 2, ty + 5, Math.round(22 * a), 1, '#ffd040');
+      // Gewendet: die helle Seite liegt oben, sonst bräunt er gleichmäßig
+      r(c, tx + 5, ty - 4, 16, 2, cr.gewendet ? mische('#f4e4b0', '#e8b868', a * 0.6) : mische('#f4e4b0', '#e0a850', a));
+      if (cr.gewendet) { p(c, tx + 8, ty - 4, '#c8883a'); p(c, tx + 14, ty - 3, '#c8883a'); }
+      // Handgriff „Wenden": Balken mit grüner Zone, solange noch nicht gewendet
+      if (!cr.gewendet && !cr.verpasst) zeitBalken(c, tx + 2, ty + 3, 22, a, C.HANDGRIFF.wenden.timing);
+      else r(c, tx + 2, ty + 5, Math.round(22 * a), 1, cr.gewendet ? '#4ac05a' : '#ffd040');
       if (Math.floor(t * 8) % 2) p(c, tx + 8, ty - 7, '#eef2f6');
     } else if (cr.fertig) {
       icon(c, 'crepe', cx - 5, ty - 12, t);

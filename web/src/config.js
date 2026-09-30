@@ -45,8 +45,8 @@ export const PRODUKTE = [
   { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false, griffe: ['guss'], bonus: 0.25 },
   { id: 'schoko',       name: 'Heiße Schokolade', preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, griffe: ['sahne'], bonus: 0.30 },
   { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 20, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, griffe: ['sahne', 'zimtpulver'], bonus: 0.40 },
-  { id: 'jaegertee',    name: 'Waldtee',          preis: 24, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false },
-  { id: 'crepe',        name: 'Crêpe',            preis: 28, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false },
+  { id: 'jaegertee',    name: 'Waldtee',          preis: 24, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false, griffe: ['beutel'], bonus: 0.40 },
+  { id: 'crepe',        name: 'Crêpe',            preis: 28, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false, griffe: ['wenden'], bonus: 0.40 },
   { id: 'weisser',      name: 'Zimtwolke',        preis: 32, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: false, griffe: ['schaum', 'zimt'], bonus: 0.45 },
   { id: 'feuerzange',   name: 'Feuerzauber',      preis: 40, zeit: 2.4, kosten: 220000, art: 'topf',   farbe: '#a01818', alk: false, griffe: ['zucker'], bonus: 0.50 },
 ];
@@ -56,8 +56,8 @@ export const PRODUKTE = [
 // Wichtel und der Ein-Tipp-Service lassen sie weg - sie sind der Grund,
 // selbst am Tresen zu stehen. Seit 30.09. bringt JEDES neue Getränk eine neue
 // Art Handgriff mit (Nutzerwunsch: „immer schwieriger in der Zubereitung"):
-// 1 Tipp → mehrfach tippen → Reihenfolge. Timing-Griffe (Waldtee, Crêpe)
-// sind als zweiter Schritt geplant.
+// 1 Tipp → mehrfach tippen → Reihenfolge → Timing. `timing`: der Griff hat
+// ein Zeitfenster (Anteil von `dauer`), zu früh oder zu spät = kein Bonus.
 export const HANDGRIFF = {
   zuckerstange: { name: 'Zuckerstange', satz: 'eine Zuckerstange rein', n: 1 },
   ruehren:      { name: 'Umrühren',     satz: 'dreimal umrühren', n: 3 },
@@ -66,8 +66,12 @@ export const HANDGRIFF = {
   zimtpulver:   { name: 'Zimt',         satz: 'Zimt darüberstreuen', n: 1 },
   schaum:       { name: 'Milchschaum',  satz: 'Milch aufschäumen (2-mal tippen)', n: 2 },
   zimt:         { name: 'Zimtstange',   satz: 'eine Zimtstange rein', n: 1 },
-  zucker:       { name: 'Zuckerhut',    satz: 'den Zuckerhut anzünden', n: 1 },
+  zucker:       { name: 'Zuckerhut',    satz: 'den Zuckerhut anzünden - und servieren, solange er brennt', n: 1 },
+  // Timing (seit 30.09.): Tee ziehen lassen, Crêpe wenden (auf der Platte)
+  beutel:       { name: 'Teebeutel',    satz: 'den Teebeutel herausziehen, wenn der Balken im Grünen ist', n: 1, timing: { dauer: 3.0, von: 0.45, bis: 0.75 } },
+  wenden:       { name: 'Wenden',       satz: 'den Crêpe wenden, wenn der Balken im Grünen ist', n: 1, timing: { von: 0.40, bis: 0.65 } },
 };
+export const FEUER_FENSTER = 5;    // s, die der angezündete Zuckerhut brennt - nur so lange gibt es den Bonus
 export const EXTRA = HANDGRIFF;    // alter Name
 export const EXTRA_BONUS = 0.30;   // Rückfall, wenn ein Getränk keinen eigenen `bonus` hat
 export const ZUCKER_ZEIT = 1.2;    // s, die der Zuckerhut brennt

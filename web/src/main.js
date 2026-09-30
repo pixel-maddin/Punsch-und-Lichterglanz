@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260930d';
-import * as S from './spiel.js?v=20260930d';
-import * as Z from './zeit.js?v=20260930d';
-import * as T from './ton.js?v=20260930d';
-import * as UI from './ui.js?v=20260930d';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260930d';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930d';
-import * as Lernen from './lernen.js?v=20260930d';
-import { zeigeAdvent } from './ereignis.js?v=20260930d';
-import * as A from './auftraege.js?v=20260930d';
-import * as E from './erfolge.js?v=20260930d';
-import * as ZL from './ziele.js?v=20260930d';
+import * as C from './config.js?v=20260930e';
+import * as S from './spiel.js?v=20260930e';
+import * as Z from './zeit.js?v=20260930e';
+import * as T from './ton.js?v=20260930e';
+import * as UI from './ui.js?v=20260930e';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20260930e';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930e';
+import * as Lernen from './lernen.js?v=20260930e';
+import { zeigeAdvent } from './ereignis.js?v=20260930e';
+import * as A from './auftraege.js?v=20260930e';
+import * as E from './erfolge.js?v=20260930e';
+import * as ZL from './ziele.js?v=20260930e';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');

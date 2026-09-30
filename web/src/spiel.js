@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260930d';
-import * as Z from './zeit.js?v=20260930d';
-import { neueFarben } from './pixel.js?v=20260930d';
+import * as C from './config.js?v=20260930e';
+import * as Z from './zeit.js?v=20260930e';
+import { neueFarben } from './pixel.js?v=20260930e';
 
 const SCHLUESSEL = 'adventshaus.v1';
 
@@ -108,7 +108,7 @@ function resetLauf() {
     gaeste: [], hand: [], naechsteId: 1,
     schwung: 0, schwungT: 0,
     spawnT: 1.5, servierT: 0,
-    crepe: { backT: -1, fertig: false },
+    crepe: { backT: -1, fertig: false, gewendet: false, verpasst: false },
     nachfuellT: {}, fuellen: {},   // Wichtel-Uhr bzw. Tippfortschritt je Topf
     texte: [], herzen: [], elfen: [],
     lernen: false, fehlGast: 0,
@@ -537,14 +537,20 @@ export function tippeZelle(i) {
   if (!hat(p.id)) return 'laden';
   const hand = lauf.hand;
   if (p.art === 'platte') {
-    if (lauf.crepe.fertig) {
+    const cr = lauf.crepe;
+    if (cr.fertig) {
       if (!platzFuerEssen()) { hooks.ton('falsch'); lauf.wackel.hand = 0.3; return; }
-      hand.push({ art: 'voll', id: p.id, rest: 0 });
-      lauf.crepe.fertig = false;
+      hand.push({ art: 'voll', id: p.id, rest: 0, griffe: null, extra: null, extraFertig: cr.gewendet });
+      cr.fertig = false;
       hooks.ton('greifen');
-    } else if (lauf.crepe.backT < 0) {
-      lauf.crepe.backT = 0;
+    } else if (cr.backT < 0) {
+      cr.backT = 0; cr.gewendet = false; cr.verpasst = false;
       hooks.ton('brutzeln');
+    } else if (!cr.gewendet && !cr.verpasst) {
+      // Handgriff „Wenden": im grünen Moment auf die Platte tippen
+      const tm = C.HANDGRIFF.wenden.timing, a = cr.backT / C.CREPE_ZEIT;
+      if (a >= tm.von && a <= tm.bis) { cr.gewendet = true; hooks.ton('greifen'); }
+      else { cr.verpasst = true; hooks.ton('klick'); hooks.toast(a < tm.von ? 'Zu früh gewendet - der Teig war noch flüssig.' : 'Zu spät gewendet - schon zu dunkel.', 'hinweis'); }
     }
     return;
   }
@@ -576,7 +582,14 @@ export function tippeZelle(i) {
  * aktuellen (Umrühren braucht drei). `extra` ist der gerade fällige Griff.
  */
 function neueGriffe(p) {
-  return { griffe: p.griffe || null, schritt: 0, tipps: 0, extra: p.griffe ? p.griffe[0] : null, extraFertig: false, brennT: 0 };
+  return { griffe: p.griffe || null, schritt: 0, tipps: 0, extra: p.griffe ? p.griffe[0] : null, extraFertig: false, brennT: 0,
+    ziehT: 0, flammeT: 0, verpasst: false };
+}
+/** Timing verpasst: kein Bonus mehr für dieses Glas, servieren geht trotzdem. */
+function griffVerpasst(h, text) {
+  h.extra = null; h.extraFertig = false; h.verpasst = true;
+  hooks.ton('klick');
+  hooks.toast(text, 'hinweis');
 }
 /** Nächster Handgriff dran - oder alle fertig. */
 function griffWeiter(h) {
@@ -591,6 +604,11 @@ export function tippeHand(i) {
   if (!h || h.art !== 'voll' || !h.extra || h.extraFertig || h.brennT > 0) return;
   if (h.rest > 0) { lauf.wackel.hand = 0.2; hooks.toast('Erst fertig einschenken lassen!', 'hinweis'); return; }
   if (h.extra === 'zucker') { h.brennT = C.ZUCKER_ZEIT; hooks.ton('brutzeln'); }
+  else if (h.extra === 'beutel') {   // im grünen Moment herausziehen
+    const tm = C.HANDGRIFF.beutel.timing, a = h.ziehT / tm.dauer;
+    if (a >= tm.von && a <= tm.bis) { hooks.ton('greifen'); griffWeiter(h); }
+    else griffVerpasst(h, 'Zu früh - der Tee ist noch zu schwach. Diesmal ohne Bonus.');
+  }
   else {
     h.tipps++;
     const fertig = h.tipps >= C.HANDGRIFF[h.extra].n;
@@ -829,7 +847,14 @@ export function update(dt) {
   // Zubereitung auf dem Tablett
   for (const h of lauf.hand) {
     if (h.rest > 0) { h.rest -= dt; if (h.rest <= 0) hooks.ton('fertig'); }
-    if (h.brennT > 0) { h.brennT -= dt; if (h.brennT <= 0) { h.brennT = 0; griffWeiter(h); hooks.ton('fertig'); } }
+    if (h.brennT > 0) { h.brennT -= dt; if (h.brennT <= 0) { h.brennT = 0; griffWeiter(h); h.flammeT = C.FEUER_FENSTER; hooks.ton('fertig'); } }
+    // Feuerzauber: nur solange er brennt, gibt es den Bonus
+    if (h.flammeT > 0) { h.flammeT -= dt; if (h.flammeT <= 0) { h.flammeT = 0; h.extraFertig = false; h.verpasst = true; hooks.toast('Der Zuckerhut ist ausgegangen - diesmal ohne Bonus.', 'hinweis'); } }
+    // Waldtee: der Beutel zieht; wer ihn nicht rechtzeitig herausnimmt, hat bitteren Tee
+    if (h.extra === 'beutel' && !(h.rest > 0)) {
+      h.ziehT += dt;
+      if (h.ziehT >= C.HANDGRIFF.beutel.timing.dauer) griffVerpasst(h, 'Zu lange gezogen - der Tee ist bitter geworden. Diesmal ohne Bonus.');
+    }
   }
   // Spül-Wichtel: stellt nach und nach saubere Gläser aufs Tablett
   if (hat('spuel') && lauf.hand.length < handMax()) {
@@ -860,7 +885,7 @@ export function update(dt) {
   if (cr.backT >= 0) {
     cr.backT += hat('crepe_w') ? wt : dt;
     if (cr.backT >= C.CREPE_ZEIT) { cr.backT = -1; cr.fertig = true; hooks.ton('fertig'); }
-  } else if (!cr.fertig && hat('crepe_w') && hat('crepe')) cr.backT = 0;
+  } else if (!cr.fertig && hat('crepe_w') && hat('crepe')) { cr.backT = 0; cr.gewendet = false; cr.verpasst = false; }
 
   // Servier-Wichtel
   const sv = stufe('servier');
