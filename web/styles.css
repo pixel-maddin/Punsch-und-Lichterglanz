@@ -537,3 +537,7 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   display: block; margin: 0 auto calc(var(--px) * 2);
   width: calc(var(--px) * 48); height: calc(var(--px) * 40); image-rendering: pixelated;
 }
+
+/* Hinweisblase offen = Pause: Bild blasser und dunkler, Blase und Kopfzeile bleiben klar */
+#cv { transition: filter 0.25s; }
+#huelle.pausiert #cv { filter: saturate(0.3) brightness(0.72); }

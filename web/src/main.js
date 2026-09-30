@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260930g';
-import * as S from './spiel.js?v=20260930g';
-import * as Z from './zeit.js?v=20260930g';
-import * as T from './ton.js?v=20260930g';
-import * as UI from './ui.js?v=20260930g';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260930g';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930g';
-import * as Lernen from './lernen.js?v=20260930g';
-import { zeigeAdvent } from './ereignis.js?v=20260930g';
-import * as A from './auftraege.js?v=20260930g';
-import * as E from './erfolge.js?v=20260930g';
-import * as ZL from './ziele.js?v=20260930g';
+import * as C from './config.js?v=20260930h';
+import * as S from './spiel.js?v=20260930h';
+import * as Z from './zeit.js?v=20260930h';
+import * as T from './ton.js?v=20260930h';
+import * as UI from './ui.js?v=20260930h';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20260930h';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930h';
+import * as Lernen from './lernen.js?v=20260930h';
+import { zeigeAdvent } from './ereignis.js?v=20260930h';
+import * as A from './auftraege.js?v=20260930h';
+import * as E from './erfolge.js?v=20260930h';
+import * as ZL from './ziele.js?v=20260930h';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -157,18 +157,24 @@ function ankommen(erstesMal) {
 // Bildschleife
 // ---------------------------------------------------------------------------
 let letzte = performance.now();
+const huelleEl = document.getElementById('huelle');
 let tSek = 0;
 function frame(jetzt) {
-  const dt = Math.min(0.1, (jetzt - letzte) / 1000);
+  let dt = Math.min(0.1, (jetzt - letzte) / 1000);
   letzte = jetzt;
-  tSek += dt;
-  // Während Laden, Kalender oder ein Fenster offen ist, steht der Stand still -
-  // sonst liefen einem beim Stöbern die Gäste davon.
+  // Während Laden, Kalender, ein Fenster oder eine Hinweisblase offen ist, steht
+  // der Stand still - sonst liefen einem beim Stöbern die Gäste davon.
   const steht = UI.fensterOffen() || !!UI.panelOffen() || querFormat.matches || Lernen.pausiert();
+  // Pause heißt ALLES steht, auch Schnee, Funken und Gehbewegungen: Die hängen
+  // an der Zeichen-Uhr tSek, die lief vorher weiter (gemeldet 30.09.)
+  if (steht) dt = 0;
+  tSek += dt;
+  // Hinter einer Hinweisblase wird das Bild blasser - man sieht, dass Pause ist
+  huelleEl.classList.toggle('pausiert', Lernen.pausiert());
   // Dev-Tempo in Einzelschritten, damit nichts übersprungen wird
   if (!steht) for (let i = 0; i < S.dev.tempo; i++) S.update(dt);
   // Pause-Zeichen steht an der Stelle der Herzen (sonst lag es darüber)
-  const zeigePause = steht && S.st.intro && !Lernen.pausiert();
+  const zeigePause = steht && S.st.intro;
   pauseZeichen.classList.toggle('versteckt', !zeigePause);
   stimmungFeld.classList.toggle('versteckt', zeigePause);
   // Die nächste Runde ist schon bestellt, bevor gezeichnet wird: Ein Fehler
