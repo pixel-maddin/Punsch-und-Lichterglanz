@@ -4,7 +4,7 @@
  * mit „Cache zuerst" sähe man nach einer Änderung tagelang die alte
  * Fassung. Offline kommt trotzdem alles aus dem Cache.
  */
-const VERSION = 'adventshaus-20261001c';   // bei jedem Update erhöhen (wie ?v= in index.html)
+const VERSION = 'adventshaus-20261001d';   // bei jedem Update erhöhen (wie ?v= in index.html)
 const SCHALE = ['./', './index.html', './styles.css', './manifest.webmanifest', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {

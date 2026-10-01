@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261001c';
-import * as S from './spiel.js?v=20261001c';
-import * as Z from './zeit.js?v=20261001c';
-import * as T from './ton.js?v=20261001c';
-import * as UI from './ui.js?v=20261001c';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261001c';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261001c';
-import * as Lernen from './lernen.js?v=20261001c';
-import { zeigeAdvent } from './ereignis.js?v=20261001c';
-import * as A from './auftraege.js?v=20261001c';
-import * as E from './erfolge.js?v=20261001c';
-import * as ZL from './ziele.js?v=20261001c';
+import * as C from './config.js?v=20261001d';
+import * as S from './spiel.js?v=20261001d';
+import * as Z from './zeit.js?v=20261001d';
+import * as T from './ton.js?v=20261001d';
+import * as UI from './ui.js?v=20261001d';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261001d';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261001d';
+import * as Lernen from './lernen.js?v=20261001d';
+import { zeigeAdvent } from './ereignis.js?v=20261001d';
+import * as A from './auftraege.js?v=20261001d';
+import * as E from './erfolge.js?v=20261001d';
+import * as ZL from './ziele.js?v=20261001d';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -33,11 +33,20 @@ let H = 320, G = 166;
 const BILD_ABSTAND = 1000 / 30;   // ms zwischen zwei gezeichneten Bildern
 let letzteZeichnung = 0, zeichenDt = 0, standGezeichnet = false, bildVeraltet = true;
 
+let gemessenB = 0, gemessenH = 0;
 function groesse() {
   const vw = buehne.clientWidth, vh = buehne.clientHeight;
   // Unsichtbares Fenster (0 x 0): NICHT neu messen. Sonst wird die Höhe NaN,
   // das Canvas 0 hoch, drawImage wirft - und die Bildschleife stand still.
   if (!vw || !vh) return;
+  // Bildschirmtastatur: Firefox auf Android macht den sichtbaren Bereich dann
+  // kleiner, und das Spiel schrumpfte auf winzig, um über die Tastatur zu
+  // passen (gemeldet 01.10.). Solange in ein Textfeld getippt wird und nur die
+  // Höhe kleiner wird, bleibt die Größe stehen; nach dem Tippen wird neu gemessen.
+  const el = document.activeElement;
+  const tippt = el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+  if (tippt && vw === gemessenB && vh < gemessenH) return;
+  gemessenB = vw; gemessenH = vh;
   let skala = vw / C.B;
   H = Math.floor(vh / skala);
   if (H < C.H_MIN) { skala = vh / C.H_MIN; H = C.H_MIN; }
@@ -53,6 +62,8 @@ function groesse() {
   c.imageSmoothingEnabled = false;
 }
 window.addEventListener('resize', groesse);
+// Tastatur zu: einmal neu messen (sie verschwindet mit kurzer Animation)
+document.addEventListener('focusout', () => setTimeout(groesse, 350));
 // Auch wenn das Fenster erst später sichtbar wird (Vorschau, App-Wechsel)
 if (window.ResizeObserver) new ResizeObserver(() => groesse()).observe(buehne);
 groesse();
@@ -291,7 +302,9 @@ function demo(art) {
   st.name = 'Haus Schneeflocke'; st.standName = 'LICHTERGLANZ';
   st.adventGesehen = 4; st.ersterSchnee = true; st.kiste = 0;
   st.tipps = {}; st.ziel = 99;
-  if (art === 'start') {
+  if (art === 'kamin') {   // nur der Kaminofen, damit man die Fenster beurteilen kann
+    st.lernen = 99; st.ziel = 99; st.besitz.kamin = 1; st.besitz.kinderpunsch = 1; st.geld = 500; st.gesamt = 2000;
+  } else if (art === 'start') {
     // Ganz am Anfang: Startziel oben, das Haus noch kahl
     st.lernen = 99; st.ziel = 1; st.besitz.kinderpunsch = 1; st.geld = 60; st.gesamt = 260;
     for (let i = 0; i < 8; i++) st.tipps['x' + i] = true;

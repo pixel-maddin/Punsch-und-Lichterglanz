@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText } from './pixel.js?v=20261001c';
-import * as Z from './zeit.js?v=20261001c';
-import * as S from './spiel.js?v=20261001c';
-import { FASSADEN } from './config.js?v=20261001c';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText } from './pixel.js?v=20261001d';
+import * as Z from './zeit.js?v=20261001d';
+import * as S from './spiel.js?v=20261001d';
+import { FASSADEN } from './config.js?v=20261001d';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -485,18 +485,41 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
     for (let yy = y + 1; yy < y + fh; yy += 3) { r(c, x - 4, yy, 2, 1, ton(F.laden, -0.25)); r(c, x + fw + 2, yy, 2, 1, ton(F.laden, -0.25)); }
   }
   if (warm && wo !== 'gaube') {
-    // Warmes Licht von drinnen
-    r(c, x, y, fw, fh, '#e89a3a');
-    r(c, x + 2, y + 2, fw - 4, fh - 4, '#f4b858');
-    r(c, x, y, 3, fh, '#b83a2e'); r(c, x + fw - 3, y, 3, fh, '#b83a2e'); // Vorhänge
+    // Kaminofen: Man sieht ins Zimmer. Links der Kamin selbst (unteres linkes
+    // Feld), rechts nur sein Widerschein und ein Weihnachtsbaum im Anschnitt.
+    // Vorher war das ganze Fenster grell orange (gemeldet 01.10.: zu hell).
+    const fl = Math.sin(t * 7) * 0.5 + Math.sin(t * 11.3) * 0.5;   // Flackern -1..1
     if (wo === 'links') {
-      // Kamin im Zimmer
-      const kx = x + fw / 2 - 4, ky = y + fh - 6;
-      r(c, kx, ky, 8, 6, '#6a4a3a'); r(c, kx + 2, ky + 2, 4, 4, '#2a1a14');
-      const fl = Math.floor(t * 9) % 3;
-      p(c, kx + 3, ky + 3 - (fl === 0 ? 1 : 0), '#ffd040'); p(c, kx + 4, ky + 3 - (fl === 1 ? 1 : 0), '#ff8a20'); r(c, kx + 2, ky + 4, 4, 1, '#ff6a10');
+      r(c, x, y, fw, fh, '#6e3a26');                     // Wand, warm angestrahlt
+      r(c, x, y, fw, 4, '#5a2e20');                      // oben dunkler
+      r(c, x, y + fh - 2, fw, 2, '#3e2018');             // Boden
+      // Kamin im unteren linken Feld: Steinrand, Öffnung, Feuer
+      const kx = x + 1, ky = y + 9;
+      r(c, kx, ky, 7, 7, '#8a7a6a'); r(c, kx, ky, 7, 1, '#a89888');
+      r(c, kx + 1, ky + 2, 5, 5, '#1e100a');
+      const h = Math.floor(t * 9) % 3;
+      r(c, kx + 2, ky + 5, 3, 1, '#c84a14');                                  // Glut
+      p(c, kx + 2, ky + 4, '#ff8a20'); p(c, kx + 4, ky + 4, '#ff8a20');
+      p(c, kx + 3, ky + 4 - (h === 0 ? 1 : 0), '#ffb040'); p(c, kx + 3, ky + 3, h === 2 ? '#ff8a20' : '#ffb040');
+      // Widerschein auf der Wand daneben
+      r(c, x + 8, y + 9, fw - 8, fh - 11, '#7e4428');
+      L.push({ rect: [kx + 2, ky + 3, 3, 3], f: '#ff8a30', halo: 9, an: 0.8 + 0.15 * fl });
+      L.push({ rect: [x, y, fw, fh], f: '#ff9a40', halo: 7, an: 0.22 + 0.05 * fl });
+    } else {
+      r(c, x, y, fw, fh, '#4e2a20');                     // weiter weg vom Kamin: dunkler
+      r(c, x, y + fh - 2, fw, 2, '#321810');
+      // Kleiner Weihnachtsbaum im unteren rechten Feld, rechts angeschnitten
+      const bx = x + fw - 3;
+      for (let k = 0; k < 7; k++) { const b = 1 + Math.floor(k / 2); r(c, bx - b, y + 8 + k, Math.min(b * 2 + 1, x + fw - (bx - b)), 1, k % 2 ? '#1f5a2e' : '#2a7038'); }   // am Fensterrand abgeschnitten
+      r(c, bx, y + 15, 1, 1, '#5a3a22');
+      p(c, bx, y + 7, '#ffd84a');                         // Spitze
+      for (const [dx, dy, f] of [[-1, 10, '#ffd060'], [1, 12, '#ff6a5a'], [-2, 13, '#ffd060']]) {
+        p(c, bx + dx, y + dy, f);
+        L.push({ x: bx + dx, y: y + dy, f, halo: 2, an: 0.7 });
+      }
+      L.push({ rect: [x, y, fw, fh], f: '#ff9a40', halo: 6, an: 0.14 + 0.03 * fl });
     }
-    L.push({ rect: [x, y, fw, fh], f: '#ffc060', halo: 16, an: 0.9 + 0.1 * Math.sin(t * 7) });
+    r(c, x, y, 2, fh, '#9a3028'); r(c, x + fw - 2, y, 2, fh, '#9a3028');   // Vorhänge
   } else {
     r(c, x, y, fw, fh, '#39404e');
     p(c, x + 2, y + 2, '#5a6478'); p(c, x + 3, y + 3, '#5a6478');
