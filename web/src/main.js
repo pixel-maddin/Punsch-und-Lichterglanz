@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20260930k';
-import * as S from './spiel.js?v=20260930k';
-import * as Z from './zeit.js?v=20260930k';
-import * as T from './ton.js?v=20260930k';
-import * as UI from './ui.js?v=20260930k';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20260930k';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20260930k';
-import * as Lernen from './lernen.js?v=20260930k';
-import { zeigeAdvent } from './ereignis.js?v=20260930k';
-import * as A from './auftraege.js?v=20260930k';
-import * as E from './erfolge.js?v=20260930k';
-import * as ZL from './ziele.js?v=20260930k';
+import * as C from './config.js?v=20261001c';
+import * as S from './spiel.js?v=20261001c';
+import * as Z from './zeit.js?v=20261001c';
+import * as T from './ton.js?v=20261001c';
+import * as UI from './ui.js?v=20261001c';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261001c';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261001c';
+import * as Lernen from './lernen.js?v=20261001c';
+import { zeigeAdvent } from './ereignis.js?v=20261001c';
+import * as A from './auftraege.js?v=20261001c';
+import * as E from './erfolge.js?v=20261001c';
+import * as ZL from './ziele.js?v=20261001c';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -195,6 +195,9 @@ function frame(jetzt) {
   // wenn man etwas antippt (bildVeraltet).
   zeichenDt += dt;
   if (!steht) standGezeichnet = false;
+  // Nach einem Kauf blendet der Laden kurz aus, und am Haus funkelt es - das
+  // muss gezeichnet werden, obwohl der Laden noch „offen" ist (gemeldet 01.10.)
+  if (UI.zeigtKauf()) bildVeraltet = true;
   const faellig = jetzt - letzteZeichnung >= BILD_ABSTAND - 2;
   if (faellig && !(steht && standGezeichnet && !bildVeraltet)) {
     try {
@@ -263,7 +266,7 @@ else if (!S.st.intro) {
     S.st.saison = Z.saison();
     S.speichere();
     UI.zeigeZiel(modus, () => {
-      S.st.intro = true; S.st.lernen = 0; S.speichere();
+      S.st.intro = true; S.st.lernen = 0; S.setzeStartTag(); S.speichere();
       setTimeout(() => ankommen(true), 100);
     });
   }));
@@ -280,7 +283,9 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 // Blasen, Fenster und Einblendungen; die Szene wählt der Wert.
 // ---------------------------------------------------------------------------
 function demo(art) {
+  S.allesLoeschen();   // immer frisch - im Vorführ-Speicher können Reste von Messläufen liegen
   const st = S.st;
+  st.zuletzt = Date.now(); st.startTag = null;
   S.hooks.toast = () => {};
   st.intro = true;
   st.name = 'Haus Schneeflocke'; st.standName = 'LICHTERGLANZ';

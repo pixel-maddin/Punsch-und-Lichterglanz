@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20260930k';
-import * as C from './config.js?v=20260930k';
-import * as S from './spiel.js?v=20260930k';
-import * as Z from './zeit.js?v=20260930k';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20261001c';
+import * as C from './config.js?v=20261001c';
+import * as S from './spiel.js?v=20261001c';
+import * as Z from './zeit.js?v=20261001c';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -217,6 +217,14 @@ function gaestezone(c, y0, t, w) {
   balken(c, y0);
   // Wunschbläschen zuletzt: Sie dürfen von nichts verdeckt werden
   for (const [g, x, y, anteil] of blasen) blase(c, g, x, y, t, anteil);
+  // Servier-Wichtel: über dem Gast, der als Nächstes dran ist, ein kleiner
+  // Wichtel mit grünem Balken - so lange braucht er noch (gemeldet 01.10.)
+  const sv = S.servierVorschau();
+  if (sv) for (const [g, x, y] of blasen) {
+    if (g.id !== sv.id || g.bedient) continue;
+    wichtelKlein(c, x - 3, y + 2, t);
+    r(c, x + 1, y - 4, 14, 2, '#2a1a10'); r(c, x + 1, y - 4, Math.max(1, Math.round(14 * sv.anteil)), 2, '#6ad06a');
+  }
   if (S.zeigt('musik')) {
     const n2 = (t * 0.7) % 1;
     const nx = 170 - n2 * 12, ny = y0 + 44 - n2 * 30;

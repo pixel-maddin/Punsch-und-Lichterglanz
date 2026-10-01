@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20260930k';
-import * as Z from './zeit.js?v=20260930k';
-import { neueFarben } from './pixel.js?v=20260930k';
+import * as C from './config.js?v=20261001c';
+import * as Z from './zeit.js?v=20261001c';
+import { neueFarben } from './pixel.js?v=20261001c';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -27,6 +27,9 @@ const START_X = -12, ENDE_X = 196;
 // ---------------------------------------------------------------------------
 // Gespeicherter Zustand
 // ---------------------------------------------------------------------------
+function heuteMitternacht() { const d = new Date(Z.jetzt()); d.setHours(0, 0, 0, 0); return d.getTime(); }
+/** Beim Losspielen (nach der Begrüßung, nach dem Kalenderversatz) den ersten Spieltag merken. */
+export function setzeStartTag() { st.startTag = heuteMitternacht(); }
 function neuerStand(name = '', andenken = 0) {
   return {
     v: 1, saison: Z.saison(), name, geld: 0, gesamt: 0,
@@ -38,8 +41,9 @@ function neuerStand(name = '', andenken = 0) {
     stats: { bedient: 0, verpasst: 0, spezial: 0 },
     ersterSchnee: false, intro: false, lernen: 0, tipps: {},
     gemeldet: null, neu: {},
-    modus: 'echt', versatzTage: 0,
-    sterne10: true,                  // Beträge in ganzen Sternen (seit 29.09. alles ×10)   // 'echt' = echter Kalender, 'eigen' = Start eine Woche vor dem 1.12.   // Freischaltungen: schon angesagt / noch nicht angesehen
+    modus: 'echt', versatzTage: 0,   // 'echt' = echter Kalender, 'eigen' = Start eine Woche vor dem 1.12.
+    sterne10: true,                  // Beträge in ganzen Sternen (seit 29.09. alles ×10)
+    startTag: 0,                     // erster Spieltag (setzeStartTag beim Losspielen); 0 = noch nicht, fehlt = alter Stand
   };
 }
 
@@ -96,6 +100,7 @@ export function pruefeSaison() {
     const tipps = st.tipps;
     st = neuerStand(st.name, st.andenken + (hatteFortschritt ? 1 : 0));
     st.intro = true; st.lernen = 99; st.tipps = tipps || {};   // kennt das Spiel schon
+    setzeStartTag();
     resetLauf();
     speichere();
     return true;
@@ -199,7 +204,20 @@ export const chefAktiv = () => lauf.chefT < C.CHEF_ZEIT;
 /** Wie schnell die Wichtel gerade arbeiten. */
 // Du bist da: schneller. Fünf Minuten nichts getippt: nur noch ein Fünftel -
 // genauso wie bei geschlossener App (offlineAbrechnen).
-export const wichtelTempo = () => chefAktiv() ? C.CHEF_TEMPO : lauf.chefT >= C.INAKTIV_AB ? C.OFFLINE_ANTEIL : 1;
+/**
+ * Wie fleißig und wie lange arbeiten die Wichtel ohne dich? Wächst mit den
+ * Spieltagen (`st.startTag` = Datum des ersten Spieltags; alte Spielstände
+ * ohne ihn bekommen gleich die volle Leistung).
+ */
+export function spieltag() {
+  if (st.startTag == null) return 99;   // alter Spielstand: volle Leistung
+  if (!st.startTag) return 0;
+  return Math.max(0, Math.floor((Z.jetzt() - st.startTag) / 86400000));
+}
+const nachTag = (liste) => liste[Math.min(liste.length - 1, spieltag())];
+export const offlineAnteil = () => nachTag(C.OFFLINE_JE_TAG.anteil);
+export const offlineStunden = () => nachTag(C.OFFLINE_JE_TAG.stunden);
+export const wichtelTempo = () => chefAktiv() ? C.CHEF_TEMPO : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() : 1;
 export const hatWichtel = () => ['spuel', 'servier', 'nachfuell', 'crepe_w'].some((id) => hat(id));
 
 /**
@@ -660,6 +678,24 @@ export function tippeGast(platz) {
 }
 
 /**
+ * Wen bedient der Servier-Wichtel als Nächstes? Den ungeduldigsten Gast am
+ * Tresen - aber keine besonderen Gäste und Großbestellungen (Sache des
+ * Chefs) und keinen, für den schon ein Glas auf dem Tablett steht.
+ */
+function servierKandidat() {
+  return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
+    && !lauf.hand.some((h) => h.fuer === x.id))
+    .sort((a, b) => a.geduld - b.geduld)[0] || null;
+}
+/** Für die Anzeige (tresen.js): welcher Gast ist dran, und wie weit ist der Wichtel? */
+export function servierVorschau() {
+  const sv = stufe('servier');
+  if (!sv) return null;
+  const g = servierKandidat();
+  return g ? { id: g.id, anteil: Math.min(1, lauf.servierT / C.SERVIER_TAKT[sv]) } : null;
+}
+
+/**
  * Wichtel-Bestellung (seit 30.09., sobald der Servier-Wichtel da ist): Ein Tipp
  * auf den Gast heißt „Wichtel, schenk ihm ein". Ein Glas mit seinem Wunsch
  * kommt aufs Tablett und füllt sich sichtbar (kleiner Wichtel daneben, etwas
@@ -940,11 +976,7 @@ export function update(dt) {
     }
     lauf.servierT += wt;
     if (lauf.servierT >= C.SERVIER_TAKT[sv]) {
-      // Besondere Gäste und Großbestellungen sind Sache des Chefs
-      // … und wer schon ein Glas auf dem Tablett hat, wartet darauf
-      const g = G.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
-        && !lauf.hand.some((h) => h.fuer === x.id))
-        .sort((a, b) => a.geduld - b.geduld)[0];
+      const g = servierKandidat();
       if (g) {
         if (!(chefAktiv() && wichtelGlas(g))) {
           const p = C.PRODUKT[g.wunsch];
@@ -1032,13 +1064,13 @@ export function wichtelProSekunde() {
 export function offlineAbrechnen() {
   const weg = (Date.now() - st.zuletzt) / 1000;
   if (weg < C.OFFLINE_AB) return null;
-  const sek = Math.min(weg, C.OFFLINE_MAX_H * 3600);
+  const sek = Math.min(weg, offlineStunden() * 3600);
   const sv = stufe('servier');
   if (!sv) return { sek, betrag: 0, portionen: 0 };
   const rate = Math.min(1 / C.SERVIER_TAKT[sv], 1 / gastTakt());
   // Die ersten INAKTIV_AB Sekunden arbeiten sie voll, danach nur noch ein Fünftel
   const voll = Math.min(sek, C.INAKTIV_AB);
-  let n = (voll + (sek - voll) * C.OFFLINE_ANTEIL) * rate;
+  let n = (voll + (sek - voll) * offlineAnteil()) * rate;
   // Ohne Nachfüll-Wichtel ist nach den vollen Töpfen Schluss
   if (!stufe('nachfuell')) {
     const vorrat = produkteFrei().filter((p) => p.art !== 'platte').reduce((a, p) => a + (st.toepfe[p.id] || 0), 0);

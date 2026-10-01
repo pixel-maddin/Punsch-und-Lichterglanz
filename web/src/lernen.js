@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20260930k';
-import * as S from './spiel.js?v=20260930k';
-import * as A from './auftraege.js?v=20260930k';
-import * as E from './erfolge.js?v=20260930k';
-import * as Z from './ziele.js?v=20260930k';
+import * as C from './config.js?v=20261001c';
+import * as S from './spiel.js?v=20261001c';
+import * as A from './auftraege.js?v=20261001c';
+import * as E from './erfolge.js?v=20261001c';
+import * as Z from './ziele.js?v=20261001c';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -172,7 +172,7 @@ const HINWEISE = [
     ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
-    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher (bis zu ${C.OFFLINE_MAX_H} Stunden). Solange du selbst mit anpackst, sind sie schneller.`,
+    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher. Mit jedem Spieltag werden sie ausdauernder (gerade bis zu ${S.offlineStunden()} Stunden). Solange du selbst mit anpackst, sind sie schneller.`,
     ziel: null, dauer: 12 },
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)

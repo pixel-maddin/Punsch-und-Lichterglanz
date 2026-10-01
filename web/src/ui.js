@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20260930k';
-import * as S from './spiel.js?v=20260930k';
-import * as Z from './zeit.js?v=20260930k';
-import * as T from './ton.js?v=20260930k';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20260930k';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20260930k';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20260930k';
-import * as A from './auftraege.js?v=20260930k';
-import * as E from './erfolge.js?v=20260930k';
-import * as ZL from './ziele.js?v=20260930k';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20260930k';
-import { alleSymbole } from './symbole.js?v=20260930k';
+import * as C from './config.js?v=20261001c';
+import * as S from './spiel.js?v=20261001c';
+import * as Z from './zeit.js?v=20261001c';
+import * as T from './ton.js?v=20261001c';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261001c';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261001c';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261001c';
+import * as A from './auftraege.js?v=20261001c';
+import * as E from './erfolge.js?v=20261001c';
+import * as ZL from './ziele.js?v=20261001c';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261001c';
+import { alleSymbole } from './symbole.js?v=20261001c';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -417,6 +417,8 @@ export function aktualisiereLaden() {
  * verdeckt genau das, was man gerade gekauft hat.
  */
 let kaufZeigenT = null;
+/** Blendet der Laden gerade kurz aus, um einen Kauf am Haus zu zeigen? (main.js zeichnet dann weiter) */
+export const zeigtKauf = () => $('#blatt').classList.contains('kurz-weg');
 function zeigeKauf(id) {
   const ort = ortVon(id);
   if (!ort) return;
@@ -621,7 +623,7 @@ export function zeigeKiste(sek, weiter) {
   const box = fenster('Während du weg warst …',
     `<canvas class="kiste" width="24" height="20"></canvas>
      <p>${dauer ? `In ${dauer} haben deine Wichtel` : 'Deine Wichtel haben'} <b>${gaeste}</b> Gäste bedient und alles in diese Kiste gelegt.</p>
-     ${sek >= C.OFFLINE_MAX_H * 3600 ? `<p class="klein">Länger als ${C.OFFLINE_MAX_H} Stunden arbeiten sie nicht allein.</p>` : ''}`,
+     ${sek >= S.offlineStunden() * 3600 ? `<p class="klein">Länger als ${S.offlineStunden()} Stunden arbeiten sie noch nicht allein - mit jedem Spieltag werden sie ausdauernder.</p>` : ''}`,
     [{ text: 'Kiste öffnen', aktion: (b) => {
       const betrag = S.oeffneKiste();
       T.spiele('spezialKasse');

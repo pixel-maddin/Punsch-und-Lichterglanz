@@ -48,7 +48,7 @@ export const PRODUKTE = [
   { id: 'jaegertee',    name: 'Waldtee',          preis: 24, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false, griffe: ['beutel'], bonus: 0.40 },
   { id: 'crepe',        name: 'Crêpe',            preis: 28, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false, griffe: ['wenden'], bonus: 0.40 },
   { id: 'weisser',      name: 'Zimtwolke',        preis: 32, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: false, griffe: ['schaum', 'zimt'], bonus: 0.45 },
-  { id: 'feuerzange',   name: 'Feuerzauber',      preis: 40, zeit: 2.4, kosten: 220000, art: 'topf',   farbe: '#a01818', alk: false, griffe: ['zucker'], bonus: 0.50 },
+  { id: 'feuerzange',   name: 'Feuerzauber',      preis: 40, zeit: 2.4, kosten: 165000, art: 'topf',   farbe: '#a01818', alk: false, griffe: ['zucker'], bonus: 0.50 },
 ];
 // griffe: die Handgriffe, die nur DU machst - nach dem Einschenken das Glas
 // auf dem Tablett antippen, in dieser Reihenfolge (je `n`-mal). Fertig zahlt
@@ -141,7 +141,16 @@ export const STOSS_GRUPPEN = ['Der Kirchenchor', 'Die Nachbarschaft', 'Der Kegel
 
 // Während die App zu ist, arbeiten nur die Wichtel - und nicht so gut wie du.
 export const OFFLINE_MAX_H = 8;
-export const OFFLINE_ANTEIL = 0.4;   // nach INAKTIV_AB: die Wichtel schaffen noch 40 % (bis 29.09.: 20 %)
+export const OFFLINE_ANTEIL = 0.4;   // nach INAKTIV_AB: die Wichtel schaffen noch 40 % (bis 29.09.: 20 %) - gilt erst ab Servier-Stufe 6
+// Seit 01.10. wächst beides mit den SPIELTAGEN (gemeldet: in den ersten Tagen
+// kam nach einer Nacht eine überwältigende Kiste). Index = Spieltag ab 0 (der
+// erste Tag), danach gilt der letzte Wert. Erst an die Servier-Stufe
+// gekoppelt - dann blieb die Kiste ewig klein, weil Stufe 2 15.000 kostet
+// und man vorher Deko kauft (gemessen: 12 Dinge fehlten am 24.12.).
+export const OFFLINE_JE_TAG = {
+  anteil:  [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, OFFLINE_ANTEIL],
+  stunden: [2, 3, 4, 5, 6, 7, OFFLINE_MAX_H],
+};
 export const INAKTIV_AB = 300;       // s ohne dich - bis dahin arbeiten sie voll weiter
 export const OFFLINE_AB = 15;        // s weg, ab denen die Wichtel abrechnen
 export const OFFLINE_FENSTER = 300;  // kürzer weg: nur eine Einblendung statt Fenster
@@ -184,7 +193,9 @@ export const FASSADEN = {
 //             braucht man es nicht (luxusAb: erst ab dieser Stufe). Seit 29.09.,
 //             damit das Ziel bis Heiligabend auch mit 10-15 min am Tag hält.
 //   Preise ab 20.000 je Stufe sind seit 29.09. verdoppelt, Luxus vervierfacht
-//   (gemessen mit Offline 40 %, siehe CLAUDE.md „Casual-Umbau").
+//   (gemessen mit Offline 40 %, siehe CLAUDE.md „Casual-Umbau"). Seit 01.10.
+//   Normales ab 200.000 wieder ×0,75 - die Offline-Leistung wächst jetzt erst
+//   mit den Spieltagen, sonst fehlten am 24.12. die teuersten Stücke.
 // ---------------------------------------------------------------------------
 export const TABS = [
   { id: 'super',    name: 'Supermarkt' },
@@ -197,42 +208,42 @@ export const ARTIKEL = [
   // --- Weihnachtsmarkt: Haus ---
   { id: 'kranz',          tab: 'markt', gruppe: 'Am Haus', name: 'Türkranz',             kosten: 100,    stimmung: 3,  text: 'Tannenkranz mit roter Schleife.' },
   { id: 'tuerbogenkranz', tab: 'markt', gruppe: 'Am Haus', name: 'Winterkranz über der Tür', kosten: [8000, 100000], stimmung: 6, text: 'Großer runder Kranz mit Beeren und Schleife über der Haustür. Stufe 2: Lichter dazu.' },
-  { id: 'lichter_dach',   tab: 'markt', gruppe: 'Am Haus', name: 'Lichterkette am Dach', kosten: [400, 120000, 560000],    stimmung: 6,  text: 'Hängt an der Dachrinne. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
+  { id: 'lichter_dach',   tab: 'markt', gruppe: 'Am Haus', name: 'Lichterkette am Dach', kosten: [400, 120000, 420000],    stimmung: 6,  text: 'Hängt an der Dachrinne. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
   { id: 'fensterstern',   tab: 'markt', gruppe: 'Am Haus', name: 'Stern im Giebel',      kosten: 1700,   stimmung: 5,  text: 'Ein Zackenstern fürs Dachfenster.' },
   { id: 'schwibbogen',    tab: 'markt', gruppe: 'Am Haus', name: 'Schwibbogen',          kosten: 3300,   stimmung: 6,  text: 'Kerzenbogen fürs linke Fenster.' },
   { id: 'nussknacker',    tab: 'markt', gruppe: 'Am Haus', name: 'Nussknacker',          kosten: 5000,   stimmung: 6,  text: 'Hält Wache neben der Tür.' },
-  { id: 'lichter_fenster',tab: 'markt', gruppe: 'Am Haus', name: 'Fensterlichter',       kosten: [5600, 180000, 740000],   stimmung: 7,  text: 'Lichter rund um beide Fenster. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
+  { id: 'lichter_fenster',tab: 'markt', gruppe: 'Am Haus', name: 'Fensterlichter',       kosten: [5600, 180000, 555000],   stimmung: 7,  text: 'Lichter rund um beide Fenster. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
   { id: 'zaun_girlande',  tab: 'markt', gruppe: 'Am Haus', name: 'Tannengirlande am Zaun', kosten: 7000, stimmung: 5, text: 'Tannenzweige mit roten Schleifen, den ganzen Zaun entlang.', braucht: 'zaun' },
-  { id: 'lichter_zaun',   tab: 'markt', gruppe: 'Am Haus', name: 'Lichter am Zaun',      kosten: [18000, 240000, 920000],   stimmung: 7,  text: 'Eine Kette in die Girlande am Zaun. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.', braucht: 'zaun_girlande' },
+  { id: 'lichter_zaun',   tab: 'markt', gruppe: 'Am Haus', name: 'Lichter am Zaun',      kosten: [18000, 180000, 690000],   stimmung: 7,  text: 'Eine Kette in die Girlande am Zaun. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.', braucht: 'zaun_girlande' },
   { id: 'schornstein',    tab: 'markt', gruppe: 'Am Haus', name: 'Schornstein-Schmuck',  kosten: [50000, 180000], stimmung: 6, text: 'Stufe 1: Tannengrün mit Schleife um den Schornstein. Stufe 2: Lichter dazu.' },
   { id: 'eiszapfen',      tab: 'markt', gruppe: 'Am Haus', name: 'Eiszapfen-Lichter',    kosten: 86000,  stimmung: 10, text: 'Funkeln wie echte Eiszapfen.' },
-  { id: 'dach_nikolaus',  tab: 'markt', gruppe: 'Am Haus', name: 'Nikolaus auf dem Dach',kosten: 1000000, stimmung: 26, text: 'Er winkt vom Schornstein.' },
+  { id: 'dach_nikolaus',  tab: 'markt', gruppe: 'Am Haus', name: 'Nikolaus auf dem Dach',kosten: 750000, stimmung: 26, text: 'Er winkt vom Schornstein.' },
   { id: 'lichtershow',    tab: 'markt', gruppe: 'Am Haus', name: 'Große Lichtershow',    kosten: 2400000, stimmung: 40, luxus: true, text: 'Schneeflocken tanzen über die Fassade.' },
   // Das Teuerste im Spiel: das ganze Dach in warmweißen Lichtern - wie bei „Schöne Bescherung"
   { id: 'festbeleuchtung', tab: 'markt', gruppe: 'Am Haus', name: 'Festbeleuchtung',    kosten: 3200000, stimmung: 45, luxus: true, text: 'Das GANZE Dach voller warmweißer Lichter, dicht an dicht. Man sieht es bis ins Nachbardorf.', braucht: 'lichter_dach' },
   // --- Weihnachtsmarkt: Garten ---
   { id: 'tanne',          tab: 'markt', gruppe: 'Im Garten', name: 'Weihnachtstanne',   kosten: 2700,   stimmung: 8,  text: 'Eine echte Nordmanntanne im Vorgarten.' },
-  { id: 'tanne_lichter',  tab: 'markt', gruppe: 'Im Garten', name: 'Lichter für die Tanne', kosten: [15000, 220000, 880000], stimmung: 8, text: 'Eine Kette rund um den Baum. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.', braucht: 'tanne' },
+  { id: 'tanne_lichter',  tab: 'markt', gruppe: 'Im Garten', name: 'Lichter für die Tanne', kosten: [15000, 165000, 660000], stimmung: 8, text: 'Eine Kette rund um den Baum. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.', braucht: 'tanne' },
   { id: 'tanne_kugeln',   tab: 'markt', gruppe: 'Im Garten', name: 'Christbaumkugeln',  kosten: 70000,  stimmung: 10, text: 'Rot und Gold.', braucht: 'tanne' },
   { id: 'tanne_stern',    tab: 'markt', gruppe: 'Im Garten', name: 'Stern auf der Spitze', kosten: 160000, stimmung: 14, text: 'Das Tüpfelchen auf dem Baum.', braucht: 'tanne' },
-  { id: 'baum_girlande',  tab: 'markt', gruppe: 'Im Garten', name: 'Leuchtgirlande für den alten Baum', kosten: [4400, 160000, 680000], stimmung: 7, text: 'Grüne Girlande mit Lichtern um den kahlen Baum. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
+  { id: 'baum_girlande',  tab: 'markt', gruppe: 'Im Garten', name: 'Leuchtgirlande für den alten Baum', kosten: [4400, 160000, 510000], stimmung: 7, text: 'Grüne Girlande mit Lichtern um den kahlen Baum. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
   { id: 'schneemann',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneemann',        kosten: 2100,   stimmung: 6,  text: 'Mit Möhre und Hut.', schnee: true },
   { id: 'schneefrau',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneefrau',        kosten: 3900,   stimmung: 7,  text: 'Mit Schal und Schleife.', schnee: true },
   { id: 'schneekind',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneekind',        kosten: 48000,   stimmung: 8,  text: 'Die Familie ist komplett.', schnee: true },
   { id: 'rentier_licht',  tab: 'markt', gruppe: 'Im Garten', name: 'Lichter-Rentier',   kosten: 112000,  stimmung: 12, text: 'Ein Rentier aus Draht und Licht.' },
-  { id: 'schlitten',      tab: 'markt', gruppe: 'Im Garten', name: 'Schlitten mit Geschenken', kosten: 240000, stimmung: 16, text: 'Voll beladen, bereit für die Nacht.' },
-  { id: 'lichterbogen',   tab: 'markt', gruppe: 'Im Garten', name: 'Lichterbogen am Weg', kosten: 1100000, stimmung: 18, text: 'Ein leuchtendes Tor zur Haustür.' },
+  { id: 'schlitten',      tab: 'markt', gruppe: 'Im Garten', name: 'Schlitten mit Geschenken', kosten: 180000, stimmung: 16, text: 'Voll beladen, bereit für die Nacht.' },
+  { id: 'lichterbogen',   tab: 'markt', gruppe: 'Im Garten', name: 'Lichterbogen am Weg', kosten: 825000, stimmung: 18, text: 'Ein leuchtendes Tor zur Haustür.' },
   // --- Weihnachtsmarkt: Stand ---
   { id: 'girlande',       tab: 'markt', gruppe: 'Am Stand', name: 'Tannengirlande',  kosten: 200,   stimmung: 0, bonus: { preis: 0.05 },     text: 'Sieht nach Weihnachtsmarkt aus.' },
   { id: 'zuckerstangen',  tab: 'markt', gruppe: 'Am Stand', name: 'Große Zuckerstangen', kosten: 1700, stimmung: 0, bonus: { trinkgeld: 0.15 }, text: 'Zwei riesige Zuckerstangen im Vorgarten - Kinder lieben sie.' },
-  { id: 'standlicht',     tab: 'markt', gruppe: 'Am Stand', name: 'Standbeleuchtung', kosten: [3900, 140000, 600000],  stimmung: 0, bonus: { geduld: 0.2 },     text: 'Licht unter dem Dach. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
+  { id: 'standlicht',     tab: 'markt', gruppe: 'Am Stand', name: 'Standbeleuchtung', kosten: [3900, 140000, 450000],  stimmung: 0, bonus: { geduld: 0.2 },     text: 'Licht unter dem Dach. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
   { id: 'schild',         tab: 'markt', gruppe: 'Am Stand', name: 'Punsch-Schild',   kosten: 18000,  stimmung: 0, bonus: { gaeste: 0.15 },     text: 'Man sieht dich schon von Weitem.' },
   { id: 'musik',          tab: 'markt', gruppe: 'Am Stand', name: 'Musikbox',        kosten: 60000, stimmung: 0, bonus: { gaeste: 0.15 },     text: 'Weihnachtslieder am Stand.' },
   { id: 'heizpilz',       tab: 'markt', gruppe: 'Am Stand', name: 'Heizpilz',        kosten: 136000, stimmung: 0, bonus: { geduld: 0.3 },      text: 'Wer es warm hat, wartet gern.' },
-  { id: 'baenke',         tab: 'markt', gruppe: 'Am Stand', name: 'Bierbänke',       kosten: 300000, stimmung: 0, bonus: { preis: 0.10, gaeste: 0.10 }, text: 'Die Leute bleiben - und bestellen nach.' },
+  { id: 'baenke',         tab: 'markt', gruppe: 'Am Stand', name: 'Bierbänke',       kosten: 225000, stimmung: 0, bonus: { preis: 0.10, gaeste: 0.10 }, text: 'Die Leute bleiben - und bestellen nach.' },
 
   // --- Baumarkt: Stand ---
-  { id: 'stand',   tab: 'baumarkt', gruppe: 'Am Stand', name: 'Stand ausbauen',    kosten: [120000, 640000, 2400000], stimmung: 5, bonus: { preis: 0.06 }, bonusJeStufe: true, luxusAb: 3, text: 'Stufe 1: Holzdach · Stufe 2: Laternen und Tannengrün · Stufe 3: goldener Stern und Lichter.' },
+  { id: 'stand',   tab: 'baumarkt', gruppe: 'Am Stand', name: 'Stand ausbauen',    kosten: [120000, 480000, 2400000], stimmung: 5, bonus: { preis: 0.06 }, bonusJeStufe: true, luxusAb: 3, text: 'Stufe 1: Holzdach · Stufe 2: Laternen und Tannengrün · Stufe 3: goldener Stern und Lichter.' },
   { id: 'tresen',  tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tresen verlängern', kosten: [500, 48000],        stimmung: 0, text: 'Ein Gast mehr gleichzeitig am Tresen.' },
   { id: 'topf',    tab: 'baumarkt', gruppe: 'Am Stand', name: 'Größere Töpfe',     kosten: [180, 3900, 136000], stimmung: 0, text: 'Mehr Portionen, seltener nachfüllen.' },
   { id: 'tablett', tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tablett',           kosten: [2700, 112000],      stimmung: 0, text: 'Ein Ding mehr gleichzeitig in der Hand.' },
@@ -247,17 +258,17 @@ export const ARTIKEL = [
   // --- Baumarkt: Anstrich ---
   { id: 'farbe_weiss',     tab: 'baumarkt', gruppe: 'Anstrich', name: 'Winterweiß',   kosten: 1400,   stimmung: 6,  text: 'Helle Bretter, holzbraune Rahmen.', wahl: 'fassade', fassade: 'weiss' },
   { id: 'farbe_rot',       tab: 'baumarkt', gruppe: 'Anstrich', name: 'Schwedenrot',  kosten: 15000,   stimmung: 10, text: 'Rot mit weißen Kanten, wie in Småland.', wahl: 'fassade', fassade: 'rot' },
-  { id: 'farbe_lebkuchen', tab: 'baumarkt', gruppe: 'Anstrich', name: 'Lebkuchenhaus',kosten: 220000,  stimmung: 16, text: 'Zuckerguss auf dem Dach.', wahl: 'fassade', fassade: 'lebkuchen' },
-  { id: 'farbe_chalet',    tab: 'baumarkt', gruppe: 'Anstrich', name: 'Alpenchalet',  kosten: 860000, stimmung: 20, text: 'Dunkles Holz, Steinsockel, grüne Läden.', wahl: 'fassade', fassade: 'chalet' },
+  { id: 'farbe_lebkuchen', tab: 'baumarkt', gruppe: 'Anstrich', name: 'Lebkuchenhaus',kosten: 165000,  stimmung: 16, text: 'Zuckerguss auf dem Dach.', wahl: 'fassade', fassade: 'lebkuchen' },
+  { id: 'farbe_chalet',    tab: 'baumarkt', gruppe: 'Anstrich', name: 'Alpenchalet',  kosten: 645000, stimmung: 20, text: 'Dunkles Holz, Steinsockel, grüne Läden.', wahl: 'fassade', fassade: 'chalet' },
 
   // --- Supermarkt: Zutaten (aus PRODUKTE erzeugt, siehe unten) ---
 
   // --- Wichtel ---
   { id: 'spuel',     tab: 'wichtel', gruppe: 'Helfer', name: 'Spül-Wichtel',     kosten: 180,   stimmung: 0, text: `Stellt dir alle ${String(1.5).replace('.', ',')} Sekunden ein sauberes Glas aufs Tablett.` },
-  { id: 'servier',   tab: 'wichtel', gruppe: 'Helfer', name: 'Servier-Wichtel',  kosten: [400, 15000, 112000, 300000, 900000, 1100000], stimmung: 0, text: 'Bedient Gäste von allein - auch wenn du weg bist.' },
+  { id: 'servier',   tab: 'wichtel', gruppe: 'Helfer', name: 'Servier-Wichtel',  kosten: [400, 15000, 112000, 225000, 675000, 825000], stimmung: 0, text: 'Bedient Gäste von allein - auch wenn du weg bist.' },
   { id: 'nachfuell', tab: 'wichtel', gruppe: 'Helfer', name: 'Nachfüll-Wichtel', kosten: [350, 15000, 160000], stimmung: 0, text: 'Füllt leere Töpfe von selbst nach.' },
   { id: 'crepe_w',   tab: 'wichtel', gruppe: 'Helfer', name: 'Crêpe-Wichtel',    kosten: 70000, stimmung: 0, text: 'Bäckt immer einen Crêpe vor.', braucht: 'crepe' },
-  { id: 'kasse',     tab: 'wichtel', gruppe: 'Helfer', name: 'Kassen-Wichtel',   kosten: 240000, stimmung: 0, bonus: { preis: 0.10 }, text: 'Rundet freundlich auf.' },
+  { id: 'kasse',     tab: 'wichtel', gruppe: 'Helfer', name: 'Kassen-Wichtel',   kosten: 180000, stimmung: 0, bonus: { preis: 0.10 }, text: 'Rundet freundlich auf.' },
 ];
 
 // Supermarkt: je Produkt ein Artikel (Sternenpunsch hat man von Anfang an)
