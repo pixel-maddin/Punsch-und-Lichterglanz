@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText } from './pixel.js?v=20261001d';
-import * as Z from './zeit.js?v=20261001d';
-import * as S from './spiel.js?v=20261001d';
-import { FASSADEN } from './config.js?v=20261001d';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261002a';
+import * as Z from './zeit.js?v=20261002a';
+import * as S from './spiel.js?v=20261002a';
+import { FASSADEN } from './config.js?v=20261002a';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -432,12 +432,20 @@ function haus(c, G, w, t, L) {
   L.push({ rect: [lx, ly + 1, 3, 3], f: '#ffd070', halo: 11, an: 1 });
 
   if (S.zeigt('kranz')) {
-    const kx = 80, ky = to + 6;
-    const g = '#2f6a2a';
-    r(c, kx - 3, ky - 3, 6, 1, g); r(c, kx - 3, ky + 2, 6, 1, g); r(c, kx - 4, ky - 2, 1, 4, g); r(c, kx + 3, ky - 2, 1, 4, g);
-    p(c, kx - 3, ky - 2, g); p(c, kx + 2, ky - 2, g); p(c, kx - 3, ky + 1, g); p(c, kx + 2, ky + 1, g);
-    p(c, kx - 1, ky + 3, '#d83a3a'); p(c, kx, ky + 3, '#d83a3a'); p(c, kx - 2, ky + 4, '#d83a3a'); p(c, kx + 1, ky + 4, '#d83a3a');
-    p(c, kx - 2, ky - 3, '#d83a3a'); p(c, kx + 3, ky, '#d83a3a');
+    // Seit 02.10. ein voller, dicker Ring über fast die ganze Türbreite
+    // (10 statt 8 px, zwei Grüntöne). Der alte war ein dünner Rahmen und am
+    // Handy kaum zu finden - für den ERSTEN Deko-Kauf zu wenig (Betatest).
+    const x0 = 75, y0 = to + 2;   // linke obere Ecke des 10x10-Felds
+    for (let y = 0; y < 10; y++) for (let x = 0; x < 10; x++) {
+      const d = Math.hypot(x - 4.5, y - 4.5);
+      if (d < 2.3 || d > 5.0) continue;
+      p(c, x0 + x, y0 + y, d > 4.2 || (x * 7 + y * 3) % 5 === 0 ? '#245a22' : '#3a7e32');
+    }
+    // Beeren rundherum, Schleife unten mit zwei Bändern
+    for (const [bx, by] of [[0, 3], [7, 1], [3, 0], [9, 5], [1, 7]]) p(c, x0 + bx, y0 + by, '#e83a3a');
+    const sy = y0 + 8;
+    r(c, x0 + 2, sy, 2, 2, '#d02a2a'); r(c, x0 + 6, sy, 2, 2, '#d02a2a'); r(c, x0 + 4, sy, 2, 2, '#a01818');
+    p(c, x0 + 3, sy + 2, '#d02a2a'); p(c, x0 + 6, sy + 2, '#d02a2a'); p(c, x0 + 2, sy + 3, '#d02a2a'); p(c, x0 + 7, sy + 3, '#d02a2a');
   }
   if (S.zeigt('tuerbogenkranz')) winterkranz(c, L, 80, to - 12, t, w, S.stufe('tuerbogenkranz'));
   if (S.zeigt('kal_mistel')) {
@@ -1226,11 +1234,17 @@ const ORTE = {
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
-export function funkeln(x, y) { funken.push({ x, y, t0: performance.now() }); }
+/**
+ * Funkeln an einer Stelle der Welt. `text` (z. B. „+3 ♥") steigt dabei über
+ * dem Teil auf - nach dem Kauf sieht man so, WAS es gebracht hat, und vor
+ * allem WO es hängt (Betatest 02.10.: der Türkranz ging unter).
+ */
+export function funkeln(x, y, text = '') { funken.push({ x, y, text, t0: performance.now() }); }
+const FUNKEL_DAUER = 2400;
 function zeichneFunkeln(c, GW) {
   const jetzt = performance.now();
   for (let i = funken.length - 1; i >= 0; i--) {
-    const f = funken[i], a = (jetzt - f.t0) / 1600;
+    const f = funken[i], a = (jetzt - f.t0) / FUNKEL_DAUER;
     if (a >= 1) { funken.splice(i, 1); continue; }
     const cx = f.x, cy = GW + f.y;
     // Ring, der sich öffnet, und acht Sterne, die nach außen fliegen
@@ -1241,6 +1255,15 @@ function zeichneFunkeln(c, GW) {
       const sx = cx + Math.cos(w) * d, sy = cy + Math.sin(w) * d;
       const hell = k % 2 ? '#fff6c8' : '#ffd040';
       if (a < 0.85 || Math.floor(jetzt / 80) % 2) { p(c, sx, sy, hell); p(c, sx - 1, sy, hell); p(c, sx + 1, sy, hell); p(c, sx, sy - 1, hell); p(c, sx, sy + 1, hell); }
+    }
+    // Zuletzt der Text auf einem dunklen Schild - zwischen den Funken ging
+    // er sonst unter. Er steigt langsam und blinkt zum Schluss aus.
+    if (f.text && a > 0.06 && (a < 0.88 || Math.floor(jetzt / 90) % 2)) {
+      const w = textBreite(f.text);
+      const tx = Math.round(Math.max(2, Math.min(178 - w, cx - w / 2))), ty = Math.round(cy - 18 - a * 10);
+      r(c, tx - 2, ty - 2, w + 4, 9, '#2a1810');
+      r(c, tx - 2, ty - 2, w + 4, 1, '#5a3a20');
+      pixText(c, f.text, tx, ty, '#ffe060', null);
     }
   }
 }

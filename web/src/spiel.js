@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261001d';
-import * as Z from './zeit.js?v=20261001d';
-import { neueFarben } from './pixel.js?v=20261001d';
+import * as C from './config.js?v=20261002a';
+import * as Z from './zeit.js?v=20261002a';
+import { neueFarben } from './pixel.js?v=20261002a';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -580,7 +580,13 @@ export function tippeZelle(i) {
   if ((st.toepfe[p.id] || 0) <= 0) {
     lauf.fuellen[p.id] = (lauf.fuellen[p.id] || 0) + 1 / C.NACHFUELL_TIPPS;
     hooks.ton('blubb');
-    if (lauf.fuellen[p.id] >= 0.999) { st.toepfe[p.id] = topfMax(); lauf.fuellen[p.id] = 0; hooks.ton('voll'); }
+    if (lauf.fuellen[p.id] >= 0.999) { st.toepfe[p.id] = topfMax(); lauf.fuellen[p.id] = 0; hooks.ton('voll'); hooks.toast(`${p.name} ist wieder voll!`, 'gut'); }
+    // Wer mit leerem Glas kam, wollte einschenken - sagen, warum nichts passiert
+    // (sonst blieb das Glas still leer stehen, Betatest 02.10.)
+    else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS) {
+      const noch = C.NACHFUELL_TIPPS - Math.round(lauf.fuellen[p.id] * C.NACHFUELL_TIPPS);
+      hooks.toast(`Topf leer! Noch ${noch}× antippen, dann ist er wieder voll.`, 'hinweis');
+    }
     return;
   }
   if (p.art === 'dose') {
@@ -654,16 +660,15 @@ export function tippeGast(platz) {
     }
     // Mit Servier-Wichtel: Tipp auf den Gast = der Wichtel schenkt ihm ein
     if (hat('servier') && wichtelEinschenken(g)) return;
-    // Falsch geliefert: Der Gast lehnt ab, das Getränk ist hin (seit 29.09.
-    // kostet es keine Sterne mehr - FALSCH_ANTEIL 0 -, nur das Glas)
+    // Falsch geliefert: Der Gast lehnt ab - das Glas BLEIBT seit 02.10. auf
+    // dem Tablett (vorher war es weg). Oft wollte es ein anderer Gast, oder
+    // der Nächste in der Schlange will es; wegkippen kann man es jederzeit.
     const k = lauf.hand.findIndex(bereit);
     if (k >= 0) {
-      const p = C.PRODUKT[lauf.hand[k].id];
-      lauf.hand.splice(k, 1);
-      const minus = Math.min(st.geld, Math.round(p.preis * C.FALSCH_ANTEIL));
-      if (minus > 0) { st.geld -= minus; hooks.geld(); lauf.texte.push({ platz: g.platz, x: g.x, text: '-' + minus, t: 0, boese: true }); }
-      else hooks.toast('Das war das falsche Getränk - schau aufs Bläschen.', 'hinweis');
+      const anderer = lauf.gaeste.find((x) => x !== g && x.am && !x.gehen && !x.bedient && lauf.hand.some((h) => bereit(h) && h.id === x.wunsch));
       lauf.wackel['g' + g.id] = 0.35; hooks.ton('falsch');
+      if (anderer) { lauf.wackel['g' + anderer.id] = 0.35; hooks.toast('Das ist für den anderen Gast - tippe ihn an!', 'hinweis'); return; }
+      hooks.toast('Der Gast möchte etwas anderes - schau aufs Bläschen. Dein Glas bleibt stehen.', 'hinweis');
       lauf.fehlGast++;
       lauf.schwung = 0; lauf.schwungT = 0;
     }
@@ -883,6 +888,18 @@ export function update(dt) {
 
   // Bewegen
   let reihe = 0;
+  // Wessen Getränk ist gerade in Arbeit? Je Glas der ungeduldigste Gast am
+  // Tresen mit genau diesem Wunsch. Der geht nicht mehr weg - sonst stand
+  // nach dem Einschenken plötzlich jemand anderes da, und man lieferte
+  // „falsch", ohne etwas falsch gemacht zu haben (Betatest 02.10.).
+  // Großbestellungen nicht: deren Uhr ist die Aufgabe.
+  const reserviert = new Set();
+  for (const h of lauf.hand) {
+    if (h.art !== 'voll') continue;
+    const g = G.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && x.wunsch === h.id && !reserviert.has(x.id))
+      .sort((a, b) => a.geduld - b.geduld)[0];
+    if (g) reserviert.add(g.id);
+  }
   for (const g of G) {
     const def = C.GAESTE[g.typ];
     let ziel;
@@ -902,7 +919,8 @@ export function update(dt) {
     g.am = g.platz != null && !g.laeuft;
     if (lauf.lernen) continue;
     if (g.am && !g.bedient) {
-      g.geduld -= dt;
+      if (reserviert.has(g.id)) g.geduld = Math.max(Math.min(g.geduld, C.GEDULD_RESERVIERT), g.geduld - dt);
+      else g.geduld -= dt;
       if (g.geduld <= 0) gehe(g, false);
     } else if (g.platz == null && !g.laeuft) {
       g.schlange -= dt;
@@ -1125,8 +1143,27 @@ export function oeffneTuer(n) {
   speichere();
   return ergebnis;
 }
+/**
+ * Vorfreude-Päckchen: vor dem 1. Dezember eins je Spieltag im Kalender,
+ * ab dem zweiten Tag (am ersten kennt man das Spiel ja gerade erst - und
+ * „morgen wartet ein Päckchen" ist der Grund wiederzukommen).
+ * `st.vorfreude` = Mitternacht des Tages, an dem es zuletzt geöffnet wurde.
+ */
+export function vorfreudeBereit() {
+  return Z.phase() === 'herbst' && st.lernen >= 99 && spieltag() >= 1 && st.vorfreude !== heuteMitternacht();
+}
+export function oeffneVorfreude() {
+  if (!vorfreudeBereit()) return 0;
+  st.vorfreude = heuteMitternacht();
+  st.vorfreudeZahl = (st.vorfreudeZahl || 0) + 1;
+  const betrag = Math.max(C.VORFREUDE_MIN, Math.round(st.gesamt * C.VORFREUDE_ANTEIL / 10) * 10);
+  st.geld += betrag; hooks.geld();
+  speichere();
+  return betrag;
+}
+/** Was im Kalender wartet: offene Türchen plus ein Vorfreude-Päckchen. */
 export function offeneTueren() {
-  let n = 0;
+  let n = vorfreudeBereit() ? 1 : 0;
   for (let i = 1; i <= 24; i++) if (tuerBereit(i)) n++;
   return n;
 }

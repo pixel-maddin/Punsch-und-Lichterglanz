@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261001d';
-import * as S from './spiel.js?v=20261001d';
-import * as Z from './zeit.js?v=20261001d';
-import * as T from './ton.js?v=20261001d';
-import * as UI from './ui.js?v=20261001d';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261001d';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261001d';
-import * as Lernen from './lernen.js?v=20261001d';
-import { zeigeAdvent } from './ereignis.js?v=20261001d';
-import * as A from './auftraege.js?v=20261001d';
-import * as E from './erfolge.js?v=20261001d';
-import * as ZL from './ziele.js?v=20261001d';
+import * as C from './config.js?v=20261002a';
+import * as S from './spiel.js?v=20261002a';
+import * as Z from './zeit.js?v=20261002a';
+import * as T from './ton.js?v=20261002a';
+import * as UI from './ui.js?v=20261002a';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261002a';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261002a';
+import * as Lernen from './lernen.js?v=20261002a';
+import { zeigeAdvent } from './ereignis.js?v=20261002a';
+import * as A from './auftraege.js?v=20261002a';
+import * as E from './erfolge.js?v=20261002a';
+import * as ZL from './ziele.js?v=20261002a';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -159,7 +159,7 @@ function ankommen(erstesMal) {
   // Adventssonntage: jedes Ereignis als eigenes Fenster, in der richtigen Reihenfolge
   for (const n of S.neueAdventsereignisse()) meldungen.push(['advent', n]);
   const tueren = S.offeneTueren();
-  if (tueren > 0 && !erstesMal) UI.toast(tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
+  if (tueren > 0 && !erstesMal) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
   S.speichere();
   const zeige = () => {
     const m = meldungen.shift();

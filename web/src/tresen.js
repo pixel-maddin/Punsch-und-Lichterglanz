@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20261001d';
-import * as C from './config.js?v=20261001d';
-import * as S from './spiel.js?v=20261001d';
-import * as Z from './zeit.js?v=20261001d';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=20261002a';
+import * as C from './config.js?v=20261002a';
+import * as S from './spiel.js?v=20261002a';
+import * as Z from './zeit.js?v=20261002a';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -655,6 +655,16 @@ function zelle(c, i, x, y, t) {
       for (let k = 0; k < C.NACHFUELL_TIPPS; k++) {
         const px = cx - 7 + k * 4, py = y + 1;
         r(c, px, py, 3, 3, k < getippt ? '#5ab0f0' : (Math.floor(t * 3) % 2 ? '#f4f4f4' : '#9aa0aa'));
+      }
+      // Groß „LEER" quer über das Etikett und ein blinkender Rahmen um das
+      // Fach - die vier Punkte allein übersah man, und das Glas blieb dann
+      // still leer stehen (Betatest 02.10.)
+      const an = Math.floor(t * 2.5) % 2;
+      r(c, cx - 9, y + 10, 19, 7, '#2a1010');
+      text(c, 'LEER', cx - 7, y + 11, an ? '#ff6a5a' : '#ffd0c8', null);
+      if (an) {
+        r(c, x + 1, y + 1, W - 2, 1, '#ff6a5a'); r(c, x + 1, y + H - 2, W - 2, 1, '#ff6a5a');
+        r(c, x + 1, y + 1, 1, H - 2, '#ff6a5a'); r(c, x + W - 2, y + 1, 1, H - 2, '#ff6a5a');
       }
     }
     if (nf) nachfuellWichtel(c, x, y, a, p0.farbe, t, i);

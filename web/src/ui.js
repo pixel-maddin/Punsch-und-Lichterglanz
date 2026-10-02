@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261001d';
-import * as S from './spiel.js?v=20261001d';
-import * as Z from './zeit.js?v=20261001d';
-import * as T from './ton.js?v=20261001d';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261001d';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261001d';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261001d';
-import * as A from './auftraege.js?v=20261001d';
-import * as E from './erfolge.js?v=20261001d';
-import * as ZL from './ziele.js?v=20261001d';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261001d';
-import { alleSymbole } from './symbole.js?v=20261001d';
+import * as C from './config.js?v=20261002a';
+import * as S from './spiel.js?v=20261002a';
+import * as Z from './zeit.js?v=20261002a';
+import * as T from './ton.js?v=20261002a';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261002a';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261002a';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261002a';
+import * as A from './auftraege.js?v=20261002a';
+import * as E from './erfolge.js?v=20261002a';
+import * as ZL from './ziele.js?v=20261002a';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261002a';
+import { alleSymbole } from './symbole.js?v=20261002a';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -61,7 +61,9 @@ export function zielLeiste() {
   const z = ZL.aktuell();
   const k = z && ZL.kaufziel();
   const bereit = !!(k && k.leisten);
-  const sig = z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}` : '';
+  // Der Kontostand gehört in die Signatur: „noch 186 Sterne" blieb sonst
+  // stehen, während man längst 179 hatte (Betatest 02.10.)
+  const sig = z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
   const b = $('#ziel');
@@ -69,8 +71,12 @@ export function zielLeiste() {
   if (!z) { b.classList.add('versteckt'); return; }
   const zahl = z.ziel > 1 ? ` <i>${z.stand()}/${z.ziel}</i>` : '';
   const nochNicht = k && !bereit ? `<small>noch ${S.formatGeld(k.kosten - S.st.geld)}</small>` : '';
+  // Fortschrittsbalken an der Unterkante: Sterne bis zum nächsten Kauf,
+  // sonst wie weit das Ziel selbst ist
+  const anteil = bereit ? 1 : k ? S.st.geld / k.kosten : z.stand() / z.ziel;
   b.innerHTML = `<span class="nr">Ziel ${ZL.nummer()}/${ZL.ZIELE.length}</span><span class="was">${z.text}${zahl}</span>`
-    + (bereit ? '<span class="los">Los ▸</span>' : nochNicht || `<span class="lohn">+${z.lohn} ★</span>`);
+    + (bereit ? '<span class="los">Los ▸</span>' : nochNicht || `<span class="lohn">+${z.lohn} ★</span>`)
+    + `<span class="fort"><span style="width:${Math.round(Math.max(0, Math.min(1, anteil)) * 100)}%"></span></span>`;
   b.classList.toggle('bereit', bereit);
   b.classList.remove('versteckt');
   // Unterkante merken: Einblendungen und Hinweisblasen rutschen darunter
@@ -422,12 +428,18 @@ export const zeigtKauf = () => $('#blatt').classList.contains('kurz-weg');
 function zeigeKauf(id) {
   const ort = ortVon(id);
   if (!ort) return;
-  funkeln(ort.x, ort.y);
+  // Über dem Teil steigt auf, was es bringt: Stimmung, sonst der Preisbonus
+  const a = S.ARTIKEL_MAP[id] || {};
+  const bo = a.bonus || {};
+  const was = a.stimmung ? `+${a.stimmung} ♥` : bo.preis ? `+${Math.round(bo.preis * 100)} % ★` : '';
+  funkeln(ort.x, ort.y, was);
   T.spiele('spezial');
   const b = $('#blatt');
   b.classList.add('kurz-weg');
   clearTimeout(kaufZeigenT);
-  kaufZeigenT = setTimeout(() => b.classList.remove('kurz-weg'), 1700);
+  // 1,7 s waren zu kurz: Im Betatest (02.10.) war der Laden wieder da, bevor
+  // man das Teil am Haus gefunden hatte
+  kaufZeigenT = setTimeout(() => b.classList.remove('kurz-weg'), 2600);
 }
 
 /** Roter Punkt mit Zahl an der Laden-Taste: so viele Dinge sind neu. */
@@ -659,6 +671,11 @@ function zeichneKiste(cv, offen) {
 let auftragReiter = 'heute';   // 'heute' | 'erfolge'
 export function oeffneAuftraege(reiter) {
   if (reiter) auftragReiter = reiter;
+  // Wer schon drin war, braucht die Erklärung nicht mehr (kam im Betatest
+  // NACH zwei abgeholten Aufträgen - und dann gleich zweimal)
+  S.st.tipps = S.st.tipps || {};
+  if (auftragReiter === 'erfolge') S.st.tipps.erfolge = true;
+  else S.st.tipps.auftraege_neu = S.st.tipps.auftrag = true;
   oeffneBlatt('auftraege', auftragReiter === 'erfolge' ? 'Erfolgswand' : 'Aufträge für heute');
   const kopf = $('#blattTabs');
   kopf.innerHTML = '';
@@ -720,6 +737,19 @@ export function oeffneKalender() {
     const ea = Z.ersterAdvent();
     const bis = Math.ceil((new Date(Z.saison(), 11, 1) - Z.jetzt()) / 86400000);
     liste.appendChild(el('p', 'hinweis', `Noch <b>${bis} ${bis === 1 ? 'Tag' : 'Tage'}</b> bis zum ersten Türchen. Der 1. Advent ist am ${ea.getDate()}.${ea.getMonth() + 1}.<br>Bis dahin: das Haus herrichten!`));
+    // Bis dahin jeden Tag ein Vorfreude-Päckchen (spiel.js)
+    const vf = el('button', 'vorfreude' + (S.vorfreudeBereit() ? ' bereit' : ''));
+    vf.innerHTML = S.vorfreudeBereit()
+      ? '<span class="vf-ico">🎁</span><b>Vorfreude-Päckchen</b><small>Heute für dich - antippen!</small>'
+      : `<span class="vf-ico">🎁</span><b>Vorfreude-Päckchen</b><small>${S.spieltag() < 1 ? 'Ab morgen wartet hier jeden Tag eins - bis die Türchen aufgehen.' : 'Heute schon geöffnet. Morgen wartet das nächste!'}</small>`;
+    vf.onclick = () => {
+      const betrag = S.oeffneVorfreude();
+      if (!betrag) { T.spiele('falsch'); toast(S.spieltag() < 1 ? 'Das erste Päckchen gibt es morgen.' : 'Das nächste Päckchen gibt es morgen.', 'hinweis'); return; }
+      T.spiele('tuer');
+      oeffneKalender();
+      fenster('Vorfreude!', `<div class="gross-ico">🎁</div><p>Ein Päckchen mit</p><p class="summe">${S.formatGeld(betrag)}</p><p class="klein">Bis zum 1. Dezember gibt es jeden Tag eins.</p>`);
+    };
+    liste.appendChild(vf);
   }
   const raster = el('div', 'kalender');
   for (const n of C.KALENDER_REIHE) {
@@ -928,14 +958,20 @@ export function frageName(umbenennen = false, danach) {
 /** Nach dem Namen: klassisch mit dem echten Kalender oder eigener Start. */
 export function waehleModus(fertig) {
   const heute = new Date();
+  // Wie lange noch Spätherbst wäre - bei „Klassisch" im Oktober fast zwei
+  // Monate ohne Türchen und Schnee. Das muss man VOR der Wahl wissen (Betatest 02.10.)
+  const bis = Math.ceil((new Date(Z.saison(heute), 11, 1) - heute) / 86400000);
+  const warten = bis > 7
+    ? ` Bis zum 1. Dezember sind es noch <strong>${bis} Tage</strong> - so lange ist Spätherbst, ohne Türchen und ohne Schnee. Dafür wartet jeden Tag ein Vorfreude-Päckchen.`
+    : '';
   const box = fenster('Wie möchtest du spielen?', `
     <button class="modus" data-m="echt">
       <b>🕯️ Klassisch</b>
-      <span>Das Spiel läuft mit dem echten Kalender. Heute ist der ${heute.getDate()}.${heute.getMonth() + 1}. - die Adventszeit kommt, wenn sie wirklich kommt.</span>
+      <span>Das Spiel läuft mit dem echten Kalender. Heute ist der ${heute.getDate()}.${heute.getMonth() + 1}. - die Adventszeit kommt, wenn sie wirklich kommt.${warten}</span>
     </button>
     <button class="modus" data-m="eigen">
       <b>🎄 Individuell</b>
-      <span>Dein Spiel beginnt eine Woche vor dem 1. Dezember, egal wann du startest. Die Tage laufen danach ganz normal weiter.</span>
+      <span>Dein Spiel beginnt eine Woche vor dem 1. Dezember, egal wann du startest. Bis zum ersten Türchen gibt es jeden Tag ein Vorfreude-Päckchen.</span>
     </button>
     <p class="klein">Die Uhrzeit ist in beiden Fällen die echte: Nachts ist es dunkel.</p>`, []);
   for (const b of box.querySelectorAll('.modus')) b.onclick = () => { T.spiele('klick'); schliesseFenster(); fertig(b.dataset.m); };

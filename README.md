@@ -31,8 +31,9 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
    Moment herausziehen, den Crêpe auf der Platte im grünen Moment wenden, und
    den Feuerzauber servieren, solange der Zuckerhut brennt.
 
-Falsch geliefert kostet nur das Glas. Falsch Eingeschenktes kippt man in
-den Ausguss rechts. **Sobald der Servier-Wichtel da ist,** schenkt er für dich ein: Gast
+Falsch geliefert kostet nichts: Der Gast lehnt ab, das Glas bleibt stehen -
+vielleicht will es der Nächste. Wer gerade sein Getränk bekommt, wartet.
+Falsch Eingeschenktes kippt man in den Ausguss rechts. **Sobald der Servier-Wichtel da ist,** schenkt er für dich ein: Gast
 antippen, ein Wichtel stellt das Getränk aufs Tablett, dann (gern mit
 Handgriff) den Gast nochmal antippen zum Servieren.
 
@@ -91,6 +92,8 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
 - Nachts ist es dunkel, die Lichter leuchten.
 - Bis zum 30. November ist Spätherbst: kahle Bäume, fallendes Laub, Regen.
 - **Ab dem 1. Dezember liegt Schnee**, und es gibt Schneemänner zu kaufen.
+- **Vorfreude-Päckchen:** Bis zum 1. Dezember wartet im Kalender jeden Tag
+  ein Päckchen mit Sternen.
 - **Adventskalender:** jeden Tag ein Türchen, manche mit Deko, die es nur
   dort gibt (Adventskranz, dessen Kerzen mit den Adventssonntagen
   mitzählen; Nikolausstiefel; Mistelzweig; Vogelhäuschen; am 24. der

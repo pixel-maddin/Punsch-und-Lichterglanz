@@ -87,7 +87,6 @@ export const CREPE_ZEIT = 3.5;                   // Backzeit (s)
 export const SPUEL_ZEIT = 1.5;                   // Spül-Wichtel: alle so viele s ein Glas aufs Tablett
 export const WICHTEL_EINSCHENKEN = 0.8;          // s, die der Wichtel länger braucht als du (Glas holen, eingießen)
 export const WICHTEL_WARTEN = 4;               // s, die ein eingeschenktes Glas auf dich wartet, bevor der Wichtel selbst serviert
-export const FALSCH_ANTEIL = 0;                  // falsch geliefert: nur das Glas ist weg, keine Sterne (seit 29.09., verzeihender)
 export const JUBEL_ZEIT = 0.375;                 // s Freudensprung, wenn du selbst bedienst (20 % flotter als 0,45)
 
 // ---------------------------------------------------------------------------
@@ -382,5 +381,13 @@ export const KALENDER_DEKO = {
 };
 export const KALENDER_GELD_ANTEIL = 0.04; // Geldgeschenk: 4 % aller bisherigen Einnahmen
 export const KALENDER_GELD_MIN = 150;
+// Vorfreude-Päckchen: vor dem 1.12. (ab dem zweiten Spieltag) eins je Tag im
+// Kalender - sonst gab es in der ersten Woche keinen Grund wiederzukommen
+// (Betatest 02.10.: „Noch 7 Tage bis zum ersten Türchen")
+export const VORFREUDE_ANTEIL = 0.03;
+export const VORFREUDE_MIN = 150;
+// Wer am Tresen sieht, dass sein Getränk gerade gemacht wird, geht nicht
+// mehr weg (die Geduld sinkt weiter, aber nie unter diesen Rest in s)
+export const GEDULD_RESERVIERT = 1.5;
 // Reihenfolge der Türchen im Raster (wie ein echter Kalender, durcheinander)
 export const KALENDER_REIHE = [7, 15, 2, 20, 11, 24, 4, 18, 9, 13, 1, 22, 16, 6, 19, 3, 12, 23, 8, 14, 21, 5, 17, 10];

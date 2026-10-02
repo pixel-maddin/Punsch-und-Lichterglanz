@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261001d';
-import * as S from './spiel.js?v=20261001d';
-import * as A from './auftraege.js?v=20261001d';
-import * as E from './erfolge.js?v=20261001d';
-import * as Z from './ziele.js?v=20261001d';
+import * as C from './config.js?v=20261002a';
+import * as S from './spiel.js?v=20261002a';
+import * as A from './auftraege.js?v=20261002a';
+import * as E from './erfolge.js?v=20261002a';
+import * as Z from './ziele.js?v=20261002a';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -36,7 +36,7 @@ let aktuell = null;      // { id, text, ziel, bis }
 let hinweisT = 0;
 let letzterText = '';
 const HINWEIS_PAUSE = 25;       // s Ruhe zwischen zwei Hinweisen
-const HINWEIS_PAUSE_SOFORT = 4; // s für Hinweise, deren Lage gleich vorbei ist
+const HINWEIS_PAUSE_SOFORT = 6; // s für Hinweise, deren Lage gleich vorbei ist
 const NACH_EINFUEHRUNG = 40;    // s nach „Geschafft!", bevor der erste Hinweis kommt
 let ruheT = 0;                  // s seit dem letzten Hinweis (zählt nur, wenn nichts offen ist)
 
@@ -127,13 +127,13 @@ function einfuehrung() {
 // Einzelne Hinweise, je einer einmal
 // ---------------------------------------------------------------------------
 const HINWEISE = [
-  { id: 'leer', sofort: true, wann: () => !S.stufe('nachfuell') && leererTopf() >= 0,
+  { id: 'leer', ruhig: true, sofort: true, wann: () => !S.stufe('nachfuell') && leererTopf() >= 0,
     text: () => 'Der Topf ist leer! Tippe ihn 4-mal an, dann ist er wieder voll.',
     ziel: () => zellZiel(leererTopf()), fertig: () => leererTopf() < 0 },
-  { id: 'falsch', sofort: true, wann: () => S.lauf.fehlGast > 0,
-    text: () => 'Das war das falsche Getränk! Der Gast hat es abgelehnt - das Glas ist weg, sonst passiert nichts. Schau genau aufs Bläschen.',
+  { id: 'falsch', ruhig: true, sofort: true, wann: () => S.lauf.fehlGast > 0,
+    text: () => 'Falsches Getränk - der Gast möchte, was in seinem Bläschen steht. Dein Glas bleibt stehen: vielleicht will es der Nächste, sonst ab in den Ausguss.',
     ziel: () => gastZiel(0), dauer: 6 },
-  { id: 'voll', sofort: true, wann: () => S.lauf.hand.length >= S.handMax() && !S.lauf.hand.some((h) => h.art === 'glas') && !gastWillWasInHand() && gastAmTresen(),
+  { id: 'voll', ruhig: true, sofort: true, wann: () => S.lauf.hand.length >= S.handMax() && !S.lauf.hand.some((h) => h.art === 'glas') && !gastWillWasInHand() && gastAmTresen(),
     text: () => 'Deine Hände sind voll. Leere sie im AUSGUSS.',
     ziel: ausgussZiel, fertig: () => S.lauf.hand.length < S.handMax() },
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
@@ -141,20 +141,20 @@ const HINWEISE = [
     info: () => 'Neues Getränk! Du hast genug Sterne für Kinderpunsch. Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
     text: () => 'Tippe auf LADEN - ich zeige dir, wo es Kinderpunsch gibt.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
-  { id: 'laden_danach', sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
+  { id: 'laden_danach', ruhig: true, sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
     text: () => 'Prima! Kinderpunsch steht jetzt im Regal. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn aus dem neuen Topf. Weitere Getränke findest du später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
   { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
     info: () => 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen. Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus der Straße werden!',
     text: () => 'Tippe auf LADEN - im Weihnachtsmarkt wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
-  { id: 'deko_danach', sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
+  { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
     text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung (oben neben den Sternen) - je mehr Stimmung, desto mehr Gäste, und sie zahlen mehr.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 9 },
-  { id: 'gegangen', wann: () => S.st.stats.verpasst >= 1,
+  { id: 'gegangen', ruhig: true, wann: () => S.st.stats.verpasst >= 1,
     text: () => 'Ein Gast ist weitergegangen - nicht schlimm, es kommen neue! Aber Achtung: Manchmal kommt jemand GANZ BESONDERES vorbei - den solltest du nicht warten lassen.',
     ziel: () => gastZiel(0), dauer: 8 },
-  { id: 'schwung', wann: () => S.lauf.schwung >= 3,
+  { id: 'schwung', ruhig: true, wann: () => S.lauf.schwung >= 3,
     text: () => 'Schwung! Wenn du zügig hintereinander servierst, gibt es mehr Sterne (bis ×1,40).',
     ziel: () => ({ x: 140, y: G + 2 }), dauer: 5 },
   // Die drei ersten Wichtel (Startziele 3-5): erst erklären, was sie tun, dann zum Laden
@@ -187,11 +187,11 @@ const HINWEISE = [
     ziel: null, dauer: 10 },
   // Besondere Gäste stellen sich hinten an und gehen, wenn es zu lange
   // dauert - das muss man einmal gesagt bekommen (gemeldet: Rentier war weg)
-  { id: 'sonder_schlange', sofort: true, wann: () => S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.platz == null && !g.gehen && !g.laeuft),
+  { id: 'sonder_schlange', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.platz == null && !g.gehen && !g.laeuft),
     text: () => 'Ein besonderer Gast steht in der Schlange! Bediene zügig, damit er an den Tresen kommt - sonst wird es ihm zu lang, und er geht wieder.',
     ziel: () => { const g = S.lauf.gaeste.find((x) => C.GAESTE[x.typ].spezial && x.platz == null && !x.gehen); return { x: g ? g.x : 100, y: G - 24 }; },
     fertig: () => !S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.platz == null && !g.gehen), dauer: 10 },
-  { id: 'sonder_weg', sofort: true, wann: () => S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.gehen && !g.froh),
+  { id: 'sonder_weg', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.gehen && !g.froh),
     text: () => 'Schade - der besondere Gast hat zu lange gewartet und ist gegangen. Beim nächsten Mal schneller bedienen, damit er rechtzeitig drankommt!',
     ziel: null, dauer: 7 },
   // Der letzte Handgriff: Sahne, Zimt, Zuckerhut
@@ -209,26 +209,26 @@ const HINWEISE = [
   { id: 'gross', sofort: true, wann: () => S.lauf.gaeste.some((g) => g.gross && g.am && !g.bedient),
     text: () => { const g = S.lauf.gaeste.find((x) => x.gross); return g ? `Großbestellung! ${g.gross.name} will ${g.gross.n} × ${C.PRODUKT[g.gross.id].name}. Bring alle, bevor die Zeit abläuft - das gibt richtig viele Sterne. Die Wichtel trauen sich da nicht ran.` : ''; },
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.gross && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 9 },
-  { id: 'chef', wann: () => S.hat('servier') && S.chefAktiv() && S.st.stats.bedient >= 60,
+  { id: 'chef', ruhig: true, wann: () => S.hat('servier') && S.chefAktiv() && S.st.stats.bedient >= 60,
     text: () => `Du bist der Chef! Solange du am Stand mit anpackst, arbeiten die Wichtel ×${String(C.CHEF_TEMPO).replace('.', ',')} so schnell (Tafel links oben). Besondere Gäste bedienst nur du.`,
     ziel: () => ({ x: 40, y: G + 2 }), dauer: 8 },
-  { id: 'schild', wann: () => S.st.stats.bedient >= 40 && !S.st.standName,
+  { id: 'schild', ruhig: true, wann: () => S.st.stats.bedient >= 40 && !S.st.standName,
     text: () => 'Tipp: Tippe auf das rote Schild über dem Stand - dann kannst du ihm einen eigenen Namen geben.',
     ziel: () => ({ x: 90, y: G + 1 }), fertig: () => !!S.st.standName, dauer: 7 },
-  { id: 'eilig', sofort: true, wann: () => S.lauf.gaeste.some((g) => g.eilig && g.am && !g.bedient),
+  { id: 'eilig', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => g.eilig && g.am && !g.bedient),
     text: () => 'Ein eiliger Gast (orange Blase)! Er wartet nur kurz, zahlt aber doppelt.',
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.eilig && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 6 },
-  { id: 'auftrag', wann: () => A.abholbar() > 0,
+  { id: 'auftrag', ruhig: true, ersetzt: ['auftraege_neu'], wann: () => A.abholbar() > 0,
     text: () => 'Auftrag erfüllt! Unter AUFTRÄGE wartet deine Belohnung. Jeden Tag gibt es drei neue.',
     ziel: auftragZiel, fertig: () => A.abholbar() === 0, dauer: 10 },
-  { id: 'auftraege_neu', wann: () => S.st.stats.bedient >= 25,
+  { id: 'auftraege_neu', ruhig: true, ersetzt: ['auftrag'], wann: () => S.st.stats.bedient >= 25 && A.abholbar() === 0,
     text: () => 'Neu: Unter AUFTRÄGE warten jeden Tag drei Aufgaben mit Belohnung - der schwere bringt ein Sammelstück.',
     ziel: auftragZiel, dauer: 7 },
-  { id: 'erfolge', wann: () => E.anzahl() >= 1,
+  { id: 'erfolge', ruhig: true, wann: () => E.anzahl() >= 1,
     text: () => 'Deine erste Socke hängt an der Erfolgswand! Du findest sie unter AUFTRÄGE → Erfolge. Mit jeder Socke wird es dort weihnachtlicher.',
     ziel: auftragZiel, dauer: 8 },
-  { id: 'kalender', wann: () => S.offeneTueren() > 0,
-    text: () => 'Im Adventskalender wartet ein Türchen auf dich!',
+  { id: 'kalender', ruhig: true, wann: () => S.offeneTueren() > 0,
+    text: () => S.vorfreudeBereit() ? 'Im Kalender wartet ein Vorfreude-Päckchen auf dich!' : 'Im Adventskalender wartet ein Türchen auf dich!',
     ziel: kalenderZiel, dauer: 6 },
 ];
 
@@ -289,6 +289,15 @@ function hinweise(dt) {
     // dann schon mit Zeiger) - sie kommt auch, wenn schon gekauft ist.
     // Danach bleibt nur, wo man etwas TUN soll (fertig + ziel), der Zeiger
     // stehen, ohne Pause, bis es erledigt ist; alles andere ist damit gelesen.
+    // RUHIGE Hinweise (seit 02.10.): kurze Sätze zur Lage (Topf leer, falsches
+    // Getränk, Auftrag erfüllt …) halten das Spiel NICHT an. Sie stehen da,
+    // bis die Lage vorbei ist oder ihre Zeit um ist; Antippen schließt sie.
+    // Im Betatest kamen sonst ~15 Pausen in 13 Minuten.
+    if (h.ruhig) {
+      const fertigR = h.fertig ? h.fertig() : false;
+      if (fertigR || aktuell.t > Math.max(h.dauer || 7, 7) + (h.fertig ? 8 : 0)) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
+      return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
+    }
     if (!aktuell.gelesen) {
       const a = aktuell; a.t = 0;
       const handeln = !!(h.fertig && h.ziel);
@@ -307,6 +316,8 @@ function hinweise(dt) {
   for (const h of HINWEISE) {
     if (st.tipps[h.id] || ruheT < (h.sofort ? HINWEIS_PAUSE_SOFORT : HINWEIS_PAUSE) || !h.wann()) continue;
     aktuell = { h, t: 0 };
+    // Verwandte Hinweise gelten mit als erklärt (Aufträge kam sonst doppelt)
+    for (const id of h.ersetzt || []) st.tipps[id] = true;
     return hinweise(0);
   }
   return null;
@@ -352,7 +363,12 @@ function zeige(z) {
     zeiger.style.top = `calc(var(--px) * ${z.ziel.y})`;
   } else zeiger.classList.add('versteckt');
   const unten = z.ziel && z.ziel.y >= G;
-  if (unten) {
+  if (z.weiter && !unten) {
+    // Blasen mit „Weiter" stehen seit 02.10. unten über der Leiste: Dort ist
+    // der Daumen. Das Spiel steht ohnehin, die Töpfe darf sie verdecken.
+    tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${C.LEISTE + 5})`;
+    tipp.dataset.pfeil = '';
+  } else if (unten) {
     tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${H - G + 6})`;
     tipp.dataset.pfeil = 'unten';
     const px = Math.max(12, Math.min(168, z.ziel.x));
