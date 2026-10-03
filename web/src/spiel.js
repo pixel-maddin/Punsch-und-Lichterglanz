@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261003a';
-import * as Z from './zeit.js?v=20261003a';
-import { neueFarben } from './pixel.js?v=20261003a';
+import * as C from './config.js?v=20261003b';
+import * as Z from './zeit.js?v=20261003b';
+import { neueFarben } from './pixel.js?v=20261003b';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -17,7 +17,7 @@ export const DEMO = typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1
   ? new URLSearchParams(location.search).get('demo') : null;
 const SCHLUESSEL = DEMO ? 'adventshaus.demo' : 'adventshaus.v1';
 
-export const hooks = { ton() {}, toast() {}, geld() {}, musik() {}, bedient() {} };
+export const hooks = { ton() {}, toast() {}, geld() {}, musik() {}, bedient() {}, schicht() {} };
 
 // Positionen auf der Straße (Weltpixel x)
 export const TRESEN_X = [136, 150, 164];
@@ -27,6 +27,16 @@ const START_X = -12, ENDE_X = 196;
 // ---------------------------------------------------------------------------
 // Gespeicherter Zustand
 // ---------------------------------------------------------------------------
+/**
+ * Mitternacht des SPIELtages, zu dem der echte Zeitpunkt `ms` gehört.
+ * `st.zuletzt` ist echte Zeit, der Spieltag hat den Kalenderversatz (und im
+ * Test `Z.setzeZeit`) - beides wird hier auf denselben Tag gebracht.
+ */
+function echtMitternacht(ms = Date.now()) {
+  const d = new Date(ms + (Z.jetzt().getTime() - Date.now()));
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
 function heuteMitternacht() { const d = new Date(Z.jetzt()); d.setHours(0, 0, 0, 0); return d.getTime(); }
 /** Beim Losspielen (nach der Begrüßung, nach dem Kalenderversatz) den ersten Spieltag merken. */
 export function setzeStartTag() { st.startTag = heuteMitternacht(); }
@@ -44,6 +54,7 @@ function neuerStand(name = '', andenken = 0) {
     modus: 'echt', versatzTage: 0,   // 'echt' = echter Kalender, 'eigen' = Start eine Woche vor dem 1.12.
     sterne10: true,                  // Beträge in ganzen Sternen (seit 29.09. alles ×10)
     startTag: 0,                     // erster Spieltag (setzeStartTag beim Losspielen); 0 = noch nicht, fehlt = alter Stand
+    schichtFertig: 0,                // echter Tag (Mitternacht), an dem die Tagesschicht geschafft wurde
   };
 }
 
@@ -56,6 +67,7 @@ function laden() {
       // Falle: neuerStand() trägt sterne10 schon - ein alter Stand OHNE die
       // Marke wäre sonst nie umgerechnet worden (so beim ersten Test passiert)
       if (!('sterne10' in alt)) stand.sterne10 = false;
+      if (!('schichtFertig' in alt)) stand.schichtGnade = true;   // erste Kiste nach dem Update noch voll
       return stand;
     }
   } catch (e) { /* kaputter Spielstand: neu anfangen */ }
@@ -123,6 +135,7 @@ function resetLauf() {
     lernen: false, fehlGast: 0,
     klicks: [], druck: null, neuInHand: -1, neuInHandT: 0,   // sichtbare Rückmeldung beim Tippen
     aktivT: 0, spezialAb: 20, stossRest: 0, stossBis: 0, stossName: '',
+    stossMult: 2, ansturm: false, ansturmT: 0,   // Tagesansturm: Trinkgeld ×3, nur für dich
     wackel: {},                     // kurzes Wackeln je Topf/Gast bei Fehlern
     chefT: 0,                       // s seit dem letzten Tippen am Stand (Start zählt als da)
     grossAb: C.GROSS_ERST,          // frühestens dann die nächste Großbestellung
@@ -217,7 +230,35 @@ export function spieltag() {
 const nachTag = (liste) => liste[Math.min(liste.length - 1, spieltag())];
 export const offlineAnteil = () => nachTag(C.OFFLINE_JE_TAG.anteil);
 export const offlineStunden = () => nachTag(C.OFFLINE_JE_TAG.stunden);
-export const wichtelTempo = () => chefAktiv() ? C.CHEF_TEMPO : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() : 1;
+export const wichtelTempo = () => chefAktiv() ? C.CHEF_TEMPO : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() * schichtFaktor(echtMitternacht()) : 1;
+
+// ---------------------------------------------------------------------------
+// Tagesschicht (seit 03.10.): Wer heute SCHICHT_ZIEL Gäste selbst bedient,
+// lässt die Wichtel in der Nacht mit voller Kraft arbeiten. Ohne Schicht
+// schaffen sie nur SCHICHT_OHNE davon. Gemeldet: Wer täglich nur kurz
+// reinschaute, ließ alles die Wichtel machen - die Kiste brachte rund das
+// Zehnfache einer 10-Minuten-Runde, selbst spielen war überflüssig.
+// ---------------------------------------------------------------------------
+/** Wie viele Gäste heute selbst bedient (echter Tag). */
+export function schichtStand() {
+  const h = echtMitternacht();
+  if (!st.schicht || st.schicht.tag !== h) st.schicht = { tag: h, n: 0 };
+  return st.schicht.n;
+}
+export const schichtFertig = () => st.schichtFertig === echtMitternacht();
+/** Ab wann die Schicht zählt: erst mit dem Servier-Wichtel gibt es eine Kiste. */
+export const schichtAktiv = () => st.lernen >= 99 && hat('servier');
+/** Volle Kraft, wenn die Schicht an dem Tag geschafft war, an dem man ging. */
+const schichtFaktor = (tag) => (st.schichtFertig === tag ? 1 : C.SCHICHT_OHNE);
+function zaehleSchicht() {
+  schichtStand();
+  st.schicht.n++;
+  if (!schichtFertig() && st.schicht.n >= C.SCHICHT_ZIEL && schichtAktiv()) {
+    st.schichtFertig = echtMitternacht();
+    hooks.schicht();
+    speichere();
+  }
+}
 export const hatWichtel = () => ['spuel', 'servier', 'nachfuell', 'crepe_w'].some((id) => hat(id));
 
 /**
@@ -688,7 +729,7 @@ export function tippeGast(platz) {
  * Chefs) und keinen, für den schon ein Glas auf dem Tablett steht.
  */
 function servierKandidat() {
-  return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
+  return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !x.ansturm && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
     && !lauf.hand.some((h) => h.fuer === x.id))
     .sort((a, b) => a.geduld - b.geduld)[0] || null;
 }
@@ -751,6 +792,7 @@ function wichtelGlas(g) {
 function liefereGross(g, faktor) {
   const gr = g.gross;
   gr.stand++; gr.wert += faktor;
+  zaehleSchicht();
   if (faktor > 1) zaehleErfolg('extras');
   if (lauf.schwungT > 0 && lauf.schwung === C.SCHWUNG_MAX - 1) zaehleErfolg('schwungVoll');
   lauf.schwung = lauf.schwungT > 0 ? Math.min(C.SCHWUNG_MAX, lauf.schwung + 1) : 1;
@@ -785,11 +827,14 @@ function bediene(g, auto, faktor = 1) {
   const p = C.PRODUKT[g.wunsch];
   const def = C.GAESTE[g.typ];
   const b = boni();
-  const stoss = lauf.t < lauf.stossBis ? 2 : 1;
-  const tip = C.TRINKGELD_MAX * (g.geduld / g.geduldMax) * (1 + b.trinkgeld) * stoss;
+  const stoss = lauf.t < lauf.stossBis ? lauf.stossMult : 1;
+  // Trinkgeld gibt es seit 03.10. nur, wenn DU servierst - die Wichtel
+  // kassieren nur den Preis. Selbst bedienen soll sich lohnen.
+  const tip = auto ? 0 : C.TRINKGELD_MAX * (g.geduld / g.geduldMax) * (1 + b.trinkgeld) * stoss;
   let betrag = p.preis * preisFaktor() * (1 + tip) * (def.mult || 1) * (def.trink || 1) * (g.eilig ? C.EILIG_MULT : 1);
   const schwungVorher = lauf.schwung;
   if (!auto) {
+    zaehleSchicht();
     lauf.schwung = lauf.schwungT > 0 ? Math.min(C.SCHWUNG_MAX, lauf.schwung + 1) : 1;
     lauf.schwungT = C.SCHWUNG_FENSTER;
     betrag *= 1 + lauf.schwung * C.SCHWUNG_PRO;
@@ -852,9 +897,27 @@ export function update(dt) {
     lauf.aktivT = 0;
     lauf.stossRest = C.STOSS_GAESTE;
     lauf.stossBis = lauf.t + C.STOSS_DAUER;
+    lauf.stossMult = 2; lauf.ansturm = false;
     lauf.stossName = C.STOSS_GRUPPEN[Math.floor(Math.random() * C.STOSS_GRUPPEN.length)];
     hooks.toast(`${lauf.stossName} kommt! Doppeltes Trinkgeld.`, 'spezial');
     hooks.ton('spezial');
+  }
+
+  // Tagesansturm: einmal am (echten) Tag, nach ANSTURM_NACH s, in denen DU
+  // am Stand warst. Kurz, laut, dreifaches Trinkgeld, und die Wichtel
+  // schauen nur zu - der Moment, für den man reinschaut.
+  if (chefAktiv() && !lauf.lernen) lauf.ansturmT += dt;
+  if (lauf.ansturm && lauf.t >= lauf.stossBis) lauf.ansturm = false;
+  if (lauf.ansturmT >= C.ANSTURM_NACH && st.ansturmTag !== echtMitternacht() && st.lernen >= 99
+      && lauf.stossRest === 0 && lauf.t > lauf.stossBis && produkteFrei().length >= 2) {
+    st.ansturmTag = echtMitternacht();
+    lauf.stossRest = C.ANSTURM_GAESTE;
+    lauf.stossBis = lauf.t + C.ANSTURM_DAUER;
+    lauf.stossMult = C.ANSTURM_MULT; lauf.ansturm = true;
+    lauf.aktivT = 0;
+    hooks.toast(`Ansturm! ${C.ANSTURM_DAUER} Sekunden dreifaches Trinkgeld - nur wenn DU servierst.`, 'spezial');
+    hooks.ton('spezial');
+    speichere();
   }
 
   // Der erste Sondergast kommt garantiert früh - die erste Überraschung
@@ -868,9 +931,11 @@ export function update(dt) {
   const unterwegs = wartende().length;
   if (lauf.spawnT <= 0) {
     // Während der Einführung kommt immer nur EIN Gast, und der wartet geduldig
-    const grenze = lauf.lernen ? 1 : C.SCHLANGE_MAX + tresenPlaetze();
+    // Beim Ansturm darf die Schlange länger werden, sonst kämen die Gäste
+    // bei vollem Stand erst, wenn die 60 s fast um sind
+    const grenze = lauf.lernen ? 1 : C.SCHLANGE_MAX + tresenPlaetze() + (lauf.ansturm ? 4 : 0);
     if (unterwegs < grenze) {
-      if (lauf.stossRest > 0) { neuerGast(waehleTyp(false)); lauf.stossRest--; }
+      if (lauf.stossRest > 0) { const g = neuerGast(waehleTyp(false)); if (g && lauf.ansturm) g.ansturm = true; lauf.stossRest--; }
       else neuerGast();
     }
     lauf.spawnT = lauf.stossRest > 0 ? 0.9 : gastTakt() * (0.6 + Math.random() * 0.8);
@@ -1076,7 +1141,7 @@ export function wichtelProSekunde() {
   const sv = stufe('servier');
   if (!sv) return 0;
   const rate = Math.min(1 / C.SERVIER_TAKT[sv], 1 / gastTakt());
-  return rate * durchschnittsPreis() * preisFaktor() * (1 + C.TRINKGELD_MAX * 0.5);
+  return rate * durchschnittsPreis() * preisFaktor();   // Trinkgeld gibt es nur für dich
 }
 
 export function offlineAbrechnen() {
@@ -1088,20 +1153,26 @@ export function offlineAbrechnen() {
   const rate = Math.min(1 / C.SERVIER_TAKT[sv], 1 / gastTakt());
   // Die ersten INAKTIV_AB Sekunden arbeiten sie voll, danach nur noch ein Fünftel
   const voll = Math.min(sek, C.INAKTIV_AB);
-  let n = (voll + (sek - voll) * offlineAnteil()) * rate;
+  // Danach zählt die Tagesschicht des Tages, an dem man gegangen ist
+  const volleKraft = st.schichtGnade || st.schichtFertig === echtMitternacht(st.zuletzt);
+  delete st.schichtGnade;
+  let n = (voll + (sek - voll) * offlineAnteil() * (volleKraft ? 1 : C.SCHICHT_OHNE)) * rate;
   // Ohne Nachfüll-Wichtel ist nach den vollen Töpfen Schluss
   if (!stufe('nachfuell')) {
     const vorrat = produkteFrei().filter((p) => p.art !== 'platte').reduce((a, p) => a + (st.toepfe[p.id] || 0), 0);
     if (n >= vorrat) { n = vorrat; for (const p of produkteFrei()) if (p.art !== 'platte') st.toepfe[p.id] = 0; }
   }
   n = Math.floor(n);
-  const betrag = Math.round(n * durchschnittsPreis() * preisFaktor() * (1 + C.TRINKGELD_MAX * 0.5) * dev.geld);
+  // Schichtprämie: Nach geschaffter Schicht legen die Wichtel das Trinkgeld
+  // obendrauf, das sie am Stand nicht mehr bekommen - so bleibt die Saison
+  // für Schichtspieler so schnell wie vorher (gemessen 03.10.)
+  const betrag = Math.round(n * durchschnittsPreis() * preisFaktor() * (volleKraft ? C.SCHICHT_PRAEMIE : 1) * dev.geld);
   // Kurz weg: gleich gutschreiben. Länger weg: in die Kiste - die öffnet man
   // selbst (der Moment „ich komme zurück, und es ist viel passiert"). Sie
   // bleibt gespeichert, falls man die App vorher wieder zumacht.
   if (betrag > 0) {
     if (sek < C.OFFLINE_FENSTER) verdiene(betrag);
-    else { st.kiste = (st.kiste || 0) + betrag; st.kisteGaeste = (st.kisteGaeste || 0) + n; }
+    else { st.kiste = (st.kiste || 0) + betrag; st.kisteGaeste = (st.kisteGaeste || 0) + n; st.kisteVoll = volleKraft; }
   }
   st.stats.bedient += n;
   return { sek, betrag, portionen: n };

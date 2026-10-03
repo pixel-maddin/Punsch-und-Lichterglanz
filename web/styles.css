@@ -537,6 +537,11 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #ziel .lohn { color: #9a6a10; }
 #ziel small { color: #7a5a44; font-weight: normal; }
 #ziel .los { background: var(--gruen); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.8) calc(var(--px) * 2); }
+#ziel.ansturm { background: rgba(255, 226, 150, 0.95); border-color: var(--rot); animation: zielPuls 0.8s ease-in-out infinite; }
+#ziel.ansturm .nr { background: var(--rot); }
+#ziel.ansturm .fort span { background: var(--rot); }
+.schicht-hinweis { font-size: calc(var(--px) * 5); line-height: 1.35; background: #fbe6d0; border-radius: calc(var(--px) * 1.5); padding: calc(var(--px) * 2) calc(var(--px) * 3); }
+.schicht-hinweis.gut { background: #e4f4d8; }
 #ziel.bereit { background: rgba(255, 243, 196, 0.9); border-color: var(--gold); animation: zielPuls 1.4s ease-in-out infinite; }
 @keyframes zielPuls { 50% { box-shadow: 0 0 0 calc(var(--px) * 1.2) rgba(232, 176, 48, 0.55), 0 calc(var(--px) * 0.8) 0 var(--holz2); } }
 #ziel:active { transform: scale(0.97); }

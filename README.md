@@ -37,6 +37,11 @@ Falsch Eingeschenktes kippt man in den Ausguss rechts. **Sobald der Servier-Wich
 antippen, ein Wichtel stellt das Getränk aufs Tablett, dann (gern mit
 Handgriff) den Gast nochmal antippen zum Servieren.
 
+**Tagesschicht:** Bediene jeden Tag 30 Gäste selbst - dann arbeiten die
+Wichtel in der Nacht mit voller Kraft, sonst nur mit halber. Trinkgeld gibt
+es nur, wenn du selbst servierst. Einmal am Tag kommt ein **Ansturm**:
+60 Sekunden dreifaches Trinkgeld, die Wichtel schauen nur zu.
+
 **Während du weg bist**, arbeiten die Wichtel weiter (die ersten 5 Minuten
 voll, danach mit 40 %, höchstens 8 Stunden) und legen alles in eine Kiste,
 die du beim Zurückkommen öffnest.

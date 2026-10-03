@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261003a';
-import * as S from './spiel.js?v=20261003a';
-import * as Z from './zeit.js?v=20261003a';
-import * as T from './ton.js?v=20261003a';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261003a';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261003a';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261003a';
-import * as A from './auftraege.js?v=20261003a';
-import * as E from './erfolge.js?v=20261003a';
-import * as ZL from './ziele.js?v=20261003a';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261003a';
-import { alleSymbole } from './symbole.js?v=20261003a';
+import * as C from './config.js?v=20261003b';
+import * as S from './spiel.js?v=20261003b';
+import * as Z from './zeit.js?v=20261003b';
+import * as T from './ton.js?v=20261003b';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261003b';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261003b';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261003b';
+import * as A from './auftraege.js?v=20261003b';
+import * as E from './erfolge.js?v=20261003b';
+import * as ZL from './ziele.js?v=20261003b';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261003b';
+import { alleSymbole } from './symbole.js?v=20261003b';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -57,17 +57,40 @@ export function hud() {
 // Startziele: eine Leiste unter der Kopfzeile (ziele.js)
 // ---------------------------------------------------------------------------
 let letztesZiel = '';
+let leistenModus = '';   // 'ziel' | 'schicht' | 'ansturm' | ''
 export function zielLeiste() {
   const z = ZL.aktuell();
   const k = z && ZL.kaufziel();
   const bereit = !!(k && k.leisten);
   // Der Kontostand gehört in die Signatur: „noch 186 Sterne" blieb sonst
   // stehen, während man längst 179 hatte (Betatest 02.10.)
-  const sig = z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
+  // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist
+  // kurz) und - wenn die Startziele durch sind - die Tagesschicht
+  const ansturm = S.lauf.ansturm ? Math.max(0, Math.ceil(S.lauf.stossBis - S.lauf.t)) : 0;
+  const schicht = !z && !ansturm && S.schichtAktiv() && !S.schichtFertig();
+  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : schicht ? 'schicht' : '';
+  const sig = ansturm ? `a|${ansturm}` : schicht ? `s|${S.schichtStand()}`
+    : z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
   const b = $('#ziel');
-  $('#huelle').classList.toggle('mit-ziel', !!z);
+  $('#huelle').classList.toggle('mit-ziel', !!leistenModus);
+  b.classList.toggle('ansturm', !!ansturm);
+  if (ansturm) {
+    b.innerHTML = `<span class="nr">ANSTURM</span><span class="was">Trinkgeld ×${C.ANSTURM_MULT} - nur wenn du servierst!</span><span class="los">${ansturm} s</span>`
+      + `<span class="fort"><span style="width:${Math.round(ansturm / C.ANSTURM_DAUER * 100)}%"></span></span>`;
+    b.classList.remove('bereit', 'versteckt');
+    $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
+    return;
+  }
+  if (schicht) {
+    const n = Math.min(S.schichtStand(), C.SCHICHT_ZIEL);
+    b.innerHTML = `<span class="nr">Schicht</span><span class="was">Bediene heute selbst <i>${n}/${C.SCHICHT_ZIEL}</i> - dann arbeiten die Wichtel nachts voll</span>`
+      + `<span class="fort"><span style="width:${Math.round(n / C.SCHICHT_ZIEL * 100)}%"></span></span>`;
+    b.classList.remove('bereit', 'versteckt');
+    $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
+    return;
+  }
   if (!z) { b.classList.add('versteckt'); return; }
   const zahl = z.ziel > 1 ? ` <i>${z.stand()}/${z.ziel}</i>` : '';
   const nochNicht = k && !bereit ? `<small>noch ${S.formatGeld(k.kosten - S.st.geld)}</small>` : '';
@@ -635,6 +658,9 @@ export function zeigeKiste(sek, weiter) {
   const box = fenster('Während du weg warst …',
     `<canvas class="kiste" width="24" height="20"></canvas>
      <p>${dauer ? `In ${dauer} haben deine Wichtel` : 'Deine Wichtel haben'} <b>${gaeste}</b> Gäste bedient und alles in diese Kiste gelegt.</p>
+     ${S.st.kisteVoll === false
+        ? `<p class="schicht-hinweis">Ohne Tagesschicht haben sie nur mit halber Kraft gearbeitet. Bediene heute ${C.SCHICHT_ZIEL} Gäste selbst - dann arbeiten sie heute Nacht voll.</p>`
+        : S.st.kisteVoll ? '<p class="schicht-hinweis gut">Dank deiner Tagesschicht haben sie mit voller Kraft gearbeitet.</p>' : ''}
      ${sek >= S.offlineStunden() * 3600 ? `<p class="klein">Länger als ${S.offlineStunden()} Stunden arbeiten sie noch nicht allein - mit jedem Spieltag werden sie ausdauernder.</p>` : ''}`,
     [{ text: 'Kiste öffnen', aktion: (b) => {
       const betrag = S.oeffneKiste();
@@ -645,6 +671,24 @@ export function zeigeKiste(sek, weiter) {
       return false;
     } }]);
   zeichneKiste(box.querySelector('canvas'), false);
+}
+
+/** Antippen der Schicht-Leiste: worum es geht. */
+function zeigeSchichtInfo() {
+  fenster('Deine Tagesschicht', `
+    <div class="gross-ico">🧑‍🍳</div>
+    <p>Bediene heute <b>${C.SCHICHT_ZIEL} Gäste selbst</b> (${Math.min(S.schichtStand(), C.SCHICHT_ZIEL)} hast du schon).</p>
+    <p>Dann arbeiten deine Wichtel heute Nacht <b>mit voller Kraft</b> - sonst nur mit halber Kraft, und die Kiste bleibt klein.</p>
+    <p class="klein">Trinkgeld gibt es übrigens nur, wenn DU servierst. Die Wichtel kassieren nur den Preis.</p>`);
+}
+/** Schicht geschafft (spiel.js → hooks.schicht). */
+export function schichtGeschafft() {
+  T.spiele('fertig');
+  fenster('Schicht geschafft!', `
+    <div class="gross-ico">⭐</div>
+    <p>${C.SCHICHT_ZIEL} Gäste heute selbst bedient.</p>
+    <p><b>Deine Wichtel arbeiten heute Nacht mit voller Kraft.</b></p>
+    <p class="klein">Du kannst jetzt guten Gewissens aufhören - oder weiter Trinkgeld sammeln.</p>`);
 }
 
 /** Pixelkiste 24 × 20, zu oder offen mit Sternen. */
@@ -1184,7 +1228,12 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
 // ---------------------------------------------------------------------------
 export function verdrahte() {
   alleSymbole();
-  $('#ziel').onclick = () => { T.spiele('klick'); offen === 'laden' ? schliesseBlatt() : oeffneLaden(); };
+  $('#ziel').onclick = () => {
+    T.spiele('klick');
+    if (leistenModus === 'schicht') return zeigeSchichtInfo();
+    if (leistenModus === 'ansturm') return;   // jetzt servieren, nicht lesen
+    offen === 'laden' ? schliesseBlatt() : oeffneLaden();
+  };
   $('#btnLaden').onclick = () => { T.spiele('klick'); offen === 'laden' ? schliesseBlatt() : oeffneLaden(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };

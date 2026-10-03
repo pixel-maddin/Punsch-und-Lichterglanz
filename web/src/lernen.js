@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261003a';
-import * as S from './spiel.js?v=20261003a';
-import * as A from './auftraege.js?v=20261003a';
-import * as E from './erfolge.js?v=20261003a';
-import * as Z from './ziele.js?v=20261003a';
+import * as C from './config.js?v=20261003b';
+import * as S from './spiel.js?v=20261003b';
+import * as A from './auftraege.js?v=20261003b';
+import * as E from './erfolge.js?v=20261003b';
+import * as Z from './ziele.js?v=20261003b';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -172,13 +172,17 @@ const HINWEISE = [
     ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
-    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher. Mit jedem Spieltag werden sie ausdauernder (gerade bis zu ${S.offlineStunden()} Stunden). Solange du selbst mit anpackst, sind sie schneller.`,
+    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher. Mit jedem Spieltag werden sie ausdauernder (gerade bis zu ${S.offlineStunden()} Stunden). Solange du selbst mit anpackst, sind sie schneller. Und: Mit voller Kraft arbeiten sie nachts nur, wenn du am selben Tag deine SCHICHT geschafft hast (${C.SCHICHT_ZIEL} Gäste selbst bedient, Leiste oben).`,
     ziel: null, dauer: 12 },
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
   { id: 'bestellen2', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg && S.lauf.hand.some((h) => h.vonWichtel && !(h.rest > 0)),
     text: () => 'Siehst du den kleinen Wichtel am Tablett? Solange du am Stand bist, schenkt er für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - dann gibt es den Bonus. Sonst serviert er es nach ein paar Sekunden selbst (blauer Balken). Du kannst auch selbst einen Gast antippen, dann schenkt er für ihn ein.',
     ziel: () => handZiel(Math.max(0, S.lauf.hand.findIndex((h) => h.vonWichtel))), fertig: () => (S.lauf.wichtelSelbst || 0) > 0 || !S.lauf.hand.some((h) => h.vonWichtel) },
+  // Für alle, die die Wichtel schon vor der Tagesschicht hatten
+  { id: 'schicht_neu', ruhig: true, wann: () => S.schichtAktiv() && !Z.aktuell() && !!S.st.tipps.wichtel_weg && !S.schichtFertig(),
+    text: () => `Neu: die TAGESSCHICHT. Bediene heute ${C.SCHICHT_ZIEL} Gäste selbst, dann arbeiten deine Wichtel nachts mit voller Kraft. Trinkgeld gibt es nur, wenn du servierst.`,
+    ziel: () => ({ x: 90, y: 30 }), dauer: 10 },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },

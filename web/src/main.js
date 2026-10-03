@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261003a';
-import * as S from './spiel.js?v=20261003a';
-import * as Z from './zeit.js?v=20261003a';
-import * as T from './ton.js?v=20261003a';
-import * as UI from './ui.js?v=20261003a';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261003a';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261003a';
-import * as Lernen from './lernen.js?v=20261003a';
-import { zeigeAdvent } from './ereignis.js?v=20261003a';
-import * as A from './auftraege.js?v=20261003a';
-import * as E from './erfolge.js?v=20261003a';
-import * as ZL from './ziele.js?v=20261003a';
+import * as C from './config.js?v=20261003b';
+import * as S from './spiel.js?v=20261003b';
+import * as Z from './zeit.js?v=20261003b';
+import * as T from './ton.js?v=20261003b';
+import * as UI from './ui.js?v=20261003b';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261003b';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261003b';
+import * as Lernen from './lernen.js?v=20261003b';
+import { zeigeAdvent } from './ereignis.js?v=20261003b';
+import * as A from './auftraege.js?v=20261003b';
+import * as E from './erfolge.js?v=20261003b';
+import * as ZL from './ziele.js?v=20261003b';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -132,6 +132,7 @@ S.hooks.ton = (n) => { try { T.spiele(n); } catch (e) { console.warn('Ton', n, e
 // Glas holen!" wären dasselbe noch einmal (gemeldet als doppelte Tipps)
 S.hooks.toast = (t, a) => { if (a === 'hinweis' && S.st.lernen < 99) return; UI.toast(t, a); };
 S.hooks.geld = () => UI.aktualisiereLaden();
+S.hooks.schicht = () => { UI.schichtGeschafft(); UI.zielLeiste(); };
 S.hooks.bedient = (g, auto, stoss) => A.bedient(g, auto, stoss);
 A.beiErfuellt((a) => { T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
 

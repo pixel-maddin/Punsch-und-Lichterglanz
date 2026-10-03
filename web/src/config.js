@@ -389,5 +389,16 @@ export const VORFREUDE_MIN = 150;
 // Wer am Tresen sieht, dass sein Getränk gerade gemacht wird, geht nicht
 // mehr weg (die Geduld sinkt weiter, aber nie unter diesen Rest in s)
 export const GEDULD_RESERVIERT = 1.5;
+// Tagesschicht (03.10.): so viele Gäste heute SELBST bedienen (Großbestellung
+// je Glas), dann arbeiten die Wichtel in der Nacht mit voller Kraft - sonst
+// nur mit diesem Anteil. ~5-7 Minuten bei normalem Tempo.
+export const SCHICHT_ZIEL = 30;
+export const SCHICHT_OHNE = 0.5;
+export const SCHICHT_PRAEMIE = 1.15;   // Kiste nach geschaffter Schicht (= das alte Wichtel-Trinkgeld)
+// Tagesansturm: einmal am Tag, nach so vielen Sekunden am Stand
+export const ANSTURM_NACH = 75;
+export const ANSTURM_DAUER = 60;
+export const ANSTURM_GAESTE = 10;
+export const ANSTURM_MULT = 3;    // Trinkgeld-Faktor (die Stoßzeit hat 2)
 // Reihenfolge der Türchen im Raster (wie ein echter Kalender, durcheinander)
 export const KALENDER_REIHE = [7, 15, 2, 20, 11, 24, 4, 18, 9, 13, 1, 22, 16, 6, 19, 3, 12, 23, 8, 14, 21, 5, 17, 10];
