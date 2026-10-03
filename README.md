@@ -127,7 +127,7 @@ alte Dateien.
 
 ## Musik
 
-„Village at Night" (`web/audio/musik.m4a`) wurde mit [Suno](https://suno.com)
+„Music2" (`web/audio/musik.m4a`) wurde mit [Suno](https://suno.com)
 erstellt und wird nicht-kommerziell verwendet.
 
 ## Nutzung

@@ -1,7 +1,9 @@
 /*
  * ton.js - Geräusche (synthetisiert) und die Musik.
  *
- * MUSIK: `audio/musik.m4a` („Village at Night"), endlos in Schleife.
+ * MUSIK: `audio/musik.m4a` („Music2", seit 03.10.; davor „Village at Night"),
+ * endlos in Schleife. Die Versionsnummer hängt dran, damit Browser nach einem
+ * Austausch nicht das alte Stück aus dem Zwischenspeicher spielen.
  * Sie läuft über den WebAudio-Graphen, NICHT über `audio.volume`: Auf
  * iOS ist `volume` schreibgeschützt und wird still ignoriert - ein
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
@@ -20,7 +22,7 @@ export function init() {
   ctx = new AC();
   fxGain = ctx.createGain(); fxGain.gain.value = fxAn ? 0.5 : 0; fxGain.connect(ctx.destination);
   musikGain = ctx.createGain(); musikGain.gain.value = 0; musikGain.connect(ctx.destination);
-  musikEl = new Audio('audio/musik.m4a');
+  musikEl = new Audio('audio/musik.m4a?v=20261003a');
   musikEl.loop = true;
   musikEl.preload = 'auto';
   try { ctx.createMediaElementSource(musikEl).connect(musikGain); }
