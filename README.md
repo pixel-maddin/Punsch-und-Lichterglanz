@@ -91,7 +91,12 @@ je Erfolg. Mit jeder Socke wird das Wohnzimmer weihnachtlicher.
 ## Die Karte
 
 Der Knopf **Karte** unten links öffnet eine Übersichtskarte der Gegend, mit
-deinem Haus in der Mitte. Die Geschäfte sind Orte darauf:
+deinem Haus in der Mitte: Berge, ein Bach mit Holzbrücken, der in einen
+Weiher mündet (im Winter zugefroren, mit Schlittschuhläufer), Wälder,
+Wege mit Laternen. Rauch steigt aus den Schornsteinen, im Wichtelwald
+schwirren Glühwürmchen, am Schlittenberg saust ein Wok die Bahn hinunter,
+und nachts leuchten Fenster und Lichterketten. Die Geschäfte sind Orte
+darauf, und jedes zeigt beim Öffnen oben ein Bild von sich:
 
 | Ort | Was es gibt |
 |---|---|
@@ -103,6 +108,7 @@ deinem Haus in der Mitte. Die Geschäfte sind Orte darauf:
 **Waldlichtung (Minispiel):** Hasen, Eichhörnchen und Rehe hüpfen durch die
 Lichtung - tippe sie an, um sie zu füttern. 30 Sekunden, schnelles Füttern
 hintereinander gibt eine Kette bis ×5, selten kommt ein goldener Schneehase.
+Gefüttert wird an der Raufe mitten in der Lichtung - Möhren, Nüsse und Äpfel.
 Für die ersten drei Runden am Tag gibt es Sterne, dazu einen eigenen Rekord.
 Ab 800, 1.800 und 3.000 Punkten Rekord ziehen Tiere bei dir ein: eine
 Hasenfamilie, ein Eichhörnchen auf dem Dach und ein Reh am Gartenweg.

@@ -4,12 +4,12 @@
  *
  * Die Bilder sind 90 x 50 Pixel, im Fenster dreifach vergrößert.
  */
-import * as C from './config.js?v=20261009h';
-import * as S from './spiel.js?v=20261009h';
-import * as T from './ton.js?v=20261009h';
-import * as Z from './zeit.js?v=20261009h';
-import { r, p, figurKlein, neueFarben } from './pixel.js?v=20261009h';
-import { fenster } from './ui.js?v=20261009h';
+import * as C from './config.js?v=20261009i';
+import * as S from './spiel.js?v=20261009i';
+import * as T from './ton.js?v=20261009i';
+import * as Z from './zeit.js?v=20261009i';
+import { r, p, figurKlein, neueFarben } from './pixel.js?v=20261009i';
+import { fenster } from './ui.js?v=20261009i';
 
 const BW = 90, BH = 50;
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];

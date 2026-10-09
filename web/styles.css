@@ -250,6 +250,7 @@ html, body {
 }
 #blattTabs { display: flex; flex-direction: column; gap: calc(var(--px) * 2); padding: calc(var(--px) * 2) calc(var(--px) * 3) 0; }
 #blattTabs .reiter { display: flex; gap: calc(var(--px) * 1); }
+#blattTabs .ort-bild { display: block; width: 100%; aspect-ratio: 110 / 40; image-rendering: pixelated; border-radius: calc(var(--px) * 2); border: calc(var(--px) * 0.6) solid #c89a5a; box-sizing: border-box; }
 /* Oberster Umschalter im Laden: Einkaufen | Mein Haus */
 .modi {
   display: flex; padding: calc(var(--px) * 0.8);

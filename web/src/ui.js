@@ -5,20 +5,20 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009h';
-import * as S from './spiel.js?v=20261009h';
-import * as Z from './zeit.js?v=20261009h';
-import * as T from './ton.js?v=20261009h';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009h';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009h';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009h';
-import * as A from './auftraege.js?v=20261009h';
-import * as E from './erfolge.js?v=20261009h';
-import * as ZL from './ziele.js?v=20261009h';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009h';
-import * as KA from './karte.js?v=20261009h';
-import * as LI from './lichtung.js?v=20261009h';
-import { alleSymbole } from './symbole.js?v=20261009h';
+import * as C from './config.js?v=20261009i';
+import * as S from './spiel.js?v=20261009i';
+import * as Z from './zeit.js?v=20261009i';
+import * as T from './ton.js?v=20261009i';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009i';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009i';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009i';
+import * as A from './auftraege.js?v=20261009i';
+import * as E from './erfolge.js?v=20261009i';
+import * as ZL from './ziele.js?v=20261009i';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009i';
+import * as KA from './karte.js?v=20261009i';
+import * as LI from './lichtung.js?v=20261009i';
+import { alleSymbole } from './symbole.js?v=20261009i';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -197,6 +197,12 @@ export function oeffneLaden(tab, zeigeId, modus) {
   kopf.innerHTML = '';
   kopf.classList.add('versteckt');
   $('#blatt').dataset.modus = ladenModus;
+  // Oben ein Bild des Geschäfts, wie es auf der Karte steht (09.10.)
+  if (ladenModus === 'kaufen') {
+    const bild = document.createElement('canvas');
+    bild.className = 'ort-bild';
+    if (KA.vignette(bild, ladenTab)) { kopf.appendChild(bild); kopf.classList.remove('versteckt'); }
+  }
   if (ladenModus === 'haus') { zeilen = []; baueHaus(); return; }
   baueLaden();
   // Vom Regal aus geöffnet: die Zeile des Getränks zeigen und aufleuchten lassen
@@ -245,7 +251,7 @@ function zeigeLichtung() {
     <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
   [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteLichtung, 60); } }]);
 }
-function starteLichtung() {
+export function starteLichtung() {
   LI.starte(spielHoehe(), (punkte, n) => {
     const e = S.lichtungErgebnis(punkte);
     LI.schliesse();

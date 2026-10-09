@@ -4,18 +4,19 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261009h';
-import * as S from './spiel.js?v=20261009h';
-import * as Z from './zeit.js?v=20261009h';
-import * as T from './ton.js?v=20261009h';
-import * as UI from './ui.js?v=20261009h';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261009h';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009h';
-import * as Lernen from './lernen.js?v=20261009h';
-import { zeigeAdvent } from './ereignis.js?v=20261009h';
-import * as A from './auftraege.js?v=20261009h';
-import * as E from './erfolge.js?v=20261009h';
-import * as ZL from './ziele.js?v=20261009h';
+import * as C from './config.js?v=20261009i';
+import * as S from './spiel.js?v=20261009i';
+import * as Z from './zeit.js?v=20261009i';
+import * as T from './ton.js?v=20261009i';
+import * as LI from './lichtung.js?v=20261009i';
+import * as UI from './ui.js?v=20261009i';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261009i';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009i';
+import * as Lernen from './lernen.js?v=20261009i';
+import { zeigeAdvent } from './ereignis.js?v=20261009i';
+import * as A from './auftraege.js?v=20261009i';
+import * as E from './erfolge.js?v=20261009i';
+import * as ZL from './ziele.js?v=20261009i';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -365,6 +366,7 @@ function demo(art) {
   }
   if (art === 'meinhaus') UI.oeffneMeinHaus();
   if (art === 'landkarte') UI.oeffneKarte();
+  if (art === 'lichtung') { UI.starteLichtung(); LI.vorspulen(9); }
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');
   if (art === 'karte') UI.karte(0);
