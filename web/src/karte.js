@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261009n';
-import * as S from './spiel.js?v=20261009n';
-import * as Z from './zeit.js?v=20261009n';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009n';
+import * as C from './config.js?v=20261009o';
+import * as S from './spiel.js?v=20261009o';
+import * as Z from './zeit.js?v=20261009o';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009o';
 
 const $ = (s) => document.querySelector(s);
 
@@ -67,6 +67,7 @@ export function oeffne(hoehe, beiAnkunft, hervor) {
   baueSchilder(hervor);
   el.classList.remove('versteckt');
   offen = true;
+  S.lauf.karteOffen = true;   // für den Hinweis „Auf der Karte gibt es noch mehr"
   wanderer = null;
   letzte = performance.now();
   cancelAnimationFrame(rafId);
@@ -74,6 +75,7 @@ export function oeffne(hoehe, beiAnkunft, hervor) {
 }
 export function schliesse() {
   offen = false;
+  S.lauf.karteOffen = false;
   $('#landkarte').classList.add('versteckt');
   cancelAnimationFrame(rafId);
 }
@@ -92,12 +94,14 @@ function baueSchilder(hervor) {
     b.style.top = `calc(var(--px) * ${yPx(o) + 9})`;
     const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : 0;
     let unter = o.bald ? 'bald' : o.spiel ? 'Minispiel' : '';
+    // Noch nie gespielt: kleines NEU am Schild
+    const nieGespielt = o.spiel && !S.miniRekord(o.spiel);
     if (o.markt) {
       const m = S.marktInfo();
       unter = m.heute ? 'heute Weihnachtsmarkt!' : m.inTagen === 1 ? 'Markt morgen' : `Markt in ${m.inTagen} Tagen`;
       if (m.heute) b.classList.add('markt-heute');
     }
-    b.innerHTML = `${o.name}${n ? `<b class="ort-neu">${n}</b>` : ''}${unter ? `<small>${unter}</small>` : ''}`;
+    b.innerHTML = `${o.name}${n ? `<b class="ort-neu">${n}</b>` : ''}${nieGespielt ? '<b class="ort-neu">NEU</b>' : ''}${unter ? `<small>${unter}</small>` : ''}`;
     b.onclick = () => gehe(o);
     box.appendChild(b);
     // Auch das Bild des Ortes selbst ist antippbar (größere Fläche)

@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261009n';
-import * as S from './spiel.js?v=20261009n';
-import * as A from './auftraege.js?v=20261009n';
-import * as E from './erfolge.js?v=20261009n';
-import * as Z from './ziele.js?v=20261009n';
+import * as C from './config.js?v=20261009o';
+import * as S from './spiel.js?v=20261009o';
+import * as A from './auftraege.js?v=20261009o';
+import * as E from './erfolge.js?v=20261009o';
+import * as Z from './ziele.js?v=20261009o';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -179,6 +179,12 @@ const HINWEISE = [
   { id: 'bestellen2', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg && S.lauf.hand.some((h) => h.vonWichtel && !(h.rest > 0)),
     text: () => 'Siehst du den kleinen Wichtel am Tablett? Solange du am Stand bist, schenkt er für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - dann gibt es den Bonus. Sonst serviert er es nach ein paar Sekunden selbst (blauer Balken). Du kannst auch selbst einen Gast antippen, dann schenkt er für ihn ein.',
     ziel: () => handZiel(Math.max(0, S.lauf.hand.findIndex((h) => h.vonWichtel))), fertig: () => (S.lauf.wichtelSelbst || 0) > 0 || !S.lauf.hand.some((h) => h.vonWichtel) },
+  // Was es außer dem Stand gibt (09.10.): erst, wenn die Wichtel den Stand
+  // tragen - dann ist Zeit dafür, und es hat Sterne für die Markt-Ware
+  { id: 'karte_mehr', sofort: true, wann: () => !!S.st.tipps.wichtel_weg,
+    info: () => 'Auf der Karte gibt es noch mehr zu entdecken: drei MINISPIELE - Waldlichtung, Christbaumverkauf und Schlittenberg. Sie bringen Sterne und besondere Deko fürs Haus. Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.',
+    text: () => 'Tippe auf KARTE und schau dich um.',
+    ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, lang: true },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },

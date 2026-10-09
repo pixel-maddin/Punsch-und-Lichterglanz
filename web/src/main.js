@@ -4,21 +4,21 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261009n';
-import * as S from './spiel.js?v=20261009n';
-import * as Z from './zeit.js?v=20261009n';
-import * as T from './ton.js?v=20261009n';
-import * as LI from './lichtung.js?v=20261009n';
-import * as CB from './christbaum.js?v=20261009n';
-import * as SB from './schlitten.js?v=20261009n';
-import * as UI from './ui.js?v=20261009n';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261009n';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009n';
-import * as Lernen from './lernen.js?v=20261009n';
-import { zeigeAdvent } from './ereignis.js?v=20261009n';
-import * as A from './auftraege.js?v=20261009n';
-import * as E from './erfolge.js?v=20261009n';
-import * as ZL from './ziele.js?v=20261009n';
+import * as C from './config.js?v=20261009o';
+import * as S from './spiel.js?v=20261009o';
+import * as Z from './zeit.js?v=20261009o';
+import * as T from './ton.js?v=20261009o';
+import * as LI from './lichtung.js?v=20261009o';
+import * as CB from './christbaum.js?v=20261009o';
+import * as SB from './schlitten.js?v=20261009o';
+import * as UI from './ui.js?v=20261009o';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261009o';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009o';
+import * as Lernen from './lernen.js?v=20261009o';
+import { zeigeAdvent } from './ereignis.js?v=20261009o';
+import * as A from './auftraege.js?v=20261009o';
+import * as E from './erfolge.js?v=20261009o';
+import * as ZL from './ziele.js?v=20261009o';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -352,7 +352,7 @@ function demo(art) {
   // Alle Hinweise als gelesen, damit keine Blase im Bild steht
   for (const k of ['leer', 'falsch', 'voll', 'laden', 'laden_danach', 'deko', 'deko_danach', 'gegangen', 'schwung', 'w_spuel', 'w_nachfuell', 'w_servier',
     'wichtel_weg', 'bestellen2', 'herz_ziel', 'ziele_fertig', 'sonder_schlange', 'sonder_weg', 'extra', 'gross', 'chef', 'schild', 'eilig', 'auftrag',
-    'auftraege_neu', 'erfolge', 'kalender', ...Object.keys(C.HANDGRIFF).map((g) => 'griff_' + g)]) st.tipps[k] = true;
+    'auftraege_neu', 'erfolge', 'kalender', 'karte_mehr', ...Object.keys(C.HANDGRIFF).map((g) => 'griff_' + g)]) st.tipps[k] = true;
   if (art === 'start') delete st.tipps.laden;
   S.lauf.lernen = false;
   // Etwas Betrieb am Stand

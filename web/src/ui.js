@@ -5,22 +5,22 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009n';
-import * as S from './spiel.js?v=20261009n';
-import * as Z from './zeit.js?v=20261009n';
-import * as T from './ton.js?v=20261009n';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009n';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009n';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009n';
-import * as A from './auftraege.js?v=20261009n';
-import * as E from './erfolge.js?v=20261009n';
-import * as ZL from './ziele.js?v=20261009n';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009n';
-import * as KA from './karte.js?v=20261009n';
-import * as LI from './lichtung.js?v=20261009n';
-import * as CB from './christbaum.js?v=20261009n';
-import * as SB from './schlitten.js?v=20261009n';
-import { alleSymbole } from './symbole.js?v=20261009n';
+import * as C from './config.js?v=20261009o';
+import * as S from './spiel.js?v=20261009o';
+import * as Z from './zeit.js?v=20261009o';
+import * as T from './ton.js?v=20261009o';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009o';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009o';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009o';
+import * as A from './auftraege.js?v=20261009o';
+import * as E from './erfolge.js?v=20261009o';
+import * as ZL from './ziele.js?v=20261009o';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009o';
+import * as KA from './karte.js?v=20261009o';
+import * as LI from './lichtung.js?v=20261009o';
+import * as CB from './christbaum.js?v=20261009o';
+import * as SB from './schlitten.js?v=20261009o';
+import { alleSymbole } from './symbole.js?v=20261009o';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
