@@ -105,8 +105,8 @@ darauf, und jedes zeigt beim Öffnen oben ein Bild von sich:
 | **Supermarkt** | Zutaten: Kinderpunsch (lockt Kinder an), heißer Apfel, Lebkuchen, heiße Schokolade, Herzwärmer, Waldtee, Crêpe, Zimtwolke, Feuerzauber - alles alkoholfrei |
 | **Wichtelwald** | Spül-, Servier-, Nachfüll-, Crêpe- und Kassen-Wichtel, in ihren Baumstammhäusern |
 
-**Waldlichtung (Minispiel):** Hasen, Eichhörnchen und Rehe hüpfen durch die
-Lichtung - tippe sie an, um sie zu füttern. 30 Sekunden, schnelles Füttern
+**Waldlichtung (Minispiel):** Hasen, Eichhörnchen und Rehe ziehen durch die
+Lichtung - die Rehe im schnellen Galopp - tippe sie an, um sie zu füttern. 30 Sekunden, schnelles Füttern
 hintereinander gibt eine Kette bis ×5, selten kommt ein goldener Schneehase.
 Gefüttert wird an der Raufe mitten in der Lichtung - Möhren, Nüsse und Äpfel.
 Für die ersten drei Runden am Tag gibt es Sterne, dazu einen eigenen Rekord.

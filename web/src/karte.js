@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261009j';
-import * as S from './spiel.js?v=20261009j';
-import * as Z from './zeit.js?v=20261009j';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009j';
+import * as C from './config.js?v=20261009k';
+import * as S from './spiel.js?v=20261009k';
+import * as Z from './zeit.js?v=20261009k';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009k';
 
 const $ = (s) => document.querySelector(s);
 
@@ -313,7 +313,6 @@ function baueGrund(winter) {
   markiere(w.x - 22, w.y - 12, 44, 24);
 
   // 6. Wald und Einzelbäume, nach unten sortiert (vorn liegt vorn)
-  const baeume = [];
   const dicht = (x, y) => {
     const yy = y / H;
     let d = 0.06;
@@ -327,11 +326,39 @@ function baueGrund(winter) {
     const be = ort('berg'); if (Math.hypot(x - be.x, y - yPx(be)) < 32) d = Math.max(d, 0.45);
     return d;
   };
-  for (let y = 4; y < H + 8; y += 4) for (let x = 2; x < C.B; x += 5) {
-    const jx = x + (hash2(x, y) - 0.5) * 5, jy = y + (hash2(y, x) - 0.5) * 4;
-    if (hash2(x + 3, y + 7) > dicht(jx, jy)) continue;
+  // Geschlossene Waldflächen statt Hunderter Einzelbäume (09.10., gemeldet:
+  // „zu viel Struktur, besonders mit Schnee"). Innen ein ruhiges, gleich-
+  // mäßiges Kronenmuster, nur am oberen Waldrand stehen einzelne Tannen.
+  const wald = new Uint8Array(C.B * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < C.B; x++) {
+    if (!frei(x, y)) continue;
+    if (dicht(x, y) + (rausch(x / 11, y / 11) - 0.5) * 0.4 > 0.66) wald[y * C.B + x] = 1;
+  }
+  const istWald = (x, y) => x >= 0 && x < C.B && y >= 0 && y < H && wald[y * C.B + x];
+  const WG = winter ? ['#24473a', '#2d5546', '#b9cdd6', '#1c3a30'] : ['#28532f', '#326238', '#447d40', '#1e4226'];
+  for (let y = 0; y < H; y++) for (let x = 0; x < C.B; x++) if (wald[y * C.B + x]) p(c, x, y, WG[0]);
+  // Kronen im versetzten Raster: Kuppe mit Licht oben links, Schatten unten rechts
+  for (let y0 = 3; y0 < H + 3; y0 += 5) for (let x0 = (Math.floor(y0 / 5) % 2) * 3 + 1; x0 < C.B; x0 += 6) {
+    const x = x0 + Math.round((hash2(x0, y0) - 0.5) * 2), y = y0 + (hash2(y0, x0) < 0.4 ? 1 : 0);
+    if (!istWald(x, y)) continue;
+    r(c, x - 2, y, 5, 2, WG[1]); r(c, x - 1, y - 1, 3, 1, WG[1]);
+    p(c, x - 1, y - 1, WG[2]);
+    if (!winter || hash2(x, y) < 0.5) p(c, x, y - 1, WG[2]);
+    p(c, x + 2, y + 1, WG[3]);
+  }
+  // Unterkante der Flächen etwas dunkler, damit sie auf dem Boden stehen
+  for (let y = 1; y < H - 1; y++) for (let x = 0; x < C.B; x++) if (wald[y * C.B + x] && !istWald(x, y + 1)) p(c, x, y + 1, 'rgba(20,40,30,0.25)');
+  const baeume = [];
+  // Tannen am oberen Waldrand
+  for (let x = 2; x < C.B; x += 5) for (let y = 1; y < H; y++) {
+    if (istWald(x, y) && !istWald(x, y - 1) && !istWald(x, y - 2)) baeume.push({ x: x + Math.round((hash2(x, y) - 0.5) * 2), y: y + 3, g: hash2(x, y) < 0.3 ? 2 : 1 });
+  }
+  // Wenige Einzelbäume auf offenem Land
+  for (let y = 4; y < H + 8; y += 6) for (let x = 2; x < C.B; x += 7) {
+    const jx = x + (hash2(x, y) - 0.5) * 6, jy = y + (hash2(y, x) - 0.5) * 5;
+    if (istWald(Math.round(jx), Math.round(jy)) || hash2(x + 3, y + 7) > 0.09) continue;
     if (!frei(jx, jy) || !frei(jx, jy - 4)) continue;
-    baeume.push({ x: Math.round(jx), y: Math.round(jy), g: hash2(x, y * 3) < 0.25 ? 2 : hash2(x * 5, y) < 0.5 ? 1 : 0, laub: !winter && hash2(x * 7, y) < 0.12 });
+    baeume.push({ x: Math.round(jx), y: Math.round(jy), g: hash2(x, y * 3) < 0.3 ? 1 : 0, laub: !winter && hash2(x * 7, y) < 0.3 });
   }
   // Büsche, Felsen und Kleinkram auf freien Flächen
   for (let i = 0; i < 70; i++) {
@@ -418,8 +445,10 @@ function tanne(x, y, g, P) {
       r(c, x - w, yy, w, 1, P.nadel[2]);                       // Lichtseite links
       r(c, x, yy, w + 1, 1, P.nadel[1]);
       p(c, x + w, yy, P.nadel[0]);
-      if (P.schnee && yy === oben) r(c, x - w, yy, w * 2 + 1, 1, P.schnee);
-      else if (P.schnee && yy === unten - 1 && s > 0) p(c, x - w, yy, P.schnee2);
+      // Schnee nur als Kappe oben und als Tupfer an den Astspitzen links -
+      // ganze weiße Zeilen je Stufe machten den Wald streifig
+      if (P.schnee && yy === oben && s === 0) r(c, x - w, yy, w * 2 + 1, 1, P.schnee);
+      else if (P.schnee && yy === unten - 1) p(c, x - w, yy, P.schnee);
     }
   }
   p(c, x, y - h - 1, P.schnee || P.nadel[1]);
