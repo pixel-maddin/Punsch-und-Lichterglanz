@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009l';
-import * as Z from './zeit.js?v=20261009l';
-import * as S from './spiel.js?v=20261009l';
-import { FASSADEN } from './config.js?v=20261009l';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009m';
+import * as Z from './zeit.js?v=20261009m';
+import * as S from './spiel.js?v=20261009m';
+import { FASSADEN } from './config.js?v=20261009m';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -188,6 +188,15 @@ function hintergrund(c, G, w, L, t = 0) {
       const x = i * abstand + Math.floor(Z.hash(seed + i * 7) * abstand);
       const h = hMin + Math.floor(Z.hash(seed * 3 + i * 5) * (hMax - hMin));
       tannenRiss(c, x, fuss, h, f, schnee ? sf : null);
+      // Lichterwald aus dem Christbaumverkauf (09.10.): eine Kette um jede Tanne
+      if (S.zeigt('c_wald')) for (let k = 1; k <= 4; k++) {
+        const ly = fuss - Math.round(h * k / 5), lx = x + Math.round(h * 0.34 * k / 5) * (k % 2 ? -1 : 1);
+        // Hinter Haus, Stand und Kirche nicht: Lichter werden zuletzt gemalt
+        // und schienen sonst durch die Wände
+        if (hausVerdeckt(lx, ly, G) || (lx >= 122 && ly > G - 50) || (lx < 24 && ly > hz - 36)) continue;
+        const lf = BUNT[(i + k) % BUNT.length];
+        p(c, lx, ly, lf); L.push({ x: lx, y: ly, f: lf, halo: 2, an: 0.75 });
+      }
     }
   };
   const fest = w.kerzen >= 4;
@@ -1193,6 +1202,31 @@ function kutsche(c, L, G, t, w) {
   L.push({ rect: [x + 11, fuss - 12, 4, 4], f: '#ffd070', halo: 5, an: 0.7 });
 }
 
+// ---------------------------------------------------------------------------
+// Aus dem Christbaumverkauf (09.10.)
+// ---------------------------------------------------------------------------
+/** Drei große Kugeln an Aststellen des kahlen Baums, die nicht hinter Haus oder Stand liegen. */
+function riesenkugeln(c, L, G) {
+  for (const [x, y, f] of [[122, G - 84, '#d83a3a'], [128, G - 96, '#e8b030'], [138, G - 68, '#3a7ad8']]) {
+    r(c, x, y - 3, 1, 3, '#3a3a40'); r(c, x - 1, y - 1, 3, 1, '#c8a040');
+    r(c, x - 2, y + 1, 5, 3, f); r(c, x - 1, y, 3, 5, f); p(c, x - 1, y + 1, '#ffffff'); p(c, x + 1, y + 3, ton(f, -0.3));
+    L.push({ x, y: y + 2, f, halo: 3, an: 0.4 });
+  }
+}
+/** Kleiner Christbaum mit Lichtern oben auf dem Dachfirst. */
+function dachbaum(c, L, x, fuss, t, w) {
+  r(c, x - 2, fuss - 2, 5, 2, '#6a4428');
+  for (let i = 0; i < 12; i++) {
+    const s = Math.floor(i / 4), innen = (i % 4) / 4, bw = Math.round((s + 1) * 1.6 * (0.6 + innen * 0.4));
+    r(c, x - bw, fuss - 14 + i, bw * 2 + 1, 1, i % 4 === 3 ? '#1c5228' : '#2a6a34');
+    if (w.schnee > 0 && innen === 0) p(c, x - bw, fuss - 14 + i, '#ffffff');
+  }
+  p(c, x, fuss - 15, '#ffe060'); L.push({ x, y: fuss - 15, f: '#ffe060', halo: 5, an: 0.9 });
+  [[-2, -11], [2, -9], [-3, -6], [3, -4], [0, -7]].forEach(([dx, dy], k) => {
+    const f = BUNT[k % BUNT.length]; p(c, x + dx, fuss + dy, f); L.push({ x: x + dx, y: fuss + dy, f, halo: 2, an: lichtHell(k, t, 2) });
+  });
+}
+
 /** Lichter-Flamingo: pink, S-Hals, ein Bein, Weihnachtsmütze, Lichterkette. */
 function flamingo(c, L, x, fuss, t) {
   const pk = '#f06aa8', dk = '#c8487e';
@@ -1700,7 +1734,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -1799,10 +1833,12 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   hintergrund(e, GW, w, L, t);
   kahlerBaum(e, GW, w, L, t);
   if (S.zeigt('m_stern')) herrnhuter(e, L, 147, GW - 85, t);
+  if (S.zeigt('c_kugeln')) riesenkugeln(e, L, GW);
   boden(e, GW, w);
   fahrbahn(e, GW, G, w);
   haus(e, GW, w, t, L);
   if (S.zeigt('m_fenster')) fensterbilder(e, GW);
+  if (S.zeigt('c_dachbaum')) dachbaum(e, L, 92, GW - 94, t, w);
   // Verdeckung: Alle Lichter werden erst am Ende über das Bild gemalt. Was
   // danach DAVOR gezeichnet wird (Tanne vor der Kirche, Leute vor dem Zaun),
   // würde sonst von ihnen durchleuchtet. Deshalb ein Schnappschuss nach jeder

@@ -105,6 +105,14 @@ darauf, und jedes zeigt beim Öffnen oben ein Bild von sich:
 | **Supermarkt** | Zutaten: Kinderpunsch (lockt Kinder an), heißer Apfel, Lebkuchen, heiße Schokolade, Herzwärmer, Waldtee, Crêpe, Zimtwolke, Feuerzauber - alles alkoholfrei |
 | **Wichtelwald** | Spül-, Servier-, Nachfüll-, Crêpe- und Kassen-Wichtel, in ihren Baumstammhäusern |
 
+**Christbaumverkauf (Minispiel):** Kunden fahren vor und wollen einen
+bestimmten Baum - Größe und Sorte (Nordmanntanne, Blaufichte, Fichte) stehen
+in der Sprechblase. Den richtigen Baum dreimal antippen zum Sägen, dreimal ins
+Netz, dann aufs Autodach. 60 Sekunden; je schneller, desto mehr Punkte, und
+fehlerfreie Kunden hintereinander geben eine Kette bis ×3. Sterne für die
+ersten drei Runden am Tag, Rekord, und ab 900, 1.700 und 2.700 Punkten:
+Riesenkugeln im Baum, ein Bäumchen auf dem Dachfirst und ein Lichterwald.
+
 **Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt - er wird
 ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.
 Am Markttag kommen 20 % mehr Gäste an deinen Stand, und auf dem Markt gibt es

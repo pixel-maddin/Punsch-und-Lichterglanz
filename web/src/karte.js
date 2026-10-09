@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261009l';
-import * as S from './spiel.js?v=20261009l';
-import * as Z from './zeit.js?v=20261009l';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009l';
+import * as C from './config.js?v=20261009m';
+import * as S from './spiel.js?v=20261009m';
+import * as Z from './zeit.js?v=20261009m';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009m';
 
 const $ = (s) => document.querySelector(s);
 
@@ -29,7 +29,7 @@ const $ = (s) => document.querySelector(s);
 export const ORTE = [
   { id: 'dorf',      name: 'Weihnachtsladen', x: 90,  y: 0.17, tab: 'markt' },
   { id: 'festplatz', name: 'Festplatz',       x: 30,  y: 0.19, markt: true },
-  { id: 'baeume',    name: 'Christbaumverkauf', x: 150, y: 0.21, bald: 'Fälle den Baum, den der Kunde will, pack ihn ein und lade ihn aufs Autodach. Je schneller, desto mehr Sterne.' },
+  { id: 'baeume',    name: 'Christbaumverkauf', x: 150, y: 0.21, spiel: 'baum' },
   { id: 'super',     name: 'Supermarkt',      x: 34,  y: 0.40, tab: 'super' },
   { id: 'bau',       name: 'Baumarkt',        x: 148, y: 0.41, tab: 'baumarkt' },
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },

@@ -507,4 +507,19 @@ export const LICHTUNG_DEKO = [
   { id: 'l_eich',  name: 'Eichhörnchen auf dem Dach', ab: 1800, stimmung: 5, text: 'Sitzt auf dem Dach und knabbert eine Nuss.' },
   { id: 'l_reh',   name: 'Reh am Gartenweg',          ab: 3000, stimmung: 7, text: 'Kommt aus dem Wald zu Besuch und bleibt.' },
 ];
+// Minispiel Christbaumverkauf (09.10.): 60 s, Kunden wollen einen bestimmten
+// Baum (Sorte und Größe). Fällen (3x tippen), einnetzen (3x), aufs Autodach.
+export const BAUM_DAUER = 60;
+export const BAUM_PUNKTE_JE_MIN = 600;
+export const BAUM_MAX_MIN = 3;
+export const BAUM_DEKO = [
+  { id: 'c_kugeln',   name: 'Riesenkugeln im Baum',   ab: 900,  stimmung: 5, text: 'Drei große Kugeln hängen im kahlen Baum.' },
+  { id: 'c_dachbaum', name: 'Bäumchen auf dem First', ab: 1700, stimmung: 5, text: 'Ein kleiner Christbaum mit Lichtern ganz oben auf dem Dach.' },
+  { id: 'c_wald',     name: 'Lichterwald',            ab: 2700, stimmung: 7, text: 'Die Tannen hinter deinem Stand tragen Lichterketten.' },
+];
+// Welche Minispiele es gibt: Deko-Liste und Umrechnung der Punkte in Sterne
+export const MINISPIELE = {
+  lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN },
+  baum:     { deko: BAUM_DEKO,     jeMin: BAUM_PUNKTE_JE_MIN,     maxMin: BAUM_MAX_MIN },
+};
 

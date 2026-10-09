@@ -5,20 +5,21 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009l';
-import * as S from './spiel.js?v=20261009l';
-import * as Z from './zeit.js?v=20261009l';
-import * as T from './ton.js?v=20261009l';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009l';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009l';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009l';
-import * as A from './auftraege.js?v=20261009l';
-import * as E from './erfolge.js?v=20261009l';
-import * as ZL from './ziele.js?v=20261009l';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009l';
-import * as KA from './karte.js?v=20261009l';
-import * as LI from './lichtung.js?v=20261009l';
-import { alleSymbole } from './symbole.js?v=20261009l';
+import * as C from './config.js?v=20261009m';
+import * as S from './spiel.js?v=20261009m';
+import * as Z from './zeit.js?v=20261009m';
+import * as T from './ton.js?v=20261009m';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009m';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009m';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009m';
+import * as A from './auftraege.js?v=20261009m';
+import * as E from './erfolge.js?v=20261009m';
+import * as ZL from './ziele.js?v=20261009m';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009m';
+import * as KA from './karte.js?v=20261009m';
+import * as LI from './lichtung.js?v=20261009m';
+import * as CB from './christbaum.js?v=20261009m';
+import { alleSymbole } from './symbole.js?v=20261009m';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -30,7 +31,7 @@ let ladenTab = 'super';
 let ladenModus = 'kaufen';  // 'kaufen' | 'haus' - Einkaufen oder Mein Haus (einstellen)
 let zeilen = [];           // Ladenzeilen zum Nachführen
 
-export function panelOffen() { return offen || (LI.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
+export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
 
 // ---------------------------------------------------------------------------
 // Kopfzeile
@@ -243,6 +244,7 @@ function amOrt(o) {
   if (o.id === 'haus') { KA.schliesse(); return; }
   if (o.tab) { oeffneLaden(o.tab); return; }
   if (o.spiel === 'lichtung') { zeigeLichtung(); return; }
+  if (o.spiel === 'baum') { zeigeBaumspiel(); return; }
   if (o.markt) { zeigeMarkt(); return; }
   if (o.bald) fenster(o.name, `<p>${o.bald}</p><p class="klein">Kommt bald!</p>`);
 }
@@ -264,23 +266,41 @@ function zeigeLichtung() {
   [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteLichtung, 60); } }]);
 }
 export function starteLichtung() {
-  LI.starte(spielHoehe(), (punkte, n) => {
-    const e = S.lichtungErgebnis(punkte);
-    LI.schliesse();
-    const deko = e.neu.map((d) => `<p class="bonus">Neu für dein Haus: <b>${d.name}</b> (♥ +${d.stimmung})</p>`).join('');
-    fenster(e.rekord ? 'Neuer Rekord!' : 'Gut gefüttert!', `
-      <p>${n} Tiere gefüttert</p>
-      <p class="summe">${punkte} Punkte</p>
-      <p class="klein">Rekord: ${e.best}</p>
-      ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}</p>` : '<p class="klein">Heute keine Sterne mehr - morgen wieder.</p>'}
-      ${e.sterne && e.rest ? `<p class="klein">Heute noch ${e.rest} ${e.rest === 1 ? 'Runde' : 'Runden'} mit Sternen.</p>` : ''}
-      ${deko}`,
-    // Neue Deko: gleich ansehen - auf der Karte sähe man das Funkeln am Haus nicht
-    e.neu.length
-      ? [{ text: 'Nochmal', neben: true, aktion: () => { setTimeout(starteLichtung, 60); } },
-        { text: 'Ansehen', aktion: () => { schliesseKarte(); for (const d of e.neu) { const o = ortVon(d.id); if (o) funkeln(o.x, o.y, `+${d.stimmung} ♥`); } } }]
-      : [{ text: 'Zur Karte', neben: true }, { text: 'Nochmal', aktion: () => { setTimeout(starteLichtung, 60); } }]);
-  });
+  LI.starte(spielHoehe(), (punkte, n) => { LI.schliesse(); miniErgebnis('lichtung', punkte, `${n} Tiere gefüttert`, 'Gut gefüttert!', starteLichtung); });
+}
+/** Ergebnisfenster für jedes Minispiel: Punkte, Rekord, Sterne, neue Deko. */
+function miniErgebnis(name, punkte, zeile, titel, nochmal) {
+  const e = S.miniErgebnis(name, punkte);
+  const deko = e.neu.map((d) => `<p class="bonus">Neu für dein Haus: <b>${d.name}</b> (♥ +${d.stimmung})</p>`).join('');
+  fenster(e.rekord ? 'Neuer Rekord!' : titel, `
+    <p>${zeile}</p>
+    <p class="summe">${punkte} Punkte</p>
+    <p class="klein">Rekord: ${e.best}</p>
+    ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}</p>` : '<p class="klein">Heute keine Sterne mehr - morgen wieder.</p>'}
+    ${e.sterne && e.rest ? `<p class="klein">Heute noch ${e.rest} ${e.rest === 1 ? 'Runde' : 'Runden'} mit Sternen.</p>` : ''}
+    ${deko}`,
+  // Neue Deko: gleich ansehen - auf der Karte sähe man das Funkeln am Haus nicht
+  e.neu.length
+    ? [{ text: 'Nochmal', neben: true, aktion: () => { setTimeout(nochmal, 60); } },
+      { text: 'Ansehen', aktion: () => { schliesseKarte(); for (const d of e.neu) { const o = ortVon(d.id); if (o) funkeln(o.x, o.y, `+${d.stimmung} ♥`); } } }]
+    : [{ text: 'Zur Karte', neben: true }, { text: 'Nochmal', aktion: () => { setTimeout(nochmal, 60); } }]);
+}
+
+// ---------------------------------------------------------------------------
+// Minispiel Christbaumverkauf (christbaum.js)
+// ---------------------------------------------------------------------------
+function zeigeBaumspiel() {
+  const rest = S.miniRest('baum'), best = S.miniRekord('baum');
+  const naechste = C.BAUM_DEKO.find((d) => !S.st.kalDeko[d.id]);
+  fenster('Christbaumverkauf', `
+    <p>Kunden fahren vor und wollen einen bestimmten Baum - <b>Größe und Sorte stehen in der Sprechblase.</b></p>
+    <p>Tippe den richtigen Baum an und <b>säge ihn mit drei Tipps</b>. Dann <b>dreimal aufs Netz</b> und zum Schluss <b>aufs Auto</b>. Je schneller, desto mehr Punkte - fehlerfreie Kunden hintereinander geben eine Kette bis ×3.</p>
+    <p class="klein">${C.BAUM_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
+    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteBaumspiel, 60); } }]);
+}
+export function starteBaumspiel() {
+  CB.starte(spielHoehe(), (punkte, n) => { CB.schliesse(); miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft`, 'Gut verkauft!', starteBaumspiel); });
 }
 
 function baueLaden() {
@@ -385,7 +405,7 @@ function zeigeVariante(platz, text = '') {
 export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
-  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO].filter((d) => S.st.kalDeko[d.id]);
+  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
@@ -715,6 +735,10 @@ function zeichneIcon(cv, a) {
     case 'l_eich': r(c, 5, 7, 5, 5, '#c86a2a'); r(c, 9, 5, 3, 3, '#c86a2a'); r(c, 1, 3, 4, 8, '#d88a4a'); p(c, 11, 6, '#2a1a10'); r(c, 11, 10, 2, 2, '#8a5a2a'); return;
     case 'l_reh': r(c, 2, 7, 10, 4, '#a8703a'); for (const x of [3, 5, 9, 11]) r(c, x, 11, 1, 4, '#a8703a'); r(c, 11, 3, 2, 4, '#a8703a'); r(c, 12, 2, 3, 2, '#a8703a'); p(c, 5, 8, '#f4ead8'); p(c, 8, 8, '#f4ead8'); return;
     case 'h_zimt': for (const [x, y] of [[7, 1], [7, 13], [1, 7], [13, 7]]) r(c, x, y, 2, 2, '#c8843a'); r(c, 4, 4, 8, 8, '#c8843a'); r(c, 5, 5, 6, 6, '#f4ead8'); p(c, 7, 7, '#c8843a'); p(c, 8, 8, '#c8843a'); return;
+    // Aus dem Christbaumverkauf
+    case 'c_kugeln': for (const [x, y, f] of [[4, 6, '#d83a3a'], [10, 4, '#ffd040'], [9, 11, '#3a8ad8']]) { r(c, x - 2, y - 1, 5, 3, f); r(c, x - 1, y - 2, 3, 5, f); p(c, x - 1, y - 1, '#ffffff'); r(c, x, y - 4, 1, 2, '#3a3a40'); } return;
+    case 'c_dachbaum': for (let i = 0; i < 4; i++) r(c, 2 + i * 3, 14 - i * 3, 12 - i * 6 > 0 ? 12 - i * 6 : 2, 1, '#5a5a62'); for (let i = 0; i < 9; i++) { const w = Math.round((i + 1) / 9 * 4); r(c, 8 - w, 2 + i, w * 2 + 1, 1, i % 3 ? '#2a6a34' : '#1c5228'); } p(c, 8, 1, '#ffe060'); p(c, 6, 6, '#ff5a5a'); p(c, 10, 8, '#5ad0ff'); return;
+    case 'c_wald': for (const x of [3, 8, 13]) { for (let i = 0; i < 10; i++) { const w = Math.round((i + 1) / 10 * 3); r(c, x - w, 4 + i, w * 2 + 1, 1, '#2a5a3a'); } p(c, x, 7, '#ffe060'); p(c, x - 1, 10, '#ff5a5a'); p(c, x + 1, 12, '#5ad0ff'); } return;
     // Vom Weihnachtsmarkt
     case 'm_rad': for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; p(c, 8 + Math.round(Math.cos(a) * 6), 7 + Math.round(Math.sin(a) * 6), k % 2 ? '#ffd040' : '#d83a3a'); } r(c, 7, 6, 2, 2, '#6a5a6a'); r(c, 4, 13, 1, 3, '#6a5a6a'); r(c, 11, 13, 1, 3, '#6a5a6a'); r(c, 3, 15, 10, 1, '#6a5a6a'); return;
     case 'm_stern': r(c, 7, 0, 1, 3, '#6a4428'); for (const [x, y] of [[7, 3], [3, 7], [11, 7], [7, 11], [4, 4], [10, 4], [4, 10], [10, 10]]) r(c, x, y, 2, 2, '#ffe060'); r(c, 6, 6, 4, 4, '#fff6c8'); return;
@@ -1445,7 +1469,7 @@ export function verdrahte() {
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
   $('#kartenZu').onclick = () => { T.spiele('klick'); schliesseKarte(); };
-  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); };
+  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); CB.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
   $('#btnKarte').onclick = () => karte();

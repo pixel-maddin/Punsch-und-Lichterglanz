@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261009l';
-import * as Z from './zeit.js?v=20261009l';
-import { neueFarben } from './pixel.js?v=20261009l';
+import * as C from './config.js?v=20261009m';
+import * as Z from './zeit.js?v=20261009m';
+import { neueFarben } from './pixel.js?v=20261009m';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -201,7 +201,7 @@ export function stimmung() {
   for (const d of C.AUFTRAG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.HAENDLER_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.MARKT_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
-  for (const d of C.LICHTUNG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
+  for (const d of [...C.LICHTUNG_DEKO, ...C.BAUM_DEKO]) if (st.kalDeko[d.id]) s += d.stimmung;
   s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
   return s;
 }
@@ -1265,29 +1265,36 @@ function marktAnsage() {
 // ---------------------------------------------------------------------------
 // Minispiel Waldlichtung (09.10.)
 // ---------------------------------------------------------------------------
-function lichtungStand() {
-  st.lichtung = st.lichtung || { best: 0, tag: 0, runden: 0 };
-  if (st.lichtung.tag !== echtMitternacht()) { st.lichtung.tag = echtMitternacht(); st.lichtung.runden = 0; }
-  return st.lichtung;
+// Gemeinsam für alle Minispiele (09.10.): je Spiel Rekord und Runden am Tag
+// in st.mini[name]; die Lichtung hatte vorher st.lichtung - der wird übernommen.
+function miniStand(name) {
+  st.mini = st.mini || {};
+  if (!st.mini[name]) st.mini[name] = (name === 'lichtung' && st.lichtung) || { best: 0, tag: 0, runden: 0 };
+  const m = st.mini[name];
+  if (m.tag !== echtMitternacht()) { m.tag = echtMitternacht(); m.runden = 0; }
+  return m;
 }
 /** Wie viele Runden mit Sternen heute noch übrig sind. */
-export const lichtungRest = () => Math.max(0, C.MINI_RUNDEN_STERNE - lichtungStand().runden);
-export const lichtungRekord = () => lichtungStand().best;
+export const miniRest = (name) => Math.max(0, C.MINI_RUNDEN_STERNE - miniStand(name).runden);
+export const miniRekord = (name) => miniStand(name).best;
 /** Nach einer Runde: Sterne (nur die ersten Runden am Tag), Rekord, neue Deko. */
-export function lichtungErgebnis(punkte) {
-  const l = lichtungStand();
+export function miniErgebnis(name, punkte) {
+  const l = miniStand(name), def = C.MINISPIELE[name];
   const mitSternen = l.runden < C.MINI_RUNDEN_STERNE;
   l.runden++;
-  const sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(C.LICHTUNG_MAX_MIN, punkte / C.LICHTUNG_PUNKTE_JE_MIN))) : 0;
+  const sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(def.maxMin, punkte / def.jeMin))) : 0;
   if (sterne) verdiene(sterne);
   const vorher = l.best;
   if (punkte > l.best) l.best = punkte;
-  const neu = C.LICHTUNG_DEKO.filter((d) => !st.kalDeko[d.id] && l.best >= d.ab);
+  const neu = def.deko.filter((d) => !st.kalDeko[d.id] && l.best >= d.ab);
   st.neu = st.neu || {};
   for (const d of neu) { st.kalDeko[d.id] = true; st.neu[d.id] = true; }
   speichere();
-  return { sterne, rekord: punkte > vorher && vorher > 0, best: l.best, neu, rest: lichtungRest() };
+  return { sterne, rekord: punkte > vorher && vorher > 0, best: l.best, neu, rest: miniRest(name) };
 }
+export const lichtungRest = () => miniRest('lichtung');
+export const lichtungRekord = () => miniRekord('lichtung');
+export const lichtungErgebnis = (punkte) => miniErgebnis('lichtung', punkte);
 
 /** Den Nikolaus angetippt: Sterne! Gibt den Betrag zurück (oder 0). */
 export function fangeSchlitten() {
