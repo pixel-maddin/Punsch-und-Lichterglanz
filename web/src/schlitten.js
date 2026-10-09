@@ -10,14 +10,15 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=20261009p';
-import * as Z from './zeit.js?v=20261009p';
-import * as T from './ton.js?v=20261009p';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=20261009p';
+import * as C from './config.js?v=20261009q';
+import * as Z from './zeit.js?v=20261009q';
+import * as T from './ton.js?v=20261009q';
+import * as MH from './minihud.js?v=20261009q';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=20261009q';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
-const LAENGE = 2600;            // Strecke in Pixeln
+const LAENGE = 3900;            // Strecke in Pixeln (09.10.: 50 % länger, Nutzerwunsch)
 const RAND = 14;                // Bäume am Rand: weiter geht es nicht
 const TEMPO = [60, 160], BESCHL = 18, CRASH_TEMPO = 20;
 const ARTEN = {
@@ -44,6 +45,8 @@ export function starte(hoehe, beiEnde) {
   c.imageSmoothingEnabled = false;
   spiel = neuesSpiel(-3);
   $('#minispiel').classList.remove('versteckt');
+  MH.an(W, H);
+  T.musikPause(true);   // Musik ruht im Minispiel (09.10., Nutzerwunsch)
   // Lenken: Wo der Finger ist, dorthin zieht der Wok
   const fx = (e) => { const rc = cv.getBoundingClientRect(); return (e.clientX - rc.left) / rc.width * W; };
   cv.onpointerdown = (e) => { if (spiel) { spiel.finger = true; spiel.zielX = fx(e); } };
@@ -61,6 +64,8 @@ export function schliesse() {
   window.removeEventListener('keydown', taste);
   window.removeEventListener('keyup', taste);
   $('#minispiel').classList.add('versteckt');
+  MH.aus();
+  T.musikPause(false);
 }
 function taste(e) {
   const an = e.type === 'keydown';
@@ -85,7 +90,8 @@ function neuesSpiel(t0) {
     if (Math.round((y - 260) / 68) % 2 === 0) {
       let sx, tries = 0;
       do { sx = zufall(RAND + 8, W - RAND - 8); tries++; } while (xs.some((o) => Math.abs(o - sx) < 18) && tries < 10);
-      g.dinge.push({ art: 'stern', x: sx, y: y + 34, getroffen: false });
+      // Jeder vierte Stern ist ein großer: doppelte Punkte (Nutzerwunsch 09.10.)
+      g.dinge.push({ art: 'stern', gross: Math.random() < 0.25, x: sx, y: y + 34, getroffen: false });
     }
   }
   return g;
@@ -142,10 +148,11 @@ function schritt(dt) {
     const dy = d.y - g.dist;
     if (dy < -10 || dy > 10) continue;
     if (d.art === 'stern') {
-      if (Math.abs(d.x - g.x) < 10 && Math.abs(dy) < 8) {
-        d.getroffen = true; g.sterne++; g.punkte += C.BERG_STERN;
-        g.texte.push({ x: d.x, y: WOK_Y() - 14, text: '+' + C.BERG_STERN, farbe: '#ffe060', t: 0 });
-        T.spiele('greifen');
+      if (Math.abs(d.x - g.x) < (d.gross ? 12 : 10) && Math.abs(dy) < 8) {
+        const pkt = C.BERG_STERN * (d.gross ? 2 : 1);
+        d.getroffen = true; g.sterne++; g.punkte += pkt;
+        g.texte.push({ x: d.x, y: WOK_Y() - 14, text: '+' + pkt, farbe: d.gross ? '#ffb040' : '#ffe27a', t: 0 });
+        T.spiele(d.gross ? 'kasse' : 'greifen');
       }
       continue;
     }
@@ -183,7 +190,7 @@ function lenkeAuto(fehler, voraus = 110) {
       const k = Math.min(1, dy / Math.max(1, g.v) / Math.max(0.01, dauer));
       const px = g.x + (x - g.x) * k;
       const dx = Math.abs(d.x - px);
-      if (d.art === 'stern') { if (dx < 10) w += 30 * (1 - dy / voraus); }
+      if (d.art === 'stern') { if (dx < 10) w += (d.gross ? 60 : 30) * (1 - dy / voraus); }
       else if (dx < ARTEN[d.art].r + 10) w -= 200 * (1 - dy / (voraus * 1.2));
     }
     if (w > bw) { bw = w; best = x; }
@@ -262,6 +269,14 @@ function ding(d, y, t) {
     for (let i = 0; i < 3; i++) { r(c, x - 7 + i * 5, y - 3, 4, 4, '#8a5a32'); r(c, x - 6 + i * 5, y - 2, 2, 2, '#c8a070'); }
     for (let i = 0; i < 2; i++) { r(c, x - 5 + i * 5, y - 7, 4, 4, '#7a4c28'); r(c, x - 4 + i * 5, y - 6, 2, 2, '#c8a070'); }
     r(c, x - 5, y - 8, 9, 1, '#ffffff');
+  } else if (d.art === 'stern' && !d.getroffen && d.gross) {
+    // Großer Stern: doppelt so groß, mit Strahlenkranz
+    const yy = y - 6 + Math.round(Math.sin(t * 4 + d.x) * 2), f = Math.floor(t * 6 + d.x) % 3 ? '#ffd040' : '#fff6c8';
+    c.fillStyle = 'rgba(255,220,100,0.25)'; c.fillRect(x - 7, yy - 7, 15, 15);
+    r(c, x - 2, yy - 2, 5, 5, f); r(c, x - 1, yy - 6, 3, 4, f); r(c, x - 1, yy + 3, 3, 4, f); r(c, x - 6, yy - 1, 4, 3, f); r(c, x + 3, yy - 1, 4, 3, f);
+    p(c, x, yy - 7, f); p(c, x, yy + 7, f); p(c, x - 7, yy, f); p(c, x + 7, yy, f);
+    for (const [dx, dy] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) p(c, x + dx, yy + dy, '#e8a020');
+    p(c, x - 1, yy - 1, '#ffffff');
   } else if (d.art === 'stern' && !d.getroffen) {
     const yy = y - 4 + Math.round(Math.sin(t * 4 + d.x) * 1.5), f = Math.floor(t * 6 + d.x) % 3 ? '#ffe060' : '#fff6c8';
     r(c, x - 1, yy - 1, 3, 3, f); p(c, x, yy - 3, f); p(c, x, yy + 3, f); p(c, x - 3, yy, f); p(c, x + 3, yy, f);
@@ -320,32 +335,16 @@ function zeichne(t) {
   }
   if (!wokGemalt) wok(Math.round(g.x), wy, t, g);
   for (const s of g.gischt) p(c, s.x, s.y, '#ffffff');
-  for (const x of g.texte) gross(x.text, x.farbe, Math.round(x.x), Math.round(x.y - x.t * 18), x.text.length > 4 ? 1 : 2, false);
+  // Schwebende Texte als DOM (minihud.js) - einmal anstoßen, sie steigen selbst
+  for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || (x.text.length > 3 ? '#ffb040' : '#ffe27a'), x.text.length > 5 ? 0.8 : 1.1); }
   // Daumen-Hinweis am Anfang
-  if (g.t < 2.5) {
-    const s = 'DAUMEN ZIEHEN ZUM LENKEN';
-    const bx = Math.round(W / 2 - textBreite(s) / 2);
-    r(c, bx - 3, H - 22, textBreite(s) + 6, 10, 'rgba(30,20,10,0.55)'); pixText(c, s, bx, H - 20, '#ffe060');
-  }
+  MH.hinweis(g.t < 2.5 ? 'Daumen ziehen zum Lenken' : null);
   // Leicht dunkler bei Nacht
   const li = Z.licht();
   if (li.hell < 0.9) { c.fillStyle = `rgba(14,20,62,${((1 - li.hell) * 0.35).toFixed(3)})`; c.fillRect(0, 0, W, H); }
 
-  // Kopfzeile: Restzeit, Fortschritt bis zum Ziel, Punkte
-  r(c, 0, 0, W, 16, '#6a4428'); r(c, 0, 15, W, 1, '#3a2414'); r(c, 0, 0, W, 1, '#8a5a32');
+  // Kopfzeile: Restzeit, Fortschritt bis zum Ziel, Punkte (DOM, minihud.js)
   const rest = Math.max(0, Math.ceil(C.BERG_DAUER - Math.max(0, g.t)));
-  kreis(9, 8, 5, '#3a2414'); kreis(9, 8, 4, '#f4ead8'); r(c, 9, 5, 1, 4, '#2a1a10'); r(c, 9, 8, 3, 1, '#2a1a10');
-  gross(String(rest), rest <= 5 && Math.floor(t * 4) % 2 ? '#ff7a6a' : '#ffffff', 17, 3, 2, true);
-  const anteil = Math.min(1, g.dist / LAENGE);
-  r(c, 48, 6, 54, 4, '#3a2414'); r(c, 48, 6, Math.round(54 * anteil), 4, '#7ae07a'); r(c, 101, 4, 2, 8, '#ffffff');
-  const ps = String(g.punkte);
-  gross(ps, '#ffe060', W - 30 - textBreite(ps) * 2, 3, 2, true);
-  // Countdown und Ende
-  const mitteY = Math.round(H * 0.5);
-  if (g.t < 0.6 || g.aus) {
-    c.fillStyle = 'rgba(30,20,10,0.45)';
-    c.fillRect(0, mitteY - 8, W, 36);
-    const s = g.aus ? (g.imZiel ? 'ZIEL!' : 'ZEIT!') : g.t < 0 ? String(Math.ceil(-g.t)) : 'LOS!';
-    gross(s, g.t < 0 && !g.aus ? '#ffffff' : '#ffe060', W / 2, mitteY, 4, false);
-  }
+  MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, fortschritt: Math.min(1, g.dist / LAENGE), punkte: g.punkte });
+  MH.mitte(g.aus ? (g.imZiel ? 'ZIEL!' : 'ZEIT!') : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }

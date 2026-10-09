@@ -13,10 +13,11 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=20261009p';
-import * as Z from './zeit.js?v=20261009p';
-import * as T from './ton.js?v=20261009p';
-import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=20261009p';
+import * as C from './config.js?v=20261009q';
+import * as Z from './zeit.js?v=20261009q';
+import * as T from './ton.js?v=20261009q';
+import * as MH from './minihud.js?v=20261009q';
+import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=20261009q';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -51,6 +52,8 @@ export function starte(hoehe, beiEnde) {
   c.imageSmoothingEnabled = false;
   spiel = neuesSpiel(-3);
   $('#minispiel').classList.remove('versteckt');
+  MH.an(W, H);
+  T.musikPause(true);   // Musik ruht im Minispiel (09.10., Nutzerwunsch)
   cv.onpointerdown = (e) => {
     const rc = cv.getBoundingClientRect();
     tippeAuf((e.clientX - rc.left) / rc.width * W, (e.clientY - rc.top) / rc.height * H);
@@ -63,6 +66,8 @@ export function schliesse() {
   spiel = null;
   cancelAnimationFrame(rafId);
   $('#minispiel').classList.add('versteckt');
+  MH.aus();
+  T.musikPause(false);
 }
 
 function zufall(a, b) { return a + Math.random() * (b - a); }
@@ -390,8 +395,7 @@ function blase(a, pp, t) {
   // Der Wunschbaum in echter Größe, dazu Sorte und Größe in Schrift
   baumStehend(bx + 12, by + bh - 4, a.wunsch.art, a.wunsch.gr, 1, false, 0);
   const s1 = GROESSE[a.wunsch.gr], s2 = SORTEN[a.wunsch.art].name;
-  pixText(c, s1, bx + 23, by + 7, '#2a1810', null);
-  pixText(c, s2, bx + 23, by + 15, SORTEN[a.wunsch.art].f[2], null);
+  MH.label('wunsch', bx + 23, by + 5, `${s1}<small style="color:${SORTEN[a.wunsch.art].f[2]}">${s2}</small>`, 'wunsch');
   // Geduld
   const anteil = Math.max(0, a.geduld / a.max);
   r(c, bx + 3, by + bh - 6, bw - 6, 3, '#d8ccb8');
@@ -423,7 +427,7 @@ function zeichne(t) {
   for (let i = 0; i < 8; i++) r(c, m.x - 10 + i, m.y - 16 + i, 20 - i * 2, 1, i % 2 ? '#c83a32' : '#e84a3a');
   r(c, m.x - 6, m.y - 8, 12, 6, '#a82a24'); r(c, m.x - 3, m.y - 6, 6, 3, '#2a2a30');
   r(c, m.x - 5, m.y - 19, 10, 3, '#f4f0e8'); r(c, m.x - 5, m.y - 19, 10, 1, '#ffffff');
-  pixText(c, 'NETZ', m.x - 7, m.y + 10, '#ffffff', '#2a1810');
+  MH.label('netz', m.x, m.y + 9, 'NETZ', 'schild');
   // Die Ware
   const w = g.ware;
   if (w) {
@@ -438,18 +442,15 @@ function zeichne(t) {
     if (a.phase !== 'faehrt') {
       figurKlein(c, a.kunde, a.x - 28, pp.y, t);
       blase(a, pp, t);
-    }
-  }
+    } else MH.label('wunsch', 0, 0, null);
+  } else MH.label('wunsch', 0, 0, null);
   // Hinweis, was als Nächstes dran ist
   const was = !a || a.phase === 'faehrt' ? '' : g.schritt === 'suchen' ? 'BAUM SUCHEN' : g.schritt === 'saegen' ? 'SÄGEN!' : g.schritt === 'netz' ? (w && w.phase === 'wartet' ? 'INS NETZ!' : '') : g.schritt === 'laden' ? 'AUFS AUTO!' : '';
-  if (was && g.t >= 0 && !g.aus) {
-    const bx = Math.round(W / 2 - textBreite(was) / 2);
-    r(c, bx - 3, 18, textBreite(was) + 6, 10, 'rgba(30,20,10,0.55)');
-    pixText(c, was, bx, 20, '#ffe060');
-  }
+  MH.hinweis(was && g.t >= 0 && !g.aus ? was : null);
   // Fehlgriffe und Texte
   for (const f of g.fehl) { const k = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - k})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
-  for (const x of g.texte) gross(x.text, x.farbe, Math.round(x.x), Math.round(x.y - x.t * 18), x.text.length > 5 ? 1 : 2, false);
+  // Schwebende Texte als DOM (minihud.js) - einmal anstoßen, sie steigen selbst
+  for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || (x.text.length > 3 ? '#ffb040' : '#ffe27a'), x.text.length > 5 ? 0.8 : 1.1); }
 
   // Nacht
   const li = Z.licht();
@@ -465,20 +466,8 @@ function zeichne(t) {
     for (let x = 34; x < W; x += 6) p(c, x, oben - 3 + (x % 12 === 4 ? 1 : 0), ['#c84040', '#c8a030', '#3a90b0', '#4aa04a'][(x / 6) % 4 | 0]);
   }
 
-  // Kopfzeile wie in der Lichtung: Uhr, Kette, Punkte
-  r(c, 0, 0, W, 16, '#6a4428'); r(c, 0, 15, W, 1, '#3a2414'); r(c, 0, 0, W, 1, '#8a5a32');
+  // Kopfzeile, Countdown und Ende als DOM (minihud.js)
   const rest = Math.max(0, Math.ceil(C.BAUM_DAUER - Math.max(0, g.t)));
-  kreis(9, 8, 5, '#3a2414'); kreis(9, 8, 4, '#f4ead8'); r(c, 9, 5, 1, 4, '#2a1a10'); r(c, 9, 8, 3, 1, '#2a1a10');
-  gross(String(rest), rest <= 5 && Math.floor(t * 4) % 2 ? '#ff7a6a' : '#ffffff', 17, 3, 2, true);
-  if (g.kette > 1) gross('x' + g.kette, '#7ae07a', 70, 3, 2, true);
-  const ps = String(g.punkte);
-  gross(ps, '#ffe060', W - 30 - textBreite(ps) * 2, 3, 2, true);
-  // Countdown und Ende
-  const mitteY = Math.round(H * 0.4);
-  if (g.t < 0.6 || g.aus) {
-    c.fillStyle = 'rgba(30,20,10,0.45)';
-    c.fillRect(0, mitteY - 8, W, 36);
-    const s = g.aus ? 'ZEIT!' : g.t < 0 ? String(Math.ceil(-g.t)) : 'LOS!';
-    gross(s, g.t < 0 && !g.aus ? '#ffffff' : '#ffe060', W / 2, mitteY, 4, false);
-  }
+  MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: g.kette > 1 ? 1 : 0, punkte: g.punkte });
+  MH.mitte(g.aus ? 'ZEIT!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }

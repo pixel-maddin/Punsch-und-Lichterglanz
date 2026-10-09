@@ -115,9 +115,13 @@ Riesenkugeln im Baum, ein Bäumchen auf dem Dachfirst und ein Lichterwald.
 
 **Schlittenberg (Minispiel):** Im Wok den Berg hinunter! Daumen aufs Bild
 legen und seitlich ziehen - der Wok folgt. Tannen, Steinen, Schneemännern und
-Holzstapeln ausweichen, Sterne einsammeln; je schneller du im Ziel bist, desto
-mehr Punkte. Ab 900, 1.350 und 1.600 Punkten Rekord: Rodelkinder auf dem
-Gehweg, dein Wok als Trophäe an der Hauswand und ein Rodelhang am Horizont.
+Holzstapeln ausweichen, Sterne einsammeln - große Sterne zählen doppelt. Je
+schneller du im Ziel bist, desto mehr Punkte. Ab 1.000, 1.550 und 1.900 Punkten
+Rekord: Rodelkinder auf dem Gehweg, dein Wok als Trophäe an der Hauswand und
+ein Rodelhang am Horizont.
+
+In allen Minispielen pausiert die Musik und läuft danach an derselben Stelle
+weiter.
 
 **Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt - er wird
 ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.

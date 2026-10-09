@@ -518,16 +518,16 @@ export const BAUM_DEKO = [
   { id: 'c_wald',     name: 'Lichterwald',            ab: 2700, stimmung: 7, text: 'Die Tannen hinter deinem Stand tragen Lichterketten.' },
 ];
 // Minispiel Schlittenberg (09.10.): im Wok den Hang hinunter, gegen die Zeit.
-export const BERG_DAUER = 45;     // s - wer bis dahin nicht im Ziel ist, bekommt nur die Sterne
+export const BERG_DAUER = 60;     // s - wer bis dahin nicht im Ziel ist, bekommt nur die Sterne (45 bis die Piste länger wurde)
 export const BERG_STERN = 20;     // Punkte je Stern auf der Strecke
 export const BERG_ZIEL = 400;     // Punkte fürs Ankommen …
 export const BERG_JE_S = 40;      // … plus so viele je Sekunde, die noch übrig war
 export const BERG_PUNKTE_JE_MIN = 500;
 export const BERG_MAX_MIN = 3;
 export const BERG_DEKO = [
-  { id: 's_kinder', name: 'Rodelkinder',          ab: 900,  stimmung: 5, text: 'Zwei Kinder ziehen ihren Schlitten am Haus vorbei.' },
-  { id: 's_wok',    name: 'Wok an der Hauswand',  ab: 1350, stimmung: 5, text: 'Dein Rodel-Wok hängt als Trophäe neben dem Fenster.' },
-  { id: 's_hang',   name: 'Rodelhang am Horizont', ab: 1600, stimmung: 7, text: 'Hinter dem Stand ein Hügel, auf dem winzige Rodler hinunterflitzen.' },
+  { id: 's_kinder', name: 'Rodelkinder',          ab: 1000,  stimmung: 5, text: 'Zwei Kinder ziehen ihren Schlitten am Haus vorbei.' },
+  { id: 's_wok',    name: 'Wok an der Hauswand',  ab: 1550, stimmung: 5, text: 'Dein Rodel-Wok hängt als Trophäe neben dem Fenster.' },
+  { id: 's_hang',   name: 'Rodelhang am Horizont', ab: 1900, stimmung: 7, text: 'Hinter dem Stand ein Hügel, auf dem winzige Rodler hinunterflitzen.' },
 ];
 // Welche Minispiele es gibt: Deko-Liste und Umrechnung der Punkte in Sterne
 export const MINISPIELE = {

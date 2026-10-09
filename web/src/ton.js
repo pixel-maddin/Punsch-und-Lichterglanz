@@ -22,7 +22,7 @@ export function init() {
   ctx = new AC();
   fxGain = ctx.createGain(); fxGain.gain.value = fxAn ? 0.5 : 0; fxGain.connect(ctx.destination);
   musikGain = ctx.createGain(); musikGain.gain.value = 0; musikGain.connect(ctx.destination);
-  musikEl = new Audio('audio/musik.m4a?v=20261009p');
+  musikEl = new Audio('audio/musik.m4a?v=20261009q');
   musikEl.loop = true;
   musikEl.preload = 'auto';
   try { ctx.createMediaElementSource(musikEl).connect(musikGain); }
@@ -30,8 +30,14 @@ export function init() {
   stelleMusik();
   starteMusik();
 }
+let musikRuht = false;
+/** Im Minispiel ruht die Musik; danach geht sie an derselben Stelle weiter. */
+export function musikPause(an) {
+  musikRuht = an;
+  if (an) { if (musikEl) musikEl.pause(); } else starteMusik();
+}
 function starteMusik() {
-  if (!musikEl || musikStufe === 0 || document.hidden) return;
+  if (!musikEl || musikStufe === 0 || document.hidden || musikRuht) return;
   if (musikEl.paused) musikEl.play().catch(() => {});
 }
 export function schlafen() {

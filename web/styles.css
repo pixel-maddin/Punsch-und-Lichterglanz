@@ -638,3 +638,49 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #ziel.haus .nr { background: #2f6a3a; }
 .modus.empfohlen { border-color: var(--gold) !important; box-shadow: 0 0 0 calc(var(--px) * 0.6) var(--gold); }
 .modus .empf { font-style: normal; font-size: 0.7em; background: var(--gold); color: var(--tinte); padding: 0 calc(var(--px) * 1.2); border-radius: calc(var(--px) * 1); vertical-align: middle; margin-left: calc(var(--px) * 1); }
+
+/* Minispiele: Kopfzeile und Schrift (minihud.js) - wie die Kopfzeile am Stand */
+#miniHud { position: absolute; inset: 0; pointer-events: none; z-index: 1; font-weight: bold; color: #fff; }
+#miniHud .mh-kopf {
+  position: absolute; left: 0; right: calc(var(--px) * 16); top: 0; height: calc(var(--px) * 16);
+  display: flex; align-items: center; justify-content: space-between; gap: calc(var(--px) * 2);
+  padding: 0 calc(var(--px) * 3); font-size: calc(var(--px) * 5.6);
+}
+#miniHud .mh-kopf > div {
+  box-sizing: border-box; height: calc(var(--px) * 11); display: flex; align-items: center;
+  background: rgba(40, 20, 10, 0.62); border: calc(var(--px) * 0.8) solid rgba(255, 230, 180, 0.35);
+  border-radius: calc(var(--px) * 2); padding: calc(var(--px) * 1.2) calc(var(--px) * 3); white-space: nowrap;
+}
+#miniHud .mh-zeit.knapp span { color: #ff8a7a; animation: pulsieren 0.6s infinite; }
+#miniHud .mh-punkte { color: #ffe27a; }
+#miniHud .mh-kette { color: #8ae88a; gap: calc(var(--px) * 2); }
+#miniHud .mh-kette i { display: block; width: calc(var(--px) * 16); height: calc(var(--px) * 2.4); background: rgba(0, 0, 0, 0.45); border-radius: calc(var(--px) * 1.2); overflow: hidden; }
+#miniHud .mh-kette b { display: block; height: 100%; background: #8ae88a; }
+#miniHud .mh-kette.fort { color: #fff; font-size: calc(var(--px) * 4.2); }
+#miniHud .mh-kette.fort i { width: calc(var(--px) * 26); }
+#miniHud .mh-kette.versteckt { visibility: hidden; }
+#miniHud .mh-hinweis {
+  position: absolute; left: 50%; top: calc(var(--px) * 18); transform: translateX(-50%);
+  background: rgba(40, 20, 10, 0.62); color: #ffe27a; font-size: calc(var(--px) * 4.6);
+  padding: calc(var(--px) * 1) calc(var(--px) * 3); border-radius: calc(var(--px) * 3); white-space: nowrap;
+}
+#miniHud .mh-gross {
+  position: absolute; left: 0; right: 0; top: 40%; transform: translateY(-50%); text-align: center;
+  font-size: calc(var(--px) * 22); letter-spacing: calc(var(--px) * 0.5);
+  text-shadow: 0 calc(var(--px) * 1) 0 #3a2414, 0 0 calc(var(--px) * 4) rgba(0, 0, 0, 0.5);
+  background: linear-gradient(transparent, rgba(30, 20, 10, 0.45) 25%, rgba(30, 20, 10, 0.45) 75%, transparent);
+  padding: calc(var(--px) * 3) 0;
+}
+#miniHud .mh-gross.plopp { animation: mhPlopp 0.35s ease-out; }
+@keyframes mhPlopp { from { transform: translateY(-50%) scale(1.35); opacity: 0.4; } }
+#miniHud .mh-schwebe {
+  position: absolute; transform: translate(-50%, -100%); white-space: nowrap;
+  text-shadow: 0 calc(var(--px) * 0.6) 0 #2a1810, calc(var(--px) * 0.6) 0 0 #2a1810, calc(var(--px) * -0.6) 0 0 #2a1810, 0 calc(var(--px) * -0.6) 0 #2a1810;
+  animation: mhSteigen 1s ease-out forwards;
+}
+@keyframes mhSteigen { to { transform: translate(-50%, calc(-100% - var(--px) * 14)); opacity: 0; } }
+#miniHud .mh-label { position: absolute; transform: translate(-50%, 0); text-align: left; color: #2a1810; line-height: 1.15; white-space: nowrap; }
+#miniHud .mh-label.wunsch { font-size: calc(var(--px) * 6); transform: none; }
+#miniHud .mh-label.wunsch small { display: block; font-size: calc(var(--px) * 4.8); }
+#miniHud .mh-label.schild { font-size: calc(var(--px) * 4.2); color: #fff; background: rgba(40, 20, 10, 0.62); padding: 0 calc(var(--px) * 1.6); border-radius: calc(var(--px) * 1.5); }
+#miniZu { top: calc(var(--px) * 2.5) !important; height: calc(var(--px) * 11) !important; width: calc(var(--px) * 12) !important; }
