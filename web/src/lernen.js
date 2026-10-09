@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261009o';
-import * as S from './spiel.js?v=20261009o';
-import * as A from './auftraege.js?v=20261009o';
-import * as E from './erfolge.js?v=20261009o';
-import * as Z from './ziele.js?v=20261009o';
+import * as C from './config.js?v=20261009p';
+import * as S from './spiel.js?v=20261009p';
+import * as A from './auftraege.js?v=20261009p';
+import * as E from './erfolge.js?v=20261009p';
+import * as Z from './ziele.js?v=20261009p';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -186,7 +186,7 @@ const HINWEISE = [
     text: () => 'Tippe auf KARTE und schau dich um.',
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, lang: true },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
-    text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
+    text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer, was als Nächstes geht.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },
   { id: 'ziele_fertig', sofort: true, wann: () => Z.fertig() && S.st.tipps.wichtel_weg,
     text: () => 'Alle sieben Ziele geschafft - jetzt weißt du alles Wichtige! Genieße die Weihnachtszeit und schmücke dein Haus, wie es dir gefällt. Schau jeden Tag mal rein: Es gibt neue Aufträge, ein Türchen im Adventskalender und besondere Ereignisse.',

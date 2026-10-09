@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261009o';
-import * as Z from './zeit.js?v=20261009o';
-import { neueFarben } from './pixel.js?v=20261009o';
+import * as C from './config.js?v=20261009p';
+import * as Z from './zeit.js?v=20261009p';
+import { neueFarben } from './pixel.js?v=20261009p';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -641,10 +641,14 @@ export function tippeZelle(i) {
   if ((st.toepfe[p.id] || 0) <= 0) {
     lauf.fuellen[p.id] = (lauf.fuellen[p.id] || 0) + 1 / C.NACHFUELL_TIPPS;
     hooks.ton('blubb');
-    if (lauf.fuellen[p.id] >= 0.999) { st.toepfe[p.id] = topfMax(); lauf.fuellen[p.id] = 0; hooks.ton('voll'); hooks.toast(`${p.name} ist wieder voll!`, 'gut'); }
+    // „wieder voll" sagt der Ton, der Topf zeigt es - keine Einblendung mehr
+    // (Betatest 2: rund 40 Topf-Meldungen in den ersten 10 Minuten)
+    if (lauf.fuellen[p.id] >= 0.999) { st.toepfe[p.id] = topfMax(); lauf.fuellen[p.id] = 0; hooks.ton('voll'); }
     // Wer mit leerem Glas kam, wollte einschenken - sagen, warum nichts passiert
-    // (sonst blieb das Glas still leer stehen, Betatest 02.10.)
-    else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS) {
+    // (sonst blieb das Glas still leer stehen, Betatest 02.10.). Nur die
+    // ersten zwei Male als Text, danach reicht das blinkende LEER am Topf.
+    else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS && (st.topfHinweise || 0) < 2) {
+      st.topfHinweise = (st.topfHinweise || 0) + 1;
       const noch = C.NACHFUELL_TIPPS - Math.round(lauf.fuellen[p.id] * C.NACHFUELL_TIPPS);
       hooks.toast(`Topf leer! Noch ${noch}× antippen, dann ist er wieder voll.`, 'hinweis');
     }
@@ -1137,7 +1141,9 @@ export function haendlerPreis(w) {
 }
 function haendlerTakt(dt) {
   if (chefAktiv() && !lauf.lernen) lauf.haendlerT += dt;
-  if (!lauf.haendler && lauf.haendlerT >= lauf.haendlerAb && st.lernen >= 99 && produkteFrei().length >= 2
+  // Erst nach dem Hinweis auf die Karte: Vorher kam er nach 2,5 Minuten,
+  // bevor man die erste Deko kannte (Betatest 2)
+  if (!lauf.haendler && lauf.haendlerT >= lauf.haendlerAb && st.lernen >= 99 && st.tipps && st.tipps.karte_mehr && produkteFrei().length >= 2
       && haendlerHeute() < C.HAENDLER_PRO_TAG) {
     st.haendler = { tag: echtMitternacht(), n: haendlerHeute() + 1 };
     lauf.haendler = { x: -26, t: 0, phase: 'kommt', angebot: haendlerAngebot(), gutschein: true };
@@ -1250,7 +1256,9 @@ export const marktBesucht = () => marktStand().besucht === tagNr();
 export function marktBesuchen() { marktStand().besucht = tagNr(); speichere(); }
 /** Einmal je Tag ansagen: heute Markt, oder in ein paar Tagen. */
 function marktAnsage() {
-  if (st.lernen < 99 || lauf.t < 8 || lauf.marktAngesagt) return;
+  // Erst, wenn man die Karte kennt (Hinweis `karte_mehr`) - vorher kam die
+  // Ansage in Sekunde 14 des allerersten Spiels (Betatest 2)
+  if (st.lernen < 99 || !st.tipps || !st.tipps.karte_mehr || lauf.t < 8 || lauf.marktAngesagt) return;
   lauf.marktAngesagt = true;
   const m = marktStand();
   if (m.angesagt === tagNr()) return;

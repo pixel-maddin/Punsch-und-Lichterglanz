@@ -5,22 +5,22 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009o';
-import * as S from './spiel.js?v=20261009o';
-import * as Z from './zeit.js?v=20261009o';
-import * as T from './ton.js?v=20261009o';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009o';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009o';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009o';
-import * as A from './auftraege.js?v=20261009o';
-import * as E from './erfolge.js?v=20261009o';
-import * as ZL from './ziele.js?v=20261009o';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009o';
-import * as KA from './karte.js?v=20261009o';
-import * as LI from './lichtung.js?v=20261009o';
-import * as CB from './christbaum.js?v=20261009o';
-import * as SB from './schlitten.js?v=20261009o';
-import { alleSymbole } from './symbole.js?v=20261009o';
+import * as C from './config.js?v=20261009p';
+import * as S from './spiel.js?v=20261009p';
+import * as Z from './zeit.js?v=20261009p';
+import * as T from './ton.js?v=20261009p';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009p';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009p';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009p';
+import * as A from './auftraege.js?v=20261009p';
+import * as E from './erfolge.js?v=20261009p';
+import * as ZL from './ziele.js?v=20261009p';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009p';
+import * as KA from './karte.js?v=20261009p';
+import * as LI from './lichtung.js?v=20261009p';
+import * as CB from './christbaum.js?v=20261009p';
+import * as SB from './schlitten.js?v=20261009p';
+import { alleSymbole } from './symbole.js?v=20261009p';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -49,8 +49,10 @@ export function hud() {
   $('#geldZahl').textContent = g;
   $('#stimmungZahl').textContent = s;
   $('#uhr').textContent = u + ((Z.zeitVerstellt() || S.devAn()) && !S.DEMO ? ' ⚙' : '');
-  const ab = A.abholbar() + E.neuZahl();
-  const bA = $('#aufBadge'); bA.textContent = ab; bA.classList.toggle('versteckt', ab === 0);
+  // Eine Zahl nur für Belohnungen, die man abholen kann; neue Erfolge sind
+  // nur ein Punkt (Betatest 2: „Aufträge 10" nach 20 Minuten)
+  const ab = A.abholbar(), en = E.neuZahl();
+  const bA = $('#aufBadge'); bA.textContent = ab || ''; bA.classList.toggle('versteckt', ab === 0 && en === 0); bA.classList.toggle('punkt', ab === 0 && en > 0);
   $('#btnAuftraege').classList.toggle('lockt', ab > 0);
   const b = $('#kalBadge');
   b.textContent = k; b.classList.toggle('versteckt', k === 0);
@@ -72,8 +74,11 @@ export function zielLeiste() {
   const ansturm = S.lauf.ansturm ? Math.max(0, Math.ceil(S.lauf.stossBis - S.lauf.t)) : 0;
   const zimt = !ansturm && !z ? S.zimtRest() : 0;
   const markt = !ansturm && !z && !zimt && S.marktHeute() && !S.marktBesucht();
-  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : '';
+  const haus = !ansturm && !z && !zimt && !markt ? ZL.hausZiel() : null;
+  const hn = haus && haus.naechstes;
+  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : haus ? 'haus' : '';
   const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}` : markt ? 'markt'
+    : haus ? `h|${haus.geschafft}|${hn ? hn.id + '|' + hn.leisten + '|' + (hn.leisten ? '' : Math.floor(S.st.geld / 50)) : ''}`
     : z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
@@ -100,6 +105,19 @@ export function zielLeiste() {
   if (markt) {
     b.innerHTML = `<span class="nr">MARKTTAG</span><span class="was">Weihnachtsmarkt auf dem Festplatz</span><span class="los">Hin ▸</span>`;
     b.classList.remove('bereit', 'versteckt');
+    $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
+    return;
+  }
+  b.classList.toggle('haus', !!haus);
+  if (haus) {
+    // Schönstes Haus: Fortschritt und das günstigste nächste Teil
+    const was = hn ? `Nächstes: ${hn.name}` : 'Mehr ♥ Stimmung schaltet Neues frei';
+    const rechts = !hn ? '' : hn.leisten ? '<span class="los">Los ▸</span>' : `<small>noch ${S.formatGeld(hn.kosten - S.st.geld)}</small>`;
+    const anteil = hn ? Math.min(1, S.st.geld / hn.kosten) : haus.geschafft / haus.gesamt;
+    b.innerHTML = `<span class="nr">HAUS ${haus.geschafft}/${haus.gesamt}</span><span class="was">${was}</span>${rechts}`
+      + `<span class="fort"><span style="width:${Math.round(anteil * 100)}%"></span></span>`;
+    b.classList.toggle('bereit', !!(hn && hn.leisten));
+    b.classList.remove('versteckt');
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
   }
@@ -621,7 +639,9 @@ function zeigeKauf(id) {
 
 /** Roter Punkt mit Zahl an der Laden-Taste: so viele Dinge sind neu. */
 export function neuMarke() {
-  const n = Object.keys(S.st.neu || {}).length;
+  // Nur Neues, das man sich auch leisten kann (Betatest 2: „9+" an der Karte
+  // war Druck statt Richtung). Die Orte auf der Karte zeigen nur einen Punkt.
+  const n = Object.keys(S.st.neu || {}).filter((id) => { const a = S.ARTIKEL_MAP[id]; if (!a) return false; const st = S.status(a); return !st.fertig && !st.versteckt && st.leisten; }).length;
   const b = $('#ladenBadge');
   b.classList.toggle('versteckt', n === 0);
   b.textContent = n > 9 ? '9+' : n;   // zweistellig sprengte den Punkt
@@ -842,7 +862,7 @@ export function zeigeKiste(sek, weiter) {
   const box = fenster('Während du weg warst …',
     `<canvas class="kiste" width="24" height="20"></canvas>
      <p>${dauer ? `In ${dauer} haben deine Wichtel` : 'Deine Wichtel haben'} <b>${gaeste}</b> Gäste bedient und alles in diese Kiste gelegt.</p>
-     ${sek >= S.offlineStunden() * 3600 ? `<p class="klein">Die Kiste war voll - mehr als ${S.offlineStunden()} Stunden Arbeit passen nicht hinein. Schau öfter vorbei, dann verschenkst du nichts.</p>` : ''}`,
+     ${sek >= S.offlineStunden() * 3600 ? `<p class="klein">Die Kiste war voll - mehr als ${String(S.offlineStunden()).replace('.', ',')} Stunden Arbeit passen nicht hinein. Schau öfter vorbei, dann verschenkst du nichts.</p>` : ''}`,
     [{ text: 'Kiste öffnen', aktion: (b) => {
       const betrag = S.oeffneKiste();
       T.spiele('spezialKasse');
@@ -1268,15 +1288,18 @@ export function waehleModus(fertig) {
   const warten = bis > 7
     ? ` Bis zum 1. Dezember sind es noch <strong>${bis} Tage</strong> - so lange ist Spätherbst, ohne Türchen und ohne Schnee. Dafür wartet jeden Tag ein Vorfreude-Päckchen.`
     : '';
-  const box = fenster('Wie möchtest du spielen?', `
-    <button class="modus" data-m="echt">
+  // Lange vor Dezember ist „Individuell" für fast jeden die bessere Wahl:
+  // dann steht es oben und ist als Empfehlung markiert (Betatest 2)
+  const klassisch = `<button class="modus" data-m="echt">
       <b>🕯️ Klassisch</b>
       <span>Das Spiel läuft mit dem echten Kalender. Heute ist der ${heute.getDate()}.${heute.getMonth() + 1}. - die Adventszeit kommt, wenn sie wirklich kommt.${warten}</span>
-    </button>
-    <button class="modus" data-m="eigen">
-      <b>🎄 Individuell</b>
+    </button>`;
+  const individuell = `<button class="modus${bis > 7 ? ' empfohlen' : ''}" data-m="eigen">
+      <b>🎄 Individuell${bis > 7 ? ' <i class="empf">Empfohlen</i>' : ''}</b>
       <span>Dein Spiel beginnt eine Woche vor dem 1. Dezember, egal wann du startest. Bis zum ersten Türchen gibt es jeden Tag ein Vorfreude-Päckchen.</span>
-    </button>
+    </button>`;
+  const box = fenster('Wie möchtest du spielen?', `
+    ${bis > 7 ? individuell + klassisch : klassisch + individuell}
     <p class="klein">Die Uhrzeit ist in beiden Fällen die echte: Nachts ist es dunkel.</p>`, []);
   for (const b of box.querySelectorAll('.modus')) b.onclick = () => { T.spiele('klick'); schliesseFenster(); fertig(b.dataset.m); };
 }
@@ -1492,6 +1515,7 @@ export function verdrahte() {
     T.spiele('klick');
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
     if (leistenModus === 'markt') { oeffneKarte('festplatz'); return; }
+    if (leistenModus === 'haus') { const h = ZL.hausZiel(); const n = h && h.naechstes; if (n) oeffneLaden(n.tab, n.id); else oeffneKarte(); return; }
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };

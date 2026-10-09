@@ -14,7 +14,7 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=20261009o';
+import * as S from './spiel.js?v=20261009p';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -62,6 +62,25 @@ export function aktuell() {
 }
 export const nummer = () => idx() + 1;
 export const fertig = () => idx() >= ZIELE.length;
+
+/**
+ * Nach den Startzielen (09.10., Betatest 2): Wie weit ist das schönste Haus,
+ * und was ist das günstigste Teil, das als Nächstes geht? Vorher verschwand
+ * die Zielleiste, und man stand mit vielen Sternen ohne Richtung da.
+ */
+export function hausZiel() {
+  if (S.st.lernen < 99 || !fertig()) return null;
+  const alle = S.zumZiel();
+  const geschafft = alle.filter((a) => S.fertigOhneLuxus(a)).length;
+  let best = null;
+  for (const a of alle) {
+    if (S.fertigOhneLuxus(a)) continue;
+    const st = S.status(a);
+    if (st.versteckt || st.grund || st.kosten == null) continue;
+    if (!best || st.kosten < best.kosten) best = { id: a.id, tab: a.tab, name: a.name, kosten: st.kosten, leisten: st.leisten };
+  }
+  return { geschafft, gesamt: alle.length, naechstes: best };
+}
 
 /** Was soll gerade gekauft werden, und wo? { tab, id } oder null. */
 export function kaufziel() {
