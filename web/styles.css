@@ -214,6 +214,14 @@ html, body {
   border-radius: calc(var(--px) * 2.5); background: var(--holz); color: #fff; font: bold calc(var(--px) * 6) var(--schrift);
   box-shadow: 0 calc(var(--px) * 1) 0 rgba(0, 0, 0, 0.35);
 }
+/* Minispiele: über allem außer Fenstern und Einblendungen */
+#minispiel { position: absolute; inset: 0; z-index: 6; background: #1a2a1a; touch-action: none; }
+#miniCv { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+#miniZu {
+  position: absolute; right: calc(var(--px) * 3); top: calc(var(--px) * 15); z-index: 2;
+  appearance: none; border: 0; cursor: pointer; width: calc(var(--px) * 12); height: calc(var(--px) * 12);
+  border-radius: calc(var(--px) * 2.5); background: rgba(90, 50, 30, 0.85); color: #fff; font: bold calc(var(--px) * 5.5) var(--schrift);
+}
 #blatt {
   position: absolute; left: calc(var(--px) * 3); right: calc(var(--px) * 3);
   top: calc(var(--px) * 21); bottom: calc(var(--px) * 27);

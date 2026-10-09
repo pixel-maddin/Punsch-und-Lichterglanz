@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261009e';
-import * as Z from './zeit.js?v=20261009e';
-import { neueFarben } from './pixel.js?v=20261009e';
+import * as C from './config.js?v=20261009h';
+import * as Z from './zeit.js?v=20261009h';
+import { neueFarben } from './pixel.js?v=20261009h';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -200,6 +200,7 @@ export function stimmung() {
   for (const d of Object.values(C.KALENDER_DEKO)) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.AUFTRAG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.HAENDLER_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
+  for (const d of C.LICHTUNG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
   return s;
 }
@@ -1186,6 +1187,33 @@ export function kaufeBeimHaendler(id) {
 }
 /** Restzeit des Zimtstern-Gutscheins in Sekunden (0 = keiner). */
 export const zimtRest = () => Math.max(0, Math.ceil(((st.zimtBis || 0) - Date.now()) / 1000));
+
+// ---------------------------------------------------------------------------
+// Minispiel Waldlichtung (09.10.)
+// ---------------------------------------------------------------------------
+function lichtungStand() {
+  st.lichtung = st.lichtung || { best: 0, tag: 0, runden: 0 };
+  if (st.lichtung.tag !== echtMitternacht()) { st.lichtung.tag = echtMitternacht(); st.lichtung.runden = 0; }
+  return st.lichtung;
+}
+/** Wie viele Runden mit Sternen heute noch übrig sind. */
+export const lichtungRest = () => Math.max(0, C.MINI_RUNDEN_STERNE - lichtungStand().runden);
+export const lichtungRekord = () => lichtungStand().best;
+/** Nach einer Runde: Sterne (nur die ersten Runden am Tag), Rekord, neue Deko. */
+export function lichtungErgebnis(punkte) {
+  const l = lichtungStand();
+  const mitSternen = l.runden < C.MINI_RUNDEN_STERNE;
+  l.runden++;
+  const sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(C.LICHTUNG_MAX_MIN, punkte / C.LICHTUNG_PUNKTE_JE_MIN))) : 0;
+  if (sterne) verdiene(sterne);
+  const vorher = l.best;
+  if (punkte > l.best) l.best = punkte;
+  const neu = C.LICHTUNG_DEKO.filter((d) => !st.kalDeko[d.id] && l.best >= d.ab);
+  st.neu = st.neu || {};
+  for (const d of neu) { st.kalDeko[d.id] = true; st.neu[d.id] = true; }
+  speichere();
+  return { sterne, rekord: punkte > vorher && vorher > 0, best: l.best, neu, rest: lichtungRest() };
+}
 
 /** Den Nikolaus angetippt: Sterne! Gibt den Betrag zurück (oder 0). */
 export function fangeSchlitten() {

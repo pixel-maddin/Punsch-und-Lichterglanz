@@ -10,10 +10,10 @@
  * große Tippflächen). Antippen: Ein kleiner Wichtel läuft hin, dann öffnet
  * sich der Ort.
  */
-import * as C from './config.js?v=20261009e';
-import * as S from './spiel.js?v=20261009e';
-import * as Z from './zeit.js?v=20261009e';
-import { r, p, wichtelKlein } from './pixel.js?v=20261009e';
+import * as C from './config.js?v=20261009h';
+import * as S from './spiel.js?v=20261009h';
+import * as Z from './zeit.js?v=20261009h';
+import { r, p, wichtelKlein } from './pixel.js?v=20261009h';
 
 const $ = (s) => document.querySelector(s);
 
@@ -28,7 +28,7 @@ export const ORTE = [
   { id: 'super',     name: 'Supermarkt',      x: 34,  y: 0.38, tab: 'super' },
   { id: 'bau',       name: 'Baumarkt',        x: 148, y: 0.39, tab: 'baumarkt' },
   { id: 'haus',      name: 'Zuhause',         x: 90,  y: 0.53 },
-  { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.72, bald: 'Hasen, Eichhörnchen und Rehe hüpfen durch die Lichtung. Füttere sie - das gibt Punkte, Sterne und vielleicht ein neues Deko-Stück.' },
+  { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.72, spiel: 'lichtung' },
   { id: 'wichtel',   name: 'Wichtelwald',     x: 90,  y: 0.82, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.72, bald: 'Im Wok den Berg hinunter, so schnell du kannst - an Bäumen, Steinen und Schneemännern vorbei.' },
 ];
@@ -80,7 +80,7 @@ function baueSchilder(hervor) {
     b.style.left = `calc(var(--px) * ${o.x})`;
     b.style.top = `calc(var(--px) * ${yPx(o) + 9})`;
     const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : 0;
-    b.innerHTML = `${o.name}${n ? `<b class="ort-neu">${n}</b>` : ''}${o.bald ? '<small>bald</small>' : ''}`;
+    b.innerHTML = `${o.name}${n ? `<b class="ort-neu">${n}</b>` : ''}${o.bald ? '<small>bald</small>' : o.spiel ? '<small>Minispiel</small>' : ''}`;
     b.onclick = () => gehe(o);
     box.appendChild(b);
     // Auch das Bild des Ortes selbst ist antippbar (größere Fläche)

@@ -5,19 +5,20 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009e';
-import * as S from './spiel.js?v=20261009e';
-import * as Z from './zeit.js?v=20261009e';
-import * as T from './ton.js?v=20261009e';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009e';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009e';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009e';
-import * as A from './auftraege.js?v=20261009e';
-import * as E from './erfolge.js?v=20261009e';
-import * as ZL from './ziele.js?v=20261009e';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009e';
-import * as KA from './karte.js?v=20261009e';
-import { alleSymbole } from './symbole.js?v=20261009e';
+import * as C from './config.js?v=20261009h';
+import * as S from './spiel.js?v=20261009h';
+import * as Z from './zeit.js?v=20261009h';
+import * as T from './ton.js?v=20261009h';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009h';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009h';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009h';
+import * as A from './auftraege.js?v=20261009h';
+import * as E from './erfolge.js?v=20261009h';
+import * as ZL from './ziele.js?v=20261009h';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009h';
+import * as KA from './karte.js?v=20261009h';
+import * as LI from './lichtung.js?v=20261009h';
+import { alleSymbole } from './symbole.js?v=20261009h';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -29,7 +30,7 @@ let ladenTab = 'super';
 let ladenModus = 'kaufen';  // 'kaufen' | 'haus' - Einkaufen oder Mein Haus (einstellen)
 let zeilen = [];           // Ladenzeilen zum Nachführen
 
-export function panelOffen() { return offen || (KA.istOffen() ? 'karte' : null); }
+export function panelOffen() { return offen || (LI.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
 
 // ---------------------------------------------------------------------------
 // Kopfzeile
@@ -224,7 +225,40 @@ function amOrt(o) {
   T.spiele('klick');
   if (o.id === 'haus') { KA.schliesse(); return; }
   if (o.tab) { oeffneLaden(o.tab); return; }
+  if (o.spiel === 'lichtung') { zeigeLichtung(); return; }
   if (o.bald) fenster(o.name, `<p>${o.bald}</p><p class="klein">Kommt bald!</p>`);
+}
+
+// ---------------------------------------------------------------------------
+// Minispiel Waldlichtung (lichtung.js)
+// ---------------------------------------------------------------------------
+function spielHoehe() {
+  const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 1;
+  return Math.round($('#minispiel').parentElement.clientHeight / px);
+}
+function zeigeLichtung() {
+  const rest = S.lichtungRest(), best = S.lichtungRekord();
+  const naechste = C.LICHTUNG_DEKO.find((d) => !S.st.kalDeko[d.id]);
+  fenster('Waldlichtung', `
+    <p>Hasen, Eichhörnchen und Rehe hüpfen durch die Lichtung. <b>Tippe sie an, um sie zu füttern.</b> Schnell hintereinander gibt eine Kette bis ×5.</p>
+    <p class="klein">${C.LICHTUNG_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
+    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteLichtung, 60); } }]);
+}
+function starteLichtung() {
+  LI.starte(spielHoehe(), (punkte, n) => {
+    const e = S.lichtungErgebnis(punkte);
+    LI.schliesse();
+    const deko = e.neu.map((d) => `<p class="bonus">Neu für dein Haus: <b>${d.name}</b> (♥ +${d.stimmung})</p>`).join('');
+    fenster(e.rekord ? 'Neuer Rekord!' : 'Gut gefüttert!', `
+      <p>${n} Tiere gefüttert</p>
+      <p class="summe">${punkte} Punkte</p>
+      <p class="klein">Rekord: ${e.best}</p>
+      ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}</p>` : '<p class="klein">Heute keine Sterne mehr - morgen wieder.</p>'}
+      ${deko}`,
+    [{ text: 'Zur Karte', neben: true }, { text: 'Nochmal', aktion: () => { setTimeout(starteLichtung, 60); } }]);
+    for (const d of e.neu) { const o = ortVon(d.id); if (o) funkeln(o.x, o.y, `+${d.stimmung} ♥`); }
+  });
 }
 
 function baueLaden() {
@@ -329,7 +363,7 @@ function zeigeVariante(platz, text = '') {
 export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
-  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO].filter((d) => S.st.kalDeko[d.id]);
+  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
@@ -412,7 +446,7 @@ function baueHaus(behalteScroll) {
   if (gesch.length) {
     gruppe('Geschenkt');
     for (const d of gesch) {
-      const herkunft = d.id.startsWith('kal_') ? 'Aus dem Adventskalender' : d.id.startsWith('h_') ? 'Vom fahrenden Händler' : 'Für einen schweren Auftrag';
+      const herkunft = d.id.startsWith('kal_') ? 'Aus dem Adventskalender' : d.id.startsWith('h_') ? 'Vom fahrenden Händler' : d.id.startsWith('l_') ? 'Aus der Waldlichtung' : 'Für einen schweren Auftrag';
       hausZeile(liste, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), herkunft,
         punktWahl(['aus', 'an'], S.zeigt(d.id) ? 'an' : 'aus', (v) => S.setzeDeko(d.id, v === 'an')));
       delete neu[d.id];
@@ -655,6 +689,9 @@ function zeichneIcon(cv, a) {
     case 'h_polar': r(c, 0, 0, 16, 16, '#141c3a'); for (let x = 0; x < 16; x++) { const y = 5 + Math.round(Math.sin(x * 0.6) * 2); r(c, x, y, 1, 5, '#5aff96'); r(c, x, y + 5, 1, 2, '#3a9a6a'); } p(c, 3, 2, '#ffffff'); p(c, 12, 1, '#ffffff'); return;
     case 'h_orgel': r(c, 2, 5, 9, 7, '#8a3a2a'); r(c, 3, 7, 7, 2, '#e8c030'); r(c, 3, 12, 1, 3, '#5a3219'); r(c, 9, 12, 1, 3, '#5a3219'); r(c, 11, 7, 2, 1, '#3a3a40'); r(c, 13, 5, 1, 3, '#3a3a40'); p(c, 4, 2, '#f4f4f4'); p(c, 5, 1, '#f4f4f4'); return;
     case 'h_hahn': r(c, 7, 6, 1, 10, '#3a3a44'); r(c, 3, 12, 9, 1, '#3a3a44'); r(c, 4, 4, 7, 3, '#3a3a44'); r(c, 10, 1, 2, 3, '#3a3a44'); p(c, 10, 0, '#3a3a44'); p(c, 12, 0, '#3a3a44'); p(c, 12, 3, '#d83a3a'); r(c, 4, 7, 1, 2, '#3a3a44'); r(c, 9, 7, 1, 2, '#3a3a44'); return;
+    case 'l_hasen': for (const [x, y] of [[2, 9], [7, 7], [11, 10]]) { r(c, x, y, 4, 3, '#b8a898'); r(c, x + 2, y - 3, 1, 3, '#b8a898'); p(c, x + 3, y - 1, '#2a1a10'); } return;
+    case 'l_eich': r(c, 5, 7, 5, 5, '#c86a2a'); r(c, 9, 5, 3, 3, '#c86a2a'); r(c, 1, 3, 4, 8, '#d88a4a'); p(c, 11, 6, '#2a1a10'); r(c, 11, 10, 2, 2, '#8a5a2a'); return;
+    case 'l_reh': r(c, 2, 7, 10, 4, '#a8703a'); for (const x of [3, 5, 9, 11]) r(c, x, 11, 1, 4, '#a8703a'); r(c, 11, 3, 2, 4, '#a8703a'); r(c, 12, 2, 3, 2, '#a8703a'); p(c, 5, 8, '#f4ead8'); p(c, 8, 8, '#f4ead8'); return;
     case 'h_zimt': for (const [x, y] of [[7, 1], [7, 13], [1, 7], [13, 7]]) r(c, x, y, 2, 2, '#c8843a'); r(c, 4, 4, 8, 8, '#c8843a'); r(c, 5, 5, 6, 6, '#f4ead8'); p(c, 7, 7, '#c8843a'); p(c, 8, 8, '#c8843a'); return;
     case 'auf_rodel': r(c, 2, 8, 12, 2, '#a8703a'); r(c, 3, 10, 1, 3, '#6a4222'); r(c, 12, 10, 1, 3, '#6a4222'); r(c, 1, 13, 14, 1, '#8a8a92'); r(c, 14, 11, 1, 2, '#8a8a92'); return;
     case 'auf_engel': r(c, 6, 5, 4, 9, '#f4f0e0'); r(c, 6, 2, 4, 3, '#f2c9a0'); r(c, 6, 0, 4, 1, '#ffd040'); r(c, 2, 5, 4, 5, '#dce8f4'); r(c, 10, 5, 4, 5, '#dce8f4'); return;
@@ -1313,6 +1350,7 @@ export function verdrahte() {
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
   $('#kartenZu').onclick = () => { T.spiele('klick'); schliesseKarte(); };
+  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
   $('#btnKarte').onclick = () => karte();

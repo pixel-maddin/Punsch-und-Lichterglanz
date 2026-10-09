@@ -468,3 +468,18 @@ export const VARIANTEN = {
                   { kurz: 'Lavalampen', name: 'Lavalampen', text: 'Bunte Blasen, die langsam auf- und absteigen.' }],
 };
 
+// ---------------------------------------------------------------------------
+// Minispiel Waldlichtung (09.10.). Sterne gibt es für die ersten
+// MINI_RUNDEN_STERNE Runden am Tag (sonst ließe sich hier statt am Stand
+// „farmen"), Deko hängt am Rekord.
+// ---------------------------------------------------------------------------
+export const MINI_RUNDEN_STERNE = 3;
+export const LICHTUNG_DAUER = 30;          // s je Runde
+export const LICHTUNG_PUNKTE_JE_MIN = 400; // so viele Punkte = eine Minute Einnahmen …
+export const LICHTUNG_MAX_MIN = 3;         // … höchstens drei (perfekter Autopilot: 3.810 Punkte, 42 Tiere)
+export const LICHTUNG_DEKO = [
+  { id: 'l_hasen', name: 'Hasenfamilie',            ab: 800,  stimmung: 5, text: 'Drei Hasen sitzen vor dem Zaun und mümmeln.' },
+  { id: 'l_eich',  name: 'Eichhörnchen auf dem Dach', ab: 1800, stimmung: 5, text: 'Sitzt auf dem Dach und knabbert eine Nuss.' },
+  { id: 'l_reh',   name: 'Reh am Gartenweg',          ab: 3000, stimmung: 7, text: 'Kommt aus dem Wald zu Besuch und bleibt.' },
+];
+

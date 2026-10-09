@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-  <link rel="stylesheet" href="styles.css?v=20261009e">
+  <link rel="stylesheet" href="styles.css?v=20261009h">
 </head>
 <body>
   <div id="buehne">
@@ -39,6 +39,12 @@
         <button id="kartenZu" aria-label="Karte schließen">✕</button>
       </section>
 
+      <!-- Minispiele (lichtung.js): eigenes Vollbild über allem -->
+      <section id="minispiel" class="versteckt">
+        <canvas id="miniCv" width="180" height="320"></canvas>
+        <button id="miniZu" aria-label="Minispiel beenden">✕</button>
+      </section>
+
       <nav id="leiste">
         <button id="btnLaden"><canvas class="sym" data-ico="landkarte"></canvas>Karte<b id="ladenBadge" class="versteckt">0</b></button>
         <button id="btnAuftraege"><canvas class="sym" data-ico="auftraege"></canvas>Aufträge<b id="aufBadge" class="versteckt">0</b></button>
@@ -61,6 +67,6 @@
     </div>
     <div id="quer"><div>📱<br><b>Bitte hochkant halten</b><br><small>Das Spiel ist fürs Hochformat gemacht.</small></div></div>
   </div>
-  <script type="module" src="src/main.js?v=20261009e"></script>
+  <script type="module" src="src/main.js?v=20261009h"></script>
 </body>
 </html>

@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009e';
-import * as Z from './zeit.js?v=20261009e';
-import * as S from './spiel.js?v=20261009e';
-import { FASSADEN } from './config.js?v=20261009e';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009h';
+import * as Z from './zeit.js?v=20261009h';
+import * as S from './spiel.js?v=20261009h';
+import { FASSADEN } from './config.js?v=20261009h';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -493,6 +493,7 @@ function haus(c, G, w, t, L) {
   }
   if (S.zeigt('auf_engel')) engel(c, L, 60, wandO - 28, t);
   if (S.zeigt('h_hahn')) wetterhahn(c, 52, wandO - 28, t);
+  if (S.zeigt('l_eich')) dachEichhorn(c, 41, wandO - 10, t);
   if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershow(c, L, wandO, wandU, t);
 }
 
@@ -1074,6 +1075,27 @@ function haendlerKarren(c, h, fuss, t) {
   // Er steht: kleines Funkeln über dem Karren, damit man ihn antippt
   if (h.phase === 'steht' && Math.floor(t * 3) % 2) { p(c, kx + 6, ky - 15, '#ffe060'); p(c, kx + 5, ky - 14, '#ffe060'); p(c, kx + 7, ky - 14, '#ffe060'); p(c, kx + 6, ky - 13, '#ffe060'); }
 }
+/** Aus der Waldlichtung (09.10.) */
+function hasenfamilie(c, x, fuss, t) {
+  for (const [dx, k] of [[0, 1], [6, 0.8], [11, 0.7]]) {
+    const hx = x + dx, f = '#b8a898', hop = Math.floor(t * 0.8 + dx) % 5 === 0 ? 1 : 0;
+    r(c, hx - 2, fuss - 3 - hop, Math.round(4 * k) + 1, 3, f); r(c, hx + 1, fuss - 5 - hop, 2, 2, f);
+    p(c, hx + 1, fuss - 7 - hop, f); p(c, hx + 2, fuss - 7 - hop, f); p(c, hx + 2, fuss - 5 - hop, '#2a1a10'); p(c, hx - 2, fuss - 3 - hop, '#f4f4f4');
+  }
+}
+function dachEichhorn(c, x, y, t) {
+  const f = '#c86a2a';
+  r(c, x, y - 3, 3, 3, f); r(c, x + 2, y - 5, 2, 2, f); p(c, x + 3, y - 5, '#2a1a10');
+  r(c, x - 2, y - 6, 2, 5, '#d88a4a');
+  if (Math.floor(t * 3) % 2) p(c, x + 4, y - 3, '#8a5a2a');   // knabbert
+}
+function gartenReh(c, x, fuss, t) {
+  const f = '#a8703a', kopf = Math.floor(t * 0.4) % 3 === 0 ? 2 : 0;   // senkt ab und zu den Kopf zum Grasen
+  r(c, x - 4, fuss - 7, 8, 3, f);
+  for (const dx of [-3, -1, 2, 3]) r(c, x + dx, fuss - 4, 1, 4, f);
+  r(c, x + 3, fuss - 10 + kopf, 2, 4, f); r(c, x + 4, fuss - 11 + kopf, 3, 2, f); p(c, x + 6, fuss - 11 + kopf, '#2a1a10'); p(c, x + 4, fuss - 12 + kopf, f);
+  p(c, x - 2, fuss - 6, '#f4ead8'); p(c, x + 1, fuss - 6, '#f4ead8');
+}
 /** Riesen-Schneekugel: Glaskuppel auf Holzsockel, drinnen ein Häuschen und Schnee. */
 function schneekugel(c, L, x, fuss, t, w) {
   r(c, x - 6, fuss - 3, 13, 3, '#7a4a2a'); r(c, x - 5, fuss - 4, 11, 1, '#9a6238'); r(c, x - 6, fuss - 1, 13, 1, '#5a3219');
@@ -1596,7 +1618,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [124, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [31, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [104, -16], h_orgel: [169, -12], h_hahn: [52, -110], h_polar: [90, -120], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [31, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [104, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -1738,6 +1760,9 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Kopf auf halber Dachhöhe über dem Stand steht
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
+  // Aus der Waldlichtung: Hasen vor dem Zaun, das Reh am Weg
+  if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 2, t);
+  if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 2, t);
   // Vor dem Stand (sonst verdeckt er sie): Flamingo an der linken Ecke, Drehorgel rechts
   if (S.zeigt('h_flamingo')) flamingo(e, L, 104, GW - 4, t);
   if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
