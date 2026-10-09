@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261003b';
-import * as Z from './zeit.js?v=20261003b';
-import * as S from './spiel.js?v=20261003b';
-import { FASSADEN } from './config.js?v=20261003b';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009a';
+import * as Z from './zeit.js?v=20261009a';
+import * as S from './spiel.js?v=20261009a';
+import { FASSADEN } from './config.js?v=20261009a';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -483,6 +483,7 @@ function haus(c, G, w, t, L) {
   if (S.zeigt('festbeleuchtung')) festbeleuchtung(c, L, wandO, dachH, gx0, gx1, go, ko, ku, t);
   if (S.zeigt('dach_nikolaus')) nikolausDach(c, 110, wandO - 18, t);
   if (S.zeigt('auf_engel')) engel(c, L, 60, wandO - 28, t);
+  if (S.zeigt('h_hahn')) wetterhahn(c, 52, wandO - 28, t);
   if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershow(c, L, wandO, wandU, t);
 }
 
@@ -849,6 +850,91 @@ function lebkuchenmann(c, x, fuss) {
   p(c, x, fuss - 10, '#d83a3a'); p(c, x, fuss - 8, '#3aa84a'); p(c, x, fuss - 6, '#d83a3a');
   r(c, x - 6, fuss - 10, 1, 2, k); r(c, x + 5, fuss - 10, 1, 2, k);
 }
+// ---------------------------------------------------------------------------
+// Der fahrende Händler und seine Ware (09.10.)
+// ---------------------------------------------------------------------------
+/** Karren mit gestreiftem Dach, davor der Händler mit Hut und Bart. */
+function haendlerKarren(c, h, fuss, t) {
+  const x = Math.round(h.x), laeuft = h.phase !== 'steht';
+  const hop = laeuft ? (Math.floor(t * 6) % 2) : 0;
+  // Karren (hinter dem Händler, er zieht ihn)
+  const kx = x - 13, ky = fuss - 10;
+  r(c, kx, ky, 12, 7, '#7a4a2a'); r(c, kx, ky, 12, 1, '#9a6238'); r(c, kx + 1, ky + 2, 10, 1, '#5a3219');
+  for (let i = 0; i < 3; i++) { r(c, kx + 1 + i * 4, ky - 3, 3, 3, ['#e04a4a', '#e8c030', '#4ab0e0'][i]); }   // Ware
+  r(c, kx - 1, ky - 9, 1, 9, '#5a3219'); r(c, kx + 12, ky - 9, 1, 9, '#5a3219');                         // Stangen
+  for (let i = 0; i < 14; i++) r(c, kx - 1 + i, ky - 11 + (i % 2 ? 0 : 1), 1, 2, i % 4 < 2 ? '#7a3aa8' : '#e8c030');   // Dach
+  for (const wx of [kx + 2, kx + 9]) { r(c, wx - 1, fuss - 4, 3, 3, '#3a2418'); p(c, wx, fuss - 3, '#c8a060'); }   // Räder
+  r(c, kx + 12, ky + 3, 3, 1, '#5a3219');   // Deichsel
+  // Händler
+  const hx = x, hy = fuss - hop;
+  r(c, hx - 2, hy - 2, 2, 2, '#3a2a20'); r(c, hx + 1, hy - 2, 2, 2, '#3a2a20');   // Stiefel
+  r(c, hx - 2, hy - 9, 5, 7, '#6a3a8a'); r(c, hx - 2, hy - 6, 5, 1, '#e8c030');   // Mantel, Gürtel
+  r(c, hx - 1, hy - 13, 4, 4, '#f0c8a0');                                           // Gesicht
+  r(c, hx - 1, hy - 11, 4, 2, '#f4f4f4'); p(c, hx + 1, hy - 12, '#3a2010');         // Bart, Auge
+  r(c, hx - 3, hy - 14, 7, 1, '#3a2418'); r(c, hx - 1, hy - 17, 4, 3, '#3a2418'); r(c, hx - 1, hy - 15, 4, 1, '#d83a3a');   // Hut
+  // Er steht: kleines Funkeln über dem Karren, damit man ihn antippt
+  if (h.phase === 'steht' && Math.floor(t * 3) % 2) { p(c, kx + 6, ky - 15, '#ffe060'); p(c, kx + 5, ky - 14, '#ffe060'); p(c, kx + 7, ky - 14, '#ffe060'); p(c, kx + 6, ky - 13, '#ffe060'); }
+}
+/** Riesen-Schneekugel: Glaskuppel auf Holzsockel, drinnen ein Häuschen und Schnee. */
+function schneekugel(c, L, x, fuss, t, w) {
+  r(c, x - 6, fuss - 3, 13, 3, '#7a4a2a'); r(c, x - 5, fuss - 4, 11, 1, '#9a6238'); r(c, x - 6, fuss - 1, 13, 1, '#5a3219');
+  const cy = fuss - 11;
+  for (let y = -6; y <= 6; y++) for (let xx = -6; xx <= 6; xx++) {
+    const d = Math.hypot(xx, y);
+    if (d > 6.4) continue;
+    p(c, x + xx, cy + y, d > 5.6 ? '#cfe2f0' : '#9cc4e4');
+  }
+  r(c, x - 3, cy + 1, 6, 4, '#d83a3a'); for (let i = 0; i < 4; i++) r(c, x - 3 + i, cy + 1 - i, 7 - i * 2, 1, '#5a3a32');   // Häuschen
+  p(c, x, cy + 3, '#ffd070');
+  for (let i = 0; i < 6; i++) { const a = (t * 0.4 + i / 6) % 1; p(c, x - 4 + ((i * 3) % 9), cy - 5 + Math.floor(a * 10), '#ffffff'); }
+  p(c, x - 3, cy - 4, '#ffffff'); p(c, x - 4, cy - 3, '#ffffff');   // Glanzlicht
+  L.push({ x, y: cy + 3, f: '#ffd070', halo: 4, an: 0.6 });
+}
+/** Lichter-Flamingo: pink, S-Hals, ein Bein, Weihnachtsmütze, Lichterkette. */
+function flamingo(c, L, x, fuss, t) {
+  const pk = '#f06aa8', dk = '#c8487e';
+  r(c, x, fuss - 7, 1, 7, dk);                                                    // Bein
+  r(c, x - 3, fuss - 11, 6, 4, pk); r(c, x - 4, fuss - 10, 1, 2, dk);             // Körper
+  r(c, x + 2, fuss - 15, 1, 4, pk); r(c, x + 1, fuss - 17, 2, 2, pk);             // Hals
+  r(c, x + 1, fuss - 19, 3, 2, pk); p(c, x + 4, fuss - 18, '#2a1810');            // Kopf, Schnabel
+  r(c, x + 1, fuss - 21, 3, 2, '#d83a3a'); p(c, x + 3, fuss - 22, '#f4f4f4');     // Mütze
+  const bunt = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040'];
+  for (let i = 0; i < 4; i++) { const lx = x - 3 + i * 2, ly = fuss - 11 + (i % 2); p(c, lx, ly, bunt[(i + Math.floor(t * 2)) % 4]); L.push({ x: lx, y: ly, f: bunt[(i + Math.floor(t * 2)) % 4], halo: 2, an: 0.9 }); }
+}
+/** Drehorgel-Wichtel: Kasten auf Stelzen, der Wichtel kurbelt. */
+function drehorgel(c, x, fuss, t) {
+  r(c, x - 4, fuss - 9, 8, 6, '#8a3a2a'); r(c, x - 4, fuss - 9, 8, 1, '#c86a3a'); r(c, x - 3, fuss - 7, 6, 2, '#e8c030');
+  r(c, x - 3, fuss - 3, 1, 3, '#5a3219'); r(c, x + 2, fuss - 3, 1, 3, '#5a3219');
+  const k = Math.floor(t * 4) % 4;   // Kurbel dreht sich
+  p(c, x + 4, fuss - 7, '#3a3a40'); p(c, x + 5 + (k === 1 ? 1 : 0), fuss - 8 + (k === 2 ? 2 : k === 0 ? 0 : 1), '#3a3a40');
+  wichtelKlein(c, x + 7, fuss, t, 1);
+  if (Math.floor(t * 2) % 2) { p(c, x - 2, fuss - 12, '#f4f4f4'); p(c, x - 1, fuss - 13, '#f4f4f4'); }   // Note
+  else { p(c, x + 1, fuss - 13, '#f4f4f4'); p(c, x + 2, fuss - 14, '#f4f4f4'); }
+}
+/** Wetterhahn-Rentier auf dem First: Stange, Pfeil, Rentier, das sich dreht. */
+function wetterhahn(c, x, y, t) {
+  const e = '#3a3a44';
+  r(c, x, y - 12, 1, 12, e); r(c, x - 3, y - 4, 7, 1, e);                         // Stange, Kreuz
+  const s = Math.sin(t * 0.7) > 0 ? 1 : -1;                                        // Blickrichtung
+  r(c, x - 3, y - 15, 6, 3, e); r(c, x - 3 + (s > 0 ? 0 : 5), y - 12, 1, 2, e); r(c, x + 2 - (s > 0 ? 0 : 5), y - 12, 1, 2, e);   // Körper, Beine
+  r(c, x + (s > 0 ? 3 : -4), y - 18, 2, 3, e);                                     // Hals/Kopf
+  p(c, x + (s > 0 ? 3 : -3), y - 20, e); p(c, x + (s > 0 ? 5 : -5), y - 20, e); p(c, x + (s > 0 ? 4 : -4), y - 21, e);   // Geweih
+  p(c, x + (s > 0 ? 5 : -5), y - 17, '#d83a3a');                                   // rote Nase
+}
+/** Polarlicht: grüne, langsam wogende Bänder am Nachthimmel. */
+function polarlicht(c, G, w, t) {
+  const a = Math.min(1, (w.dunkel - 0.25) * 2);
+  for (let x = 0; x < 180; x += 1) {
+    for (let b = 0; b < 2; b++) {
+      const y0 = 22 + b * 14 + Math.sin(x * 0.045 + t * 0.25 + b * 2) * 8 + Math.sin(x * 0.11 - t * 0.4) * 3;
+      const h = 10 + Math.sin(x * 0.07 + t * 0.3 + b) * 4;
+      const st = (0.5 + 0.5 * Math.sin(x * 0.09 + t * 0.6 + b * 3)) * a * (b ? 0.18 : 0.26);
+      c.fillStyle = `rgba(${b ? '120,240,190' : '90,255,150'},${st.toFixed(3)})`;
+      c.fillRect(x, Math.round(y0), 1, Math.round(h));
+    }
+  }
+}
+
 /** Große Zuckerstange im Vorgarten; `gespiegelt` biegt den Haken nach rechts. */
 function zuckerstange(c, x, fuss, gespiegelt) {
   const h = 16, d = gespiegelt ? 1 : -1;
@@ -1027,6 +1113,7 @@ function stand(c, G, w, t, L) {
 // ---------------------------------------------------------------------------
 function strasse(c, G, t) {
   const fuss = G - 3;
+  if (S.lauf.haendler) haendlerKarren(c, S.lauf.haendler, fuss, t);
   const liste = [...S.lauf.gaeste].sort((a, b) => a.x - b.x);
   for (const g of liste) {
     if (g.x < -10 || g.x > 190) continue;
@@ -1230,7 +1317,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [124, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [31, -26], auf_rodel: [62, -32], auf_engel: [60, -98], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [31, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [104, -16], h_orgel: [169, -12], h_hahn: [52, -110], h_polar: [90, -120], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -1320,6 +1407,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   const w = weltInfo(d);
   const L = [];
   himmel(c, G, w, t);
+  if (S.zeigt('h_polar') && w.dunkel > 0.25) polarlicht(c, G, w, t);
 
   const e = ebeneFuer(c.canvas.width, c.canvas.height);
   // Haus und Straße stehen ein Stück über der Tresenkante; darunter
@@ -1359,10 +1447,16 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('lichterbogen')) lichterbogen(e, L, GW, t);
   if (S.zeigt('laternen')) { laterne(e, L, 67, GW - 12, t); laterne(e, L, 93, GW - 12, t); }
   if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(e, 31, GW - 18);
+  // Vom fahrenden Händler (09.10.)
+  if (S.zeigt('h_kugel')) schneekugel(e, L, 7, GW - 13, t, w);
+
   // Rechts hinter dem Stand, neben dem Baum; der Mast ist lang, damit der
   // Kopf auf halber Dachhöhe über dem Stand steht
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
+  // Vor dem Stand (sonst verdeckt er sie): Flamingo an der linken Ecke, Drehorgel rechts
+  if (S.zeigt('h_flamingo')) flamingo(e, L, 104, GW - 4, t);
+  if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t);
   if (neuPruefen) { verdecke(L, stufen, pixel(e, G)); if (!opts.karte) deckungMerken(L, t); }

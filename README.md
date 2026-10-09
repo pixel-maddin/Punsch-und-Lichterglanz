@@ -37,18 +37,24 @@ Falsch Eingeschenktes kippt man in den Ausguss rechts. **Sobald der Servier-Wich
 antippen, ein Wichtel stellt das Getränk aufs Tablett, dann (gern mit
 Handgriff) den Gast nochmal antippen zum Servieren.
 
-**Tagesschicht:** Bediene jeden Tag 30 Gäste selbst - dann arbeiten die
-Wichtel in der Nacht mit voller Kraft, sonst nur mit halber. Trinkgeld gibt
-es nur, wenn du selbst servierst. Einmal am Tag kommt ein **Ansturm**:
-60 Sekunden dreifaches Trinkgeld, die Wichtel schauen nur zu.
+**Selbst servieren lohnt sich:** Was du selbst servierst, bringt doppelt so
+viele Sterne wie bei den Wichteln, und Trinkgeld gibt es nur von dir.
+Einmal am Tag kommt ein **Ansturm**: 60 Sekunden dreifaches Trinkgeld, die
+Wichtel schauen nur zu.
 
-**Während du weg bist**, arbeiten die Wichtel weiter (die ersten 5 Minuten
-voll, danach mit 40 %, höchstens 8 Stunden) und legen alles in eine Kiste,
-die du beim Zurückkommen öffnest.
+**Während du weg bist**, arbeiten die Wichtel weiter und legen alles in eine
+Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst höchstens 3 Stunden
+Arbeit - wer mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
+
+**Der fahrende Händler** kommt bis zu zweimal am Tag mit seinem Karren vorbei
+(links vor dem Haus antippen). Er hat Deko, die es nur bei ihm gibt -
+Riesen-Schneekugel, Lichter-Flamingo, Polarlicht-Laterne, Drehorgel-Wichtel,
+Wetterhahn-Rentier - und einen Zimtstern-Gutschein: 10 Minuten doppelte
+Sterne fürs Servieren.
 
 **Luxus-Stücke** (✦ Extra für Profis: Lichtershow, Festbeleuchtung, Stand
 Stufe 3) braucht man fürs schönste Haus nicht - mit 10 bis 15 Minuten am
-Tag ist bis Heiligabend alles andere geschafft.
+Tag (verteilt auf mehrere kurze Besuche) ist bis Heiligabend alles andere geschafft.
 
 **Schwung:** Wer zügig hintereinander bedient, bekommt bis zu 40 % mehr.
 **Stoßzeit:** Wer ein paar Minuten am Stück spielt, bekommt Besuch von

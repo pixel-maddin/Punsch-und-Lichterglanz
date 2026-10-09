@@ -115,8 +115,8 @@ export const CHEF_TEMPO = 1.5;
 
 // Der Nikolaus fliegt vorbei: ganz selten, nur solange das Spiel offen ist.
 // Antippen schenkt so viele Minuten normaler Einnahmen (mindestens 20).
-export const SCHLITTEN_ERST = 240;          // s nach Sitzungsbeginn frühestens
-export const SCHLITTEN_PAUSE = [420, 900];  // s zwischen zwei Flügen
+export const SCHLITTEN_ERST = 120;          // s nach Sitzungsbeginn frühestens (bis 09.10.: 240 - kurze Besuche sahen ihn nie)
+export const SCHLITTEN_PAUSE = [300, 700];  // s zwischen zwei Flügen
 export const SCHLITTEN_DAUER = 9;           // s, bis er über den Himmel ist
 export const SCHLITTEN_MINUTEN = 3;
 export const SCHLITTEN_MIN = 200;
@@ -139,16 +139,19 @@ export const STOSS_GAESTE = 6;
 export const STOSS_GRUPPEN = ['Der Kirchenchor', 'Die Nachbarschaft', 'Der Kegelclub', 'Die Feuerwehr', 'Der Posaunenchor'];
 
 // Während die App zu ist, arbeiten nur die Wichtel - und nicht so gut wie du.
-export const OFFLINE_MAX_H = 8;
-export const OFFLINE_ANTEIL = 0.4;   // nach INAKTIV_AB: die Wichtel schaffen noch 40 % (bis 29.09.: 20 %) - gilt erst ab Servier-Stufe 6
+// Die Kiste fasst seit 09.10. höchstens 3 Stunden (vorher 8): Wer mehrmals am
+// Tag kurz reinschaut, holt jedes Mal eine volle Kiste - wer nur einmal am Tag
+// kommt, verschenkt etwas. Das ist der Grund, öfter zu kommen.
+export const OFFLINE_MAX_H = 3;
+export const OFFLINE_ANTEIL = 0.65;  // nach INAKTIV_AB: so viel schaffen die Wichtel noch (bis 09.10.: 40 % bei 8 h Kiste, jetzt 65 % bei 3 h)
 // Seit 01.10. wächst beides mit den SPIELTAGEN (gemeldet: in den ersten Tagen
 // kam nach einer Nacht eine überwältigende Kiste). Index = Spieltag ab 0 (der
 // erste Tag), danach gilt der letzte Wert. Erst an die Servier-Stufe
 // gekoppelt - dann blieb die Kiste ewig klein, weil Stufe 2 15.000 kostet
 // und man vorher Deko kauft (gemessen: 12 Dinge fehlten am 24.12.).
 export const OFFLINE_JE_TAG = {
-  anteil:  [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, OFFLINE_ANTEIL],
-  stunden: [2, 3, 4, 5, 6, 7, OFFLINE_MAX_H],
+  anteil:  [0.15, 0.25, 0.35, 0.45, 0.50, 0.55, OFFLINE_ANTEIL],
+  stunden: [2, 2.5, OFFLINE_MAX_H],
 };
 export const INAKTIV_AB = 300;       // s ohne dich - bis dahin arbeiten sie voll weiter
 export const OFFLINE_AB = 15;        // s weg, ab denen die Wichtel abrechnen
@@ -389,12 +392,30 @@ export const VORFREUDE_MIN = 150;
 // Wer am Tresen sieht, dass sein Getränk gerade gemacht wird, geht nicht
 // mehr weg (die Geduld sinkt weiter, aber nie unter diesen Rest in s)
 export const GEDULD_RESERVIERT = 1.5;
-// Tagesschicht (03.10.): so viele Gäste heute SELBST bedienen (Großbestellung
-// je Glas), dann arbeiten die Wichtel in der Nacht mit voller Kraft - sonst
-// nur mit diesem Anteil. ~5-7 Minuten bei normalem Tempo.
-export const SCHICHT_ZIEL = 30;
-export const SCHICHT_OHNE = 0.5;
-export const SCHICHT_PRAEMIE = 1.15;   // Kiste nach geschaffter Schicht (= das alte Wichtel-Trinkgeld)
+// Selbst servieren zählt doppelt (09.10.; die Tagesschicht vom 03.10. ist
+// dafür wieder raus - 30 Pflichtgäste fühlten sich nach Arbeit an)
+export const SELBST_MULT = 2;
+
+// Der fahrende Händler (09.10.): kommt höchstens HAENDLER_PRO_TAG-mal am Tag
+// mit seinem Karren, bleibt HAENDLER_BLEIBT Sekunden am Haus stehen und hat
+// Deko, die es NUR bei ihm gibt. Erscheint, wenn man am Stand ist.
+export const HAENDLER_PRO_TAG = 2;
+export const HAENDLER_ERST = [60, 150];   // s am Stand bis zum ersten Besuch der Sitzung
+export const HAENDLER_PAUSE = 360;        // s am Stand bis zum zweiten
+export const HAENDLER_BLEIBT = 150;
+export const HAENDLER_X = 16;             // Halteplatz auf dem Gehweg (links vor dem Haus)
+// Preise in Minuten Einnahmen (einnahmenProMinute), damit er früh wie spät
+// etwas kostet, aber erreichbar bleibt - mindestens `min` Sterne
+export const HAENDLER_DEKO = [
+  { id: 'h_kugel',    name: 'Riesen-Schneekugel',  stimmung: 8,  minuten: 28, min: 1200, text: 'Steht im Garten, darin dein Haus in klein. Drinnen schneit es immer.' },
+  { id: 'h_flamingo', name: 'Lichter-Flamingo',    stimmung: 6,  minuten: 18, min: 800,  text: 'Pink, mit Lichterkette und Mütze. Gehört hier nicht her - genau deshalb.' },
+  { id: 'h_polar',    name: 'Polarlicht-Laterne',  stimmung: 10, minuten: 35, min: 1500, text: 'Nachts zieht ein grünes Polarlicht über den Himmel.' },
+  { id: 'h_orgel',    name: 'Drehorgel-Wichtel',   stimmung: 5,  minuten: 24, min: 1000, bonus: { gaeste: 0.08 }, text: 'Kurbelt am Stand ein Liedchen - es kommen 8 % mehr Gäste.' },
+  { id: 'h_hahn',     name: 'Wetterhahn-Rentier',  stimmung: 6,  minuten: 18, min: 800,  text: 'Dreht sich auf dem Dachfirst mit dem Wind.' },
+];
+// Dazu jedes Mal ein Gutschein zum Verbrauchen
+export const HAENDLER_GUTSCHEIN = { id: 'h_zimt', name: 'Zimtstern-Gutschein', minuten: 3, min: 250, dauer: 600, mult: 2,
+  text: '10 Minuten lang bringt alles, was du selbst servierst, doppelt so viele Sterne.' };
 // Tagesansturm: einmal am Tag, nach so vielen Sekunden am Stand
 export const ANSTURM_NACH = 75;
 export const ANSTURM_DAUER = 60;

@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261003b';
-import * as S from './spiel.js?v=20261003b';
-import * as Z from './zeit.js?v=20261003b';
-import * as T from './ton.js?v=20261003b';
-import * as UI from './ui.js?v=20261003b';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261003b';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261003b';
-import * as Lernen from './lernen.js?v=20261003b';
-import { zeigeAdvent } from './ereignis.js?v=20261003b';
-import * as A from './auftraege.js?v=20261003b';
-import * as E from './erfolge.js?v=20261003b';
-import * as ZL from './ziele.js?v=20261003b';
+import * as C from './config.js?v=20261009a';
+import * as S from './spiel.js?v=20261009a';
+import * as Z from './zeit.js?v=20261009a';
+import * as T from './ton.js?v=20261009a';
+import * as UI from './ui.js?v=20261009a';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261009a';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009a';
+import * as Lernen from './lernen.js?v=20261009a';
+import { zeigeAdvent } from './ereignis.js?v=20261009a';
+import * as A from './auftraege.js?v=20261009a';
+import * as E from './erfolge.js?v=20261009a';
+import * as ZL from './ziele.js?v=20261009a';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -89,6 +89,16 @@ cv.addEventListener('pointerdown', (e) => {
       return;
     }
   }
+  // Der fahrende Händler (steht links auf dem Gehweg, der Karren hinter ihm)
+  if (S.haendlerDa()) {
+    const h = S.lauf.haendler, fuss = G - 9;
+    if (x > h.x - 17 && x < h.x + 6 && y > fuss - 26 && y < fuss + 3) {
+      S.lauf.klicks.push({ x, y, t: 0 });
+      T.spiele('klick');
+      UI.zeigeHaendler();
+      return;
+    }
+  }
   // Das Schild „DEIN STAND" lässt sich beschriften
   if (trifftSchild(x, y, G)) { T.spiele('klick'); UI.schildBeschriften(); return; }
   const tr = treffer(x, y, G);
@@ -132,7 +142,6 @@ S.hooks.ton = (n) => { try { T.spiele(n); } catch (e) { console.warn('Ton', n, e
 // Glas holen!" wären dasselbe noch einmal (gemeldet als doppelte Tipps)
 S.hooks.toast = (t, a) => { if (a === 'hinweis' && S.st.lernen < 99) return; UI.toast(t, a); };
 S.hooks.geld = () => UI.aktualisiereLaden();
-S.hooks.schicht = () => { UI.schichtGeschafft(); UI.zielLeiste(); };
 S.hooks.bedient = (g, auto, stoss) => A.bedient(g, auto, stoss);
 A.beiErfuellt((a) => { T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
 
@@ -315,6 +324,8 @@ function demo(art) {
     for (const p of C.PRODUKTE) st.toepfe[p.id] = S.topfMax();
     for (const d of Object.values(C.KALENDER_DEKO)) st.kalDeko[d.id] = true;
     for (const d of C.AUFTRAG_DEKO) st.kalDeko[d.id] = true;
+    // Händler-Szenen: drei Stücke schon gekauft, zwei noch im Angebot
+    if (art.startsWith('haendler')) for (const id of art === 'haendleralle' ? C.HAENDLER_DEKO.map((d) => d.id) : ['h_kugel', 'h_flamingo', 'h_hahn']) st.kalDeko[id] = true;
     st.fassade = 'rot'; st.geld = 1284650; st.gesamt = 6500000;
     for (let n = 1; n <= Z.dezemberTag(); n++) st.kalender[n] = true;
     st.stats.bedient = 8421;
@@ -335,6 +346,10 @@ function demo(art) {
     gib('schoko'); gib('apfel'); gib('kinderpunsch');
     for (let i = 0; i < 90; i++) S.update(1 / 60);
     S.tippeHand(0); S.tippeHand(1);
+  }
+  if (art.startsWith('haendler') && art !== 'haendleralle') {
+    S.lauf.haendler = { x: C.HAENDLER_X, t: 0, phase: 'steht', angebot: ['h_polar', 'h_orgel'], gutschein: true };
+    if (art === 'haendlerfenster') UI.zeigeHaendler();
   }
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');

@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261003b';
-import * as S from './spiel.js?v=20261003b';
-import * as Z from './zeit.js?v=20261003b';
-import * as T from './ton.js?v=20261003b';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261003b';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261003b';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261003b';
-import * as A from './auftraege.js?v=20261003b';
-import * as E from './erfolge.js?v=20261003b';
-import * as ZL from './ziele.js?v=20261003b';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261003b';
-import { alleSymbole } from './symbole.js?v=20261003b';
+import * as C from './config.js?v=20261009a';
+import * as S from './spiel.js?v=20261009a';
+import * as Z from './zeit.js?v=20261009a';
+import * as T from './ton.js?v=20261009a';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009a';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009a';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009a';
+import * as A from './auftraege.js?v=20261009a';
+import * as E from './erfolge.js?v=20261009a';
+import * as ZL from './ziele.js?v=20261009a';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009a';
+import { alleSymbole } from './symbole.js?v=20261009a';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -57,25 +57,25 @@ export function hud() {
 // Startziele: eine Leiste unter der Kopfzeile (ziele.js)
 // ---------------------------------------------------------------------------
 let letztesZiel = '';
-let leistenModus = '';   // 'ziel' | 'schicht' | 'ansturm' | ''
+let leistenModus = '';   // 'ziel' | 'ansturm' | ''
 export function zielLeiste() {
   const z = ZL.aktuell();
   const k = z && ZL.kaufziel();
   const bereit = !!(k && k.leisten);
   // Der Kontostand gehört in die Signatur: „noch 186 Sterne" blieb sonst
   // stehen, während man längst 179 hatte (Betatest 02.10.)
-  // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist
-  // kurz) und - wenn die Startziele durch sind - die Tagesschicht
+  // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist kurz)
   const ansturm = S.lauf.ansturm ? Math.max(0, Math.ceil(S.lauf.stossBis - S.lauf.t)) : 0;
-  const schicht = !z && !ansturm && S.schichtAktiv() && !S.schichtFertig();
-  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : schicht ? 'schicht' : '';
-  const sig = ansturm ? `a|${ansturm}` : schicht ? `s|${S.schichtStand()}`
+  const zimt = !ansturm && !z ? S.zimtRest() : 0;
+  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : '';
+  const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}`
     : z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
   const b = $('#ziel');
   $('#huelle').classList.toggle('mit-ziel', !!leistenModus);
   b.classList.toggle('ansturm', !!ansturm);
+  b.classList.toggle('zimt', !!zimt);
   if (ansturm) {
     b.innerHTML = `<span class="nr">ANSTURM</span><span class="was">Trinkgeld ×${C.ANSTURM_MULT} - nur wenn du servierst!</span><span class="los">${ansturm} s</span>`
       + `<span class="fort"><span style="width:${Math.round(ansturm / C.ANSTURM_DAUER * 100)}%"></span></span>`;
@@ -83,10 +83,10 @@ export function zielLeiste() {
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
   }
-  if (schicht) {
-    const n = Math.min(S.schichtStand(), C.SCHICHT_ZIEL);
-    b.innerHTML = `<span class="nr">Schicht</span><span class="was">Bediene heute selbst <i>${n}/${C.SCHICHT_ZIEL}</i> - dann arbeiten die Wichtel nachts voll</span>`
-      + `<span class="fort"><span style="width:${Math.round(n / C.SCHICHT_ZIEL * 100)}%"></span></span>`;
+  if (zimt) {
+    const m = Math.floor(zimt / 60), sek = String(zimt % 60).padStart(2, '0');
+    b.innerHTML = `<span class="nr">ZIMTSTERN</span><span class="was">Doppelte Sterne, wenn du servierst</span><span class="los">${m}:${sek}</span>`
+      + `<span class="fort"><span style="width:${Math.round(zimt / C.HAENDLER_GUTSCHEIN.dauer * 100)}%"></span></span>`;
     b.classList.remove('bereit', 'versteckt');
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
@@ -311,7 +311,7 @@ function hausZeile(liste, a, name, text, wahl) {
 }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
-  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO].filter((d) => S.st.kalDeko[d.id]);
+  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
@@ -359,7 +359,7 @@ function baueHaus(behalteScroll) {
   if (gesch.length) {
     gruppe('Geschenkt');
     for (const d of gesch) {
-      const herkunft = d.id.startsWith('kal_') ? 'Aus dem Adventskalender' : 'Für einen schweren Auftrag';
+      const herkunft = d.id.startsWith('kal_') ? 'Aus dem Adventskalender' : d.id.startsWith('h_') ? 'Vom fahrenden Händler' : 'Für einen schweren Auftrag';
       hausZeile(liste, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), herkunft,
         punktWahl(['aus', 'an'], S.zeigt(d.id) ? 'an' : 'aus', (v) => S.setzeDeko(d.id, v === 'an')));
       delete neu[d.id];
@@ -594,6 +594,13 @@ function zeichneIcon(cv, a) {
     case 'kal_vogel': r(c, 7, 9, 2, 7, '#6a4222'); r(c, 3, 5, 10, 5, '#a8703a'); for (let i = 0; i < 4; i++) r(c, 2 + i, 4 - i, 12 - i * 2, 1, '#c83030'); r(c, 7, 6, 2, 2, '#2a1a10'); r(c, 11, 3, 3, 2, '#d8502a'); return;
     case 'kal_goldstern': r(c, 6, 6, 4, 4, '#ffd040'); r(c, 7, 1, 2, 14, '#ffd040'); r(c, 1, 7, 14, 2, '#ffd040'); p(c, 4, 4, '#fff6c8'); p(c, 11, 4, '#fff6c8'); p(c, 4, 11, '#fff6c8'); p(c, 11, 11, '#fff6c8'); return;
     case 'auf_lebkuchenmann': icon(c, 'lebkuchen', 3, 3, 0); return;
+    // Vom fahrenden Händler
+    case 'h_kugel': for (let y = 0; y < 11; y++) for (let x = 0; x < 11; x++) if (Math.hypot(x - 5, y - 5) <= 5.4) p(c, x + 2, y + 1, '#9cc4e4'); r(c, 5, 6, 6, 4, '#d83a3a'); r(c, 1, 12, 14, 3, '#7a4a2a'); p(c, 4, 3, '#ffffff'); p(c, 9, 4, '#ffffff'); return;
+    case 'h_flamingo': r(c, 7, 9, 1, 6, '#c8487e'); r(c, 3, 6, 7, 4, '#f06aa8'); r(c, 9, 2, 1, 4, '#f06aa8'); r(c, 9, 1, 3, 2, '#f06aa8'); p(c, 12, 2, '#2a1810'); r(c, 9, 0, 3, 1, '#d83a3a'); p(c, 4, 7, '#5aff6a'); p(c, 6, 8, '#ffd040'); return;
+    case 'h_polar': r(c, 0, 0, 16, 16, '#141c3a'); for (let x = 0; x < 16; x++) { const y = 5 + Math.round(Math.sin(x * 0.6) * 2); r(c, x, y, 1, 5, '#5aff96'); r(c, x, y + 5, 1, 2, '#3a9a6a'); } p(c, 3, 2, '#ffffff'); p(c, 12, 1, '#ffffff'); return;
+    case 'h_orgel': r(c, 2, 5, 9, 7, '#8a3a2a'); r(c, 3, 7, 7, 2, '#e8c030'); r(c, 3, 12, 1, 3, '#5a3219'); r(c, 9, 12, 1, 3, '#5a3219'); r(c, 11, 7, 2, 1, '#3a3a40'); r(c, 13, 5, 1, 3, '#3a3a40'); p(c, 4, 2, '#f4f4f4'); p(c, 5, 1, '#f4f4f4'); return;
+    case 'h_hahn': r(c, 7, 6, 1, 10, '#3a3a44'); r(c, 3, 12, 9, 1, '#3a3a44'); r(c, 4, 4, 7, 3, '#3a3a44'); r(c, 10, 1, 2, 3, '#3a3a44'); p(c, 10, 0, '#3a3a44'); p(c, 12, 0, '#3a3a44'); p(c, 12, 3, '#d83a3a'); r(c, 4, 7, 1, 2, '#3a3a44'); r(c, 9, 7, 1, 2, '#3a3a44'); return;
+    case 'h_zimt': for (const [x, y] of [[7, 1], [7, 13], [1, 7], [13, 7]]) r(c, x, y, 2, 2, '#c8843a'); r(c, 4, 4, 8, 8, '#c8843a'); r(c, 5, 5, 6, 6, '#f4ead8'); p(c, 7, 7, '#c8843a'); p(c, 8, 8, '#c8843a'); return;
     case 'auf_rodel': r(c, 2, 8, 12, 2, '#a8703a'); r(c, 3, 10, 1, 3, '#6a4222'); r(c, 12, 10, 1, 3, '#6a4222'); r(c, 1, 13, 14, 1, '#8a8a92'); r(c, 14, 11, 1, 2, '#8a8a92'); return;
     case 'auf_engel': r(c, 6, 5, 4, 9, '#f4f0e0'); r(c, 6, 2, 4, 3, '#f2c9a0'); r(c, 6, 0, 4, 1, '#ffd040'); r(c, 2, 5, 4, 5, '#dce8f4'); r(c, 10, 5, 4, 5, '#dce8f4'); return;
     default:
@@ -658,10 +665,7 @@ export function zeigeKiste(sek, weiter) {
   const box = fenster('Während du weg warst …',
     `<canvas class="kiste" width="24" height="20"></canvas>
      <p>${dauer ? `In ${dauer} haben deine Wichtel` : 'Deine Wichtel haben'} <b>${gaeste}</b> Gäste bedient und alles in diese Kiste gelegt.</p>
-     ${S.st.kisteVoll === false
-        ? `<p class="schicht-hinweis">Ohne Tagesschicht haben sie nur mit halber Kraft gearbeitet. Bediene heute ${C.SCHICHT_ZIEL} Gäste selbst - dann arbeiten sie heute Nacht voll.</p>`
-        : S.st.kisteVoll ? '<p class="schicht-hinweis gut">Dank deiner Tagesschicht haben sie mit voller Kraft gearbeitet.</p>' : ''}
-     ${sek >= S.offlineStunden() * 3600 ? `<p class="klein">Länger als ${S.offlineStunden()} Stunden arbeiten sie noch nicht allein - mit jedem Spieltag werden sie ausdauernder.</p>` : ''}`,
+     ${sek >= S.offlineStunden() * 3600 ? `<p class="klein">Die Kiste war voll - mehr als ${S.offlineStunden()} Stunden Arbeit passen nicht hinein. Schau öfter vorbei, dann verschenkst du nichts.</p>` : ''}`,
     [{ text: 'Kiste öffnen', aktion: (b) => {
       const betrag = S.oeffneKiste();
       T.spiele('spezialKasse');
@@ -673,22 +677,41 @@ export function zeigeKiste(sek, weiter) {
   zeichneKiste(box.querySelector('canvas'), false);
 }
 
-/** Antippen der Schicht-Leiste: worum es geht. */
-function zeigeSchichtInfo() {
-  fenster('Deine Tagesschicht', `
-    <div class="gross-ico">🧑‍🍳</div>
-    <p>Bediene heute <b>${C.SCHICHT_ZIEL} Gäste selbst</b> (${Math.min(S.schichtStand(), C.SCHICHT_ZIEL)} hast du schon).</p>
-    <p>Dann arbeiten deine Wichtel heute Nacht <b>mit voller Kraft</b> - sonst nur mit halber Kraft, und die Kiste bleibt klein.</p>
-    <p class="klein">Trinkgeld gibt es übrigens nur, wenn DU servierst. Die Wichtel kassieren nur den Preis.</p>`);
-}
-/** Schicht geschafft (spiel.js → hooks.schicht). */
-export function schichtGeschafft() {
-  T.spiele('fertig');
-  fenster('Schicht geschafft!', `
-    <div class="gross-ico">⭐</div>
-    <p>${C.SCHICHT_ZIEL} Gäste heute selbst bedient.</p>
-    <p><b>Deine Wichtel arbeiten heute Nacht mit voller Kraft.</b></p>
-    <p class="klein">Du kannst jetzt guten Gewissens aufhören - oder weiter Trinkgeld sammeln.</p>`);
+/**
+ * Der fahrende Händler (09.10.): sein Angebot in einem Fenster. Deko gibt es
+ * nur bei ihm; gekauft wird sofort, das Fenster schließt, und das neue Teil
+ * funkelt am Haus.
+ */
+export function zeigeHaendler() {
+  const h = S.lauf.haendler;
+  if (!h) return;
+  const waren = [...h.angebot.map((id) => C.HAENDLER_DEKO.find((d) => d.id === id)), ...(h.gutschein ? [C.HAENDLER_GUTSCHEIN] : [])];
+  const leer = !waren.length;
+  const box = fenster('Der fahrende Händler', `
+    <p class="klein">${leer ? 'Heute hat er nichts mehr für dich - du hast schon alles!' : '„Seltene Ware von weit her! Gibt es nur bei mir - und ich ziehe bald weiter."'}</p>
+    <div class="haendler-liste"></div>`, [{ text: 'Später', neben: true }]);
+  const liste = box.querySelector('.haendler-liste');
+  for (const w of waren) {
+    const preis = S.haendlerPreis(w);
+    const z = el('div', 'zeile haendler');
+    const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
+    zeichneIcon(cv, w);
+    z.appendChild(cv);
+    const extra = w.stimmung ? `<em class="bonus">♥ +${w.stimmung}</em>` : '';
+    z.appendChild(el('div', 'txt', `<b>${w.name}</b><span>${w.text}</span>${extra}`));
+    const k = el('button', 'k k--kauf' + (S.st.geld >= preis ? '' : ' gesperrt'), S.formatGeld(preis));
+    k.onclick = () => {
+      if (!S.kaufeBeimHaendler(w.id)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
+      schliesseFenster();
+      if (w === C.HAENDLER_GUTSCHEIN) { toast(`Zimtstern-Gutschein: ${Math.round(w.dauer / 60)} Minuten doppelte Sterne fürs Servieren!`, 'spezial'); zielLeiste(); return; }
+      toast(`${w.name} gekauft! Nur beim Händler zu haben.`, 'gut');
+      const o = ortVon(w.id);
+      if (o) funkeln(o.x, o.y, `+${w.stimmung} ♥`);
+      T.spiele('spezial');
+    };
+    z.appendChild(k);
+    liste.appendChild(z);
+  }
 }
 
 /** Pixelkiste 24 × 20, zu oder offen mit Sternen. */
@@ -1230,8 +1253,7 @@ export function verdrahte() {
   alleSymbole();
   $('#ziel').onclick = () => {
     T.spiele('klick');
-    if (leistenModus === 'schicht') return zeigeSchichtInfo();
-    if (leistenModus === 'ansturm') return;   // jetzt servieren, nicht lesen
+    if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); offen === 'laden' ? schliesseBlatt() : oeffneLaden(); };
