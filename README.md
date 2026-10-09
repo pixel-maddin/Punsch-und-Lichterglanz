@@ -113,6 +113,12 @@ fehlerfreie Kunden hintereinander geben eine Kette bis ×3. Sterne für die
 ersten drei Runden am Tag, Rekord, und ab 900, 1.700 und 2.700 Punkten:
 Riesenkugeln im Baum, ein Bäumchen auf dem Dachfirst und ein Lichterwald.
 
+**Schlittenberg (Minispiel):** Im Wok den Berg hinunter! Daumen aufs Bild
+legen und seitlich ziehen - der Wok folgt. Tannen, Steinen, Schneemännern und
+Holzstapeln ausweichen, Sterne einsammeln; je schneller du im Ziel bist, desto
+mehr Punkte. Ab 900, 1.350 und 1.600 Punkten Rekord: Rodelkinder auf dem
+Gehweg, dein Wok als Trophäe an der Hauswand und ein Rodelhang am Horizont.
+
 **Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt - er wird
 ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.
 Am Markttag kommen 20 % mehr Gäste an deinen Stand, und auf dem Markt gibt es

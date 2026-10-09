@@ -5,21 +5,22 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009m';
-import * as S from './spiel.js?v=20261009m';
-import * as Z from './zeit.js?v=20261009m';
-import * as T from './ton.js?v=20261009m';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009m';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009m';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009m';
-import * as A from './auftraege.js?v=20261009m';
-import * as E from './erfolge.js?v=20261009m';
-import * as ZL from './ziele.js?v=20261009m';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009m';
-import * as KA from './karte.js?v=20261009m';
-import * as LI from './lichtung.js?v=20261009m';
-import * as CB from './christbaum.js?v=20261009m';
-import { alleSymbole } from './symbole.js?v=20261009m';
+import * as C from './config.js?v=20261009n';
+import * as S from './spiel.js?v=20261009n';
+import * as Z from './zeit.js?v=20261009n';
+import * as T from './ton.js?v=20261009n';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009n';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009n';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009n';
+import * as A from './auftraege.js?v=20261009n';
+import * as E from './erfolge.js?v=20261009n';
+import * as ZL from './ziele.js?v=20261009n';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009n';
+import * as KA from './karte.js?v=20261009n';
+import * as LI from './lichtung.js?v=20261009n';
+import * as CB from './christbaum.js?v=20261009n';
+import * as SB from './schlitten.js?v=20261009n';
+import { alleSymbole } from './symbole.js?v=20261009n';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -31,7 +32,7 @@ let ladenTab = 'super';
 let ladenModus = 'kaufen';  // 'kaufen' | 'haus' - Einkaufen oder Mein Haus (einstellen)
 let zeilen = [];           // Ladenzeilen zum Nachführen
 
-export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
+export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() || SB.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
 
 // ---------------------------------------------------------------------------
 // Kopfzeile
@@ -245,6 +246,7 @@ function amOrt(o) {
   if (o.tab) { oeffneLaden(o.tab); return; }
   if (o.spiel === 'lichtung') { zeigeLichtung(); return; }
   if (o.spiel === 'baum') { zeigeBaumspiel(); return; }
+  if (o.spiel === 'berg') { zeigeBergspiel(); return; }
   if (o.markt) { zeigeMarkt(); return; }
   if (o.bald) fenster(o.name, `<p>${o.bald}</p><p class="klein">Kommt bald!</p>`);
 }
@@ -301,6 +303,27 @@ function zeigeBaumspiel() {
 }
 export function starteBaumspiel() {
   CB.starte(spielHoehe(), (punkte, n) => { CB.schliesse(); miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft`, 'Gut verkauft!', starteBaumspiel); });
+}
+
+// ---------------------------------------------------------------------------
+// Minispiel Schlittenberg (schlitten.js)
+// ---------------------------------------------------------------------------
+function zeigeBergspiel() {
+  const rest = S.miniRest('berg'), best = S.miniRekord('berg');
+  const naechste = C.BERG_DEKO.find((d) => !S.st.kalDeko[d.id]);
+  fenster('Schlittenberg', `
+    <p>Im Wok den Berg hinunter! <b>Leg den Daumen aufs Bild und zieh ihn nach links oder rechts</b> - der Wok folgt ihm.</p>
+    <p>Weich Tannen, Steinen, Schneemännern und Holzstapeln aus und sammle die Sterne. Je schneller du im Ziel bist, desto mehr Punkte.</p>
+    <p class="klein">${C.BERG_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
+    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteBergspiel, 60); } }]);
+}
+export function starteBergspiel() {
+  SB.starte(spielHoehe(), (punkte, zeit, sterne) => {
+    SB.schliesse();
+    const zeile = zeit != null ? `Im Ziel nach ${zeit.toFixed(1).replace('.', ',')} s · ${sterne} Sterne` : `Nicht ins Ziel geschafft · ${sterne} Sterne`;
+    miniErgebnis('berg', punkte, zeile, zeit != null ? 'Geschafft!' : 'Fast!', starteBergspiel);
+  });
 }
 
 function baueLaden() {
@@ -405,7 +428,7 @@ function zeigeVariante(platz, text = '') {
 export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
-  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO].filter((d) => S.st.kalDeko[d.id]);
+  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
@@ -739,6 +762,10 @@ function zeichneIcon(cv, a) {
     case 'c_kugeln': for (const [x, y, f] of [[4, 6, '#d83a3a'], [10, 4, '#ffd040'], [9, 11, '#3a8ad8']]) { r(c, x - 2, y - 1, 5, 3, f); r(c, x - 1, y - 2, 3, 5, f); p(c, x - 1, y - 1, '#ffffff'); r(c, x, y - 4, 1, 2, '#3a3a40'); } return;
     case 'c_dachbaum': for (let i = 0; i < 4; i++) r(c, 2 + i * 3, 14 - i * 3, 12 - i * 6 > 0 ? 12 - i * 6 : 2, 1, '#5a5a62'); for (let i = 0; i < 9; i++) { const w = Math.round((i + 1) / 9 * 4); r(c, 8 - w, 2 + i, w * 2 + 1, 1, i % 3 ? '#2a6a34' : '#1c5228'); } p(c, 8, 1, '#ffe060'); p(c, 6, 6, '#ff5a5a'); p(c, 10, 8, '#5ad0ff'); return;
     case 'c_wald': for (const x of [3, 8, 13]) { for (let i = 0; i < 10; i++) { const w = Math.round((i + 1) / 10 * 3); r(c, x - w, 4 + i, w * 2 + 1, 1, '#2a5a3a'); } p(c, x, 7, '#ffe060'); p(c, x - 1, 10, '#ff5a5a'); p(c, x + 1, 12, '#5ad0ff'); } return;
+    // Vom Schlittenberg
+    case 's_kinder': r(c, 1, 11, 9, 2, '#a8703a'); r(c, 1, 13, 10, 1, '#6a4428'); for (const [x, f] of [[6, '#c83a32'], [12, '#3a6ab8']]) { r(c, x, 5, 3, 5, f); r(c, x, 2, 3, 3, '#f2c9a0'); r(c, x, 1, 3, 1, '#e8c030'); r(c, x, 10, 1, 4, '#2a2a30'); r(c, x + 2, 10, 1, 4, '#2a2a30'); } return;
+    case 's_wok': for (let y = -3; y <= 3; y++) { const w = Math.round(6 * Math.sqrt(1 - y * y / 9)); r(c, 8 - w, 9 + y, w * 2, 1, y < 0 ? '#4a4a54' : '#2a2a30'); } r(c, 1, 6, 4, 1, '#6a4428'); r(c, 6, 3, 4, 2, '#e8c030'); return;
+    case 's_hang': for (let x = 0; x < 16; x++) { const h = Math.round(9 - Math.abs(x - 8) * 0.9); r(c, x, 14 - h, 1, h, '#e8eef6'); } p(c, 6, 8, '#c83a32'); p(c, 10, 10, '#3a6ab8'); r(c, 0, 14, 16, 2, '#2a5a3a'); return;
     // Vom Weihnachtsmarkt
     case 'm_rad': for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; p(c, 8 + Math.round(Math.cos(a) * 6), 7 + Math.round(Math.sin(a) * 6), k % 2 ? '#ffd040' : '#d83a3a'); } r(c, 7, 6, 2, 2, '#6a5a6a'); r(c, 4, 13, 1, 3, '#6a5a6a'); r(c, 11, 13, 1, 3, '#6a5a6a'); r(c, 3, 15, 10, 1, '#6a5a6a'); return;
     case 'm_stern': r(c, 7, 0, 1, 3, '#6a4428'); for (const [x, y] of [[7, 3], [3, 7], [11, 7], [7, 11], [4, 4], [10, 4], [4, 10], [10, 10]]) r(c, x, y, 2, 2, '#ffe060'); r(c, 6, 6, 4, 4, '#fff6c8'); return;
@@ -1469,7 +1496,7 @@ export function verdrahte() {
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
   $('#kartenZu').onclick = () => { T.spiele('klick'); schliesseKarte(); };
-  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); CB.schliesse(); };
+  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); CB.schliesse(); SB.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
   $('#btnKarte').onclick = () => karte();

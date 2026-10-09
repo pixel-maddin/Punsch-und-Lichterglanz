@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261009m';
-import * as S from './spiel.js?v=20261009m';
-import * as Z from './zeit.js?v=20261009m';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009m';
+import * as C from './config.js?v=20261009n';
+import * as S from './spiel.js?v=20261009n';
+import * as Z from './zeit.js?v=20261009n';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009n';
 
 const $ = (s) => document.querySelector(s);
 
@@ -35,7 +35,7 @@ export const ORTE = [
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },
   { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.75, spiel: 'lichtung' },
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
-  { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, bald: 'Im Wok den Berg hinunter, so schnell du kannst - an Bäumen, Steinen und Schneemännern vorbei.' },
+  { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
 ];
 
 let offen = false;
@@ -771,12 +771,7 @@ function zeichne(t, dt) {
   c.drawImage(grund, 0, 0);
   const P = palette(winter);
 
-  // Wasser glitzert und fließt
-  const fluss = flussPunkte();
-  for (let i = 0; i < fluss.length; i += 3) {
-    const q = fluss[i];
-    if ((i + Math.floor(t * 8)) % 9 === 0) { p(c, q.x - 1, q.y, P.glanz); p(c, q.x, q.y, P.glanz); }
-  }
+  // Kein Glitzern im Fluss mehr (09.10., Nutzerwunsch: „irritiert zu sehr")
   const w = WEIHER();
   if (winter) {
     // Ein Schlittschuhläufer zieht Kreise auf dem Weiher

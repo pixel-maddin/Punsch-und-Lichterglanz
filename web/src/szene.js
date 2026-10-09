@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009m';
-import * as Z from './zeit.js?v=20261009m';
-import * as S from './spiel.js?v=20261009m';
-import { FASSADEN } from './config.js?v=20261009m';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009n';
+import * as Z from './zeit.js?v=20261009n';
+import * as S from './spiel.js?v=20261009n';
+import { FASSADEN } from './config.js?v=20261009n';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -201,6 +201,7 @@ function hintergrund(c, G, w, L, t = 0) {
   };
   const fest = w.kerzen >= 4;
   const W = ['#efe3cc', '#e6d2b8', '#f4ead8', '#dcc8b0'];
+  if (S.zeigt('s_hang')) rodelhang(c, hz, t, schnee);
   reihe(hz - 4, 12, 22, schnee ? '#a8b8c8' : '#7a9a88', '#eef3f8', 11, 6);
   // Links drei Häuschen WEIT hinten: klein, blass, zwischen den Tannenreihen
   const blass = (f) => mische(f, schnee ? '#c4d0dc' : '#9aae9e', 0.35);
@@ -1227,6 +1228,54 @@ function dachbaum(c, L, x, fuss, t, w) {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Vom Schlittenberg (09.10.)
+// ---------------------------------------------------------------------------
+/** Ein verschneiter Hügel am Horizont rechts, auf dem winzige Rodler hinunterfahren. */
+function rodelhang(c, hz, t, schnee) {
+  const x0 = 140, x1 = 186, gipfel = hz - 38;
+  for (let x = x0; x < x1; x++) {
+    const h = Math.round(Math.max(0, 38 - Math.abs(x - 168) * 1.5));
+    if (h <= 0) continue;
+    r(c, x, hz - h, 1, h, x < 168 ? '#e4ecf4' : '#c8d6e4');
+    p(c, x, hz - h, '#9fb4c8');                                   // Kante gegen den hellen Himmel
+  }
+  for (const [tx, th] of [[150, 7], [156, 6], [181, 7], [176, 5]]) {
+    const fuss = hz - Math.round(Math.max(0, 38 - Math.abs(tx - 168) * 1.5)) + th;
+    for (let i = 0; i < th; i++) r(c, tx - Math.floor(i / 2), fuss - th + i, Math.floor(i / 2) * 2 + 1, 1, '#3a5a48');
+  }
+  // Rodelbahn als Linie, darauf drei winzige Rodler
+  for (let i = 0; i < 22; i++) p(c, 167 - i, gipfel + 3 + Math.round(i * 1.4), '#a8b8c8');
+  for (let k = 0; k < 3; k++) {
+    const a = ((t * 0.12 + k / 3) % 1), x = 167 - a * 22, y = gipfel + 2 + a * 30;
+    p(c, x, y, ['#c83a32', '#3a6ab8', '#2f8a3a'][k]); p(c, x, y - 1, '#f2c9a0');
+  }
+}
+/** Der Rodel-Wok als Trophäe an der Hauswand rechts neben dem Fenster. */
+function wandWok(c, x, y) {
+  p(c, x, y - 5, '#3a3a40');
+  for (let k = -3; k <= 3; k++) { const w = Math.round(3 * Math.sqrt(1 - k * k / 9)); r(c, x - w, y + k, w * 2 + 1, 1, k < 0 ? '#5a5a64' : '#2e2e36'); }
+  r(c, x - 1, y - 4, 3, 1, '#e8c030'); p(c, x - 2, y - 1, '#8a8a92');
+  r(c, x - 1, y + 4, 1, 3, '#6a4428');
+}
+/** Zwei Kinder ziehen einen Schlitten über den Gehweg (alle 50 s). */
+function rodelkinder(c, G, t, w) {
+  const phase = (t + 30) % 50;
+  if (phase > 14) return;
+  const x = Math.round(196 - phase * 16), fuss = G - 2, schritt = Math.floor(t * 6) % 2;
+  // Schlitten hinter ihnen (sie gehen nach links)
+  r(c, x + 12, fuss - 4, 11, 2, '#a8703a'); r(c, x + 11, fuss - 2, 13, 1, '#6a4428'); p(c, x + 23, fuss - 3, '#6a4428');
+  for (let i = 0; i < 6; i++) p(c, x + 4 + i, fuss - 6 + Math.round(i * 0.3), '#3a3a40');   // Seil
+  r(c, x + 14, fuss - 7, 3, 3, '#e8c030');                                                    // Paket auf dem Schlitten
+  for (const [dx, f] of [[0, '#c83a32'], [6, '#3a6ab8']]) {
+    const kx = x + dx;
+    r(c, kx - 1, fuss - 3 + (schritt ? 0 : 1), 1, 3, '#2c2c38'); r(c, kx + 1, fuss - 3 + (schritt ? 1 : 0), 1, 3, '#2c2c38');
+    r(c, kx - 2, fuss - 8, 5, 5, f); r(c, kx - 2, fuss - 12, 4, 4, '#f2c9a0'); p(c, kx - 2, fuss - 10, '#2a1a1a');
+    r(c, kx - 2, fuss - 13, 5, 2, dx ? '#e8c030' : '#2f8a3a'); p(c, kx + 2, fuss - 14, '#ffffff');
+  }
+  if (w.schnee > 0) for (let i = 0; i < 4; i++) p(c, x + 24 + i * 3, fuss - 1, '#ffffff');
+}
+
 /** Lichter-Flamingo: pink, S-Hals, ein Bein, Weihnachtsmütze, Lichterkette. */
 function flamingo(c, L, x, fuss, t) {
   const pk = '#f06aa8', dk = '#c8487e';
@@ -1734,7 +1783,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -1839,6 +1888,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   haus(e, GW, w, t, L);
   if (S.zeigt('m_fenster')) fensterbilder(e, GW);
   if (S.zeigt('c_dachbaum')) dachbaum(e, L, 92, GW - 94, t, w);
+  if (S.zeigt('s_wok')) wandWok(e, 118, GW - 52);
   // Verdeckung: Alle Lichter werden erst am Ende über das Bild gemalt. Was
   // danach DAVOR gezeichnet wird (Tanne vor der Kirche, Leute vor dem Zaun),
   // würde sonst von ihnen durchleuchtet. Deshalb ein Schnappschuss nach jeder
@@ -1892,6 +1942,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t);
   if (S.zeigt('m_kutsche') && !opts.karte) kutsche(e, L, G, t, w);
+  if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(e, GW, t, w);
   if (neuPruefen) { verdecke(L, stufen, pixel(e, G)); if (!opts.karte) deckungMerken(L, t); }
   else if (pruefen) deckungNehmen(L);
   if (!opts.karte) deckung.nNeu = L.length;
