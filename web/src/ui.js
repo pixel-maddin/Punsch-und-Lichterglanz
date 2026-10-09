@@ -5,22 +5,22 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009r';
-import * as S from './spiel.js?v=20261009r';
-import * as Z from './zeit.js?v=20261009r';
-import * as T from './ton.js?v=20261009r';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009r';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009r';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009r';
-import * as A from './auftraege.js?v=20261009r';
-import * as E from './erfolge.js?v=20261009r';
-import * as ZL from './ziele.js?v=20261009r';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009r';
-import * as KA from './karte.js?v=20261009r';
-import * as LI from './lichtung.js?v=20261009r';
-import * as CB from './christbaum.js?v=20261009r';
-import * as SB from './schlitten.js?v=20261009r';
-import { alleSymbole } from './symbole.js?v=20261009r';
+import * as C from './config.js?v=20261009s';
+import * as S from './spiel.js?v=20261009s';
+import * as Z from './zeit.js?v=20261009s';
+import * as T from './ton.js?v=20261009s';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009s';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009s';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009s';
+import * as A from './auftraege.js?v=20261009s';
+import * as E from './erfolge.js?v=20261009s';
+import * as ZL from './ziele.js?v=20261009s';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009s';
+import * as KA from './karte.js?v=20261009s';
+import * as LI from './lichtung.js?v=20261009s';
+import * as CB from './christbaum.js?v=20261009s';
+import * as SB from './schlitten.js?v=20261009s';
+import { alleSymbole } from './symbole.js?v=20261009s';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -432,6 +432,17 @@ export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 function geschenke() {
   return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
+/** Woher ein geschenktes Stück kommt - bei Minispielen mit der Punktschwelle. */
+function herkunftVon(d) {
+  const ab = d.ab ? ` (Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten)` : '';
+  if (d.id.startsWith('kal_')) return 'Aus dem Adventskalender';
+  if (d.id.startsWith('h_')) return 'Vom fahrenden Händler';
+  if (d.id.startsWith('m_')) return 'Vom Weihnachtsmarkt';
+  if (d.id.startsWith('l_')) return 'Aus der Waldlichtung' + ab;
+  if (d.id.startsWith('c_')) return 'Aus dem Christbaumverkauf' + ab;
+  if (d.id.startsWith('s_')) return 'Vom Schlittenberg' + ab;
+  return 'Für einen schweren Auftrag';
+}
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
   const pos = liste.scrollTop;
@@ -513,7 +524,7 @@ function baueHaus(behalteScroll) {
   if (gesch.length) {
     gruppe('Geschenkt');
     for (const d of gesch) {
-      const herkunft = d.id.startsWith('kal_') ? 'Aus dem Adventskalender' : d.id.startsWith('h_') ? 'Vom fahrenden Händler' : d.id.startsWith('l_') ? 'Aus der Waldlichtung' : 'Für einen schweren Auftrag';
+      const herkunft = herkunftVon(d);
       hausZeile(liste, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), herkunft,
         punktWahl(['aus', 'an'], S.zeigt(d.id) ? 'an' : 'aus', (v) => S.setzeDeko(d.id, v === 'an')));
       delete neu[d.id];

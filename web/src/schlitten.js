@@ -10,11 +10,11 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=20261009r';
-import * as Z from './zeit.js?v=20261009r';
-import * as T from './ton.js?v=20261009r';
-import * as MH from './minihud.js?v=20261009r';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=20261009r';
+import * as C from './config.js?v=20261009s';
+import * as Z from './zeit.js?v=20261009s';
+import * as T from './ton.js?v=20261009s';
+import * as MH from './minihud.js?v=20261009s';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=20261009s';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
