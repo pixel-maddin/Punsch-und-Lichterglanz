@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261009k';
-import * as S from './spiel.js?v=20261009k';
-import * as Z from './zeit.js?v=20261009k';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009k';
+import * as C from './config.js?v=20261009l';
+import * as S from './spiel.js?v=20261009l';
+import * as Z from './zeit.js?v=20261009l';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009l';
 
 const $ = (s) => document.querySelector(s);
 
@@ -28,7 +28,7 @@ const $ = (s) => document.querySelector(s);
  */
 export const ORTE = [
   { id: 'dorf',      name: 'Weihnachtsladen', x: 90,  y: 0.17, tab: 'markt' },
-  { id: 'festplatz', name: 'Festplatz',       x: 30,  y: 0.19, bald: 'Hier steht alle paar Tage der Weihnachtsmarkt - mit Deko, die es nur dort gibt, und Verbesserungen für deine Getränke.' },
+  { id: 'festplatz', name: 'Festplatz',       x: 30,  y: 0.19, markt: true },
   { id: 'baeume',    name: 'Christbaumverkauf', x: 150, y: 0.21, bald: 'Fälle den Baum, den der Kunde will, pack ihn ein und lade ihn aufs Autodach. Je schneller, desto mehr Sterne.' },
   { id: 'super',     name: 'Supermarkt',      x: 34,  y: 0.40, tab: 'super' },
   { id: 'bau',       name: 'Baumarkt',        x: 148, y: 0.41, tab: 'baumarkt' },
@@ -91,7 +91,13 @@ function baueSchilder(hervor) {
     b.style.left = `calc(var(--px) * ${o.x})`;
     b.style.top = `calc(var(--px) * ${yPx(o) + 9})`;
     const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : 0;
-    b.innerHTML = `${o.name}${n ? `<b class="ort-neu">${n}</b>` : ''}${o.bald ? '<small>bald</small>' : o.spiel ? '<small>Minispiel</small>' : ''}`;
+    let unter = o.bald ? 'bald' : o.spiel ? 'Minispiel' : '';
+    if (o.markt) {
+      const m = S.marktInfo();
+      unter = m.heute ? 'heute Weihnachtsmarkt!' : m.inTagen === 1 ? 'Markt morgen' : `Markt in ${m.inTagen} Tagen`;
+      if (m.heute) b.classList.add('markt-heute');
+    }
+    b.innerHTML = `${o.name}${n ? `<b class="ort-neu">${n}</b>` : ''}${unter ? `<small>${unter}</small>` : ''}`;
     b.onclick = () => gehe(o);
     box.appendChild(b);
     // Auch das Bild des Ortes selbst ist antippbar (größere Fläche)
@@ -233,7 +239,7 @@ function bezier(a, b, k, n) {
 let grund = null, grundSchl = '', grundLichter = [];
 
 function baueGrund(winter) {
-  const schl = `${H}|${winter}|${S.st.fassade}`;
+  const schl = `${H}|${winter}|${S.st.fassade}|${S.marktHeute()}`;
   if (grund && grundSchl === schl) return;
   grundSchl = schl;
   grund = document.createElement('canvas');
@@ -571,6 +577,7 @@ function dorf(x, y, P, winter) {
 }
 
 function festplatz(x, y, P, winter) {
+  if (S.marktHeute()) { marktPlatz(x, y, P, winter); return; }
   schattenOval(x, y + 3, 36);
   // Fester Platz mit Holzzaun
   r(c, x - 17, y - 12, 34, 15, winter ? '#dce4ec' : '#c4ac7c');
@@ -588,6 +595,29 @@ function festplatz(x, y, P, winter) {
   // Ein Karussell in der Mitte, zugedeckt
   ellipse(x, y - 1, 5, 2, '#8a5a6a'); r(c, x, y - 8, 1, 6, '#c8a040');
   for (let i = -4; i <= 4; i++) p(c, x + i, y - 8 + Math.floor(Math.abs(i) / 2), i % 2 ? '#f4e8f0' : '#c86a8a');
+}
+
+/** Am Markttag: bunte Buden mit Lichtern, Karussell offen, Glühweinpyramide. */
+function marktPlatz(x, y, P, winter) {
+  schattenOval(x, y + 3, 38);
+  r(c, x - 18, y - 13, 36, 16, winter ? '#dce4ec' : '#c4ac7c');
+  for (let i = 0; i < 30; i++) p(c, x - 17 + Math.floor(hash(i + 11) * 34), y - 12 + Math.floor(hash(i + 31) * 14), winter ? '#ccd6e2' : '#b09868');
+  // Buden hinten und an den Seiten, jede mit eigener Dachfarbe
+  const bude = (bx, by, dachF) => {
+    r(c, bx - 4, by - 5, 9, 5, '#8a5a32'); r(c, bx - 3, by - 4, 7, 2, '#f8d878'); licht(bx - 2, by - 4); licht(bx + 2, by - 4);
+    for (let i = 0; i < 4; i++) r(c, bx - 5 + i, by - 6 - i, 11 - i * 2, 1, i % 2 ? ton(dachF, -0.2) : dachF);
+    if (P.dach) r(c, bx - 2, by - 9, 5, 1, '#ffffff');
+    for (let i = -4; i <= 4; i += 2) { p(c, bx + i, by - 6, '#ffe060'); licht(bx + i, by - 6, '#ffe060'); }
+  };
+  bude(x - 12, y - 6, '#c83a32'); bude(x, y - 9, '#2f7a3a'); bude(x + 12, y - 6, '#3a6ab8');
+  bude(x - 13, y + 3, '#e8a030'); bude(x + 13, y + 3, '#a83a8a');
+  // Weihnachtspyramide in der Mitte
+  r(c, x - 1, y - 2, 3, 6, '#6a4428');
+  for (let i = 0; i < 3; i++) r(c, x - 3 + i, y - 2 + i * 2, 7 - i * 2 + i * 2, 1, '#a8763e');
+  p(c, x, y - 5, '#ffe060'); licht(x, y - 4, '#ffe060');
+  // Lichterkette quer über den Platz
+  for (let i = -16; i <= 16; i += 2) { const yy = y - 14 + Math.round(Math.sin((i + 16) / 32 * Math.PI) * 2); p(c, x + i, yy, ['#ff5a5a', '#ffe060', '#5ad0ff'][(i + 16) / 2 % 3]); licht(x + i, yy, '#ffe8a0'); }
+  r(c, x - 17, y - 16, 1, 5, '#5a3a22'); r(c, x + 17, y - 16, 1, 5, '#5a3a22');
 }
 
 function christbaeume(x, y, P, winter) {
@@ -767,9 +797,13 @@ function zeichne(t, dt) {
   rauch(d.x - 10, yPx(d) - 17, t, 1.3);
   rauch(d.x + 9, yPx(d) - 16, t, 2.1);
 
-  // Festplatz: Wimpelkette flattert
+  // Festplatz: Wimpelkette flattert - am Markttag laufen Leute zwischen den Buden
   const f = ort('festplatz'), fy = yPx(f);
-  for (let i = 0; i < 15; i++) {
+  if (S.marktHeute()) for (let i = 0; i < 6; i++) {
+    const a = t * (0.25 + i * 0.05) + i * 1.9, lx = f.x + Math.cos(a) * (8 + i % 3 * 3), ly = fy - 2 + Math.sin(a) * 3;
+    r(c, lx, ly - 2, 1, 2, ['#c83a32', '#3a6ab8', '#2f8a3a', '#e8a030', '#6a3a8a', '#8a5a32'][i]); p(c, lx, ly - 3, '#f2c9a0');
+  }
+  else for (let i = 0; i < 15; i++) {
     const xx = f.x - 7 + i, yy = fy - 17 + Math.round(Math.sin(i / 14 * Math.PI) * 2 + Math.sin(t * 4 + i) * 0.4);
     p(c, xx, yy, ['#e84a4a', '#ffe060', '#3a8ad8', '#7ae07a'][i % 4]);
   }

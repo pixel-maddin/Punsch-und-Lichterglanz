@@ -204,6 +204,8 @@ html, body {
 #kartenOrte .ort small { display: block; font-weight: normal; font-size: calc(var(--px) * 3.4); color: #8a6a4a; }
 #kartenOrte .ort.bald { background: rgba(240, 232, 214, 0.88); }
 #kartenOrte .ort.zuhause { background: #fff3c4; border-color: var(--gold); }
+#kartenOrte .ort.markt-heute { background: #fff0e0; border-color: #c83030; animation: pulsieren 1.6s infinite; }
+#kartenOrte .ort.markt-heute small { color: #c83030; font-weight: bold; }
 #kartenOrte .ort.hervor { border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 1) var(--gold), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); animation: pulsieren 1.2s infinite; }
 #kartenOrte .ort:active { transform: translate(-50%, 0) scale(0.94); }
 #kartenOrte .ort-neu { display: inline-block; margin-left: calc(var(--px) * 1.5); min-width: calc(var(--px) * 5.5); padding: 0 calc(var(--px) * 1); border-radius: calc(var(--px) * 3); background: var(--rot); color: #fff; font-size: calc(var(--px) * 3.8); }
@@ -596,6 +598,9 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #ziel.ansturm .nr { background: var(--rot); }
 #ziel.ansturm .fort span { background: var(--rot); }
 #ziel.zimt { background: rgba(250, 232, 200, 0.95); }
+#ziel.markt { background: rgba(255, 236, 210, 0.96); border-color: #c83030; }
+#ziel.markt .nr { background: #2f7a3a; }
+#ziel.markt .los { background: #c83030; }
 .haendler-liste { display: flex; flex-direction: column; gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 2); text-align: left; }
 .zeile.haendler { display: grid; grid-template-columns: auto 1fr auto; gap: calc(var(--px) * 2.5); align-items: center; background: var(--papier2); border-radius: calc(var(--px) * 1.5); padding: calc(var(--px) * 2); }
 .zeile.haendler .ico { width: calc(var(--px) * 13); height: calc(var(--px) * 13); image-rendering: pixelated; }
@@ -625,3 +630,4 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 /* Hinweisblase offen = Pause: Bild blasser und dunkler, Blase und Kopfzeile bleiben klar */
 #cv { transition: filter 0.25s; }
 #huelle.pausiert #cv { filter: saturate(0.3) brightness(0.72); }
+.txt i.rezept { font-style: normal; font-weight: bold; color: #2f7a3a; }

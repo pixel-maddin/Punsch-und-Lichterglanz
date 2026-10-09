@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009k';
-import * as Z from './zeit.js?v=20261009k';
-import * as S from './spiel.js?v=20261009k';
-import { FASSADEN } from './config.js?v=20261009k';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009l';
+import * as Z from './zeit.js?v=20261009l';
+import * as S from './spiel.js?v=20261009l';
+import { FASSADEN } from './config.js?v=20261009l';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -177,7 +177,7 @@ function dorfhaus(c, L, x, fuss, bw, h, dach, wand, schnee, licht, festlich) {
   }
 }
 
-function hintergrund(c, G, w, L) {
+function hintergrund(c, G, w, L, t = 0) {
   const hz = G - 40;
   const schnee = w.schnee > 0;
   // Feld bis zum Vorgarten
@@ -201,6 +201,8 @@ function hintergrund(c, G, w, L) {
   dorfhaus(c, L, 0, hz, 9, 7, blass('#b8554a'), blass(W[0]), schnee, 0, false);
   dorfhaus(c, L, 11, hz - 1, 8, 6, blass('#5a6e9a'), blass(W[1]), schnee, 0, false);
   dorfhaus(c, L, 22, hz, 9, 7, blass('#8a6a3a'), blass(W[3]), schnee, 0, false);
+  // Riesenrad vom Weihnachtsmarkt (09.10.): hinter dem Dorf, vor der hinteren Tannenreihe
+  if (S.zeigt('m_rad')) riesenrad(c, L, 22, hz - 22, t, w);
   reihe(hz + 2, 14, 26, schnee ? '#7a9488' : '#4f7a5a', '#f4f8fb', 23, 8);
   // Links das Dorf mit der Kirche. Rechts steht nichts mehr (die Häuser dort
   // lugten nur halb über den Stand) - der kahle Baum steht frei.
@@ -1111,6 +1113,86 @@ function schneekugel(c, L, x, fuss, t, w) {
   p(c, x - 3, cy - 4, '#ffffff'); p(c, x - 4, cy - 3, '#ffffff');   // Glanzlicht
   L.push({ x, y: cy + 3, f: '#ffd070', halo: 4, an: 0.6 });
 }
+// ---------------------------------------------------------------------------
+// Vom Weihnachtsmarkt (09.10.)
+// ---------------------------------------------------------------------------
+/** Riesenrad hinter dem Dorf: dreht sich langsam, Gondeln hängen immer senkrecht. */
+function riesenrad(c, L, x, y, t, w) {
+  const rad = 12, a0 = t * 0.25;
+  const blass = w.schnee > 0 ? '#6a6a84' : '#5e5a72';
+  // Gestell
+  for (let i = 0; i < 18; i++) { p(c, x - 1 - Math.round(i * 0.45), y + i, blass); p(c, x + 1 + Math.round(i * 0.45), y + i, blass); }
+  // Kranz und Speichen
+  for (let k = 0; k < 48; k++) { const a = k / 48 * Math.PI * 2; p(c, x + Math.round(Math.cos(a) * rad), y + Math.round(Math.sin(a) * rad), blass); }
+  for (let k = 0; k < 8; k++) {
+    const a = a0 + k / 8 * Math.PI * 2;
+    for (let d = 2; d < rad; d += 2) p(c, x + Math.round(Math.cos(a) * d), y + Math.round(Math.sin(a) * d), blass);
+    // Gondel
+    const gx = x + Math.round(Math.cos(a) * rad), gy = y + Math.round(Math.sin(a) * rad);
+    const f = ['#c83a32', '#e8a030', '#3a6ab8', '#2f8a3a'][k % 4];
+    r(c, gx - 1, gy + 1, 3, 2, f);
+    L.push({ x: gx, y: gy, f: BUNT[k % BUNT.length], halo: 3, an: 0.8 });
+  }
+  r(c, x - 1, y - 1, 3, 3, '#5a5a68');
+}
+/** Herrnhuter Stern: hängt an einem Ast des kahlen Baums, viele Zacken, leuchtet. */
+function herrnhuter(c, L, x, ast, t) {
+  r(c, x, ast, 1, 4, '#3a3a40');
+  const cx = x, cy = ast + 8;
+  const zacken = [[0, -5], [0, 5], [-5, 0], [5, 0], [-4, -4], [4, -4], [-4, 4], [4, 4], [-2, -5], [2, -5]];
+  for (const [dx, dy] of zacken) {
+    const n = Math.max(Math.abs(dx), Math.abs(dy));
+    for (let i = 1; i <= n; i++) p(c, cx + Math.round(dx * i / n), cy + Math.round(dy * i / n), i === n ? '#fff6c8' : '#ffe060');
+  }
+  r(c, cx - 2, cy - 2, 5, 5, '#ffd040'); r(c, cx - 1, cy - 1, 3, 3, '#fff6c8');
+  L.push({ x: cx, y: cy, f: '#ffe880', halo: 12, an: 0.9 + 0.1 * Math.sin(t * 2) });
+}
+/** Fensterbilder: Schneeflocken aus Papier oben in den beiden großen Fenstern. */
+function fensterbilder(c, G) {
+  const flocke = (x, y, g) => {
+    p(c, x, y, '#ffffff');
+    for (let i = 1; i <= g; i++) { p(c, x - i, y, '#ffffff'); p(c, x + i, y, '#ffffff'); p(c, x, y - i, '#ffffff'); p(c, x, y + i, '#ffffff'); }
+    if (g > 1) { p(c, x - 1, y - 1, '#f0f4f8'); p(c, x + 1, y + 1, '#f0f4f8'); p(c, x + 1, y - 1, '#f0f4f8'); p(c, x - 1, y + 1, '#f0f4f8'); }
+  };
+  for (const fx of [48, 96]) { flocke(fx + 3, G - 55, 2); flocke(fx + 12, G - 54, 1); flocke(fx + 7, G - 52, 1); }
+}
+/** Lebkuchenherzen an Bändern unter der Markise. */
+function lebkuchenherzen(c, G, t) {
+  const markise = G - 44;
+  [138, 152, 166].forEach((hx, i) => {
+    const sw = Math.round(Math.sin(t * 1.5 + i) * 0.6);
+    p(c, hx, markise + 6, '#c83030');
+    const x = hx - 2 + sw, y = markise + 7;
+    r(c, x, y, 2, 1, '#a8642e'); r(c, x + 3, y, 2, 1, '#a8642e'); r(c, x, y + 1, 5, 2, '#a8642e'); p(c, x + 2, y + 3, '#a8642e'); r(c, x + 1, y + 3, 3, 1, '#a8642e');
+    r(c, x + 1, y + 1, 3, 1, '#fff4e6');
+  });
+}
+/** Pferdekutsche: fährt alle 45 s auf der Fahrbahn von links nach rechts vorbei. */
+function kutsche(c, L, G, t, w) {
+  const phase = (t + 42) % 45;
+  if (phase > 13) return;
+  const x = Math.round(-36 + phase * 18), fuss = G - 3;   // etwas höher: unten liegen die Schilder des Stands darüber
+  const hop = Math.floor(t * 8) % 2;
+  // Pferd vorn (rechts)
+  const px = x + 26, pf = '#7a4a28';
+  r(c, px - 5, fuss - 9 - hop, 10, 4, pf); r(c, px + 4, fuss - 13 - hop, 3, 5, pf); r(c, px + 5, fuss - 14 - hop, 4, 3, pf);
+  p(c, px + 8, fuss - 13 - hop, '#2a1a10'); p(c, px + 5, fuss - 15 - hop, pf); r(c, px + 3, fuss - 12 - hop, 1, 4, '#3a2416');   // Mähne
+  r(c, px - 6, fuss - 9 - hop, 1, 4, '#3a2416');                                                                        // Schweif
+  for (const [lx, ph] of [[-4, 0], [-2, 1], [2, 0], [4, 1]]) r(c, px + lx + ((ph === hop) ? 1 : 0), fuss - 5, 1, 5, '#5a3418');
+  r(c, px - 2, fuss - 9 - hop, 1, 1, '#e8c030'); r(c, px - 2, fuss - 8 - hop, 1, 1, '#c83030');                       // Glöckchen, Decke
+  // Deichsel und Kutsche
+  r(c, x + 16, fuss - 7, 6, 1, '#3a2416');
+  r(c, x + 2, fuss - 14, 15, 9, '#2a3a6a'); r(c, x + 2, fuss - 14, 15, 1, '#4a5a8a'); r(c, x + 1, fuss - 16, 17, 2, '#1e2a50');
+  r(c, x + 5, fuss - 12, 4, 4, '#f8d878'); r(c, x + 11, fuss - 12, 4, 4, '#f8d878');
+  r(c, x + 3, fuss - 6, 13, 1, '#c8a040');
+  for (const rx of [x + 4, x + 14]) { r(c, rx - 2, fuss - 5, 5, 5, '#3a2a1a'); p(c, rx, fuss - 3, '#c8a040'); }
+  if (w.schnee > 0) r(c, x + 1, fuss - 17, 17, 1, '#ffffff');
+  // Kutscher mit Zylinder
+  r(c, x + 15, fuss - 20, 3, 4, '#3a3a40'); r(c, x + 15, fuss - 22, 3, 2, '#f2c9a0'); r(c, x + 14, fuss - 24, 5, 1, '#1a1a1a'); r(c, x + 15, fuss - 27, 3, 3, '#1a1a1a');
+  L.push({ rect: [x + 5, fuss - 12, 4, 4], f: '#ffd070', halo: 5, an: 0.7 });
+  L.push({ rect: [x + 11, fuss - 12, 4, 4], f: '#ffd070', halo: 5, an: 0.7 });
+}
+
 /** Lichter-Flamingo: pink, S-Hals, ein Bein, Weihnachtsmütze, Lichterkette. */
 function flamingo(c, L, x, fuss, t) {
   const pk = '#f06aa8', dk = '#c8487e';
@@ -1618,7 +1700,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -1714,11 +1796,13 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Haus und Straße stehen ein Stück über der Tresenkante; darunter
   // liegt die Fahrbahn. GW ist die Bodenlinie der Welt.
   const GW = G - STRASSE;
-  hintergrund(e, GW, w, L);
+  hintergrund(e, GW, w, L, t);
   kahlerBaum(e, GW, w, L, t);
+  if (S.zeigt('m_stern')) herrnhuter(e, L, 147, GW - 85, t);
   boden(e, GW, w);
   fahrbahn(e, GW, G, w);
   haus(e, GW, w, t, L);
+  if (S.zeigt('m_fenster')) fensterbilder(e, GW);
   // Verdeckung: Alle Lichter werden erst am Ende über das Bild gemalt. Was
   // danach DAVOR gezeichnet wird (Tanne vor der Kirche, Leute vor dem Zaun),
   // würde sonst von ihnen durchleuchtet. Deshalb ein Schnappschuss nach jeder
@@ -1760,6 +1844,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Kopf auf halber Dachhöhe über dem Stand steht
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
+  if (S.zeigt('m_herzen')) lebkuchenherzen(e, GW, t);
   // Aus der Waldlichtung: Hasen vor dem Zaun, das Reh am Weg
   if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 2, t);
   if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 2, t);
@@ -1770,6 +1855,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t);
+  if (S.zeigt('m_kutsche') && !opts.karte) kutsche(e, L, G, t, w);
   if (neuPruefen) { verdecke(L, stufen, pixel(e, G)); if (!opts.karte) deckungMerken(L, t); }
   else if (pruefen) deckungNehmen(L);
   if (!opts.karte) deckung.nNeu = L.length;

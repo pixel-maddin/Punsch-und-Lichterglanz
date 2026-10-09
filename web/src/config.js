@@ -416,6 +416,31 @@ export const HAENDLER_DEKO = [
 // Dazu jedes Mal ein Gutschein zum Verbrauchen
 export const HAENDLER_GUTSCHEIN = { id: 'h_zimt', name: 'Zimtstern-Gutschein', minuten: 3, min: 250, dauer: 600, mult: 2,
   text: '10 Minuten lang bringt alles, was du selbst servierst, doppelt so viele Sterne.' };
+// Der Weihnachtsmarkt auf dem Festplatz (09.10.): zufällig alle paar Tage,
+// mit Ansage. Er hat Deko, die es nur dort gibt (je Markt MARKT_ANGEBOT
+// Stücke, die man noch nicht hat), ein Rezept, das zwei Getränke dauerhaft
+// teurer verkauft, und am Markttag kommen mehr Leute am Stand vorbei.
+export const MARKT_ERST = 2;          // Tage nach dem ersten Spieltag bis zum ersten Markt
+export const MARKT_ABSTAND = [3, 4];  // Tage zwischen zwei Märkten
+export const MARKT_ANSAGE = 3;        // ab so vielen Tagen vorher wird er angekündigt
+export const MARKT_GAESTE = 0.2;      // am Markttag 20 % mehr Gäste
+export const MARKT_ANGEBOT = 3;
+export const MARKT_DEKO = [
+  { id: 'm_rad',     name: 'Riesenrad',          stimmung: 9, minuten: 30, min: 1200, text: 'Dreht sich hinter dem Dorf - nachts mit Lichtern.' },
+  { id: 'm_stern',   name: 'Herrnhuter Stern',   stimmung: 7, minuten: 22, min: 900,  text: 'Hängt leuchtend im Baum über deinem Stand.' },
+  { id: 'm_kutsche', name: 'Pferdekutsche',      stimmung: 8, minuten: 26, min: 1000, text: 'Fährt immer wieder mit Glöckchen an deinem Haus vorbei.' },
+  { id: 'm_fenster', name: 'Fensterbilder',      stimmung: 5, minuten: 15, min: 700,  text: 'Schneeflocken aus Papier in allen Fenstern.' },
+  { id: 'm_herzen',  name: 'Lebkuchenherzen',    stimmung: 6, minuten: 18, min: 800,  text: 'Hängen an der Markise deines Stands.' },
+];
+// Rezepte: je Markt eins (das erste, das man noch nicht hat und für das man
+// schon eines der Getränke verkauft). `plus` = Aufschlag auf den Preis.
+export const MARKT_REZEPTE = [
+  { id: 'r_zimt',   name: 'Zimtstangen-Bündel',  fuer: ['gluehwein', 'kinderpunsch'], plus: 0.2, minuten: 20, min: 600 },
+  { id: 'r_apfel',  name: 'Bratapfel-Gewürz',    fuer: ['apfel', 'lebkuchen'],        plus: 0.2, minuten: 22, min: 900 },
+  { id: 'r_vanille', name: 'Echte Vanille',      fuer: ['schoko', 'eierpunsch'],      plus: 0.2, minuten: 24, min: 1500 },
+  { id: 'r_honig',  name: 'Waldhonig',           fuer: ['jaegertee', 'crepe'],        plus: 0.2, minuten: 26, min: 3000 },
+  { id: 'r_orange', name: 'Orangenschalen',      fuer: ['weisser', 'feuerzange'],     plus: 0.2, minuten: 28, min: 6000 },
+];
 // Tagesansturm: einmal am Tag, nach so vielen Sekunden am Stand
 export const ANSTURM_NACH = 75;
 export const ANSTURM_DAUER = 60;

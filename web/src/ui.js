@@ -5,20 +5,20 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009k';
-import * as S from './spiel.js?v=20261009k';
-import * as Z from './zeit.js?v=20261009k';
-import * as T from './ton.js?v=20261009k';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009k';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009k';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009k';
-import * as A from './auftraege.js?v=20261009k';
-import * as E from './erfolge.js?v=20261009k';
-import * as ZL from './ziele.js?v=20261009k';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009k';
-import * as KA from './karte.js?v=20261009k';
-import * as LI from './lichtung.js?v=20261009k';
-import { alleSymbole } from './symbole.js?v=20261009k';
+import * as C from './config.js?v=20261009l';
+import * as S from './spiel.js?v=20261009l';
+import * as Z from './zeit.js?v=20261009l';
+import * as T from './ton.js?v=20261009l';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009l';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009l';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009l';
+import * as A from './auftraege.js?v=20261009l';
+import * as E from './erfolge.js?v=20261009l';
+import * as ZL from './ziele.js?v=20261009l';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009l';
+import * as KA from './karte.js?v=20261009l';
+import * as LI from './lichtung.js?v=20261009l';
+import { alleSymbole } from './symbole.js?v=20261009l';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -69,8 +69,9 @@ export function zielLeiste() {
   // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist kurz)
   const ansturm = S.lauf.ansturm ? Math.max(0, Math.ceil(S.lauf.stossBis - S.lauf.t)) : 0;
   const zimt = !ansturm && !z ? S.zimtRest() : 0;
-  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : '';
-  const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}`
+  const markt = !ansturm && !z && !zimt && S.marktHeute() && !S.marktBesucht();
+  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : '';
+  const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}` : markt ? 'markt'
     : z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
@@ -89,6 +90,13 @@ export function zielLeiste() {
     const m = Math.floor(zimt / 60), sek = String(zimt % 60).padStart(2, '0');
     b.innerHTML = `<span class="nr">ZIMTSTERN</span><span class="was">Doppelte Sterne, wenn du servierst</span><span class="los">${m}:${sek}</span>`
       + `<span class="fort"><span style="width:${Math.round(zimt / C.HAENDLER_GUTSCHEIN.dauer * 100)}%"></span></span>`;
+    b.classList.remove('bereit', 'versteckt');
+    $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
+    return;
+  }
+  b.classList.toggle('markt', markt);
+  if (markt) {
+    b.innerHTML = `<span class="nr">MARKTTAG</span><span class="was">Weihnachtsmarkt auf dem Festplatz</span><span class="los">Hin ▸</span>`;
     b.classList.remove('bereit', 'versteckt');
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
@@ -222,12 +230,12 @@ export function oeffneLaden(tab, zeigeId, modus) {
 // ---------------------------------------------------------------------------
 /** Ort für ein Geschäft (für die Führung: welcher Ort pulsiert?). */
 const ORT_FUER_TAB = { super: 'super', markt: 'dorf', baumarkt: 'bau', wichtel: 'wichtel' };
-export function oeffneKarte() {
+export function oeffneKarte(hervor) {
   schliesseBlatt();
   const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 1;
   const hoehe = Math.round($('#landkarte').parentElement.clientHeight / px) - C.LEISTE;
   const fu = fuehrung();
-  KA.oeffne(hoehe, amOrt, fu ? ORT_FUER_TAB[fu.tab] : null);
+  KA.oeffne(hoehe, amOrt, hervor || (fu ? ORT_FUER_TAB[fu.tab] : null));
 }
 export function schliesseKarte() { schliesseBlatt(); KA.schliesse(); }
 function amOrt(o) {
@@ -235,6 +243,7 @@ function amOrt(o) {
   if (o.id === 'haus') { KA.schliesse(); return; }
   if (o.tab) { oeffneLaden(o.tab); return; }
   if (o.spiel === 'lichtung') { zeigeLichtung(); return; }
+  if (o.markt) { zeigeMarkt(); return; }
   if (o.bald) fenster(o.name, `<p>${o.bald}</p><p class="klein">Kommt bald!</p>`);
 }
 
@@ -283,7 +292,7 @@ function baueLaden() {
   const artikel = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => a.tab === ladenTab));
   let gruppe = null;
   if (ladenTab === 'super') {
-    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
+    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.${rezeptHinweis('gluehwein')}</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
     zeichneIcon(liste.lastChild.querySelector('canvas'), { id: 'gluehwein', produkt: true });
   }
   const neu = S.st.neu || {};
@@ -302,7 +311,7 @@ function baueLaden() {
     const txt = el('div', 'txt');
     txt.innerHTML = versteckt
       ? `<b>???</b><span>${S.bedingungText(a)}</span>`
-      : `<b>${a.name}${neu[a.id] ? ' <i class="neuTag">NEU</i>' : ''}</b><span>${a.text}</span><em class="bonus">${bonusText(a)}</em>`;
+      : `<b>${a.name}${neu[a.id] ? ' <i class="neuTag">NEU</i>' : ''}</b><span>${a.text}${rezeptHinweis(a.id)}</span><em class="bonus">${bonusText(a)}</em>`;
     z.appendChild(txt);
     delete neu[a.id];   // gesehen
     const platz = el('div', 'knopfplatz');
@@ -376,7 +385,7 @@ function zeigeVariante(platz, text = '') {
 export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
-  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO].filter((d) => S.st.kalDeko[d.id]);
+  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
@@ -706,6 +715,18 @@ function zeichneIcon(cv, a) {
     case 'l_eich': r(c, 5, 7, 5, 5, '#c86a2a'); r(c, 9, 5, 3, 3, '#c86a2a'); r(c, 1, 3, 4, 8, '#d88a4a'); p(c, 11, 6, '#2a1a10'); r(c, 11, 10, 2, 2, '#8a5a2a'); return;
     case 'l_reh': r(c, 2, 7, 10, 4, '#a8703a'); for (const x of [3, 5, 9, 11]) r(c, x, 11, 1, 4, '#a8703a'); r(c, 11, 3, 2, 4, '#a8703a'); r(c, 12, 2, 3, 2, '#a8703a'); p(c, 5, 8, '#f4ead8'); p(c, 8, 8, '#f4ead8'); return;
     case 'h_zimt': for (const [x, y] of [[7, 1], [7, 13], [1, 7], [13, 7]]) r(c, x, y, 2, 2, '#c8843a'); r(c, 4, 4, 8, 8, '#c8843a'); r(c, 5, 5, 6, 6, '#f4ead8'); p(c, 7, 7, '#c8843a'); p(c, 8, 8, '#c8843a'); return;
+    // Vom Weihnachtsmarkt
+    case 'm_rad': for (let k = 0; k < 8; k++) { const a = k / 8 * Math.PI * 2; p(c, 8 + Math.round(Math.cos(a) * 6), 7 + Math.round(Math.sin(a) * 6), k % 2 ? '#ffd040' : '#d83a3a'); } r(c, 7, 6, 2, 2, '#6a5a6a'); r(c, 4, 13, 1, 3, '#6a5a6a'); r(c, 11, 13, 1, 3, '#6a5a6a'); r(c, 3, 15, 10, 1, '#6a5a6a'); return;
+    case 'm_stern': r(c, 7, 0, 1, 3, '#6a4428'); for (const [x, y] of [[7, 3], [3, 7], [11, 7], [7, 11], [4, 4], [10, 4], [4, 10], [10, 10]]) r(c, x, y, 2, 2, '#ffe060'); r(c, 6, 6, 4, 4, '#fff6c8'); return;
+    case 'm_kutsche': r(c, 7, 5, 8, 6, '#2a3a6a'); r(c, 8, 6, 3, 3, '#f8d878'); for (const x of [8, 13]) { r(c, x, 11, 3, 3, '#3a2a1a'); p(c, x + 1, 12, '#c8a040'); } r(c, 1, 7, 5, 4, '#8a5a32'); r(c, 4, 4, 2, 3, '#8a5a32'); r(c, 1, 11, 1, 3, '#5a3a22'); r(c, 4, 11, 1, 3, '#5a3a22'); return;
+    case 'm_fenster': r(c, 1, 1, 14, 14, '#f2ead8'); r(c, 2, 2, 12, 12, '#3a5a8a'); r(c, 7, 2, 1, 12, '#f2ead8'); r(c, 2, 7, 12, 1, '#f2ead8'); for (const [x, y] of [[4, 4], [10, 10], [10, 4]]) { p(c, x, y, '#ffffff'); p(c, x - 1, y, '#ffffff'); p(c, x + 1, y, '#ffffff'); p(c, x, y - 1, '#ffffff'); p(c, x, y + 1, '#ffffff'); } return;
+    case 'm_herzen': for (const [x, y] of [[2, 4], [9, 7]]) { r(c, x, y, 2, 2, '#a8642e'); r(c, x + 3, y, 2, 2, '#a8642e'); r(c, x - 1, y + 1, 7, 2, '#a8642e'); r(c, x, y + 3, 5, 1, '#a8642e'); r(c, x + 1, y + 4, 3, 1, '#a8642e'); p(c, x + 2, y + 5, '#a8642e'); r(c, x + 1, y + 2, 3, 1, '#fff4e6'); } r(c, 0, 0, 16, 1, '#c83030'); return;
+    case 'r_zimt': case 'r_apfel': case 'r_vanille': case 'r_honig': case 'r_orange': {
+      // Rezeptkarte mit Zutat
+      r(c, 2, 1, 12, 14, '#f4ead8'); r(c, 2, 1, 12, 1, '#c8a070'); for (let y = 4; y < 14; y += 2) r(c, 4, y, 8, 1, '#c8b898');
+      const f = { r_zimt: '#a8642e', r_apfel: '#d83a3a', r_vanille: '#3a2a1a', r_honig: '#e8a020', r_orange: '#f08a2a' }[a.id];
+      r(c, 9, 9, 5, 5, f); p(c, 9, 9, '#ffffff'); return;
+    }
     case 'auf_rodel': r(c, 2, 8, 12, 2, '#a8703a'); r(c, 3, 10, 1, 3, '#6a4222'); r(c, 12, 10, 1, 3, '#6a4222'); r(c, 1, 13, 14, 1, '#8a8a92'); r(c, 14, 11, 1, 2, '#8a8a92'); return;
     case 'auf_engel': r(c, 6, 5, 4, 9, '#f4f0e0'); r(c, 6, 2, 4, 3, '#f2c9a0'); r(c, 6, 0, 4, 1, '#ffd040'); r(c, 2, 5, 4, 5, '#dce8f4'); r(c, 10, 5, 4, 5, '#dce8f4'); return;
     default:
@@ -813,6 +834,66 @@ export function zeigeHaendler() {
       const o = ortVon(w.id);
       if (o) funkeln(o.x, o.y, `+${w.stimmung} ♥`);
       T.spiele('spezial');
+    };
+    z.appendChild(k);
+    liste.appendChild(z);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Der Weihnachtsmarkt auf dem Festplatz (09.10.)
+// ---------------------------------------------------------------------------
+const WOCHENTAG = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+function marktText(w) {
+  if (!w.fuer) return w.text;
+  const namen = w.fuer.map((id) => C.PRODUKT[id].name);
+  return `${namen.join(' und ')} bringen dauerhaft ${Math.round(w.plus * 100)} % mehr Sterne.`;
+}
+/** „ · Marktrezept +20 %" hinter dem Getränk, wenn ein Rezept es teurer macht. */
+function rezeptHinweis(id) {
+  const x = C.MARKT_REZEPTE.find((r) => (S.st.rezepte || {})[r.id] && r.fuer.includes(id));
+  return x ? ` · <i class="rezept">Marktrezept +${Math.round(x.plus * 100)} %</i>` : '';
+}
+export function zeigeMarkt() {
+  const m = S.marktInfo();
+  const deko = C.MARKT_DEKO.filter((d) => S.st.kalDeko[d.id]).length;
+  const rez = C.MARKT_REZEPTE.filter((x) => (S.st.rezepte || {})[x.id]).length;
+  const stand = `<p class="klein">Gesammelt: ${deko}/${C.MARKT_DEKO.length} Markt-Deko · ${rez}/${C.MARKT_REZEPTE.length} Rezepte</p>`;
+  if (!m.heute) {
+    const wann = m.inTagen === 1 ? 'morgen' : `am ${WOCHENTAG[m.datum.getDay()]}, ${m.datum.getDate()}.${m.datum.getMonth() + 1}. (in ${m.inTagen} Tagen)`;
+    fenster('Festplatz', `
+      <p>Noch ist der Platz leer. Der nächste <b>Weihnachtsmarkt</b> ist ${wann}.</p>
+      <p class="klein">Dort gibt es Deko, die du nur auf dem Markt bekommst, und Rezepte, mit denen deine Getränke dauerhaft mehr Sterne bringen. Am Markttag kommen außerdem ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste an deinen Stand.</p>
+      ${stand}`, [{ text: 'Bis dann!' }]);
+    return;
+  }
+  S.marktBesuchen();
+  zielLeiste();
+  const a = S.marktAngebot();
+  const waren = [...a.deko, ...(a.rezept ? [a.rezept] : [])];
+  const box = fenster('Weihnachtsmarkt', `
+    <p class="klein">${waren.length ? `Heute ist Markt! Am Stand ist viel los: ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste. Was es hier gibt, gibt es nur auf dem Markt.` : 'Du hast schon alles, was der Markt heute hat - aber am Stand ist trotzdem mehr los!'}</p>
+    <div class="haendler-liste"></div>${stand}`, [{ text: 'Später', neben: true }]);
+  const liste = box.querySelector('.haendler-liste');
+  for (const w of waren) {
+    const preis = S.haendlerPreis(w);
+    const z = el('div', 'zeile haendler');
+    const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
+    zeichneIcon(cv, w);
+    z.appendChild(cv);
+    const extra = w.stimmung ? `<em class="bonus">♥ +${w.stimmung}</em>` : '<em class="bonus">Rezept</em>';
+    z.appendChild(el('div', 'txt', `<b>${w.name}</b><span>${marktText(w)}</span>${extra}`));
+    const k = el('button', 'k k--kauf' + (S.st.geld >= preis ? '' : ' gesperrt'), S.formatGeld(preis));
+    k.onclick = () => {
+      if (!S.kaufeAufMarkt(w.id)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
+      schliesseFenster();
+      T.spiele('spezial');
+      if (w.fuer) { toast(`${w.name}: ${marktText(w)}`, 'spezial'); return; }
+      // Deko: Karte zu, damit man sie am Haus funkeln sieht
+      schliesseKarte();
+      toast(`${w.name} gekauft! Nur auf dem Markt zu haben.`, 'gut');
+      const o = ortVon(w.id);
+      if (o) funkeln(o.x, o.y, `+${w.stimmung} ♥`);
     };
     z.appendChild(k);
     liste.appendChild(z);
@@ -1359,6 +1440,7 @@ export function verdrahte() {
   $('#ziel').onclick = () => {
     T.spiele('klick');
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
+    if (leistenModus === 'markt') { oeffneKarte('festplatz'); return; }
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };

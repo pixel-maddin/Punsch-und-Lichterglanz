@@ -105,6 +105,13 @@ darauf, und jedes zeigt beim Öffnen oben ein Bild von sich:
 | **Supermarkt** | Zutaten: Kinderpunsch (lockt Kinder an), heißer Apfel, Lebkuchen, heiße Schokolade, Herzwärmer, Waldtee, Crêpe, Zimtwolke, Feuerzauber - alles alkoholfrei |
 | **Wichtelwald** | Spül-, Servier-, Nachfüll-, Crêpe- und Kassen-Wichtel, in ihren Baumstammhäusern |
 
+**Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt - er wird
+ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.
+Am Markttag kommen 20 % mehr Gäste an deinen Stand, und auf dem Markt gibt es
+Deko, die es nur dort gibt (Riesenrad, Herrnhuter Stern, Pferdekutsche,
+Fensterbilder, Lebkuchenherzen), dazu jedes Mal ein Rezept, mit dem zwei
+Getränke dauerhaft 20 % mehr Sterne bringen.
+
 **Waldlichtung (Minispiel):** Hasen, Eichhörnchen und Rehe ziehen durch die
 Lichtung - die Rehe im schnellen Galopp - tippe sie an, um sie zu füttern. 30 Sekunden, schnelles Füttern
 hintereinander gibt eine Kette bis ×5, selten kommt ein goldener Schneehase.

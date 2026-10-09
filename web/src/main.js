@@ -4,19 +4,19 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261009k';
-import * as S from './spiel.js?v=20261009k';
-import * as Z from './zeit.js?v=20261009k';
-import * as T from './ton.js?v=20261009k';
-import * as LI from './lichtung.js?v=20261009k';
-import * as UI from './ui.js?v=20261009k';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261009k';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009k';
-import * as Lernen from './lernen.js?v=20261009k';
-import { zeigeAdvent } from './ereignis.js?v=20261009k';
-import * as A from './auftraege.js?v=20261009k';
-import * as E from './erfolge.js?v=20261009k';
-import * as ZL from './ziele.js?v=20261009k';
+import * as C from './config.js?v=20261009l';
+import * as S from './spiel.js?v=20261009l';
+import * as Z from './zeit.js?v=20261009l';
+import * as T from './ton.js?v=20261009l';
+import * as LI from './lichtung.js?v=20261009l';
+import * as UI from './ui.js?v=20261009l';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261009l';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009l';
+import * as Lernen from './lernen.js?v=20261009l';
+import { zeigeAdvent } from './ereignis.js?v=20261009l';
+import * as A from './auftraege.js?v=20261009l';
+import * as E from './erfolge.js?v=20261009l';
+import * as ZL from './ziele.js?v=20261009l';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -332,7 +332,9 @@ function demo(art) {
     for (const d of C.AUFTRAG_DEKO) st.kalDeko[d.id] = true;
     // Händler-Szenen: drei Stücke schon gekauft, zwei noch im Angebot
     // Varianten-Szenen: alle Plätze auf Variante 2 bzw. 3
-    if (art === 'alles') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO]) st.kalDeko[d.id] = true;
+    if (art === 'alles' || art === 'marktdeko') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO]) st.kalDeko[d.id] = true;
+    // Markttag erzwingen: Anker so legen, dass heute der erste Markt ist
+    if (art === 'markt' || art === 'marktkarte') st.markt = { anker: Math.round(new Date(Z.jetzt()).setHours(0, 0, 0, 0) / 86400000) - C.MARKT_ERST, seed: 1, besucht: 0, angesagt: 0 };
     if (art === 'meinhaus') { st.var = { 'tanne:1': true, 'kranz:1': true, 'kranz:2': true }; st.wahl = { kranz: 2 }; }
     if (art === 'var1' || art === 'var2') {
       st.var = {}; st.wahl = {};
@@ -365,7 +367,8 @@ function demo(art) {
     if (art === 'haendlerfenster') UI.zeigeHaendler();
   }
   if (art === 'meinhaus') UI.oeffneMeinHaus();
-  if (art === 'landkarte') UI.oeffneKarte();
+  if (art === 'landkarte' || art === 'marktkarte') UI.oeffneKarte();
+  if (art === 'markt') UI.zeigeMarkt();
   if (art === 'lichtung') { UI.starteLichtung(); LI.vorspulen(9); }
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');

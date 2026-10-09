@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261009k';
-import * as Z from './zeit.js?v=20261009k';
-import { neueFarben } from './pixel.js?v=20261009k';
+import * as C from './config.js?v=20261009l';
+import * as Z from './zeit.js?v=20261009l';
+import { neueFarben } from './pixel.js?v=20261009l';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -200,6 +200,7 @@ export function stimmung() {
   for (const d of Object.values(C.KALENDER_DEKO)) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.AUFTRAG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.HAENDLER_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
+  for (const d of C.MARKT_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.LICHTUNG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
   return s;
@@ -259,7 +260,8 @@ export const preisFaktor = () => (1 + stimmung() * C.STIMMUNG_PREIS) * (1 + boni
 
 export function gastTakt() {
   const sonntag = Z.adventssonntag() ? C.ADVENT_GAESTE : 0;
-  const t = C.GAST_BASIS / (1 + stimmung() / C.STIMMUNG_TAKT) / (1 + boni().gaeste + sonntag);
+  const markt = marktHeute() ? C.MARKT_GAESTE : 0;
+  const t = C.GAST_BASIS / (1 + stimmung() / C.STIMMUNG_TAKT) / (1 + boni().gaeste + sonntag + markt);
   return Math.max(C.GAST_MIN, t);
 }
 
@@ -553,7 +555,7 @@ function gehe(g, froh) {
   if (!froh && g.gross) {
     // Zeit um: Was schon geliefert ist, wird normal bezahlt - keine Strafe
     const gr = g.gross;
-    const betrag = gr.stand * C.PRODUKT[gr.id].preis * preisFaktor() * dev.geld;
+    const betrag = gr.stand * produktPreis(C.PRODUKT[gr.id]) * preisFaktor() * dev.geld;
     if (betrag > 0) verdiene(betrag);
     hooks.toast(gr.stand ? `Zeit um! ${gr.stand} von ${gr.n} geliefert: +${formatGeld(betrag)}` : 'Zeit um - die Großbestellung ist weitergezogen.', 'hinweis');
     return;
@@ -820,7 +822,7 @@ function liefereGross(g, faktor) {
   const p = C.PRODUKT[gr.id];
   // Je Glas der dreifache Preis - aber mindestens GROSS_MINUTEN Einnahmen,
   // sonst lohnt sie sich spät nicht mehr (dort kommen Gäste im Sekundentakt)
-  const grund = Math.max(gr.wert * p.preis * preisFaktor() * C.GROSS_MULT, einnahmenProMinute() * C.GROSS_MINUTEN * gr.wert / gr.n);
+  const grund = Math.max(gr.wert * produktPreis(p) * preisFaktor() * C.GROSS_MULT, einnahmenProMinute() * C.GROSS_MINUTEN * gr.wert / gr.n);
   const betrag = grund * (1 + lauf.schwung * C.SCHWUNG_PRO) * dev.geld;
   verdiene(betrag);
   st.stats.bedient++;
@@ -848,7 +850,7 @@ function bediene(g, auto, faktor = 1) {
   // Trinkgeld gibt es seit 03.10. nur, wenn DU servierst - die Wichtel
   // kassieren nur den Preis. Selbst bedienen soll sich lohnen.
   const tip = auto ? 0 : C.TRINKGELD_MAX * (g.geduld / g.geduldMax) * (1 + b.trinkgeld) * stoss;
-  let betrag = p.preis * preisFaktor() * (1 + tip) * (def.mult || 1) * (def.trink || 1) * (g.eilig ? C.EILIG_MULT : 1);
+  let betrag = produktPreis(p) * preisFaktor() * (1 + tip) * (def.mult || 1) * (def.trink || 1) * (g.eilig ? C.EILIG_MULT : 1);
   const schwungVorher = lauf.schwung;
   if (!auto) {
     // Selbst serviert zählt doppelt (09.10., Nutzerwunsch: „wesentlich mehr
@@ -1098,6 +1100,7 @@ export function update(dt) {
     hooks.ton('glocken');
   }
   haendlerTakt(dt);
+  marktAnsage();
   if (lauf.schlitten) { lauf.schlitten.t += dt; if (lauf.schlitten.t >= lauf.schlitten.dauer) lauf.schlitten = null; }
   for (const g of G) if (g.jubelT > 0) g.jubelT -= dt;
 
@@ -1189,6 +1192,77 @@ export function kaufeBeimHaendler(id) {
 export const zimtRest = () => Math.max(0, Math.ceil(((st.zimtBis || 0) - Date.now()) / 1000));
 
 // ---------------------------------------------------------------------------
+// Der Weihnachtsmarkt (09.10.)
+// ---------------------------------------------------------------------------
+/** Spieltag als ganze Zahl (Tage seit 1970, nach der Spieluhr). */
+const tagNr = () => Math.round(echtMitternacht() / 86400000);
+function marktStand() {
+  if (!st.markt) st.markt = { anker: tagNr(), seed: Math.floor(Math.random() * 1e6), besucht: 0, angesagt: 0 };
+  return st.markt;
+}
+/** Ist an Tag `d` Markt? Erster Markt MARKT_ERST Tage nach dem Anker, dann alle 3-4 Tage. */
+function istMarkt(d) {
+  const m = marktStand();
+  let k = m.anker + C.MARKT_ERST;
+  while (k < d) k += C.MARKT_ABSTAND[0] + (Z.hash(m.seed + k) < 0.5 ? 0 : C.MARKT_ABSTAND[1] - C.MARKT_ABSTAND[0]);
+  return k === d;
+}
+/** Erst nach der Einführung - davor gibt es keinen Markt und keine Ansage. */
+export const marktHeute = () => st.lernen >= 99 && istMarkt(tagNr());
+/** { heute, inTagen, datum } des nächsten Markts. */
+export function marktInfo() {
+  const heute = tagNr();
+  let n = 0;
+  while (n < 10 && !istMarkt(heute + n)) n++;
+  const datum = new Date(echtMitternacht() + n * 86400000 + 12 * 3600000);
+  return { heute: st.lernen >= 99 && n === 0, inTagen: n, datum };
+}
+/** Heutiges Angebot: Deko (bis MARKT_ANGEBOT, die man nicht hat, je Tag gemischt) und ein Rezept. */
+export function marktAngebot() {
+  const d = tagNr();
+  const rest = C.MARKT_DEKO.filter((x) => !st.kalDeko[x.id]);
+  rest.sort((a, b) => Z.hash(d * 7 + a.id.length * 13 + a.id.charCodeAt(2)) - Z.hash(d * 7 + b.id.length * 13 + b.id.charCodeAt(2)));
+  const rezept = C.MARKT_REZEPTE.find((x) => !(st.rezepte || {})[x.id] && x.fuer.some((id) => hat(id) || id === 'gluehwein'));
+  return { deko: rest.slice(0, C.MARKT_ANGEBOT), rezept: rezept || null };
+}
+/** Aufschlag eines Getränks durch Rezepte vom Markt. */
+export function produktPreis(p) {
+  let f = 1;
+  if (st.rezepte) for (const x of C.MARKT_REZEPTE) if (st.rezepte[x.id] && x.fuer.includes(p.id)) f += x.plus;
+  return p.preis * f;
+}
+/** Auf dem Markt kaufen (Deko oder Rezept). true = gekauft. */
+export function kaufeAufMarkt(id) {
+  if (!marktHeute()) return false;
+  const a = marktAngebot();
+  const w = a.deko.find((x) => x.id === id) || (a.rezept && a.rezept.id === id ? a.rezept : null);
+  if (!w) return false;
+  const preis = haendlerPreis(w);
+  if (st.geld < preis) return false;
+  if (w.fuer) { st.rezepte = st.rezepte || {}; st.rezepte[id] = true; } else st.kalDeko[id] = true;
+  st.geld -= preis;
+  hooks.ton('kauf'); hooks.geld();
+  speichere();
+  return true;
+}
+/** Heute schon über den Markt gelaufen? (für die Zielleiste) */
+export const marktBesucht = () => marktStand().besucht === tagNr();
+export function marktBesuchen() { marktStand().besucht = tagNr(); speichere(); }
+/** Einmal je Tag ansagen: heute Markt, oder in ein paar Tagen. */
+function marktAnsage() {
+  if (st.lernen < 99 || lauf.t < 8 || lauf.marktAngesagt) return;
+  lauf.marktAngesagt = true;
+  const m = marktStand();
+  if (m.angesagt === tagNr()) return;
+  const i = marktInfo();
+  if (i.inTagen > C.MARKT_ANSAGE) return;
+  m.angesagt = tagNr();
+  if (i.heute) { hooks.toast('Heute ist Weihnachtsmarkt auf dem Festplatz! Schau auf der Karte vorbei.', 'spezial'); hooks.ton('spezial'); }
+  else hooks.toast(i.inTagen === 1 ? 'Morgen ist Weihnachtsmarkt auf dem Festplatz!' : `In ${i.inTagen} Tagen ist Weihnachtsmarkt auf dem Festplatz!`, 'hinweis');
+  speichere();
+}
+
+// ---------------------------------------------------------------------------
 // Minispiel Waldlichtung (09.10.)
 // ---------------------------------------------------------------------------
 function lichtungStand() {
@@ -1234,7 +1308,7 @@ export function fangeSchlitten() {
 export function durchschnittsPreis() {
   const frei = produkteFrei();
   let s = 0, w = 0;
-  for (const p of frei) { const g = 1 + C.PRODUKTE.indexOf(p) * 0.15; s += p.preis * g; w += g; }
+  for (const p of frei) { const g = 1 + C.PRODUKTE.indexOf(p) * 0.15; s += produktPreis(p) * g; w += g; }
   return w ? s / w : 0;
 }
 
