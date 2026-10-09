@@ -201,9 +201,9 @@ export const FASSADEN = {
 // ---------------------------------------------------------------------------
 export const TABS = [
   { id: 'super',    name: 'Supermarkt' },
-  { id: 'markt',    name: 'Weihnachtsmarkt' },
+  { id: 'markt',    name: 'Weihnachtsladen' },   // im Dorf (seit 09.10. Orte auf der Karte statt Reiter)
   { id: 'baumarkt', name: 'Baumarkt' },
-  { id: 'wichtel',  name: 'Wichtel' },
+  { id: 'wichtel',  name: 'Wichtelwald' },
 ];
 
 export const ARTIKEL = [

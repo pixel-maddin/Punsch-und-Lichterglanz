@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261009c';
-import * as S from './spiel.js?v=20261009c';
-import * as A from './auftraege.js?v=20261009c';
-import * as E from './erfolge.js?v=20261009c';
-import * as Z from './ziele.js?v=20261009c';
+import * as C from './config.js?v=20261009e';
+import * as S from './spiel.js?v=20261009e';
+import * as A from './auftraege.js?v=20261009e';
+import * as E from './erfolge.js?v=20261009e';
+import * as Z from './ziele.js?v=20261009e';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -139,17 +139,17 @@ const HINWEISE = [
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
   { id: 'laden', sofort: true, wann: () => zielDran('getraenk', 'kinderpunsch'),
     info: () => 'Neues Getränk! Du hast genug Sterne für Kinderpunsch. Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
-    text: () => 'Tippe auf LADEN - ich zeige dir, wo es Kinderpunsch gibt.',
+    text: () => 'Tippe auf KARTE - im Supermarkt gibt es Kinderpunsch.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
   { id: 'laden_danach', ruhig: true, sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
     text: () => 'Prima! Kinderpunsch steht jetzt im Regal. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn aus dem neuen Topf. Weitere Getränke findest du später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
   { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
     info: () => 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen. Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus der Straße werden!',
-    text: () => 'Tippe auf LADEN - im Weihnachtsmarkt wartet dein erster Türkranz.',
+    text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
-    text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung (oben neben den Sternen) - je mehr Stimmung, desto mehr Gäste, und sie zahlen mehr.',
+    text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung - je mehr, desto mehr Gäste. Tipp: Tippe auf dein Haus, um es zu schmücken (Lichter, Farben, Varianten).',
     ziel: () => ({ x: 90, y: 10 }), dauer: 9 },
   { id: 'gegangen', ruhig: true, wann: () => S.st.stats.verpasst >= 1,
     text: () => 'Ein Gast ist weitergegangen - nicht schlimm, es kommen neue! Aber Achtung: Manchmal kommt jemand GANZ BESONDERES vorbei - den solltest du nicht warten lassen.',
@@ -160,15 +160,15 @@ const HINWEISE = [
   // Die drei ersten Wichtel (Startziele 3-5): erst erklären, was sie tun, dann zum Laden
   { id: 'w_spuel', sofort: true, wann: () => zielDran('spuel', 'spuel'),
     info: () => 'Zeit für Hilfe! Wichtel nehmen dir am Stand Arbeit ab. Der erste ist der SPÜL-WICHTEL: Er stellt dir laufend saubere Gläser aufs Tablett - dann musst du nicht jedes Mal auf die Gläser tippen.',
-    text: () => 'Tippe auf LADEN - unter Wichtel wartet er schon.',
+    text: () => 'Tippe auf KARTE - im Wichtelwald wartet er schon.',
     ziel: ladenZiel, fertig: () => S.hat('spuel'), laden: { tab: 'wichtel', id: 'spuel' }, lang: true },
   { id: 'w_nachfuell', sofort: true, wann: () => zielDran('nachfuell', 'nachfuell'),
     info: () => 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.',
-    text: () => 'Tippe auf LADEN - unter Wichtel findest du ihn.',
+    text: () => 'Tippe auf KARTE - im Wichtelwald findest du ihn.',
     ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, lang: true },
   { id: 'w_servier', sofort: true, wann: () => zielDran('servier', 'servier'),
     info: () => 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand dann von selbst - sogar wenn du nicht da bist.',
-    text: () => 'Tippe auf LADEN - unter Wichtel wartet der Servier-Wichtel.',
+    text: () => 'Tippe auf KARTE - im Wichtelwald wartet der Servier-Wichtel.',
     ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
@@ -180,7 +180,7 @@ const HINWEISE = [
     text: () => 'Siehst du den kleinen Wichtel am Tablett? Solange du am Stand bist, schenkt er für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - dann gibt es den Bonus. Sonst serviert er es nach ein paar Sekunden selbst (blauer Balken). Du kannst auch selbst einen Gast antippen, dann schenkt er für ihn ein.',
     ziel: () => handZiel(Math.max(0, S.lauf.hand.findIndex((h) => h.vonWichtel))), fertig: () => (S.lauf.wichtelSelbst || 0) > 0 || !S.lauf.hand.some((h) => h.vonWichtel) },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
-    text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet im Laden Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
+    text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter. Die Leiste oben zeigt dir immer die günstigste Deko.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },
   { id: 'ziele_fertig', sofort: true, wann: () => Z.fertig() && S.st.tipps.wichtel_weg,
     text: () => 'Alle sieben Ziele geschafft - jetzt weißt du alles Wichtige! Genieße die Weihnachtszeit und schmücke dein Haus, wie es dir gefällt. Schau jeden Tag mal rein: Es gibt neue Aufträge, ein Türchen im Adventskalender und besondere Ereignisse.',

@@ -88,14 +88,21 @@ warten kürzer, zahlen aber doppelt.
 Im zweiten Reiter hängt die **Erfolgswand**: 24 Socken über dem Kamin, eine
 je Erfolg. Mit jeder Socke wird das Wohnzimmer weihnachtlicher.
 
-## Der Laden
+## Die Karte
 
-| Reiter | Was es gibt |
+Der Knopf **Karte** unten links öffnet eine Übersichtskarte der Gegend, mit
+deinem Haus in der Mitte. Die Geschäfte sind Orte darauf:
+
+| Ort | Was es gibt |
 |---|---|
-| **Weihnachtsmarkt** | Deko fürs Haus (Lichterketten, Stern, Schwibbogen, Nussknacker, Eiszapfen, Nikolaus auf dem Dach, Lichtershow), den Garten (Tanne mit Lichtern, Kugeln, Stern, Schneemann-Familie, Lichter-Rentier, Schlitten, Lichterbogen) und den Stand (Girlande, Zuckerstangen, Licht, Schild, Musikbox, Heizpilz, Bierbänke - jeweils mit Bonus) |
+| **Weihnachtsladen** (im Dorf) | Deko fürs Haus (Lichterketten, Stern, Schwibbogen, Nussknacker, Eiszapfen, Nikolaus auf dem Dach, Lichtershow), den Garten (Tanne mit Lichtern, Kugeln, Stern, Schneemann-Familie, Lichter-Rentier, Schlitten, Lichterbogen) und den Stand (Girlande, Zuckerstangen, Licht, Schild, Musikbox, Heizpilz, Bierbänke - jeweils mit Bonus) |
 | **Baumarkt** | Längerer Tresen, größere Töpfe, Tablett; Holzstapel, neue Tür, Zaun, **Kaminofen** (die Fenster leuchten), Laternen; vier Anstriche: Winterweiß, Schwedenrot, Lebkuchenhaus, Alpenchalet |
 | **Supermarkt** | Zutaten: Kinderpunsch (lockt Kinder an), heißer Apfel, Lebkuchen, heiße Schokolade, Herzwärmer, Waldtee, Crêpe, Zimtwolke, Feuerzauber - alles alkoholfrei |
-| **Wichtel** | Spül-, Servier-, Nachfüll-, Crêpe- und Kassen-Wichtel. Der Servier-Wichtel arbeitet auch, wenn die App zu ist (bis 8 Stunden) |
+| **Wichtelwald** | Spül-, Servier-, Nachfüll-, Crêpe- und Kassen-Wichtel, in ihren Baumstammhäusern |
+
+Dazu kommen bald: der **Festplatz** (alle paar Tage Weihnachtsmarkt), der
+**Christbaumverkauf**, die **Waldlichtung** und der **Schlittenberg** - mit
+Minispielen. Die Weihnachtskarte zum Teilen heißt jetzt **Foto**.
 
 Hausdeko bringt **Stimmung** (♥). Je mehr Stimmung, desto mehr Gäste -
 und desto mehr zahlen sie.
@@ -124,7 +131,7 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
 
 ## Teilen
 
-**Karte** in der Leiste macht aus dem aktuellen Bild eine Weihnachtskarte
+**Foto** in der Leiste macht aus dem aktuellen Bild eine Weihnachtskarte
 mit einem von fünf Rahmen, einem Weihnachtsgruß, Hausname und Datum, die über das Teilen-Menü des Handys verschickt
 werden kann.
 

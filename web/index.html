@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-  <link rel="stylesheet" href="styles.css?v=20261009c">
+  <link rel="stylesheet" href="styles.css?v=20261009e">
 </head>
 <body>
   <div id="buehne">
@@ -32,11 +32,18 @@
       <div id="tipp" class="versteckt"></div>
       <div id="toast"></div>
 
+      <!-- Die Übersichtskarte (karte.js): Orte statt Laden-Reiter -->
+      <section id="landkarte" class="versteckt">
+        <canvas id="kartenCv" width="180" height="320"></canvas>
+        <div id="kartenOrte"></div>
+        <button id="kartenZu" aria-label="Karte schließen">✕</button>
+      </section>
+
       <nav id="leiste">
-        <button id="btnLaden"><canvas class="sym" data-ico="laden"></canvas>Laden<b id="ladenBadge" class="versteckt">0</b></button>
+        <button id="btnLaden"><canvas class="sym" data-ico="landkarte"></canvas>Karte<b id="ladenBadge" class="versteckt">0</b></button>
         <button id="btnAuftraege"><canvas class="sym" data-ico="auftraege"></canvas>Aufträge<b id="aufBadge" class="versteckt">0</b></button>
         <button id="btnKalender"><canvas class="sym" data-ico="kalender"></canvas>Kalender<b id="kalBadge" class="versteckt">0</b></button>
-        <button id="btnKarte"><canvas class="sym" data-ico="karte"></canvas>Karte</button>
+        <button id="btnKarte"><canvas class="sym" data-ico="karte"></canvas>Foto</button>
         <button id="btnMenue"><canvas class="sym" data-ico="menue"></canvas>Menü</button>
       </nav>
 
@@ -54,6 +61,6 @@
     </div>
     <div id="quer"><div>📱<br><b>Bitte hochkant halten</b><br><small>Das Spiel ist fürs Hochformat gemacht.</small></div></div>
   </div>
-  <script type="module" src="src/main.js?v=20261009c"></script>
+  <script type="module" src="src/main.js?v=20261009e"></script>
 </body>
 </html>

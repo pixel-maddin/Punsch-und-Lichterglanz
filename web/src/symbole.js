@@ -45,6 +45,17 @@ const SYMBOLE = {
     '.bwkkkwnwb.',
     '.bbbbbbbbb.',
   ],
+  landkarte: [
+    '.nnnwwnnnn.',
+    '.nnwwnnnwn.',
+    '.nwnnnngwn.',
+    '.nwnngggnn.',
+    '.nnwwnggnl.',
+    '.nnnnwnnll.',
+    '.nrrnwnlln.',
+    '.nrrnnwlnn.',
+    '.nnnnnnwnn.',
+  ],
   kalender: [
     '..k.....k..',
     '.rkrrrrrkr.',

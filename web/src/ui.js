@@ -5,18 +5,19 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009c';
-import * as S from './spiel.js?v=20261009c';
-import * as Z from './zeit.js?v=20261009c';
-import * as T from './ton.js?v=20261009c';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009c';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009c';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009c';
-import * as A from './auftraege.js?v=20261009c';
-import * as E from './erfolge.js?v=20261009c';
-import * as ZL from './ziele.js?v=20261009c';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009c';
-import { alleSymbole } from './symbole.js?v=20261009c';
+import * as C from './config.js?v=20261009e';
+import * as S from './spiel.js?v=20261009e';
+import * as Z from './zeit.js?v=20261009e';
+import * as T from './ton.js?v=20261009e';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009e';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009e';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009e';
+import * as A from './auftraege.js?v=20261009e';
+import * as E from './erfolge.js?v=20261009e';
+import * as ZL from './ziele.js?v=20261009e';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009e';
+import * as KA from './karte.js?v=20261009e';
+import { alleSymbole } from './symbole.js?v=20261009e';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -28,7 +29,7 @@ let ladenTab = 'super';
 let ladenModus = 'kaufen';  // 'kaufen' | 'haus' - Einkaufen oder Mein Haus (einstellen)
 let zeilen = [];           // Ladenzeilen zum Nachführen
 
-export function panelOffen() { return offen; }
+export function panelOffen() { return offen || (KA.istOffen() ? 'karte' : null); }
 
 // ---------------------------------------------------------------------------
 // Kopfzeile
@@ -176,39 +177,24 @@ export function schliesseBlatt() {
 // Laden
 // ---------------------------------------------------------------------------
 /**
- * Der Laden hat zwei Bereiche: EINKAUFEN (nur kaufen, vier Reiter) und
- * MEIN HAUS (alles, was man hat, einstellen: Lichter aus/weiß/bunt, Deko
- * an/aus, Anstrich, Zaun, Geschenke). Vorher standen Kauf- und
- * Schaltknöpfe gemischt in denselben Zeilen - bei 70 Artikeln unübersichtlich.
+ * Seit 09.10. gibt es keinen Laden mit Reitern mehr: Jedes Geschäft ist ein
+ * ORT auf der Karte (karte.js) und öffnet sich hier mit seinem Namen als
+ * Titel. „Haus schmücken" (früher „Mein Haus") ist eigenständig und öffnet
+ * sich durch Antippen des Hauses (oeffneMeinHaus).
  */
 export function oeffneLaden(tab, zeigeId, modus) {
-  // Einführung „erstes Getränk / erste Deko": gleich zur richtigen Zeile
-  const f = !tab && !zeigeId && !modus && fuehrung();
+  // Einführung „erstes Getränk / erste Deko": gleich zur richtigen Zeile -
+  // auch, wenn man über die Karte zum richtigen Ort gelaufen ist
+  const fu = fuehrung();
+  const f = (!tab && !zeigeId && !modus && fu) || (fu && tab === fu.tab && !modus ? fu : null);
   if (f) { tab = f.tab; zeigeId = f.id; }
   if (tab) ladenTab = tab;
-  if (modus) ladenModus = modus; else if (tab || zeigeId) ladenModus = 'kaufen';
-  oeffneBlatt('laden', ladenModus === 'haus' ? 'Haus schmücken' : 'Einkaufen');
+  ladenModus = modus === 'haus' ? 'haus' : 'kaufen';
+  const ort = (C.TABS.find((x) => x.id === ladenTab) || {}).name || 'Einkaufen';
+  oeffneBlatt('laden', ladenModus === 'haus' ? 'Haus schmücken' : ort);
   const kopf = $('#blattTabs');
   kopf.innerHTML = '';
-  const neu = S.st.neu || {};
-  const modi = el('div', 'modi');
-  for (const [id, name] of [['kaufen', 'Einkaufen'], ['haus', 'Haus schmücken']]) {
-    const b = el('button', 'modus-k' + (id === ladenModus ? ' aktiv' : '') + (id === 'haus' && geschenke().some((d) => neu[d.id]) ? ' neu' : ''), name);
-    b.onclick = () => { T.spiele('klick'); oeffneLaden(null, null, id); };
-    modi.appendChild(b);
-  }
-  kopf.appendChild(modi);
-  if (ladenModus === 'kaufen') {
-    const reiter = el('div', 'reiter');
-    for (const tb of C.TABS) {
-      const hatNeu = tb.id !== ladenTab && C.ARTIKEL.some((a) => a.tab === tb.id && neu[a.id]);
-      const b = el('button', 'tab' + (tb.id === ladenTab ? ' aktiv' : '') + (hatNeu ? ' neu' : ''), tb.name);
-      b.onclick = () => { T.spiele('klick'); ladenTab = tb.id; oeffneLaden(null, null, 'kaufen'); };
-      reiter.appendChild(b);
-    }
-    kopf.appendChild(reiter);
-  }
-  kopf.classList.remove('versteckt');
+  kopf.classList.add('versteckt');
   $('#blatt').dataset.modus = ladenModus;
   if (ladenModus === 'haus') { zeilen = []; baueHaus(); return; }
   baueLaden();
@@ -219,6 +205,26 @@ export function oeffneLaden(tab, zeigeId, modus) {
     z.z.classList.add('blitz'); setTimeout(() => z.z.classList.remove('blitz'), 900);
     if (f) { z.z.classList.add('fuehrung'); z.txt.appendChild(el('span', 'fuehr-pfeil', f.leisten === false ? 'Dein nächstes Ziel - noch etwas sparen' : 'Tippe hier auf Kaufen ▸')); }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Die Übersichtskarte (karte.js)
+// ---------------------------------------------------------------------------
+/** Ort für ein Geschäft (für die Führung: welcher Ort pulsiert?). */
+const ORT_FUER_TAB = { super: 'super', markt: 'dorf', baumarkt: 'bau', wichtel: 'wichtel' };
+export function oeffneKarte() {
+  schliesseBlatt();
+  const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 1;
+  const hoehe = Math.round($('#landkarte').parentElement.clientHeight / px) - C.LEISTE;
+  const fu = fuehrung();
+  KA.oeffne(hoehe, amOrt, fu ? ORT_FUER_TAB[fu.tab] : null);
+}
+export function schliesseKarte() { schliesseBlatt(); KA.schliesse(); }
+function amOrt(o) {
+  T.spiele('klick');
+  if (o.id === 'haus') { KA.schliesse(); return; }
+  if (o.tab) { oeffneLaden(o.tab); return; }
+  if (o.bald) fenster(o.name, `<p>${o.bald}</p><p class="klein">Kommt bald!</p>`);
 }
 
 function baueLaden() {
@@ -506,6 +512,8 @@ function zeigeKauf(id) {
   T.spiele('spezial');
   const b = $('#blatt');
   b.classList.add('kurz-weg');
+  $('#landkarte').classList.add('kurz-weg');
+  setTimeout(() => $('#landkarte').classList.remove('kurz-weg'), 2600);
   clearTimeout(kaufZeigenT);
   // 1,7 s waren zu kurz: Im Betatest (02.10.) war der Laden wieder da, bevor
   // man das Teil am Haus gefunden hatte
@@ -1303,7 +1311,8 @@ export function verdrahte() {
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();
   };
-  $('#btnLaden').onclick = () => { T.spiele('klick'); offen === 'laden' ? schliesseBlatt() : oeffneLaden(); };
+  $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
+  $('#kartenZu').onclick = () => { T.spiele('klick'); schliesseKarte(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
   $('#btnKarte').onclick = () => karte();

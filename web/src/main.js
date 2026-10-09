@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261009c';
-import * as S from './spiel.js?v=20261009c';
-import * as Z from './zeit.js?v=20261009c';
-import * as T from './ton.js?v=20261009c';
-import * as UI from './ui.js?v=20261009c';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261009c';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009c';
-import * as Lernen from './lernen.js?v=20261009c';
-import { zeigeAdvent } from './ereignis.js?v=20261009c';
-import * as A from './auftraege.js?v=20261009c';
-import * as E from './erfolge.js?v=20261009c';
-import * as ZL from './ziele.js?v=20261009c';
+import * as C from './config.js?v=20261009e';
+import * as S from './spiel.js?v=20261009e';
+import * as Z from './zeit.js?v=20261009e';
+import * as T from './ton.js?v=20261009e';
+import * as UI from './ui.js?v=20261009e';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261009e';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009e';
+import * as Lernen from './lernen.js?v=20261009e';
+import { zeigeAdvent } from './ereignis.js?v=20261009e';
+import * as A from './auftraege.js?v=20261009e';
+import * as E from './erfolge.js?v=20261009e';
+import * as ZL from './ziele.js?v=20261009e';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -121,7 +121,7 @@ cv.addEventListener('pointerdown', (e) => {
       const p0 = C.PRODUKTE[tr.i];
       T.spiele('falsch');
       S.lauf.wackel['z' + p0.id] = 0.3;
-      if (S.freiErfuellt(p0.id)) UI.toast(`${p0.name} gibt es im Laden unter Supermarkt (${S.formatGeld(p0.kosten)}).`, 'hinweis');
+      if (S.freiErfuellt(p0.id)) UI.toast(`${p0.name} gibt es im Supermarkt auf der Karte (${S.formatGeld(p0.kosten)}).`, 'hinweis');
       else UI.toast(`Noch verdeckt. Frei ab: ${S.freiText(p0.id)}`, 'hinweis');
     }
   }
@@ -254,7 +254,7 @@ setInterval(() => {
   const neu = S.pruefeFreischaltungen();
   if (neu.length) {
     T.spiele('spezial');
-    UI.toast(neu.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neu[0].id)}!` : `${neu.length} neue Dinge im Laden!`, 'neu');
+    UI.toast(neu.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neu[0].id)}!` : `${neu.length} neue Dinge auf der Karte!`, 'neu');
     S.speichere();
   }
   const ziel = ZL.pruefe();
@@ -363,6 +363,7 @@ function demo(art) {
     if (art === 'haendlerfenster') UI.zeigeHaendler();
   }
   if (art === 'meinhaus') UI.oeffneMeinHaus();
+  if (art === 'landkarte') UI.oeffneKarte();
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');
   if (art === 'karte') UI.karte(0);
