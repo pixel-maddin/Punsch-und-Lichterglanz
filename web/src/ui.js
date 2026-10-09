@@ -5,22 +5,22 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009q';
-import * as S from './spiel.js?v=20261009q';
-import * as Z from './zeit.js?v=20261009q';
-import * as T from './ton.js?v=20261009q';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009q';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009q';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009q';
-import * as A from './auftraege.js?v=20261009q';
-import * as E from './erfolge.js?v=20261009q';
-import * as ZL from './ziele.js?v=20261009q';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009q';
-import * as KA from './karte.js?v=20261009q';
-import * as LI from './lichtung.js?v=20261009q';
-import * as CB from './christbaum.js?v=20261009q';
-import * as SB from './schlitten.js?v=20261009q';
-import { alleSymbole } from './symbole.js?v=20261009q';
+import * as C from './config.js?v=20261009r';
+import * as S from './spiel.js?v=20261009r';
+import * as Z from './zeit.js?v=20261009r';
+import * as T from './ton.js?v=20261009r';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009r';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009r';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009r';
+import * as A from './auftraege.js?v=20261009r';
+import * as E from './erfolge.js?v=20261009r';
+import * as ZL from './ziele.js?v=20261009r';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009r';
+import * as KA from './karte.js?v=20261009r';
+import * as LI from './lichtung.js?v=20261009r';
+import * as CB from './christbaum.js?v=20261009r';
+import * as SB from './schlitten.js?v=20261009r';
+import { alleSymbole } from './symbole.js?v=20261009r';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -74,11 +74,8 @@ export function zielLeiste() {
   const ansturm = S.lauf.ansturm ? Math.max(0, Math.ceil(S.lauf.stossBis - S.lauf.t)) : 0;
   const zimt = !ansturm && !z ? S.zimtRest() : 0;
   const markt = !ansturm && !z && !zimt && S.marktHeute() && !S.marktBesucht();
-  const haus = !ansturm && !z && !zimt && !markt ? ZL.hausZiel() : null;
-  const hn = haus && haus.naechstes;
-  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : haus ? 'haus' : '';
+  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : '';
   const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}` : markt ? 'markt'
-    : haus ? `h|${haus.geschafft}|${hn ? hn.id + '|' + hn.leisten + '|' + (hn.leisten ? '' : Math.floor(S.st.geld / 50)) : ''}`
     : z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
@@ -105,19 +102,6 @@ export function zielLeiste() {
   if (markt) {
     b.innerHTML = `<span class="nr">MARKTTAG</span><span class="was">Weihnachtsmarkt auf dem Festplatz</span><span class="los">Hin ▸</span>`;
     b.classList.remove('bereit', 'versteckt');
-    $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
-    return;
-  }
-  b.classList.toggle('haus', !!haus);
-  if (haus) {
-    // Schönstes Haus: Fortschritt und das günstigste nächste Teil
-    const was = hn ? `Nächstes: ${hn.name}` : 'Mehr ♥ Stimmung schaltet Neues frei';
-    const rechts = !hn ? '' : hn.leisten ? '<span class="los">Los ▸</span>' : `<small>noch ${S.formatGeld(hn.kosten - S.st.geld)}</small>`;
-    const anteil = hn ? Math.min(1, S.st.geld / hn.kosten) : haus.geschafft / haus.gesamt;
-    b.innerHTML = `<span class="nr">HAUS ${haus.geschafft}/${haus.gesamt}</span><span class="was">${was}</span>${rechts}`
-      + `<span class="fort"><span style="width:${Math.round(anteil * 100)}%"></span></span>`;
-    b.classList.toggle('bereit', !!(hn && hn.leisten));
-    b.classList.remove('versteckt');
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
   }
@@ -1515,7 +1499,6 @@ export function verdrahte() {
     T.spiele('klick');
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
     if (leistenModus === 'markt') { oeffneKarte('festplatz'); return; }
-    if (leistenModus === 'haus') { const h = ZL.hausZiel(); const n = h && h.naechstes; if (n) oeffneLaden(n.tab, n.id); else oeffneKarte(); return; }
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };

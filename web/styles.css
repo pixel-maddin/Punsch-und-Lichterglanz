@@ -635,7 +635,6 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 /* Betatest 2: Punkt statt Zahl */
 #kartenOrte .ort-neu.punkt { min-width: calc(var(--px) * 2.6); width: calc(var(--px) * 2.6); height: calc(var(--px) * 2.6); padding: 0; vertical-align: super; }
 #aufBadge.punkt { min-width: calc(var(--px) * 3.6); width: calc(var(--px) * 3.6); height: calc(var(--px) * 3.6); }
-#ziel.haus .nr { background: #2f6a3a; }
 .modus.empfohlen { border-color: var(--gold) !important; box-shadow: 0 0 0 calc(var(--px) * 0.6) var(--gold); }
 .modus .empf { font-style: normal; font-size: 0.7em; background: var(--gold); color: var(--tinte); padding: 0 calc(var(--px) * 1.2); border-radius: calc(var(--px) * 1); vertical-align: middle; margin-left: calc(var(--px) * 1); }
 
