@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261009a';
-import * as Z from './zeit.js?v=20261009a';
-import { neueFarben } from './pixel.js?v=20261009a';
+import * as C from './config.js?v=20261009c';
+import * as Z from './zeit.js?v=20261009c';
+import { neueFarben } from './pixel.js?v=20261009c';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -200,6 +200,7 @@ export function stimmung() {
   for (const d of Object.values(C.KALENDER_DEKO)) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.AUFTRAG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.HAENDLER_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
+  s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
   return s;
 }
 
@@ -362,6 +363,47 @@ export function kaufe(id) {
   hooks.geld();
   speichere();
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// Varianten je Deko-Platz (09.10.). `st.var` = gekaufte Varianten
+// ('tanne:1' …), `st.wahl` = gewählte Variante je Platz (0 = das Teil selbst).
+// ---------------------------------------------------------------------------
+export const hatVariante = (platz, i) => (i === 0 ? hat(platz) : !!(st.var && st.var[platz + ':' + i]));
+/** Welche Variante wird gezeichnet? (0, 1 oder 2) */
+export function variante(platz) {
+  const i = (st.wahl && st.wahl[platz]) || 0;
+  return hatVariante(platz, i) ? i : 0;
+}
+export function variantePreis(platz, i) {
+  const a = ARTIKEL_MAP[platz];
+  const basis = Array.isArray(a.kosten) ? a.kosten[0] : a.kosten;
+  const roh = Math.max(C.VARIANTE_MIN[i], basis * C.VARIANTE_FAKTOR[i]);
+  const stelle = Math.pow(10, Math.max(0, Math.floor(Math.log10(roh)) - 1));
+  return Math.round(roh / stelle) * stelle;
+}
+/** { hat, kosten, versteckt, leisten } - die dritte zeigt sich erst mit der zweiten. */
+export function varianteStatus(platz, i) {
+  const h = hatVariante(platz, i);
+  const versteckt = !h && i === 2 && !hatVariante(platz, 1);
+  const kosten = h || i === 0 ? null : variantePreis(platz, i);
+  return { hat: h, kosten, versteckt, leisten: !h && !versteckt && hat(platz) && kosten != null && st.geld >= kosten };
+}
+export function kaufeVariante(platz, i) {
+  const s = varianteStatus(platz, i);
+  if (!s.leisten) return false;
+  st.geld -= s.kosten;
+  st.var = st.var || {}; st.var[platz + ':' + i] = true;
+  st.wahl = st.wahl || {}; st.wahl[platz] = i;
+  hooks.ton('kauf'); hooks.geld();
+  speichere();
+  return true;
+}
+export function waehleVariante(platz, i) {
+  if (!hatVariante(platz, i)) return;
+  st.wahl = st.wahl || {}; st.wahl[platz] = i;
+  hooks.ton('klick');
+  speichere();
 }
 
 /** Umschaltbare Dinge (Anstrich, Lichtfarbe) nach dem Kauf. */

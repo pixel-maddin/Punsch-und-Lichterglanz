@@ -46,6 +46,12 @@ Wichtel schauen nur zu.
 Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst höchstens 3 Stunden
 Arbeit - wer mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
 
+**Haus schmücken:** Tippe auf dein Haus. Jeder Deko-Platz hat drei
+Varianten - die Tanne kann eine Riesentanne oder eine Palme werden, auf dem
+Dach warten Rentiere oder ein steckengebliebener Nikolaus, am Stand spielt
+eine Blaskapelle oder der Elvis-Wichtel. Die dritte Variante zeigt sich erst,
+wenn man die zweite hat. Jede zusätzliche bringt ♥ +2.
+
 **Der fahrende Händler** kommt bis zu zweimal am Tag mit seinem Karren vorbei
 (links vor dem Haus antippen). Er hat Deko, die es nur bei ihm gibt -
 Riesen-Schneekugel, Lichter-Flamingo, Polarlicht-Laterne, Drehorgel-Wichtel,

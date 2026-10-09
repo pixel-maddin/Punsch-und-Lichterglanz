@@ -423,3 +423,48 @@ export const ANSTURM_GAESTE = 10;
 export const ANSTURM_MULT = 3;    // Trinkgeld-Faktor (die Stoßzeit hat 2)
 // Reihenfolge der Türchen im Raster (wie ein echter Kalender, durcheinander)
 export const KALENDER_REIHE = [7, 15, 2, 20, 11, 24, 4, 18, 9, 13, 1, 22, 16, 6, 19, 3, 12, 23, 8, 14, 21, 5, 17, 10];
+
+// ---------------------------------------------------------------------------
+// Varianten je Deko-Platz (09.10., Nutzerwunsch: „jedes Haus sieht gleich aus,
+// wenn man alles hat"). Variante 1 ist das Teil selbst; 2 und 3 kauft man im
+// „Haus schmücken" dazu und wählt frei. Die dritte ist die schräge und zeigt
+// sich erst, wenn man die zweite hat. Jede zusätzliche bringt
+// VARIANTE_HERZEN Stimmung - fürs schönste Haus braucht man keine.
+// Preis = erster Preis des Teils × FAKTOR, mindestens MIN.
+// ---------------------------------------------------------------------------
+export const VARIANTE_HERZEN = 2;
+export const VARIANTE_FAKTOR = [0, 1, 2];
+export const VARIANTE_MIN = [0, 300, 800];
+export const VARIANTEN = {
+  tanne:         [{ kurz: 'Tanne' },       { kurz: 'Riesentanne', name: 'Große Nordmanntanne', text: 'Ein Drittel größer, bis über die Fenster.' },
+                  { kurz: 'Palme', name: 'Weihnachtspalme', text: 'Mit Lichterkette, Kokosnuss-Kugeln und Stern. Urlaubsgefühl im Schnee.' }],
+  kranz:         [{ kurz: 'Tannenkranz' }, { kurz: 'Strohstern', name: 'Strohsternkranz', text: 'Goldgelbes Stroh mit einem Stern in der Mitte.' },
+                  { kurz: 'Brezel', name: 'Brezelkranz', text: 'Aus echten Laugenbrezeln. Duftet herrlich.' }],
+  fensterstern:  [{ kurz: 'Stern' },       { kurz: 'Komet', name: 'Komet mit Schweif', text: 'Ein Schweifstern im Dachfenster.' },
+                  { kurz: 'Discokugel', name: 'Discokugel', text: 'Dreht sich und wirft bunte Punkte.' }],
+  schwibbogen:   [{ kurz: 'Schwibbogen' }, { kurz: 'Pyramide', name: 'Lichterpyramide', text: 'Dreht sich mit der Wärme der Kerzen.' },
+                  { kurz: 'Katze', name: 'Fensterkatze', text: 'Eine Katze mit Weihnachtsmütze schaut hinaus und blinzelt.' }],
+  nussknacker:   [{ kurz: 'Nussknacker' }, { kurz: 'Holzrentier', name: 'Holz-Rentier', text: 'Geschnitzt, mit roter Schleife.' },
+                  { kurz: 'Gartenzwerg', name: 'Zwerg im Nikolauskostüm', text: 'Hat sich als Weihnachtsmann verkleidet. Überzeugt niemanden.' }],
+  schneemann:    [{ kurz: 'Schneemann' },  { kurz: 'Schneeburg', name: 'Schneeburg', text: 'Mit zwei Türmen und Fähnchen.' },
+                  { kurz: 'Urlaub', name: 'Schneemann im Liegestuhl', text: 'Sonnenbrille auf, Füße hoch. Er hat Urlaub.' }],
+  dach_nikolaus: [{ kurz: 'Nikolaus' },    { kurz: 'Rentiere', name: 'Rentiere auf dem Dach', text: 'Zwei Rentiere warten auf ihren Einsatz.' },
+                  { kurz: 'Steckt fest', name: 'Steckengebliebener Nikolaus', text: 'Nur noch die Beine schauen aus dem Schornstein.' }],
+  rentier_licht: [{ kurz: 'Rentier' },     { kurz: 'Elch', name: 'Lichter-Elch', text: 'Größer, mit Schaufelgeweih.' },
+                  { kurz: 'Dino', name: 'Lichter-Dinosaurier', text: 'Ein Langhals aus Licht. Warum nicht.' }],
+  schlitten:     [{ kurz: 'Schlitten' },   { kurz: 'Bollerwagen', name: 'Bollerwagen mit Geschenken', text: 'Randvoll mit Päckchen.' },
+                  { kurz: 'Rasenmäher', name: 'Aufsitzmäher mit Lichterkette', text: 'Der Rasen hat Pause, der Mäher nicht.' }],
+  lichterbogen:  [{ kurz: 'Bogen' },       { kurz: 'Tunnel', name: 'Lichtertunnel', text: 'Drei Bögen hintereinander.' },
+                  { kurz: 'Zuckerstange', name: 'Zuckerstangen-Tor', text: 'Rot-weiß gestreift, wie aus dem Bonbonglas.' }],
+  zaun:          [{ kurz: 'Lattenzaun' },  { kurz: 'Jägerzaun', name: 'Jägerzaun', text: 'Gekreuzte Latten, ganz klassisch.' },
+                  { kurz: 'Lebkuchen', name: 'Lebkuchenzaun', text: 'Mit Zuckerguss und Gummibärchen.' }],
+  schild:        [{ kurz: 'Holzschild' },  { kurz: 'Leuchtreklame', name: 'Leuchtreklame', text: 'PUNSCH in pinker Neonschrift.' },
+                  { kurz: 'Riesentasse', name: 'Drehende Riesentasse', text: 'Dampft und dreht sich über dem Stand.' }],
+  musik:         [{ kurz: 'Musikbox' },    { kurz: 'Blaskapelle', name: 'Blaskapelle', text: 'Drei Wichtel mit Trompeten.' },
+                  { kurz: 'Elvis', name: 'Elvis-Wichtel', text: 'Mit Tolle und Gitarre. Thank you very much.' }],
+  heizpilz:      [{ kurz: 'Heizpilz' },    { kurz: 'Feuerschale', name: 'Feuerschale', text: 'Echtes Feuer auf drei Beinen.' },
+                  { kurz: 'Marshmallow', name: 'Marshmallow-Tonne', text: 'Eine Feuertonne, die Stöcke stecken schon drin.' }],
+  laternen:      [{ kurz: 'Laternen' },    { kurz: 'Fackeln', name: 'Fackeln', text: 'Zwei Fackeln am Weg.' },
+                  { kurz: 'Lavalampen', name: 'Lavalampen', text: 'Bunte Blasen, die langsam auf- und absteigen.' }],
+};
+

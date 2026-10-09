@@ -5,18 +5,18 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009a';
-import * as S from './spiel.js?v=20261009a';
-import * as Z from './zeit.js?v=20261009a';
-import * as T from './ton.js?v=20261009a';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009a';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009a';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009a';
-import * as A from './auftraege.js?v=20261009a';
-import * as E from './erfolge.js?v=20261009a';
-import * as ZL from './ziele.js?v=20261009a';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009a';
-import { alleSymbole } from './symbole.js?v=20261009a';
+import * as C from './config.js?v=20261009c';
+import * as S from './spiel.js?v=20261009c';
+import * as Z from './zeit.js?v=20261009c';
+import * as T from './ton.js?v=20261009c';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009c';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009c';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009c';
+import * as A from './auftraege.js?v=20261009c';
+import * as E from './erfolge.js?v=20261009c';
+import * as ZL from './ziele.js?v=20261009c';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009c';
+import { alleSymbole } from './symbole.js?v=20261009c';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -187,12 +187,12 @@ export function oeffneLaden(tab, zeigeId, modus) {
   if (f) { tab = f.tab; zeigeId = f.id; }
   if (tab) ladenTab = tab;
   if (modus) ladenModus = modus; else if (tab || zeigeId) ladenModus = 'kaufen';
-  oeffneBlatt('laden', ladenModus === 'haus' ? 'Mein Haus' : 'Einkaufen');
+  oeffneBlatt('laden', ladenModus === 'haus' ? 'Haus schmücken' : 'Einkaufen');
   const kopf = $('#blattTabs');
   kopf.innerHTML = '';
   const neu = S.st.neu || {};
   const modi = el('div', 'modi');
-  for (const [id, name] of [['kaufen', 'Einkaufen'], ['haus', 'Mein Haus']]) {
+  for (const [id, name] of [['kaufen', 'Einkaufen'], ['haus', 'Haus schmücken']]) {
     const b = el('button', 'modus-k' + (id === ladenModus ? ' aktiv' : '') + (id === 'haus' && geschenke().some((d) => neu[d.id]) ? ' neu' : ''), name);
     b.onclick = () => { T.spiele('klick'); oeffneLaden(null, null, id); };
     modi.appendChild(b);
@@ -309,6 +309,18 @@ function hausZeile(liste, a, name, text, wahl) {
   z.appendChild(wahl);
   liste.appendChild(z);
 }
+/** Nach Wahl oder Kauf einer Variante: kurz ausblenden und am Haus funkeln lassen. */
+function zeigeVariante(platz, text = '') {
+  const o = ortVon(platz);
+  if (!o) return;
+  funkeln(o.x, o.y, text);
+  const b = $('#blatt');
+  b.classList.add('kurz-weg');
+  clearTimeout(kaufZeigenT);
+  kaufZeigenT = setTimeout(() => b.classList.remove('kurz-weg'), 2000);
+}
+/** Das Haus angetippt: „Haus schmücken" (der Bereich Mein Haus). */
+export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
   return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO].filter((d) => S.st.kalDeko[d.id]);
@@ -321,6 +333,41 @@ function baueHaus(behalteScroll) {
   const hat = (a) => S.stufe(a.id) > 0;
   let leer = true;
   const gruppe = (titel) => { liste.appendChild(el('div', 'gruppe', titel)); leer = false; };
+
+  // Varianten je Platz (09.10.): drei Knöpfe - gewählt, gekauft, kaufbar, ???
+  const plaetze = Object.keys(C.VARIANTEN).filter((pl) => S.hat(pl));
+  if (plaetze.length) {
+    gruppe('Varianten');
+    liste.appendChild(el('p', 'klein var-erkl', `Jeder Platz hat drei Varianten. Jede zusätzliche bringt ♥ +${C.VARIANTE_HERZEN} - die dritte zeigt sich erst, wenn du die zweite hast.`));
+    for (const pl of plaetze) {
+      const vs = C.VARIANTEN[pl], aktiv = S.variante(pl);
+      const name = aktiv ? vs[aktiv].name : S.artikelName(pl);
+      const reihe = el('div', 'varwahl');
+      vs.forEach((v, i) => {
+        const st = S.varianteStatus(pl, i);
+        let cls = 'vw', inhalt;
+        if (st.hat) { cls += i === aktiv ? ' aktiv' : ''; inhalt = `<b>${v.kurz}</b><small>${i === aktiv ? 'gewählt' : 'wählen'}</small>`; }
+        else if (st.versteckt) { cls += ' zu'; inhalt = '<b>???</b><small>erst Nr. 2</small>'; }
+        else { cls += st.leisten ? ' kauf' : ' teuer'; inhalt = `<b>${v.kurz}</b><small>★ ${S.formatGeld(st.kosten).replace(' Sterne', '')}</small>`; }
+        const b = el('button', cls, inhalt);
+        b.onclick = () => {
+          if (st.hat) { S.waehleVariante(pl, i); baueHaus(true); zeigeVariante(pl); return; }
+          if (st.versteckt) { T.spiele('falsch'); toast('Die dritte Variante zeigt sich, wenn du die zweite hast.', 'hinweis'); return; }
+          if (!S.kaufeVariante(pl, i)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
+          toast(`${v.name} gekauft! ♥ +${C.VARIANTE_HERZEN}`, 'gut');
+          baueHaus(true); zeigeVariante(pl, `+${C.VARIANTE_HERZEN} ♥`);
+        };
+        reihe.appendChild(b);
+      });
+      const z = el('div', 'zeile haus var');
+      const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
+      zeichneIcon(cv, S.ARTIKEL_MAP[pl]);
+      z.appendChild(cv);
+      z.appendChild(el('div', 'txt', `<b>${name}</b>${aktiv ? `<span>${vs[aktiv].text}</span>` : ''}`));
+      z.appendChild(reihe);
+      liste.appendChild(z);
+    }
+  }
 
   // Lichter: Aus / Weiß / Bunt (oder Aus / An ohne Farbwahl)
   const lichter = C.ARTIKEL.filter((a) => a.id in C.LICHTER && hat(a));

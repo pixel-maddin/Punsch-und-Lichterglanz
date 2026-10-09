@@ -4,18 +4,18 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261009a';
-import * as S from './spiel.js?v=20261009a';
-import * as Z from './zeit.js?v=20261009a';
-import * as T from './ton.js?v=20261009a';
-import * as UI from './ui.js?v=20261009a';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261009a';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009a';
-import * as Lernen from './lernen.js?v=20261009a';
-import { zeigeAdvent } from './ereignis.js?v=20261009a';
-import * as A from './auftraege.js?v=20261009a';
-import * as E from './erfolge.js?v=20261009a';
-import * as ZL from './ziele.js?v=20261009a';
+import * as C from './config.js?v=20261009c';
+import * as S from './spiel.js?v=20261009c';
+import * as Z from './zeit.js?v=20261009c';
+import * as T from './ton.js?v=20261009c';
+import * as UI from './ui.js?v=20261009c';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261009c';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009c';
+import * as Lernen from './lernen.js?v=20261009c';
+import { zeigeAdvent } from './ereignis.js?v=20261009c';
+import * as A from './auftraege.js?v=20261009c';
+import * as E from './erfolge.js?v=20261009c';
+import * as ZL from './ziele.js?v=20261009c';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -102,7 +102,12 @@ cv.addEventListener('pointerdown', (e) => {
   // Das Schild „DEIN STAND" lässt sich beschriften
   if (trifftSchild(x, y, G)) { T.spiele('klick'); UI.schildBeschriften(); return; }
   const tr = treffer(x, y, G);
-  if (!tr) return;
+  if (!tr) {
+    // Das Haus angetippt (Wand und Dach): Haus schmücken
+    const GW = G - 6;
+    if (x >= 32 && x <= 128 && y >= GW - 96 && y <= GW - 22 && S.st.lernen >= 99) { T.spiele('klick'); UI.oeffneMeinHaus(); }
+    return;
+  }
   S.lauf.chefT = 0;   // du bist am Stand: Wichtel legen einen Zahn zu
   // Sichtbare Rückmeldung: Ring an der Tippstelle, gedrücktes Feld
   S.lauf.klicks.push({ x, y, t: 0 });
@@ -325,6 +330,12 @@ function demo(art) {
     for (const d of Object.values(C.KALENDER_DEKO)) st.kalDeko[d.id] = true;
     for (const d of C.AUFTRAG_DEKO) st.kalDeko[d.id] = true;
     // Händler-Szenen: drei Stücke schon gekauft, zwei noch im Angebot
+    // Varianten-Szenen: alle Plätze auf Variante 2 bzw. 3
+    if (art === 'meinhaus') { st.var = { 'tanne:1': true, 'kranz:1': true, 'kranz:2': true }; st.wahl = { kranz: 2 }; }
+    if (art === 'var1' || art === 'var2') {
+      st.var = {}; st.wahl = {};
+      for (const platz in C.VARIANTEN) { st.var[platz + ':1'] = true; st.var[platz + ':2'] = true; st.wahl[platz] = art === 'var1' ? 1 : 2; }
+    }
     if (art.startsWith('haendler')) for (const id of art === 'haendleralle' ? C.HAENDLER_DEKO.map((d) => d.id) : ['h_kugel', 'h_flamingo', 'h_hahn']) st.kalDeko[id] = true;
     st.fassade = 'rot'; st.geld = 1284650; st.gesamt = 6500000;
     for (let n = 1; n <= Z.dezemberTag(); n++) st.kalender[n] = true;
@@ -351,6 +362,7 @@ function demo(art) {
     S.lauf.haendler = { x: C.HAENDLER_X, t: 0, phase: 'steht', angebot: ['h_polar', 'h_orgel'], gutschein: true };
     if (art === 'haendlerfenster') UI.zeigeHaendler();
   }
+  if (art === 'meinhaus') UI.oeffneMeinHaus();
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');
   if (art === 'karte') UI.karte(0);

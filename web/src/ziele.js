@@ -14,7 +14,7 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=20261009a';
+import * as S from './spiel.js?v=20261009c';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];

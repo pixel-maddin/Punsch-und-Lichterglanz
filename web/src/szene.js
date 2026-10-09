@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009a';
-import * as Z from './zeit.js?v=20261009a';
-import * as S from './spiel.js?v=20261009a';
-import { FASSADEN } from './config.js?v=20261009a';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009c';
+import * as Z from './zeit.js?v=20261009c';
+import * as S from './spiel.js?v=20261009c';
+import { FASSADEN } from './config.js?v=20261009c';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -433,19 +433,23 @@ function haus(c, G, w, t, L) {
 
   if (S.zeigt('kranz')) {
     // Seit 02.10. ein voller, dicker Ring über fast die ganze Türbreite
-    // (10 statt 8 px, zwei Grüntöne). Der alte war ein dünner Rahmen und am
-    // Handy kaum zu finden - für den ERSTEN Deko-Kauf zu wenig (Betatest).
+    // (10 statt 8 px, zwei Grüntöne). Varianten (09.10.): Stroh, Brezel.
+    const kv = S.variante('kranz');
+    const [dunkel, hell] = kv === 1 ? ['#b88a30', '#e0b850'] : kv === 2 ? ['#7a4220', '#a8642e'] : ['#245a22', '#3a7e32'];
     const x0 = 75, y0 = to + 2;   // linke obere Ecke des 10x10-Felds
     for (let y = 0; y < 10; y++) for (let x = 0; x < 10; x++) {
       const d = Math.hypot(x - 4.5, y - 4.5);
       if (d < 2.3 || d > 5.0) continue;
-      p(c, x0 + x, y0 + y, d > 4.2 || (x * 7 + y * 3) % 5 === 0 ? '#245a22' : '#3a7e32');
+      p(c, x0 + x, y0 + y, d > 4.2 || (x * 7 + y * 3) % 5 === 0 ? dunkel : hell);
     }
-    // Beeren rundherum, Schleife unten mit zwei Bändern
-    for (const [bx, by] of [[0, 3], [7, 1], [3, 0], [9, 5], [1, 7]]) p(c, x0 + bx, y0 + by, '#e83a3a');
-    const sy = y0 + 8;
-    r(c, x0 + 2, sy, 2, 2, '#d02a2a'); r(c, x0 + 6, sy, 2, 2, '#d02a2a'); r(c, x0 + 4, sy, 2, 2, '#a01818');
-    p(c, x0 + 3, sy + 2, '#d02a2a'); p(c, x0 + 6, sy + 2, '#d02a2a'); p(c, x0 + 2, sy + 3, '#d02a2a'); p(c, x0 + 7, sy + 3, '#d02a2a');
+    if (kv === 0) for (const [bx, by] of [[0, 3], [7, 1], [3, 0], [9, 5], [1, 7]]) p(c, x0 + bx, y0 + by, '#e83a3a');
+    if (kv === 1) { r(c, x0 + 4, y0 + 3, 2, 4, '#ffe060'); r(c, x0 + 3, y0 + 4, 4, 2, '#ffe060'); }
+    if (kv === 2) for (const [bx, by] of [[1, 2], [6, 0], [9, 4], [3, 8], [8, 7], [0, 6]]) p(c, x0 + bx, y0 + by, '#f4f4f4');   // Salz
+    if (kv !== 2) {
+      const sy = y0 + 8;
+      r(c, x0 + 2, sy, 2, 2, '#d02a2a'); r(c, x0 + 6, sy, 2, 2, '#d02a2a'); r(c, x0 + 4, sy, 2, 2, '#a01818');
+      p(c, x0 + 3, sy + 2, '#d02a2a'); p(c, x0 + 6, sy + 2, '#d02a2a'); p(c, x0 + 2, sy + 3, '#d02a2a'); p(c, x0 + 7, sy + 3, '#d02a2a');
+    }
   }
   if (S.zeigt('tuerbogenkranz')) winterkranz(c, L, 80, to - 12, t, w, S.stufe('tuerbogenkranz'));
   if (S.zeigt('kal_mistel')) {
@@ -465,7 +469,7 @@ function haus(c, G, w, t, L) {
     }
     if (w.schnee > 0) r(c, hx - 1, hy - 13, 10, 1, '#f6f9fc');
   }
-  if (S.zeigt('nussknacker')) nussknacker(c, 94, G - 24);
+  if (S.zeigt('nussknacker')) [nussknacker, holzrentier, gartenzwerg][S.variante('nussknacker')](c, 94, G - 24, t);
 
   // Lichter am Dach
   if (S.zeigt('lichter_dach')) kette(c, L, 33, 127, wandO + 1, 16, 2, t, 0, S.stufe('lichter_dach'), 'dach');
@@ -481,7 +485,12 @@ function haus(c, G, w, t, L) {
   }
   if (S.zeigt('schornstein')) schornsteinSchmuck(c, L, 98, ko, ku, t, w, S.stufe('schornstein'));
   if (S.zeigt('festbeleuchtung')) festbeleuchtung(c, L, wandO, dachH, gx0, gx1, go, ko, ku, t);
-  if (S.zeigt('dach_nikolaus')) nikolausDach(c, 110, wandO - 18, t);
+  if (S.zeigt('dach_nikolaus')) {
+    const v = S.variante('dach_nikolaus');
+    if (v === 1) { dachRentier(c, 108, wandO - 16, t, 0); dachRentier(c, 117, wandO - 10, t, 1); }
+    else if (v === 2) steckengeblieben(c, 98, ko, t);
+    else nikolausDach(c, 110, wandO - 18, t);
+  }
   if (S.zeigt('auf_engel')) engel(c, L, 60, wandO - 28, t);
   if (S.zeigt('h_hahn')) wetterhahn(c, 52, wandO - 28, t);
   if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershow(c, L, wandO, wandU, t);
@@ -540,18 +549,54 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
 
   if (wo === 'gaube' && S.zeigt('fensterstern')) {
     const sx = x + fw / 2 - 0.5, sy = y + fh / 2;
-    const f = '#fff0a0';
-    r(c, sx - 1, sy - 1, 3, 3, f); p(c, sx, sy - 3, f); p(c, sx, sy + 3, f); p(c, sx - 3, sy, f); p(c, sx + 3, sy, f);
-    p(c, sx - 2, sy - 2, f); p(c, sx + 2, sy + 2, f); p(c, sx + 2, sy - 2, f); p(c, sx - 2, sy + 2, f);
-    L.push({ x: sx, y: sy, f, halo: 9, an: 1, gross: true });
+    const v = S.variante('fensterstern');
+    if (v === 1) {
+      // Komet: heller Kopf oben rechts, Schweif nach links unten
+      const f = '#fff0a0';
+      r(c, sx + 1, sy - 3, 3, 3, f);
+      for (let i = 1; i <= 6; i++) { p(c, sx + 1 - i, sy - 2 + Math.round(i * 0.7), i % 2 ? '#ffd860' : '#fff8d0'); if (i < 4) p(c, sx + 1 - i, sy - 1 + Math.round(i * 0.7), '#e8b040'); }
+      L.push({ x: sx + 2, y: sy - 2, f, halo: 8, an: 1, gross: true });
+    } else if (v === 2) {
+      // Discokugel: silbernes Karomuster, wechselnde bunte Glanzpunkte
+      for (let yy = -3; yy <= 3; yy++) for (let xx = -3; xx <= 3; xx++) if (Math.hypot(xx, yy) <= 3.3) p(c, sx + xx, sy + yy, (xx + yy + 10) % 2 ? '#c8ccd8' : '#8a8ea0');
+      p(c, sx, sy - 5, '#5a5a62'); p(c, sx, sy - 4, '#5a5a62');
+      const k = Math.floor(t * 4);
+      for (let i = 0; i < 3; i++) { const f = BUNT[(k + i) % BUNT.length]; const px = sx - 2 + ((k + i * 3) % 5), py = sy - 2 + ((k * 2 + i) % 5); p(c, px, py, f); L.push({ x: px, y: py, f, halo: 4, an: 1 }); }
+    } else {
+      const f = '#fff0a0';
+      r(c, sx - 1, sy - 1, 3, 3, f); p(c, sx, sy - 3, f); p(c, sx, sy + 3, f); p(c, sx - 3, sy, f); p(c, sx + 3, sy, f);
+      p(c, sx - 2, sy - 2, f); p(c, sx + 2, sy + 2, f); p(c, sx + 2, sy - 2, f); p(c, sx - 2, sy + 2, f);
+      L.push({ x: sx, y: sy, f, halo: 9, an: 1, gross: true });
+    }
   }
   if (wo === 'links' && S.zeigt('schwibbogen')) {
     const bx = x + 1, by = y + fh - 1;
-    r(c, bx, by, fw - 2, 1, '#6a4a2a');
-    for (let i = 0; i < 7; i++) {
-      const cx = bx + 1 + i * 2, hoch = Math.round(Math.sin((i / 6) * Math.PI) * 3);
-      p(c, cx, by - 1 - hoch, '#6a4a2a'); p(c, cx, by - 2 - hoch, '#f4f0e0');
-      L.push({ x: cx, y: by - 3 - hoch, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 9 + i) });
+    const v = S.variante('schwibbogen');
+    if (v === 1) {
+      // Lichterpyramide: drei Etagen, oben dreht sich das Flügelrad
+      const mx = x + Math.floor(fw / 2);
+      for (let e = 0; e < 3; e++) { const b = 6 - e * 2, yy = by - e * 3; r(c, mx - b, yy, b * 2 + 1, 1, '#8a5a32'); p(c, mx - b + 1, yy - 1, '#c8a060'); p(c, mx + b - 1, yy - 1, '#c8a060'); }
+      r(c, mx, by - 10, 1, 10, '#6a4a2a');
+      const fl = Math.floor(t * 6) % 2;
+      r(c, mx - 3 + fl, by - 11, 3, 1, '#e8c030'); r(c, mx + 1 - fl, by - 11, 3, 1, '#e8c030');
+      for (const [dx, dy] of [[-5, 0], [5, 0], [-3, -3], [3, -3]]) { r(c, mx + dx, by + dy - 2, 1, 2, '#f4f0e0'); L.push({ x: mx + dx, y: by + dy - 3, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 9 + dx) }); }
+    } else if (v === 2) {
+      // Fensterkatze mit Mütze, blinzelt ab und zu
+      const kx = x + 5, ky = by;
+      r(c, kx, ky - 6, 6, 6, '#3a3a44'); r(c, kx + 1, ky - 10, 4, 4, '#3a3a44');
+      p(c, kx + 1, ky - 11, '#3a3a44'); p(c, kx + 4, ky - 11, '#3a3a44');
+      const zu = Math.floor(t * 0.7) % 4 === 0 && (t % 1.43) < 0.2;
+      p(c, kx + 2, ky - 8, zu ? '#3a3a44' : '#e8d040'); p(c, kx + 3, ky - 8, zu ? '#3a3a44' : '#e8d040');
+      r(c, kx + 6, ky - 2, 2, 1, '#3a3a44'); p(c, kx + 7, ky - 3 - (Math.floor(t * 2) % 2), '#3a3a44');   // Schwanz
+      r(c, kx + 1, ky - 12, 4, 2, '#d83a3a'); p(c, kx + 4, ky - 13, '#d83a3a'); p(c, kx + 5, ky - 13, '#f4f4f4');   // Mütze
+      L.push({ x: kx + 2, y: ky - 8, f: '#e8d040', halo: 2, an: zu ? 0 : 0.7 });
+    } else {
+      r(c, bx, by, fw - 2, 1, '#6a4a2a');
+      for (let i = 0; i < 7; i++) {
+        const cx = bx + 1 + i * 2, hoch = Math.round(Math.sin((i / 6) * Math.PI) * 3);
+        p(c, cx, by - 1 - hoch, '#6a4a2a'); p(c, cx, by - 2 - hoch, '#f4f0e0');
+        L.push({ x: cx, y: by - 3 - hoch, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 9 + i) });
+      }
     }
   }
   if (wo === 'rechts' && S.zeigt('kal_kranz')) {
@@ -732,10 +777,13 @@ function boden(c, G, w) {
 }
 
 function tanne(c, G, w, t, L) {
+  const v = S.variante('tanne');
+  if (v === 2) return palme(c, G, w, t, L);
+  const sk = v === 1 ? 1.3 : 1;   // Riesentanne: ein Drittel größer
   const cx = 18, fuss = G - 18;
   r(c, cx - 1, fuss - 4, 3, 4, '#5a3a22');
   const g1 = '#2a5a32', g2 = '#1f4a28';
-  const stufen = [[fuss - 4, 13, 12], [fuss - 13, 10, 11], [fuss - 21, 7, 10], [fuss - 28, 4, 8]];
+  const stufen = [[4, 13, 12], [13, 10, 11], [21, 7, 10], [28, 4, 8]].map(([u, h, ho]) => [fuss - Math.round(u * sk), Math.round(h * sk), Math.round(ho * sk)]);
   for (const [unten, halb, hoch] of stufen) {
     for (let i = 0; i < hoch; i++) {
       const bw = Math.round(halb * (i + 1) / hoch);
@@ -743,14 +791,14 @@ function tanne(c, G, w, t, L) {
     }
     if (w.schnee > 0) { r(c, cx - halb + 1, unten - 1, halb * 2 - 1, 1, '#eef4fa'); p(c, cx, unten - hoch, '#eef4fa'); }
   }
-  const spitze = fuss - 36;
+  const spitze = fuss - Math.round(36 * sk);
   if (S.zeigt('tanne_lichter')) {
     const bunt = S.bunt('tanne');
-    const ts = S.stufe('tanne_lichter'), anzahl = 22 * Math.min(2, ts);
+    const ts = S.stufe('tanne_lichter'), anzahl = Math.round(22 * Math.min(2, ts) * sk);
     for (let i = 0; i < anzahl; i++) {
       const hy = i / anzahl;
-      const y = Math.round(fuss - 6 - hy * 28);
-      const breite = 12 * (1 - hy) + 1;
+      const y = Math.round(fuss - 6 * sk - hy * 28 * sk);
+      const breite = (12 * (1 - hy) + 1) * sk;
       const x = Math.round(cx + Math.sin(i * 1.9) * breite * 0.8);
       const f = bunt ? BUNT[i % BUNT.length] : WARM;
       p(c, x, y, f);
@@ -759,13 +807,51 @@ function tanne(c, G, w, t, L) {
   }
   if (S.zeigt('tanne_kugeln')) {
     const K = [[-6, 10, '#d83a3a'], [5, 12, '#e8c030'], [-3, 18, '#e8c030'], [4, 20, '#d83a3a'], [-1, 26, '#d83a3a'], [8, 7, '#e8c030'], [-9, 6, '#d83a3a']];
-    for (const [dx, dy, f] of K) { r(c, cx + dx, fuss - dy, 2, 2, f); p(c, cx + dx, fuss - dy, ton(f, 0.5)); }
+    for (const [dx, dy, f] of K) { const kx = cx + Math.round(dx * sk), ky = fuss - Math.round(dy * sk); r(c, kx, ky, 2, 2, f); p(c, kx, ky, ton(f, 0.5)); }
   }
-  if (S.zeigt('tanne_stern')) {
-    const f = '#ffe060';
-    r(c, cx - 1, spitze - 2, 3, 3, f); p(c, cx, spitze - 4, f); p(c, cx - 2, spitze - 1, f); p(c, cx + 2, spitze - 1, f); p(c, cx - 1, spitze + 1, f); p(c, cx + 1, spitze + 1, f);
-    L.push({ x: cx, y: spitze - 1, f, halo: 8, an: 0.85 + 0.15 * Math.sin(t * 2), gross: true });
+  if (S.zeigt('tanne_stern')) tannenStern(c, L, cx, spitze, t);
+}
+function tannenStern(c, L, cx, spitze, t) {
+  const f = '#ffe060';
+  r(c, cx - 1, spitze - 2, 3, 3, f); p(c, cx, spitze - 4, f); p(c, cx - 2, spitze - 1, f); p(c, cx + 2, spitze - 1, f); p(c, cx - 1, spitze + 1, f); p(c, cx + 1, spitze + 1, f);
+  L.push({ x: cx, y: spitze - 1, f, halo: 8, an: 0.85 + 0.15 * Math.sin(t * 2), gross: true });
+}
+/** Variante 3 der Tanne: eine Palme. Lichter, Kugeln und Stern ziehen mit. */
+function palme(c, G, w, t, L) {
+  const cx = 18, fuss = G - 18, hoch = 30;
+  // Stamm: leicht gebogen, mit Ringen
+  const stamm = [];
+  for (let i = 0; i < hoch; i++) {
+    const x = Math.round(cx + Math.sin(i / hoch * 1.6) * 3);
+    stamm.push([x, fuss - i]);
+    r(c, x - 1, fuss - i, 3, 1, i % 3 === 0 ? '#6a4626' : '#8a5e34');
   }
+  const [kx, ky] = stamm[hoch - 1];
+  // Wedel: sechs Bögen, die nach außen hängen
+  const wedel = [[-1, -0.35], [1, -0.35], [-1, 0.25], [1, 0.25], [-0.6, -0.9], [0.6, -0.9]];
+  const spitzen = [];
+  for (const [rx, ry] of wedel) {
+    for (let i = 0; i <= 12; i++) {
+      const x = Math.round(kx + rx * i * (ry < -0.5 ? 0.6 : 1));
+      const y = Math.round(ky + ry * i * 0.6 + (i * i) * 0.045 * (ry < -0.5 ? 0.3 : 1));
+      r(c, x, y, 1, 2, i % 2 ? '#2f7a3a' : '#3a9a46');
+      if (i % 3 === 1) { p(c, x, y + 2, '#256a30'); }
+      if (w.schnee > 0 && i % 2 === 0) p(c, x, y - 1, '#eef4fa');
+      if (i === 12) spitzen.push([x, y]);
+    }
+  }
+  if (S.zeigt('tanne_lichter')) {
+    const bunt = S.bunt('tanne'), ts = S.stufe('tanne_lichter');
+    const pkt = [];
+    stamm.forEach(([x, y], i) => { if (i % 3 === 1) pkt.push([x + (i % 6 < 3 ? -2 : 2), y]); });
+    for (const [rx, ry] of wedel) for (let i = 2; i <= 12; i += 2 + (ts >= 2 ? 0 : 1)) pkt.push([Math.round(kx + rx * i * (ry < -0.5 ? 0.6 : 1)), Math.round(ky + ry * i * 0.6 + i * i * 0.045 * (ry < -0.5 ? 0.3 : 1)) + 1]);
+    pkt.forEach(([x, y], i) => { const f = bunt ? BUNT[i % BUNT.length] : WARM; p(c, x, y, f); L.push({ x, y, f, halo: 2, an: 0.75 * lichtHell(i, t, ts) }); });
+  }
+  if (S.zeigt('tanne_kugeln')) {
+    // Kokosnüsse unter der Krone - weihnachtlich bemalt
+    for (const [dx, f] of [[-2, '#d83a3a'], [1, '#e8c030'], [3, '#d83a3a']]) { r(c, kx + dx, ky + 2, 2, 2, f); p(c, kx + dx, ky + 2, ton(f, 0.5)); }
+  }
+  if (S.zeigt('tanne_stern')) tannenStern(c, L, kx, ky - 6, t);
 }
 
 function schneefigur(c, x, fuss, groesse, art) {
@@ -824,9 +910,24 @@ function zaun(c, G, w, L, t) {
   // Holzbraun gibt es im Baumarkt dazu (`zaunfarbe`).
   const braun = S.st.zaunfarbe === 'braun';
   const f = braun ? '#7a5234' : '#e2d5bb', sf = braun ? '#5a3a22' : '#bba98a';
+  const zv = S.variante('zaun');
   for (const [x0, x1] of [[0, 71], [89, 126]]) {
-    r(c, x0, hoch + 2, x1 - x0, 1, sf); r(c, x0, hoch + 4, x1 - x0, 1, sf);
-    for (let x = x0 + 1; x < x1; x += 4) { r(c, x, hoch, 2, 6, f); p(c, x, hoch - 1, f); if (w.schnee > 0) p(c, x, hoch - 1, '#ffffff'); }
+    if (zv === 1) {
+      // Jägerzaun: gekreuzte Latten zwischen Pfosten
+      for (let x = x0; x < x1; x++) { const k = (x - x0) % 8; p(c, x, hoch + Math.round(k * 0.7), f); p(c, x, hoch + 5 - Math.round(k * 0.7), f); }
+      for (let x = x0; x < x1; x += 8) { r(c, x, hoch - 1, 2, 7, sf); if (w.schnee > 0) p(c, x, hoch - 2, '#ffffff'); }
+      r(c, x0, hoch + 2, x1 - x0, 1, sf);
+    } else if (zv === 2) {
+      // Lebkuchenzaun: braune Latten mit Zuckerguss-Spitzen und Gummibärchen
+      r(c, x0, hoch + 2, x1 - x0, 1, '#7a4220'); r(c, x0, hoch + 4, x1 - x0, 1, '#7a4220');
+      for (let x = x0 + 1, i = 0; x < x1; x += 4, i++) {
+        r(c, x, hoch, 2, 6, '#a8642e'); r(c, x, hoch - 1, 2, 1, '#fff8f0'); p(c, x, hoch, '#fff8f0');
+        if (i % 3 === 1) p(c, x + 1, hoch + 3, ['#e03a3a', '#3aa84a', '#e8c030'][i % 3]);
+      }
+    } else {
+      r(c, x0, hoch + 2, x1 - x0, 1, sf); r(c, x0, hoch + 4, x1 - x0, 1, sf);
+      for (let x = x0 + 1; x < x1; x += 4) { r(c, x, hoch, 2, 6, f); p(c, x, hoch - 1, f); if (w.schnee > 0) p(c, x, hoch - 1, '#ffffff'); }
+    }
   }
   // Tannengirlande: hängt in Bögen am oberen Riegel, rote Schleife an jedem Bogen
   if (S.zeigt('zaun_girlande')) for (const [x0, x1] of [[0, 71], [89, 126]]) {
@@ -838,6 +939,104 @@ function zaun(c, G, w, L, t) {
     for (let x = x0 + 1; x < x1 - 1; x += 12) { r(c, x - 1, hoch, 3, 2, '#d83a3a'); p(c, x - 1, hoch + 2, '#b02828'); p(c, x + 1, hoch + 2, '#b02828'); }
   }
   if (S.zeigt('lichter_zaun')) { const z = S.stufe('lichter_zaun'); kette(c, L, 0, 70, hoch + 2, 12, 2, t, 1, z, 'zaun'); kette(c, L, 90, 126, hoch + 2, 12, 2, t, 1, z, 'zaun'); }
+}
+
+// ---------------------------------------------------------------------------
+// Varianten (09.10.) - je Platz zwei weitere Formen
+// ---------------------------------------------------------------------------
+function holzrentier(c, x, fuss) {
+  const b = '#a8703a', d = '#7a4a22';
+  r(c, x - 3, fuss - 7, 6, 3, b); r(c, x - 3, fuss - 4, 1, 4, d); r(c, x + 2, fuss - 4, 1, 4, d);
+  r(c, x + 2, fuss - 10, 2, 3, b); r(c, x + 3, fuss - 11, 2, 2, b);                        // Hals, Kopf
+  p(c, x + 3, fuss - 13, d); p(c, x + 2, fuss - 14, d); p(c, x + 5, fuss - 13, d); p(c, x + 6, fuss - 14, d);   // Geweih
+  r(c, x + 1, fuss - 8, 2, 1, '#d83a3a'); p(c, x + 1, fuss - 7, '#d83a3a');                 // Schleife
+}
+function gartenzwerg(c, x, fuss) {
+  r(c, x - 1, fuss - 2, 1, 2, '#1a1a1a'); r(c, x + 1, fuss - 2, 1, 2, '#1a1a1a');
+  r(c, x - 2, fuss - 7, 5, 5, '#c82828'); r(c, x - 2, fuss - 4, 5, 1, '#1a1a1a');
+  r(c, x - 1, fuss - 10, 3, 3, '#f2c9a0'); p(c, x, fuss - 9, '#1a1a1a');
+  r(c, x - 2, fuss - 8, 5, 2, '#f4f4f4'); p(c, x, fuss - 6, '#f4f4f4');                     // Bart
+  r(c, x - 2, fuss - 11, 5, 1, '#f4f4f4'); r(c, x - 1, fuss - 13, 3, 2, '#c82828'); p(c, x + 1, fuss - 14, '#c82828'); p(c, x + 2, fuss - 15, '#f4f4f4');   // Zipfelmütze
+}
+function dachRentier(c, x, y, t, n) {
+  const b = '#8a5a32';
+  r(c, x - 3, y - 4, 6, 3, b); r(c, x - 3, y - 1, 1, 2, b); r(c, x + 2, y - 1, 1, 2, b);
+  r(c, x + 2, y - 7, 2, 3, b); p(c, x + 4, y - 6, '#d83a3a');
+  p(c, x + 2, y - 9, '#5a3a22'); p(c, x + 4, y - 9, '#5a3a22'); p(c, x + 1, y - 10, '#5a3a22'); p(c, x + 5, y - 10, '#5a3a22');
+  if (Math.floor(t * 1.5 + n) % 3 === 0) p(c, x - 4, y - 4, b);   // Schwanzwackeln
+}
+function steckengeblieben(c, x, ko, t) {
+  // Zwei Beine ragen aus dem Schornstein, ab und zu strampelt eins
+  const st = Math.floor(t * 2) % 4 === 0 ? 1 : 0;
+  for (const [dx, hoch] of [[2, 7 + st], [6, 7]]) {
+    r(c, x + dx, ko - 1 - hoch, 2, hoch, '#c82828');
+    r(c, x + dx, ko - 1 - hoch, 2, 1, '#f4f4f4');
+    r(c, x + dx - (dx < 4 ? 1 : 0), ko - 4 - hoch, 3, 3, '#1a1a1a');
+  }
+}
+function schneeburg(c, x, fuss) {
+  const w = '#f6f9fc', s = '#cfd9e8';
+  r(c, x - 8, fuss - 7, 17, 7, w); r(c, x - 8, fuss - 1, 17, 1, s);
+  for (const tx of [x - 8, x + 5]) { r(c, tx, fuss - 13, 4, 13, w); for (let i = 0; i < 4; i += 2) p(c, tx + i, fuss - 14, w); r(c, tx + 1, fuss - 9, 2, 2, s); }
+  for (let i = -3; i <= 3; i += 2) p(c, x + i, fuss - 8, w);
+  r(c, x - 1, fuss - 4, 3, 4, s);                                                           // Tor
+  r(c, x - 7, fuss - 19, 1, 5, '#6a4a2a'); r(c, x - 6, fuss - 19, 3, 2, '#d83a3a');         // Fähnchen
+  r(c, x + 6, fuss - 19, 1, 5, '#6a4a2a'); r(c, x + 7, fuss - 19, 3, 2, '#3a8ad8');
+}
+function liegestuhl(c, x, fuss, t) {
+  // Gestreifter Liegestuhl, darauf ein Schneemann mit Sonnenbrille
+  for (let i = 0; i < 9; i++) r(c, x - 6 + i, fuss - 2 - Math.round(i * 0.7), 1, 2, i % 2 ? '#3a8ad8' : '#f4f4f4');
+  r(c, x - 6, fuss - 2, 1, 2, '#8a6a3a'); r(c, x + 2, fuss - 8, 1, 8, '#8a6a3a'); r(c, x - 3, fuss - 2, 1, 2, '#8a6a3a');
+  const w = '#f6f9fc';
+  r(c, x - 5, fuss - 6, 6, 4, w); r(c, x + 1, fuss - 11, 5, 5, w);                         // Bauch, Kopf
+  r(c, x + 1, fuss - 9, 5, 1, '#1a1a22'); p(c, x + 2, fuss - 10, '#1a1a22'); p(c, x + 4, fuss - 10, '#1a1a22');   // Sonnenbrille
+  p(c, x + 6, fuss - 8, '#f08020'); r(c, x + 1, fuss - 13, 5, 2, '#e8c030');               // Nase, Strohhut
+  p(c, x - 6, fuss - 5, '#6a4a2a'); p(c, x - 7, fuss - 6, '#6a4a2a');                      // Arm hinterm Kopf
+}
+function lichtLinien(c, L, pts, bunt, rot, t) {
+  pts.forEach(([px, py], i) => { const f = bunt ? BUNT[Math.floor(i / 3) % BUNT.length] : '#fff2c8'; p(c, px, py, f); if (i % 2 === 0) L.push({ x: px, y: py, f, halo: 2, an: 0.8 }); });
+  if (rot) { p(c, rot[0], rot[1], '#ff3030'); L.push({ x: rot[0], y: rot[1], f: '#ff3030', halo: 3, an: 1 }); }
+}
+function linienPunkte(segs) {
+  const pts = [];
+  for (const [x0, y0, x1, y1] of segs) { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)); for (let i = 0; i <= n; i++) pts.push([Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n)]); }
+  return pts;
+}
+function lichterElch(c, L, x, fuss, t) {
+  const pts = linienPunkte([
+    [x + 1, fuss - 9, x + 12, fuss - 9], [x + 1, fuss - 14, x + 12, fuss - 14], [x + 1, fuss - 9, x + 1, fuss - 14], [x + 12, fuss - 9, x + 13, fuss - 15],
+    [x + 2, fuss - 9, x + 2, fuss], [x + 11, fuss - 9, x + 11, fuss],
+    [x + 1, fuss - 14, x - 1, fuss - 18], [x - 1, fuss - 18, x - 5, fuss - 16], [x - 5, fuss - 16, x - 4, fuss - 14],
+    [x - 1, fuss - 18, x - 4, fuss - 23], [x - 4, fuss - 23, x + 1, fuss - 24], [x + 1, fuss - 24, x + 1, fuss - 19],
+  ]);
+  lichtLinien(c, L, pts, S.bunt('rentier'), null, t);
+}
+function lichterDino(c, L, x, fuss, t) {
+  // Langhals: dicker Bauch, Hals schräg nach oben, Schwanz nach hinten
+  const pts = linienPunkte([
+    [x + 2, fuss - 6, x + 12, fuss - 6], [x + 2, fuss - 6, x + 3, fuss - 11], [x + 3, fuss - 11, x + 10, fuss - 12], [x + 10, fuss - 12, x + 12, fuss - 6],
+    [x + 4, fuss - 6, x + 4, fuss], [x + 10, fuss - 6, x + 10, fuss],
+    [x + 3, fuss - 11, x - 1, fuss - 20], [x - 1, fuss - 20, x - 4, fuss - 20], [x - 4, fuss - 20, x - 3, fuss - 18],
+    [x + 12, fuss - 7, x + 17, fuss - 4], [x + 17, fuss - 4, x + 19, fuss - 1],
+  ]);
+  lichtLinien(c, L, pts, S.bunt('rentier'), null, t);
+}
+function bollerwagen(c, x, fuss) {
+  r(c, x + 1, fuss - 7, 11, 5, '#3a8a4a'); r(c, x + 1, fuss - 7, 11, 1, '#5aaa6a');
+  for (const wx of [x + 3, x + 10]) { r(c, wx - 1, fuss - 3, 3, 3, '#2a2a30'); p(c, wx, fuss - 2, '#c8c8d0'); }
+  r(c, x - 3, fuss - 6, 4, 1, '#2a2a30'); r(c, x - 4, fuss - 8, 1, 3, '#2a2a30');           // Deichsel
+  r(c, x + 2, fuss - 11, 4, 4, '#d83a3a'); r(c, x + 3, fuss - 11, 1, 4, '#e8c030');
+  r(c, x + 6, fuss - 13, 4, 6, '#3a8ad8'); r(c, x + 6, fuss - 11, 4, 1, '#f4f4f4');
+  r(c, x + 9, fuss - 10, 3, 3, '#e8c030'); p(c, x + 10, fuss - 11, '#d83a3a');
+}
+function rasenmaeher(c, x, fuss, t, L) {
+  r(c, x + 1, fuss - 7, 12, 4, '#c82828'); r(c, x + 1, fuss - 7, 12, 1, '#e84a3a');
+  r(c, x + 9, fuss - 10, 3, 3, '#2a2a30'); r(c, x + 9, fuss - 12, 1, 2, '#2a2a30');        // Sitz, Lehne
+  r(c, x + 3, fuss - 10, 1, 3, '#2a2a30'); r(c, x + 2, fuss - 11, 3, 1, '#2a2a30');        // Lenkrad
+  r(c, x + 9, fuss - 4, 4, 4, '#1a1a1a'); p(c, x + 10, fuss - 3, '#8a8a92');               // großes Hinterrad
+  r(c, x + 1, fuss - 3, 3, 3, '#1a1a1a');
+  const bunt = S.bunt('schlitten');
+  for (let i = 0; i < 6; i++) { const lx = x + 1 + i * 2, ly = fuss - 8 + (i % 2); const f = BUNT[(i + Math.floor(t * 3)) % BUNT.length]; p(c, lx, ly, bunt === false ? WARM : f); if (L) L.push({ x: lx, y: ly, f, halo: 2, an: 0.9 }); }
 }
 
 // Sammelstücke aus den Tagesaufträgen
@@ -992,18 +1191,47 @@ function laterne(c, L, x, fuss, t) {
   L.push({ fleck: [x + 0.5, fuss + 9, 20, 7], f: '#ffd88a', an: 1 });
 }
 
-function lichterbogen(c, L, G, t) {
-  const pts = [];
-  for (let i = 0; i <= 24; i++) {
-    const a = Math.PI * i / 24;
-    pts.push([Math.round(80 - Math.cos(a) * 9), Math.round(G - 13 - Math.sin(a) * 20)]);
-  }
-  pts.forEach(([x, y], i) => {
-    p(c, x, y, '#3a3a2a');
-    if (i % 2 === 0) {
-      const f = S.bunt('bogen') ? BUNT[(i / 2) % BUNT.length] : WARM;
-      p(c, x, y, f); L.push({ x, y, f, halo: 3, an: 1 });
+function fackel(c, L, x, fuss, t, n = 0) {
+  r(c, x, fuss - 14, 1, 14, '#6a4226'); r(c, x - 1, fuss - 16, 3, 2, '#3a2a1a');
+  const fl = Math.sin(t * 13 + n * 2) > 0;
+  r(c, x - 1, fuss - 19, 3, 3, '#ff8a20'); p(c, x, fuss - 20 - (fl ? 1 : 0), '#ffd040'); p(c, x, fuss - 18, '#fff0a0');
+  L.push({ x, y: fuss - 18, f: '#ff9a40', halo: 12, an: 0.85 + 0.15 * Math.sin(t * 11 + n) });
+  L.push({ fleck: [x + 0.5, fuss + 9, 18, 6], f: '#ff9a40', an: 0.8 });
+}
+function lavalampe(c, L, x, fuss, t, n = 0) {
+  const farbe = n ? ['#a040e0', '#ff60c0'] : ['#ff4a2a', '#ffb030'];
+  r(c, x - 1, fuss - 3, 3, 3, '#2a2a32'); r(c, x - 2, fuss - 1, 5, 1, '#2a2a32');
+  r(c, x - 1, fuss - 12, 3, 9, farbe[0]); r(c, x, fuss - 13, 1, 1, '#2a2a32');
+  for (let i = 0; i < 2; i++) { const y = fuss - 4 - Math.round((Math.sin(t * 0.8 + i * 3 + n) * 0.5 + 0.5) * 7); r(c, x - (i ? 1 : 0), y, 2, 2, farbe[1]); }
+  L.push({ rect: [x - 1, fuss - 12, 3, 9], f: farbe[1], halo: 10, an: 0.8 });
+}
+function lichterbogen(c, L, G, t, v = 0) {
+  if (v === 2) {
+    // Zuckerstangen-Tor: dicker rot-weißer Bogen, oben ein Stern
+    for (let i = 0; i <= 40; i++) {
+      const a = Math.PI * i / 40;
+      const x = Math.round(80 - Math.cos(a) * 9), y = Math.round(G - 13 - Math.sin(a) * 20);
+      const f = Math.floor(i / 3) % 2 ? '#f4f4f4' : '#d83a3a';
+      r(c, x, y, 2, 2, f);
     }
+    r(c, 79, G - 37, 3, 3, '#ffe060'); L.push({ x: 80, y: G - 36, f: '#ffe060', halo: 6, an: 0.9 });
+    return;
+  }
+  // Variante 1: Tunnel aus drei Bögen, nach hinten kleiner und höher
+  const boegen = v === 1 ? [[0, 1], [-3, 0.82], [-6, 0.66]] : [[0, 1]];
+  boegen.forEach(([dy, sk], bi) => {
+    const pts = [];
+    for (let i = 0; i <= 24; i++) {
+      const a = Math.PI * i / 24;
+      pts.push([Math.round(80 - Math.cos(a) * 9 * sk), Math.round(G - 13 + dy - Math.sin(a) * 20 * sk)]);
+    }
+    pts.forEach(([x, y], i) => {
+      p(c, x, y, '#3a3a2a');
+      if (i % 2 === 0) {
+        const f = S.bunt('bogen') ? BUNT[(i / 2 + bi) % BUNT.length] : WARM;
+        p(c, x, y, f); L.push({ x, y, f, halo: 3, an: 1 - bi * 0.2 });
+      }
+    });
   });
   r(c, 70, G - 13, 2, 1, '#3a3a2a'); r(c, 89, G - 13, 2, 1, '#3a3a2a');
 }
@@ -1090,21 +1318,72 @@ function stand(c, G, w, t, L) {
   r(c, x0 - 1, G - 23, x1 - x0 + 2, 2, '#a8703a');
   if (w.schnee > 0) r(c, x0, G - 24, x1 - x0, 1, '#f6f9fc');
   if (S.zeigt('musik')) {
-    r(c, x0 + 2, G - 28, 6, 5, '#3a3a44'); p(c, x0 + 4, G - 26, '#8a8a9a'); p(c, x0 + 6, G - 26, '#8a8a9a');
+    const mv = S.variante('musik');
     const n = (t * 0.8) % 1;
-    p(c, x0 + 5 + Math.sin(n * 6) * 2, G - 30 - n * 10, '#ffffff');
+    if (mv === 1) {
+      // Blaskapelle: drei Wichtel mit goldenen Trompeten
+      for (let i = 0; i < 3; i++) {
+        const bx = x0 + 2 + i * 4, hop = Math.floor(t * 3 + i) % 2;
+        r(c, bx, G - 26 - hop, 3, 3, ['#3aa84a', '#c82828', '#3a8ad8'][i]); r(c, bx, G - 28 - hop, 3, 2, '#f2c9a0');
+        p(c, bx + 1, G - 29 - hop, '#c82828'); p(c, bx + 3, G - 27 - hop, '#e8c030'); p(c, bx + 4, G - 28 - hop, '#e8c030');
+      }
+    } else if (mv === 2) {
+      // Elvis-Wichtel: weißer Anzug, schwarze Tolle, Gitarre
+      const hop = Math.floor(t * 4) % 2;
+      r(c, x0 + 4, G - 27 + hop, 4, 4, '#f4f4f4'); r(c, x0 + 4, G - 30 + hop, 4, 3, '#f2c9a0');
+      r(c, x0 + 3, G - 32 + hop, 5, 2, '#1a1a1a'); p(c, x0 + 8, G - 31 + hop, '#1a1a1a');
+      r(c, x0 + 7, G - 26 + hop, 4, 2, '#a8642e'); r(c, x0 + 10, G - 28 + hop, 1, 3, '#6a4226');
+    } else {
+      r(c, x0 + 2, G - 28, 6, 5, '#3a3a44'); p(c, x0 + 4, G - 26, '#8a8a9a'); p(c, x0 + 6, G - 26, '#8a8a9a');
+    }
+    p(c, x0 + 5 + Math.sin(n * 6) * 2, G - 32 - n * 10, '#ffffff');
   }
   if (S.zeigt('schild')) {
-    r(c, x0 + 10, markise - 11, 28, 9, '#6a4222'); r(c, x0 + 11, markise - 10, 26, 7, '#f0e0b0');
-    r(c, x0 + 14, markise - 2, 1, 2, '#6a4222'); r(c, x0 + 33, markise - 2, 1, 2, '#6a4222');
-    pixText(c, 'PUNSCH', x0 + 12, markise - 9, '#b02020', null);
+    const sv = S.variante('schild');
+    if (sv === 1) {
+      // Leuchtreklame: dunkle Tafel, pinke Neonschrift, die ab und zu flackert
+      r(c, x0 + 10, markise - 11, 28, 9, '#1a1426'); r(c, x0 + 14, markise - 2, 1, 2, '#3a3a44'); r(c, x0 + 33, markise - 2, 1, 2, '#3a3a44');
+      const an = !(Math.floor(t * 3) % 11 === 0);
+      pixText(c, 'PUNSCH', x0 + 12, markise - 9, an ? '#ff6ad0' : '#6a3a5a', null);
+      if (an) L.push({ rect: [x0 + 12, markise - 9, 24, 5], f: '#ff6ad0', halo: 6, an: 0.7 });
+    } else if (sv === 2) {
+      // Drehende Riesentasse über dem Stand
+      const mx = x0 + 24, my = markise - 8;
+      const b = Math.max(1, Math.round(Math.abs(Math.cos(t * 1.6)) * 7));
+      r(c, mx - b, my - 6, b * 2, 9, '#c82828'); r(c, mx - b, my - 3, b * 2, 2, '#f4f4f4');
+      const seite = Math.cos(t * 1.6) > 0 ? 1 : -1;
+      if (b > 2) { r(c, mx + seite * (b + 1) - (seite < 0 ? 1 : 0), my - 4, 1, 4, '#c82828'); p(c, mx + seite * b, my - 4, '#c82828'); p(c, mx + seite * b, my - 1, '#c82828'); }
+      r(c, mx - 1, my + 3, 2, 2, '#6a4222');
+      for (let i = 0; i < 3; i++) { const a = (t * 0.6 + i / 3) % 1; p(c, mx - 2 + i * 2 + Math.round(Math.sin(a * 6) ), my - 8 - Math.round(a * 6), '#eef2f6'); }
+    } else {
+      r(c, x0 + 10, markise - 11, 28, 9, '#6a4222'); r(c, x0 + 11, markise - 10, 26, 7, '#f0e0b0');
+      r(c, x0 + 14, markise - 2, 1, 2, '#6a4222'); r(c, x0 + 33, markise - 2, 1, 2, '#6a4222');
+      pixText(c, 'PUNSCH', x0 + 12, markise - 9, '#b02020', null);
+    }
   }
   if (S.zeigt('heizpilz')) {
     const hx = x0 - 4;   // links neben dem Stand - rechts ging er am Bildrand unter
-    r(c, hx, G - 36, 1, 26, '#6a6a72'); r(c, hx - 1, G - 11, 3, 1, '#6a6a72');
-    r(c, hx - 3, G - 38, 7, 2, '#8a8a92');
-    r(c, hx - 1, G - 36, 3, 2, '#ff7a30');
-    L.push({ rect: [hx - 1, G - 36, 3, 2], f: '#ff8a40', halo: 12, an: 0.8 + 0.2 * Math.sin(t * 5) });
+    const hv = S.variante('heizpilz');
+    const fl = Math.floor(t * 8) % 2;
+    if (hv === 1) {
+      // Feuerschale auf drei Beinen
+      r(c, hx - 3, G - 17, 7, 2, '#3a3a40'); r(c, hx - 2, G - 15, 5, 1, '#3a3a40');
+      r(c, hx - 2, G - 14, 1, 4, '#3a3a40'); r(c, hx + 2, G - 14, 1, 4, '#3a3a40'); r(c, hx, G - 14, 1, 4, '#3a3a40');
+      r(c, hx - 2, G - 20, 5, 3, '#ff7a20'); p(c, hx - 1 + fl, G - 22, '#ffd040'); p(c, hx + 1 - fl, G - 21, '#ffd040'); p(c, hx, G - 23 - fl, '#ff9a30');
+      L.push({ x: hx, y: G - 19, f: '#ff8a40', halo: 12, an: 0.8 + 0.2 * Math.sin(t * 7) });
+    } else if (hv === 2) {
+      // Feuertonne mit Marshmallow-Stöcken
+      r(c, hx - 3, G - 20, 7, 10, '#5a5a62'); r(c, hx - 3, G - 17, 7, 1, '#3a3a42'); r(c, hx - 3, G - 13, 7, 1, '#3a3a42');
+      r(c, hx - 2, G - 22, 5, 2, '#ff7a20'); p(c, hx - 1 + fl, G - 24, '#ffd040'); p(c, hx + 1 - fl, G - 23, '#ff9a30');
+      for (let i = 0; i < 5; i++) { p(c, hx + 3 + i, G - 22 - i, '#8a6a3a'); p(c, hx - 3 - i, G - 22 - i, '#8a6a3a'); }
+      r(c, hx + 2, G - 22, 2, 2, '#f4f0e8'); r(c, hx - 3, G - 22, 2, 2, '#f4f0e8');
+      L.push({ x: hx, y: G - 22, f: '#ff8a40', halo: 12, an: 0.8 + 0.2 * Math.sin(t * 7) });
+    } else {
+      r(c, hx, G - 36, 1, 26, '#6a6a72'); r(c, hx - 1, G - 11, 3, 1, '#6a6a72');
+      r(c, hx - 3, G - 38, 7, 2, '#8a8a92');
+      r(c, hx - 1, G - 36, 3, 2, '#ff7a30');
+      L.push({ rect: [hx - 1, G - 36, 3, 2], f: '#ff8a40', halo: 12, an: 0.8 + 0.2 * Math.sin(t * 5) });
+    }
   }
 }
 
@@ -1438,14 +1717,19 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Das Vogelhäuschen hängt im kahlen Baum - im Vorgarten stand es den
   // Zuckerstangen im Weg
   if (S.zeigt('kal_vogel')) vogelhaus(e, 132, GW - 42, true);
-  if (S.zeigt('schneemann')) schneefigur(e, 45, GW - 18, 4, 'mann');
+  if (S.zeigt('schneemann')) {
+    const v = S.variante('schneemann');
+    if (v === 1) schneeburg(e, 45, GW - 18);
+    else if (v === 2) liegestuhl(e, 45, GW - 18, t);
+    else schneefigur(e, 45, GW - 18, 4, 'mann');
+  }
   if (S.zeigt('schneefrau')) schneefigur(e, 55, GW - 18, 4, 'frau');
   if (S.zeigt('schneekind')) schneefigur(e, 64, GW - 18, 3, 'kind');
-  if (S.zeigt('rentier_licht')) lichterRentier(e, L, 99, GW - 18, t);
-  if (S.zeigt('schlitten')) schlitten(e, 111, GW - 18);
+  if (S.zeigt('rentier_licht')) [lichterRentier, lichterElch, lichterDino][S.variante('rentier_licht')](e, L, 99, GW - 18, t);
+  if (S.zeigt('schlitten')) [schlitten, bollerwagen, rasenmaeher][S.variante('schlitten')](e, 111, GW - 18, t, L);
   if (S.zeigt('zaun')) zaun(e, GW, w, L, t);
-  if (S.zeigt('lichterbogen')) lichterbogen(e, L, GW, t);
-  if (S.zeigt('laternen')) { laterne(e, L, 67, GW - 12, t); laterne(e, L, 93, GW - 12, t); }
+  if (S.zeigt('lichterbogen')) lichterbogen(e, L, GW, t, S.variante('lichterbogen'));
+  if (S.zeigt('laternen')) { const lf = [laterne, fackel, lavalampe][S.variante('laternen')]; lf(e, L, 67, GW - 12, t, 0); lf(e, L, 93, GW - 12, t, 1); }
   if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(e, 31, GW - 18);
   // Vom fahrenden Händler (09.10.)
   if (S.zeigt('h_kugel')) schneekugel(e, L, 7, GW - 13, t, w);

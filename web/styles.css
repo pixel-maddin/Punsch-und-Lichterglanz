@@ -255,6 +255,26 @@ html, body {
 .p-weiss { background: #fff2cc; box-shadow: 0 0 calc(var(--px) * 2) #ffd98a; }
 .p-bunt { background: conic-gradient(#ff4a4a, #ffd040, #5aff6a, #4a8aff, #ff6adf, #ff4a4a); }
 .pw.aktiv .punkt { border-color: rgba(0, 0, 0, 0.45); }
+/* Varianten (09.10.): Titel und Text oben, drei Knöpfe darunter über die ganze Breite */
+.zeile.haus.var { flex-wrap: wrap; }
+.zeile.haus.var .txt { flex: 1 1 60%; }
+.zeile.haus.var .txt span { display: block; }
+.varwahl { flex: 1 1 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 1.5); margin-top: calc(var(--px) * 1.5); }
+.vw {
+  appearance: none; cursor: pointer; text-align: center;
+  padding: calc(var(--px) * 1.6) calc(var(--px) * 1);
+  background: var(--papier2); color: #7a5a44;
+  border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2);
+  font: bold calc(var(--px) * 4.2) var(--schrift); line-height: 1.2;
+}
+.vw b { display: block; font-size: calc(var(--px) * 4.4); }
+.vw small { display: block; font-weight: normal; font-size: calc(var(--px) * 3.8); }
+.vw.aktiv { background: #fff3c4; color: var(--tinte); border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 0.6) var(--gold); }
+.vw.kauf { background: #e4f4d8; border-color: var(--gruen); color: var(--gruen2); }
+.vw.teuer { opacity: 0.6; }
+.vw.zu { background: #e8e0d4; color: #a89880; }
+.vw:active { transform: scale(0.95); }
+.var-erkl { margin: 0 0 calc(var(--px) * 2); }
 /* Anstrich: eine eigene Reihe unter dem Titel, darf umbrechen */
 .gruppe + .punktwahl { flex-wrap: wrap; margin: calc(var(--px) * 1) 0 calc(var(--px) * 2); }
 .tab {
