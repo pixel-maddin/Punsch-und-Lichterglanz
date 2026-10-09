@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009i';
-import * as Z from './zeit.js?v=20261009i';
-import * as S from './spiel.js?v=20261009i';
-import { FASSADEN } from './config.js?v=20261009i';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261009j';
+import * as Z from './zeit.js?v=20261009j';
+import * as S from './spiel.js?v=20261009j';
+import { FASSADEN } from './config.js?v=20261009j';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -469,7 +469,7 @@ function haus(c, G, w, t, L) {
     }
     if (w.schnee > 0) r(c, hx - 1, hy - 13, 10, 1, '#f6f9fc');
   }
-  if (S.zeigt('nussknacker')) [nussknacker, holzrentier, gartenzwerg][S.variante('nussknacker')](c, 94, G - 24, t);
+  if (S.zeigt('nussknacker')) [nussknacker, holzrentier, gartenzwerg][S.variante('nussknacker')](c, 96, G - 24, t);
 
   // Lichter am Dach
   if (S.zeigt('lichter_dach')) kette(c, L, 33, 127, wandO + 1, 16, 2, t, 0, S.stufe('lichter_dach'), 'dach');
@@ -1384,7 +1384,7 @@ function stand(c, G, w, t, L) {
     }
   }
   if (S.zeigt('heizpilz')) {
-    const hx = x0 - 4;   // links neben dem Stand - rechts ging er am Bildrand unter
+    const hx = x0 - 2;   // links neben dem Stand - rechts ging er am Bildrand unter
     const hv = S.variante('heizpilz');
     const fl = Math.floor(t * 8) % 2;
     if (hv === 1) {
@@ -1610,15 +1610,15 @@ function fahrbahn(c, GW, G, w) {
 // ---------------------------------------------------------------------------
 const ORTE = {
   kranz: [80, -38], tuerbogenkranz: [80, -55], lichter_dach: [80, -66], fensterstern: [80, -80], schwibbogen: [56, -44],
-  lichter_bunt: [80, -66], nussknacker: [94, -32], lichter_fenster: [104, -50], lichter_zaun: [60, -18],
+  lichter_bunt: [80, -66], nussknacker: [96, -32], lichter_fenster: [104, -50], lichter_zaun: [60, -18],
   eiszapfen: [80, -64], dach_nikolaus: [110, -90], lichtershow: [80, -50],
   tanne: [18, -40], tanne_lichter: [18, -40], tanne_kugeln: [18, -35], tanne_stern: [18, -56],
   baum_girlande: [133, -74], schneemann: [45, -26], schneefrau: [55, -26], schneekind: [64, -24],
-  rentier_licht: [105, -28], schlitten: [117, -24], lichterbogen: [80, -28],
+  rentier_licht: [107, -28], schlitten: [116, -24], lichterbogen: [80, -28],
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
-  musik: [134, -28], heizpilz: [124, -30], baenke: [152, -20], stand: [152, -50],
+  musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [31, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [104, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -1747,12 +1747,12 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   }
   if (S.zeigt('schneefrau')) schneefigur(e, 55, GW - 18, 4, 'frau');
   if (S.zeigt('schneekind')) schneefigur(e, 64, GW - 18, 3, 'kind');
-  if (S.zeigt('rentier_licht')) [lichterRentier, lichterElch, lichterDino][S.variante('rentier_licht')](e, L, 99, GW - 18, t);
-  if (S.zeigt('schlitten')) [schlitten, bollerwagen, rasenmaeher][S.variante('schlitten')](e, 111, GW - 18, t, L);
+  if (S.zeigt('rentier_licht')) [lichterRentier, lichterElch, lichterDino][S.variante('rentier_licht')](e, L, 101, GW - 18, t);
+  if (S.zeigt('schlitten')) [schlitten, bollerwagen, rasenmaeher][S.variante('schlitten')](e, 109, GW - 18, t, L);
   if (S.zeigt('zaun')) zaun(e, GW, w, L, t);
   if (S.zeigt('lichterbogen')) lichterbogen(e, L, GW, t, S.variante('lichterbogen'));
-  if (S.zeigt('laternen')) { const lf = [laterne, fackel, lavalampe][S.variante('laternen')]; lf(e, L, 67, GW - 12, t, 0); lf(e, L, 93, GW - 12, t, 1); }
-  if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(e, 31, GW - 18);
+  if (S.zeigt('laternen')) { const lf = [laterne, fackel, lavalampe][S.variante('laternen')]; lf(e, L, 69, GW - 12, t, 0); lf(e, L, 91, GW - 12, t, 1); }
+  if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(e, 28, GW - 18);
   // Vom fahrenden Händler (09.10.)
   if (S.zeigt('h_kugel')) schneekugel(e, L, 7, GW - 13, t, w);
 
@@ -1763,8 +1763,10 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Aus der Waldlichtung: Hasen vor dem Zaun, das Reh am Weg
   if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 2, t);
   if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 2, t);
-  // Vor dem Stand (sonst verdeckt er sie): Flamingo an der linken Ecke, Drehorgel rechts
-  if (S.zeigt('h_flamingo')) flamingo(e, L, 104, GW - 4, t);
+  // Vor dem Stand (sonst verdeckt er sie): Flamingo vor dem Schlitten, Drehorgel rechts.
+  // Garten rechts der Tür (09.10. neu verteilt, vorher standen Laterne und
+  // Nussknacker auf demselben Pixel, Flamingo mitten im Lichter-Rentier)
+  if (S.zeigt('h_flamingo')) flamingo(e, L, 119, GW - 4, t);
   if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t);

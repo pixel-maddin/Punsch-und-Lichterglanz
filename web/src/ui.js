@@ -5,20 +5,20 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261009i';
-import * as S from './spiel.js?v=20261009i';
-import * as Z from './zeit.js?v=20261009i';
-import * as T from './ton.js?v=20261009i';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009i';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009i';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009i';
-import * as A from './auftraege.js?v=20261009i';
-import * as E from './erfolge.js?v=20261009i';
-import * as ZL from './ziele.js?v=20261009i';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009i';
-import * as KA from './karte.js?v=20261009i';
-import * as LI from './lichtung.js?v=20261009i';
-import { alleSymbole } from './symbole.js?v=20261009i';
+import * as C from './config.js?v=20261009j';
+import * as S from './spiel.js?v=20261009j';
+import * as Z from './zeit.js?v=20261009j';
+import * as T from './ton.js?v=20261009j';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261009j';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261009j';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261009j';
+import * as A from './auftraege.js?v=20261009j';
+import * as E from './erfolge.js?v=20261009j';
+import * as ZL from './ziele.js?v=20261009j';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261009j';
+import * as KA from './karte.js?v=20261009j';
+import * as LI from './lichtung.js?v=20261009j';
+import { alleSymbole } from './symbole.js?v=20261009j';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -172,6 +172,9 @@ export function schliesseBlatt() {
   $('#blatt').classList.add('versteckt');
   $('#huelle').classList.remove('blatt-offen');
   zeilen = [];
+  // Zurück auf der Karte: Zähler und Führung auf den neuen Stand bringen
+  // (sonst pulsierte nach dem Kauf noch der Supermarkt)
+  if (KA.istOffen()) { const fu = fuehrung(); KA.aktualisiere(fu ? ORT_FUER_TAB[fu.tab] : null); }
 }
 
 // ---------------------------------------------------------------------------
@@ -261,9 +264,13 @@ export function starteLichtung() {
       <p class="summe">${punkte} Punkte</p>
       <p class="klein">Rekord: ${e.best}</p>
       ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}</p>` : '<p class="klein">Heute keine Sterne mehr - morgen wieder.</p>'}
+      ${e.sterne && e.rest ? `<p class="klein">Heute noch ${e.rest} ${e.rest === 1 ? 'Runde' : 'Runden'} mit Sternen.</p>` : ''}
       ${deko}`,
-    [{ text: 'Zur Karte', neben: true }, { text: 'Nochmal', aktion: () => { setTimeout(starteLichtung, 60); } }]);
-    for (const d of e.neu) { const o = ortVon(d.id); if (o) funkeln(o.x, o.y, `+${d.stimmung} ♥`); }
+    // Neue Deko: gleich ansehen - auf der Karte sähe man das Funkeln am Haus nicht
+    e.neu.length
+      ? [{ text: 'Nochmal', neben: true, aktion: () => { setTimeout(starteLichtung, 60); } },
+        { text: 'Ansehen', aktion: () => { schliesseKarte(); for (const d of e.neu) { const o = ortVon(d.id); if (o) funkeln(o.x, o.y, `+${d.stimmung} ♥`); } } }]
+      : [{ text: 'Zur Karte', neben: true }, { text: 'Nochmal', aktion: () => { setTimeout(starteLichtung, 60); } }]);
   });
 }
 

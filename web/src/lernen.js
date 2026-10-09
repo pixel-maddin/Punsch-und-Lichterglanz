@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261009i';
-import * as S from './spiel.js?v=20261009i';
-import * as A from './auftraege.js?v=20261009i';
-import * as E from './erfolge.js?v=20261009i';
-import * as Z from './ziele.js?v=20261009i';
+import * as C from './config.js?v=20261009j';
+import * as S from './spiel.js?v=20261009j';
+import * as A from './auftraege.js?v=20261009j';
+import * as E from './erfolge.js?v=20261009j';
+import * as Z from './ziele.js?v=20261009j';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -138,14 +138,14 @@ const HINWEISE = [
     ziel: ausgussZiel, fertig: () => S.lauf.hand.length < S.handMax() },
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
   { id: 'laden', sofort: true, wann: () => zielDran('getraenk', 'kinderpunsch'),
-    info: () => 'Neues Getränk! Du hast genug Sterne für Kinderpunsch. Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
+    info: () => (S.hat('kinderpunsch') ? 'Neues Getränk: Kinderpunsch! Gut gemacht.' : 'Neues Getränk! Du hast genug Sterne für Kinderpunsch.') + ' Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
     text: () => 'Tippe auf KARTE - im Supermarkt gibt es Kinderpunsch.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
   { id: 'laden_danach', ruhig: true, sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
     text: () => 'Prima! Kinderpunsch steht jetzt im Regal. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn aus dem neuen Topf. Weitere Getränke findest du später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
   { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
-    info: () => 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen. Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus der Straße werden!',
+    info: () => (S.hat('kranz') ? 'Deine erste Deko hängt!' : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen.') + ' Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus der Straße werden!',
     text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,

@@ -22,7 +22,7 @@ export function init() {
   ctx = new AC();
   fxGain = ctx.createGain(); fxGain.gain.value = fxAn ? 0.5 : 0; fxGain.connect(ctx.destination);
   musikGain = ctx.createGain(); musikGain.gain.value = 0; musikGain.connect(ctx.destination);
-  musikEl = new Audio('audio/musik.m4a?v=20261009i');
+  musikEl = new Audio('audio/musik.m4a?v=20261009j');
   musikEl.loop = true;
   musikEl.preload = 'auto';
   try { ctx.createMediaElementSource(musikEl).connect(musikGain); }

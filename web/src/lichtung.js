@@ -8,10 +8,10 @@
  * Eigenes Vollbild-Canvas (#minispiel), 180 Pixel breit wie die Welt, so hoch
  * wie das Spiel. Gezeichnet und getaktet wird nur, solange es offen ist.
  */
-import * as C from './config.js?v=20261009i';
-import * as Z from './zeit.js?v=20261009i';
-import * as T from './ton.js?v=20261009i';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=20261009i';
+import * as C from './config.js?v=20261009j';
+import * as Z from './zeit.js?v=20261009j';
+import * as T from './ton.js?v=20261009j';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=20261009j';
 
 const $ = (s) => document.querySelector(s);
 // Das Feld ist nur 90 Pixel breit (halbe Weltbreite) und wird doppelt so groß

@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261009i';
-import * as S from './spiel.js?v=20261009i';
-import * as Z from './zeit.js?v=20261009i';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009i';
+import * as C from './config.js?v=20261009j';
+import * as S from './spiel.js?v=20261009j';
+import * as Z from './zeit.js?v=20261009j';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009j';
 
 const $ = (s) => document.querySelector(s);
 
@@ -77,6 +77,9 @@ export function schliesse() {
   $('#landkarte').classList.add('versteckt');
   cancelAnimationFrame(rafId);
 }
+
+/** Schilder neu (Zähler „neu", pulsierender Ort) - nach einem Kauf. */
+export function aktualisiere(hervor) { hervorId = hervor; baueSchilder(hervor); }
 
 function baueSchilder(hervor) {
   const box = $('#kartenOrte');
