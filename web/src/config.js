@@ -441,6 +441,12 @@ export const MARKT_REZEPTE = [
   { id: 'r_honig',  name: 'Waldhonig',           fuer: ['jaegertee', 'crepe'],        plus: 0.2, minuten: 26, min: 3000 },
   { id: 'r_orange', name: 'Orangenschalen',      fuer: ['weisser', 'feuerzange'],     plus: 0.2, minuten: 28, min: 6000 },
 ];
+// Der Weihnachtsmann versteckt sich auf der Karte (10.10.): selten, an
+// wechselnden Stellen. Antippen schenkt Sterne.
+export const SANTA_CHANCE = 0.2;       // je Öffnen der Karte
+export const SANTA_PRO_TAG = 2;
+export const SANTA_MINUTEN = 5;        // so viele Minuten Einnahmen …
+export const SANTA_MIN = 300;          // … mindestens
 // Tagesansturm: einmal am Tag, nach so vielen Sekunden am Stand
 export const ANSTURM_NACH = 75;
 export const ANSTURM_DAUER = 60;

@@ -4,21 +4,22 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261009s';
-import * as S from './spiel.js?v=20261009s';
-import * as Z from './zeit.js?v=20261009s';
-import * as T from './ton.js?v=20261009s';
-import * as LI from './lichtung.js?v=20261009s';
-import * as CB from './christbaum.js?v=20261009s';
-import * as SB from './schlitten.js?v=20261009s';
-import * as UI from './ui.js?v=20261009s';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261009s';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261009s';
-import * as Lernen from './lernen.js?v=20261009s';
-import { zeigeAdvent } from './ereignis.js?v=20261009s';
-import * as A from './auftraege.js?v=20261009s';
-import * as E from './erfolge.js?v=20261009s';
-import * as ZL from './ziele.js?v=20261009s';
+import * as C from './config.js?v=20261010a';
+import * as S from './spiel.js?v=20261010a';
+import * as Z from './zeit.js?v=20261010a';
+import * as T from './ton.js?v=20261010a';
+import * as LI from './lichtung.js?v=20261010a';
+import * as CB from './christbaum.js?v=20261010a';
+import * as KA from './karte.js?v=20261010a';
+import * as SB from './schlitten.js?v=20261010a';
+import * as UI from './ui.js?v=20261010a';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261010a';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010a';
+import * as Lernen from './lernen.js?v=20261010a';
+import { zeigeAdvent } from './ereignis.js?v=20261010a';
+import * as A from './auftraege.js?v=20261010a';
+import * as E from './erfolge.js?v=20261010a';
+import * as ZL from './ziele.js?v=20261010a';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -369,7 +370,8 @@ function demo(art) {
     if (art === 'haendlerfenster') UI.zeigeHaendler();
   }
   if (art === 'meinhaus') UI.oeffneMeinHaus();
-  if (art === 'landkarte' || art === 'marktkarte') UI.oeffneKarte();
+  if (art === 'landkarte' || art === 'marktkarte' || art === 'santa') UI.oeffneKarte();
+  if (art === 'santa') KA.santaTest(0);
   if (art === 'markt') UI.zeigeMarkt();
   if (art === 'lichtung') { UI.starteLichtung(); LI.vorspulen(9); }
   if (art === 'baumspiel') { UI.starteBaumspiel(); CB.vorspulen(5.5); }

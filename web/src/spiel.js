@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261009s';
-import * as Z from './zeit.js?v=20261009s';
-import { neueFarben } from './pixel.js?v=20261009s';
+import * as C from './config.js?v=20261010a';
+import * as Z from './zeit.js?v=20261010a';
+import { neueFarben } from './pixel.js?v=20261010a';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1303,6 +1303,27 @@ export function miniErgebnis(name, punkte) {
 export const lichtungRest = () => miniRest('lichtung');
 export const lichtungRekord = () => miniRekord('lichtung');
 export const lichtungErgebnis = (punkte) => miniErgebnis('lichtung', punkte);
+
+/** Versteckt sich der Weihnachtsmann diesmal auf der Karte? (würfelt, zählt je Tag) */
+export function santaWuerfeln() {
+  if (st.lernen < 99 || !st.tipps || !st.tipps.karte_mehr) return false;
+  const s = st.santaKarte && st.santaKarte.tag === echtMitternacht() ? st.santaKarte : { tag: echtMitternacht(), n: 0 };
+  st.santaKarte = s;
+  if (s.n >= C.SANTA_PRO_TAG || Math.random() >= C.SANTA_CHANCE) return false;
+  s.n++;
+  speichere();
+  return true;
+}
+/** Den versteckten Weihnachtsmann gefunden: Sterne. */
+export function fangeSanta() {
+  const betrag = Math.round(Math.max(C.SANTA_MIN, einnahmenProMinute() * C.SANTA_MINUTEN) * dev.geld);
+  verdiene(betrag);
+  st.stats.santa = (st.stats.santa || 0) + 1;
+  hooks.ton('spezialKasse');
+  hooks.toast(`Ho ho ho! Gefunden! Der Weihnachtsmann schenkt dir ${formatGeld(betrag)}.`, 'spezial');
+  speichere();
+  return betrag;
+}
 
 /** Den Nikolaus angetippt: Sterne! Gibt den Betrag zurück (oder 0). */
 export function fangeSchlitten() {

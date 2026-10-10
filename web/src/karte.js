@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261009s';
-import * as S from './spiel.js?v=20261009s';
-import * as Z from './zeit.js?v=20261009s';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261009s';
+import * as C from './config.js?v=20261010a';
+import * as S from './spiel.js?v=20261010a';
+import * as Z from './zeit.js?v=20261010a';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010a';
 
 const $ = (s) => document.querySelector(s);
 
@@ -44,6 +44,15 @@ let wanderer = null;        // { von:{x,y}, nach:{x,y}, t, dauer, fertig }
 let pos = null;             // wo der Wichtel gerade steht
 let handler = null;         // was beim Ankommen passiert (ort) => void
 let rafId = 0, letzte = 0, hervorId = null;
+// Der versteckte Weihnachtsmann (10.10.): Stelle als Anteil, dazu was ihn verdeckt
+const VERSTECKE = [
+  { x: 62, y: 0.30, hinter: 'tanne' }, { x: 74, y: 0.62, hinter: 'busch' }, { x: 168, y: 0.46, hinter: 'tanne' },
+  { x: 12, y: 0.66, hinter: 'tanne' }, { x: 112, y: 0.12, hinter: 'busch' }, { x: 132, y: 0.62, hinter: 'busch' },
+  { x: 52, y: 0.88, hinter: 'tanne' }, { x: 16, y: 0.31, hinter: 'busch' },
+];
+let santa = null;   // { x, y, hinter, t, gefunden }
+/** Vorführszene: den Weihnachtsmann sicher an Versteck `i` setzen. */
+export function santaTest(i = 0) { santa = { ...VERSTECKE[i], t: 1, gefunden: -1 }; baueSchilder(hervorId); }
 
 export const istOffen = () => offen;
 const yPx = (o) => Math.round(o.y * H);
@@ -64,6 +73,8 @@ export function oeffne(hoehe, beiAnkunft, hervor) {
   c.imageSmoothingEnabled = false;
   const h = ort('haus');
   pos = { x: h.x, y: yPx(h) };
+  // Selten versteckt sich der Weihnachtsmann irgendwo
+  santa = S.santaWuerfeln() ? { ...VERSTECKE[Math.floor(Math.random() * VERSTECKE.length)], t: 0, gefunden: -1 } : null;
   baueSchilder(hervor);
   el.classList.remove('versteckt');
   offen = true;
@@ -86,6 +97,19 @@ export function aktualisiere(hervor) { hervorId = hervor; baueSchilder(hervor); 
 function baueSchilder(hervor) {
   const box = $('#kartenOrte');
   box.innerHTML = '';
+  if (santa && santa.gefunden < 0) {
+    const f = document.createElement('button');
+    f.className = 'ort-flaeche santa';
+    f.setAttribute('aria-label', 'Weihnachtsmann');
+    f.style.left = `calc(var(--px) * ${santa.x - 10})`;
+    f.style.top = `calc(var(--px) * ${Math.round(santa.y * H) - 16})`;
+    f.onclick = () => {
+      if (!santa || santa.gefunden >= 0) return;
+      santa.gefunden = 0; f.remove();
+      S.fangeSanta();
+    };
+    box.appendChild(f);
+  }
   const neu = S.st.neu || {};
   for (const o of ORTE) {
     const b = document.createElement('button');
@@ -345,16 +369,27 @@ function baueGrund(winter) {
     if (dicht(x, y) + (rausch(x / 11, y / 11) - 0.5) * 0.4 > 0.66) wald[y * C.B + x] = 1;
   }
   const istWald = (x, y) => x >= 0 && x < C.B && y >= 0 && y < H && wald[y * C.B + x];
-  const WG = winter ? ['#24473a', '#2d5546', '#b9cdd6', '#1c3a30'] : ['#28532f', '#326238', '#447d40', '#1e4226'];
+  const WG = winter ? ['#183428', '#2d5546', '#b9cdd6', '#1c3a30'] : ['#163620', '#326238', '#447d40', '#1e4226'];
   for (let y = 0; y < H; y++) for (let x = 0; x < C.B; x++) if (wald[y * C.B + x]) p(c, x, y, WG[0]);
-  // Kronen im versetzten Raster: Kuppe mit Licht oben links, Schatten unten rechts
-  for (let y0 = 3; y0 < H + 3; y0 += 5) for (let x0 = (Math.floor(y0 / 5) % 2) * 3 + 1; x0 < C.B; x0 += 6) {
-    const x = x0 + Math.round((hash2(x0, y0) - 0.5) * 2), y = y0 + (hash2(y0, x0) < 0.4 ? 1 : 0);
-    if (!istWald(x, y)) continue;
-    r(c, x - 2, y, 5, 2, WG[1]); r(c, x - 1, y - 1, 3, 1, WG[1]);
-    p(c, x - 1, y - 1, WG[2]);
-    if (!winter || hash2(x, y) < 0.5) p(c, x, y - 1, WG[2]);
-    p(c, x + 2, y + 1, WG[3]);
+  // Tannenwald (10.10., Nutzerwunsch: „mehr nach Tannenwald"): dicht an dicht
+  // stehende kleine Tannen im versetzten Raster, von hinten nach vorn - jede
+  // Reihe verdeckt den Fuß der Reihe dahinter, man sieht nur die Spitzen.
+  // Alle gleich groß und nur zwei Grüntöne, damit es ruhig bleibt.
+  const TW = winter ? ['#245040', '#36685a', '#18382c'] : ['#255a30', '#3a7a42', '#1a4424'];
+  // Form einer Waldtanne, 16 hoch: drei Stufen, jede unten breiter. Reihen im
+  // Abstand von 9 Pixeln - man sieht von jeder Tanne die oberen zwei Stufen,
+  // dazwischen den dunklen Waldboden
+  const FORM = [0, 1, 1, 2, 2, 3, 2, 3, 3, 4, 4, 3, 4, 5, 5, 5];
+  const STUFE_OBEN = new Set([0, 6, 11]);
+  for (let y0 = 6; y0 < H + 16; y0 += 9) for (let x0 = (Math.floor(y0 / 9) % 2) * 5; x0 < C.B + 6; x0 += 10) {
+    const x = x0 + Math.round((hash2(x0, y0) - 0.5) * 3), y = y0 + (hash2(y0, x0) < 0.3 ? 1 : 0);
+    if (!istWald(x, Math.min(H - 1, y))) continue;
+    FORM.forEach((w, i) => {
+      const yy = y - FORM.length + i;
+      r(c, x - w, yy, w, 1, TW[1]); r(c, x, yy, w + 1, 1, TW[0]); if (w) p(c, x + w, yy, TW[2]);
+      if (winter && STUFE_OBEN.has(i)) r(c, x - w, yy, w + 1, 1, '#eef3f8');
+    });
+    r(c, x, y, 1, 1, '#3a2a1a');
   }
   // Unterkante der Flächen etwas dunkler, damit sie auf dem Boden stehen
   for (let y = 1; y < H - 1; y++) for (let x = 0; x < C.B; x++) if (wald[y * C.B + x] && !istWald(x, y + 1)) p(c, x, y + 1, 'rgba(20,40,30,0.25)');
@@ -387,6 +422,11 @@ function baueGrund(winter) {
   const [a0, b0, k0] = wege()[0];
   const dorfWeg = bezier(a0, b0, k0, 10);
   for (let i = 2; i < 9; i += 2) laterne(dorfWeg[i].x + 4, dorfWeg[i].y);
+  // Dazu je eine Laterne auf halbem Weg zu den anderen Orten (10.10.: nachts gemütlicher)
+  for (const [a1, b1, k1] of wege().slice(1)) {
+    const m = bezier(a1, b1, k1, 2)[1];
+    if (frei(m.x + 4, m.y - 6)) laterne(Math.round(m.x + 4), Math.round(m.y));
+  }
 
   // 8. Die Orte
   for (const o of ORTE) ZEICHNER[o.id](o.x, yPx(o), P, winter);
@@ -843,6 +883,8 @@ function zeichne(t, dt) {
     for (let i = 0; i < 3; i++) { const xx = vx - i * 5, yy = vy + i * 2 + ((Math.floor(t * 5) + i) % 2); p(c, xx, yy, '#2a3a2a'); p(c, xx - 1, yy - 1, '#2a3a2a'); p(c, xx + 1, yy - 1, '#2a3a2a'); }
   }
 
+  if (santa) zeichneSanta(t, dt, winter);
+
   // Der Wichtel (läuft beim Wechsel, sonst wippt er)
   const wipp = wanderer ? (Math.floor(t * 10) % 2) : 0;
   r(c, Math.round(pos.x) - 19, Math.round(pos.y) + 6, 5, 1, 'rgba(0,0,0,0.25)');
@@ -857,17 +899,80 @@ function zeichne(t, dt) {
   }
 
   // Nachts dunkler, dann leuchten Fenster, Laternen und Lichterketten
-  nachtLichter(li, C.B, H, grundLichter, 0.55);
+  nachtLichter(li, C.B, H, grundLichter, 0.5);
+  // Gemütlich (10.10.): Jeder Ort hat nachts einen warmen Lichthof, der sanft
+  // atmet, und die Schilder glühen (CSS-Klasse .nacht) - man sieht sofort,
+  // wohin man tippen kann
+  const nacht = 1 - li.hell;
+  $('#landkarte').classList.toggle('nacht', nacht > 0.4);
+  if (nacht > 0.25) {
+    for (const o of ORTE) {
+      const ox = o.x, oy = yPx(o) - 8, atem = 0.85 + Math.sin(t * 1.2 + o.x) * 0.15;
+      const g = c.createRadialGradient(ox, oy, 2, ox, oy, 30);
+      g.addColorStop(0, `rgba(255,190,100,${(nacht * 0.45 * atem).toFixed(3)})`);
+      g.addColorStop(0.5, `rgba(255,170,80,${(nacht * 0.18 * atem).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(255,160,70,0)');
+      c.fillStyle = g;
+      c.fillRect(ox - 30, oy - 30, 60, 60);
+    }
+    // Fenster und Laternen noch einmal obendrauf, damit sie aus dem Hof strahlen
+    for (const q of grundLichter) p(c, q.x, q.y, q.f);
+  }
+}
+
+/**
+ * Der Weihnachtsmann lugt hinter einem Busch oder einer Tanne hervor: taucht
+ * auf, winkt, duckt sich wieder weg (alle 3,5 s). Gefunden hüpft er hoch,
+ * „Ho ho ho" steigt auf, dann ist er weg.
+ */
+function zeichneSanta(t, dt, winter) {
+  const s = santa, x = s.x, fuss = Math.round(s.y * H);
+  s.t += dt;
+  let hoch;   // wie weit er hinter der Deckung hervorschaut (0 = gar nicht, 9 = ganz)
+  if (s.gefunden >= 0) {
+    s.gefunden += dt;
+    hoch = 9 + Math.round(Math.sin(Math.min(1, s.gefunden / 0.6) * Math.PI) * 10);
+    if (s.gefunden > 1.4) { santa = null; return; }
+  } else {
+    const k = s.t % 3.5;
+    hoch = k < 0.4 ? Math.round(k / 0.4 * 9) : k < 2.4 ? 9 : k < 2.8 ? Math.round((2.8 - k) / 0.4 * 9) : 0;
+  }
+  if (hoch > 0) {
+    const y = fuss - 4 - hoch;   // Oberkante der Mütze
+    // Mütze mit Bommel, Gesicht, Bart, winkender Arm
+    r(c, x - 2, y, 4, 2, '#d83a3a'); r(c, x - 3, y + 2, 6, 1, '#d83a3a'); p(c, x + 2, y - 1, '#d83a3a'); p(c, x + 3, y - 1, '#ffffff');
+    r(c, x - 3, y + 3, 6, 1, '#ffffff');
+    r(c, x - 2, y + 4, 4, 2, '#f2c9a0'); p(c, x - 1, y + 4, '#2a1a1a'); p(c, x + 1, y + 4, '#2a1a1a');
+    r(c, x - 3, y + 6, 6, 3, '#ffffff'); p(c, x, y + 6, '#e8a0a0');
+    r(c, x - 3, y + 9, 6, 4, '#c82828');
+    if (s.gefunden >= 0 || (s.t % 3.5) > 0.6) {
+      const w = Math.floor(t * 6) % 2;
+      r(c, x + 3, y + 6 - w, 1, 3, '#c82828'); p(c, x + 4, y + 5 - w, '#ffffff');
+    }
+  }
+  // Die Deckung vor ihm (nach ihm gezeichnet, damit sie ihn verdeckt)
+  if (s.gefunden < 0) {
+    const P = palette(winter);
+    if (s.hinter === 'tanne') tanne(x, fuss + 1, 1, P);
+    else { busch(x, fuss, P, winter); busch(x - 3, fuss + 1, P, winter); busch(x + 3, fuss + 1, P, winter); r(c, x - 5, fuss - 3, 11, 3, P.busch); if (winter) r(c, x - 4, fuss - 4, 9, 1, '#ffffff'); }
+  } else if (s.gefunden < 1.2) {
+    const a = s.gefunden / 1.2;
+    c.globalAlpha = 1 - a;
+    pixText(c, 'HO HO HO!', x - 16, fuss - 30 - Math.round(a * 12), '#ffe060', '#6a1414');
+    c.globalAlpha = 1;
+  }
 }
 
 /** Nachtschleier über das Bild legen und die gesammelten Lichter darauf. */
 function nachtLichter(li, w, h, liste, staerke) {
   if (li.hell >= 0.9) return;
   const nacht = 1 - li.hell;
-  c.fillStyle = `rgba(14,20,62,${(nacht * staerke).toFixed(3)})`;
+  c.fillStyle = `rgba(24,20,66,${(nacht * staerke).toFixed(3)})`;   // etwas violetter: Winterabend statt Mitternacht
   c.fillRect(0, 0, w, h);
   if (nacht < 0.25) return;
-  c.fillStyle = `rgba(255,200,110,${(nacht * 0.16).toFixed(3)})`;
+  c.fillStyle = `rgba(255,200,110,${(nacht * 0.1).toFixed(3)})`;
+  for (const q of liste) c.fillRect(q.x - 2, q.y - 2, 5, 5);
+  c.fillStyle = `rgba(255,210,130,${(nacht * 0.22).toFixed(3)})`;
   for (const q of liste) c.fillRect(q.x - 1, q.y - 1, 3, 3);
   for (const q of liste) p(c, q.x, q.y, q.f);
 }

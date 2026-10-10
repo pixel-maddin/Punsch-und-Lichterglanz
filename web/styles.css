@@ -683,3 +683,8 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #miniHud .mh-label.wunsch small { display: block; font-size: calc(var(--px) * 4.8); }
 #miniHud .mh-label.schild { font-size: calc(var(--px) * 4.2); color: #fff; background: rgba(40, 20, 10, 0.62); padding: 0 calc(var(--px) * 1.6); border-radius: calc(var(--px) * 1.5); }
 #miniZu { top: calc(var(--px) * 2.5) !important; height: calc(var(--px) * 11) !important; width: calc(var(--px) * 12) !important; }
+
+/* Karte nachts (10.10.): Schilder glühen warm */
+#landkarte.nacht #kartenOrte .ort { box-shadow: 0 0 calc(var(--px) * 3) rgba(255, 190, 90, 0.75), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); border-color: #c8903a; }
+#landkarte.nacht #kartenOrte .ort.zuhause { box-shadow: 0 0 calc(var(--px) * 4.5) rgba(255, 210, 110, 0.95), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); }
+#kartenOrte .ort-flaeche.santa { width: calc(var(--px) * 20); height: calc(var(--px) * 22); z-index: 3; }
