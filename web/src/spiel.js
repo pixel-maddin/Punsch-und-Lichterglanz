@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610101357';
-import * as Z from './zeit.js?v=202610101357';
-import { neueFarben } from './pixel.js?v=202610101357';
+import * as C from './config.js?v=202610101407';
+import * as Z from './zeit.js?v=202610101407';
+import { neueFarben } from './pixel.js?v=202610101407';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -54,6 +54,7 @@ function neuerStand(name = '', andenken = 0) {
     modus: 'echt', versatzTage: 0,   // 'echt' = echter Kalender, 'eigen' = Start eine Woche vor dem 1.12.
     sterne10: true,                  // Beträge in ganzen Sternen (seit 29.09. alles ×10)
     startTag: 0,                     // erster Spieltag (setzeStartTag beim Losspielen); 0 = noch nicht, fehlt = alter Stand
+    miniStaffel: true,               // Minispiele kommen nach und nach (10.10.); fehlt = alter Stand, siehe laden()
   };
 }
 
@@ -66,6 +67,14 @@ function laden() {
       // Falle: neuerStand() trägt sterne10 schon - ein alter Stand OHNE die
       // Marke wäre sonst nie umgerechnet worden (so beim ersten Test passiert)
       if (!('sterne10' in alt)) stand.sterne10 = false;
+      // Minispiele kommen seit 10.10. nach und nach. Wer die Karte schon
+      // vorher kannte, hatte alle fünf - ihm verschwindet keins. Erkannt an der
+      // fehlenden Marke `miniStaffel` (nicht an `miniGemeldet`: das hat die
+      // erste Fassung schon in alte Stände geschrieben)
+      if (!('miniStaffel' in alt)) {
+        stand.miniStaffel = true;
+        if (alt.tipps && alt.tipps.karte_mehr) stand.miniAlle = true;
+      }
       return stand;
     }
   } catch (e) { /* kaputter Spielstand: neu anfangen */ }
@@ -1316,6 +1325,7 @@ export function miniErgebnis(name, punkte) {
  */
 export function miniOffen(name) {
   const ab = C.MINI_AB_TAG[name] || 0;
+  if (DEMO || st.miniAlle) return true;   // Vorführszenen; Spielstand von vor der Staffelung
   if (!ab || spieltag() >= ab || miniStand(name).best > 0) return true;
   const letzter = Math.max(...Object.values(C.MINI_AB_TAG));
   return Z.dezemberTag() >= C.MINI_ALLE_DEZ - (letzter - ab);
@@ -1329,12 +1339,12 @@ export function miniOffen(name) {
 export function pruefeMiniFrei() {
   const erstes = !st.miniGemeldet;
   st.miniGemeldet = st.miniGemeldet || {};
-  st.miniHinweis = st.miniHinweis || [];
+  st.miniHinweis = st.miniAlle ? [] : st.miniHinweis || [];
   const reihe = Object.keys(C.MINISPIELE).sort((a, b) => (C.MINI_AB_TAG[a] || 0) - (C.MINI_AB_TAG[b] || 0));
   for (const n of reihe) {
     if (st.miniGemeldet[n] || !miniOffen(n)) continue;
     st.miniGemeldet[n] = true;
-    if (!erstes && st.tipps && st.tipps.karte_mehr) st.miniHinweis.push(n);
+    if (!erstes && !st.miniAlle && st.tipps && st.tipps.karte_mehr) st.miniHinweis.push(n);   // alter Stand: kannte sie schon
   }
   return st.miniHinweis;
 }
