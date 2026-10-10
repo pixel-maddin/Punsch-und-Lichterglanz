@@ -4,22 +4,23 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261010b';
-import * as S from './spiel.js?v=20261010b';
-import * as Z from './zeit.js?v=20261010b';
-import * as T from './ton.js?v=20261010b';
-import * as LI from './lichtung.js?v=20261010b';
-import * as CB from './christbaum.js?v=20261010b';
-import * as KA from './karte.js?v=20261010b';
-import * as SB from './schlitten.js?v=20261010b';
-import * as UI from './ui.js?v=20261010b';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261010b';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010b';
-import * as Lernen from './lernen.js?v=20261010b';
-import { zeigeAdvent } from './ereignis.js?v=20261010b';
-import * as A from './auftraege.js?v=20261010b';
-import * as E from './erfolge.js?v=20261010b';
-import * as ZL from './ziele.js?v=20261010b';
+import * as C from './config.js?v=20261010c';
+import * as S from './spiel.js?v=20261010c';
+import * as Z from './zeit.js?v=20261010c';
+import * as T from './ton.js?v=20261010c';
+import * as LI from './lichtung.js?v=20261010c';
+import * as CB from './christbaum.js?v=20261010c';
+import * as KA from './karte.js?v=20261010c';
+import * as SB from './schlitten.js?v=20261010c';
+import * as EB from './schlittschuh.js?v=20261010c';
+import * as UI from './ui.js?v=20261010c';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261010c';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010c';
+import * as Lernen from './lernen.js?v=20261010c';
+import { zeigeAdvent } from './ereignis.js?v=20261010c';
+import * as A from './auftraege.js?v=20261010c';
+import * as E from './erfolge.js?v=20261010c';
+import * as ZL from './ziele.js?v=20261010c';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -335,7 +336,7 @@ function demo(art) {
     for (const d of C.AUFTRAG_DEKO) st.kalDeko[d.id] = true;
     // Händler-Szenen: drei Stücke schon gekauft, zwei noch im Angebot
     // Varianten-Szenen: alle Plätze auf Variante 2 bzw. 3
-    if (art === 'alles' || art === 'marktdeko') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO]) st.kalDeko[d.id] = true;
+    if (art === 'alles' || art === 'marktdeko') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO]) st.kalDeko[d.id] = true;
     // Markttag erzwingen: Anker so legen, dass heute der erste Markt ist
     if (art === 'markt' || art === 'marktkarte') st.markt = { anker: Math.round(new Date(Z.jetzt()).setHours(0, 0, 0, 0) / 86400000) - C.MARKT_ERST, seed: 1, besucht: 0, angesagt: 0 };
     if (art === 'meinhaus') { st.var = { 'tanne:1': true, 'kranz:1': true, 'kranz:2': true }; st.wahl = { kranz: 2 }; }
@@ -377,6 +378,7 @@ function demo(art) {
   if (art === 'lichtung') { UI.starteLichtung(); LI.vorspulen(9); }
   if (art === 'baumspiel') { UI.starteBaumspiel(); CB.vorspulen(5.5); }
   if (art === 'bergspiel') { UI.starteBergspiel(); SB.vorspulen(6); }
+  if (art === 'eisspiel') { UI.starteEisbahn(); EB.vorspulen(5); }
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');
   if (art === 'karte') UI.karte(0);

@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261010b';
-import * as Z from './zeit.js?v=20261010b';
-import * as S from './spiel.js?v=20261010b';
-import { FASSADEN } from './config.js?v=20261010b';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261010c';
+import * as Z from './zeit.js?v=20261010c';
+import * as S from './spiel.js?v=20261010c';
+import { FASSADEN } from './config.js?v=20261010c';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1276,6 +1276,39 @@ function rodelkinder(c, G, t, w) {
   if (w.schnee > 0) for (let i = 0; i < 4; i++) p(c, x + 24 + i * 3, fuss - 1, '#ffffff');
 }
 
+// ---------------------------------------------------------------------------
+// Von der Eisbahn (10.10.)
+// ---------------------------------------------------------------------------
+/** Ein Paar Schlittschuhe am Nagel neben der Haustür. */
+function wandSchlittschuhe(c, x, y) {
+  p(c, x + 2, y - 1, '#3a3a40');
+  r(c, x + 1, y, 1, 2, '#c83a32'); r(c, x + 3, y, 1, 2, '#c83a32');                       // Schnürsenkel
+  for (const bx of [x - 1, x + 3]) { r(c, bx, y + 2, 3, 4, '#f4f0e8'); r(c, bx, y + 6, 4, 1, '#3a2a1a'); r(c, bx - 1, y + 7, 5, 1, '#c8ccd8'); }
+}
+/** Kleiner Pinguin mit Mütze auf dem Gehweg, wackelt ab und zu. */
+function pinguin(c, x, fuss, t) {
+  const w = Math.floor(t * 1.5) % 4 === 0 ? (Math.floor(t * 8) % 2 ? 1 : -1) : 0;
+  r(c, x - 2 + w, fuss - 8, 5, 8, '#2a2a34'); r(c, x - 1 + w, fuss - 6, 3, 5, '#f4f4f4');
+  p(c, x - 1 + w, fuss - 7, '#ffffff'); p(c, x + 1 + w, fuss - 7, '#ffffff'); p(c, x - 1 + w, fuss - 7, '#1a1a1a');
+  r(c, x + w, fuss - 6, 1, 1, '#e8a020');
+  r(c, x - 2 + w, fuss - 10, 5, 2, '#d83a3a'); p(c, x + 2 + w, fuss - 11, '#ffffff');
+  r(c, x - 2, fuss, 2, 1, '#e8a020'); r(c, x + 1, fuss, 2, 1, '#e8a020');
+}
+/** Nachts zieht etwa alle sechs Sekunden eine Sternschnuppe über den Himmel. */
+function sternschnuppen(c, G, t) {
+  const takt = 6.5, k = (t % takt) / 0.9;
+  if (k > 1) return;
+  const n = Math.floor(t / takt);
+  const x0 = 30 + Z.hash(n * 7) * 120, y0 = 20 + Z.hash(n * 11) * (G - 140);
+  const x = x0 - k * 40, y = y0 + k * 18;
+  for (let i = 0; i < 9; i++) {
+    const a = 1 - i / 9;
+    c.fillStyle = `rgba(255,${230 - i * 6},${170 + i * 6},${(a * (1 - k * 0.6)).toFixed(2)})`;
+    c.fillRect(Math.round(x + i * 2), Math.round(y - i * 0.9), 1, 1);
+  }
+  p(c, x, y, '#ffffff');
+}
+
 /** Lichter-Flamingo: pink, S-Hals, ein Bein, Weihnachtsmütze, Lichterkette. */
 function flamingo(c, L, x, fuss, t) {
   const pk = '#f06aa8', dk = '#c8487e';
@@ -1783,7 +1816,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -1874,6 +1907,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   const L = [];
   himmel(c, G, w, t);
   if (S.zeigt('h_polar') && w.dunkel > 0.25) polarlicht(c, G, w, t);
+  if (S.zeigt('e_schnuppen') && w.dunkel > 0.3) sternschnuppen(c, G, t);
 
   const e = ebeneFuer(c.canvas.width, c.canvas.height);
   // Haus und Straße stehen ein Stück über der Tresenkante; darunter
@@ -1889,6 +1923,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('m_fenster')) fensterbilder(e, GW);
   if (S.zeigt('c_dachbaum')) dachbaum(e, L, 92, GW - 94, t, w);
   if (S.zeigt('s_wok')) wandWok(e, 118, GW - 52);
+  if (S.zeigt('e_schlittschuhe')) wandSchlittschuhe(e, 70, GW - 58);
   // Verdeckung: Alle Lichter werden erst am Ende über das Bild gemalt. Was
   // danach DAVOR gezeichnet wird (Tanne vor der Kirche, Leute vor dem Zaun),
   // würde sonst von ihnen durchleuchtet. Deshalb ein Schnappschuss nach jeder
@@ -1934,6 +1969,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Aus der Waldlichtung: Hasen vor dem Zaun, das Reh am Weg
   if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 2, t);
   if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 2, t);
+  if (S.zeigt('e_pinguin')) pinguin(e, 97, GW - 1, t);
   // Vor dem Stand (sonst verdeckt er sie): Flamingo vor dem Schlitten, Drehorgel rechts.
   // Garten rechts der Tür (09.10. neu verteilt, vorher standen Laterne und
   // Nussknacker auf demselben Pixel, Flamingo mitten im Lichter-Rentier)

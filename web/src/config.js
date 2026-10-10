@@ -535,6 +535,16 @@ export const BERG_DEKO = [
   { id: 's_wok',    name: 'Wok an der Hauswand',  ab: 1550, stimmung: 5, text: 'Dein Rodel-Wok hängt als Trophäe neben dem Fenster.' },
   { id: 's_hang',   name: 'Rodelhang am Horizont', ab: 1900, stimmung: 7, text: 'Hinter dem Stand ein Hügel, auf dem winzige Rodler hinunterflitzen.' },
 ];
+// Minispiel Eisbahn (10.10.): Schlittschuh-Läufer, springen und Tricks.
+export const EIS_DAUER = 45;
+export const EIS_STERN = 15;
+export const EIS_PUNKTE_JE_MIN = 600;
+export const EIS_MAX_MIN = 3;
+export const EIS_DEKO = [
+  { id: 'e_schlittschuhe', name: 'Schlittschuhe am Nagel', ab: 700,  stimmung: 5, text: 'Ein Paar Schlittschuhe hängt neben der Haustür.' },
+  { id: 'e_pinguin',       name: 'Pinguin',                ab: 1400, stimmung: 5, text: 'Ein kleiner Pinguin mit Mütze steht auf dem Gehweg.' },
+  { id: 'e_schnuppen',     name: 'Sternschnuppen',         ab: 2400, stimmung: 7, text: 'Nachts ziehen Sternschnuppen über dein Haus.' },
+];
 // Drei Schwierigkeiten für alle Minispiele (10.10.): `tempo` macht Tiere,
 // Wok und Kundenungeduld schneller, `punkte` zahlt dafür mehr. Ein Rekord
 // für alle Stufen - wer schwer spielt, kommt schneller an die Deko.
@@ -548,5 +558,6 @@ export const MINISPIELE = {
   lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN },
   baum:     { deko: BAUM_DEKO,     jeMin: BAUM_PUNKTE_JE_MIN,     maxMin: BAUM_MAX_MIN },
   berg:     { deko: BERG_DEKO,     jeMin: BERG_PUNKTE_JE_MIN,     maxMin: BERG_MAX_MIN },
+  eis:      { deko: EIS_DEKO,      jeMin: EIS_PUNKTE_JE_MIN,      maxMin: EIS_MAX_MIN },
 };
 

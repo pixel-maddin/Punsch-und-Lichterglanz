@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261010b';
-import * as Z from './zeit.js?v=20261010b';
-import { neueFarben } from './pixel.js?v=20261010b';
+import * as C from './config.js?v=20261010c';
+import * as Z from './zeit.js?v=20261010c';
+import { neueFarben } from './pixel.js?v=20261010c';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -201,7 +201,7 @@ export function stimmung() {
   for (const d of C.AUFTRAG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.HAENDLER_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.MARKT_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
-  for (const d of [...C.LICHTUNG_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO]) if (st.kalDeko[d.id]) s += d.stimmung;
+  for (const d of [...C.LICHTUNG_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO]) if (st.kalDeko[d.id]) s += d.stimmung;
   s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
   return s;
 }

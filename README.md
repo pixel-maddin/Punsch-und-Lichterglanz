@@ -124,6 +124,18 @@ In allen Minispielen pausiert die Musik und läuft danach an derselben Stelle
 weiter. Jedes Minispiel hat drei Schwierigkeiten: Leicht (Punkte ×0,7),
 Normal und Schwer (Punkte ×1,4) - der Rekord gilt für alle.
 
+**Eisbahn (Minispiel, am Weiher):** Schlittschuhlaufen! Tippen lässt den
+Wichtel springen - über Schneemänner, Steine, Holzstapel und Eislöcher. In der
+Luft wischen macht Tricks: nach oben ein Salto, nach links eine Pirouette,
+nach rechts eine Grätsche. Zwei Tricks in einem Sprung sind eine Kombo mit
+doppelten Punkten - aber wer landet, bevor der Trick fertig ist, fällt hin.
+Ab 700, 1.400 und 2.400 Punkten Rekord: Schlittschuhe neben der Haustür, ein
+Pinguin auf dem Gehweg und Sternschnuppen am Nachthimmel.
+
+**Weihnachtsmann:** Ab und zu versteckt er sich irgendwo auf der Karte und
+lugt hinter einem Busch oder einer Tanne hervor. Wer ihn findet und antippt,
+bekommt Sterne geschenkt.
+
 **Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt - er wird
 ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.
 Am Markttag kommen 20 % mehr Gäste an deinen Stand, und auf dem Markt gibt es

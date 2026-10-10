@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261010b';
-import * as S from './spiel.js?v=20261010b';
-import * as Z from './zeit.js?v=20261010b';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010b';
+import * as C from './config.js?v=20261010c';
+import * as S from './spiel.js?v=20261010c';
+import * as Z from './zeit.js?v=20261010c';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010c';
 
 const $ = (s) => document.querySelector(s);
 
@@ -34,6 +34,7 @@ export const ORTE = [
   { id: 'bau',       name: 'Baumarkt',        x: 148, y: 0.41, tab: 'baumarkt' },
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },
   { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.75, spiel: 'lichtung' },
+  { id: 'eis',       name: 'Eisbahn',         x: 64,  y: 0.645, spiel: 'eis' },
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
 ];
@@ -802,7 +803,15 @@ function berg(x, y, P) {
   r(c, x - 9, y, 5, 2, '#e8c870'); r(c, x - 3, y + 1, 5, 2, '#d8b860');
 }
 
-const ZEICHNER = { dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
+/** Eisbahn am Weiher: Bank mit Schlittschuhen und ein Schild am Ufer. */
+function eisbahn(x, y, P, winter) {
+  r(c, x + 2, y - 4, 9, 2, '#8a5a32'); r(c, x + 3, y - 2, 1, 2, '#5a3a22'); r(c, x + 9, y - 2, 1, 2, '#5a3a22');
+  r(c, x + 4, y - 6, 2, 2, '#c83a32'); r(c, x + 7, y - 6, 2, 2, '#3a6ab8'); p(c, x + 4, y - 4, '#c8ccd8'); p(c, x + 8, y - 4, '#c8ccd8');
+  if (winter) r(c, x + 2, y - 5, 9, 1, '#ffffff');
+  r(c, x + 13, y - 10, 1, 10, '#5a3a22'); r(c, x + 11, y - 13, 6, 4, '#3a6ab8'); p(c, x + 13, y - 12, '#ffffff'); p(c, x + 14, y - 11, '#ffffff');
+  licht(x + 14, y - 12, '#a8d8ff');
+}
+const ZEICHNER = { eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
 
 // ---------------------------------------------------------------------------
 // Je Bild: was sich bewegt

@@ -5,22 +5,23 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261010b';
-import * as S from './spiel.js?v=20261010b';
-import * as Z from './zeit.js?v=20261010b';
-import * as T from './ton.js?v=20261010b';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010b';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010b';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010b';
-import * as A from './auftraege.js?v=20261010b';
-import * as E from './erfolge.js?v=20261010b';
-import * as ZL from './ziele.js?v=20261010b';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010b';
-import * as KA from './karte.js?v=20261010b';
-import * as LI from './lichtung.js?v=20261010b';
-import * as CB from './christbaum.js?v=20261010b';
-import * as SB from './schlitten.js?v=20261010b';
-import { alleSymbole } from './symbole.js?v=20261010b';
+import * as C from './config.js?v=20261010c';
+import * as S from './spiel.js?v=20261010c';
+import * as Z from './zeit.js?v=20261010c';
+import * as T from './ton.js?v=20261010c';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010c';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010c';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010c';
+import * as A from './auftraege.js?v=20261010c';
+import * as E from './erfolge.js?v=20261010c';
+import * as ZL from './ziele.js?v=20261010c';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010c';
+import * as KA from './karte.js?v=20261010c';
+import * as LI from './lichtung.js?v=20261010c';
+import * as CB from './christbaum.js?v=20261010c';
+import * as SB from './schlitten.js?v=20261010c';
+import * as EB from './schlittschuh.js?v=20261010c';
+import { alleSymbole } from './symbole.js?v=20261010c';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -32,7 +33,7 @@ let ladenTab = 'super';
 let ladenModus = 'kaufen';  // 'kaufen' | 'haus' - Einkaufen oder Mein Haus (einstellen)
 let zeilen = [];           // Ladenzeilen zum Nachführen
 
-export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() || SB.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
+export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() || SB.istOffen() || EB.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
 
 // ---------------------------------------------------------------------------
 // Kopfzeile
@@ -249,6 +250,7 @@ function amOrt(o) {
   if (o.spiel === 'lichtung') { zeigeLichtung(); return; }
   if (o.spiel === 'baum') { zeigeBaumspiel(); return; }
   if (o.spiel === 'berg') { zeigeBergspiel(); return; }
+  if (o.spiel === 'eis') { zeigeEisbahn(); return; }
   if (o.markt) { zeigeMarkt(); return; }
   if (o.bald) fenster(o.name, `<p>${o.bald}</p><p class="klein">Kommt bald!</p>`);
 }
@@ -325,6 +327,26 @@ function zeigeBaumspiel() {
 }
 export function starteBaumspiel(stufeNr = 1) {
   CB.starte(spielHoehe(), (punkte, n) => { CB.schliesse(); miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft`, 'Gut verkauft!', () => starteBaumspiel(stufeNr)); }, stufeNr);
+}
+
+// ---------------------------------------------------------------------------
+// Minispiel Eisbahn (schlittschuh.js)
+// ---------------------------------------------------------------------------
+function zeigeEisbahn() {
+  const rest = S.miniRest('eis'), best = S.miniRekord('eis');
+  const naechste = C.EIS_DEKO.find((d) => !S.st.kalDeko[d.id]);
+  miniFenster('Eisbahn', `
+    <p>Schlittschuhlaufen auf dem Weiher! <b>Tippen = springen</b> - über Schneemänner, Steine, Holzstapel und Eislöcher.</p>
+    <p><b>In der Luft wischen</b> macht Tricks: nach oben ein Salto, nach links eine Pirouette, nach rechts eine Grätsche. Mehrere Tricks in einem Sprung sind eine Kombo - aber erst fertig drehen, dann landen!</p>
+    <p class="klein">${C.EIS_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
+    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  [{ text: 'Später', neben: true }], 'eis', starteEisbahn);
+}
+export function starteEisbahn(stufeNr = 1) {
+  EB.starte(spielHoehe(), (punkte, kombi) => {
+    EB.schliesse();
+    miniErgebnis('eis', punkte, kombi > 1 ? `Beste Kombo: ${kombi} Tricks in einem Sprung` : 'Schön gefahren!', 'Gut gelaufen!', () => starteEisbahn(stufeNr));
+  }, stufeNr);
 }
 
 // ---------------------------------------------------------------------------
@@ -450,7 +472,7 @@ function zeigeVariante(platz, text = '') {
 export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
-  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO].filter((d) => S.st.kalDeko[d.id]);
+  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
 /** Woher ein geschenktes Stück kommt - bei Minispielen mit der Punktschwelle. */
 function herkunftVon(d) {
@@ -461,6 +483,7 @@ function herkunftVon(d) {
   if (d.id.startsWith('l_')) return 'Aus der Waldlichtung' + ab;
   if (d.id.startsWith('c_')) return 'Aus dem Christbaumverkauf' + ab;
   if (d.id.startsWith('s_')) return 'Vom Schlittenberg' + ab;
+  if (d.id.startsWith('e_')) return 'Von der Eisbahn' + ab;
   return 'Für einen schweren Auftrag';
 }
 function baueHaus(behalteScroll) {
@@ -797,6 +820,10 @@ function zeichneIcon(cv, a) {
     case 'c_kugeln': for (const [x, y, f] of [[4, 6, '#d83a3a'], [10, 4, '#ffd040'], [9, 11, '#3a8ad8']]) { r(c, x - 2, y - 1, 5, 3, f); r(c, x - 1, y - 2, 3, 5, f); p(c, x - 1, y - 1, '#ffffff'); r(c, x, y - 4, 1, 2, '#3a3a40'); } return;
     case 'c_dachbaum': for (let i = 0; i < 4; i++) r(c, 2 + i * 3, 14 - i * 3, 12 - i * 6 > 0 ? 12 - i * 6 : 2, 1, '#5a5a62'); for (let i = 0; i < 9; i++) { const w = Math.round((i + 1) / 9 * 4); r(c, 8 - w, 2 + i, w * 2 + 1, 1, i % 3 ? '#2a6a34' : '#1c5228'); } p(c, 8, 1, '#ffe060'); p(c, 6, 6, '#ff5a5a'); p(c, 10, 8, '#5ad0ff'); return;
     case 'c_wald': for (const x of [3, 8, 13]) { for (let i = 0; i < 10; i++) { const w = Math.round((i + 1) / 10 * 3); r(c, x - w, 4 + i, w * 2 + 1, 1, '#2a5a3a'); } p(c, x, 7, '#ffe060'); p(c, x - 1, 10, '#ff5a5a'); p(c, x + 1, 12, '#5ad0ff'); } return;
+    // Von der Eisbahn
+    case 'e_schlittschuhe': for (const x of [3, 9]) { r(c, x, 3, 4, 7, '#f4f0e8'); r(c, x, 10, 5, 2, '#3a2a1a'); r(c, x - 1, 12, 7, 1, '#c8ccd8'); } r(c, 7, 0, 2, 3, '#c83a32'); return;
+    case 'e_pinguin': r(c, 5, 4, 6, 10, '#2a2a34'); r(c, 6, 6, 4, 7, '#f4f4f4'); p(c, 6, 5, '#ffffff'); p(c, 9, 5, '#ffffff'); r(c, 7, 7, 2, 1, '#e8a020'); r(c, 5, 2, 6, 2, '#d83a3a'); p(c, 10, 1, '#ffffff'); r(c, 5, 14, 2, 1, '#e8a020'); r(c, 9, 14, 2, 1, '#e8a020'); return;
+    case 'e_schnuppen': r(c, 0, 0, 16, 16, '#1a1e48'); for (let i = 0; i < 7; i++) p(c, 3 + i, 10 - i, i > 4 ? '#ffe060' : '#8a90c8'); r(c, 10, 2, 2, 2, '#ffffff'); p(c, 2, 3, '#ffffff'); p(c, 13, 12, '#ffffff'); return;
     // Vom Schlittenberg
     case 's_kinder': r(c, 1, 11, 9, 2, '#a8703a'); r(c, 1, 13, 10, 1, '#6a4428'); for (const [x, f] of [[6, '#c83a32'], [12, '#3a6ab8']]) { r(c, x, 5, 3, 5, f); r(c, x, 2, 3, 3, '#f2c9a0'); r(c, x, 1, 3, 1, '#e8c030'); r(c, x, 10, 1, 4, '#2a2a30'); r(c, x + 2, 10, 1, 4, '#2a2a30'); } return;
     case 's_wok': for (let y = -3; y <= 3; y++) { const w = Math.round(6 * Math.sqrt(1 - y * y / 9)); r(c, 8 - w, 9 + y, w * 2, 1, y < 0 ? '#4a4a54' : '#2a2a30'); } r(c, 1, 6, 4, 1, '#6a4428'); r(c, 6, 3, 4, 2, '#e8c030'); return;
@@ -1534,7 +1561,7 @@ export function verdrahte() {
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
   $('#kartenZu').onclick = () => { T.spiele('klick'); schliesseKarte(); };
-  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); CB.schliesse(); SB.schliesse(); };
+  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); CB.schliesse(); SB.schliesse(); EB.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
   $('#btnKarte').onclick = () => karte();
