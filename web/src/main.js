@@ -4,23 +4,23 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261010c';
-import * as S from './spiel.js?v=20261010c';
-import * as Z from './zeit.js?v=20261010c';
-import * as T from './ton.js?v=20261010c';
-import * as LI from './lichtung.js?v=20261010c';
-import * as CB from './christbaum.js?v=20261010c';
-import * as KA from './karte.js?v=20261010c';
-import * as SB from './schlitten.js?v=20261010c';
-import * as EB from './schlittschuh.js?v=20261010c';
-import * as UI from './ui.js?v=20261010c';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261010c';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010c';
-import * as Lernen from './lernen.js?v=20261010c';
-import { zeigeAdvent } from './ereignis.js?v=20261010c';
-import * as A from './auftraege.js?v=20261010c';
-import * as E from './erfolge.js?v=20261010c';
-import * as ZL from './ziele.js?v=20261010c';
+import * as C from './config.js?v=20261010d';
+import * as S from './spiel.js?v=20261010d';
+import * as Z from './zeit.js?v=20261010d';
+import * as T from './ton.js?v=20261010d';
+import * as LI from './lichtung.js?v=20261010d';
+import * as CB from './christbaum.js?v=20261010d';
+import * as KA from './karte.js?v=20261010d';
+import * as SB from './schlitten.js?v=20261010d';
+import * as EB from './schlittschuh.js?v=20261010d';
+import * as UI from './ui.js?v=20261010d';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261010d';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010d';
+import * as Lernen from './lernen.js?v=20261010d';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick } from './ereignis.js?v=20261010d';
+import * as A from './auftraege.js?v=20261010d';
+import * as E from './erfolge.js?v=20261010d';
+import * as ZL from './ziele.js?v=20261010d';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -178,6 +178,8 @@ function ankommen(erstesMal) {
   }
   // Adventssonntage: jedes Ereignis als eigenes Fenster, in der richtigen Reihenfolge
   for (const n of S.neueAdventsereignisse()) meldungen.push(['advent', n]);
+  // Heiligabend: das Finale, einmal je Saison (nach den Adventen)
+  if (S.heiligabendFaellig()) meldungen.push(['heiligabend']);
   const tueren = S.offeneTueren();
   if (tueren > 0 && !erstesMal) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
   S.speichere();
@@ -185,6 +187,7 @@ function ankommen(erstesMal) {
     const m = meldungen.shift();
     if (!m) return;
     if (m[0] === 'advent') zeigeAdvent(m[1], zeige);
+    else if (m[0] === 'heiligabend') zeigeHeiligabend(zeige);
     else if (m[0] === 'kiste') UI.zeigeKiste(m[1], () => setTimeout(zeige, 60));
     else UI.fenster(m[0], m[1], [{ text: 'Weiter', aktion: () => { setTimeout(zeige, 60); } }]);
   };
@@ -256,6 +259,8 @@ let letzterTag = Z.tagesSchluessel();
 setInterval(() => {
   const k = Z.tagesSchluessel();
   if (k !== letzterTag) { letzterTag = k; ankommen(false); }
+  // Heiligabend bricht an, während man spielt: warten, bis nichts offen ist
+  else if (S.heiligabendFaellig() && !UI.fensterOffen() && !UI.panelOffen()) zeigeHeiligabend();
   const neu = S.pruefeFreischaltungen();
   if (neu.length) {
     T.spiele('spezial');
@@ -382,6 +387,17 @@ function demo(art) {
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');
   if (art === 'karte') UI.karte(0);
+  // Barbarazweig und Heiligabend (10.10.): Zweig am 4.12. geschnitten, täglich gegossen
+  if (['zweig', 'barbara', 'heiligabend', 'rueckblick', 'festkarte'].includes(art)) {
+    const heute = Math.min(24, Z.dezemberTag());
+    st.barbara = { geschnitten: 4, gegossen: [] };
+    for (let d = 4; d <= heute; d++) st.barbara.gegossen.push(d);
+    if (art !== 'heiligabend') st.heiligabend = Z.saison();   // sonst kommt das Finale dazwischen
+    if (art === 'barbara') { st.barbara.gegossen.pop(); UI.oeffneKalender(); }
+    if (art === 'heiligabend') zeigeHeiligabend();
+    if (art === 'rueckblick') { st.stats.bedient = 4821; st.stats.santa = 3; zeigeRueckblick(); }
+    if (art === 'festkarte') { st.stats.bedient = 4821; UI.karte('heilig', false, 'Frohe Weihnachten!'); }
+  }
 }
 
 // ---------------------------------------------------------------------------

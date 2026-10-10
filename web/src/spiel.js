@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261010c';
-import * as Z from './zeit.js?v=20261010c';
-import { neueFarben } from './pixel.js?v=20261010c';
+import * as C from './config.js?v=20261010d';
+import * as Z from './zeit.js?v=20261010d';
+import { neueFarben } from './pixel.js?v=20261010d';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1462,4 +1462,69 @@ export function offeneTueren() {
   let n = vorfreudeBereit() ? 1 : 0;
   for (let i = 1; i <= 24; i++) if (tuerBereit(i)) n++;
   return n;
+}
+
+// ---------------------------------------------------------------------------
+// Barbarazweig: am 4.12. geschnitten, jeden Tag gegossen, blüht an Heiligabend
+// ---------------------------------------------------------------------------
+// Es gibt nichts zu verlieren: Ungegossen blüht er trotzdem, nur mit weniger
+// Blüten. `st.barbara` = { geschnitten: Dezembertag, gegossen: [Dezembertage] }.
+const barbaraZeit = () => Z.phase() === 'advent' || Z.phase() === 'weihnacht';
+export function barbaraSchneidbar() {
+  const dt = Z.dezemberTag();
+  return Z.phase() === 'advent' && !st.barbara && dt >= C.BARBARA_TAG && dt < 24 && st.lernen >= 99;
+}
+export function barbaraSchneiden() {
+  if (!barbaraSchneidbar()) return false;
+  st.barbara = { geschnitten: Z.dezemberTag(), gegossen: [] };
+  speichere();
+  return true;
+}
+export function barbaraGiessbar() {
+  const b = st.barbara;
+  return !!b && Z.phase() === 'advent' && !b.gegossen.includes(Z.dezemberTag());
+}
+export function barbaraGiessen() {
+  if (!barbaraGiessbar()) return false;
+  st.barbara.gegossen.push(Z.dezemberTag());
+  speichere();
+  return true;
+}
+const barbaraBlueten = (b) => Math.min(C.BARBARA_BLUETEN_MAX, C.BARBARA_BLUETEN_MIN + b.gegossen.length);
+/** Wie weit ist er? null = kein Zweig (oder Saison vorbei). */
+export function barbaraZustand() {
+  const b = st.barbara;
+  if (!b || !barbaraZeit()) return null;
+  const dt = Math.min(24, Z.dezemberTag());
+  // Wachstum 0..1 vom Schneiden bis Heiligabend
+  const wachs = Math.max(0, Math.min(1, (dt - b.geschnitten) / Math.max(1, 24 - b.geschnitten)));
+  return { wachs, bluehen: dt >= 24, blueten: barbaraBlueten(b), gegossen: b.gegossen.length, heuteGegossen: b.gegossen.includes(Z.dezemberTag()) };
+}
+
+// ---------------------------------------------------------------------------
+// Heiligabend: einmal je Saison das Finale mit Rückblick
+// ---------------------------------------------------------------------------
+/** Ab 24.12. abends bis zum 6. Januar - wer später kommt, bekommt es nachgereicht. */
+export function heiligabendJetzt() {
+  const d = Z.jetzt(), dt = Z.dezemberTag(d);
+  return (dt === 24 && d.getHours() >= C.HEILIGABEND_STUNDE) || (dt > 24 && dt <= 37);
+}
+/** Der Abend selbst: Glocken, Sänger vor dem Haus, Kirche hell. */
+export function heiligabendAbend(d = Z.jetzt()) {
+  return Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE - 1;
+}
+export function heiligabendFaellig() {
+  return st.lernen >= 99 && heiligabendJetzt() && st.heiligabend !== Z.saison();
+}
+export function heiligabendGesehen() { st.heiligabend = Z.saison(); speichere(); }
+/** Zahlen für den Rückblick. */
+export function rueckblick() {
+  const deko = C.ARTIKEL.filter((a) => istDeko(a) && hat(a.id)).length + Object.keys(st.kalDeko || {}).length;
+  return {
+    bedient: st.stats.bedient, verdient: st.gesamt, stimmung: stimmung(), deko,
+    tueren: Object.keys(st.kalender || {}).length, santa: st.stats.santa || 0,
+    getraenke: C.PRODUKTE.filter((p) => hat(p.id)).length,
+    rekorde: Object.keys(C.MINISPIELE).filter((n) => miniRekord(n) > 0).length,
+    blueten: st.barbara ? barbaraBlueten(st.barbara) : 0,
+  };
 }

@@ -4,12 +4,12 @@
  *
  * Die Bilder sind 90 x 50 Pixel, im Fenster dreifach vergrößert.
  */
-import * as C from './config.js?v=20261010c';
-import * as S from './spiel.js?v=20261010c';
-import * as T from './ton.js?v=20261010c';
-import * as Z from './zeit.js?v=20261010c';
-import { r, p, figurKlein, neueFarben } from './pixel.js?v=20261010c';
-import { fenster } from './ui.js?v=20261010c';
+import * as C from './config.js?v=20261010d';
+import * as S from './spiel.js?v=20261010d';
+import * as T from './ton.js?v=20261010d';
+import * as Z from './zeit.js?v=20261010d';
+import { r, p, figurKlein, neueFarben } from './pixel.js?v=20261010d';
+import { fenster, karte } from './ui.js?v=20261010d';
 
 const BW = 90, BH = 50;
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
@@ -91,7 +91,71 @@ const BILDER = {
     r(c, 44, 37, 3, 2, '#5a3a22');
     mensch(c, 36, 47, 'erwachsen'); mensch(c, 54, 47, 'oma'); mensch(c, 60, 47, 'kind');
   },
+  // Heiligabend: Kirche mit offener Tür, das Dorf kommt mit Kerzen
+  heiligabend(c) {
+    himmel(c, '#0e1438', '#1c2656'); sterne(c, 30, 22);
+    // großer Stern über der Kirche
+    r(c, 70, 4, 3, 3, '#fff0a0'); p(c, 71, 2, '#fff0a0'); p(c, 71, 8, '#fff0a0'); p(c, 68, 5, '#fff0a0'); p(c, 74, 5, '#fff0a0');
+    for (let i = 1; i < 6; i++) p(c, 71 - i, 5 + i, i % 2 ? '#e8c030' : '#fff0a0');
+    haeuschen(c, 2, 38, 14, 10, '#b8554a', '#efe3cc', true, 'bunt');
+    haeuschen(c, 19, 38, 12, 8, '#5a6e9a', '#e6d2b8', true, 'bunt');
+    // Kirche rechts mit Turm
+    r(c, 50, 22, 26, 16, '#f0e8dc'); for (let i = 0; i < 9; i++) r(c, 49 + i, 22 - i, 28 - i * 2, 1, i < 2 ? '#f4f8fc' : '#8a4a3a');
+    r(c, 77, 10, 9, 28, '#f4ecde'); r(c, 78, 6, 7, 4, '#3f6a5a'); r(c, 79, 4, 5, 2, '#3f6a5a'); p(c, 81, 2, '#e8c030');
+    r(c, 79, 13, 5, 5, '#ffd070'); r(c, 80, 14, 3, 3, '#c89a2a');   // Glocke
+    for (const x of [54, 60, 66]) r(c, x, 26, 3, 6, '#ffd070');
+    r(c, 61, 31, 5, 7, '#ffe090'); r(c, 60, 30, 7, 1, '#8a6a4a');   // offene Tür
+    r(c, 0, 38, BW, 12, '#dfe6ee');
+    for (let x = 58; x < 70; x++) p(c, x, 38 + ((x * 7) % 3), '#fff4c8');   // Lichtschein im Schnee
+    // Leute mit Kerzen
+    const leute = [[6, 'erwachsen'], [12, 'kind'], [18, 'oma'], [25, 'erwachsen'], [31, 'kind'], [37, 'opa'], [44, 'erwachsen']];
+    for (const [x, typ] of leute) { mensch(c, x, 47, typ); const ky = typ === 'kind' ? 40 : 38; p(c, x + 2, ky, '#f4f0e0'); p(c, x + 2, ky - 1, '#ffd060'); }
+    for (let i = 0; i < 30; i++) p(c, (i * 41 + i * i * 3) % BW, (i * 29 + i * i) % 36, '#ffffff');
+  },
 };
+
+/**
+ * Heiligabend (10.10.): das Finale. Erst das Bild mit Glocken, dann der
+ * Rückblick auf den Advent, von dort die Festtagskarte.
+ */
+export function zeigeHeiligabend(danach) {
+  S.heiligabendGesehen();   // gleich merken - sonst käme es nach jedem Wegklicken wieder
+  T.spiele('spezial');
+  T.spiele('glocken'); setTimeout(() => T.spiele('glocken'), 1300); setTimeout(() => T.spiele('glocken'), 2600);
+  const bz = S.barbaraZustand();
+  const zweig = bz ? `<p>Und am Fenster ist dein Barbarazweig aufgeblüht - mit ${bz.blueten} Blüten.</p>` : '';
+  const spaet = Z.dezemberTag() > 24;
+  const box = fenster(spaet ? 'Frohe Weihnachten!' : 'Heiligabend', `
+    <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
+    <p class="zeile-gross">${spaet ? 'Weihnachten ist da!' : 'Die Glocken läuten!'}</p>
+    <p>Das ganze Dorf ist auf den Beinen. Mit Kerzen in der Hand ziehen alle zur Kirche - und bleiben bei deinem Haus stehen, um zu singen.</p>
+    ${zweig}`,
+  [{ text: 'Mein Advent', aktion: () => { setTimeout(() => zeigeRueckblick(danach), 60); } }]);
+  BILDER.heiligabend(box.querySelector('canvas').getContext('2d'));
+}
+
+/** Der Rückblick: was in diesem Advent passiert ist. Auch aus dem Menü erreichbar. */
+export function zeigeRueckblick(danach) {
+  const r0 = S.rueckblick(), z = (n) => Math.round(n).toLocaleString('de-DE');
+  const zeilen = [
+    ['Gäste bewirtet', z(r0.bedient)],
+    ['Sterne verdient', S.formatGeld(r0.verdient)],
+    ['Deko am Haus', z(r0.deko)],
+    ['Stimmung', `♥ ${z(r0.stimmung)}`],
+    ['Getränke im Angebot', z(r0.getraenke)],
+    ['Türchen geöffnet', `${z(r0.tueren)} von 24`],
+  ];
+  if (r0.rekorde) zeilen.push(['Minispiele gespielt', z(r0.rekorde)]);
+  if (r0.santa) zeilen.push(['Weihnachtsmann entdeckt', `${z(r0.santa)}-mal`]);
+  if (r0.blueten) zeilen.push(['Blüten am Barbarazweig', z(r0.blueten)]);
+  fenster(`Der Advent von ${S.st.name || 'deinem Haus'}`, `
+    <div class="statistik rueckblick">${zeilen.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join('')}</div>
+    <p class="klein">Danke fürs Mitfeiern - frohe Weihnachten!</p>`,
+  [
+    { text: 'Festtagskarte', aktion: () => { setTimeout(() => karte('heilig', false, 'Frohe Weihnachten!'), 60); } },
+    { text: 'Schließen', neben: true, aktion: () => { if (danach) setTimeout(danach, 60); } },
+  ]);
+}
 
 export function zeigeAdvent(n, danach) {
   const e = C.ADVENT_EREIGNIS[n];

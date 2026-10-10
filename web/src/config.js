@@ -455,6 +455,16 @@ export const ANSTURM_MULT = 3;    // Trinkgeld-Faktor (die Stoßzeit hat 2)
 // Reihenfolge der Türchen im Raster (wie ein echter Kalender, durcheinander)
 export const KALENDER_REIHE = [7, 15, 2, 20, 11, 24, 4, 18, 9, 13, 1, 22, 16, 6, 19, 3, 12, 23, 8, 14, 21, 5, 17, 10];
 
+// Barbarazweig (10.10.): ab dem 4.12. im Kalender zu schneiden, blüht am 24.12.
+// Blüten = MIN + gegossene Tage (bis MAX). Am 4.12. geschnitten und täglich
+// gegossen sind es 21 Gießtage - also die volle Pracht.
+export const BARBARA_TAG = 4;
+export const BARBARA_BLUETEN_MIN = 4;
+export const BARBARA_BLUETEN_MAX = 24;
+// Heiligabend (10.10.): ab dieser Stunde läuft das Finale; eine Stunde vorher
+// stehen schon die Sänger vor dem Haus
+export const HEILIGABEND_STUNDE = 17;
+
 // ---------------------------------------------------------------------------
 // Varianten je Deko-Platz (09.10., Nutzerwunsch: „jedes Haus sieht gleich aus,
 // wenn man alles hat"). Variante 1 ist das Teil selbst; 2 und 3 kauft man im

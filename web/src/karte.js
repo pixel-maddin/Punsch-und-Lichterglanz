@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261010c';
-import * as S from './spiel.js?v=20261010c';
-import * as Z from './zeit.js?v=20261010c';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010c';
+import * as C from './config.js?v=20261010d';
+import * as S from './spiel.js?v=20261010d';
+import * as Z from './zeit.js?v=20261010d';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010d';
 
 const $ = (s) => document.querySelector(s);
 

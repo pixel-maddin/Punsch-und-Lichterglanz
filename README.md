@@ -175,7 +175,20 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
 - **Jeder Adventssonntag** bringt ein Ereignis mit Bild (Weihnachtsmarkt,
   Neuschnee, Chorkonzert, das Dorf leuchtet), schaltet Neues frei und
   lockt besonders viele Gäste an.
-- Heiligabend schneit es ab dem Nachmittag, Silvester gibt es Feuerwerk.
+- **Barbarazweig:** Ab dem 4. Dezember (Barbaratag) lässt sich im Kalender
+  ein Kirschzweig schneiden. Er steht dann in einer Vase im rechten
+  Fenster. Jeden Tag kann man ihn einmal gießen, die Knospen schwellen,
+  und an Heiligabend blüht er auf: je gegossenem Tag eine Blüte mehr
+  (4 bis 24). Wer nicht gießt oder später schneidet, verliert nichts,
+  er blüht trotzdem, nur kleiner.
+- **Heiligabend** schneit es ab dem Nachmittag. Ab 17 Uhr läuten die
+  Glocken: Die Kirche ist hell, ihre Tür steht offen, und vor dem Haus
+  singen Leute mit Kerzen. Einmal kommt das **Finale** mit Bild und
+  danach **Mein Advent**, ein Rückblick mit Gästen, Sternen, Deko,
+  Stimmung, Türchen, Weihnachtsmann-Funden und Blüten. Wer erst nach
+  Heiligabend spielt (bis zum 6. Januar), bekommt es nachgereicht. Den
+  Rückblick gibt es danach auch im Menü.
+- Silvester gibt es Feuerwerk.
 - Ab September beginnt eine neue Adventszeit - das Haus fängt wieder kahl
   an, ein Andenken bleibt.
 
@@ -183,7 +196,10 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
 
 **Foto** in der Leiste macht aus dem aktuellen Bild eine Weihnachtskarte
 mit einem von fünf Rahmen, einem Weihnachtsgruß, Hausname und Datum, die über das Teilen-Menü des Handys verschickt
-werden kann.
+werden kann. Ab Heiligabend gibt es zusätzlich die **Festtagskarte**
+(dunkelblau, goldener Rahmen, großer Stern). Auf ihr steht eine Zeile
+„Unser Advent“ mit Gästen, Deko und Stimmung. Sie ist dann die erste
+Karte, die man sieht.
 
 ## Technik
 

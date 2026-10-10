@@ -416,6 +416,10 @@ html, body {
 .vorfreude small { font-weight: normal; font-size: calc(var(--px) * 4.6); }
 .vorfreude.bereit { background: #fff3c4; border: calc(var(--px) * 0.8) solid var(--gold); animation: pulsieren 1.2s infinite; }
 .vorfreude.bereit .vf-ico { filter: none; opacity: 1; }
+/* Barbarazweig im Kalender: kleines Fensterbild, pixelgenau vergrößert */
+.vorfreude .vf-ico.zweig { width: calc(var(--px) * 14); height: calc(var(--px) * 18); image-rendering: pixelated; filter: none; opacity: 1;
+  background: #dfe8f0; border: calc(var(--px) * 0.8) solid #b89a70; border-radius: calc(var(--px) * 1); }
+.statistik.rueckblick { margin-bottom: calc(var(--px) * 4); }
 p.hinweis, p.klein { font-size: calc(var(--px) * 5); line-height: 1.35; }
 p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 

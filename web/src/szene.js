@@ -13,10 +13,10 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261010c';
-import * as Z from './zeit.js?v=20261010c';
-import * as S from './spiel.js?v=20261010c';
-import { FASSADEN } from './config.js?v=20261010c';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261010d';
+import * as Z from './zeit.js?v=20261010d';
+import * as S from './spiel.js?v=20261010d';
+import { FASSADEN } from './config.js?v=20261010d';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -221,17 +221,25 @@ function hintergrund(c, G, w, L, t = 0) {
   const kx = 3, kf = hz + 6;
   r(c, kx + 5, kf - 10, 13, 10, '#f0e8dc'); for (let i = 0; i < 7; i++) r(c, kx + 4 + i, kf - 10 - i, 15 - i * 2, 1, '#8a4a3a');
   // Schiff: zwei Rundbogenfenster, abends warm erleuchtet
+  // Heiligabend (10.10.): Die Kirche ist hell, im Turm schwingt die Glocke
+  const hab = S.heiligabendAbend(w.d);
   for (const fx of [kx + 9, kx + 14]) {
     r(c, fx, kf - 7, 2, 4, '#5a6070'); p(c, fx, kf - 8, '#e0d6c6'); p(c, fx + 1, kf - 8, '#e0d6c6');
-    L.push({ rect: [fx, kf - 7, 2, 4], f: '#ffcf70', halo: 3, an: 0.7 });
+    L.push({ rect: [fx, kf - 7, 2, 4], f: '#ffcf70', halo: hab ? 5 : 3, an: hab ? 1 : 0.7 });
   }
   r(c, kx, kf - 26, 7, 26, '#f4ecde'); r(c, kx, kf - 26, 1, 26, '#dcd0c0');
   r(c, kx + 1, kf - 30, 5, 4, '#3f6a5a'); r(c, kx + 2, kf - 32, 3, 2, '#3f6a5a'); p(c, kx + 3, kf - 34, '#3f6a5a'); p(c, kx + 3, kf - 35, '#e8c030');
   if (schnee) r(c, kx + 1, kf - 31, 5, 1, '#f4f8fb');
   r(c, kx + 2, kf - 22, 3, 3, '#e8e0c8'); p(c, kx + 3, kf - 21, '#3a3a3a');   // Uhr
   r(c, kx + 2, kf - 15, 3, 4, '#5a6070');
-  L.push({ rect: [kx + 2, kf - 15, 3, 4], f: '#ffd88a', halo: 4, an: 0.75 });
+  L.push({ rect: [kx + 2, kf - 15, 3, 4], f: '#ffd88a', halo: hab ? 6 : 4, an: hab ? 1 : 0.75 });
+  if (hab) {
+    const sw = Math.round(Math.sin(t * 3));   // Glocke schwingt
+    r(c, kx + 2 + (sw > 0 ? 1 : 0), kf - 14, 2, 2, '#c89a2a'); p(c, kx + 3 + sw, kf - 12, '#8a6a1a');
+  }
   r(c, kx + 2, kf - 5, 3, 5, '#6a4a32'); p(c, kx + 2, kf - 5, '#f4ecde'); p(c, kx + 4, kf - 5, '#f4ecde');   // Tür
+  // An Heiligabend steht die Tür offen, warmes Licht fällt heraus
+  if (hab) { r(c, kx + 3, kf - 4, 1, 4, '#ffd070'); L.push({ rect: [kx + 3, kf - 4, 1, 4], f: '#ffd070', halo: 5, an: 0.9 }); }
 }
 
 // ---------------------------------------------------------------------------
@@ -612,6 +620,7 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
       }
     }
   }
+  if (wo === 'rechts') { const bz = S.barbaraZustand(); if (bz) barbaraZweig(c, x + 1, y + fh, bz, L, t); }
   if (wo === 'rechts' && S.zeigt('kal_kranz')) {
     const bx = x + fw / 2, by = y + fh - 1;
     r(c, bx - 5, by - 1, 10, 2, '#2f6a2a'); p(c, bx - 3, by - 1, '#d83a3a'); p(c, bx + 2, by, '#d83a3a');
@@ -620,6 +629,41 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
       const cx = bx - 4 + i * 3;
       r(c, cx, by - 4, 1, 3, '#c82828');
       if (i < kerzen) L.push({ x: cx, y: by - 5, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 10 + i) });
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Barbarazweig (10.10.): Kirschzweig in einer Vase, links im rechten Fenster
+// ---------------------------------------------------------------------------
+// Koordinaten relativ zur Vase (Fuß links unten). Die Knospen schwellen mit
+// dem Advent, an Heiligabend gehen die Blüten auf. Im 16-px-Fenster sind
+// es höchstens sechs Büschel - einzelne Pixel lasen sich als Schachbrett.
+const ZWEIG_AESTE = [
+  [[1, -4], [1, -14]], [[1, -8], [4, -11], [5, -13]], [[1, -11], [3, -13]], [[1, -6], [3, -7]],
+];
+// Büschel in der Reihenfolge, in der sie dazukommen (Spitzen zuerst)
+const ZWEIG_BLUETEN = [[1, -15], [5, -14], [3, -14], [4, -11], [3, -8], [2, -10]];
+export function barbaraZweig(c, x0, fuss, z, L, t) {
+  // Vase: Glas mit Wasser
+  r(c, x0, fuss - 4, 3, 4, '#a8c8d8'); r(c, x0, fuss - 2, 3, 2, '#6a98b8'); p(c, x0, fuss - 4, '#e0f0f8');
+  const ast = '#4a2e22';
+  for (const zweig of ZWEIG_AESTE) for (let i = 1; i < zweig.length; i++) {
+    const [ax, ay] = zweig[i - 1], [bx, by] = zweig[i];
+    const n = Math.max(Math.abs(bx - ax), Math.abs(by - ay));
+    for (let k = 0; k <= n; k++) p(c, x0 + Math.round(ax + (bx - ax) * k / n), fuss + Math.round(ay + (by - ay) * k / n), ast);
+  }
+  // Wie viele Büschel: 24 Blüten = alle sechs, wenige Blüten = eins
+  const n = z.blueten > 0 ? Math.max(1, Math.round(z.blueten / 4)) : 0;
+  for (let i = 0; i < Math.min(n, ZWEIG_BLUETEN.length); i++) {
+    const [bx, by] = ZWEIG_BLUETEN[i], px = x0 + bx, py = fuss + by;
+    if (z.bluehen) {
+      // Kirschblüte: weiß mit rosa Herz
+      p(c, px, py, '#ffffff'); p(c, px + 1, py, '#fff0f4'); p(c, px, py + 1, '#fff0f4'); p(c, px + 1, py + 1, '#f4a0b8');
+    } else {
+      // Knospen: erst klein und grün, kurz vor Heiligabend mit weißer Spitze
+      p(c, px, py + 1, z.wachs > 0.4 ? '#8ab060' : '#6a8a4a');
+      if (z.wachs > 0.7) p(c, px, py, '#f0e4e8');
     }
   }
 }
@@ -1610,8 +1654,38 @@ function stand(c, G, w, t, L) {
 // ---------------------------------------------------------------------------
 // Straße: Gäste
 // ---------------------------------------------------------------------------
-function strasse(c, G, t) {
+// Heiligabend (10.10.): Das Dorf steht mit Kerzen vor dem Haus und singt.
+// Feste Farben (neueFarben würfelt - die Leute flackerten sonst je Bild).
+const SAENGER = [
+  { x: 7, typ: 'erwachsen', farben: { mantel: '#3a5a8a', hut: '#c83030', schal: '#f4f0e8', haut: '#f2c9a0', haar: '#5a3a22' } },
+  { x: 13, typ: 'kind', farben: { mantel: '#c84a3a', hut: '#2f7a3a', schal: '#f4f0e8', haut: '#e8b890', haar: '#3a2a1a' } },
+  { x: 19, typ: 'oma', farben: { mantel: '#6a4a8a', hut: '#c83030', schal: '#e8c030', haut: '#f2c9a0', haar: '#d8d8e0' } },
+  { x: 26, typ: 'opa', farben: { mantel: '#4a5a3a', hut: '#6a4a36', schal: '#c83030', haut: '#e8b890', haar: '#d8d8e0' } },
+  { x: 32, typ: 'kind', farben: { mantel: '#2f6a8a', hut: '#e8c030', schal: '#c83030', haut: '#c89070', haar: '#2a1a1a' } },
+  { x: 38, typ: 'erwachsen', farben: { mantel: '#8a3a4a', hut: '#f4f0e8', schal: '#2f7a3a', haut: '#c89070', haar: '#2a1a1a' } },
+];
+function saenger(c, L, fuss, t) {
+  for (const g of SAENGER) {
+    figurKlein(c, { ...g, phase: 0, laeuft: false }, g.x, fuss, t);
+    // Kerze vor der Brust
+    const kl = g.typ === 'kind', kx = g.x + 2, ky = fuss - (kl ? 7 : 9);
+    r(c, kx, ky, 1, 2, '#f4f0e0');
+    const fl = Math.sin(t * 9 + g.x) > 0.6 ? 1 : 0;
+    p(c, kx, ky - 1 - fl, '#ffd060');
+    if (L) L.push({ x: kx, y: ky - 1, f: '#ffc860', halo: 4, an: 0.8 + 0.15 * Math.sin(t * 7 + g.x) });
+  }
+  // Noten steigen auf
+  for (let i = 0; i < 3; i++) {
+    const ph = (t * 0.35 + i / 3) % 1, nx = Math.round(10 + i * 11 + Math.sin(ph * 6 + i) * 3), ny = Math.round(fuss - 20 - ph * 22);
+    if (ph > 0.85) continue;
+    const f = '#fff4d0';
+    p(c, nx, ny + 2, f); p(c, nx + 1, ny + 2, f); r(c, nx + 1, ny - 1, 1, 3, f); p(c, nx + 2, ny - 1, f);
+  }
+}
+
+function strasse(c, G, t, L = null) {
   const fuss = G - 3;
+  if (S.heiligabendAbend()) saenger(c, L, fuss - 1, t);
   if (S.lauf.haendler) haendlerKarren(c, S.lauf.haendler, fuss, t);
   const liste = [...S.lauf.gaeste].sort((a, b) => a.x - b.x);
   for (const g of liste) {
@@ -1976,7 +2050,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('h_flamingo')) flamingo(e, L, 119, GW - 4, t);
   if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
-  if (!opts.ohneGaeste) strasse(e, GW, t);
+  if (!opts.ohneGaeste) strasse(e, GW, t, L);
   if (S.zeigt('m_kutsche') && !opts.karte) kutsche(e, L, G, t, w);
   if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(e, GW, t, w);
   if (neuPruefen) { verdecke(L, stufen, pixel(e, G)); if (!opts.karte) deckungMerken(L, t); }

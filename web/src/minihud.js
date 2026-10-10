@@ -11,7 +11,7 @@
  * Fläche umgerechnet, damit sie bei jeder Bildschirmgröße sitzen.
  * Solange kein Minispiel offen ist (z. B. im Messweg), tut alles nichts.
  */
-import { zeichneSymbol } from './symbole.js?v=20261010c';
+import { zeichneSymbol } from './symbole.js?v=20261010d';
 
 const $ = (s) => document.querySelector(s);
 let aktiv = false, W = 180, H = 320;

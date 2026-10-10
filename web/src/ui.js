@@ -5,23 +5,25 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261010c';
-import * as S from './spiel.js?v=20261010c';
-import * as Z from './zeit.js?v=20261010c';
-import * as T from './ton.js?v=20261010c';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010c';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010c';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010c';
-import * as A from './auftraege.js?v=20261010c';
-import * as E from './erfolge.js?v=20261010c';
-import * as ZL from './ziele.js?v=20261010c';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010c';
-import * as KA from './karte.js?v=20261010c';
-import * as LI from './lichtung.js?v=20261010c';
-import * as CB from './christbaum.js?v=20261010c';
-import * as SB from './schlitten.js?v=20261010c';
-import * as EB from './schlittschuh.js?v=20261010c';
-import { alleSymbole } from './symbole.js?v=20261010c';
+import * as C from './config.js?v=20261010d';
+import * as S from './spiel.js?v=20261010d';
+import * as Z from './zeit.js?v=20261010d';
+import * as T from './ton.js?v=20261010d';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010d';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010d';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010d';
+import * as A from './auftraege.js?v=20261010d';
+import * as E from './erfolge.js?v=20261010d';
+import * as ZL from './ziele.js?v=20261010d';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010d';
+import * as KA from './karte.js?v=20261010d';
+import { zeigeRueckblick } from './ereignis.js?v=20261010d';
+import { barbaraZweig } from './szene.js?v=20261010d';
+import * as LI from './lichtung.js?v=20261010d';
+import * as CB from './christbaum.js?v=20261010d';
+import * as SB from './schlitten.js?v=20261010d';
+import * as EB from './schlittschuh.js?v=20261010d';
+import { alleSymbole } from './symbole.js?v=20261010d';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1117,6 +1119,25 @@ export function oeffneKalender() {
     };
     liste.appendChild(vf);
   }
+  // Barbarazweig (10.10.): ab dem 4.12. schneiden, dann täglich gießen
+  const bz = S.barbaraZustand();
+  if (bz || S.barbaraSchneidbar()) {
+    const bb = el('button', 'vorfreude barbara' + (S.barbaraSchneidbar() || S.barbaraGiessbar() ? ' bereit' : ''));
+    const zeile = !bz ? 'Heute ist Barbaratag! Schneide einen Kirschzweig - an Heiligabend blüht er.'
+      : bz.bluehen ? `Er blüht! ${bz.blueten} Blüten - für jeden Tag, an dem du gegossen hast, eine mehr.`
+      : bz.heuteGegossen ? `Heute gegossen. Noch ${24 - Z.dezemberTag()} ${24 - Z.dezemberTag() === 1 ? 'Tag' : 'Tage'} bis Heiligabend.`
+      : 'Antippen zum Gießen - jeder Tag bringt eine Blüte mehr.';
+    if (!bz && Z.dezemberTag() > C.BARBARA_TAG) bb.dataset.spaet = '1';
+    bb.innerHTML = `<canvas class="vf-ico zweig" width="14" height="18"></canvas><b>Barbarazweig</b><small>${zeile}${!bz && Z.dezemberTag() > C.BARBARA_TAG ? ' Auch später geschnitten blüht er noch.' : ''}</small>`;
+    barbaraZweig(bb.querySelector('canvas').getContext('2d'), 4, 18, bz || { blueten: 0, wachs: 0, bluehen: false }, null, 0);
+    bb.onclick = () => {
+      if (S.barbaraSchneiden()) { T.spiele('greifen'); toast('Der Zweig steht jetzt am Fenster.', 'gut'); oeffneKalender(); return; }
+      if (S.barbaraGiessen()) { T.spiele('giessen'); toast('Gegossen - eine Knospe mehr.', 'gut'); oeffneKalender(); return; }
+      T.spiele('klick');
+      if (bz && !bz.bluehen) toast('Heute hat er schon Wasser. Morgen wieder!', 'hinweis');
+    };
+    liste.appendChild(bb);
+  }
   const raster = el('div', 'kalender');
   for (const n of C.KALENDER_REIHE) {
     const b = el('button', 'tuer');
@@ -1201,6 +1222,12 @@ export function oeffneMenue() {
     ]);
   };
   zeile.appendChild(nm); zeile.appendChild(hilfe); zeile.appendChild(neu);
+  // Ab Heiligabend: den Rückblick noch einmal ansehen
+  if (S.heiligabendJetzt() && S.st.heiligabend === Z.saison()) {
+    const rb = el('button', 'k k--neben', 'Mein Advent');
+    rb.onclick = () => { schliesseBlatt(); zeigeRueckblick(); };
+    zeile.appendChild(rb);
+  }
   liste.appendChild(zeile);
 
   // Neustart: ganz unten und abgesetzt, mit Rückfrage
@@ -1441,6 +1468,31 @@ const RAHMEN = [
     }
   } },
 ];
+// Festtagskarte (10.10.): nur ab Heiligabend, mit dem Rückblick in einer Zeile
+const HEILIG = { name: 'Heilige Nacht', titel: '#fff0b0', text: '#e8dcc0', umriss: 'rgba(10,8,30,0.9)', male(c, W, H) {
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#120c2e'); g.addColorStop(0.6, '#2a1a4a'); g.addColorStop(1, '#4a2a3a');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  // Goldener Doppelrahmen
+  c.strokeStyle = '#c8a040'; c.lineWidth = 6; c.strokeRect(14, 14, W - 28, H - 28);
+  c.strokeStyle = '#f0d070'; c.lineWidth = 2; c.strokeRect(24, 24, W - 48, H - 48);
+  for (let i = 0; i < 60; i++) {
+    const x = Z.hash(i * 7 + 2) * W, y = Z.hash(i * 13 + 4) * H;
+    if (x > 30 && x < W - 30 && y > 30 && y < H - 230) continue;
+    stern(c, x, y, 2 + Z.hash(i * 3) * 5, i % 4 ? '#fff4d0' : '#e8c030');
+  }
+  // Großer Stern oben in der Mitte, mit Schein
+  const sg = c.createRadialGradient(W / 2, 26, 2, W / 2, 26, 46); sg.addColorStop(0, 'rgba(255,240,170,0.9)'); sg.addColorStop(1, 'rgba(255,240,170,0)');
+  c.fillStyle = sg; c.fillRect(W / 2 - 46, 0, 92, 72);
+  stern(c, W / 2, 24, 16, '#fff0a0');
+} };
+const rahmenVon = (nr) => (nr === 'heilig' ? HEILIG : RAHMEN[nr]);
+/** „Andere Karte" blättert durch; ab Heiligabend gehört die Festtagskarte dazu. */
+function naechsterRahmen(nr) {
+  if (nr === 'heilig') return 0;
+  if (nr + 1 < RAHMEN.length) return nr + 1;
+  return S.heiligabendJetzt() ? 'heilig' : 0;
+}
+
 const GRUESSE = [
   'Frohe Weihnachten!',
   'Fröhliche Weihnachten!',
@@ -1495,14 +1547,17 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   welt.width = 180; welt.height = WG;
   zeichneWelt(welt.getContext('2d'), WG, performance.now() / 1000, 0, { karte: true, ohneGaeste: ohneLeute });
 
-  const rand = 44, unten = 190;
+  // Ab Heiligabend ist die Festtagskarte die erste, die man sieht
+  if (rahmenNr == null && S.heiligabendJetzt()) rahmenNr = 'heilig';
+  const heilig = rahmenNr === 'heilig';
+  const rand = 44, unten = heilig ? 226 : 190;
   const cv = document.createElement('canvas');
   cv.width = 180 * SK + rand * 2; cv.height = WG * SK + rand + unten;
   // Im Hauptspeicher malen, nicht auf der Grafikkarte: Fürs PNG muss das Bild
   // sonst erst zurückgelesen werden - auf manchen Android-Geräten spürbar langsam
   const c = cv.getContext('2d', { willReadFrequently: true });
   const nr = rahmenNr ?? Math.floor(Math.random() * RAHMEN.length);
-  const R = RAHMEN[nr];
+  const R = rahmenVon(nr);
   R.male(c, cv.width, cv.height);
   // Bild mit hellem Passepartout
   c.fillStyle = '#f6ecd4'; c.fillRect(rand - 8, rand - 8, 180 * SK + 16, WG * SK + 16);
@@ -1517,7 +1572,11 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   c.textAlign = 'center';
   kartenSchrift(c, gruss, mx, y0 + 72, 52, 'bold italic', R.titel, R.umriss, maxB);
   kartenSchrift(c, von, mx, y0 + 122, 30, '', R.text, R.umriss, maxB);
-  kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + 158, 20, '', R.text, R.umriss, maxB);
+  if (heilig) {
+    const rb = S.rueckblick(), z = (n) => Math.round(n).toLocaleString('de-DE');
+    kartenSchrift(c, `Unser Advent: ${z(rb.bedient)} Gäste · ${z(rb.deko)} Deko-Stücke · ♥ ${z(rb.stimmung)}`, mx, y0 + 160, 22, 'italic', R.titel, R.umriss, maxB);
+  }
+  kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + (heilig ? 196 : 158), 20, '', R.text, R.umriss, maxB);
 
   // Gemeldet: auf Android dauerte es „ewig" bis zur Karte. Das Fenster zeigt
   // jetzt SOFORT das gemalte Bild selbst; die PNG-Datei fürs Teilen entsteht
@@ -1536,7 +1595,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
       });
       return false;   // Fenster bleibt offen
     } },
-    { text: 'Andere Karte', neben: true, aktion: () => { setTimeout(() => karte((nr + 1) % RAHMEN.length, ohneLeute), 30); } },
+    { text: 'Andere Karte', neben: true, aktion: () => { setTimeout(() => karte(naechsterRahmen(nr), ohneLeute), 30); } },
     { text: ohneLeute ? 'Mit Gästen' : 'Ohne Gäste', neben: true, aktion: () => { setTimeout(() => karte(nr, !ohneLeute, gruss), 30); } },
     { text: 'Text ändern', neben: true, aktion: () => { setTimeout(() => kartenText(nr, ohneLeute, gruss), 30); } },
     { text: 'Schließen', neben: true },
