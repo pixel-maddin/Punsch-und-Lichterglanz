@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261010h';
-import * as S from './spiel.js?v=20261010h';
-import * as Z from './zeit.js?v=20261010h';
-import * as T from './ton.js?v=20261010h';
-import * as LI from './lichtung.js?v=20261010h';
-import * as CB from './christbaum.js?v=20261010h';
-import * as KA from './karte.js?v=20261010h';
-import * as SB from './schlitten.js?v=20261010h';
-import * as EB from './schlittschuh.js?v=20261010h';
-import * as BS from './backstube.js?v=20261010h';
-import * as UI from './ui.js?v=20261010h';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261010h';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010h';
-import * as Lernen from './lernen.js?v=20261010h';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=20261010h';
-import * as A from './auftraege.js?v=20261010h';
-import * as E from './erfolge.js?v=20261010h';
-import * as ZL from './ziele.js?v=20261010h';
+import * as C from './config.js?v=20261010i';
+import * as S from './spiel.js?v=20261010i';
+import * as Z from './zeit.js?v=20261010i';
+import * as T from './ton.js?v=20261010i';
+import * as LI from './lichtung.js?v=20261010i';
+import * as CB from './christbaum.js?v=20261010i';
+import * as KA from './karte.js?v=20261010i';
+import * as SB from './schlitten.js?v=20261010i';
+import * as EB from './schlittschuh.js?v=20261010i';
+import * as BS from './backstube.js?v=20261010i';
+import * as UI from './ui.js?v=20261010i';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261010i';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010i';
+import * as Lernen from './lernen.js?v=20261010i';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=20261010i';
+import * as A from './auftraege.js?v=20261010i';
+import * as E from './erfolge.js?v=20261010i';
+import * as ZL from './ziele.js?v=20261010i';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');

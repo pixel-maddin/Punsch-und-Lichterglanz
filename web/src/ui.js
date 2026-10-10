@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261010h';
-import * as S from './spiel.js?v=20261010h';
-import * as Z from './zeit.js?v=20261010h';
-import * as T from './ton.js?v=20261010h';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010h';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010h';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010h';
-import * as A from './auftraege.js?v=20261010h';
-import * as E from './erfolge.js?v=20261010h';
-import * as ZL from './ziele.js?v=20261010h';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010h';
-import * as KA from './karte.js?v=20261010h';
-import { zeigeRueckblick } from './ereignis.js?v=20261010h';
-import { barbaraZweig } from './szene.js?v=20261010h';
-import * as LI from './lichtung.js?v=20261010h';
-import * as CB from './christbaum.js?v=20261010h';
-import * as SB from './schlitten.js?v=20261010h';
-import * as EB from './schlittschuh.js?v=20261010h';
-import * as BS from './backstube.js?v=20261010h';
-import { alleSymbole } from './symbole.js?v=20261010h';
+import * as C from './config.js?v=20261010i';
+import * as S from './spiel.js?v=20261010i';
+import * as Z from './zeit.js?v=20261010i';
+import * as T from './ton.js?v=20261010i';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010i';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010i';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010i';
+import * as A from './auftraege.js?v=20261010i';
+import * as E from './erfolge.js?v=20261010i';
+import * as ZL from './ziele.js?v=20261010i';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010i';
+import * as KA from './karte.js?v=20261010i';
+import { zeigeRueckblick } from './ereignis.js?v=20261010i';
+import { barbaraZweig } from './szene.js?v=20261010i';
+import * as LI from './lichtung.js?v=20261010i';
+import * as CB from './christbaum.js?v=20261010i';
+import * as SB from './schlitten.js?v=20261010i';
+import * as EB from './schlittschuh.js?v=20261010i';
+import * as BS from './backstube.js?v=20261010i';
+import { alleSymbole } from './symbole.js?v=20261010i';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */

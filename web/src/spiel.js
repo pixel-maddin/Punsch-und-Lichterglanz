@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261010h';
-import * as Z from './zeit.js?v=20261010h';
-import { neueFarben } from './pixel.js?v=20261010h';
+import * as C from './config.js?v=20261010i';
+import * as Z from './zeit.js?v=20261010i';
+import { neueFarben } from './pixel.js?v=20261010i';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
