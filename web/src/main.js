@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610101341';
-import * as S from './spiel.js?v=202610101341';
-import * as Z from './zeit.js?v=202610101341';
-import * as T from './ton.js?v=202610101341';
-import * as LI from './lichtung.js?v=202610101341';
-import * as CB from './christbaum.js?v=202610101341';
-import * as KA from './karte.js?v=202610101341';
-import * as SB from './schlitten.js?v=202610101341';
-import * as EB from './schlittschuh.js?v=202610101341';
-import * as BS from './backstube.js?v=202610101341';
-import * as UI from './ui.js?v=202610101341';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610101341';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610101341';
-import * as Lernen from './lernen.js?v=202610101341';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=202610101341';
-import * as A from './auftraege.js?v=202610101341';
-import * as E from './erfolge.js?v=202610101341';
-import * as ZL from './ziele.js?v=202610101341';
+import * as C from './config.js?v=202610101357';
+import * as S from './spiel.js?v=202610101357';
+import * as Z from './zeit.js?v=202610101357';
+import * as T from './ton.js?v=202610101357';
+import * as LI from './lichtung.js?v=202610101357';
+import * as CB from './christbaum.js?v=202610101357';
+import * as KA from './karte.js?v=202610101357';
+import * as SB from './schlitten.js?v=202610101357';
+import * as EB from './schlittschuh.js?v=202610101357';
+import * as BS from './backstube.js?v=202610101357';
+import * as UI from './ui.js?v=202610101357';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610101357';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610101357';
+import * as Lernen from './lernen.js?v=202610101357';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=202610101357';
+import * as A from './auftraege.js?v=202610101357';
+import * as E from './erfolge.js?v=202610101357';
+import * as ZL from './ziele.js?v=202610101357';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -37,7 +37,7 @@ let H = 320, G = 166;
 // ---------------------------------------------------------------------------
 // Sparsames Zeichnen (siehe frame): Takt und „muss neu gezeichnet werden"
 const BILD_ABSTAND = 1000 / 30;   // ms zwischen zwei gezeichneten Bildern
-let letzteZeichnung = 0, zeichenDt = 0, standGezeichnet = false, bildVeraltet = true;
+let letzteZeichnung = 0, zeichenDt = 0, standGezeichnet = false, bildVeraltet = true, leinwandLeer = true;
 
 let gemessenB = 0, gemessenH = 0;
 function groesse() {
@@ -57,8 +57,14 @@ function groesse() {
   H = Math.floor(vh / skala);
   if (H < C.H_MIN) { skala = vh / C.H_MIN; H = C.H_MIN; }
   if (H > C.H_MAX) H = C.H_MAX;
-  cv.width = C.B; cv.height = H;
-  bildVeraltet = true;   // neue Größe = leere Leinwand, auch in der Pause neu zeichnen
+  // Nur bei echter Größenänderung neu setzen: Schon das Zuweisen derselben
+  // Breite leert die Leinwand. Gemeldet 10.10. (Android): Menü zu → kurz
+  // schwarz. Das ✕ verliert dabei den Fokus, `focusout` ruft 350 ms später
+  // hierher, und bis zum nächsten Bild war das Haus weg.
+  if (cv.width !== C.B || cv.height !== H) {
+    cv.width = C.B; cv.height = H;
+    bildVeraltet = leinwandLeer = true;   // neue Größe = leere Leinwand, auch in der Pause neu zeichnen
+  }
   const w = C.B * skala, h = H * skala;
   document.documentElement.style.setProperty('--px', skala + 'px');
   const huelle = document.getElementById('huelle');
@@ -245,7 +251,9 @@ function frame(jetzt) {
   // Nach einem Kauf blendet der Laden kurz aus, und am Haus funkelt es - das
   // muss gezeichnet werden, obwohl der Laden noch „offen" ist (gemeldet 01.10.)
   if (UI.zeigtKauf()) bildVeraltet = true;
-  const faellig = jetzt - letzteZeichnung >= BILD_ABSTAND - 2;
+  // Eine geleerte Leinwand (neue Größe) wartet nicht auf den 30-Bilder-Takt -
+  // sonst stünde sie bis zu einem Bild lang schwarz da
+  const faellig = jetzt - letzteZeichnung >= BILD_ABSTAND - 2 || leinwandLeer;
   if (faellig && !(steht && standGezeichnet && !bildVeraltet)) {
     try {
       c.clearRect(0, 0, C.B, H);
@@ -253,7 +261,7 @@ function frame(jetzt) {
       zeichneTresen(c, G, tSek, w);
     } catch (e) { console.warn('Zeichnen', e); }
     zeichenDt = 0; letzteZeichnung = jetzt;
-    standGezeichnet = steht; bildVeraltet = false;
+    standGezeichnet = steht; bildVeraltet = leinwandLeer = false;
   }
   UI.hud();
   Lernen.update(dt, UI.fensterOffen() || !!UI.panelOffen());

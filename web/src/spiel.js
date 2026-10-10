@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610101341';
-import * as Z from './zeit.js?v=202610101341';
-import { neueFarben } from './pixel.js?v=202610101341';
+import * as C from './config.js?v=202610101357';
+import * as Z from './zeit.js?v=202610101357';
+import { neueFarben } from './pixel.js?v=202610101357';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1661,6 +1661,32 @@ export function briefDank() {
 // ---------------------------------------------------------------------------
 // Album (10.10.): was man schon gesehen hat - Gäste, Tiere, Rezepte, Bilder
 // ---------------------------------------------------------------------------
+/**
+ * Seltene Gäste der Waldlichtung (10.10.): Fuchs, Wildschwein, Igel. Einer
+ * kommt nur alle 4-7 Runden. `st.lichtungSelten.rest` = so viele Runden
+ * noch ohne; bei 0 ist diese Runde die seltene. Gewählt wird bevorzugt ein
+ * Tier, das man noch nicht gefüttert hat (fürs Album).
+ */
+const SELTEN = ['fuchs', 'schwein', 'igel'];
+const seltenPause = () => 3 + Math.floor(Math.random() * 4);   // 3-6 Runden ohne → alle 4-7
+export function lichtungSelten() {
+  const L = st.lichtungSelten || (st.lichtungSelten = { rest: seltenPause(), art: null });
+  if (L.rest > 0) return null;
+  if (!L.art) {
+    const t = st.stats.tiere || {};
+    const neu = SELTEN.filter((a) => !t[a]);
+    const liste = neu.length ? neu : SELTEN;
+    L.art = liste[Math.floor(Math.random() * liste.length)];
+  }
+  return L.art;
+}
+/** Nach jeder fertigen Runde weiterzählen. */
+export function lichtungRundeVorbei() {
+  const L = st.lichtungSelten;
+  if (!L) return;
+  if (L.rest > 0) L.rest--;
+  else { L.rest = seltenPause(); L.art = null; }
+}
 export function zaehleTiere(arten) {
   st.stats.tiere = st.stats.tiere || {};
   for (const [a, n] of Object.entries(arten || {})) st.stats.tiere[a] = (st.stats.tiere[a] || 0) + n;

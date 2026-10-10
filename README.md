@@ -157,6 +157,9 @@ Gefüttert wird an der Raufe mitten in der Lichtung - Möhren, Nüsse und Äpfel
 Für die ersten drei Runden am Tag gibt es Sterne, dazu einen eigenen Rekord.
 Ab 800, 1.800 und 3.000 Punkten Rekord ziehen Tiere bei dir ein: eine
 Hasenfamilie, ein Eichhörnchen auf dem Dach und ein Reh am Gartenweg.
+Ganz selten - nur alle vier bis sieben Runden - kommt ein besonderer Gast
+vorbei: ein Fuchs, ein Wildschwein oder ein Igel. Wer ihn füttert, hat ihn
+im Album.
 
 **Backstube (Minispiel, im Dorf):** Kunden wollen Plätzchen - das Bild steht
 in der Sprechblase. Die richtige Ausstechform antippen (das Plätzchen rutscht

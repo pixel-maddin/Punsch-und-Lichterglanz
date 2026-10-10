@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610101341';
-import * as S from './spiel.js?v=202610101341';
-import * as Z from './zeit.js?v=202610101341';
-import * as T from './ton.js?v=202610101341';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610101341';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610101341';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610101341';
-import * as A from './auftraege.js?v=202610101341';
-import * as E from './erfolge.js?v=202610101341';
-import * as ZL from './ziele.js?v=202610101341';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610101341';
-import * as KA from './karte.js?v=202610101341';
-import { zeigeRueckblick } from './ereignis.js?v=202610101341';
-import { barbaraZweig } from './szene.js?v=202610101341';
-import * as LI from './lichtung.js?v=202610101341';
-import * as CB from './christbaum.js?v=202610101341';
-import * as SB from './schlitten.js?v=202610101341';
-import * as EB from './schlittschuh.js?v=202610101341';
-import * as BS from './backstube.js?v=202610101341';
-import { alleSymbole } from './symbole.js?v=202610101341';
+import * as C from './config.js?v=202610101357';
+import * as S from './spiel.js?v=202610101357';
+import * as Z from './zeit.js?v=202610101357';
+import * as T from './ton.js?v=202610101357';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610101357';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610101357';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610101357';
+import * as A from './auftraege.js?v=202610101357';
+import * as E from './erfolge.js?v=202610101357';
+import * as ZL from './ziele.js?v=202610101357';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610101357';
+import * as KA from './karte.js?v=202610101357';
+import { zeigeRueckblick } from './ereignis.js?v=202610101357';
+import { barbaraZweig } from './szene.js?v=202610101357';
+import * as LI from './lichtung.js?v=202610101357';
+import * as CB from './christbaum.js?v=202610101357';
+import * as SB from './schlitten.js?v=202610101357';
+import * as EB from './schlittschuh.js?v=202610101357';
+import * as BS from './backstube.js?v=202610101357';
+import { alleSymbole } from './symbole.js?v=202610101357';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -291,13 +291,17 @@ function zeigeLichtung() {
   const rest = S.lichtungRest(), best = S.lichtungRekord();
   const naechste = C.LICHTUNG_DEKO.find((d) => !S.st.kalDeko[d.id]);
   miniFenster('Waldlichtung', `
-    <p>Hasen, Eichhörnchen und Rehe hüpfen durch die Lichtung. <b>Tippe sie an, um sie zu füttern.</b> Schnell hintereinander gibt eine Kette bis ×5.</p>
+    <p>Hasen, Eichhörnchen und Rehe hüpfen durch die Lichtung. <b>Tippe sie an, um sie zu füttern.</b> Schnell hintereinander gibt eine Kette bis ×5. Und ganz selten schaut ein besonderer Gast vorbei.</p>
     <p class="klein">${C.LICHTUNG_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
     <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
   [{ text: 'Später', neben: true }], 'lichtung', starteLichtung);
 }
 export function starteLichtung(stufeNr = 1) {
-  LI.starte(spielHoehe(), (punkte, n, arten) => { LI.schliesse(); S.zaehleTiere(arten); miniErgebnis('lichtung', punkte, `${n} Tiere gefüttert`, 'Gut gefüttert!', () => starteLichtung(stufeNr)); }, stufeNr);
+  LI.starte(spielHoehe(), (punkte, n, arten) => {
+    LI.schliesse(); S.zaehleTiere(arten); S.lichtungRundeVorbei();
+    const selten = Object.keys(arten || {}).find((a) => LI.SELTENE[a]);
+    miniErgebnis('lichtung', punkte, `${n} Tiere gefüttert${selten ? ` - sogar ein ${LI.SELTENE[selten]}!` : ''}`, 'Gut gefüttert!', () => starteLichtung(stufeNr));
+  }, stufeNr, S.lichtungSelten());
 }
 /**
  * Startfenster eines Minispiels mit drei Knöpfen für die Schwierigkeit
@@ -1233,7 +1237,8 @@ export function oeffneAuftraege(reiter) {
 // ---------------------------------------------------------------------------
 const ALBUM_GAESTE = [['erwachsen', 'Spaziergänger'], ['kind', 'Kinder'], ['oma', 'Omas'], ['opa', 'Opas'],
   ['rentier', 'Rentier'], ['schneemann', 'Schneemann'], ['grummel', 'Grummel'], ['weihnachtsmann', 'Weihnachtsmann']];
-const ALBUM_TIERE = [['hase', 'Feldhase'], ['eich', 'Eichhörnchen'], ['reh', 'Reh'], ['gold', 'Goldhase']];
+const ALBUM_TIERE = [['hase', 'Feldhase'], ['eich', 'Eichhörnchen'], ['reh', 'Reh'], ['gold', 'Goldhase'], ['fuchs', 'Fuchs'], ['schwein', 'Wildschwein'], ['igel', 'Igel']];
+const ALBUM_TIERE_ALT = ['hase', 'eich', 'reh'];   // die gab es schon vor dem Album (alte Spielstände)
 function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
   const k = el('div', 'album-karte' + (n ? '' : ' zu'));
   // n < 0: schon gesehen, aber vor dem Album (10.10.) nicht mitgezählt
@@ -1252,11 +1257,11 @@ function baueAlbum(liste) {
   for (const [t, name] of ALBUM_GAESTE) g.appendChild(albumKarte(name, typ[t] || 0, (ctx) => figurKlein(ctx, { typ: t, farben: neueFarben(t), phase: 0, laeuft: false }, 12, 22, 0), 24, 24, '× bedient'));
   liste.appendChild(g);
   // Tiere der Waldlichtung
-  kopf('Tiere der Waldlichtung', ALBUM_TIERE.filter(([a]) => tiere[a] || (!S.st.stats.tiere && S.miniRekord('lichtung') > 0 && a !== 'gold')).length, ALBUM_TIERE.length);
+  kopf('Tiere der Waldlichtung', ALBUM_TIERE.filter(([a]) => tiere[a] || (!S.st.stats.tiere && S.miniRekord('lichtung') > 0 && ALBUM_TIERE_ALT.includes(a))).length, ALBUM_TIERE.length);
   const ti = el('div', 'album-raster');
   // Alte Spielstände: Wer die Lichtung schon gespielt hat, kennt Hase, Eichhörnchen und Reh
   const frueher = !S.st.stats.tiere && S.miniRekord('lichtung') > 0;
-  for (const [a, name] of ALBUM_TIERE) ti.appendChild(albumKarte(name, tiere[a] || (frueher && a !== 'gold' ? -1 : 0), (ctx) => LI.zeichneTierAlbum(ctx, a, 14, 24), 28, 26, '× gefüttert'));
+  for (const [a, name] of ALBUM_TIERE) ti.appendChild(albumKarte(name, tiere[a] || (frueher && ALBUM_TIERE_ALT.includes(a) ? -1 : 0), (ctx) => LI.zeichneTierAlbum(ctx, a, 14, 24), 28, 26, '× gefüttert'));
   liste.appendChild(ti);
   // Rezepte
   kopf('Rezepte aus der Backstube', S.backRezepte().length, C.BACK_REZEPTE.length);

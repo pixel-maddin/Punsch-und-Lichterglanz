@@ -11,11 +11,11 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610101341';
-import * as Z from './zeit.js?v=202610101341';
-import * as T from './ton.js?v=202610101341';
-import * as MH from './minihud.js?v=202610101341';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610101341';
+import * as C from './config.js?v=202610101357';
+import * as Z from './zeit.js?v=202610101357';
+import * as T from './ton.js?v=202610101357';
+import * as MH from './minihud.js?v=202610101357';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610101357';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -27,8 +27,14 @@ const ARTEN = {
   eich: { wert: 20, tempo: [50, 62], radius: 12 },
   reh:  { wert: 30, tempo: [74, 92], radius: 17 },
   gold: { wert: 60, tempo: [58, 70], radius: 14 },
+  // Seltene Gäste (10.10.): höchstens einer je Runde, nur alle 4-7 Runden
+  // (welche Runde, entscheidet spiel.js: lichtungSelten)
+  fuchs:   { wert: 50, tempo: [64, 76], radius: 15 },
+  schwein: { wert: 45, tempo: [40, 50], radius: 17 },
+  igel:    { wert: 40, tempo: [20, 26], radius: 13 },
 };
-const MITTE = { hase: 7, eich: 7, reh: 11, gold: 7 };   // Körpermitte über den Füßen
+const MITTE = { hase: 7, eich: 7, reh: 11, gold: 7, fuchs: 7, schwein: 7, igel: 5 };   // Körpermitte über den Füßen
+export const SELTENE = { fuchs: 'Fuchs', schwein: 'Wildschwein', igel: 'Igel' };
 
 let cv = null, c = null, H = 320;
 let stufe = C.MINI_STUFEN[1];   // Schwierigkeit der laufenden Runde
@@ -39,15 +45,19 @@ export const zustand = () => spiel;
 /** Für Tests: Körpermitte eines Tieres (dorthin tippt der Autopilot). */
 export const mitte = (tier) => ({ x: tier.x, y: tier.y - MITTE[tier.art] });
 
-/** Runde starten. `beiEnde(punkte)` kommt nach Ablauf (ui.js zeigt das Ergebnis). */
-export function starte(hoehe, beiEnde, stufeNr = 1) {
+/**
+ * Runde starten. `beiEnde(punkte)` kommt nach Ablauf (ui.js zeigt das Ergebnis).
+ * `selten` = Art des seltenen Gastes dieser Runde oder null.
+ */
+export function starte(hoehe, beiEnde, stufeNr = 1, selten = null) {
   stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
   c = cv.getContext('2d');
   c.imageSmoothingEnabled = false;
-  spiel = { t: -3, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, arten: {}, aus: false };
+  spiel = { t: -3, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, arten: {}, aus: false,
+    selten, seltenZeit: zufall(5, C.LICHTUNG_DAUER - 10) };
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
   T.musikPause(true);   // Musik ruht im Minispiel (09.10., Nutzerwunsch)
@@ -65,16 +75,17 @@ export function schliesse() {
 }
 
 function zufall(a, b) { return a + Math.random() * (b - a); }
-function neuesTier() {
+function neuesTier(festeArt) {
   const g = spiel;
   const roll = Math.random();
-  const art = roll < 0.04 ? 'gold' : roll < 0.22 ? 'reh' : roll < 0.52 ? 'eich' : 'hase';
+  const art = festeArt || (roll < 0.04 ? 'gold' : roll < 0.22 ? 'reh' : roll < 0.52 ? 'eich' : 'hase');
   const dir = Math.random() < 0.5 ? 1 : -1;
   const a = ARTEN[art];
   g.tiere.push({
     art, dir, x: dir > 0 ? -16 : W + 16, y: Math.round(zufall(H * 0.4, H * 0.88)),
     v: zufall(a.tempo[0], a.tempo[1]) * stufe.tempo, phase: Math.random() * 6, t: 0, satt: -1,
   });
+  return g.tiere[g.tiere.length - 1];
 }
 
 function tippe(e) {
@@ -101,7 +112,7 @@ export function tippeAuf(x, y) {
   spiel.arten[best.art] = (spiel.arten[best.art] || 0) + 1;   // fürs Album
   best.satt = 0;
   spiel.texte.push({ x: best.x, y: best.y - 30, text: '+' + pkt, t: 0 });
-  T.spiele(best.art === 'gold' ? 'spezialKasse' : spiel.kette >= 3 ? 'kasse' : 'greifen');
+  T.spiele(best.art === 'gold' || SELTENE[best.art] ? 'spezialKasse' : spiel.kette >= 3 ? 'kasse' : 'greifen');
 }
 
 function takt(jetzt) {
@@ -156,6 +167,14 @@ function schritt(dt) {
     if (g.spawnT <= 0 && g.tiere.filter((x) => x.satt < 0).length < 7) {
       neuesTier();
       g.spawnT = Math.max(0.35, 0.95 - g.t / C.LICHTUNG_DAUER * 0.55) * zufall(0.7, 1.3) / stufe.tempo;
+    }
+    // Der seltene Gast kommt einmal, mitten in der Runde, und wird angesagt
+    if (g.selten && g.t >= g.seltenZeit) {
+      const tier = neuesTier(g.selten);
+      tier.y = Math.round(zufall(H * 0.5, H * 0.8));
+      g.texte.push({ x: W / 2, y: H * 0.36, text: SELTENE[g.selten] + '!', farbe: '#ffb0e0', t: 0 });
+      T.spiele('spezial');
+      g.selten = null;
     }
     if (g.ketteT > 0) { g.ketteT -= dt; if (g.ketteT <= 0) g.kette = 1; }
     if (g.t >= C.LICHTUNG_DAUER) {
@@ -386,8 +405,48 @@ const SPRITE = {
     ['....bb........bb.......', '....bb........bb.......', '....b.b......b.b.......', '....k.k......k.k.......'],
     ['...b..b......b..b......', '..b....b....b....b.....', '.b......b..b......b....', '.k......k..k......k....'],
   ],
+  // Seltene Gäste (10.10.)
+  fuchs: [
+    '...............b.b..',
+    '..............babab.',
+    '..............aaaaa.',
+    '..............aakaa.',
+    '.w...........aaaacck',
+    'wwa..........aaacc..',
+    'waaa.......aaaacc...',
+    '.aaaa..aaaaaaaacc...',
+    '..aaaaaaaaaaaaac....',
+    '...aaaaaaaaaaaa.....',
+    '....ccccccccccc.....',
+  ],
+  fuchsBeine: [['.....k.k......k.k...', '.....k.k......k.k...'], ['....k...k....k...k..', '....k...k....k...k..']],
+  schwein: [
+    '..............bb......',
+    '.......bbbbbbbbbb.....',
+    '.....baaaaaaaaaaab....',
+    '....baaaaaaaaaaaakab..',
+    '...baaaaaaaaaaaaaaaab.',
+    'b.baaaaaaaaaaaaaaaaapp',
+    '.bbaaaaaaaaaaaaaaaawpp',
+    '...aaaaaaaaaaaaaaab...',
+    '....aaaaaaaaaaaaab....',
+  ],
+  schweinBeine: [['....bb.........bb.....', '....kk.........kk.....'], ['.....bb.......bb......', '....k..k.....k..k.....']],
+  igel: [
+    '...b.b.b......',
+    '..bababab.....',
+    '.babababab....',
+    'bababababacc..',
+    'abababababckc.',
+    '.babababacccck',
+    '..aaaaaaacc...',
+  ],
+  igelBeine: [['...k...k..k...'], ['....k.k...k...']],
 };
 const FARBEN = {
+  fuchs: { a: '#e0702a', b: '#3a2010', c: '#f8ecd8', w: '#ffffff', k: '#2a1a10' },
+  schwein: { a: '#5e4e44', b: '#3a2c24', p: '#a08070', w: '#f8f4ea', k: '#120c08' },
+  igel: { a: '#7a5a3a', b: '#3a2818', c: '#d8b890', k: '#1a1008' },
   hase: { a: '#b8a898', b: '#8a7a6c', c: '#e8e0d4', w: '#ffffff', k: '#2a1a10', p: '#e8a0a8' },
   gold: { a: '#ffd040', b: '#d8a020', c: '#fff0a8', w: '#ffffff', k: '#5a3a10', p: '#ffb0a0' },
   eich: { a: '#c8622a', b: '#7a3a14', c: '#f0dcc0', k: '#2a1a10' },
@@ -431,15 +490,16 @@ function zeichne(t) {
     const hop = springt && !satt ? Math.abs(Math.sin(tier.t * 8 + tier.phase)) * 8 : 0;
     const freu = satt && tier.satt < 0.6 ? Math.abs(Math.sin(tier.satt * 14)) * 5 : 0;
     // Das Reh setzt im Galopp leicht auf und ab
-    const galopp = tier.art === 'reh' && !satt ? Math.abs(Math.sin(tier.t * 12)) * 3 : 0;
+    const galopp = satt ? 0 : tier.art === 'reh' ? Math.abs(Math.sin(tier.t * 12)) * 3
+      : tier.art === 'fuchs' ? Math.abs(Math.sin(tier.t * 11)) * 2 : tier.art === 'schwein' ? Math.abs(Math.sin(tier.t * 9)) * 1.5 : 0;
     const x = Math.round(tier.x), y = Math.round(tier.y - hop - freu - galopp);
     // Schatten, kleiner, je höher das Tier springt
-    const sw = (tier.art === 'reh' ? 20 : 14) - Math.round(hop);
+    const sw = ({ reh: 20, schwein: 20, fuchs: 16, igel: 12 }[tier.art] || 14) - Math.round(hop);
     c.fillStyle = 'rgba(20,30,20,0.22)';
     c.fillRect(Math.round(tier.x - sw / 2), Math.round(tier.y), sw, 2);
     zeichneTier(tier, x, y, t, hop > 3, satt, winter);
     if (satt && tier.satt < 0.9) {
-      futter(tier.art, x + tier.dir * 8, y - (tier.art === 'reh' ? 24 : 16));
+      futter(tier.art, x + tier.dir * 8, y - (tier.art === 'reh' ? 24 : tier.art === 'igel' ? 12 : 16));
       herz(x - 6, y - 26 - tier.satt * 18); herz(x + 4, y - 22 - tier.satt * 24);
     }
   }
@@ -501,6 +561,9 @@ function zeichneTier(tier, x, y, t, inDerLuft, satt, winter) {
   } else if (tier.art === 'eich') {
     const k = satt ? 0 : Math.floor(t * 14) % 2;   // war !satt && …: false als Index → Absturz beim Füttern (09.10.)
     sprite([...SPRITE.eich, ...SPRITE.eichBeine[k]], FARBEN.eich, x, y, d);
+  } else if (SELTENE[tier.art]) {
+    const k = satt ? 0 : Math.floor(t * (tier.art === 'igel' ? 8 : 12)) % 2;
+    sprite([...SPRITE[tier.art], ...SPRITE[tier.art + 'Beine'][k]], FARBEN[tier.art], x, y, d);
   } else {
     const k = satt ? 2 : Math.floor(t * 12) % 4;
     sprite([...SPRITE.reh, ...SPRITE.rehBeine[k]], FARBEN.reh, x, y, d);
@@ -512,10 +575,13 @@ function herz(x, y) {
   r(c, x, y, 2, 1, '#ff5a7a'); r(c, x + 3, y, 2, 1, '#ff5a7a'); r(c, x - 1, y + 1, 7, 2, '#ff5a7a');
   r(c, x, y + 3, 5, 1, '#ff5a7a'); r(c, x + 1, y + 4, 3, 1, '#ff5a7a'); p(c, x + 2, y + 5, '#ff5a7a'); p(c, x, y + 1, '#ffb0c0');
 }
-/** Das Futter, das das Tier gerade bekommt: Möhre, Nuss, Apfel, goldene Möhre. */
+/** Das Futter, das das Tier gerade bekommt: Möhre, Nuss, Apfel, goldene Möhre - Ei, Eicheln, Beeren. */
 function futter(art, x, y) {
   x = Math.round(x); y = Math.round(y);
-  if (art === 'eich') { kreis(x, y, 2, '#a8703a'); r(c, x - 2, y - 2, 5, 1, '#6a4428'); p(c, x, y - 3, '#6a4428'); p(c, x - 1, y, '#c89058'); }
+  if (art === 'fuchs') { r(c, x - 2, y - 2, 4, 6, '#f8f4ea'); r(c, x - 3, y - 1, 6, 4, '#f8f4ea'); p(c, x - 1, y - 1, '#ffffff'); r(c, x - 2, y + 3, 4, 1, '#d8d0c0'); }
+  else if (art === 'schwein') for (const [dx, dy] of [[-3, 0], [2, -1], [0, 2]]) { kreis(x + dx, y + dy, 2, '#a8703a'); r(c, x + dx - 2, y + dy - 2, 5, 1, '#6a4428'); }
+  else if (art === 'igel') for (const [dx, dy] of [[-2, 0], [1, -1], [0, 2], [3, 1]]) { r(c, x + dx, y + dy, 2, 2, '#7a2a8a'); p(c, x + dx, y + dy, '#c080d0'); }
+  else if (art === 'eich') { kreis(x, y, 2, '#a8703a'); r(c, x - 2, y - 2, 5, 1, '#6a4428'); p(c, x, y - 3, '#6a4428'); p(c, x - 1, y, '#c89058'); }
   else if (art === 'reh') { kreis(x, y, 3, '#d83a3a'); p(c, x - 1, y - 1, '#ff8a8a'); p(c, x, y - 4, '#6a4428'); r(c, x + 1, y - 5, 2, 1, '#4a8a3a'); }
   else {
     const f = art === 'gold' ? '#ffd040' : '#f08a2a', f2 = art === 'gold' ? '#d8a020' : '#c8621a';

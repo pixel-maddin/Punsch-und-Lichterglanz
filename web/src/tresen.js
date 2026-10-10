@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=202610101341';
-import * as C from './config.js?v=202610101341';
-import * as S from './spiel.js?v=202610101341';
-import * as Z from './zeit.js?v=202610101341';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=202610101357';
+import * as C from './config.js?v=202610101357';
+import * as S from './spiel.js?v=202610101357';
+import * as Z from './zeit.js?v=202610101357';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
