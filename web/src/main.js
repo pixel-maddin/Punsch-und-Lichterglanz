@@ -4,23 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261010d';
-import * as S from './spiel.js?v=20261010d';
-import * as Z from './zeit.js?v=20261010d';
-import * as T from './ton.js?v=20261010d';
-import * as LI from './lichtung.js?v=20261010d';
-import * as CB from './christbaum.js?v=20261010d';
-import * as KA from './karte.js?v=20261010d';
-import * as SB from './schlitten.js?v=20261010d';
-import * as EB from './schlittschuh.js?v=20261010d';
-import * as UI from './ui.js?v=20261010d';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261010d';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010d';
-import * as Lernen from './lernen.js?v=20261010d';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick } from './ereignis.js?v=20261010d';
-import * as A from './auftraege.js?v=20261010d';
-import * as E from './erfolge.js?v=20261010d';
-import * as ZL from './ziele.js?v=20261010d';
+import * as C from './config.js?v=20261010h';
+import * as S from './spiel.js?v=20261010h';
+import * as Z from './zeit.js?v=20261010h';
+import * as T from './ton.js?v=20261010h';
+import * as LI from './lichtung.js?v=20261010h';
+import * as CB from './christbaum.js?v=20261010h';
+import * as KA from './karte.js?v=20261010h';
+import * as SB from './schlitten.js?v=20261010h';
+import * as EB from './schlittschuh.js?v=20261010h';
+import * as BS from './backstube.js?v=20261010h';
+import * as UI from './ui.js?v=20261010h';
+import { zeichneWelt, schlittenPos } from './szene.js?v=20261010h';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010h';
+import * as Lernen from './lernen.js?v=20261010h';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=20261010h';
+import * as A from './auftraege.js?v=20261010h';
+import * as E from './erfolge.js?v=20261010h';
+import * as ZL from './ziele.js?v=20261010h';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -110,6 +111,8 @@ cv.addEventListener('pointerdown', (e) => {
   if (!tr) {
     // Das Haus angetippt (Wand und Dach): Haus schmücken
     const GW = G - 6;
+    // Der Briefkasten neben der Tür (Wunschzettel, 10.10.)
+    if (x >= 62 && x <= 78 && y >= GW - 40 && y <= GW - 26 && (S.briefDa() || S.st.briefe)) { T.spiele('klick'); UI.zeigeBrief(); return; }
     if (x >= 32 && x <= 128 && y >= GW - 96 && y <= GW - 22 && S.st.lernen >= 99) { T.spiele('klick'); UI.oeffneMeinHaus(); }
     return;
   }
@@ -174,10 +177,19 @@ function ankommen(erstesMal) {
   if (S.st.kiste > 0) meldungen.push(['kiste', off && off.sek >= C.OFFLINE_FENSTER ? off.sek : 0]);
   if (Z.schnee() > 0 && !S.st.ersterSchnee) {
     S.st.ersterSchnee = true;
-    meldungen.push(['Der erste Schnee!', '<p>Über Nacht ist alles weiß geworden. Im Weihnachtsmarkt gibt es jetzt Schneemänner.</p>']);
+    meldungen.push(['schnee']);
   }
   // Adventssonntage: jedes Ereignis als eigenes Fenster, in der richtigen Reihenfolge
   for (const n of S.neueAdventsereignisse()) meldungen.push(['advent', n]);
+  // Wetter mit Folgen: einmal am Tag sagen, was heute gut geht
+  const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
+  if (lage && S.st.lernen >= 99 && S.st.wetterTag !== Z.tagesSchluessel()) {
+    S.st.wetterTag = Z.tagesSchluessel();
+    setTimeout(() => UI.toast(`${lage.name}! ${lage.text} (+${Math.round(lage.bonus * 100)} %)`, 'spezial'), 2600);
+  }
+  // Wunschzettel: ein neuer Brief oder ein Dankesbild im Briefkasten
+  const brief = S.briefPruefen();
+  if (brief) setTimeout(() => UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'), 1500);
   // Heiligabend: das Finale, einmal je Saison (nach den Adventen)
   if (S.heiligabendFaellig()) meldungen.push(['heiligabend']);
   const tueren = S.offeneTueren();
@@ -188,6 +200,7 @@ function ankommen(erstesMal) {
     if (!m) return;
     if (m[0] === 'advent') zeigeAdvent(m[1], zeige);
     else if (m[0] === 'heiligabend') zeigeHeiligabend(zeige);
+    else if (m[0] === 'schnee') zeigeErsterSchnee(zeige);
     else if (m[0] === 'kiste') UI.zeigeKiste(m[1], () => setTimeout(zeige, 60));
     else UI.fenster(m[0], m[1], [{ text: 'Weiter', aktion: () => { setTimeout(zeige, 60); } }]);
   };
@@ -261,6 +274,8 @@ setInterval(() => {
   if (k !== letzterTag) { letzterTag = k; ankommen(false); }
   // Heiligabend bricht an, während man spielt: warten, bis nichts offen ist
   else if (S.heiligabendFaellig() && !UI.fensterOffen() && !UI.panelOffen()) zeigeHeiligabend();
+  // Wunschzettel: neuer Brief oder ein erfüllter Wunsch
+  else { const brief = S.briefPruefen(); if (brief) UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'); }
   const neu = S.pruefeFreischaltungen();
   if (neu.length) {
     T.spiele('spezial');
@@ -384,6 +399,22 @@ function demo(art) {
   if (art === 'baumspiel') { UI.starteBaumspiel(); CB.vorspulen(5.5); }
   if (art === 'bergspiel') { UI.starteBergspiel(); SB.vorspulen(6); }
   if (art === 'eisspiel') { UI.starteEisbahn(); EB.vorspulen(5); }
+  if (art === 'schnee') setTimeout(() => zeigeErsterSchnee(), 300);
+  // Wunschzettel und Album (10.10.)
+  if (['brief', 'dank', 'album'].includes(art)) {
+    const kind = (name, alter, maedchen) => ({ kind: name, alter, maedchen });
+    st.briefe = { aktiv: { art: art === 'dank' ? 'backen' : 'deko', ziel: art === 'dank' ? null : 'schneemann', ...kind('Lena', 7, true), start: 0, tag: 0, offen: true, dank: art === 'dank', v: 0 }, erfuellt: [], ab: 0, n: 1 };
+    if (art === 'album') {
+      st.briefe = { aktiv: null, ab: 0, n: 4, erfuellt: [{ art: 'deko', ziel: 'schneemann', ...kind('Lena', 7, true) }, { art: 'backen', ...kind('Paul', 6) }, { art: 'santa', ...kind('Mia', 8, true) }, { art: 'getraenk', ziel: 'schoko', ...kind('Jonas', 5) }] };
+      st.stats.typ = { erwachsen: 812, kind: 240, oma: 133, opa: 120, rentier: 4, schneemann: 2, grummel: 3 };
+      st.stats.tiere = { hase: 61, eich: 40, reh: 22 };
+      st.mini = { back: { best: 1700, tag: 0, runden: 0 } };
+      UI.oeffneAuftraege('album');
+    } else setTimeout(() => UI.zeigeBrief(), 300);
+  }
+  if (art === 'dose') st.dose = Array.from({ length: 24 }, (_, i) => C.BACK_REZEPTE[i % 5].id);
+  if (art === 'backspiel') { st.mini = { back: { best: 1700, tag: 0, runden: 0 } }; UI.starteBackstube(); BS.vorspulen(4); }
+  if (art === 'backstube') { st.mini = { back: { best: 1700, tag: 0, runden: 0 } }; st.dose = ['zimtstern', 'kipferl', 'herz', 'baeumchen', 'spitzbube', 'zimtstern', 'herz', 'kipferl', 'baeumchen', 'herz', 'zimtstern', 'kipferl', 'spitzbube', 'herz', 'zimtstern', 'kipferl', 'herz', 'baeumchen', 'herz', 'zimtstern', 'kipferl']; UI.oeffneKarte(); setTimeout(() => [...document.querySelectorAll('#kartenOrte .ort')].find((e) => e.textContent.startsWith('Backstube')).click(), 200); }
   if (art === 'laden') UI.oeffneLaden('markt');
   if (art === 'wand') UI.oeffneAuftraege('erfolge');
   if (art === 'karte') UI.karte(0);

@@ -23,11 +23,11 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261010d';
-import * as S from './spiel.js?v=20261010d';
-import * as A from './auftraege.js?v=20261010d';
-import * as E from './erfolge.js?v=20261010d';
-import * as Z from './ziele.js?v=20261010d';
+import * as C from './config.js?v=20261010h';
+import * as S from './spiel.js?v=20261010h';
+import * as A from './auftraege.js?v=20261010h';
+import * as E from './erfolge.js?v=20261010h';
+import * as Z from './ziele.js?v=20261010h';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -182,7 +182,7 @@ const HINWEISE = [
   // Was es außer dem Stand gibt (09.10.): erst, wenn die Wichtel den Stand
   // tragen - dann ist Zeit dafür, und es hat Sterne für die Markt-Ware
   { id: 'karte_mehr', sofort: true, wann: () => !!S.st.tipps.wichtel_weg,
-    info: () => 'Auf der Karte gibt es noch mehr zu entdecken: drei MINISPIELE - Waldlichtung, Christbaumverkauf und Schlittenberg. Sie bringen Sterne und besondere Deko fürs Haus. Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.',
+    info: () => 'Auf der Karte gibt es noch mehr zu entdecken: MINISPIELE - Backstube, Christbaumverkauf, Eisbahn, Waldlichtung und Schlittenberg. Sie bringen Sterne, besondere Deko fürs Haus und Plätzchen für deinen Stand. Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.',
     text: () => 'Tippe auf KARTE und schau dich um.',
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, lang: true },
   { id: 'herz_ziel', wann: () => istZiel('herz'),

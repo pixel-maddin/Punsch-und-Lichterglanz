@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261010d';
-import * as S from './spiel.js?v=20261010d';
-import * as Z from './zeit.js?v=20261010d';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010d';
+import * as C from './config.js?v=20261010h';
+import * as S from './spiel.js?v=20261010h';
+import * as Z from './zeit.js?v=20261010h';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010h';
 
 const $ = (s) => document.querySelector(s);
 
@@ -35,6 +35,7 @@ export const ORTE = [
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },
   { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.75, spiel: 'lichtung' },
   { id: 'eis',       name: 'Eisbahn',         x: 64,  y: 0.645, spiel: 'eis' },
+  { id: 'backstube', name: 'Backstube',       x: 60,  y: 0.295, spiel: 'back' },
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
 ];
@@ -47,7 +48,7 @@ let handler = null;         // was beim Ankommen passiert (ort) => void
 let rafId = 0, letzte = 0, hervorId = null;
 // Der versteckte Weihnachtsmann (10.10.): Stelle als Anteil, dazu was ihn verdeckt
 const VERSTECKE = [
-  { x: 62, y: 0.30, hinter: 'tanne' }, { x: 74, y: 0.62, hinter: 'busch' }, { x: 168, y: 0.46, hinter: 'tanne' },
+  { x: 108, y: 0.31, hinter: 'tanne' }, { x: 74, y: 0.62, hinter: 'busch' }, { x: 168, y: 0.46, hinter: 'tanne' },
   { x: 12, y: 0.66, hinter: 'tanne' }, { x: 112, y: 0.12, hinter: 'busch' }, { x: 132, y: 0.62, hinter: 'busch' },
   { x: 52, y: 0.88, hinter: 'tanne' }, { x: 16, y: 0.31, hinter: 'busch' },
 ];
@@ -251,6 +252,7 @@ function wege() {
     [P('haus'), P('wichtel'), [104, 0.7 * H]],
     [P('wichtel'), P('lichtung'), [56, 0.86 * H]],
     [P('haus'), P('berg'), [138, 0.6 * H]],
+    [P('backstube'), [84, 0.34 * H], [72, 0.33 * H]],
   ];
 }
 function bezier(a, b, k, n) {
@@ -811,7 +813,27 @@ function eisbahn(x, y, P, winter) {
   r(c, x + 13, y - 10, 1, 10, '#5a3a22'); r(c, x + 11, y - 13, 6, 4, '#3a6ab8'); p(c, x + 13, y - 12, '#ffffff'); p(c, x + 14, y - 11, '#ffffff');
   licht(x + 14, y - 12, '#a8d8ff');
 }
-const ZEICHNER = { eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
+/** Backstube (10.10.): Fachwerkhaus mit warmem Schaufenster und Brezelschild. */
+function backstube(x, y, P, winter) {
+  schattenOval(x, y + 2, 30);
+  r(c, x - 12, y - 13, 24, 13, '#efe0c0');
+  r(c, x + 10, y - 13, 2, 13, '#d8c49c');
+  for (let i = -12; i < 12; i += 4) r(c, x + i, y - 13, 1, 13, '#6a4428');
+  r(c, x - 12, y - 13, 24, 1, '#6a4428'); r(c, x - 12, y - 7, 24, 1, '#6a4428');
+  dach(x - 14, y - 14, 28, 9, '#8a3a2a', ton('#8a3a2a', -0.25), P);
+  r(c, x - 9, y - 26, 3, 7, '#7a6a5a');                          // Ofenschornstein
+  if (P.dach) r(c, x - 9, y - 26, 3, 1, '#ffffff');
+  // Schaufenster mit Plätzchen, Tür
+  r(c, x - 10, y - 6, 9, 5, '#f8d878'); for (let i = 0; i < 4; i++) p(c, x - 9 + i * 2, y - 3, ['#c8902c', '#fbf6ee', '#5a3220', '#c8283a'][i]);
+  for (let i = 0; i < 9; i++) licht(x - 10 + i, y - 6, '#ffd890');
+  r(c, x + 3, y - 6, 4, 6, '#5a3a22'); p(c, x + 6, y - 3, '#e8c030');
+  fenster(x - 7, y - 11, 3, 2); fenster(x + 4, y - 11, 3, 2);
+  // Brezelschild am Ausleger
+  r(c, x + 12, y - 11, 5, 1, '#3a2a1a');
+  for (const [dx, dy] of [[0, 0], [1, -1], [2, -1], [3, 0], [3, 1], [2, 2], [1, 2], [0, 1], [1, 0], [2, 0]]) p(c, x + 14 + dx, y - 9 + dy, '#c8902c');
+  if (winter) r(c, x - 12, y - 1, 24, 1, '#ffffff');
+}
+const ZEICHNER = { backstube, eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
 
 // ---------------------------------------------------------------------------
 // Je Bild: was sich bewegt
@@ -844,6 +866,7 @@ function zeichne(t, dt) {
   rauch(h.x + 6, yPx(h) - 26, t, 0);
   rauch(d.x - 10, yPx(d) - 17, t, 1.3);
   rauch(d.x + 9, yPx(d) - 16, t, 2.1);
+  const bs = ort('backstube'); rauch(bs.x - 8, yPx(bs) - 27, t, 0.7);
 
   // Festplatz: Wimpelkette flattert - am Markttag laufen Leute zwischen den Buden
   const f = ort('festplatz'), fy = yPx(f);

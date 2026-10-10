@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261010d';
-import * as Z from './zeit.js?v=20261010d';
-import { neueFarben } from './pixel.js?v=20261010d';
+import * as C from './config.js?v=20261010h';
+import * as Z from './zeit.js?v=20261010h';
+import { neueFarben } from './pixel.js?v=20261010h';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -482,7 +482,8 @@ function wunschFuer(typ) {
   }
   if (!frei.length) return null;
   // Neu freigeschaltete Dinge werden etwas öfter bestellt
-  return zufallGewichtet(frei, (p) => 1 + C.PRODUKTE.indexOf(p) * 0.15).id;
+  const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
+  return zufallGewichtet(frei, (p) => (1 + C.PRODUKTE.indexOf(p) * 0.15) * (lage && lage.gruppe.includes(p.id) ? lage.mehr : 1)).id;
 }
 
 function spezialMoeglich() {
@@ -855,12 +856,17 @@ function bediene(g, auto, faktor = 1) {
   // kassieren nur den Preis. Selbst bedienen soll sich lohnen.
   const tip = auto ? 0 : C.TRINKGELD_MAX * (g.geduld / g.geduldMax) * (1 + b.trinkgeld) * stoss;
   let betrag = produktPreis(p) * preisFaktor() * (1 + tip) * (def.mult || 1) * (def.trink || 1) * (g.eilig ? C.EILIG_MULT : 1);
+  // Wetter mit Folgen: die passende Sorte zahlt heute mehr (auch bei den Wichteln)
+  const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
+  if (lage && lage.gruppe.includes(p.id)) betrag *= 1 + lage.bonus;
   const schwungVorher = lauf.schwung;
   if (!auto) {
     // Selbst serviert zählt doppelt (09.10., Nutzerwunsch: „wesentlich mehr
     // Sterne, wenn man selbst bedient") - die Wichtel kassieren nur den Preis
     betrag *= C.SELBST_MULT;
     if (Date.now() < (st.zimtBis || 0)) betrag *= C.HAENDLER_GUTSCHEIN.mult;   // Zimtstern-Gutschein vom Händler
+    // Plätzchendose (10.10.): Wer selbst bedient wird, nimmt eins und gibt mehr
+    if (st.dose && st.dose.length) { st.dose.shift(); betrag *= 1 + C.DOSE_BONUS; zaehleErfolg('kekse'); }
     lauf.schwung = lauf.schwungT > 0 ? Math.min(C.SCHWUNG_MAX, lauf.schwung + 1) : 1;
     lauf.schwungT = C.SCHWUNG_FENSTER;
     betrag *= 1 + lauf.schwung * C.SCHWUNG_PRO;
@@ -1288,6 +1294,8 @@ export const miniRekord = (name) => miniStand(name).best;
 /** Nach einer Runde: Sterne (nur die ersten Runden am Tag), Rekord, neue Deko. */
 export function miniErgebnis(name, punkte) {
   const l = miniStand(name), def = C.MINISPIELE[name];
+  st.stats.runden = st.stats.runden || {};
+  st.stats.runden[name] = (st.stats.runden[name] || 0) + 1;   // für Wunschzettel und Album
   const mitSternen = l.runden < C.MINI_RUNDEN_STERNE;
   l.runden++;
   const sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(def.maxMin, punkte / def.jeMin))) : 0;
@@ -1527,4 +1535,104 @@ export function rueckblick() {
     rekorde: Object.keys(C.MINISPIELE).filter((n) => miniRekord(n) > 0).length,
     blueten: st.barbara ? barbaraBlueten(st.barbara) : 0,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Backstube (10.10.): Rezepte hängen am Rekord, Plätzchen kommen in die Dose
+// ---------------------------------------------------------------------------
+export const backRezepte = () => C.BACK_REZEPTE.filter((r) => miniRekord('back') >= r.ab);
+export const dose = () => st.dose || [];
+/** Nach einer Runde: die gebackenen Plätzchen in die Dose (höchstens DOSE_MAX). */
+export function fuelleDose(ids) {
+  st.dose = [...dose(), ...ids].slice(-C.DOSE_MAX);
+  st.stats.gebacken = (st.stats.gebacken || 0) + ids.length;
+  speichere();
+}
+
+// ---------------------------------------------------------------------------
+// Wunschzettel (10.10.): Ab und zu steckt ein Kinderbrief im Briefkasten. Ist
+// der Wunsch erfüllt, bedankt sich das Kind mit einem Bild und ein paar
+// Sternen. Nichts läuft ab, nichts wird angezeigt außer der Fahne am Kasten.
+// st.briefe = { aktiv: {…} | null, erfuellt: [{…}], ab: Tagnummer, n }
+// ---------------------------------------------------------------------------
+export function briefe() {
+  st.briefe = st.briefe || { aktiv: null, erfuellt: [], ab: 0, n: 0 };
+  return st.briefe;
+}
+const wahlAus = (l) => l[Math.floor(Math.random() * l.length)];
+/** Was kann sich ein Kind gerade wünschen? Nur, was es zu kaufen gibt und bald bezahlbar ist. */
+function wunschKandidaten() {
+  const grenze = Math.max(300, st.geld * 2 + einnahmenProMinute() * 40);
+  const kaufbar = (a) => !hat(a.id) && sichtbarUndFrei(a) && !a.luxus && status(a).kosten != null && status(a).kosten <= grenze;
+  const nachPreis = (l) => l.sort((x, y) => status(x).kosten - status(y).kosten).slice(0, 4);
+  const deko = nachPreis(C.ARTIKEL.filter((a) => istDeko(a) && !a.wahl && kaufbar(a)));
+  const getraenk = nachPreis(C.ARTIKEL.filter((a) => a.tab === 'super' && kaufbar(a)));
+  const m = [];
+  for (const a of deko) m.push({ art: 'deko', ziel: a.id, w: 3 / deko.length });
+  for (const a of getraenk) m.push({ art: 'getraenk', ziel: a.id, w: 1.5 / getraenk.length });
+  if (st.tipps && st.tipps.karte_mehr) {
+    if (!briefe().erfuellt.some((b) => b.art === 'santa')) m.push({ art: 'santa', w: 0.6 });
+    m.push({ art: 'backen', w: 0.7 });
+    m.push({ art: 'eis', w: 0.5 });
+  }
+  return m;
+}
+/** Stand der Zähler, an denen ein Aktionswunsch gemessen wird. */
+function briefZaehler(art) {
+  if (art === 'santa') return st.stats.santa || 0;
+  if (art === 'backen') return st.stats.gebacken || 0;
+  if (art === 'eis') return (st.stats.runden && st.stats.runden.eis) || 0;
+  return 0;
+}
+export function briefErfuellt(b) {
+  if (b.art === 'deko' || b.art === 'getraenk') return hat(b.ziel);
+  if (b.art === 'backen') return briefZaehler('backen') >= b.start + C.BRIEF_BACKEN;
+  return briefZaehler(b.art) > b.start;
+}
+/**
+ * Beim Ankommen und jede Minute: neuen Brief einwerfen, erfüllte Wünsche
+ * merken. Gibt 'neu' | 'dank' | null zurück (für einen kurzen Hinweis).
+ */
+export function briefPruefen() {
+  if (st.lernen < 99 || spieltag() < C.BRIEF_AB_TAG) return null;
+  const B = briefe();
+  if (B.aktiv) {
+    if (!B.aktiv.dank && briefErfuellt(B.aktiv)) { B.aktiv.dank = true; B.aktiv.offen = true; speichere(); return 'dank'; }
+    return null;
+  }
+  if (B.n >= C.BRIEF_MAX || tagNr() < B.ab) return null;
+  const k = wunschKandidaten();
+  if (!k.length) return null;
+  const w = zufallGewichtet(k, (x) => x.w);
+  const frei = C.BRIEF_KINDER.filter((x) => !B.erfuellt.some((b) => b.kind === x.name));
+  const kind = wahlAus(frei.length ? frei : C.BRIEF_KINDER);
+  B.aktiv = { art: w.art, ziel: w.ziel || null, kind: kind.name, alter: kind.alter, maedchen: kind.maedchen, start: briefZaehler(w.art), tag: tagNr(), offen: true, dank: false, v: Math.floor(Math.random() * 2) };
+  B.n++;
+  speichere();
+  return 'neu';
+}
+/** Liegt etwas im Briefkasten (Fahne oben)? */
+export const briefDa = () => !!(st.briefe && st.briefe.aktiv && st.briefe.aktiv.offen);
+/** Den Brief gelesen: Fahne runter. */
+export function briefGelesen() { if (st.briefe && st.briefe.aktiv) { st.briefe.aktiv.offen = false; speichere(); } }
+/** Dankesbild abholen: Sterne, Bild ins Album, morgen kommt vielleicht der nächste Brief. */
+export function briefDank() {
+  const B = briefe(), b = B.aktiv;
+  if (!b || !b.dank) return 0;
+  const betrag = Math.max(C.BRIEF_LOHN_MIN, Math.round(einnahmenProMinute() * C.BRIEF_LOHN_MINUTEN / 10) * 10);
+  verdiene(betrag);
+  B.erfuellt.push({ art: b.art, ziel: b.ziel, kind: b.kind, alter: b.alter, maedchen: b.maedchen, tag: tagNr() });
+  B.aktiv = null;
+  B.ab = tagNr() + 1;
+  speichere();
+  return betrag;
+}
+
+// ---------------------------------------------------------------------------
+// Album (10.10.): was man schon gesehen hat - Gäste, Tiere, Rezepte, Bilder
+// ---------------------------------------------------------------------------
+export function zaehleTiere(arten) {
+  st.stats.tiere = st.stats.tiere || {};
+  for (const [a, n] of Object.entries(arten || {})) st.stats.tiere[a] = (st.stats.tiere[a] || 0) + n;
+  speichere();
 }

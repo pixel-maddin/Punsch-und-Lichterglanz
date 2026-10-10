@@ -4,12 +4,12 @@
  *
  * Die Bilder sind 90 x 50 Pixel, im Fenster dreifach vergrößert.
  */
-import * as C from './config.js?v=20261010d';
-import * as S from './spiel.js?v=20261010d';
-import * as T from './ton.js?v=20261010d';
-import * as Z from './zeit.js?v=20261010d';
-import { r, p, figurKlein, neueFarben } from './pixel.js?v=20261010d';
-import { fenster, karte } from './ui.js?v=20261010d';
+import * as C from './config.js?v=20261010h';
+import * as S from './spiel.js?v=20261010h';
+import * as T from './ton.js?v=20261010h';
+import * as Z from './zeit.js?v=20261010h';
+import { r, p, figurKlein, neueFarben } from './pixel.js?v=20261010h';
+import { fenster, karte } from './ui.js?v=20261010h';
 
 const BW = 90, BH = 50;
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
@@ -171,4 +171,43 @@ export function zeigeAdvent(n, danach) {
   [{ text: 'Wunderbar!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
   const c = box.querySelector('canvas').getContext('2d');
   BILDER[e.bild](c);
+}
+
+/**
+ * Der erste Schnee (10.10.): Die Musik hält kurz inne, das Bild beschlägt an
+ * den Rändern, eine große Flocke schwebt herab und legt sich mitten aufs
+ * Display. Danach das Fenster mit dem Bild vom verschneiten Dorf.
+ */
+export function zeigeErsterSchnee(danach) {
+  const huelle = document.getElementById('huelle') || document.body;
+  const ov = document.createElement('div');
+  ov.className = 'erster-schnee';
+  ov.innerHTML = '<div class="frost"></div><canvas class="flocke" width="17" height="17"></canvas>';
+  const c = ov.querySelector('canvas').getContext('2d');
+  // Sechsstrahlige Flocke, pixelgenau
+  const f = '#ffffff', g = '#d8ecff';
+  // Sechs Arme im 60°-Abstand, jeder mit zwei kleinen Seitenzweigen
+  for (let k = 0; k < 6; k++) {
+    const a = Math.PI / 2 + k * Math.PI / 3, dx = Math.cos(a), dy = Math.sin(a);
+    for (let i = 0; i <= 8; i++) p(c, Math.round(8 + dx * i), Math.round(8 + dy * i), i > 6 ? g : f);
+    for (const [i, l] of [[4, 2], [6, 1]]) for (const s2 of [-1, 1]) {
+      const b2 = a + s2 * Math.PI / 3;
+      for (let j = 1; j <= l; j++) p(c, Math.round(8 + dx * i + Math.cos(b2) * j), Math.round(8 + dy * i + Math.sin(b2) * j), g);
+    }
+  }
+  p(c, 8, 8, g);
+  huelle.appendChild(ov);
+  T.musikPause(true);
+  setTimeout(() => T.spiele('glocken'), 2600);
+  setTimeout(() => {
+    ov.classList.add('weg');
+    T.musikPause(false);
+    setTimeout(() => ov.remove(), 900);
+    const box = fenster('Der erste Schnee!', `
+      <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
+      <p class="zeile-gross">Über Nacht ist alles weiß geworden.</p>
+      <p>Im Weihnachtsladen gibt es jetzt Schneemänner, und auf dem Weiher glänzt das Eis.</p>`,
+    [{ text: 'Wie schön!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
+    BILDER.schnee(box.querySelector('canvas').getContext('2d'));
+  }, 3600);
 }

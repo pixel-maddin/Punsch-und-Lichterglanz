@@ -151,11 +151,39 @@ Für die ersten drei Runden am Tag gibt es Sterne, dazu einen eigenen Rekord.
 Ab 800, 1.800 und 3.000 Punkten Rekord ziehen Tiere bei dir ein: eine
 Hasenfamilie, ein Eichhörnchen auf dem Dach und ein Reh am Gartenweg.
 
-Dazu kommen bald: der **Festplatz** (alle paar Tage Weihnachtsmarkt), der
-**Christbaumverkauf** und der **Schlittenberg**. Die Weihnachtskarte zum Teilen heißt jetzt **Foto**.
+**Backstube (Minispiel, im Dorf):** Kunden wollen Plätzchen - das Bild steht
+in der Sprechblase. Die richtige Ausstechform antippen (das Plätzchen rutscht
+von selbst in den Ofen), es goldbraun herausholen, solange der Balken über dem
+Ofen im gelben Bereich steht (zu früh blass, zu spät dunkel, am Ende
+verbrannt), dann die richtige Verzierung: Zuckerguss, Puderzucker,
+Schokolade, grüner Guss oder Marmelade. 60 Sekunden, Kette bis ×3. Statt Deko
+fürs Haus gibt es ein **Rezeptbuch**: Zimtstern, Vanillekipferl und
+Lebkuchenherz von Anfang an, ab 800, 1.600 und 2.600 Punkten Rekord
+Tannenbäumchen, Spitzbube und Schokostern - die kommen dann auch in den
+Runden vor. Was du bäckst, kommt in die **Plätzchendose** auf deinem Stand
+(höchstens 30): Jeder Gast, den du selbst bedienst, nimmt eins und zahlt 25 %
+mehr.
+
+Die Weihnachtskarte zum Teilen heißt **Foto**.
 
 Hausdeko bringt **Stimmung** (♥). Je mehr Stimmung, desto mehr Gäste -
 und desto mehr zahlen sie.
+
+## Wunschzettel und Album
+
+**Wunschzettel:** Ab und zu steckt ein Brief im roten Briefkasten neben der
+Haustür - die Fahne ist dann oben. Ein Kind aus dem Dorf wünscht sich etwas:
+ein Stück Deko, ein Getränk an deinem Stand, Plätzchen aus der Backstube, eine
+Runde auf der Eisbahn oder dass du den Weihnachtsmann auf der Karte findest.
+Es gibt keine Frist. Ist der Wunsch erfüllt, liegt ein Dankeschön im Kasten:
+ein gemaltes Bild und ein paar Sterne. Ein Brief zur Zeit, der nächste
+frühestens am Tag danach, höchstens zehn je Adventszeit.
+
+**Album** (Aufträge → Album): alle Besucher, die du schon bedient hast
+(auch Rentier, Schneemann, Grummel und Weihnachtsmann), die Tiere der
+Waldlichtung samt dem seltenen Goldhasen, das Rezeptbuch und die
+Dankesbilder der Kinder. Was du noch nicht gesehen hast, steht als dunkler
+Umriss da.
 
 ## Echte Zeit
 
@@ -189,6 +217,15 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
   Heiligabend spielt (bis zum 6. Januar), bekommt es nachgereicht. Den
   Rückblick gibt es danach auch im Menü.
 - Silvester gibt es Feuerwerk.
+- **Wetter mit Folgen:** Jeder Tag hat sein Wetter, mit Temperatur an der
+  Uhr. An Tagen mit **klirrender Kälte** (nur mit Schnee) wird Punsch öfter
+  bestellt und bringt 20 % mehr, die Gäste haben Atemwölkchen. An
+  **nasskalten Schmuddeltagen** gilt dasselbe für Heiße Schokolade,
+  Zimtwolke und Heißen Apfel. Einmal am Tag sagt ein Hinweis, was heute
+  gut geht; im Menü steht das Wetter des Tages.
+- **Der erste Schnee** ist ein eigener Moment: Die Musik hält inne, das Bild
+  beschlägt an den Rändern, eine große Flocke schwebt herab, dann kommt
+  das Bild vom verschneiten Dorf.
 - Ab September beginnt eine neue Adventszeit - das Haus fängt wieder kahl
   an, ein Andenken bleibt.
 

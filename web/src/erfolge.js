@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=20261010d';
-import * as S from './spiel.js?v=20261010d';
+import * as C from './config.js?v=20261010h';
+import * as S from './spiel.js?v=20261010h';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;

@@ -177,6 +177,24 @@ export function wetter(d = jetzt()) {
   return { art: 'klar', staerke: 0 };
 }
 
+/**
+ * Tageswetter (10.10.): eine Lage je Tag, aus dem Datum gewürfelt (für alle
+ * gleich). 'frost' nur bei Schnee; 'schmuddel' = nasskalt. Dazu eine
+ * Temperatur für die Uhr. Was die Lage bewirkt, steht in C.WETTER_LAGEN.
+ */
+export function tagesWetter(d = jetzt()) {
+  const tag = Math.round(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12).getTime() / 86400000);
+  const z = hash(tag * 31 + 7), z2 = hash(tag * 17 + 3);
+  const winter = schnee(d) > 0, herbst = phase(d) === 'herbst';
+  let art = 'normal';
+  if (winter && z < 0.3) art = 'frost';
+  else if ((winter || herbst) && z > 0.75) art = 'schmuddel';
+  const temp = art === 'frost' ? -6 - Math.round(z2 * 7)
+    : art === 'schmuddel' ? (winter ? 1 : 5) + Math.round(z2 * 4)
+    : winter ? -3 + Math.round(z2 * 4) : 2 + Math.round(z2 * 6);
+  return { art, temp };
+}
+
 export function silvester(d = jetzt()) {
   const m = d.getMonth(), t = d.getDate(), h = d.getHours() + d.getMinutes() / 60;
   return (m === 11 && t === 31 && h >= 23.5) || (m === 0 && t === 1 && h < 1.5);

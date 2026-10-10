@@ -699,3 +699,51 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 .stufen .k.stufe small { font-weight: normal; font-size: calc(var(--px) * 3.6); color: #8a6a4a; }
 .stufen .k.stufe.gewaehlt { background: var(--rot); color: #fff; border-color: var(--rot2); }
 .stufen .k.stufe.gewaehlt small { color: #ffe0d0; }
+
+/* Rezeptbuch der Backstube (10.10.) */
+.rezeptbuch { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 2); margin: calc(var(--px) * 2) 0; }
+.rezeptbuch .rezept { display: flex; flex-direction: column; align-items: center; text-align: center; padding: calc(var(--px) * 2);
+  background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 1.5); }
+.rezeptbuch canvas { width: calc(var(--px) * 20); height: calc(var(--px) * 18); image-rendering: pixelated; }
+.rezeptbuch b { font-size: calc(var(--px) * 4.4); line-height: 1.15; margin-top: calc(var(--px) * 1); }
+.rezeptbuch small { font-size: calc(var(--px) * 3.8); color: #7a5a44; line-height: 1.2; }
+.rezeptbuch .zu { opacity: 0.6; border-style: dashed; }
+/* Wunschzettel (10.10.): Kinderbrief auf liniertem Papier, Dankesbild */
+.brief { background: repeating-linear-gradient(#fffdf6 0, #fffdf6 calc(var(--px) * 6.4), #c8d8f0 calc(var(--px) * 6.4), #c8d8f0 calc(var(--px) * 6.8));
+  border-left: calc(var(--px) * 1) solid #e8a0a0; padding: calc(var(--px) * 3) calc(var(--px) * 4); text-align: left;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive; color: #2a3a8a; transform: rotate(-0.6deg); }
+.brief p { font-size: calc(var(--px) * 5.4); line-height: calc(var(--px) * 6.8); margin: 0 0 calc(var(--px) * 1.5); }
+.brief .brief-gruss { text-align: right; }
+.brief-text { font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive; color: #2a3a8a; }
+canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); image-rendering: pixelated; display: block; margin: calc(var(--px) * 2) auto;
+  box-shadow: 0 calc(var(--px) * 1) calc(var(--px) * 3) rgba(0,0,0,0.25); transform: rotate(1.2deg); }
+/* Album (10.10.) */
+.album-raster { display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(var(--px) * 2); margin: calc(var(--px) * 1) 0 calc(var(--px) * 4); }
+.album-karte { display: flex; flex-direction: column; align-items: center; text-align: center; padding: calc(var(--px) * 1.6);
+  background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 1.5); }
+.album-karte canvas { width: calc(var(--px) * 24); height: calc(var(--px) * 24); image-rendering: pixelated; }
+.album-karte b { font-size: calc(var(--px) * 4); line-height: 1.15; }
+.album-karte small { font-size: calc(var(--px) * 3.6); color: #7a5a44; line-height: 1.2; }
+.album-karte.zu { opacity: 0.65; border-style: dashed; }
+.album-bilder { display: grid; grid-template-columns: repeat(2, 1fr); gap: calc(var(--px) * 4); margin: calc(var(--px) * 2) 0 calc(var(--px) * 4); }
+.album-bild { text-align: center; }
+.album-bild canvas { width: 100%; image-rendering: pixelated; box-shadow: 0 calc(var(--px) * 1) calc(var(--px) * 2) rgba(0,0,0,0.25); }
+.album-bild:nth-child(odd) canvas { transform: rotate(-1.5deg); }
+.album-bild:nth-child(even) canvas { transform: rotate(1.5deg); }
+.album-bild small { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive; color: #2a3a8a; font-size: calc(var(--px) * 4.2); }
+/* Der erste Schnee (10.10.): Rand beschlägt, eine große Flocke schwebt herab */
+.erster-schnee { position: absolute; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; transition: opacity 0.9s; }
+.erster-schnee.weg { opacity: 0; }
+.erster-schnee .frost { position: absolute; inset: 0; opacity: 0; animation: frostAn 2.6s ease-out forwards;
+  background: radial-gradient(ellipse at 0 0, rgba(240,248,255,0.85), transparent 38%), radial-gradient(ellipse at 100% 0, rgba(240,248,255,0.8), transparent 36%),
+    radial-gradient(ellipse at 0 100%, rgba(240,248,255,0.8), transparent 36%), radial-gradient(ellipse at 100% 100%, rgba(240,248,255,0.85), transparent 38%),
+    rgba(20, 30, 70, 0.25); }
+.erster-schnee .flocke { position: absolute; left: 50%; top: -12%; width: calc(var(--px) * 34); height: calc(var(--px) * 34); image-rendering: pixelated;
+  filter: drop-shadow(0 0 calc(var(--px) * 3) rgba(200,230,255,0.9)); animation: flockeFaellt 3.2s cubic-bezier(.3,.1,.3,1) forwards; }
+@keyframes frostAn { to { opacity: 1; } }
+@keyframes flockeFaellt {
+  0% { transform: translate(-50%, 0) rotate(0deg); }
+  30% { transform: translate(-80%, 120%) rotate(60deg); }
+  60% { transform: translate(-25%, 260%) rotate(130deg); }
+  100% { transform: translate(-50%, 380%) rotate(180deg) scale(1.15); }
+}

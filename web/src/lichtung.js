@@ -11,11 +11,11 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=20261010d';
-import * as Z from './zeit.js?v=20261010d';
-import * as T from './ton.js?v=20261010d';
-import * as MH from './minihud.js?v=20261010d';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=20261010d';
+import * as C from './config.js?v=20261010h';
+import * as Z from './zeit.js?v=20261010h';
+import * as T from './ton.js?v=20261010h';
+import * as MH from './minihud.js?v=20261010h';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=20261010h';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -47,7 +47,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1) {
   cv.width = W; cv.height = H;
   c = cv.getContext('2d');
   c.imageSmoothingEnabled = false;
-  spiel = { t: -3, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, aus: false };
+  spiel = { t: -3, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, arten: {}, aus: false };
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
   T.musikPause(true);   // Musik ruht im Minispiel (09.10., Nutzerwunsch)
@@ -98,6 +98,7 @@ export function tippeAuf(x, y) {
   const pkt = Math.round(ARTEN[best.art].wert * spiel.kette * stufe.punkte);
   spiel.punkte += pkt;
   spiel.gefuettert++;
+  spiel.arten[best.art] = (spiel.arten[best.art] || 0) + 1;   // fürs Album
   best.satt = 0;
   spiel.texte.push({ x: best.x, y: best.y - 30, text: '+' + pkt, t: 0 });
   T.spiele(best.art === 'gold' ? 'spezialKasse' : spiel.kette >= 3 ? 'kasse' : 'greifen');
@@ -131,7 +132,7 @@ export function messe(takt = 0.42, treffer = 1, hoehe = 320, stufeNr = 1) {
   stufe = C.MINI_STUFEN[stufeNr];
   const altFertig = fertig;
   H = hoehe; fertig = null;
-  spiel = { t: 0, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, aus: false };
+  spiel = { t: 0, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, arten: {}, aus: false };
   let bis = takt;
   while (!spiel.aus) {
     schritt(1 / 60);
@@ -160,7 +161,7 @@ function schritt(dt) {
     if (g.t >= C.LICHTUNG_DAUER) {
       g.aus = true;
       if (fertig) T.spiele('fertig');
-      setTimeout(() => { if (spiel === g && fertig) fertig(g.punkte, g.gefuettert); }, 900);
+      setTimeout(() => { if (spiel === g && fertig) fertig(g.punkte, g.gefuettert, g.arten); }, 900);
     }
   }
   for (const tier of g.tiere) {
@@ -521,4 +522,12 @@ function futter(art, x, y) {
     r(c, x - 3, y - 1, 6, 3, f); r(c, x + 3, y, 2, 1, f); p(c, x - 1, y, f2); p(c, x + 1, y + 1, f2);
     p(c, x - 4, y - 2, '#4a9a3a'); p(c, x - 5, y - 3, '#4a9a3a'); p(c, x - 4, y + 1, '#4a9a3a'); p(c, x - 5, y + 2, '#3a8a2a');
   }
+}
+
+/** Ein Tier fürs Album (ui.js) auf eine fremde Fläche malen, stehend. */
+export function zeichneTierAlbum(ctx, art, x, y) {
+  const alt = c;
+  c = ctx;
+  zeichneTier({ art, dir: 1, t: 0, phase: 0 }, x, y, 0, false, true, false);
+  c = alt;
 }

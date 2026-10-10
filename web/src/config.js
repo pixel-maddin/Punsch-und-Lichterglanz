@@ -555,6 +555,56 @@ export const EIS_DEKO = [
   { id: 'e_pinguin',       name: 'Pinguin',                ab: 1400, stimmung: 5, text: 'Ein kleiner Pinguin mit Mütze steht auf dem Gehweg.' },
   { id: 'e_schnuppen',     name: 'Sternschnuppen',         ab: 2400, stimmung: 7, text: 'Nachts ziehen Sternschnuppen über dein Haus.' },
 ];
+// Minispiel Backstube (10.10.): Plätzchen nach Rezept - ausstechen, backen
+// (im goldenen Bereich aus dem Ofen holen), verzieren. Statt Deko fürs Haus
+// gibt es REZEPTE fürs Rezeptbuch; neue Rezepte kommen auch in die Runden.
+// Gebackene Plätzchen wandern in die Dose auf dem Stand (DOSE_*).
+export const BACK_DAUER = 60;
+export const BACK_PUNKTE_JE_MIN = 600;
+export const BACK_MAX_MIN = 3;
+export const BACK_OFEN = 2.2;           // s, bis ein Plätzchen verbrennt (Normal)
+export const BACK_GOLDEN = [0.52, 0.8]; // goldener Bereich im Ofenbalken
+export const BACK_FORMEN = ['stern', 'mond', 'herz', 'baum', 'kreis'];
+export const BACK_DEKOS = {
+  guss:      { kurz: 'GUSS', name: 'Zuckerguss',  f: '#fbf6ee' },
+  puder:     { kurz: 'PUDER', name: 'Puderzucker', f: '#f0ece4' },
+  schoko:    { kurz: 'SCHOKO', name: 'Schokolade',  f: '#5a3220' },
+  gruen:     { kurz: 'GRÜN', name: 'Grüner Guss', f: '#5aa84a' },
+  marmelade: { kurz: 'MARMELADE', name: 'Marmelade',   f: '#c8283a' },
+};
+export const BACK_REZEPTE = [
+  { id: 'zimtstern',   name: 'Zimtstern',      form: 'stern', deko: 'guss',      ab: 0,    text: 'Mandelteig mit Zimt, oben schneeweißer Guss.' },
+  { id: 'kipferl',     name: 'Vanillekipferl', form: 'mond',  deko: 'puder',     ab: 0,    text: 'Kleine Hörnchen, dick in Vanillezucker gewälzt.' },
+  { id: 'herz',        name: 'Lebkuchenherz',  form: 'herz',  deko: 'schoko',    ab: 0,    text: 'Würzig, weich und mit Schokolade überzogen.' },
+  { id: 'baeumchen',   name: 'Tannenbäumchen', form: 'baum',  deko: 'gruen',     ab: 800,  text: 'Butterplätzchen mit grünem Guss und bunten Streuseln.' },
+  { id: 'spitzbube',   name: 'Spitzbube',      form: 'kreis', deko: 'marmelade', ab: 1600, text: 'Zwei Mürbeteigtaler, dazwischen rote Marmelade.' },
+  { id: 'schokostern', name: 'Schokostern',    form: 'stern', deko: 'schoko',    ab: 2600, text: 'Wie der Zimtstern, nur in Schokolade getaucht.' },
+];
+// Die Plätzchendose auf dem Stand: Jeder Gast, den du SELBST bedienst, nimmt
+// ein Plätzchen und zahlt dafür etwas mehr. Die Wichtel verteilen keine.
+// Wetter mit Folgen (10.10.): An kalten Tagen geht Punsch besser, an
+// nasskalten Heiße Schokolade - die Sorten werden öfter bestellt (`mehr`) und
+// zahlen etwas mehr (`bonus`). Lage und Temperatur: Z.tagesWetter().
+export const WETTER_LAGEN = {
+  frost:     { name: 'Klirrende Kälte', text: 'Heute geht Punsch besonders gut', gruppe: ['gluehwein', 'kinderpunsch', 'eierpunsch', 'jaegertee', 'feuerzange'], bonus: 0.2, mehr: 1.8 },
+  schmuddel: { name: 'Nasskaltes Schmuddelwetter', text: 'Heute wollen alle etwas Süßes und Warmes', gruppe: ['schoko', 'weisser', 'apfel'], bonus: 0.2, mehr: 1.8 },
+};
+
+// Wunschzettel (10.10.): höchstens ein Brief offen, der nächste frühestens am
+// Tag nach dem Dank. Ab dem zweiten Spieltag, höchstens BRIEF_MAX je Saison.
+export const BRIEF_AB_TAG = 1;
+export const BRIEF_MAX = 10;
+export const BRIEF_BACKEN = 5;            // so viele Plätzchen wünscht sich das Back-Kind
+export const BRIEF_LOHN_MINUTEN = 4;      // Dank: so viele Minuten Einnahmen …
+export const BRIEF_LOHN_MIN = 200;        // … mindestens so viele Sterne
+export const BRIEF_KINDER = [
+  { name: 'Lena', alter: 7, maedchen: true }, { name: 'Paul', alter: 6 }, { name: 'Mia', alter: 8, maedchen: true },
+  { name: 'Jonas', alter: 5 }, { name: 'Emil', alter: 9 }, { name: 'Hanna', alter: 6, maedchen: true },
+  { name: 'Ben', alter: 7 }, { name: 'Lotta', alter: 8, maedchen: true }, { name: 'Finn', alter: 6 }, { name: 'Ida', alter: 5, maedchen: true },
+];
+export const DOSE_MAX = 30;
+export const DOSE_BONUS = 0.25;
+
 // Drei Schwierigkeiten für alle Minispiele (10.10.): `tempo` macht Tiere,
 // Wok und Kundenungeduld schneller, `punkte` zahlt dafür mehr. Ein Rekord
 // für alle Stufen - wer schwer spielt, kommt schneller an die Deko.
@@ -569,5 +619,6 @@ export const MINISPIELE = {
   baum:     { deko: BAUM_DEKO,     jeMin: BAUM_PUNKTE_JE_MIN,     maxMin: BAUM_MAX_MIN },
   berg:     { deko: BERG_DEKO,     jeMin: BERG_PUNKTE_JE_MIN,     maxMin: BERG_MAX_MIN },
   eis:      { deko: EIS_DEKO,      jeMin: EIS_PUNKTE_JE_MIN,      maxMin: EIS_MAX_MIN },
+  back:     { deko: [],            jeMin: BACK_PUNKTE_JE_MIN,     maxMin: BACK_MAX_MIN },
 };
 
