@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=20261010l';
-import * as S from './spiel.js?v=20261010l';
-import * as Z from './zeit.js?v=20261010l';
-import * as T from './ton.js?v=20261010l';
-import * as LI from './lichtung.js?v=20261010l';
-import * as CB from './christbaum.js?v=20261010l';
-import * as KA from './karte.js?v=20261010l';
-import * as SB from './schlitten.js?v=20261010l';
-import * as EB from './schlittschuh.js?v=20261010l';
-import * as BS from './backstube.js?v=20261010l';
-import * as UI from './ui.js?v=20261010l';
-import { zeichneWelt, schlittenPos } from './szene.js?v=20261010l';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=20261010l';
-import * as Lernen from './lernen.js?v=20261010l';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=20261010l';
-import * as A from './auftraege.js?v=20261010l';
-import * as E from './erfolge.js?v=20261010l';
-import * as ZL from './ziele.js?v=20261010l';
+import * as C from './config.js?v=202610101341';
+import * as S from './spiel.js?v=202610101341';
+import * as Z from './zeit.js?v=202610101341';
+import * as T from './ton.js?v=202610101341';
+import * as LI from './lichtung.js?v=202610101341';
+import * as CB from './christbaum.js?v=202610101341';
+import * as KA from './karte.js?v=202610101341';
+import * as SB from './schlitten.js?v=202610101341';
+import * as EB from './schlittschuh.js?v=202610101341';
+import * as BS from './backstube.js?v=202610101341';
+import * as UI from './ui.js?v=202610101341';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610101341';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610101341';
+import * as Lernen from './lernen.js?v=202610101341';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=202610101341';
+import * as A from './auftraege.js?v=202610101341';
+import * as E from './erfolge.js?v=202610101341';
+import * as ZL from './ziele.js?v=202610101341';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -276,6 +276,9 @@ setInterval(() => {
   else if (S.heiligabendFaellig() && !UI.fensterOffen() && !UI.panelOffen()) zeigeHeiligabend();
   // Wunschzettel: neuer Brief oder ein erfüllter Wunsch
   else { const brief = S.briefPruefen(); if (brief) UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'); }
+  // Ein neues Minispiel ist auf der Karte: eigenes Fenster, sobald nichts offen ist
+  const miniNeu = S.pruefeMiniFrei();
+  if (miniNeu.length && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { UI.zeigeMiniNeu(miniNeu.shift()); S.speichere(); }
   const neu = S.pruefeFreischaltungen();
   if (neu.length) {
     T.spiele('spezial');

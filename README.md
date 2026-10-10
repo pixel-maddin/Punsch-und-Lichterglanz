@@ -105,6 +105,13 @@ darauf, und jedes zeigt beim Öffnen oben ein Bild von sich:
 | **Supermarkt** | Zutaten: Kinderpunsch (lockt Kinder an), heißer Apfel, Lebkuchen, heiße Schokolade, Herzwärmer, Waldtee, Crêpe, Zimtwolke, Feuerzauber - alles alkoholfrei |
 | **Wichtelwald** | Spül-, Servier-, Nachfüll-, Crêpe- und Kassen-Wichtel, in ihren Baumstammhäusern |
 
+**Minispiele kommen nach und nach:** Am Anfang steht nur die Waldlichtung
+auf der Karte. Alle zwei bis drei Tage kommt ein neues dazu (Christbaumverkauf
+am 3. Spieltag, Backstube am 6., Eisbahn am 8., Schlittenberg am 11.), jeweils
+mit einem Fenster, das es vorstellt. Bis dahin sieht man auf der Karte nur das
+Bild des Ortes, ohne Schild. Wer erst im Dezember anfängt, bekommt sie
+schneller - spätestens am 14.12. ist alles offen.
+
 **Christbaumverkauf (Minispiel):** Kunden fahren vor und wollen einen
 bestimmten Baum - Größe und Sorte (Nordmanntanne, Blaufichte, Fichte) stehen
 in der Sprechblase. Den richtigen Baum dreimal antippen zum Sägen, dreimal ins

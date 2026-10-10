@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261010l';
-import * as S from './spiel.js?v=20261010l';
-import * as Z from './zeit.js?v=20261010l';
-import * as T from './ton.js?v=20261010l';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010l';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010l';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010l';
-import * as A from './auftraege.js?v=20261010l';
-import * as E from './erfolge.js?v=20261010l';
-import * as ZL from './ziele.js?v=20261010l';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010l';
-import * as KA from './karte.js?v=20261010l';
-import { zeigeRueckblick } from './ereignis.js?v=20261010l';
-import { barbaraZweig } from './szene.js?v=20261010l';
-import * as LI from './lichtung.js?v=20261010l';
-import * as CB from './christbaum.js?v=20261010l';
-import * as SB from './schlitten.js?v=20261010l';
-import * as EB from './schlittschuh.js?v=20261010l';
-import * as BS from './backstube.js?v=20261010l';
-import { alleSymbole } from './symbole.js?v=20261010l';
+import * as C from './config.js?v=202610101341';
+import * as S from './spiel.js?v=202610101341';
+import * as Z from './zeit.js?v=202610101341';
+import * as T from './ton.js?v=202610101341';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610101341';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610101341';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610101341';
+import * as A from './auftraege.js?v=202610101341';
+import * as E from './erfolge.js?v=202610101341';
+import * as ZL from './ziele.js?v=202610101341';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610101341';
+import * as KA from './karte.js?v=202610101341';
+import { zeigeRueckblick } from './ereignis.js?v=202610101341';
+import { barbaraZweig } from './szene.js?v=202610101341';
+import * as LI from './lichtung.js?v=202610101341';
+import * as CB from './christbaum.js?v=202610101341';
+import * as SB from './schlitten.js?v=202610101341';
+import * as EB from './schlittschuh.js?v=202610101341';
+import * as BS from './backstube.js?v=202610101341';
+import { alleSymbole } from './symbole.js?v=202610101341';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -258,6 +258,26 @@ function amOrt(o) {
   if (o.spiel === 'back') { zeigeBackstube(); return; }
   if (o.markt) { zeigeMarkt(); return; }
   if (o.bald) fenster(o.name, `<p>${o.bald}</p><p class="klein">Kommt bald!</p>`);
+}
+/**
+ * Ein Minispiel ist neu auf der Karte (10.10., Minispiele kommen nach und
+ * nach). Einmal je Spiel, aus main.js, wenn gerade nichts offen ist.
+ */
+const MINI_NEU_TEXT = {
+  baum: 'Am <b>Christbaumverkauf</b> wollen Kunden ihren Baum: richtig aussuchen, sägen, ins Netz und aufs Autodach.',
+  back: 'In der <b>Backstube</b> stichst du Plätzchen aus, backst sie goldbraun und verzierst sie. Was du bäckst, kommt in die Plätzchendose auf deinem Stand.',
+  eis: 'Auf der <b>Eisbahn</b> drehst du deine Runden - mit Sprüngen und Tricks.',
+  berg: 'Am <b>Schlittenberg</b> saust du im Wok den Hang hinunter, sammelst Sterne und weichst Tannen und Steinen aus.',
+  lichtung: 'Auf der <b>Waldlichtung</b> fütterst du Hasen, Eichhörnchen und Rehe.',
+};
+export function zeigeMiniNeu(name) {
+  const o = KA.ORTE.find((x) => x.spiel === name);
+  if (!o) return;
+  T.spiele('spezial');
+  fenster(`Neu: ${o.name}!`, `
+    <p>${MINI_NEU_TEXT[name] || ''}</p>
+    <p class="klein">Ab heute auf der Karte. Es bringt Sterne und besondere Deko fürs Haus.</p>`,
+  [{ text: 'Später', neben: true }, { text: 'Hingehen', aktion: () => { schliesseFenster(); oeffneKarte(o.id); return false; } }]);
 }
 
 // ---------------------------------------------------------------------------
@@ -1566,7 +1586,7 @@ export function zeigeHilfe() {
     </ol>
     <p>Wer zügig hintereinander bedient, baut <b>Schwung</b> auf (bis ×1,40). Wer länger bleibt, bekommt Besuch von ganzen Gruppen - und manchmal von jemand ganz Besonderem.</p>
     <p>Mit den Sternen kaufst du Deko, Farbe, Zutaten und Wichtel. Je gemütlicher das Haus, desto mehr Gäste kommen und desto mehr zahlen sie.</p>
-    <p>Auf der <b>Karte</b> warten Läden, fünf Minispiele und alle paar Tage der Weihnachtsmarkt. Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr. Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an. Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
+    <p>Auf der <b>Karte</b> warten Läden, Minispiele (zuerst nur die Waldlichtung, alle paar Tage kommt ein neues dazu) und alle paar Tage der Weihnachtsmarkt. Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr. Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an. Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
     <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.</p>
     <p class="klein">Das Spiel läuft mit deiner echten Uhr: Nachts ist es dunkel, ab dem 1. Dezember liegt Schnee und jeden Tag geht ein Türchen auf.</p>`);
 }

@@ -622,3 +622,11 @@ export const MINISPIELE = {
   back:     { deko: [],            jeMin: BACK_PUNKTE_JE_MIN,     maxMin: BACK_MAX_MIN },
 };
 
+
+// Minispiele kommen nach und nach (10.10., Nutzerwunsch: „sonst zu überladen
+// am Anfang"). Spieltag (ab dem ersten Spieltag gezählt), ab dem ein Spiel auf
+// der Karte steht - abwechselnd zwei und drei Tage Abstand. Wer spät anfängt,
+// bekommt sie zusammengeschoben: Spätestens am MINI_ALLE_DEZ. Dezember ist
+// das letzte offen, die anderen entsprechend früher (siehe miniOffen()).
+export const MINI_AB_TAG = { lichtung: 0, baum: 2, back: 5, eis: 7, berg: 10 };
+export const MINI_ALLE_DEZ = 14;

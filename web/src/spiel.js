@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261010l';
-import * as Z from './zeit.js?v=20261010l';
-import { neueFarben } from './pixel.js?v=20261010l';
+import * as C from './config.js?v=202610101341';
+import * as Z from './zeit.js?v=202610101341';
+import { neueFarben } from './pixel.js?v=202610101341';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1309,6 +1309,35 @@ export function miniErgebnis(name, punkte) {
   speichere();
   return { sterne, rekord: punkte > vorher && vorher > 0, best: l.best, neu, rest: miniRest(name) };
 }
+/**
+ * Steht das Minispiel schon auf der Karte? (10.10.) Nach Spieltag
+ * (`C.MINI_AB_TAG`); einmal gespielt bleibt offen, alte Spielstände
+ * (spieltag 99) haben alles. Spät im Dezember rücken die Termine zusammen.
+ */
+export function miniOffen(name) {
+  const ab = C.MINI_AB_TAG[name] || 0;
+  if (!ab || spieltag() >= ab || miniStand(name).best > 0) return true;
+  const letzter = Math.max(...Object.values(C.MINI_AB_TAG));
+  return Z.dezemberTag() >= C.MINI_ALLE_DEZ - (letzter - ab);
+}
+/**
+ * Neu aufgegangene Minispiele melden (jede Sekunde aus main.js). Was beim
+ * allerersten Aufruf schon offen ist, und alles, solange die Karte noch nicht
+ * vorgestellt ist (Hinweis `karte_mehr` nennt die offenen selbst), wird still
+ * gemerkt. Der Rest wartet in `st.miniHinweis`, bis sein Fenster kam.
+ */
+export function pruefeMiniFrei() {
+  const erstes = !st.miniGemeldet;
+  st.miniGemeldet = st.miniGemeldet || {};
+  st.miniHinweis = st.miniHinweis || [];
+  const reihe = Object.keys(C.MINISPIELE).sort((a, b) => (C.MINI_AB_TAG[a] || 0) - (C.MINI_AB_TAG[b] || 0));
+  for (const n of reihe) {
+    if (st.miniGemeldet[n] || !miniOffen(n)) continue;
+    st.miniGemeldet[n] = true;
+    if (!erstes && st.tipps && st.tipps.karte_mehr) st.miniHinweis.push(n);
+  }
+  return st.miniHinweis;
+}
 export const lichtungRest = () => miniRest('lichtung');
 export const lichtungRekord = () => miniRekord('lichtung');
 export const lichtungErgebnis = (punkte) => miniErgebnis('lichtung', punkte);
@@ -1573,8 +1602,8 @@ function wunschKandidaten() {
   for (const a of getraenk) m.push({ art: 'getraenk', ziel: a.id, w: 1.5 / getraenk.length });
   if (st.tipps && st.tipps.karte_mehr) {
     if (!briefe().erfuellt.some((b) => b.art === 'santa')) m.push({ art: 'santa', w: 0.6 });
-    m.push({ art: 'backen', w: 0.7 });
-    m.push({ art: 'eis', w: 0.5 });
+    if (miniOffen('back')) m.push({ art: 'backen', w: 0.7 });
+    if (miniOffen('eis')) m.push({ art: 'eis', w: 0.5 });
   }
   return m;
 }

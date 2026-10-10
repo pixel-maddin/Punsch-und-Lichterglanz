@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261010l';
-import * as S from './spiel.js?v=20261010l';
-import * as Z from './zeit.js?v=20261010l';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010l';
+import * as C from './config.js?v=202610101341';
+import * as S from './spiel.js?v=202610101341';
+import * as Z from './zeit.js?v=202610101341';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610101341';
 
 const $ = (s) => document.querySelector(s);
 
@@ -114,6 +114,9 @@ function baueSchilder(hervor) {
   }
   const neu = S.st.neu || {};
   for (const o of ORTE) {
+    // Noch nicht aufgegangenes Minispiel (10.10.): nur die Grafik, kein
+    // Schild und keine Tippfläche - es soll sich erst zeigen, wenn es dran ist
+    if (o.spiel && !S.miniOffen(o.spiel)) continue;
     const b = document.createElement('button');
     b.className = 'ort' + (o.bald ? ' bald' : '') + (o.id === hervor ? ' hervor' : '') + (o.id === 'haus' ? ' zuhause' : '');
     const [sdx, sdy] = o.schild || [0, 0];

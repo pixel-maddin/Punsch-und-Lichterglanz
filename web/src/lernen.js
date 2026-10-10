@@ -23,11 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=20261010l';
-import * as S from './spiel.js?v=20261010l';
-import * as A from './auftraege.js?v=20261010l';
-import * as E from './erfolge.js?v=20261010l';
-import * as Z from './ziele.js?v=20261010l';
+import * as C from './config.js?v=202610101341';
+import * as S from './spiel.js?v=202610101341';
+import * as A from './auftraege.js?v=202610101341';
+import * as E from './erfolge.js?v=202610101341';
+import * as Z from './ziele.js?v=202610101341';
+import * as KA from './karte.js?v=202610101341';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -182,7 +183,13 @@ const HINWEISE = [
   // Was es außer dem Stand gibt (09.10.): erst, wenn die Wichtel den Stand
   // tragen - dann ist Zeit dafür, und es hat Sterne für die Markt-Ware
   { id: 'karte_mehr', sofort: true, wann: () => !!S.st.tipps.wichtel_weg,
-    info: () => 'Auf der Karte gibt es noch mehr zu entdecken: MINISPIELE - Backstube, Christbaumverkauf, Eisbahn, Waldlichtung und Schlittenberg. Sie bringen Sterne, besondere Deko fürs Haus und Plätzchen für deinen Stand. Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.',
+    // Nennt nur, was schon offen ist (10.10.: Minispiele kommen nach und nach)
+    info: () => {
+      const offen = KA.ORTE.filter((o) => o.spiel && S.miniOffen(o.spiel)).map((o) => o.name);
+      const alle = offen.length === Object.keys(C.MINISPIELE).length;
+      const liste = offen.length > 1 ? `${offen.slice(0, -1).join(', ')} und ${offen.at(-1)}` : offen[0];
+      return `Auf der Karte gibt es noch mehr zu entdecken: ${offen.length > 1 ? 'MINISPIELE' : 'ein MINISPIEL'} - ${liste}. ${offen.length > 1 ? 'Sie bringen' : 'Es bringt'} Sterne und besondere Deko fürs Haus.${alle ? '' : ' Alle paar Tage kommt ein neues dazu.'} Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.`;
+    },
     text: () => 'Tippe auf KARTE und schau dich um.',
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, lang: true },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
