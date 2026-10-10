@@ -13,11 +13,11 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=20261010a';
-import * as Z from './zeit.js?v=20261010a';
-import * as T from './ton.js?v=20261010a';
-import * as MH from './minihud.js?v=20261010a';
-import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=20261010a';
+import * as C from './config.js?v=20261010b';
+import * as Z from './zeit.js?v=20261010b';
+import * as T from './ton.js?v=20261010b';
+import * as MH from './minihud.js?v=20261010b';
+import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=20261010b';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -33,6 +33,7 @@ const SAEGEN = 3, NETZ = 3;
 const AUTO_FARBEN = ['#c83a32', '#3a6ab8', '#e8c030', '#2f8a3a', '#8a4ab8', '#e8e8e4', '#3a3a44'];
 
 let cv = null, c = null, H = 320;
+let stufe = C.MINI_STUFEN[1];   // Schwierigkeit der laufenden Runde
 let spiel = null, rafId = 0, letzte = 0, fertig = null;
 export const istOffen = () => !!spiel;
 export const zustand = () => spiel;
@@ -44,7 +45,8 @@ const MASCHINE = () => ({ x: 36, y: Math.round(H * 0.84) });
 const PARKPLATZ = () => ({ x: 130, y: Math.round(H * 0.9) });
 
 /** Runde starten. `beiEnde(punkte, kunden)` kommt nach Ablauf. */
-export function starte(hoehe, beiEnde) {
+export function starte(hoehe, beiEnde, stufeNr = 1) {
+  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
@@ -86,7 +88,7 @@ function neuerBaum(x, y, i) {
 function neuesAuto(g) {
   const stehen = g.baeume.filter((b) => !b.weg);
   const ziel = wahl(stehen);
-  const max = Math.max(8, 14 - g.kunden * 0.35);
+  const max = Math.max(8, 14 - g.kunden * 0.35) / stufe.tempo;
   g.auto = { x: W + 30, phase: 'kommt', farbe: wahl(AUTO_FARBEN), wunsch: { art: ziel.art, gr: ziel.gr },
     geduld: max, max, fehler: false, dach: false, t: 0,
     kunde: { typ: wahl(['erwachsen', 'erwachsen', 'oma', 'opa']), farben: neueFarben('erwachsen'), phase: Math.random() * 6, laeuft: false } };
@@ -224,7 +226,7 @@ function schritt(dt) {
       w.x = w.vonX + (a.x - 6 - w.vonX) * k; w.y = w.vonY + (pp.y - 21 - w.vonY) * k - Math.sin(k * Math.PI) * 18;
       if (k >= 1) {
         // Auf dem Dach: kassieren, Kette, losfahren
-        const pkt = Math.round((50 + 70 * Math.max(0, a.geduld) / a.max) * g.kette);
+        const pkt = Math.round((50 + 70 * Math.max(0, a.geduld) / a.max) * g.kette * stufe.punkte);
         g.punkte += pkt; g.kunden++;
         g.texte.push({ x: a.x, y: pp.y - 44, text: '+' + pkt, farbe: g.kette > 1 ? '#ffb040' : '#ffe060', t: 0 });
         g.kette = a.fehler ? 1 : Math.min(3, g.kette + 1);
@@ -252,7 +254,8 @@ export function vorspulen(sek) {
  * Messweg: eine Runde ohne Bildschleife. `takt` = Sekunden je Handgriff,
  * `treffer` = Anteil der Kunden, bei denen der erste Baum stimmt.
  */
-export function messe(takt = 0.3, treffer = 1, hoehe = 320) {
+export function messe(takt = 0.3, treffer = 1, hoehe = 320, stufeNr = 1) {
+  stufe = C.MINI_STUFEN[stufeNr];
   const altFertig = fertig;
   H = hoehe; fertig = null;
   spiel = neuesSpiel(0);
@@ -446,7 +449,7 @@ function zeichne(t) {
   } else MH.label('wunsch', 0, 0, null);
   // Hinweis, was als Nächstes dran ist
   const was = !a || a.phase === 'faehrt' ? '' : g.schritt === 'suchen' ? 'BAUM SUCHEN' : g.schritt === 'saegen' ? 'SÄGEN!' : g.schritt === 'netz' ? (w && w.phase === 'wartet' ? 'INS NETZ!' : '') : g.schritt === 'laden' ? 'AUFS AUTO!' : '';
-  MH.hinweis(was && g.t >= 0 && !g.aus ? was : null);
+  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null);
   // Fehlgriffe und Texte
   for (const f of g.fehl) { const k = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - k})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
   // Schwebende Texte als DOM (minihud.js) - einmal anstoßen, sie steigen selbst

@@ -121,7 +121,8 @@ Rekord: Rodelkinder auf dem Gehweg, dein Wok als Trophäe an der Hauswand und
 ein Rodelhang am Horizont.
 
 In allen Minispielen pausiert die Musik und läuft danach an derselben Stelle
-weiter.
+weiter. Jedes Minispiel hat drei Schwierigkeiten: Leicht (Punkte ×0,7),
+Normal und Schwer (Punkte ×1,4) - der Rekord gilt für alle.
 
 **Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt - er wird
 ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.

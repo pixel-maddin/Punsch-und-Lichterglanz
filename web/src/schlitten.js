@@ -10,11 +10,11 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=20261010a';
-import * as Z from './zeit.js?v=20261010a';
-import * as T from './ton.js?v=20261010a';
-import * as MH from './minihud.js?v=20261010a';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=20261010a';
+import * as C from './config.js?v=20261010b';
+import * as Z from './zeit.js?v=20261010b';
+import * as T from './ton.js?v=20261010b';
+import * as MH from './minihud.js?v=20261010b';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=20261010b';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -29,6 +29,7 @@ const ARTEN = {
 };
 
 let cv = null, c = null, H = 320;
+let stufe = C.MINI_STUFEN[1];   // Schwierigkeit der laufenden Runde
 let spiel = null, rafId = 0, letzte = 0, fertig = null;
 let tasten = { l: false, r: false };
 export const istOffen = () => !!spiel;
@@ -37,7 +38,8 @@ const WOK_Y = () => Math.round(H * 0.32);
 
 function zufall(a, b) { return a + Math.random() * (b - a); }
 
-export function starte(hoehe, beiEnde) {
+export function starte(hoehe, beiEnde, stufeNr = 1) {
+  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
@@ -113,7 +115,7 @@ function takt(jetzt) {
 function ende(g) {
   g.aus = true;
   // Punkte: Sterne, und wer im Ziel ist, bekommt Ziel- und Zeitbonus
-  if (g.imZiel) g.punkte += C.BERG_ZIEL + Math.round(Math.max(0, C.BERG_DAUER - g.zeit) * C.BERG_JE_S);
+  if (g.imZiel) g.punkte += Math.round((C.BERG_ZIEL + Math.max(0, C.BERG_DAUER - g.zeit) * C.BERG_JE_S) * stufe.punkte);
   if (fertig) T.spiele('fertig');
   setTimeout(() => { if (spiel === g && fertig) fertig(g.punkte, g.imZiel ? g.zeit : null, g.sterne); }, 1300);
 }
@@ -137,7 +139,7 @@ function schritt(dt) {
   if (g.crash > 0) { g.crash -= dt; g.vx *= 0.9; }
   g.x = Math.max(RAND, Math.min(W - RAND, g.x + g.vx * dt));
   // Tempo: wird immer schneller, ein Crash wirft zurück
-  g.v = Math.min(TEMPO[1], g.v + BESCHL * dt);
+  g.v = Math.min(TEMPO[1] * stufe.tempo, g.v + BESCHL * stufe.tempo * dt);
   g.dist += g.v * dt;
   g.spur.push({ x: g.x, y: g.dist });
   if (g.spur.length > 120) g.spur.shift();
@@ -149,7 +151,7 @@ function schritt(dt) {
     if (dy < -10 || dy > 10) continue;
     if (d.art === 'stern') {
       if (Math.abs(d.x - g.x) < (d.gross ? 12 : 10) && Math.abs(dy) < 8) {
-        const pkt = C.BERG_STERN * (d.gross ? 2 : 1);
+        const pkt = Math.round(C.BERG_STERN * (d.gross ? 2 : 1) * stufe.punkte);
         d.getroffen = true; g.sterne++; g.punkte += pkt;
         g.texte.push({ x: d.x, y: WOK_Y() - 14, text: '+' + pkt, farbe: d.gross ? '#ffb040' : '#ffe27a', t: 0 });
         T.spiele(d.gross ? 'kasse' : 'greifen');
@@ -202,7 +204,8 @@ function lenkeAuto(fehler, voraus = 110) {
  * entschieden (s), `fehler` = Ungenauigkeit beim Zielen, `voraus` = wie weit
  * man vorausschaut.
  */
-export function messe(reaktion = 0.1, fehler = 0, voraus = 110, hoehe = 320) {
+export function messe(reaktion = 0.1, fehler = 0, voraus = 110, hoehe = 320, stufeNr = 1) {
+  stufe = C.MINI_STUFEN[stufeNr];
   const altFertig = fertig;
   H = hoehe; fertig = null;
   spiel = neuesSpiel(0);
@@ -338,7 +341,7 @@ function zeichne(t) {
   // Schwebende Texte als DOM (minihud.js) - einmal anstoßen, sie steigen selbst
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || (x.text.length > 3 ? '#ffb040' : '#ffe27a'), x.text.length > 5 ? 0.8 : 1.1); }
   // Daumen-Hinweis am Anfang
-  MH.hinweis(g.t < 2.5 ? 'Daumen ziehen zum Lenken' : null);
+  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : g.t < 2.5 ? 'Daumen ziehen zum Lenken' : null);
   // Leicht dunkler bei Nacht
   const li = Z.licht();
   if (li.hell < 0.9) { c.fillStyle = `rgba(14,20,62,${((1 - li.hell) * 0.35).toFixed(3)})`; c.fillRect(0, 0, W, H); }

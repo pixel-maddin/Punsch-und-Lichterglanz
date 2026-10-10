@@ -11,11 +11,11 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=20261010a';
-import * as Z from './zeit.js?v=20261010a';
-import * as T from './ton.js?v=20261010a';
-import * as MH from './minihud.js?v=20261010a';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=20261010a';
+import * as C from './config.js?v=20261010b';
+import * as Z from './zeit.js?v=20261010b';
+import * as T from './ton.js?v=20261010b';
+import * as MH from './minihud.js?v=20261010b';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=20261010b';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -31,6 +31,7 @@ const ARTEN = {
 const MITTE = { hase: 7, eich: 7, reh: 11, gold: 7 };   // Körpermitte über den Füßen
 
 let cv = null, c = null, H = 320;
+let stufe = C.MINI_STUFEN[1];   // Schwierigkeit der laufenden Runde
 let spiel = null, rafId = 0, letzte = 0, fertig = null;
 export const istOffen = () => !!spiel;
 /** Zum Testen (Autopilot im Browser): der laufende Zustand. */
@@ -39,7 +40,8 @@ export const zustand = () => spiel;
 export const mitte = (tier) => ({ x: tier.x, y: tier.y - MITTE[tier.art] });
 
 /** Runde starten. `beiEnde(punkte)` kommt nach Ablauf (ui.js zeigt das Ergebnis). */
-export function starte(hoehe, beiEnde) {
+export function starte(hoehe, beiEnde, stufeNr = 1) {
+  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
@@ -71,7 +73,7 @@ function neuesTier() {
   const a = ARTEN[art];
   g.tiere.push({
     art, dir, x: dir > 0 ? -16 : W + 16, y: Math.round(zufall(H * 0.4, H * 0.88)),
-    v: zufall(a.tempo[0], a.tempo[1]), phase: Math.random() * 6, t: 0, satt: -1,
+    v: zufall(a.tempo[0], a.tempo[1]) * stufe.tempo, phase: Math.random() * 6, t: 0, satt: -1,
   });
 }
 
@@ -93,7 +95,7 @@ export function tippeAuf(x, y) {
   // Gefüttert! Kette wächst, wenn es schnell genug ging
   spiel.kette = spiel.ketteT > 0 ? Math.min(5, spiel.kette + 1) : 1;
   spiel.ketteT = 1.6;
-  const pkt = ARTEN[best.art].wert * spiel.kette;
+  const pkt = Math.round(ARTEN[best.art].wert * spiel.kette * stufe.punkte);
   spiel.punkte += pkt;
   spiel.gefuettert++;
   best.satt = 0;
@@ -125,7 +127,8 @@ export function vorspulen(sek) {
  * zwischen zwei Tipps, `treffer` = Anteil der Tipps, die sitzen (Mensch-Näherung).
  * Gibt die Punkte zurück. Nur zum Einmessen der Schwellen.
  */
-export function messe(takt = 0.42, treffer = 1, hoehe = 320) {
+export function messe(takt = 0.42, treffer = 1, hoehe = 320, stufeNr = 1) {
+  stufe = C.MINI_STUFEN[stufeNr];
   const altFertig = fertig;
   H = hoehe; fertig = null;
   spiel = { t: 0, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, aus: false };
@@ -151,7 +154,7 @@ function schritt(dt) {
     g.spawnT -= dt;
     if (g.spawnT <= 0 && g.tiere.filter((x) => x.satt < 0).length < 7) {
       neuesTier();
-      g.spawnT = Math.max(0.35, 0.95 - g.t / C.LICHTUNG_DAUER * 0.55) * zufall(0.7, 1.3);
+      g.spawnT = Math.max(0.35, 0.95 - g.t / C.LICHTUNG_DAUER * 0.55) * zufall(0.7, 1.3) / stufe.tempo;
     }
     if (g.ketteT > 0) { g.ketteT -= dt; if (g.ketteT <= 0) g.kette = 1; }
     if (g.t >= C.LICHTUNG_DAUER) {
@@ -470,6 +473,7 @@ function zeichne(t) {
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)
   const rest = Math.max(0, Math.ceil(C.LICHTUNG_DAUER - Math.max(0, g.t)));
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: Math.max(0, g.ketteT) / 1.6, punkte: g.punkte });
+  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : null);
   MH.mitte(g.aus ? 'ZEIT!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }
 

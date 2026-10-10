@@ -5,22 +5,22 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=20261010a';
-import * as S from './spiel.js?v=20261010a';
-import * as Z from './zeit.js?v=20261010a';
-import * as T from './ton.js?v=20261010a';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010a';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010a';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010a';
-import * as A from './auftraege.js?v=20261010a';
-import * as E from './erfolge.js?v=20261010a';
-import * as ZL from './ziele.js?v=20261010a';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010a';
-import * as KA from './karte.js?v=20261010a';
-import * as LI from './lichtung.js?v=20261010a';
-import * as CB from './christbaum.js?v=20261010a';
-import * as SB from './schlitten.js?v=20261010a';
-import { alleSymbole } from './symbole.js?v=20261010a';
+import * as C from './config.js?v=20261010b';
+import * as S from './spiel.js?v=20261010b';
+import * as Z from './zeit.js?v=20261010b';
+import * as T from './ton.js?v=20261010b';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=20261010b';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=20261010b';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=20261010b';
+import * as A from './auftraege.js?v=20261010b';
+import * as E from './erfolge.js?v=20261010b';
+import * as ZL from './ziele.js?v=20261010b';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=20261010b';
+import * as KA from './karte.js?v=20261010b';
+import * as LI from './lichtung.js?v=20261010b';
+import * as CB from './christbaum.js?v=20261010b';
+import * as SB from './schlitten.js?v=20261010b';
+import { alleSymbole } from './symbole.js?v=20261010b';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -263,14 +263,34 @@ function spielHoehe() {
 function zeigeLichtung() {
   const rest = S.lichtungRest(), best = S.lichtungRekord();
   const naechste = C.LICHTUNG_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  fenster('Waldlichtung', `
+  miniFenster('Waldlichtung', `
     <p>Hasen, Eichhörnchen und Rehe hüpfen durch die Lichtung. <b>Tippe sie an, um sie zu füttern.</b> Schnell hintereinander gibt eine Kette bis ×5.</p>
     <p class="klein">${C.LICHTUNG_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
     <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
-  [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteLichtung, 60); } }]);
+  [{ text: 'Später', neben: true }], 'lichtung', starteLichtung);
 }
-export function starteLichtung() {
-  LI.starte(spielHoehe(), (punkte, n) => { LI.schliesse(); miniErgebnis('lichtung', punkte, `${n} Tiere gefüttert`, 'Gut gefüttert!', starteLichtung); });
+export function starteLichtung(stufeNr = 1) {
+  LI.starte(spielHoehe(), (punkte, n) => { LI.schliesse(); miniErgebnis('lichtung', punkte, `${n} Tiere gefüttert`, 'Gut gefüttert!', () => starteLichtung(stufeNr)); }, stufeNr);
+}
+/**
+ * Startfenster eines Minispiels mit drei Knöpfen für die Schwierigkeit
+ * (10.10.). Die zuletzt gewählte ist hervorgehoben (`st.miniStufe[name]`).
+ */
+function miniFenster(titel, html, knoepfe, name, starte) {
+  const box = fenster(titel, html + '<div class="stufen"></div>', knoepfe);
+  const reihe = box.querySelector('.stufen');
+  const zuletzt = (S.st.miniStufe || {})[name] ?? 1;
+  C.MINI_STUFEN.forEach((stufe, i) => {
+    const b = el('button', 'k stufe' + (i === zuletzt ? ' gewaehlt' : ''), `${stufe.name}<small>Punkte ×${String(stufe.punkte).replace('.', ',')}</small>`);
+    b.onclick = () => {
+      T.spiele('klick');
+      S.st.miniStufe = { ...(S.st.miniStufe || {}), [name]: i };
+      S.speichere();
+      schliesseFenster();
+      setTimeout(() => starte(i), 60);
+    };
+    reihe.appendChild(b);
+  });
 }
 /** Ergebnisfenster für jedes Minispiel: Punkte, Rekord, Sterne, neue Deko. */
 function miniErgebnis(name, punkte, zeile, titel, nochmal) {
@@ -296,15 +316,15 @@ function miniErgebnis(name, punkte, zeile, titel, nochmal) {
 function zeigeBaumspiel() {
   const rest = S.miniRest('baum'), best = S.miniRekord('baum');
   const naechste = C.BAUM_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  fenster('Christbaumverkauf', `
+  miniFenster('Christbaumverkauf', `
     <p>Kunden fahren vor und wollen einen bestimmten Baum - <b>Größe und Sorte stehen in der Sprechblase.</b></p>
     <p>Tippe den richtigen Baum an und <b>säge ihn mit drei Tipps</b>. Dann <b>dreimal aufs Netz</b> und zum Schluss <b>aufs Auto</b>. Je schneller, desto mehr Punkte - fehlerfreie Kunden hintereinander geben eine Kette bis ×3.</p>
     <p class="klein">${C.BAUM_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
     <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
-  [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteBaumspiel, 60); } }]);
+  [{ text: 'Später', neben: true }], 'baum', starteBaumspiel);
 }
-export function starteBaumspiel() {
-  CB.starte(spielHoehe(), (punkte, n) => { CB.schliesse(); miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft`, 'Gut verkauft!', starteBaumspiel); });
+export function starteBaumspiel(stufeNr = 1) {
+  CB.starte(spielHoehe(), (punkte, n) => { CB.schliesse(); miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft`, 'Gut verkauft!', () => starteBaumspiel(stufeNr)); }, stufeNr);
 }
 
 // ---------------------------------------------------------------------------
@@ -313,19 +333,19 @@ export function starteBaumspiel() {
 function zeigeBergspiel() {
   const rest = S.miniRest('berg'), best = S.miniRekord('berg');
   const naechste = C.BERG_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  fenster('Schlittenberg', `
+  miniFenster('Schlittenberg', `
     <p>Im Wok den Berg hinunter! <b>Leg den Daumen aufs Bild und zieh ihn nach links oder rechts</b> - der Wok folgt ihm.</p>
     <p>Weich Tannen, Steinen, Schneemännern und Holzstapeln aus und sammle die Sterne. Je schneller du im Ziel bist, desto mehr Punkte.</p>
     <p class="klein">${C.BERG_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
     <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
-  [{ text: 'Später', neben: true }, { text: 'Los geht’s!', aktion: () => { setTimeout(starteBergspiel, 60); } }]);
+  [{ text: 'Später', neben: true }], 'berg', starteBergspiel);
 }
-export function starteBergspiel() {
+export function starteBergspiel(stufeNr = 1) {
   SB.starte(spielHoehe(), (punkte, zeit, sterne) => {
     SB.schliesse();
     const zeile = zeit != null ? `Im Ziel nach ${zeit.toFixed(1).replace('.', ',')} s · ${sterne} Sterne` : `Nicht ins Ziel geschafft · ${sterne} Sterne`;
-    miniErgebnis('berg', punkte, zeile, zeit != null ? 'Geschafft!' : 'Fast!', starteBergspiel);
-  });
+    miniErgebnis('berg', punkte, zeile, zeit != null ? 'Geschafft!' : 'Fast!', () => starteBergspiel(stufeNr));
+  }, stufeNr);
 }
 
 function baueLaden() {

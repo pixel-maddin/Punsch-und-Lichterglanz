@@ -688,3 +688,10 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #landkarte.nacht #kartenOrte .ort { box-shadow: 0 0 calc(var(--px) * 3) rgba(255, 190, 90, 0.75), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); border-color: #c8903a; }
 #landkarte.nacht #kartenOrte .ort.zuhause { box-shadow: 0 0 calc(var(--px) * 4.5) rgba(255, 210, 110, 0.95), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); }
 #kartenOrte .ort-flaeche.santa { width: calc(var(--px) * 20); height: calc(var(--px) * 22); z-index: 3; }
+
+/* Startfenster der Minispiele: drei Knöpfe für die Schwierigkeit */
+.stufen { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 3); }
+.stufen .k.stufe { display: flex; flex-direction: column; align-items: center; padding: calc(var(--px) * 2) 0; font-weight: bold; font-size: calc(var(--px) * 5); background: #fff6e0; color: var(--tinte); border: calc(var(--px) * 0.6) solid #c89a5a; }
+.stufen .k.stufe small { font-weight: normal; font-size: calc(var(--px) * 3.6); color: #8a6a4a; }
+.stufen .k.stufe.gewaehlt { background: var(--rot); color: #fff; border-color: var(--rot2); }
+.stufen .k.stufe.gewaehlt small { color: #ffe0d0; }

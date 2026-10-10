@@ -535,6 +535,14 @@ export const BERG_DEKO = [
   { id: 's_wok',    name: 'Wok an der Hauswand',  ab: 1550, stimmung: 5, text: 'Dein Rodel-Wok hängt als Trophäe neben dem Fenster.' },
   { id: 's_hang',   name: 'Rodelhang am Horizont', ab: 1900, stimmung: 7, text: 'Hinter dem Stand ein Hügel, auf dem winzige Rodler hinunterflitzen.' },
 ];
+// Drei Schwierigkeiten für alle Minispiele (10.10.): `tempo` macht Tiere,
+// Wok und Kundenungeduld schneller, `punkte` zahlt dafür mehr. Ein Rekord
+// für alle Stufen - wer schwer spielt, kommt schneller an die Deko.
+export const MINI_STUFEN = [
+  { id: 'leicht', name: 'Leicht', tempo: 0.8,  punkte: 0.7 },
+  { id: 'normal', name: 'Normal', tempo: 1,    punkte: 1 },
+  { id: 'schwer', name: 'Schwer', tempo: 1.25, punkte: 1.4 },
+];
 // Welche Minispiele es gibt: Deko-Liste und Umrechnung der Punkte in Sterne
 export const MINISPIELE = {
   lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN },
