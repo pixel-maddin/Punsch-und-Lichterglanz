@@ -15,10 +15,10 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=20261010i';
-import * as S from './spiel.js?v=20261010i';
-import * as Z from './zeit.js?v=20261010i';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010i';
+import * as C from './config.js?v=20261010l';
+import * as S from './spiel.js?v=20261010l';
+import * as Z from './zeit.js?v=20261010l';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=20261010l';
 
 const $ = (s) => document.querySelector(s);
 
@@ -35,7 +35,7 @@ export const ORTE = [
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },
   { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.75, spiel: 'lichtung' },
   { id: 'eis',       name: 'Eisbahn',         x: 64,  y: 0.645, spiel: 'eis' },
-  { id: 'backstube', name: 'Backstube',       x: 60,  y: 0.295, spiel: 'back' },
+  { id: 'backstube', name: 'Backstube',       x: 60,  y: 0.29, spiel: 'back', schild: [34, -22] },   // Schild rechts daneben: darunter lag es auf dem Supermarkt
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
 ];
@@ -116,8 +116,9 @@ function baueSchilder(hervor) {
   for (const o of ORTE) {
     const b = document.createElement('button');
     b.className = 'ort' + (o.bald ? ' bald' : '') + (o.id === hervor ? ' hervor' : '') + (o.id === 'haus' ? ' zuhause' : '');
-    b.style.left = `calc(var(--px) * ${o.x})`;
-    b.style.top = `calc(var(--px) * ${yPx(o) + 9})`;
+    const [sdx, sdy] = o.schild || [0, 0];
+    b.style.left = `calc(var(--px) * ${o.x + sdx})`;
+    b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy})`;
     const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : 0;
     let unter = o.bald ? 'bald' : o.spiel ? 'Minispiel' : '';
     // Noch nie gespielt: kleines NEU am Schild
@@ -344,8 +345,9 @@ function baueGrund(winter) {
 
   // 5. Platz für die Gebäude und die Schilder darunter freihalten
   for (const o of ORTE) {
+    const [sdx, sdy] = o.schild || [0, 0];
     markiere(o.x - 20, yPx(o) - 26, 40, 32);
-    markiere(o.x - 26, yPx(o) + 7, 52, 13);
+    markiere(o.x - 26 + sdx, yPx(o) + 7 + sdy, 52, 13);
   }
   markiere(w.x - 22, w.y - 12, 44, 24);
 

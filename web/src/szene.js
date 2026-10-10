@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261010i';
-import * as Z from './zeit.js?v=20261010i';
-import * as S from './spiel.js?v=20261010i';
-import { FASSADEN } from './config.js?v=20261010i';
-import * as C from './config.js?v=20261010i';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=20261010l';
+import * as Z from './zeit.js?v=20261010l';
+import * as S from './spiel.js?v=20261010l';
+import { FASSADEN } from './config.js?v=20261010l';
+import * as C from './config.js?v=20261010l';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -638,13 +638,16 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
 // Briefkasten (10.10.) neben der Tür: Fahne hoch und ein Umschlag, wenn ein
 // Wunschzettel oder ein Dankesbild darin liegt.
 // ---------------------------------------------------------------------------
-function briefkasten(c, x, y, t) {
+function briefkasten(c, x, y, t, L) {
   r(c, x, y, 7, 5, '#c8322e'); r(c, x, y, 7, 1, '#e85a4a'); r(c, x, y + 4, 7, 1, '#8a2020');
   r(c, x + 1, y + 1, 5, 1, '#3a1a18');   // Schlitz
   if (S.briefDa()) {
     const hop = Math.floor(t * 2) % 2;
     r(c, x + 1, y - 2 - hop, 5, 3, '#fbf6ea'); p(c, x + 3, y - 1 - hop, '#c8322e');   // Umschlag mit Siegel
     r(c, x + 7, y - 4, 1, 5, '#5a5a62'); r(c, x + 8, y - 4, 2, 2, '#ffd040');          // Fahne oben
+    // Nachts sähe man den Brief sonst nicht: Fahne und Umschlag leuchten leicht
+    L.push({ x: x + 9, y: y - 3, f: '#ffd040', halo: 4, an: 0.7 + 0.3 * Math.sin(t * 3) });
+    L.push({ rect: [x + 1, y - 2 - hop, 5, 2], f: '#fff8e8', halo: 3, an: 0.5 });
   } else r(c, x + 7, y + 1, 3, 1, '#5a5a62');                                          // Fahne unten
 }
 
@@ -2029,7 +2032,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   boden(e, GW, w);
   fahrbahn(e, GW, G, w);
   haus(e, GW, w, t, L);
-  briefkasten(e, 66, GW - 34, t);
+  briefkasten(e, 86, GW - 40, t, L);
   if (S.zeigt('m_fenster')) fensterbilder(e, GW);
   if (S.zeigt('c_dachbaum')) dachbaum(e, L, 92, GW - 94, t, w);
   if (S.zeigt('s_wok')) wandWok(e, 118, GW - 52);

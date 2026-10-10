@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=20261010i';
-import * as Z from './zeit.js?v=20261010i';
-import { neueFarben } from './pixel.js?v=20261010i';
+import * as C from './config.js?v=20261010l';
+import * as Z from './zeit.js?v=20261010l';
+import { neueFarben } from './pixel.js?v=20261010l';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1297,7 +1297,8 @@ export function miniErgebnis(name, punkte) {
   st.stats.runden = st.stats.runden || {};
   st.stats.runden[name] = (st.stats.runden[name] || 0) + 1;   // für Wunschzettel und Album
   const mitSternen = l.runden < C.MINI_RUNDEN_STERNE;
-  l.runden++;
+  // Eine Runde ohne Punkte (abgebrochen, nichts getroffen) verbraucht keine der Sternerunden
+  if (punkte > 0) l.runden++;
   const sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(def.maxMin, punkte / def.jeMin))) : 0;
   if (sterne) verdiene(sterne);
   const vorher = l.best;
