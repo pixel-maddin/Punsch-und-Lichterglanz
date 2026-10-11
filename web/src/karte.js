@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610110855';
-import * as S from './spiel.js?v=202610110855';
-import * as Z from './zeit.js?v=202610110855';
-import * as FEIN from './fein.js?v=202610110855';
-import * as T from './ton.js?v=202610110855';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610110855';
+import * as C from './config.js?v=202610110857';
+import * as S from './spiel.js?v=202610110857';
+import * as Z from './zeit.js?v=202610110857';
+import * as FEIN from './fein.js?v=202610110857';
+import * as T from './ton.js?v=202610110857';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610110857';
 
 const $ = (s) => document.querySelector(s);
 
@@ -753,7 +753,7 @@ function supermarkt(x, y, P, winter) {
 }
 
 function baumarkt(x, y, P, winter) {
-  schattenOval(x, y + 3, 38);
+  schattenOval(x, y, 38);   // direkt am Fuß der Halle (bis 11.10. drei Pixel zu tief)
   // Große Halle mit Wellblech
   r(c, x - 15, y - 16, 30, 16, '#e8862a');
   for (let i = -15; i < 15; i += 2) r(c, x + i, y - 9, 1, 9, '#d4761e');

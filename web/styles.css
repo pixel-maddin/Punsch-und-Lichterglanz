@@ -208,7 +208,11 @@ html, body {
 #kartenOrte .ort.markt-heute { background: #fff0e0; border-color: #c83030; animation: marktLeuchten 1.8s ease-in-out infinite; }
 @keyframes marktLeuchten { 0%, 100% { box-shadow: 0 0 calc(var(--px) * 1.5) rgba(255, 200, 80, 0.55); } 50% { box-shadow: 0 0 calc(var(--px) * 5) calc(var(--px) * 1) rgba(255, 210, 90, 0.95); } }
 #kartenOrte .ort.markt-heute small { color: #c83030; font-weight: bold; }
-#kartenOrte .ort.hervor { border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 1) var(--gold), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); animation: pulsieren 1.2s infinite; }
+/* Hervorgehobener Ort: pulsiert auf der Stelle (11.10.). Vorher überschrieb das
+   allgemeine `pulsieren` (scale) die Zentrierung translate(-50%) - das Schild
+   sprang bei jedem Puls um die halbe Breite hin und her. */
+#kartenOrte .ort.hervor { border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 1) var(--gold), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); animation: ortPuls 1.2s ease-in-out infinite; }
+@keyframes ortPuls { 0%, 100% { transform: translate(-50%, 0) scale(1); } 50% { transform: translate(-50%, 0) scale(1.1); box-shadow: 0 0 0 calc(var(--px) * 1) var(--gold), 0 0 calc(var(--px) * 5) #ffe8a0; } }
 #kartenOrte .ort:active { transform: translate(-50%, 0) scale(0.94); }
 #kartenOrte .ort-neu { display: inline-block; margin-left: calc(var(--px) * 1.5); min-width: calc(var(--px) * 5.5); padding: 0 calc(var(--px) * 1); border-radius: calc(var(--px) * 3); background: var(--rot); color: #fff; font-size: calc(var(--px) * 3.8); }
 #kartenOrte .ort-flaeche { position: absolute; z-index: 1; width: calc(var(--px) * 32); height: calc(var(--px) * 24); appearance: none; border: 0; background: transparent; cursor: pointer; }

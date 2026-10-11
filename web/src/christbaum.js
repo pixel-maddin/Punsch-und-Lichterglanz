@@ -13,11 +13,11 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610110855';
-import * as Z from './zeit.js?v=202610110855';
-import * as T from './ton.js?v=202610110855';
-import * as MH from './minihud.js?v=202610110855';
-import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610110855';
+import * as C from './config.js?v=202610110857';
+import * as Z from './zeit.js?v=202610110857';
+import * as T from './ton.js?v=202610110857';
+import * as MH from './minihud.js?v=202610110857';
+import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610110857';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
