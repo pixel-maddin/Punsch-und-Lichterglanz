@@ -10,11 +10,11 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610111332';
-import * as Z from './zeit.js?v=202610111332';
-import * as T from './ton.js?v=202610111332';
-import * as MH from './minihud.js?v=202610111332';
-import { r, p, ton, mische } from './pixel.js?v=202610111332';
+import * as C from './config.js?v=202610111338';
+import * as Z from './zeit.js?v=202610111338';
+import * as T from './ton.js?v=202610111338';
+import * as MH from './minihud.js?v=202610111338';
+import { r, p, ton, mische } from './pixel.js?v=202610111338';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -322,11 +322,15 @@ function hintergrund(g, nacht) {
   };
   // Hügel als Band, dann zwei Tannenreihen
   for (let x = 0; x < W; x++) { const hh = 22 + Math.round(Math.sin((x + g.x * 0.08) / 23) * 6 + Math.sin((x + g.x * 0.08) / 9) * 2); r(c, x, boden - 18 - hh, 1, hh + 4, nacht ? '#4a5078' : '#dce6f0'); }
-  // Ein Dorf auf dem Hügel, zieht langsam vorbei, Fenster leuchten
-  const dv = (g.x * 0.1) % 60;
+  // Ein Dorf auf dem Hügel, zieht langsam vorbei, Fenster leuchten.
+  // Es läuft GENAU so schnell wie der Hügel (0,08) und rechnet seine Höhe
+  // aus der Stelle auf dem Hügel, nicht aus der Bildposition (11.10.: vorher
+  // 0,1 gegen 0,08 - jedes Haus wanderte über die Kuppen und sprang auf und ab).
+  const HV = 0.08, dv = g.x * HV;
   for (let k = -1; k < 5; k++) {
-    const n = Math.floor(g.x * 0.1 / 60) + k, hx = Math.round(k * 60 - dv + hash(n) * 30);
-    const hy = boden - 18 - (22 + Math.round(Math.sin((hx + 4 + g.x * 0.08) / 23) * 6 + Math.sin((hx + 4 + g.x * 0.08) / 9) * 2)) + 4;   // steht auf dem Hügel
+    const n = Math.floor(dv / 60) + k, wx = n * 60 + Math.floor(hash(n) * 30);   // Weltstelle des Hauses
+    const hx = Math.round(wx - dv);
+    const hy = boden - 18 - (22 + Math.round(Math.sin((wx + 4) / 23) * 6 + Math.sin((wx + 4) / 9) * 2)) + 4;   // steht auf dem Hügel
     const bw = 9 + Math.floor(hash(n + 1) * 5), hh = 7 + Math.floor(hash(n + 2) * 4);
     r(c, hx, hy - hh, bw, hh, nacht ? '#5a5070' : '#e8dcc8');
     for (let i = 0; i < 4; i++) r(c, hx - 1 + i, hy - hh - 1 - i, bw + 2 - i * 2, 1, nacht ? '#3a3050' : '#a8584a');
@@ -495,6 +499,6 @@ function zeichne(t) {
   const rest = Math.max(0, Math.ceil(C.EIS_DAUER - Math.max(0, g.t)));
   const kombo = g.tricks.length + (g.trick ? 1 : 0);
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.inLuft ? Math.max(1, kombo) : 1, ketteAnteil: g.trick ? g.trick.t / TRICKS[g.trick.art].dauer : 1, punkte: g.punkte });
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${C.MINI_STUFEN.indexOf(stufe) >= 0 ? stufe.name : ''}` : g.t < 4 ? 'Tippen = springen · in der Luft wischen = Trick' : null);
+  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : g.t < 4 ? 'Tippen = springen · in der Luft wischen = Trick' : null);
   MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }

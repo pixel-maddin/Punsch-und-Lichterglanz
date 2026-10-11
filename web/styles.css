@@ -675,9 +675,11 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   padding: 0 calc(var(--px) * 3); font-size: calc(var(--px) * 5.6);
 }
 #miniHud .mh-kopf > div {
-  box-sizing: border-box; height: calc(var(--px) * 11); display: flex; align-items: center;
+  /* 14 hoch (11.10.): Die Schrift steht 1:1 in Spielpixeln und ist mit Kontur
+     11 Pixel hoch - in 11 mit Innenabstand ragte sie über den Kasten */
+  box-sizing: border-box; height: calc(var(--px) * 14); display: flex; align-items: center; gap: calc(var(--px) * 1.5);
   background: rgba(40, 20, 10, 0.62); border: calc(var(--px) * 0.8) solid rgba(255, 230, 180, 0.35);
-  border-radius: calc(var(--px) * 2); padding: calc(var(--px) * 1.2) calc(var(--px) * 3); white-space: nowrap;
+  border-radius: calc(var(--px) * 2); padding: 0 calc(var(--px) * 2.5); white-space: nowrap;
 }
 #miniHud .mh-zeit.knapp span { color: #ff8a7a; animation: pulsieren 0.6s infinite; }
 #miniHud .mh-punkte { color: #ffe27a; }
@@ -718,7 +720,7 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #miniHud .mh-label.wunsch { font-size: calc(var(--px) * 6); transform: none; }
 #miniHud .mh-label.wunsch small { display: block; font-size: calc(var(--px) * 4.8); }
 #miniHud .mh-label.schild { font-size: calc(var(--px) * 4.2); color: #fff; background: rgba(40, 20, 10, 0.62); padding: 0 calc(var(--px) * 1.6); border-radius: calc(var(--px) * 1.5); }
-#miniZu { top: calc(var(--px) * 2.5) !important; height: calc(var(--px) * 11) !important; width: calc(var(--px) * 12) !important; }
+#miniZu { top: calc(var(--px) * 1) !important; height: calc(var(--px) * 14) !important; width: calc(var(--px) * 14) !important; }   /* so hoch wie die Kästen der Kopfzeile */
 
 /* Karte nachts (10.10.): Schilder glühen warm */
 #landkarte.nacht #kartenOrte .ort { box-shadow: 0 0 calc(var(--px) * 3) rgba(255, 190, 90, 0.75), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); border-color: #c8903a; }
