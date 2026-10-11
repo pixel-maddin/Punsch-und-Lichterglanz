@@ -735,18 +735,23 @@ export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Groß
 
 // ---------------------------------------------------------------------------
 // Vögel am Futterhaus (11.10.). Nur wenn das Futterhaus gefüllt ist (antippen,
-// hält FUTTER_STUNDEN echte Stunden). `w` = Gewicht, `schnee` = nur bei Schnee.
+// hält FUTTER_STUNDEN echte Stunden). `w` = Gewicht, `schnee` = nur bei Schnee,
+// `nacht` = nur nachts, `nachtAuch` = auch nachts.
 // Der Meisenknödel (Türchen 18) verdoppelt die Gewichte der seltenen.
 // ---------------------------------------------------------------------------
 export const VOEGEL = [
   { id: 'spatz',    name: 'Spatz',         w: 34, f: ['#8a6a4a', '#c8a880', '#5a4030'] },
   { id: 'kohlmeise', name: 'Kohlmeise',    w: 26, f: ['#2a2a30', '#f0d040', '#f4f4f0'] },
   { id: 'blaumeise', name: 'Blaumeise',    w: 18, f: ['#4a8ad8', '#f0d848', '#f4f4f0'] },
-  { id: 'rotkehlchen', name: 'Rotkehlchen', w: 12, f: ['#8a6a4a', '#e8702a', '#e8dcc8'], selten: true },
+  { id: 'rotkehlchen', name: 'Rotkehlchen', w: 12, f: ['#8a6a4a', '#e8702a', '#e8dcc8'], selten: true, nachtAuch: true },
   { id: 'gimpel',   name: 'Gimpel',        w: 6,  f: ['#2a2a30', '#e04a5a', '#7a7a88'], selten: true },
   { id: 'seidenschwanz', name: 'Seidenschwanz', w: 2, f: ['#a88a78', '#e8c060', '#3a2a2a'], selten: true, schnee: true },
+  // Nur nachts (11.10., Betatest: im Dezember ist es nur 8-17 Uhr hell - wer
+  // morgens früh und abends spielt, sah sonst nie einen Vogel)
+  { id: 'waldkauz', name: 'Waldkauz',    w: 4,  f: ['#7a5a3e', '#b8946a', '#5a4030'], selten: true, nacht: true },
 ];
-export const FUTTER_STUNDEN = 8;
+export const VOGEL_NACHT_TAKT = 2.2;   // nachts so viel seltener (nur Rotkehlchen und Waldkauz)
+export const FUTTER_STUNDEN = 12;   // vom Morgen- bis zum Abendbesuch (11.10.: vorher 8)
 export const VOGEL_TAKT = [14, 32];   // s zwischen zwei Vögeln
 export const VOGEL_BLEIBT = [7, 14];  // s am Futterhaus
 export const VOGEL_MAX = 3;           // gleichzeitig

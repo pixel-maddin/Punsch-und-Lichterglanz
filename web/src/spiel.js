@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610112029';
-import * as Z from './zeit.js?v=202610112029';
-import { neueFarben } from './pixel.js?v=202610112029';
+import * as C from './config.js?v=202610112112';
+import * as Z from './zeit.js?v=202610112112';
+import { neueFarben } from './pixel.js?v=202610112112';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1809,10 +1809,10 @@ export function fuettere() {
   speichere();
   return !voll;
 }
-const vogelZeit = () => Z.licht().hell > 0.12;   // nachts schlafen sie
+const istNacht = () => Z.licht().hell <= 0.12;   // nachts nur Rotkehlchen und Waldkauz
 function vogelWahl() {
-  const schnee = Z.schnee() > 0, knoedel = !!st.kalDeko.kal_knoedel;
-  const liste = C.VOEGEL.filter((v) => !v.schnee || schnee);
+  const schnee = Z.schnee() > 0, knoedel = !!st.kalDeko.kal_knoedel, nacht = istNacht();
+  const liste = C.VOEGEL.filter((v) => (!v.schnee || schnee) && (nacht ? v.nacht || v.nachtAuch : !v.nacht));
   const gew = (v) => v.w * (v.selten && knoedel ? C.KNOEDEL_SELTEN : 1);
   let r = Math.random() * liste.reduce((s, v) => s + gew(v), 0);
   for (const v of liste) { r -= gew(v); if (r <= 0) return v; }
@@ -1823,10 +1823,10 @@ function vogelTakt(dt) {
   for (const v of V) v.t += dt;
   // Wer seine Zeit abgesessen hat, fliegt los (1,2 s Flug), danach ist er weg
   for (let i = V.length - 1; i >= 0; i--) if (V[i].t > V[i].bleibt + 2.4) V.splice(i, 1);
-  if (!zeigt('futterhaus') || !futterVoll() || !vogelZeit() || st.lernen < 99) return;
+  if (!zeigt('futterhaus') || !futterVoll() || st.lernen < 99) return;
   lauf.vogelAb -= dt;
   if (lauf.vogelAb > 0 || V.length >= C.VOGEL_MAX) return;
-  lauf.vogelAb = C.VOGEL_TAKT[0] + Math.random() * (C.VOGEL_TAKT[1] - C.VOGEL_TAKT[0]);
+  lauf.vogelAb = (C.VOGEL_TAKT[0] + Math.random() * (C.VOGEL_TAKT[1] - C.VOGEL_TAKT[0])) * (istNacht() ? C.VOGEL_NACHT_TAKT : 1);
   const frei = [0, 1, 2, 3].filter((p) => !V.some((v) => v.platz === p));
   if (!frei.length) return;
   const art = vogelWahl();

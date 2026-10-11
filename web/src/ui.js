@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610112029';
-import * as S from './spiel.js?v=202610112029';
-import * as Z from './zeit.js?v=202610112029';
-import * as T from './ton.js?v=202610112029';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610112029';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610112029';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610112029';
-import * as A from './auftraege.js?v=202610112029';
-import * as E from './erfolge.js?v=202610112029';
-import * as ZL from './ziele.js?v=202610112029';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610112029';
-import * as KA from './karte.js?v=202610112029';
-import { zeigeRueckblick } from './ereignis.js?v=202610112029';
-import { barbaraZweig } from './szene.js?v=202610112029';
-import * as LI from './lichtung.js?v=202610112029';
-import * as CB from './christbaum.js?v=202610112029';
-import * as SB from './schlitten.js?v=202610112029';
-import * as EB from './schlittschuh.js?v=202610112029';
-import * as BS from './backstube.js?v=202610112029';
-import { alleSymbole } from './symbole.js?v=202610112029';
+import * as C from './config.js?v=202610112112';
+import * as S from './spiel.js?v=202610112112';
+import * as Z from './zeit.js?v=202610112112';
+import * as T from './ton.js?v=202610112112';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610112112';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610112112';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610112112';
+import * as A from './auftraege.js?v=202610112112';
+import * as E from './erfolge.js?v=202610112112';
+import * as ZL from './ziele.js?v=202610112112';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610112112';
+import * as KA from './karte.js?v=202610112112';
+import { zeigeRueckblick } from './ereignis.js?v=202610112112';
+import { barbaraZweig } from './szene.js?v=202610112112';
+import * as LI from './lichtung.js?v=202610112112';
+import * as CB from './christbaum.js?v=202610112112';
+import * as SB from './schlitten.js?v=202610112112';
+import * as EB from './schlittschuh.js?v=202610112112';
+import * as BS from './backstube.js?v=202610112112';
+import { alleSymbole } from './symbole.js?v=202610112112';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1396,12 +1396,19 @@ function baueAlbum(liste) {
     const vr = el('div', 'album-raster');
     for (const v of C.VOEGEL) vr.appendChild(albumKarte(v.name, vg[v.id] || 0, (ctx) => {
       // klein malen, zweimal per Scale2x vergrößern - Pixel bleiben Spielpixel
-      const k = document.createElement('canvas'); k.width = 7; k.height = 6;
-      zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 2, 4, v.id);
-      const x2 = scale2x(k, 7, 6, document.createElement('canvas'));
-      const x4 = scale2x(x2, 14, 12, document.createElement('canvas'));
+      // Der Waldkauz ist doppelt so groß wie die anderen: nur zweifach, mittig
+      if (v.id === 'waldkauz') {
+        const k = document.createElement('canvas'); k.width = 9; k.height = 10;
+        zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 4, 8, v.id);
+        ctx.drawImage(scale2x(k, 9, 10, document.createElement('canvas')), 5, 3);
+        return;
+      }
+      const k = document.createElement('canvas'); k.width = 7; k.height = 7;
+      zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 2, 5, v.id);
+      const x2 = scale2x(k, 7, 7, document.createElement('canvas'));
+      const x4 = scale2x(x2, 14, 14, document.createElement('canvas'));
       ctx.drawImage(x4, 0, 0);
-    }, 28, 24, '× gesehen'));
+    }, 28, 28, '× gesehen'));
     liste.appendChild(vr);
   }
   // Rezepte - erst, wenn die Backstube auf der Karte steht (Minispiele kommen nach und nach)

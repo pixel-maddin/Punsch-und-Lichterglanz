@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610112029';
-import * as S from './spiel.js?v=202610112029';
-import * as A from './auftraege.js?v=202610112029';
-import * as E from './erfolge.js?v=202610112029';
-import * as Z from './ziele.js?v=202610112029';
-import * as KA from './karte.js?v=202610112029';
+import * as C from './config.js?v=202610112112';
+import * as S from './spiel.js?v=202610112112';
+import * as A from './auftraege.js?v=202610112112';
+import * as E from './erfolge.js?v=202610112112';
+import * as Z from './ziele.js?v=202610112112';
+import * as KA from './karte.js?v=202610112112';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -350,6 +350,13 @@ export function update(dt, blockiert) {
   if (st.lernen == null) st.lernen = st.stats.bedient > 0 ? 99 : 0;   // alte Spielstände
   S.lauf.lernen = st.lernen < 4;
   hinweisT += dt;
+  // Erledigt, WÄHREND etwas offen ist (11.10., Betatest): „Tippe auf KARTE"
+  // ist genau dann erfüllt, wenn die Karte offen ist - und dann blockiert sie.
+  // Ohne diese Prüfung galt der Hinweis nie als erledigt und kam nach jedem
+  // Schließen der Karte wieder (bei `lang` für immer).
+  if (blockiert && st.lernen >= 99 && aktuell && aktuell.gelesen !== false && aktuell.h.fertig && !aktuell.h.ruhig && aktuell.h.fertig()) {
+    st.tipps[aktuell.h.id] = true; aktuell = null; ruheT = 0; S.speichere();
+  }
   if (blockiert || !st.intro) { zeige(null); aktuelleBlase = null; return; }
   const z = st.lernen < 99 ? einfuehrung() : hinweise(dt);
   if (z && !z.weiter && st.lernen < 99 && weggetippt === st.lernen + '|' + z.text) { zeige(null); aktuelleBlase = null; return; }

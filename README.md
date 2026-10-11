@@ -64,9 +64,10 @@ Tag (verteilt auf mehrere kurze Besuche) ist bis Heiligabend alles andere gescha
 Wer viel spielt oder gezielt darauf spart, schafft sie bis Weihnachten.
 
 **Futterhaus** (Weihnachtsladen, Im Garten): hängt im alten Baum. Antippen
-füllt es für 8 Stunden, dann kommen tagsüber Vögel - Spatz, Kohlmeise,
+füllt es für 12 Stunden, dann kommen Vögel - tagsüber Spatz, Kohlmeise,
 Blaumeise und seltener Rotkehlchen, Gimpel und (nur bei Schnee) der
-Seidenschwanz. Jede neue Art landet im Album. Der **Meisenknödel** aus
+Seidenschwanz; nachts nur das Rotkehlchen und der seltene Waldkauz. Jede
+neue Art landet im Album. Der **Meisenknödel** aus
 Türchen 18 lockt die seltenen doppelt so oft an.
 
 **Dein eigener Schneemann:** Ab dem ersten Schnee liegt auf dem Gehweg ein

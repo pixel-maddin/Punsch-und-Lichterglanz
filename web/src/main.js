@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610112029';
-import * as S from './spiel.js?v=202610112029';
-import * as Z from './zeit.js?v=202610112029';
-import * as T from './ton.js?v=202610112029';
-import * as LI from './lichtung.js?v=202610112029';
-import * as CB from './christbaum.js?v=202610112029';
-import * as KA from './karte.js?v=202610112029';
-import * as SB from './schlitten.js?v=202610112029';
-import * as EB from './schlittschuh.js?v=202610112029';
-import * as BS from './backstube.js?v=202610112029';
-import * as UI from './ui.js?v=202610112029';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610112029';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610112029';
-import * as Lernen from './lernen.js?v=202610112029';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610112029';
-import * as A from './auftraege.js?v=202610112029';
-import * as E from './erfolge.js?v=202610112029';
-import * as ZL from './ziele.js?v=202610112029';
+import * as C from './config.js?v=202610112112';
+import * as S from './spiel.js?v=202610112112';
+import * as Z from './zeit.js?v=202610112112';
+import * as T from './ton.js?v=202610112112';
+import * as LI from './lichtung.js?v=202610112112';
+import * as CB from './christbaum.js?v=202610112112';
+import * as KA from './karte.js?v=202610112112';
+import * as SB from './schlitten.js?v=202610112112';
+import * as EB from './schlittschuh.js?v=202610112112';
+import * as BS from './backstube.js?v=202610112112';
+import * as UI from './ui.js?v=202610112112';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610112112';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610112112';
+import * as Lernen from './lernen.js?v=202610112112';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610112112';
+import * as A from './auftraege.js?v=202610112112';
+import * as E from './erfolge.js?v=202610112112';
+import * as ZL from './ziele.js?v=202610112112';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -501,6 +501,8 @@ if (S.ENTWICKLUNG) window.__spiel = {
   datum(s, tempo = 1) { Z.setzeZeit(s ? new Date(s) : null, tempo); },
   alles() { for (const a of C.ARTIKEL) { const n = Array.isArray(a.kosten) ? a.kosten.length : 1; S.st.besitz[a.id] = n; } for (const p of C.PRODUKTE) S.st.toepfe[p.id] = S.topfMax(); for (const d of Object.values(C.KALENDER_DEKO)) S.st.kalDeko[d.id] = true; },
   update: (dt) => S.update(dt),
+  // Ein Bild der echten Schleife (Tests im verborgenen Fenster: rAF ersetzen und hiermit anstoßen)
+  bildschleife: (t) => frame(t),
   // Ein Bild von Hand zeichnen - im verborgenen Vorschaufenster steht
   // requestAnimationFrame still, der Screenshot zeigt sonst ein altes Bild.
   bild() { c.clearRect(0, 0, C.B, H); const w = zeichneWelt(c, G, tSek, 0); zeichneTresen(c, G, tSek, w); },

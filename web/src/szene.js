@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610112029';
-import * as Z from './zeit.js?v=202610112029';
-import * as S from './spiel.js?v=202610112029';
-import { FASSADEN } from './config.js?v=202610112029';
-import * as C from './config.js?v=202610112029';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610112112';
+import * as Z from './zeit.js?v=202610112112';
+import * as S from './spiel.js?v=202610112112';
+import { FASSADEN } from './config.js?v=202610112112';
+import * as C from './config.js?v=202610112112';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2251,7 +2251,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   }
   // Das Futterhaus hängt im kahlen Baum - im Vorgarten stand es den
   // Zuckerstangen im Weg (bis 11.10. das Vogelhäuschen aus Türchen 18)
-  if (S.zeigt('futterhaus')) { futterhaus(e, L, FUTTER_X, GW + FUTTER_DY, S.variante('futterhaus'), S.futterVoll(), S.hat('kal_knoedel'), t); voegel(e, GW, t); }
+  if (S.zeigt('futterhaus')) { futterhaus(e, L, FUTTER_X, GW + FUTTER_DY, S.variante('futterhaus'), S.futterVoll(), S.hat('kal_knoedel'), t); voegel(e, GW, t, L); }
   if (S.zeigt('schneemann')) {
     const v = S.variante('schneemann');
     if (v === 1) schneeburg(e, 45, GW - 18);
@@ -2369,6 +2369,19 @@ function futterhaus(c, L, x, fuss, v, voll, knoedel, t) {
 /** Ein Vogel, Fußlinie y, Blick nach rechts (`links` = Blick nach links). */
 export function zeichneVogel(c, x, y, art, opt = {}) {
   const v = C.VOEGEL.find((q) => q.id === art) || C.VOEGEL[0];
+  if (art === 'waldkauz') {
+    // Größer und aufrecht: Federohren, heller Gesichtsschleier, gelbe Augen
+    const [r0, s0, d0] = v.f;
+    r(c, x - 2, y - 5, 5, 6, r0); r(c, x - 1, y - 6, 3, 1, r0); p(c, x - 2, y - 6, d0); p(c, x + 2, y - 6, d0);
+    r(c, x - 1, y - 2, 3, 3, s0); p(c, x, y - 1, d0); p(c, x - 1, y + 1, '#3a2a1a'); p(c, x + 1, y + 1, '#3a2a1a');   // Bauch, Krallen
+    r(c, x - 2, y - 5, 5, 2, s0);
+    const blinzelt = opt.t != null && Math.sin(opt.t * 1.3 + x) > 0.97;
+    const auge = blinzelt ? s0 : '#ffd040';
+    p(c, x - 1, y - 4, auge); p(c, x + 1, y - 4, auge); p(c, x, y - 3, '#3a2a1a');
+    if (opt.L && !blinzelt) { opt.L.push({ x: x - 1, y: y - 4, f: '#ffd040', halo: 1, an: 0.7 }); opt.L.push({ x: x + 1, y: y - 4, f: '#ffd040', halo: 1, an: 0.7 }); }
+    if (opt.fliegt) { const hoch = opt.fluegel; r(c, x - 4, y - (hoch ? 5 : 2), 2, 1, r0); r(c, x + 3, y - (hoch ? 5 : 2), 2, 1, r0); }
+    return;
+  }
   const [oben, brust, bauch] = v.f, d = opt.links ? -1 : 1;
   const P = (dx, dy, f) => p(c, x + dx * d, y + dy, f);
   const kopfY = opt.pickt ? -1 : -2;
@@ -2379,7 +2392,7 @@ export function zeichneVogel(c, x, y, art, opt = {}) {
   if (art === 'blaumeise') P(1, kopfY, '#4a8ad8');
   if (opt.fliegt) { const hoch = opt.fluegel; P(0, hoch ? -2 : 0, oben); P(-1, hoch ? -3 : 1, oben); }
 }
-function voegel(c, GW, t) {
+function voegel(c, GW, t, L) {
   const fx = FUTTER_X, fy = GW + FUTTER_DY;
   for (const v of S.lauf.voegel) {
     const [dx, dy] = VOGEL_PLATZ[v.platz] || VOGEL_PLATZ[0];
@@ -2395,7 +2408,7 @@ function voegel(c, GW, t) {
       x = zx + (ex - zx) * e; y = zy - 40 * e; fliegt = true; links = v.links;
     }
     const pickt = !fliegt && Math.sin(v.t * 5 + v.platz) > 0.6;
-    zeichneVogel(c, Math.round(x), Math.round(y), v.art, { links, fliegt, fluegel: Math.floor(t * 14) % 2, pickt });
+    zeichneVogel(c, Math.round(x), Math.round(y), v.art, { links, fliegt, fluegel: Math.floor(t * (v.art === 'waldkauz' ? 6 : 14)) % 2, pickt: pickt && v.art !== 'waldkauz', t, L });
   }
 }
 
