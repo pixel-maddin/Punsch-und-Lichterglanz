@@ -14,7 +14,7 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=202610110857';
+import * as S from './spiel.js?v=202610111247';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -54,6 +54,7 @@ function billigsteDeko() {
   return best;
 }
 
+S.setzeZieleAnzahl(ZIELE.length);   // spiel.js braucht die Zahl für startzieleFertig()
 const idx = () => S.st.ziel || 0;
 /** Das aktuelle Ziel - oder null (Einführung läuft noch / alles geschafft). */
 export function aktuell() {
@@ -83,6 +84,7 @@ export function pruefe() {
   const z = aktuell();
   if (!z || z.stand() < z.ziel) return null;
   S.st.ziel = idx() + 1;
+  if (S.st.ziel >= ZIELE.length) S.lauf.startzieleT = S.lauf.t;   // danach erst Ruhe (S.nachStartRuhe)
   S.st.zielFertig = S.st.zielFertig || {};
   S.st.zielFertig[z.id] = true;   // lernen.js erklärt dann ggf. noch nach
   S.verdiene(z.lohn);

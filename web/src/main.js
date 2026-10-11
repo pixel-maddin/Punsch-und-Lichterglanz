@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610110857';
-import * as S from './spiel.js?v=202610110857';
-import * as Z from './zeit.js?v=202610110857';
-import * as T from './ton.js?v=202610110857';
-import * as LI from './lichtung.js?v=202610110857';
-import * as CB from './christbaum.js?v=202610110857';
-import * as KA from './karte.js?v=202610110857';
-import * as SB from './schlitten.js?v=202610110857';
-import * as EB from './schlittschuh.js?v=202610110857';
-import * as BS from './backstube.js?v=202610110857';
-import * as UI from './ui.js?v=202610110857';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610110857';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610110857';
-import * as Lernen from './lernen.js?v=202610110857';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=202610110857';
-import * as A from './auftraege.js?v=202610110857';
-import * as E from './erfolge.js?v=202610110857';
-import * as ZL from './ziele.js?v=202610110857';
+import * as C from './config.js?v=202610111247';
+import * as S from './spiel.js?v=202610111247';
+import * as Z from './zeit.js?v=202610111247';
+import * as T from './ton.js?v=202610111247';
+import * as LI from './lichtung.js?v=202610111247';
+import * as CB from './christbaum.js?v=202610111247';
+import * as KA from './karte.js?v=202610111247';
+import * as SB from './schlitten.js?v=202610111247';
+import * as EB from './schlittschuh.js?v=202610111247';
+import * as BS from './backstube.js?v=202610111247';
+import * as UI from './ui.js?v=202610111247';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610111247';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610111247';
+import * as Lernen from './lernen.js?v=202610111247';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=202610111247';
+import * as A from './auftraege.js?v=202610111247';
+import * as E from './erfolge.js?v=202610111247';
+import * as ZL from './ziele.js?v=202610111247';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -162,7 +162,8 @@ S.hooks.ton = (n) => { try { T.spiele(n); } catch (e) { console.warn('Ton', n, e
 S.hooks.toast = (t, a) => { if (a === 'hinweis' && S.st.lernen < 99) return; UI.toast(t, a); };
 S.hooks.geld = () => UI.aktualisiereLaden();
 S.hooks.bedient = (g, auto, stoss) => A.bedient(g, auto, stoss);
-A.beiErfuellt((a) => { T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
+// Während der Startziele still - die Aufträge stellt ein eigener Hinweis danach vor
+A.beiErfuellt((a) => { if (!S.startzieleFertig()) return; T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
 
 T.setzeFx(S.st.ton.fx);
 T.setzeMusik(S.st.ton.musik);
@@ -189,7 +190,7 @@ function ankommen(erstesMal) {
   for (const n of S.neueAdventsereignisse()) meldungen.push(['advent', n]);
   // Wetter mit Folgen: einmal am Tag sagen, was heute gut geht
   const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
-  if (lage && S.st.lernen >= 99 && S.st.wetterTag !== Z.tagesSchluessel()) {
+  if (lage && S.st.lernen >= 99 && S.einstieg('wetter') && S.st.wetterTag !== Z.tagesSchluessel()) {
     S.st.wetterTag = Z.tagesSchluessel();
     setTimeout(() => UI.toast(`${lage.name}! ${lage.text} (+${Math.round(lage.bonus * 100)} %)`, 'spezial'), 2600);
   }
@@ -275,6 +276,7 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', () => S.speichere());
 
+let neuGesammelt = [], neuZuletzt = 0;
 // Neuer Tag / Schnee während die App offen ist: jede Minute nachsehen
 let letzterTag = Z.tagesSchluessel();
 setInterval(() => {
@@ -286,13 +288,18 @@ setInterval(() => {
   else { const brief = S.briefPruefen(); if (brief) UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'); }
   // Ein neues Minispiel ist auf der Karte: eigenes Fenster, sobald nichts offen ist
   const miniNeu = S.pruefeMiniFrei();
-  if (miniNeu.length && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { UI.zeigeMiniNeu(miniNeu.shift()); S.speichere(); }
+  // erst nach einer Minute im Spiel - beim Ankommen kommen Kiste, Wetter und Briefe zuerst
+  if (miniNeu.length && S.lauf.t > 60 && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { UI.zeigeMiniNeu(miniNeu.shift()); S.speichere(); }
+  // Neu Freigeschaltetes: während der Startziele nur die NEU-Marken (sonst
+  // kamen in den ersten Minuten ~15 Einblendungen), danach höchstens eine
+  // Einblendung je Minute, mehrere zusammengefasst
   const neu = S.pruefeFreischaltungen();
-  if (neu.length) {
+  if (neu.length) { neuGesammelt.push(...neu); S.speichere(); }
+  if (neuGesammelt.length && S.startzieleFertig() && Date.now() - neuZuletzt > 60000) {
     T.spiele('spezial');
-    UI.toast(neu.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neu[0].id)}!` : `${neu.length} neue Dinge auf der Karte!`, 'neu');
-    S.speichere();
-  }
+    UI.toast(neuGesammelt.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neuGesammelt[0].id)}!` : `${neuGesammelt.length} neue Dinge in den Läden!`, 'neu');
+    neuGesammelt = []; neuZuletzt = Date.now();
+  } else if (!S.startzieleFertig()) neuGesammelt = [];
   const ziel = ZL.pruefe();
   if (ziel) {
     T.spiele('kauf');
@@ -300,7 +307,7 @@ setInterval(() => {
   }
   UI.zielLeiste();
   const erfolge = E.pruefe();
-  if (erfolge.length) {
+  if (erfolge.length && S.startzieleFertig()) {   // Socken zählen immer, gemeldet erst nach den Startzielen
     T.spiele('spezial');
     UI.toast(erfolge.length === 1 ? `Neue Socke an der Erfolgswand: ${erfolge[0].name}!` : `${erfolge.length} neue Socken an der Erfolgswand!`, 'neu');
     S.speichere();

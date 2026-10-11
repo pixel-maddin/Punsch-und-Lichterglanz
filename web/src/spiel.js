@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610110857';
-import * as Z from './zeit.js?v=202610110857';
-import { neueFarben } from './pixel.js?v=202610110857';
+import * as C from './config.js?v=202610111247';
+import * as Z from './zeit.js?v=202610111247';
+import { neueFarben } from './pixel.js?v=202610111247';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -55,6 +55,7 @@ function neuerStand(name = '', andenken = 0) {
     sterne10: true,                  // Beträge in ganzen Sternen (seit 29.09. alles ×10)
     startTag: 0,                     // erster Spieltag (setzeStartTag beim Losspielen); 0 = noch nicht, fehlt = alter Stand
     miniStaffel: true,               // Minispiele kommen nach und nach (10.10.); fehlt = alter Stand, siehe laden()
+    orteStaffel: true,               // Orte der Karte gehen mit der Einführung auf (11.10.)
     miniSkala: true,                 // Minispiel-Punkte angeglichen (11.10.); fehlt = Rekorde noch in Rohpunkten
     miniSkalaWert: Object.fromEntries(Object.entries(C.MINISPIELE).map(([n, d]) => [n, d.skala])),   // mit diesem Faktor sind die Rekorde gespeichert
   };
@@ -69,6 +70,11 @@ function laden() {
       // Falle: neuerStand() trägt sterne10 schon - ein alter Stand OHNE die
       // Marke wäre sonst nie umgerechnet worden (so beim ersten Test passiert)
       if (!('sterne10' in alt)) stand.sterne10 = false;
+      // Falle wie bei sterne10: neuerStand() trägt startTag 0 („noch nicht") -
+      // ein alter Stand OHNE startTag ist aber „alter Stand" (spieltag 99).
+      // Seit dem Einstieg in Wellen (11.10.) hingen sonst Händler, Gäste und
+      // Nikolaus für solche Spieler für immer an Spieltag 0.
+      if (!('startTag' in alt) && alt.intro) stand.startTag = null;
       // Minispiele kommen seit 10.10. nach und nach. Wer die Karte schon
       // vorher kannte, hatte alle fünf - ihm verschwindet keins. Erkannt an der
       // fehlenden Marke `miniStaffel` (nicht an `miniGemeldet`: das hat die
@@ -89,6 +95,8 @@ function laden() {
       }
       stand.miniSkala = true;
       stand.miniSkalaWert = Object.fromEntries(Object.entries(C.MINISPIELE).map(([n, d]) => [n, d.skala]));
+      // Orte gehen seit 11.10. mit der Einführung auf - wer schon weiter ist, hat alle
+      if (!('orteStaffel' in alt)) { stand.orteStaffel = true; if (alt.lernen >= 99) stand.orteAlle = true; }
       if (!('miniStaffel' in alt)) {
         stand.miniStaffel = true;
         if (alt.tipps && alt.tipps.karte_mehr) stand.miniAlle = true;
@@ -260,6 +268,38 @@ export function spieltag() {
   return Math.max(0, Math.floor((Z.jetzt() - st.startTag) / 86400000));
 }
 const nachTag = (liste) => liste[Math.min(liste.length - 1, spieltag())];
+
+// ---------------------------------------------------------------------------
+// Einstieg in Wellen (11.10., siehe C.EINSTIEG)
+// ---------------------------------------------------------------------------
+let zieleAnzahl = 7;
+/** ziele.js meldet, wie viele Startziele es gibt (kein Import im Kreis). */
+export function setzeZieleAnzahl(n) { zieleAnzahl = n; }
+/** Einführung und alle Startziele geschafft (oder übersprungen)? */
+export const startzieleFertig = () => st.lernen >= 99 && (st.ziel || 0) >= zieleAnzahl;
+/**
+ * Startziele fertig UND eine Weile Ruhe danach (C.RUHE_NACH_START): Im Moment
+ * des letzten Ziels stapelten sich sonst Belohnung, Abschlussblase und die
+ * erste Großbestellung. Gezählt in Spielzeit der Sitzung (`lauf.startzieleT`,
+ * gesetzt in ziele.js); in einer späteren Sitzung ist die Ruhe längst vorbei.
+ */
+export const nachStartRuhe = () => startzieleFertig() && (lauf.startzieleT == null || lauf.t - lauf.startzieleT > C.RUHE_NACH_START);
+/** Darf ein Sonderereignis schon kommen? Nach Spieltag, siehe C.EINSTIEG. */
+export const einstieg = (was) => !!DEMO || spieltag() >= (C.EINSTIEG[was] || 0);
+/**
+ * Steht ein Ort schon auf der Karte? Die Orte gehen mit der Einführung auf:
+ * Zuhause und Supermarkt sofort, der Weihnachtsladen mit dem Deko-Ziel, der
+ * Wichtelwald mit dem ersten Wichtel, der Baumarkt nach dem Servier-Wichtel,
+ * Festplatz und Minispiele, wenn die Karte vorgestellt ist (Hinweis
+ * `karte_mehr`) - die Minispiele dann weiter nach Spieltag (miniOffen).
+ */
+export function ortOffen(o) {
+  if (DEMO || st.orteAlle) return true;
+  const z = st.lernen >= 99 ? st.ziel || 0 : -1;
+  const karte = !!(st.tipps && st.tipps.karte_mehr);
+  if (o.spiel) return karte && miniOffen(o.spiel);
+  return { haus: true, super: true, dorf: z >= 1, wichtel: z >= 2, bau: z >= 5, festplatz: karte }[o.id] ?? true;
+}
 export const offlineAnteil = () => nachTag(C.OFFLINE_JE_TAG.anteil);
 export const offlineStunden = () => nachTag(C.OFFLINE_JE_TAG.stunden);
 export const wichtelTempo = () => chefAktiv() ? C.CHEF_TEMPO : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() : 1;
@@ -528,6 +568,7 @@ function spezialMoeglich() {
  * dann SONDER_NACH Sekunden später - am Anfang gibt es genug anderes zu lernen.
  */
 function sonderBereit() {
+  if (!nachStartRuhe() || !einstieg('sonder')) return false;   // Einstieg in Wellen
   if (produkteFrei().length < C.SONDER_AB_PRODUKTE) return false;
   if (lauf.sonderSeit == null) lauf.sonderSeit = lauf.t;
   return lauf.t >= lauf.sonderSeit + (st.ersterSonder ? 0 : C.SONDER_NACH);
@@ -555,7 +596,7 @@ export function neuerGast(typ, gross) {
   const def = C.GAESTE[typ];
   // Je dichter der Andrang, desto ungeduldiger die Leute (bis 60 %)
   const druck = Math.min(1, Math.max(0.6, 0.45 + gastTakt() / C.GAST_BASIS * 0.55));
-  const eilig = !gross && !def.spezial && !lauf.lernen && st.stats.bedient >= 30 && Math.random() < C.EILIG_ANTEIL;
+  const eilig = !gross && !def.spezial && !lauf.lernen && st.stats.bedient >= 30 && nachStartRuhe() && Math.random() < C.EILIG_ANTEIL;
   const geduld = gross ? gross.zeit : def.geduld * (1 + boni().geduld) * druck * (eilig ? C.EILIG_GEDULD : 1);
   const g = {
     id: lauf.naechsteId++, typ, wunsch,
@@ -938,7 +979,7 @@ export function update(dt) {
 
   // Großbestellung: nur wenn du da bist und der Stand zwei Plätze hat -
   // sonst blockiert sie den einzigen Platz
-  if (lauf.t >= lauf.grossAb && chefAktiv() && st.lernen >= 99 && st.stats.bedient >= C.GROSS_AB_BEDIENT
+  if (lauf.t >= lauf.grossAb && chefAktiv() && nachStartRuhe() && lauf.stossRest === 0 && lauf.t > lauf.stossBis && st.stats.bedient >= C.GROSS_AB_BEDIENT
       && tresenPlaetze() >= 2 && lauf.stossRest === 0 && wartende().length < C.SCHLANGE_MAX
       && !G.some((g) => g.gross && !g.gehen)) {
     lauf.grossAb = lauf.t + C.GROSS_PAUSE * (0.8 + Math.random() * 0.4);
@@ -952,7 +993,8 @@ export function update(dt) {
 
   // Stoßzeit: wer länger spielt, bekommt Besuch
   lauf.aktivT += dt;
-  if (lauf.aktivT >= C.STOSS_NACH && lauf.stossRest === 0 && lauf.t > lauf.stossBis && produkteFrei().length >= 2) {
+  if (lauf.aktivT >= C.STOSS_NACH && lauf.stossRest === 0 && lauf.t > lauf.stossBis && produkteFrei().length >= 2 && nachStartRuhe()
+      && !lauf.gaeste.some((g) => g.gross && !g.gehen)) {   // nie zusammen mit einer Großbestellung (11.10.)
     lauf.aktivT = 0;
     lauf.stossRest = C.STOSS_GAESTE;
     lauf.stossBis = lauf.t + C.STOSS_DAUER;
@@ -967,7 +1009,7 @@ export function update(dt) {
   // schauen nur zu - der Moment, für den man reinschaut.
   if (chefAktiv() && !lauf.lernen) lauf.ansturmT += dt;
   if (lauf.ansturm && lauf.t >= lauf.stossBis) lauf.ansturm = false;
-  if (lauf.ansturmT >= C.ANSTURM_NACH && st.ansturmTag !== echtMitternacht() && st.lernen >= 99
+  if (lauf.ansturmT >= C.ANSTURM_NACH && st.ansturmTag !== echtMitternacht() && nachStartRuhe() && einstieg('ansturm')
       && lauf.stossRest === 0 && lauf.t > lauf.stossBis && produkteFrei().length >= 2) {
     st.ansturmTag = echtMitternacht();
     lauf.stossRest = C.ANSTURM_GAESTE;
@@ -1131,7 +1173,7 @@ export function update(dt) {
   }
 
   // Der Nikolaus fliegt vorbei
-  if (!lauf.schlitten && lauf.t >= lauf.schlittenAb && st.lernen >= 99) {
+  if (!lauf.schlitten && lauf.t >= lauf.schlittenAb && st.lernen >= 99 && einstieg('schlitten')) {
     lauf.schlitten = { t: 0, dauer: C.SCHLITTEN_DAUER, y: 0.12 + Math.random() * 0.3, gefangen: null };
     lauf.schlittenAb = lauf.t + C.SCHLITTEN_PAUSE[0] + Math.random() * (C.SCHLITTEN_PAUSE[1] - C.SCHLITTEN_PAUSE[0]);
     hooks.ton('glocken');
@@ -1176,7 +1218,7 @@ function haendlerTakt(dt) {
   if (chefAktiv() && !lauf.lernen) lauf.haendlerT += dt;
   // Erst nach dem Hinweis auf die Karte: Vorher kam er nach 2,5 Minuten,
   // bevor man die erste Deko kannte (Betatest 2)
-  if (!lauf.haendler && lauf.haendlerT >= lauf.haendlerAb && st.lernen >= 99 && st.tipps && st.tipps.karte_mehr && produkteFrei().length >= 2
+  if (!lauf.haendler && lauf.haendlerT >= lauf.haendlerAb && st.lernen >= 99 && st.tipps && st.tipps.karte_mehr && einstieg('haendler') && produkteFrei().length >= 2
       && haendlerHeute() < C.HAENDLER_PRO_TAG) {
     st.haendler = { tag: echtMitternacht(), n: haendlerHeute() + 1 };
     lauf.haendler = { x: -26, t: 0, phase: 'kommt', angebot: haendlerAngebot(), gutschein: true };
@@ -1247,12 +1289,12 @@ function istMarkt(d) {
   return k === d;
 }
 /** Erst nach der Einführung - davor gibt es keinen Markt und keine Ansage. */
-export const marktHeute = () => st.lernen >= 99 && istMarkt(tagNr());
+export const marktHeute = () => st.lernen >= 99 && einstieg('markt') && istMarkt(tagNr());
 /** { heute, inTagen, datum } des nächsten Markts. */
 export function marktInfo() {
   const heute = tagNr();
-  let n = 0;
-  while (n < 10 && !istMarkt(heute + n)) n++;
+  let n = Math.max(0, (C.EINSTIEG.markt || 0) - spieltag());   // der erste Markt erst ab dem Einstiegstag
+  while (n < 12 && !istMarkt(heute + n)) n++;
   const datum = new Date(echtMitternacht() + n * 86400000 + 12 * 3600000);
   return { heute: st.lernen >= 99 && n === 0, inTagen: n, datum };
 }
@@ -1372,7 +1414,7 @@ export const lichtungErgebnis = (punkte) => miniErgebnis('lichtung', punkte);
 
 /** Versteckt sich der Weihnachtsmann diesmal auf der Karte? (würfelt, zählt je Tag) */
 export function santaWuerfeln() {
-  if (st.lernen < 99 || !st.tipps || !st.tipps.karte_mehr) return false;
+  if (st.lernen < 99 || !st.tipps || !st.tipps.karte_mehr || !einstieg('santa')) return false;
   const s = st.santaKarte && st.santaKarte.tag === echtMitternacht() ? st.santaKarte : { tag: echtMitternacht(), n: 0 };
   st.santaKarte = s;
   if (s.n >= C.SANTA_PRO_TAG || Math.random() >= C.SANTA_CHANCE) return false;

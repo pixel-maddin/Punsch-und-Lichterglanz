@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610110857';
-import * as S from './spiel.js?v=202610110857';
-import * as Z from './zeit.js?v=202610110857';
-import * as FEIN from './fein.js?v=202610110857';
-import * as T from './ton.js?v=202610110857';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610110857';
+import * as C from './config.js?v=202610111247';
+import * as S from './spiel.js?v=202610111247';
+import * as Z from './zeit.js?v=202610111247';
+import * as FEIN from './fein.js?v=202610111247';
+import * as T from './ton.js?v=202610111247';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610111247';
 
 const $ = (s) => document.querySelector(s);
 
@@ -131,7 +131,7 @@ function baueSchilder(hervor) {
   for (const o of ORTE) {
     // Noch nicht aufgegangenes Minispiel (10.10.): nur die Grafik, kein
     // Schild und keine Tippfläche - es soll sich erst zeigen, wenn es dran ist
-    if (o.spiel && !S.miniOffen(o.spiel)) continue;
+    if (!S.ortOffen(o)) continue;   // auch Läden gehen mit der Einführung auf (11.10.)
     const b = document.createElement('button');
     b.className = 'ort' + (o.bald ? ' bald' : '') + (o.id === hervor ? ' hervor' : '') + (o.id === 'haus' ? ' zuhause' : '');
     const [sdx, sdy] = o.schild || [0, 0];

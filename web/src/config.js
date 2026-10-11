@@ -645,7 +645,7 @@ export const WETTER_LAGEN = {
 
 // Wunschzettel (10.10.): höchstens ein Brief offen, der nächste frühestens am
 // Tag nach dem Dank. Ab dem zweiten Spieltag, höchstens BRIEF_MAX je Saison.
-export const BRIEF_AB_TAG = 1;
+export const BRIEF_AB_TAG = 3;   // 11.10.: Einstieg in Wellen (vorher 1)
 export const BRIEF_MAX = 10;
 export const BRIEF_BACKEN = 5;            // so viele Plätzchen wünscht sich das Back-Kind
 export const BRIEF_LOHN_MINUTEN = 4;      // Dank: so viele Minuten Einnahmen …
@@ -712,3 +712,14 @@ export function miniStufe(name, nr) {
 // das letzte offen, die anderen entsprechend früher (siehe miniOffen()).
 export const MINI_AB_TAG = { lichtung: 0, baum: 2, back: 5, eis: 7, berg: 10 };
 export const MINI_ALLE_DEZ = 14;
+
+// Einstieg in Wellen (11.10., Nutzerwunsch: „am Anfang zu viele Popups
+// gleichzeitig"). Gemessen hatte ein neuer Spieler in den ersten 3 Minuten
+// 10 Erklärblasen, 15 „Neu freigeschaltet", 4 Socken, Ansturm, Nikolaus und
+// eine Großbestellung mitten in der Wichtel-Erklärung. Jetzt:
+//  - erst nach den STARTZIELEN: besondere Gäste, Ansturm, Großbestellungen,
+//    eilige Gäste, Socken- und „Neu frei"-Einblendungen, Aufträge-Hinweis
+//  - dazu ab SPIELTAG (0 = erster Tag): siehe EINSTIEG
+// Alte Spielstände (spieltag 99) merken davon nichts.
+export const EINSTIEG = { sonder: 1, ansturm: 1, haendler: 1, wetter: 1, schlitten: 2, santa: 3, markt: 3 };
+export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Großbestellung, Gruppe, Ansturm, Sondergast

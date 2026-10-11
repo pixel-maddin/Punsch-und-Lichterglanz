@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610110857';
-import * as S from './spiel.js?v=202610110857';
-import * as A from './auftraege.js?v=202610110857';
-import * as E from './erfolge.js?v=202610110857';
-import * as Z from './ziele.js?v=202610110857';
-import * as KA from './karte.js?v=202610110857';
+import * as C from './config.js?v=202610111247';
+import * as S from './spiel.js?v=202610111247';
+import * as A from './auftraege.js?v=202610111247';
+import * as E from './erfolge.js?v=202610111247';
+import * as Z from './ziele.js?v=202610111247';
+import * as KA from './karte.js?v=202610111247';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -182,7 +182,12 @@ const HINWEISE = [
     ziel: () => handZiel(Math.max(0, S.lauf.hand.findIndex((h) => h.vonWichtel))), fertig: () => (S.lauf.wichtelSelbst || 0) > 0 || !S.lauf.hand.some((h) => h.vonWichtel) },
   // Was es außer dem Stand gibt (09.10.): erst, wenn die Wichtel den Stand
   // tragen - dann ist Zeit dafür, und es hat Sterne für die Markt-Ware
-  { id: 'karte_mehr', sofort: true, wann: () => !!S.st.tipps.wichtel_weg,
+  // Der Baumarkt geht nach dem Servier-Wichtel auf (Orte nach und nach, 11.10.)
+  { id: 'baumarkt', sofort: true, wann: () => !!S.st.tipps.wichtel_weg && (S.st.ziel || 0) >= 5,
+    info: () => 'Neu auf der Karte: der BAUMARKT! Dort gibt es größere Töpfe, einen längeren Tresen für mehr Gäste, ein Tablett für mehr Gläser - und neue Farbe für dein Haus.',
+    text: () => 'Tippe auf KARTE - der Baumarkt ist jetzt offen.',
+    ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, laden: { tab: 'baumarkt' }, lang: true },
+  { id: 'karte_mehr', sofort: true, wann: () => !!S.st.tipps.wichtel_weg && !!S.st.tipps.baumarkt,
     // Nennt nur, was schon offen ist (10.10.: Minispiele kommen nach und nach)
     info: () => {
       const offen = KA.ORTE.filter((o) => o.spiel && S.miniOffen(o.spiel)).map((o) => o.name);
@@ -231,14 +236,15 @@ const HINWEISE = [
   { id: 'eilig', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => g.eilig && g.am && !g.bedient),
     text: () => 'Ein eiliger Gast (orange Blase)! Er wartet nur kurz, zahlt aber doppelt.',
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.eilig && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 6 },
-  { id: 'auftrag', ruhig: true, ersetzt: ['auftraege_neu'], wann: () => A.abholbar() > 0,
+  // Aufträge und Socken erst nach den Startzielen (Einstieg in Wellen, 11.10.)
+  { id: 'auftrag', ruhig: true, ersetzt: ['auftraege_neu'], wann: () => Z.fertig() && A.abholbar() > 0,
     text: () => 'Auftrag erfüllt! Unter AUFTRÄGE wartet deine Belohnung. Jeden Tag gibt es drei neue.',
     ziel: auftragZiel, fertig: () => A.abholbar() === 0, dauer: 10 },
-  { id: 'auftraege_neu', ruhig: true, ersetzt: ['auftrag'], wann: () => S.st.stats.bedient >= 25 && A.abholbar() === 0,
+  { id: 'auftraege_neu', ruhig: true, ersetzt: ['auftrag'], wann: () => Z.fertig() && S.st.stats.bedient >= 25 && A.abholbar() === 0,
     text: () => 'Neu: Unter AUFTRÄGE warten jeden Tag drei Aufgaben mit Belohnung - der schwere bringt ein Sammelstück.',
     ziel: auftragZiel, dauer: 7 },
-  { id: 'erfolge', ruhig: true, wann: () => E.anzahl() >= 1,
-    text: () => 'Deine erste Socke hängt an der Erfolgswand! Du findest sie unter AUFTRÄGE → Erfolge. Mit jeder Socke wird es dort weihnachtlicher.',
+  { id: 'erfolge', ruhig: true, wann: () => Z.fertig() && E.anzahl() >= 1,
+    text: () => (E.anzahl() > 1 ? `Schon ${E.anzahl()} Socken hängen an der Erfolgswand!` : 'Deine erste Socke hängt an der Erfolgswand!') + ' Du findest sie unter AUFTRÄGE → Erfolge. Mit jeder Socke wird es dort weihnachtlicher.',
     ziel: auftragZiel, dauer: 8 },
   { id: 'kalender', ruhig: true, wann: () => S.offeneTueren() > 0,
     text: () => S.vorfreudeBereit() ? 'Im Kalender wartet ein Vorfreude-Päckchen auf dich!' : 'Im Adventskalender wartet ein Türchen auf dich!',
