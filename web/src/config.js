@@ -180,6 +180,8 @@ export const FASSADEN = {
   weiss:     { wand: '#ece6d8', wand2: '#d6cdbb', dach: '#566676', dach2: '#46525f', rahmen: '#9a7450', tuer: '#7a4424', muster: 'bretter', laden: '#6f8a9c' },
   rot:       { wand: '#a8352c', wand2: '#8e2a23', dach: '#3b3a44', dach2: '#2e2d35', rahmen: '#f2eee6', tuer: '#2f5040', muster: 'bretter' },
   lebkuchen: { wand: '#b8733a', wand2: '#9c5e2c', dach: '#f6f1ea', dach2: '#e3d9cc', rahmen: '#fff8f0', tuer: '#c83c3c', muster: 'lebkuchen' },
+  // 11.10.: fünfter Anstrich - Eisblöcke mit Kristallen, silbrig verschneites Dach
+  eis:       { wand: '#cfe6f6', wand2: '#a8cce6', dach: '#e4eef8', dach2: '#b8cfe6', rahmen: '#ffffff', tuer: '#3a6aa8', muster: 'eis', laden: '#7aa8d8' },
   chalet:    { wand: '#7c4a24', wand2: '#643a1b', dach: '#3b2a1c', dach2: '#2d2015', rahmen: '#e8d8a8', tuer: '#50281a', muster: 'chalet', sockel: '#8c8c88', laden: '#3d6b3a' },
 };
 
@@ -261,6 +263,7 @@ export const ARTIKEL = [
   { id: 'farbe_weiss',     tab: 'baumarkt', gruppe: 'Anstrich', name: 'Winterweiß',   kosten: 1400,   stimmung: 6,  text: 'Helle Bretter, holzbraune Rahmen.', wahl: 'fassade', fassade: 'weiss' },
   { id: 'farbe_rot',       tab: 'baumarkt', gruppe: 'Anstrich', name: 'Schwedenrot',  kosten: 15000,   stimmung: 10, text: 'Rot mit weißen Kanten, wie in Småland.', wahl: 'fassade', fassade: 'rot' },
   { id: 'farbe_lebkuchen', tab: 'baumarkt', gruppe: 'Anstrich', name: 'Lebkuchenhaus',kosten: 165000,  stimmung: 16, text: 'Zuckerguss auf dem Dach.', wahl: 'fassade', fassade: 'lebkuchen' },
+  { id: 'farbe_eis',       tab: 'baumarkt', gruppe: 'Anstrich', name: 'Eispalast',    kosten: 330000,  stimmung: 18, text: 'Eisblöcke mit funkelnden Kristallen.', wahl: 'fassade', fassade: 'eis' },
   { id: 'farbe_chalet',    tab: 'baumarkt', gruppe: 'Anstrich', name: 'Alpenchalet',  kosten: 645000, stimmung: 20, text: 'Dunkles Holz, Steinsockel, grüne Läden.', wahl: 'fassade', fassade: 'chalet' },
 
   // --- Supermarkt: Zutaten (aus PRODUKTE erzeugt, siehe unten) ---
@@ -323,7 +326,7 @@ export const FREI = {
   // Baumarkt
   tresen: { gesamt: 400 }, stand: { herzen: 60 }, tablett: { gesamt: 3000 },
   strassenlaterne: { herzen: 4 }, holz: { herzen: 5 }, tuer: { herzen: 8 }, zaun: { herzen: 10 }, kamin: { herzen: 14 }, laternen: { herzen: 40 },
-  farbe_weiss: { herzen: 6 }, farbe_rot: { herzen: 25 }, farbe_lebkuchen: { herzen: 90 }, farbe_chalet: { herzen: 150 },
+  farbe_weiss: { herzen: 6 }, farbe_rot: { herzen: 25 }, farbe_lebkuchen: { herzen: 90 }, farbe_eis: { herzen: 120 }, farbe_chalet: { herzen: 150 },
   // Wichtel - in dieser Reihenfolge: Spülen, Nachfüllen, Servieren
   spuel: { gesamt: 120 }, servier: { gesamt: 1000 }, nachfuell: { gesamt: 400 }, kasse: { gesamt: 75000 },
 };

@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610110843';
-import * as S from './spiel.js?v=202610110843';
-import * as Z from './zeit.js?v=202610110843';
-import * as T from './ton.js?v=202610110843';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110843';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110843';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110843';
-import * as A from './auftraege.js?v=202610110843';
-import * as E from './erfolge.js?v=202610110843';
-import * as ZL from './ziele.js?v=202610110843';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110843';
-import * as KA from './karte.js?v=202610110843';
-import { zeigeRueckblick } from './ereignis.js?v=202610110843';
-import { barbaraZweig } from './szene.js?v=202610110843';
-import * as LI from './lichtung.js?v=202610110843';
-import * as CB from './christbaum.js?v=202610110843';
-import * as SB from './schlitten.js?v=202610110843';
-import * as EB from './schlittschuh.js?v=202610110843';
-import * as BS from './backstube.js?v=202610110843';
-import { alleSymbole } from './symbole.js?v=202610110843';
+import * as C from './config.js?v=202610110851';
+import * as S from './spiel.js?v=202610110851';
+import * as Z from './zeit.js?v=202610110851';
+import * as T from './ton.js?v=202610110851';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110851';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110851';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110851';
+import * as A from './auftraege.js?v=202610110851';
+import * as E from './erfolge.js?v=202610110851';
+import * as ZL from './ziele.js?v=202610110851';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110851';
+import * as KA from './karte.js?v=202610110851';
+import { zeigeRueckblick } from './ereignis.js?v=202610110851';
+import { barbaraZweig } from './szene.js?v=202610110851';
+import * as LI from './lichtung.js?v=202610110851';
+import * as CB from './christbaum.js?v=202610110851';
+import * as SB from './schlitten.js?v=202610110851';
+import * as EB from './schlittschuh.js?v=202610110851';
+import * as BS from './backstube.js?v=202610110851';
+import { alleSymbole } from './symbole.js?v=202610110851';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -642,26 +642,34 @@ function baueHaus(behalteScroll) {
   liste.appendChild(sprung);
   const ziele = [];
   const abschnitt = (id, titel, kurz) => {
-    const g = el('div', 'gruppe', titel);
+    const g = el('div', 'gruppe haus-abschnitt', titel);
     g.id = 'hs-' + id;
     liste.appendChild(g);
     ziele.push([id, kurz || titel]);
   };
 
-  // Anstrich
+  // Je Ort: jedes Teil einmal. Der Anstrich gehört zum Haus (11.10.) und
+  // steht als erste Karte unter „Am Haus" statt in einem eigenen Abschnitt.
   const anstriche = C.ARTIKEL.filter((a) => a.wahl === 'fassade' && hat(a));
-  if (anstriche.length) {
-    abschnitt('anstrich', 'Anstrich');
-    const werte = [{ wert: 'trist', text: 'Alt' }, ...anstriche.map((a) => ({ wert: a.fassade, text: a.name.split(' ')[0] }))];
-    const stil = Object.fromEntries(werte.map((v) => [v.wert, C.FASSADEN[v.wert].wand]));
-    liste.appendChild(punktWahl(werte, S.st.fassade, (v) => S.setzeFassade(v), stil));
-  }
-  // Je Ort: jedes Teil einmal
   let mitVarianten = false;
   for (const [id, ort] of HAUS_ORTE) {
     const teile = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => S.istDeko(a) && a.gruppe === ort && hat(a)));
-    if (!teile.length) continue;
+    if (!teile.length && !(id === 'haus' && anstriche.length)) continue;
     abschnitt(id, ort, ort.replace(/^(Am|Im) /, ''));
+    if (id === 'haus' && anstriche.length) {
+      const z = el('div', 'zeile haus karte anstrich');
+      const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
+      zeichneIcon(cv, anstriche.find((a) => a.fassade === S.st.fassade) || anstriche[0]);
+      z.appendChild(cv);
+      const name = (anstriche.find((a) => a.fassade === S.st.fassade) || { name: 'Alter Anstrich' }).name;
+      z.appendChild(el('div', 'txt', `<b>Anstrich</b><span>${name}</span>`));
+      const werte = [{ wert: 'trist', text: 'Alt' }, ...anstriche.map((a) => ({ wert: a.fassade, text: a.name.replace(/haus$/i, '').split(' ')[0] }))];
+      const stil = Object.fromEntries(werte.map((v) => [v.wert, C.FASSADEN[v.wert].wand]));
+      const wahl = punktWahl(werte, S.st.fassade, (v) => S.setzeFassade(v), stil);
+      wahl.classList.add('anstrich-wahl');
+      z.appendChild(wahl);
+      liste.appendChild(z);
+    }
     for (const a of teile) { liste.appendChild(hausKarte(a)); if (C.VARIANTEN[a.id]) mitVarianten = true; }
   }
   // Geschenkt, nach Herkunft

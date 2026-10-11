@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610110843';
-import * as Z from './zeit.js?v=202610110843';
-import * as S from './spiel.js?v=202610110843';
-import { FASSADEN } from './config.js?v=202610110843';
-import * as C from './config.js?v=202610110843';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610110851';
+import * as Z from './zeit.js?v=202610110851';
+import * as S from './spiel.js?v=202610110851';
+import { FASSADEN } from './config.js?v=202610110851';
+import * as C from './config.js?v=202610110851';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -365,6 +365,17 @@ function haus(c, G, w, t, L) {
     }
     for (let x = HX0; x < HX1; x += 2) { p(c, x, wandO + (x % 4 === 0 ? 1 : 2), F.rahmen); }
     for (let y = wandO; y < wandU; y += 2) { p(c, HX0 + (y % 4 === 0 ? 0 : 1), y, F.rahmen); p(c, HX1 - 1 - (y % 4 === 0 ? 0 : 1), y, F.rahmen); }
+  } else if (F.muster === 'eis') {
+    // Eispalast (11.10.): versetzte Eisblöcke mit hellen Kanten, dazu Kristalle, die funkeln
+    for (let y = wandO + 5, z = 0; y < wandU; y += 6, z++) {
+      r(c, HX0, y, HX1 - HX0, 1, F.wand2); r(c, HX0, y - 1, HX1 - HX0, 1, '#e8f4fc');
+      for (let x = HX0 + (z % 2 ? 6 : 0); x < HX1; x += 12) r(c, x, y - 5, 1, 5, F.wand2);
+    }
+    for (let i = 0; i < 14; i++) {
+      const x = HX0 + 4 + Math.floor(Z.hash(i * 13) * 76), y = wandO + 3 + Math.floor(Z.hash(i * 17) * 36);
+      const an = Math.sin(t * 2 + i * 1.7) > 0.6;
+      p(c, x, y, an ? '#ffffff' : '#e0f0fc'); if (an) { p(c, x - 1, y, '#f4faff'); p(c, x + 1, y, '#f4faff'); p(c, x, y - 1, '#f4faff'); p(c, x, y + 1, '#f4faff'); }
+    }
   } else if (F.muster === 'chalet') {
     for (let y = wandO + 3; y < wandU; y += 3) r(c, HX0, y, HX1 - HX0, 1, F.wand2);
     r(c, HX0, wandU - 10, HX1 - HX0, 10, F.sockel);
@@ -2126,7 +2137,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];

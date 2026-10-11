@@ -325,6 +325,12 @@ html, body {
 .zeile.haus .txt span { display: block; }
 .zeile.haus.ist-aus .ico, .zeile.haus.ist-aus .txt b, .zeile.haus.ist-aus .varwahl, .zeile.haus.ist-aus .haus-zusatz { opacity: 0.45; }
 .haus-zusatz { flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; margin-top: calc(var(--px) * 1.5); font: bold calc(var(--px) * 4.2) var(--schrift); color: #7a5a44; }
+/* Abschnitte in „Haus schmücken" deutlich abgrenzen (11.10.): Balken statt blasser Zeile */
+.gruppe.haus-abschnitt { opacity: 1; margin: calc(var(--px) * 5) 0 calc(var(--px) * 1); padding: calc(var(--px) * 2) calc(var(--px) * 3); background: var(--holz); color: #fff8ec; border-radius: calc(var(--px) * 2); letter-spacing: 0.08em; box-shadow: 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.18); }
+.haus-sprung + .gruppe.haus-abschnitt, .var-erkl + .gruppe.haus-abschnitt { margin-top: calc(var(--px) * 2); }
+.zeile.haus.anstrich { flex-wrap: wrap; }
+.anstrich-wahl { flex: 1 1 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 1.5); margin-top: calc(var(--px) * 1.5); }
+.anstrich-wahl .pw { min-width: 0; }
 .haus-quelle { margin: calc(var(--px) * 2.5) 0 0; font: bold calc(var(--px) * 4) var(--schrift); color: #a07a52; }
 /* Anstrich: eine eigene Reihe unter dem Titel, darf umbrechen */
 .gruppe + .punktwahl { flex-wrap: wrap; margin: calc(var(--px) * 1) 0 calc(var(--px) * 2); }
