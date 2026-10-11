@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610110815';
-import * as S from './spiel.js?v=202610110815';
-import * as Z from './zeit.js?v=202610110815';
-import * as FEIN from './fein.js?v=202610110815';
-import * as T from './ton.js?v=202610110815';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610110815';
+import * as C from './config.js?v=202610110823';
+import * as S from './spiel.js?v=202610110823';
+import * as Z from './zeit.js?v=202610110823';
+import * as FEIN from './fein.js?v=202610110823';
+import * as T from './ton.js?v=202610110823';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610110823';
 
 const $ = (s) => document.querySelector(s);
 
@@ -479,31 +479,37 @@ function ellipse(cx, cy, rx, ry, f) {
 function schattenOval(x, y, w) { c.fillStyle = 'rgba(20,30,40,0.22)'; c.fillRect(Math.round(x - w / 2), Math.round(y), w, 1); c.fillRect(Math.round(x - w / 2 + 1), Math.round(y + 1), w - 2, 1); }
 
 function berge(winter) {
+  // Seit 11.10. sanfte, verschneite Hügel statt spitzer Gipfel (Nutzerwunsch:
+  // „die Berge sehen zu mächtig aus"). Zwei Lagen runder Kuppen, hinten blass
+  // und bläulich, vorn weißer mit Schattenseite und ein paar Tannen.
   const basis = Math.round(0.1 * H), oben = -vers();
-  // Himmel hinter den Gipfeln - reicht bis in den Versatz hinauf
-  for (let y = oben; y < basis; y++) r(c, 0, y, C.B, 1, y < (oben + basis) * 0.5 ? '#9cc4e8' : '#b8d6f0');
-  const plus = Math.round(vers() * 0.8);   // die Gipfel wachsen in den gewonnenen Platz
-  const zug = (gipfel, farbe, hell, dunkel, kappe, kappe2, y0) => {
+  for (let y = oben; y < basis + 2; y++) r(c, 0, y, C.B, 1, y < (oben + basis) * 0.5 ? '#a8cdec' : '#c6e0f4');
+  const huegel = (kuppen, y0, hell, schatten, kante) => {
     for (let x = 0; x < C.B; x++) {
       let hoch = 0, seite = 0;
-      for (const [gx, gh] of gipfel) { const h = gh + plus - Math.abs(x - gx) * 0.9; if (h > hoch) { hoch = h; seite = x - gx; } }
-      hoch = Math.round(hoch + (hash(x * 3.1) - 0.5) * 1.4);
-      if (hoch <= 0) continue;
-      for (let k = 0; k < hoch; k++) {
-        const nah = hoch - k;                                        // Abstand zur Kante oben
-        let f = seite > 0 ? dunkel : (seite < -2 ? hell : farbe);
-        if (nah <= Math.max(3, hoch * 0.3)) f = seite > 0 ? kappe2 : kappe;
-        p(c, x, y0 - k, f);
+      for (const [kx, kh, kb] of kuppen) {
+        const d = (x - kx) / kb;
+        if (Math.abs(d) >= 1) continue;
+        const h = kh * Math.cos(d * Math.PI / 2);   // runde Kuppe
+        if (h > hoch) { hoch = h; seite = d; }
       }
+      hoch = Math.round(hoch);
+      for (let k = 0; k < hoch; k++) p(c, x, y0 - k, k === hoch - 1 ? kante : seite > 0.35 && k > hoch * 0.3 ? schatten : hell);
     }
   };
-  zug([[8, 18], [40, 22], [72, 16], [104, 24], [138, 19], [172, 23]], '#8aa0bc', '#9cb0ca', '#7488a6', '#f2f6fb', '#cfdcea', basis - 2);
-  zug([[-4, 14], [24, 17], [58, 13], [92, 19], [124, 15], [158, 18], [186, 12]], '#7d8899', '#929dad', '#626c7c', '#ffffff', '#d4dde8', basis + 3);
-  // Waldsaum am Fuß der Berge
+  const plus = Math.round(vers() * 0.35);
+  huegel([[10, 9 + plus, 34], [56, 12 + plus, 40], [104, 10 + plus, 36], [150, 13 + plus, 42], [190, 9 + plus, 30]], basis, '#dce8f4', '#c4d4e6', '#ffffff');
+  huegel([[-6, 7 + plus, 30], [36, 9 + plus, 36], [82, 7 + plus, 30], [126, 10 + plus, 38], [172, 8 + plus, 32]], basis + 4, '#f2f6fb', '#d8e2ee', '#ffffff');
+  // ein paar Tannen auf den vorderen Kuppen
+  for (let i = 0; i < 14; i++) {
+    const tx = Math.round(hash(i + 300) * C.B), ty = basis + 2 - Math.round(hash(i + 310) * 4);
+    r(c, tx, ty - 3, 1, 3, '#2c5236'); p(c, tx - 1, ty - 1, '#2c5236'); p(c, tx + 1, ty - 1, '#2c5236'); p(c, tx, ty - 4, '#ffffff');
+  }
+  // Waldsaum am Fuß der Hügel
   for (let x = 0; x < C.B; x += 2) {
     const h = 2 + Math.floor(hash(x * 1.7) * 3);
-    r(c, x, basis + 3 - h, 2, h + 1, winter ? '#3a5a48' : '#2c5236');
-    if (winter) p(c, x, basis + 3 - h, '#e8eef4');
+    r(c, x, basis + 5 - h, 2, h + 1, winter ? '#3a5a48' : '#2c5236');
+    if (winter) p(c, x, basis + 5 - h, '#e8eef4');
   }
 }
 
@@ -593,9 +599,21 @@ function zuhause(x, y, P) {
   // Das Haus
   r(c, x - 11, y - 14, 22, 14, F.wand);
   r(c, x + 9, y - 14, 2, 14, F.wand2);
-  dach(x - 13, y - 15, 26, 9, F.dach, F.dach2, P);
-  r(c, x + 5, y - 25, 3, 6, ton(F.dach, -0.3));                // Schornstein
-  if (P.dach) r(c, x + 5, y - 25, 3, 1, '#ffffff');
+  // Dach wie am echten Haus (11.10., Nutzerwunsch): Trapez in der dunklen
+  // Dachfarbe der Fassade, Ziegelreihen, dunkle Traufe - auch im Winter nur
+  // ein Schneesaum oben statt eines weißen Dachs
+  // Auf der kleinen Karte zwischen hellen Flächen wirkt dieselbe Farbe heller -
+  // deshalb hier 20 % dunkler als am Haus, damit es gleich aussieht
+  const d1 = ton(F.dach, -0.2), d2 = ton(F.dach2, -0.25);
+  for (let i = 0; i <= 8; i++) {
+    const l = x - 13 + Math.round(i * 0.75), rr = x + 13 - Math.round(i * 0.75), yy = y - 15 - i;
+    r(c, l, yy, rr - l, 1, i % 3 === 0 ? d2 : d1);
+    if (i % 3 === 2) for (let xx = l + (i % 2 ? 1 : 0); xx < rr; xx += 3) p(c, xx, yy, d2);
+  }
+  r(c, x - 14, y - 15, 28, 1, ton(F.dach, -0.45));               // Traufe
+  if (P.dach) r(c, x - 7, y - 24, 14, 1, '#ffffff');
+  r(c, x + 5, y - 28, 3, 6, '#8a4a3a'); r(c, x + 4, y - 29, 5, 1, '#5a3a32');   // Schornstein wie am Haus
+  if (P.dach) r(c, x + 4, y - 30, 5, 1, '#ffffff');
   fenster(x - 8, y - 11, 3, 3); fenster(x + 5, y - 11, 3, 3); fenster(x - 1, y - 20, 2, 2);
   r(c, x - 2, y - 6, 4, 6, F.tuer); p(c, x + 1, y - 3, '#e8c030');
   // Kranz an der Tür
@@ -888,7 +906,7 @@ function zeichne(t, dt) {
 
   // Rauch aus den Schornsteinen
   const h = ort('haus'), d = ort('dorf');
-  rauch(h.x + 6, yPx(h) - 26, t, 0);
+  rauch(h.x + 6, yPx(h) - 30, t, 0);
   rauch(d.x - 10, yPx(d) - 17, t, 1.3);
   rauch(d.x + 9, yPx(d) - 16, t, 2.1);
   const bs = ort('backstube'); rauch(bs.x - 6, yPx(bs) - 22, t, 0.7);

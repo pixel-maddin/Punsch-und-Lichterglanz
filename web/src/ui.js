@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610110815';
-import * as S from './spiel.js?v=202610110815';
-import * as Z from './zeit.js?v=202610110815';
-import * as T from './ton.js?v=202610110815';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110815';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110815';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110815';
-import * as A from './auftraege.js?v=202610110815';
-import * as E from './erfolge.js?v=202610110815';
-import * as ZL from './ziele.js?v=202610110815';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110815';
-import * as KA from './karte.js?v=202610110815';
-import { zeigeRueckblick } from './ereignis.js?v=202610110815';
-import { barbaraZweig } from './szene.js?v=202610110815';
-import * as LI from './lichtung.js?v=202610110815';
-import * as CB from './christbaum.js?v=202610110815';
-import * as SB from './schlitten.js?v=202610110815';
-import * as EB from './schlittschuh.js?v=202610110815';
-import * as BS from './backstube.js?v=202610110815';
-import { alleSymbole } from './symbole.js?v=202610110815';
+import * as C from './config.js?v=202610110823';
+import * as S from './spiel.js?v=202610110823';
+import * as Z from './zeit.js?v=202610110823';
+import * as T from './ton.js?v=202610110823';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110823';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110823';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110823';
+import * as A from './auftraege.js?v=202610110823';
+import * as E from './erfolge.js?v=202610110823';
+import * as ZL from './ziele.js?v=202610110823';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110823';
+import * as KA from './karte.js?v=202610110823';
+import { zeigeRueckblick } from './ereignis.js?v=202610110823';
+import { barbaraZweig } from './szene.js?v=202610110823';
+import * as LI from './lichtung.js?v=202610110823';
+import * as CB from './christbaum.js?v=202610110823';
+import * as SB from './schlitten.js?v=202610110823';
+import * as EB from './schlittschuh.js?v=202610110823';
+import * as BS from './backstube.js?v=202610110823';
+import { alleSymbole } from './symbole.js?v=202610110823';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -600,6 +600,7 @@ function hausZeile(liste, a, name, text, wahl) {
   z.appendChild(el('div', 'txt', `<b>${name}</b>${text ? `<span>${text}</span>` : ''}`));
   z.appendChild(wahl);
   liste.appendChild(z);
+  return z;
 }
 /** Nach Wahl oder Kauf einer Variante: kurz ausblenden und am Haus funkeln lassen. */
 function zeigeVariante(platz, text = '') {
@@ -617,108 +618,144 @@ export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 function geschenke() {
   return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
-/** Woher ein geschenktes Stück kommt - bei Minispielen mit der Punktschwelle. */
-function herkunftVon(d) {
-  const ab = d.ab ? ` (Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten)` : '';
-  if (d.id.startsWith('kal_')) return 'Aus dem Adventskalender';
-  if (d.id.startsWith('h_')) return 'Vom fahrenden Händler';
-  if (d.id.startsWith('m_')) return 'Vom Weihnachtsmarkt';
-  if (d.id.startsWith('l_')) return 'Aus der Waldlichtung' + ab;
-  if (d.id.startsWith('c_')) return 'Aus dem Christbaumverkauf' + ab;
-  if (d.id.startsWith('s_')) return 'Vom Schlittenberg' + ab;
-  if (d.id.startsWith('e_')) return 'Von der Eisbahn' + ab;
-  return 'Für einen schweren Auftrag';
-}
+/*
+ * „Haus schmücken" (umgebaut 11.10., gemeldet: „die Tanne kann ich nicht mehr
+ * deaktivieren" und „die Anordnung kommt mir chaotisch vor"). Vorher war die
+ * Liste nach BEDIENART sortiert - erst ein Block „Varianten", dann Lichter,
+ * Anstrich, Zaun, dann die Deko nach Ort - und jedes Teil mit Varianten stand
+ * zweimal darin: oben die drei Varianten, weit unten Aus/An.
+ * Jetzt: oben der Anstrich, eine Sprungleiste, dann je ORT jedes Teil genau
+ * einmal als Karte (Name der gewählten Variante, rechts Aus/An bzw.
+ * Aus/Weiß/Bunt, darunter die Varianten), die Zaunfarbe in der Zaun-Karte,
+ * zuletzt das Geschenkte nach Herkunft. Reihenfolge innerhalb eines Ortes
+ * wie im Laden.
+ */
+const HAUS_ORTE = [['haus', 'Am Haus'], ['garten', 'Im Garten'], ['stand', 'Am Stand']];
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
   const pos = liste.scrollTop;
   liste.innerHTML = '';
   const neu = S.st.neu || {};
   const hat = (a) => S.stufe(a.id) > 0;
-  let leer = true;
-  const gruppe = (titel) => { liste.appendChild(el('div', 'gruppe', titel)); leer = false; };
+  const sprung = el('div', 'haus-sprung');
+  liste.appendChild(sprung);
+  const ziele = [];
+  const abschnitt = (id, titel, kurz) => {
+    const g = el('div', 'gruppe', titel);
+    g.id = 'hs-' + id;
+    liste.appendChild(g);
+    ziele.push([id, kurz || titel]);
+  };
 
-  // Varianten je Platz (09.10.): drei Knöpfe - gewählt, gekauft, kaufbar, ???
-  const plaetze = Object.keys(C.VARIANTEN).filter((pl) => S.hat(pl));
-  if (plaetze.length) {
-    gruppe('Varianten');
-    liste.appendChild(el('p', 'klein var-erkl', `Jeder Platz hat drei Varianten. Jede zusätzliche bringt ♥ +${C.VARIANTE_HERZEN} - die dritte zeigt sich erst, wenn du die zweite hast.`));
-    for (const pl of plaetze) {
-      const vs = C.VARIANTEN[pl], aktiv = S.variante(pl);
-      const name = aktiv ? vs[aktiv].name : S.artikelName(pl);
-      const reihe = el('div', 'varwahl');
-      vs.forEach((v, i) => {
-        const st = S.varianteStatus(pl, i);
-        let cls = 'vw', inhalt;
-        if (st.hat) { cls += i === aktiv ? ' aktiv' : ''; inhalt = `<b>${v.kurz}</b><small>${i === aktiv ? 'gewählt' : 'wählen'}</small>`; }
-        else if (st.versteckt) { cls += ' zu'; inhalt = '<b>???</b><small>erst Nr. 2</small>'; }
-        else { cls += st.leisten ? ' kauf' : ' teuer'; inhalt = `<b>${v.kurz}</b><small>★ ${S.formatGeld(st.kosten).replace(' Sterne', '')}</small>`; }
-        const b = el('button', cls, inhalt);
-        b.onclick = () => {
-          if (st.hat) { S.waehleVariante(pl, i); baueHaus(true); zeigeVariante(pl); return; }
-          if (st.versteckt) { T.spiele('falsch'); toast('Die dritte Variante zeigt sich, wenn du die zweite hast.', 'hinweis'); return; }
-          if (!S.kaufeVariante(pl, i)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
-          toast(`${v.name} gekauft! ♥ +${C.VARIANTE_HERZEN}`, 'gut');
-          baueHaus(true); zeigeVariante(pl, `+${C.VARIANTE_HERZEN} ♥`);
-        };
-        reihe.appendChild(b);
-      });
-      const z = el('div', 'zeile haus var');
-      const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
-      zeichneIcon(cv, S.ARTIKEL_MAP[pl]);
-      z.appendChild(cv);
-      z.appendChild(el('div', 'txt', `<b>${name}</b>${aktiv ? `<span>${vs[aktiv].text}</span>` : ''}`));
-      z.appendChild(reihe);
-      liste.appendChild(z);
-    }
-  }
-
-  // Lichter: Aus / Weiß / Bunt (oder Aus / An ohne Farbwahl)
-  const lichter = C.ARTIKEL.filter((a) => a.id in C.LICHTER && hat(a));
-  if (lichter.length) {
-    gruppe('Lichter');
-    for (const a of lichter) {
-      const farbe = S.lichtKette(a.id);
-      const werte = farbe ? ['aus', 'weiss', 'bunt'] : ['aus', 'an'];
-      const noch = a.id in C.LICHT_AB_STUFE && !farbe ? 'Lichter kommen mit Stufe 2.' : a.id === 'festbeleuchtung' ? 'Immer warmweiß.' : '';
-      hausZeile(liste, a, a.name, noch, punktWahl(werte, S.lichtModus(a.id), (v) => S.setzeLicht(a.id, v)));
-    }
-  }
   // Anstrich
   const anstriche = C.ARTIKEL.filter((a) => a.wahl === 'fassade' && hat(a));
   if (anstriche.length) {
-    gruppe('Anstrich');
+    abschnitt('anstrich', 'Anstrich');
     const werte = [{ wert: 'trist', text: 'Alt' }, ...anstriche.map((a) => ({ wert: a.fassade, text: a.name.split(' ')[0] }))];
     const stil = Object.fromEntries(werte.map((v) => [v.wert, C.FASSADEN[v.wert].wand]));
     liste.appendChild(punktWahl(werte, S.st.fassade, (v) => S.setzeFassade(v), stil));
   }
-  // Zaun
-  if (S.stufe('zaun_braun') > 0) {
-    gruppe('Zaun');
-    hausZeile(liste, S.ARTIKEL_MAP.zaun, 'Farbe des Zauns', '', punktWahl([{ wert: 'hell', text: 'Hell' }, { wert: 'braun', text: 'Braun' }],
-      S.st.zaunfarbe === 'braun' ? 'braun' : 'hell', (v) => S.setzeZaunfarbe(v), { hell: '#e2d5bb', braun: '#7a5234' }));
+  // Je Ort: jedes Teil einmal
+  let mitVarianten = false;
+  for (const [id, ort] of HAUS_ORTE) {
+    const teile = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => S.istDeko(a) && a.gruppe === ort && hat(a)));
+    if (!teile.length) continue;
+    abschnitt(id, ort, ort.replace(/^(Am|Im) /, ''));
+    for (const a of teile) { liste.appendChild(hausKarte(a)); if (C.VARIANTEN[a.id]) mitVarianten = true; }
   }
-  // Deko nach Ort
-  for (const ort of ['Am Haus', 'Im Garten', 'Am Stand']) {
-    const deko = C.ARTIKEL.filter((a) => S.istDeko(a) && !(a.id in C.LICHTER) && a.gruppe === ort && hat(a));
-    if (!deko.length) continue;
-    gruppe(ort);
-    for (const a of deko) hausZeile(liste, a, a.name, '', punktWahl(['aus', 'an'], S.zeigt(a.id) ? 'an' : 'aus', (v) => S.setzeDeko(a.id, v === 'an')));
-  }
-  // Geschenkt
+  // Geschenkt, nach Herkunft
   const gesch = geschenke();
   if (gesch.length) {
-    gruppe('Geschenkt');
-    for (const d of gesch) {
-      const herkunft = herkunftVon(d);
-      hausZeile(liste, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), herkunft,
-        punktWahl(['aus', 'an'], S.zeigt(d.id) ? 'an' : 'aus', (v) => S.setzeDeko(d.id, v === 'an')));
-      delete neu[d.id];
+    abschnitt('geschenkt', 'Geschenkt');
+    const QUELLEN = [['Aus dem Adventskalender', (d) => d.id.startsWith('kal_')], ['Aus den Minispielen', (d) => /^(l|c|s|e)_/.test(d.id)],
+      ['Vom Händler und vom Markt', (d) => /^(h|m)_/.test(d.id)], ['Für schwere Aufträge', () => true]];
+    const vergeben = new Set();
+    for (const [titel, passt] of QUELLEN) {
+      const teil = gesch.filter((d) => !vergeben.has(d.id) && passt(d));
+      if (!teil.length) continue;
+      liste.appendChild(el('p', 'haus-quelle', titel));
+      for (const d of teil) {
+        vergeben.add(d.id);
+        // Minispiel-Deko: aus welchem Spiel, ab welchem Rekord (wer ein neues Präfix einführt, trägt es hier ein)
+        const spiel = { l: 'Waldlichtung', c: 'Christbaumverkauf', s: 'Schlittenberg', e: 'Eisbahn' }[d.id.split('_')[0]];
+        const ab = d.ab ? `${spiel ? spiel + ' · ' : ''}Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten` : '';
+        const z = hausZeile(liste, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab,
+          punktWahl(['aus', 'an'], S.zeigt(d.id) ? 'an' : 'aus', (v) => S.setzeDeko(d.id, v === 'an')));
+        if (!S.zeigt(d.id)) z.classList.add('ist-aus');
+        delete neu[d.id];
+      }
     }
   }
-  if (leer) liste.appendChild(el('p', 'hinweis', 'Hier stellst du später alles ein, was du gekauft hast: Lichter an, aus, weiß oder bunt, Deko ein- und ausblenden, den Anstrich wählen. Noch gibt es nichts - schau unter „Einkaufen“.'));
+  // Sprungleiste (erst ab zwei Abschnitten) und der eine Satz zu den Varianten
+  if (ziele.length >= 2) for (const [id, kurz] of ziele) {
+    const b = el('button', 'hs-k', kurz);
+    b.onclick = () => { T.spiele('klick'); const z = $('#hs-' + id); if (z) liste.scrollTo({ top: z.offsetTop - sprung.offsetHeight - liste.offsetTop - 8, behavior: 'smooth' }); };
+    sprung.appendChild(b);
+  } else sprung.remove();
+  if (mitVarianten) sprung.after(el('p', 'klein var-erkl', `Manche Teile gibt es in drei Varianten - tippe eine an, um sie zu wählen oder zu kaufen (je ♥ +${C.VARIANTE_HERZEN}). Die dritte zeigt sich, wenn du die zweite hast.`));
+  if (!ziele.length) liste.appendChild(el('p', 'hinweis', 'Hier stellst du später alles ein, was du gekauft hast: Lichter an, aus, weiß oder bunt, Deko ein- und ausblenden, den Anstrich wählen. Noch gibt es nichts - schau auf der KARTE in die Läden.'));
   if (behalteScroll) liste.scrollTop = pos;
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
+}
+
+/** Eine Karte in „Haus schmücken": Name, Schalter, ggf. Zaunfarbe und Varianten. */
+function hausKarte(a) {
+  const vs = C.VARIANTEN[a.id], aktiv = vs ? S.variante(a.id) : 0;
+  const istLicht = a.id in C.LICHTER;
+  let text = vs && aktiv ? vs[aktiv].text : '', wahl, aus;
+  if (istLicht) {
+    const farbe = S.lichtKette(a.id);
+    const werte = farbe ? ['aus', 'weiss', 'bunt'] : ['aus', 'an'];
+    const noch = a.id in C.LICHT_AB_STUFE && !farbe ? 'Lichter kommen mit Stufe 2.' : a.id === 'festbeleuchtung' ? 'Immer warmweiß.' : '';
+    text = text || noch;
+    wahl = punktWahl(werte, S.lichtModus(a.id), (v) => S.setzeLicht(a.id, v));
+    aus = S.lichtModus(a.id) === 'aus';
+  } else {
+    wahl = punktWahl(['aus', 'an'], S.zeigt(a.id) ? 'an' : 'aus', (v) => S.setzeDeko(a.id, v === 'an'));
+    aus = !S.zeigt(a.id);
+  }
+  const z = el('div', 'zeile haus karte' + (aus ? ' ist-aus' : ''));
+  const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
+  zeichneIcon(cv, a);
+  z.appendChild(cv);
+  z.appendChild(el('div', 'txt', `<b>${vs && aktiv ? vs[aktiv].name : a.name}</b>${text ? `<span>${text}</span>` : ''}`));
+  z.appendChild(wahl);
+  // Die Zaunfarbe gehört zum Zaun (vorher ein eigener Abschnitt)
+  if (a.id === 'zaun' && S.stufe('zaun_braun') > 0) {
+    const zus = el('div', 'haus-zusatz', '<span>Farbe</span>');
+    zus.appendChild(punktWahl([{ wert: 'hell', text: 'Hell' }, { wert: 'braun', text: 'Braun' }],
+      S.st.zaunfarbe === 'braun' ? 'braun' : 'hell', (v) => S.setzeZaunfarbe(v), { hell: '#e2d5bb', braun: '#7a5234' }));
+    z.appendChild(zus);
+  }
+  if (vs) z.appendChild(variantenReihe(a.id));
+  return z;
+}
+/** Die drei Varianten eines Platzes: gewählt, wählbar, kaufbar, ???. */
+function variantenReihe(pl) {
+  const vs = C.VARIANTEN[pl], aktiv = S.variante(pl);
+  const reihe = el('div', 'varwahl');
+  vs.forEach((v, i) => {
+    const st = S.varianteStatus(pl, i);
+    let cls = 'vw', inhalt;
+    if (st.hat) { cls += i === aktiv ? ' aktiv' : ''; inhalt = `<b>${v.kurz}</b><small>${i === aktiv ? 'gewählt' : 'wählen'}</small>`; }
+    else if (st.versteckt) { cls += ' zu'; inhalt = '<b>???</b><small>erst Nr. 2</small>'; }
+    else { cls += st.leisten ? ' kauf' : ' teuer'; inhalt = `<b>${v.kurz}</b><small>★ ${S.formatGeld(st.kosten).replace(' Sterne', '')}</small>`; }
+    const b = el('button', cls, inhalt);
+    b.onclick = () => {
+      if (st.hat) {
+        S.waehleVariante(pl, i);
+        if (!S.zeigt(pl)) S.setzeDeko(pl, true);   // eine Variante wählen heißt: zeigen
+        baueHaus(true); zeigeVariante(pl); return;
+      }
+      if (st.versteckt) { T.spiele('falsch'); toast('Die dritte Variante zeigt sich, wenn du die zweite hast.', 'hinweis'); return; }
+      if (!S.kaufeVariante(pl, i)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
+      if (!S.zeigt(pl)) S.setzeDeko(pl, true);
+      toast(`${v.name} gekauft! ♥ +${C.VARIANTE_HERZEN}`, 'gut');
+      baueHaus(true); zeigeVariante(pl, `+${C.VARIANTE_HERZEN} ♥`);
+    };
+    reihe.appendChild(b);
+  });
+  return reihe;
 }
 
 function freiSchluessel(a) {
@@ -1072,7 +1109,6 @@ export function zeigeHaendler() {
   const box = fenster('Der fahrende Händler', `
     <p class="klein">${leer ? 'Heute hat er nichts mehr für dich - du hast schon alles!' : '„Seltene Ware von weit her! Gibt es nur bei mir - und ich ziehe bald weiter."'}</p>
     <div class="haendler-liste"></div>`, [{ text: 'Später', neben: true }]);
-  KA.vignette(box.querySelector('canvas'), 'festplatz', { offen: true });   // Ortsbild wie bei den Läden (11.10.)
   const liste = box.querySelector('.haendler-liste');
   for (const w of waren) {
     const preis = S.haendlerPreis(w);
@@ -1123,7 +1159,7 @@ export function zeigeMarkt() {
       <p>Noch ist der Platz leer. Der nächste <b>Weihnachtsmarkt</b> ist ${wann}.</p>
       <p class="klein">Dort gibt es Deko, die du nur auf dem Markt bekommst, und Rezepte, mit denen deine Getränke dauerhaft mehr Sterne bringen. Am Markttag kommen außerdem ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste an deinen Stand.</p>
       ${stand}`, [{ text: 'Bis dann!' }]);
-    KA.vignette(zu.querySelector('canvas'), 'festplatz', { offen: false });
+    KA.vignette(zu.querySelector('canvas.fenster-bild'), 'festplatz', { offen: false });
     return;
   }
   S.marktBesuchen();
@@ -1134,6 +1170,7 @@ export function zeigeMarkt() {
     <canvas class="fenster-bild"></canvas>
     <p class="klein">${waren.length ? `Heute ist Markt! Am Stand ist viel los: ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste. Was es hier gibt, gibt es nur auf dem Markt.` : 'Du hast schon alles, was der Markt heute hat - aber am Stand ist trotzdem mehr los!'}</p>
     <div class="haendler-liste"></div>${stand}`, [{ text: 'Später', neben: true }]);
+  KA.vignette(box.querySelector('canvas.fenster-bild'), 'festplatz', { offen: true });   // Ortsbild wie bei den Läden (11.10.)
   const liste = box.querySelector('.haendler-liste');
   for (const w of waren) {
     const preis = S.haendlerPreis(w);

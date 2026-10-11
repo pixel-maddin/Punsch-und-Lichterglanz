@@ -315,7 +315,17 @@ html, body {
 .vw.teuer { opacity: 0.6; }
 .vw.zu { background: #e8e0d4; color: #a89880; }
 .vw:active { transform: scale(0.95); }
-.var-erkl { margin: 0 0 calc(var(--px) * 2); }
+.var-erkl { margin: calc(var(--px) * 1) 0 calc(var(--px) * 1); }
+/* Haus schmücken (11.10.): Sprungleiste, eine Karte je Teil, Herkunft des Geschenkten */
+.haus-sprung { position: sticky; top: calc(var(--px) * -0.5); z-index: 2; display: flex; gap: calc(var(--px) * 1.5); padding: calc(var(--px) * 1.5) 0; background: var(--papier); border-bottom: calc(var(--px) * 0.5) solid #e0c898; }
+.hs-k { flex: 1; appearance: none; cursor: pointer; padding: calc(var(--px) * 1.6) 0; background: var(--papier2); color: var(--holz); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 3); font: bold calc(var(--px) * 4) var(--schrift); }
+.hs-k:active { transform: scale(0.95); background: #fff3c4; }
+.zeile.haus.karte { flex-wrap: wrap; }
+.zeile.haus.karte .txt { flex: 1 1 40%; }
+.zeile.haus .txt span { display: block; }
+.zeile.haus.ist-aus .ico, .zeile.haus.ist-aus .txt b, .zeile.haus.ist-aus .varwahl, .zeile.haus.ist-aus .haus-zusatz { opacity: 0.45; }
+.haus-zusatz { flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; margin-top: calc(var(--px) * 1.5); font: bold calc(var(--px) * 4.2) var(--schrift); color: #7a5a44; }
+.haus-quelle { margin: calc(var(--px) * 2.5) 0 0; font: bold calc(var(--px) * 4) var(--schrift); color: #a07a52; }
 /* Anstrich: eine eigene Reihe unter dem Titel, darf umbrechen */
 .gruppe + .punktwahl { flex-wrap: wrap; margin: calc(var(--px) * 1) 0 calc(var(--px) * 2); }
 .tab {
