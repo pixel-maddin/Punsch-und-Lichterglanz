@@ -15,10 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610101407';
-import * as S from './spiel.js?v=202610101407';
-import * as Z from './zeit.js?v=202610101407';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610101407';
+import * as C from './config.js?v=202610110758';
+import * as S from './spiel.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110758';
+import * as FEIN from './fein.js?v=202610110758';
+import * as T from './ton.js?v=202610110758';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610110758';
 
 const $ = (s) => document.querySelector(s);
 
@@ -80,7 +82,8 @@ export function oeffne(hoehe, beiAnkunft, hervor) {
   baueSchilder(hervor);
   el.classList.remove('versteckt');
   offen = true;
-  S.lauf.karteOffen = true;   // für den Hinweis „Auf der Karte gibt es noch mehr"
+  S.lauf.karteOffen = true;
+  T.musikKarte(true);         // auf der Karte läuft das Kartenstück (11.10.)   // für den Hinweis „Auf der Karte gibt es noch mehr"
   wanderer = null;
   letzte = performance.now();
   cancelAnimationFrame(rafId);
@@ -89,6 +92,7 @@ export function oeffne(hoehe, beiAnkunft, hervor) {
 export function schliesse() {
   offen = false;
   S.lauf.karteOffen = false;
+  T.musikKarte(false);
   $('#landkarte').classList.add('versteckt');
   cancelAnimationFrame(rafId);
 }
@@ -1027,40 +1031,10 @@ function rauch(x, y, t, ph) {
 // ---------------------------------------------------------------------------
 // Bildchen für die Geschäfte: der Ort auf eigenem Grund, als Kopf im Laden
 // ---------------------------------------------------------------------------
-const ORT_ZU_TAB = { super: 'super', markt: 'dorf', baumarkt: 'bau', wichtel: 'wichtel' };
 
-/** Zeichnet das Geschäft `tab` in ein 110 x 40 großes Canvas (CSS skaliert hoch). */
-export function vignette(ziel, tab) {
-  const id = ORT_ZU_TAB[tab];
-  if (!id) return false;
-  const winter = Z.schnee() > 0;
-  const P = palette(winter);
-  const W = 110, HH = 40, HOR = 22;
-  ziel.width = W; ziel.height = HH;
-  const alt = c, altL = lichter;
-  c = ziel.getContext('2d');
-  c.imageSmoothingEnabled = false;
-  lichter = [];
-  const li = Z.licht();
-  const himmel = li.hell > 0.6 ? ['#7fb2e0', '#a4c8ec', '#c4dcf2'] : li.hell > 0.1 ? ['#4a4a8a', '#a0708a', '#e8a07a'] : ['#10183c', '#18224c', '#24305e'];
-  for (let y = 0; y < HOR; y++) r(c, 0, y, W, 1, himmel[Math.min(2, Math.floor(y / HOR * 3))]);
-  if (li.hell < 0.3) for (let i = 0; i < 14; i++) p(c, hash(i + 70) * W, hash(i + 80) * 14, '#ffffff');   // Sterne
-  // Ferne Hügel und Waldsaum
-  for (let x = 0; x < W; x++) {
-    const hh = 5 + Math.round(Math.sin(x / 11) * 2 + Math.sin(x / 4.3));
-    r(c, x, HOR - hh, 1, hh, winter ? '#c8d4e2' : '#6a8a7a');
-  }
-  // Boden
-  for (let y = HOR; y < HH; y++) for (let x = 0; x < W; x++) {
-    const v = rausch(x / 7, y / 4) + (hash2(x, y) - 0.5) * 0.3;
-    p(c, x, y, P.boden[Math.max(0, Math.min(3, Math.floor(v * 3.5)))]);
-  }
-  for (let x = 0; x < W; x += 4) tanne(x + 1, HOR + 2, hash(x) < 0.3 ? 1 : 0, P);
-  // Nachbarschaft am Rand, damit es nicht leer wirkt
-  tanne(8, 38, 2, P); tanne(102, 39, 2, P); tanne(20, 35, 1, P); tanne(90, 36, 1, P);
-  busch(28, 38, P, winter); busch(81, 38, P, winter); fels(15, 39, P, winter);
-  ZEICHNER[id](55, 36, P, winter);
-  nachtLichter(li, W, HH, lichter, 0.5);
-  c = alt; lichter = altL;
-  return true;
-}
+/**
+ * Ortsbild eines Geschäfts oben im Laden-Blatt. Seit 11.10. in doppelter
+ * Auflösung und mit eigenen, detailreicheren Zeichnungen in fein.js
+ * (vorher hier mit den Kartenbausteinen, 110 x 40 - „zu grob pixelig").
+ */
+export function vignette(ziel, tab) { return FEIN.vignette(ziel, tab); }

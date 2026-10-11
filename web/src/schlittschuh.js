@@ -10,11 +10,11 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610101407';
-import * as Z from './zeit.js?v=202610101407';
-import * as T from './ton.js?v=202610101407';
-import * as MH from './minihud.js?v=202610101407';
-import { r, p, ton } from './pixel.js?v=202610101407';
+import * as C from './config.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110758';
+import * as T from './ton.js?v=202610110758';
+import * as MH from './minihud.js?v=202610110758';
+import { r, p, ton } from './pixel.js?v=202610110758';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -52,7 +52,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1) {
   spiel = neuesSpiel(-3);
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
-  T.musikPause(true);
+  T.musikMinispiel(true);
   // Tippen springt, Wischen macht in der Luft einen Trick (vom Boden aus:
   // nach oben wischen springt auch)
   let start = null;
@@ -77,7 +77,7 @@ export function schliesse() {
   window.removeEventListener('keydown', taste);
   $('#minispiel').classList.add('versteckt');
   MH.aus();
-  T.musikPause(false);
+  T.musikMinispiel(false);
 }
 function taste(e) {
   const k = { ' ': 'tipp', ArrowUp: 'hoch', ArrowLeft: 'links', ArrowRight: 'rechts', w: 'hoch', a: 'links', d: 'rechts' }[e.key];

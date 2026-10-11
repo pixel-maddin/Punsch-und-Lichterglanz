@@ -252,8 +252,9 @@ Karte, die man sieht.
 
 Reines Canvas 2D (180 Pixel breit, per CSS hochskaliert), ES-Module,
 kein Node, kein npm, keine Bilddatei - Grafik und Geräusche entstehen im
-Code. Einzige Fremddatei ist die Musik (`web/audio/musik.m4a`), im Menü
-lauter, leiser oder ganz aus. Spielstand in `localStorage` (`adventshaus.v1`).
+Code. Einzige Fremddateien sind die zwei Musikstücke (`web/audio/musik-haus.m4a`
+am Haus, `web/audio/musik-karte.m4a` auf der Karte und in den Minispielen,
+weich übergeblendet), im Menü lauter, leiser oder ganz aus. Spielstand in `localStorage` (`adventshaus.v1`).
 
 `web/` ist rein statisch und läuft auf jedem Webserver. Beim Hochladen auf
 GitHub veröffentlicht `.github/workflows/pages.yml` den Ordner `web/` über
@@ -264,8 +265,9 @@ alte Dateien.
 
 ## Musik
 
-„Music2" (`web/audio/musik.m4a`) wurde mit [Suno](https://suno.com)
-erstellt und wird nicht-kommerziell verwendet.
+Zwei Stücke: `musik-haus.m4a` läuft am Haus, `musik-karte.m4a` auf der
+Karte und in den Minispielen. Beide werden nicht-kommerziell verwendet.
+(Bis 10.10. lief „Music2", mit [Suno](https://suno.com) erstellt.)
 
 ## Nutzung
 

@@ -10,11 +10,11 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610101407';
-import * as Z from './zeit.js?v=202610101407';
-import * as T from './ton.js?v=202610101407';
-import * as MH from './minihud.js?v=202610101407';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610101407';
+import * as C from './config.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110758';
+import * as T from './ton.js?v=202610110758';
+import * as MH from './minihud.js?v=202610110758';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610110758';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -48,7 +48,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1) {
   spiel = neuesSpiel(-3);
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
-  T.musikPause(true);   // Musik ruht im Minispiel (09.10., Nutzerwunsch)
+  T.musikMinispiel(true);   // Im Minispiel läuft das Kartenstück (11.10.; vom 09.10. bis dahin ruhte die Musik)
   // Lenken: Wo der Finger ist, dorthin zieht der Wok
   const fx = (e) => { const rc = cv.getBoundingClientRect(); return (e.clientX - rc.left) / rc.width * W; };
   cv.onpointerdown = (e) => { if (spiel) { spiel.finger = true; spiel.zielX = fx(e); } };
@@ -67,7 +67,7 @@ export function schliesse() {
   window.removeEventListener('keyup', taste);
   $('#minispiel').classList.add('versteckt');
   MH.aus();
-  T.musikPause(false);
+  T.musikMinispiel(false);
 }
 function taste(e) {
   const an = e.type === 'keydown';

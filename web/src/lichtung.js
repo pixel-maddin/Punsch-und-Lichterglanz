@@ -11,11 +11,11 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610101407';
-import * as Z from './zeit.js?v=202610101407';
-import * as T from './ton.js?v=202610101407';
-import * as MH from './minihud.js?v=202610101407';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610101407';
+import * as C from './config.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110758';
+import * as T from './ton.js?v=202610110758';
+import * as MH from './minihud.js?v=202610110758';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610110758';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -60,7 +60,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1, selten = null) {
     selten, seltenZeit: zufall(5, C.LICHTUNG_DAUER - 10) };
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
-  T.musikPause(true);   // Musik ruht im Minispiel (09.10., Nutzerwunsch)
+  T.musikMinispiel(true);   // Im Minispiel läuft das Kartenstück (11.10.; vom 09.10. bis dahin ruhte die Musik)
   cv.onpointerdown = tippe;
   letzte = performance.now();
   cancelAnimationFrame(rafId);
@@ -71,7 +71,7 @@ export function schliesse() {
   cancelAnimationFrame(rafId);
   $('#minispiel').classList.add('versteckt');
   MH.aus();
-  T.musikPause(false);
+  T.musikMinispiel(false);
 }
 
 function zufall(a, b) { return a + Math.random() * (b - a); }

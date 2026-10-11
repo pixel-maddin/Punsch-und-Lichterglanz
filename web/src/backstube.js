@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610101407';
-import * as Z from './zeit.js?v=202610101407';
-import * as T from './ton.js?v=202610101407';
-import * as MH from './minihud.js?v=202610101407';
-import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610101407';
+import * as C from './config.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110758';
+import * as T from './ton.js?v=202610110758';
+import * as MH from './minihud.js?v=202610110758';
+import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610110758';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -103,7 +103,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1, rezeptListe) {
   spiel = neuesSpiel(-3);
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
-  T.musikPause(true);
+  T.musikMinispiel(true);
   cv.onpointerdown = (e) => {
     const rc = cv.getBoundingClientRect();
     tippeAuf((e.clientX - rc.left) / rc.width * W, (e.clientY - rc.top) / rc.height * H);
@@ -117,7 +117,7 @@ export function schliesse() {
   cancelAnimationFrame(rafId);
   $('#minispiel').classList.add('versteckt');
   MH.aus();
-  T.musikPause(false);
+  T.musikMinispiel(false);
 }
 function setzeRezepte(liste) {
   rezepte = liste && liste.length ? liste : C.BACK_REZEPTE.slice(0, 3);

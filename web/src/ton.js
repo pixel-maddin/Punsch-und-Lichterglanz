@@ -1,19 +1,30 @@
 /*
  * ton.js - Geräusche (synthetisiert) und die Musik.
  *
- * MUSIK: `audio/musik.m4a` („Music2", seit 03.10.; davor „Village at Night"),
- * endlos in Schleife. Die Versionsnummer hängt dran, damit Browser nach einem
- * Austausch nicht das alte Stück aus dem Zwischenspeicher spielen.
- * Sie läuft über den WebAudio-Graphen, NICHT über `audio.volume`: Auf
+ * MUSIK (seit 11.10.): ZWEI Stücke, je nach Ort.
+ *   haus  - `audio/musik-haus.m4a`  (Quelle musik-quelle/music-bg.mp3), am Haus
+ *   karte - `audio/musik-karte.m4a` (Quelle music-map.mp3), auf der Karte und
+ *           in den Minispielen (vorher ruhte die Musik dort)
+ * Gewechselt wird mit kurzer Überblendung; jedes Stück läuft beim nächsten
+ * Mal an seiner Stelle weiter. Beide endlos in Schleife, beide HE-AAC 48 kbps
+ * und auf dieselbe Lautheit gezogen (-14,9 LUFS) - siehe CLAUDE.md.
+ * Davor gab es ein Stück (`musik.m4a`, „Music2").
+ *
+ * Die Versionsnummer hängt an der URL, damit Browser nach einem Austausch
+ * nicht das alte Stück aus dem Zwischenspeicher spielen.
+ * Alles läuft über den WebAudio-Graphen, NICHT über `audio.volume`: Auf
  * iOS ist `volume` schreibgeschützt und wird still ignoriert - ein
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
- *
- * Die Datei ist AAC. Die Quelle war OPUS in einer .m4a - das spielt
- * Safari/iOS nicht. Original liegt in `musik-quelle/`.
+ * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-let ctx = null, fxGain = null, musikGain = null, musikEl = null;
+let ctx = null, fxGain = null, musikGain = null;
 let fxAn = true, musikStufe = 3;
-const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Datei ist mit -14,7 LUFS recht laut)
+const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -14,9 LUFS, recht laut)
+const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610110758', karte: 'audio/musik-karte.m4a?v=202610110758' };
+const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
+const spuren = {};        // name -> { el, gain }
+let szene = 'haus';       // welches Stück gerade dran ist
+let karteOffen = false, miniOffen = false, musikRuht = false;
 
 export function init() {
   if (ctx) { if (ctx.state === 'suspended') ctx.resume(); starteMusik(); return; }
@@ -22,33 +33,61 @@ export function init() {
   ctx = new AC();
   fxGain = ctx.createGain(); fxGain.gain.value = fxAn ? 0.5 : 0; fxGain.connect(ctx.destination);
   musikGain = ctx.createGain(); musikGain.gain.value = 0; musikGain.connect(ctx.destination);
-  musikEl = new Audio('audio/musik.m4a?v=202610101407');
-  musikEl.loop = true;
-  musikEl.preload = 'auto';
-  try { ctx.createMediaElementSource(musikEl).connect(musikGain); }
-  catch (e) { musikEl = null; }   // ohne Graph lieber keine Musik als eine unregelbare
+  for (const [name, url] of Object.entries(STUECKE)) {
+    const el = new Audio(url);
+    el.loop = true;
+    el.preload = name === szene ? 'auto' : 'metadata';
+    const gain = ctx.createGain();
+    gain.gain.value = name === szene ? 1 : 0;
+    try { ctx.createMediaElementSource(el).connect(gain); gain.connect(musikGain); spuren[name] = { el, gain }; }
+    catch (e) { /* ohne Graph lieber keine Musik als eine unregelbare */ }
+  }
   stelleMusik();
   starteMusik();
 }
-let musikRuht = false;
-/** Im Minispiel ruht die Musik; danach geht sie an derselben Stelle weiter. */
+/** Kurz ganz still (der erste Schnee). Danach geht es an derselben Stelle weiter. */
 export function musikPause(an) {
   musikRuht = an;
-  if (an) { if (musikEl) musikEl.pause(); } else starteMusik();
+  if (an) for (const s of Object.values(spuren)) s.el.pause(); else starteMusik();
+}
+/** Karte offen/zu (karte.js) - auf der Karte läuft das Kartenstück. */
+export function musikKarte(an) { karteOffen = an; wechsle(); }
+/** Minispiel läuft/ist vorbei - dort läuft ebenfalls das Kartenstück. */
+export function musikMinispiel(an) { miniOffen = an; wechsle(); }
+
+function wechsle() {
+  const neu = karteOffen || miniOffen ? 'karte' : 'haus';
+  if (neu === szene) return;
+  const alt = spuren[szene], jetzt = spuren[neu];
+  szene = neu;
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  if (alt) {
+    alt.gain.gain.cancelScheduledValues(t); alt.gain.gain.setValueAtTime(alt.gain.gain.value, t); alt.gain.gain.linearRampToValueAtTime(0, t + BLENDE);
+    setTimeout(() => { if (spuren[szene] !== alt) alt.el.pause(); }, BLENDE * 1000 + 80);
+  }
+  if (jetzt) {
+    jetzt.el.preload = 'auto';
+    jetzt.gain.gain.cancelScheduledValues(t); jetzt.gain.gain.setValueAtTime(jetzt.gain.gain.value, t); jetzt.gain.gain.linearRampToValueAtTime(1, t + BLENDE);
+  }
+  starteMusik();
 }
 function starteMusik() {
-  if (!musikEl || musikStufe === 0 || document.hidden || musikRuht) return;
-  if (musikEl.paused) musikEl.play().catch(() => {});
+  const s = spuren[szene];
+  if (!s || musikStufe === 0 || document.hidden || musikRuht) return;
+  if (s.el.paused) s.el.play().catch(() => {});
 }
 export function schlafen() {
-  if (musikEl) musikEl.pause();
+  for (const s of Object.values(spuren)) s.el.pause();
   if (ctx && ctx.state === 'running') ctx.suspend();
 }
 export function wecken() { if (ctx && ctx.state === 'suspended') ctx.resume(); starteMusik(); }
 
-/** Für Tests: läuft die Musik, wie laut? */
+/** Für Tests: welches Stück, läuft es, wie laut? */
 export function musikZustand() {
-  return musikEl ? { laeuft: !musikEl.paused, zeit: musikEl.currentTime, stufe: musikStufe, gain: musikGain.gain.value, ctx: ctx.state } : null;
+  const s = spuren[szene];
+  return s ? { stueck: szene, laeuft: !s.el.paused, zeit: s.el.currentTime, stufe: musikStufe, gain: musikGain.gain.value,
+    andere: Object.entries(spuren).filter(([n]) => n !== szene).map(([n, x]) => ({ stueck: n, laeuft: !x.el.paused, zeit: x.el.currentTime })), ctx: ctx.state } : null;
 }
 
 export function setzeFx(an) { fxAn = an; if (fxGain) fxGain.gain.value = an ? 0.5 : 0; }
@@ -56,7 +95,7 @@ export function setzeFx(an) { fxAn = an; if (fxGain) fxGain.gain.value = an ? 0.
 export function setzeMusik(stufe) {
   musikStufe = Math.max(0, Math.min(5, stufe));
   stelleMusik();
-  if (musikStufe === 0) { if (musikEl) musikEl.pause(); } else starteMusik();
+  if (musikStufe === 0) { for (const sp of Object.values(spuren)) sp.el.pause(); } else starteMusik();
 }
 function stelleMusik() {
   if (!musikGain) return;

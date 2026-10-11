@@ -13,11 +13,11 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610101407';
-import * as Z from './zeit.js?v=202610101407';
-import * as T from './ton.js?v=202610101407';
-import * as MH from './minihud.js?v=202610101407';
-import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610101407';
+import * as C from './config.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110758';
+import * as T from './ton.js?v=202610110758';
+import * as MH from './minihud.js?v=202610110758';
+import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610110758';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -55,7 +55,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1) {
   spiel = neuesSpiel(-3);
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
-  T.musikPause(true);   // Musik ruht im Minispiel (09.10., Nutzerwunsch)
+  T.musikMinispiel(true);   // Im Minispiel läuft das Kartenstück (11.10.; vom 09.10. bis dahin ruhte die Musik)
   cv.onpointerdown = (e) => {
     const rc = cv.getBoundingClientRect();
     tippeAuf((e.clientX - rc.left) / rc.width * W, (e.clientY - rc.top) / rc.height * H);
@@ -69,7 +69,7 @@ export function schliesse() {
   cancelAnimationFrame(rafId);
   $('#minispiel').classList.add('versteckt');
   MH.aus();
-  T.musikPause(false);
+  T.musikMinispiel(false);
 }
 
 function zufall(a, b) { return a + Math.random() * (b - a); }

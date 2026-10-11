@@ -2,115 +2,187 @@
  * ereignis.js - die vier Adventssonntage: je ein Fenster mit kleinem
  * Pixelbild, einem Satz, was passiert, und dem, was es freischaltet.
  *
- * Die Bilder sind 90 x 50 Pixel, im Fenster dreifach vergrößert.
+ * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610101407';
-import * as S from './spiel.js?v=202610101407';
-import * as T from './ton.js?v=202610101407';
-import * as Z from './zeit.js?v=202610101407';
-import { r, p, figurKlein, neueFarben } from './pixel.js?v=202610101407';
-import { fenster, karte } from './ui.js?v=202610101407';
+import * as C from './config.js?v=202610110758';
+import * as S from './spiel.js?v=202610110758';
+import * as T from './ton.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110758';
+import { r, p, figurKlein, neueFarben } from './pixel.js?v=202610110758';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT } from './fein.js?v=202610110758';
+import { fenster, karte } from './ui.js?v=202610110758';
 
-const BW = 90, BH = 50;
-const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
+// Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
+// fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
+const BW = 180, BH = 100;
 
-function himmel(c, oben, unten) {
-  for (let y = 0; y < BH; y++) { c.fillStyle = y < 20 ? oben : unten; c.fillRect(0, y, BW, 1); }
-}
-function sterne(c, n, bis) {
-  for (let i = 0; i < n; i++) p(c, (i * 37) % BW, (i * 13) % bis, i % 3 ? '#fff8e0' : '#b8c0e0');
-}
-function haeuschen(c, x, fuss, bw, h, dach, wand, schnee, licht) {
-  r(c, x, fuss - h, bw, h, wand);
-  const dh = Math.ceil(bw / 2) + 1;
-  for (let i = 0; i < dh; i++) r(c, x - 1 + i, fuss - h - i, bw + 2 - i * 2, 1, schnee && i < 3 ? '#f4f8fc' : dach);
-  for (let fx = x + 2; fx < x + bw - 2; fx += 4) r(c, fx, fuss - h + 2, 2, 2, licht ? '#ffd070' : '#4a5060');
-  if (licht === 'bunt') for (let i = 0; i < dh; i += 1) { p(c, x - 1 + i, fuss - h - i, BUNT[i % 5]); p(c, x + bw - i, fuss - h - i, BUNT[(i + 2) % 5]); }
-}
 function mensch(c, x, fuss, typ) {
   figurKlein(c, { typ, farben: neueFarben(typ), phase: x, laeuft: false }, x, fuss, 0);
 }
+/** Sänger im roten Gewand mit weißem Kragen und Notenheft (größer als figurKlein). */
+function saenger(c, x, fuss, haar, kind) {
+  const h = kind ? 15 : 19, o = fuss - h;
+  r(c, x - 4, o + 7, 9, h - 7, '#b82a2a'); r(c, x + 3, o + 7, 2, h - 7, '#8a1e1e'); r(c, x - 4, fuss - 1, 9, 1, '#6a1414');
+  r(c, x - 3, o + 7, 7, 2, '#f4f4f4');
+  r(c, x - 2, o + 1, 5, 6, '#f2c9a0'); p(c, x - 1, o + 3, '#3a2418'); p(c, x + 1, o + 3, '#3a2418'); r(c, x - 1, o + 5, 3, 1, '#c86a5a');
+  r(c, x - 3, o, 7, 2, haar); p(c, x - 3, o + 2, haar); p(c, x + 3, o + 2, haar);
+  r(c, x - 3, o + 10, 7, 4, '#1e2a5a'); r(c, x, o + 10, 1, 4, '#f4f0e0'); p(c, x - 2, o + 11, '#f4f0e0'); p(c, x + 2, o + 11, '#f4f0e0');
+  r(c, x - 4, o + 13, 2, 2, '#f2c9a0'); r(c, x + 3, o + 13, 2, 2, '#f2c9a0');
+}
+function note(c, x, y, f = '#ffffff') { r(c, x, y, 1, 6, f); r(c, x - 2, y + 5, 3, 2, f); p(c, x + 1, y, f); p(c, x + 2, y + 1, f); }
+/** Marktbude mit Satteldach, gestreifter Markise und Auslage. */
+function bude(c, x, fuss, b, farbe, ware, winter) {
+  r(c, x, fuss - 26, b, 26, '#8a5a32');
+  for (let i = 3; i < b; i += 4) r(c, x + i, fuss - 12, 1, 12, '#6a4222');
+  r(c, x + 2, fuss - 24, b - 4, 11, '#4a2414'); r(c, x + 3, fuss - 23, b - 6, 9, '#7a3a1e');
+  licht(x + b / 2, fuss - 20, '#ffb860', 2);
+  r(c, x + 3, fuss - 23, b - 6, 1, '#ffb860');
+  r(c, x - 1, fuss - 13, b + 2, 2, '#c89a5a'); r(c, x - 1, fuss - 13, b + 2, 1, '#e0b878');
+  // Ware auf dem Tresen
+  for (let k = 0; k < (b - 8) / 5; k++) {
+    const wx = x + 4 + k * 5;
+    if (ware === 'herz') { r(c, wx, fuss - 17, 4, 3, '#a8582a'); p(c, wx + 1, fuss - 18, '#a8582a'); p(c, wx + 3, fuss - 18, '#a8582a'); r(c, wx + 1, fuss - 14, 2, 1, '#a8582a'); p(c, wx + 1, fuss - 16, '#f8f4ea'); }
+    else if (ware === 'kerze') { r(c, wx + 1, fuss - 19, 2, 6, BUNT[k % 5]); p(c, wx + 1, fuss - 20, '#ffd060'); licht(wx + 1, fuss - 20, '#ffd060', 0.5); }
+    else { r(c, wx, fuss - 16, 3, 3, '#f4f0e8'); r(c, wx + 3, fuss - 15, 1, 2, '#f4f0e8'); r(c, wx, fuss - 17, 3, 1, '#c86a3a'); }   // Tassen Punsch
+  }
+  if (ware === 'tasse') for (let i = 0; i < 5; i++) p(c, x + 6 + Math.round(Math.sin(i) * 2), fuss - 20 - i * 3, '#d8dce4');
+  // Markise mit Bogenkante
+  for (let i = 0; i < b + 4; i++) {
+    const f = Math.floor(i / 4) % 2 ? '#f4f0e8' : farbe;
+    r(c, x - 2 + i, fuss - 30, 1, 5, f);
+    if (i % 4 === 1 || i % 4 === 2) p(c, x - 2 + i, fuss - 25, f);
+  }
+  // Dach
+  const dh = Math.ceil(b / 2) + 2;
+  for (let i = 0; i < Math.min(dh, 9); i++) {
+    const xx = x - 3 + i * 2, ww = b + 6 - i * 4;
+    if (ww <= 0) break;
+    r(c, xx, fuss - 31 - i, ww, 1, winter && i > 3 ? '#f6f9fc' : i % 2 ? '#6a4222' : '#7a5230');
+  }
+  if (winter) r(c, x - 3, fuss - 31, b + 6, 1, '#f6f9fc');
+}
 
-const BILDER = {
-  // 1. Advent: Marktbuden mit Lichterketten
+export const BILDER = {
+  // 1. Advent: Weihnachtsmarkt am Abend
   markt(c) {
-    himmel(c, '#1a2250', '#2e3a70'); sterne(c, 18, 20);
-    r(c, 0, 38, BW, 12, '#dfe6ee');
-    const buden = [[4, '#c83030'], [34, '#2f7a3a'], [64, '#c83030']];
-    for (const [x, f] of buden) {
-      r(c, x, 26, 22, 12, '#8a5a32'); r(c, x + 2, 28, 18, 5, '#ffc870');
-      for (let i = 0; i < 24; i++) p(c, x - 1 + i, 24, i % 4 < 2 ? f : '#f4f0e8'), p(c, x - 1 + i, 25, i % 4 < 2 ? f : '#f4f0e8');
-      for (let i = 0; i < 6; i++) r(c, x + 1 + i * 4, 21, 2, 2, BUNT[(i + x) % 5]);
-      r(c, x, 38, 22, 1, '#6a4222');
-    }
-    mensch(c, 16, 46, 'erwachsen'); mensch(c, 26, 46, 'kind'); mensch(c, 50, 47, 'oma'); mensch(c, 76, 46, 'erwachsen');
-    r(c, 44, 3, 3, 3, '#ffe060'); p(c, 45, 1, '#ffe060'); p(c, 45, 7, '#ffe060'); p(c, 42, 4, '#ffe060'); p(c, 48, 4, '#ffe060');
+    neueLichter();
+    verlauf(c, 0, 0, BW, 66, ['#0c1238', '#1a2860', '#3a3c78']);
+    sterne(c, 34, BW, 40, 1); mond(c, 24, 14);
+    // Dorfsilhouette mit Kirchturm
+    for (let x = 0; x < BW; x++) { const hh = 8 + (Math.floor(x / 14) % 3) * 3; r(c, x, 62 - hh, 1, hh, '#232c58'); }
+    r(c, 138, 26, 9, 30, '#232c58'); for (let i = 0; i < 8; i++) r(c, 138 + Math.floor(i / 2), 26 - i, 9 - Math.floor(i / 2) * 2, 1, '#232c58');
+    for (let i = 0; i < 9; i++) { const fx = 6 + i * 19; r(c, fx, 55, 2, 2, '#ffcf6a'); licht(fx, 55, '#ffcf6a', 0.4); }
+    schneeBoden(c, 62, BW, 38, 2);
+    tanne(c, 92, 70, 44, { schnee: true, lichter: 22, stern: true });
+    bude(c, 8, 86, 40, '#c83030', 'herz', true);
+    bude(c, 70, 90, 40, '#2f7a3a', 'tasse', true);
+    bude(c, 132, 86, 40, '#c83030', 'kerze', true);
+    kette(c, 46, 56, 72, 58, 4, 3); kette(c, 108, 58, 134, 56, 4, 3);
+    for (const [x, typ] of [[22, 'erwachsen'], [30, 'kind'], [58, 'oma'], [64, 'opa'], [116, 'erwachsen'], [124, 'kind'], [168, 'erwachsen']]) mensch(c, x, 98, typ);
+    leuchten(c, 1);
   },
-  // 2. Advent: tief verschneit
+  // 2. Advent und erster Schnee: das Dorf tief verschneit, am Tag
   schnee(c) {
-    himmel(c, '#9cc0dc', '#c8dcec');
-    haeuschen(c, 6, 36, 16, 10, '#8a4a3a', '#efe3cc', true, false);
-    haeuschen(c, 60, 34, 18, 11, '#4a6a8a', '#e6d2b8', true, false);
-    r(c, 0, 34, BW, 16, '#f4f8fc');
-    for (let x = 0; x < BW; x++) r(c, x, 32 + Math.round(Math.sin(x * 0.15) * 2), 1, 3, '#f4f8fc');
-    for (let x = 0; x < BW; x += 3) p(c, x, 40 + (x % 5), '#d4deea');
-    // Schneemann
-    r(c, 40, 36, 7, 6, '#ffffff'); r(c, 41, 31, 5, 5, '#ffffff'); r(c, 41, 29, 5, 2, '#1a1a22'); p(c, 44, 33, '#f08020');
-    for (let i = 0; i < 40; i++) p(c, (i * 37 + i * i * 7) % BW, (i * 53 + i * i) % 32, '#ffffff');
-    mensch(c, 26, 46, 'kind'); mensch(c, 56, 47, 'kind');
+    neueLichter();
+    verlauf(c, 0, 0, BW, 64, ['#84acd4', '#a8c8e6', '#d4e4f2']);
+    for (const [x, y, w] of [[30, 12, 26], [110, 8, 34], [150, 20, 20]]) for (let k = 0; k < w; k++) { const hh = Math.round(Math.sin(k / w * Math.PI) * 5); r(c, x + k, y - hh, 1, hh + 2, k < w / 2 ? '#f4f8fc' : '#e4ecf6'); }
+    for (let x = 0; x < BW; x++) { const hh = 6 + Math.round(Math.sin(x / 17) * 3 + Math.sin(x / 7) * 1); r(c, x, 62 - hh, 1, hh, '#c8d6e6'); }
+    for (let x = 3; x < BW; x += 8) tanne(c, x, 63, 12 + Math.floor(hash(x) * 6), { schnee: true, farben: ['#2e6a40', '#225430', '#163a22'] });
+    schneeBoden(c, 62, BW, 38, 5);
+    haus(c, 8, 82, 34, 22, { wand: '#efe3cc', dach: '#8a4a3a', schnee: true, licht: false });
+    haus(c, 132, 80, 38, 24, { wand: '#e6d2b8', dach: '#4a6a8a', schnee: true, licht: false, fachwerk: true });
+    // Schneemann mit Hut, Schal und Besen
+    const sx = 88, sf = 92;
+    for (const [cy, rr] of [[sf - 7, 8], [sf - 19, 6], [sf - 28, 4]]) for (let yy = -rr; yy <= rr; yy++) { const w = Math.round(Math.sqrt(rr * rr - yy * yy)); r(c, sx - w, cy + yy, w * 2 + 1, 1, '#ffffff'); r(c, sx + Math.round(w * 0.4), cy + yy, Math.ceil(w * 0.6) + 1, 1, '#e4ecf6'); }
+    r(c, sx - 4, sf - 34, 9, 2, '#1a1a22'); r(c, sx - 3, sf - 40, 7, 6, '#1a1a22'); r(c, sx - 3, sf - 36, 7, 1, '#c83a32');
+    p(c, sx - 2, sf - 29, '#1a1a22'); p(c, sx + 1, sf - 29, '#1a1a22'); r(c, sx, sf - 28, 4, 1, '#f08020'); p(c, sx + 4, sf - 28, '#d86010');
+    for (let k = -2; k <= 2; k++) p(c, sx + k, sf - 25 + (k * k > 1 ? 0 : 1), '#3a3a44');
+    r(c, sx - 6, sf - 23, 13, 2, '#d83a3a'); for (let k = -6; k <= 6; k += 3) p(c, sx + k, sf - 23, '#f4f4f4'); r(c, sx + 4, sf - 22, 2, 6, '#d83a3a');
+    for (const yy of [sf - 17, sf - 11]) p(c, sx, yy, '#1a1a22');
+    for (let k = 0; k < 9; k++) { p(c, sx - 7 - k, sf - 20 - Math.round(k * 0.6), '#5a3a22'); p(c, sx + 7 + k, sf - 20 - Math.round(k * 0.4), '#5a3a22'); }
+    r(c, sx + 16, sf - 30, 1, 30, '#8a5a32'); for (let k = 0; k < 5; k++) r(c, sx + 14 + k, sf - 4 + (k % 2), 1, 4, '#c8a050');
+    // Kinder mit Schlitten
+    r(c, 46, 94, 14, 2, '#8a5a32'); r(c, 46, 96, 14, 1, '#5a3a22'); p(c, 45, 95, '#5a3a22'); for (let k = 0; k < 10; k++) p(c, 60 + k, 95 - Math.round(k * 0.4), '#c83a32');
+    mensch(c, 52, 93, 'kind'); mensch(c, 74, 96, 'kind'); mensch(c, 118, 97, 'erwachsen'); mensch(c, 126, 97, 'kind');
+    schneefall(c, BW, 90, 70, 3);
+    leuchten(c, 0.2);
   },
   // 3. Advent: Chor vor der Kirche
   chor(c) {
-    himmel(c, '#26305e', '#3a4a80'); sterne(c, 12, 16);
-    r(c, 25, 10, 40, 30, '#f0e8dc'); for (let i = 0; i < 20; i++) r(c, 24 + i, 10 - Math.floor(i / 2), 42 - i * 2 > 0 ? 42 - i * 2 : 0, 1, '#8a4a3a');
-    r(c, 40, 2, 10, 12, '#f4ecde'); r(c, 43, 0, 4, 2, '#3f6a5a');
-    for (const x of [30, 52]) { r(c, x, 16, 6, 10, '#ffc860'); r(c, x + 2, 16, 1, 10, '#a86a2a'); }
-    r(c, 41, 26, 8, 14, '#6a3e22');
-    r(c, 0, 40, BW, 10, '#dfe6ee');
-    for (let i = 0; i < 6; i++) {
-      const x = 12 + i * 13;
-      r(c, x - 3, 34, 7, 11, '#b82a2a'); r(c, x - 3, 34, 7, 2, '#f4f4f4');
-      r(c, x - 2, 29, 5, 5, '#f2c9a0'); r(c, x - 2, 28, 5, 2, ['#3a2a1a', '#c8a060', '#6a4a2a'][i % 3]);
-      r(c, x - 1, 37, 4, 3, '#2a2a3a');
-      p(c, x, 32, '#5a2a1a');
+    neueLichter();
+    verlauf(c, 0, 0, BW, 72, ['#141c48', '#24305e', '#3a4a80']);
+    sterne(c, 28, BW, 40, 7);
+    // Kirchenfassade mit Turm, Rosette und hohen Fenstern
+    const kx = 90;
+    r(c, kx - 36, 26, 72, 46, '#efe7da'); r(c, kx + 32, 26, 4, 46, '#d8cebe');
+    for (let i = 0; i < 22; i++) r(c, kx - 38 + Math.round(i * 1.7), 26 - i, 76 - Math.round(i * 3.4), 1, i < 3 ? '#f6f9fc' : i % 3 ? '#8a4a3a' : '#6a3428');
+    r(c, kx - 6, 0, 12, 10, '#f4ecde'); r(c, kx + 4, 0, 2, 10, '#dcd2c2');
+    for (let yy = -4; yy <= 4; yy++) for (let xx = -4; xx <= 4; xx++) if (xx * xx + yy * yy <= 17) p(c, kx + xx, 18 + yy, xx * xx + yy * yy > 10 ? '#8a6a4a' : BUNT[(Math.abs(xx) + Math.abs(yy)) % 5]);
+    licht(kx, 18, '#ffd88a', 2);
+    for (const fx of [kx - 26, kx - 16, kx + 12, kx + 22]) {
+      r(c, fx - 1, 32, 7, 22, '#6a4a32'); r(c, fx, 34, 5, 19, '#ffc860'); r(c, fx + 1, 33, 3, 1, '#ffc860');
+      r(c, fx + 2, 34, 1, 19, '#c88a3a'); r(c, fx, 43, 5, 1, '#c88a3a'); r(c, fx, 34, 2, 6, '#ffe6a0');
+      licht(fx + 2, 44, '#ffd88a', 1.5);
     }
-    for (let i = 0; i < 4; i++) { const x = 18 + i * 18, y = 18 - (i % 2) * 4; r(c, x, y, 1, 4, '#ffffff'); r(c, x - 2, y + 3, 2, 2, '#ffffff'); }
+    r(c, kx - 7, 50, 14, 22, '#4a2c1a'); r(c, kx - 6, 52, 12, 20, '#7a4a2a'); r(c, kx - 5, 51, 10, 1, '#7a4a2a'); r(c, kx, 52, 1, 20, '#5a3420'); p(c, kx - 2, 62, '#e8c030'); p(c, kx + 2, 62, '#e8c030');
+    for (let i = 0; i < 3; i++) r(c, kx - 12 - i * 3, 72 + i * 2, 24 + i * 6, 2, i % 2 ? '#c8c4bc' : '#d8d4cc');
+    schneeBoden(c, 72, BW, 28, 9);
+    for (let i = 0; i < 3; i++) r(c, kx - 12 - i * 3, 72 + i * 2, 24 + i * 6, 2, i % 2 ? '#c8ccd4' : '#e4e8ee');
+    laterne(c, 20, 94, 22); laterne(c, 160, 94, 22);
+    tanne(c, 36, 80, 30, { schnee: true }); tanne(c, 146, 80, 28, { schnee: true });
+    const haare = ['#3a2a1a', '#c8a060', '#6a4a2a', '#2a1a10', '#d8b878', '#8a4a2a'];
+    for (let i = 0; i < 7; i++) saenger(c, 48 + i * 14, 97 - (i % 2), haare[i % 6], i === 3);
+    for (const [x, y] of [[40, 52], [62, 44], [118, 40], [140, 50], [100, 30]]) note(c, x, y);
+    leuchten(c, 1);
   },
-  // 4. Advent: das Dorf leuchtet
+  // 4. Advent: das ganze Dorf leuchtet
   dorf(c) {
-    himmel(c, '#141c48', '#26305e'); sterne(c, 24, 18);
-    r(c, 0, 38, BW, 12, '#dfe6ee');
-    haeuschen(c, 3, 38, 14, 10, '#b8554a', '#efe3cc', true, 'bunt');
-    haeuschen(c, 22, 38, 12, 12, '#5a6e9a', '#e6d2b8', true, 'bunt');
-    haeuschen(c, 56, 38, 14, 11, '#4a8a7a', '#f4ead8', true, 'bunt');
-    haeuschen(c, 74, 38, 13, 9, '#c0744a', '#dcc8b0', true, 'bunt');
-    // Baum mit Stern in der Mitte
-    for (let i = 0; i < 22; i++) r(c, 45 - Math.floor(i / 2), 15 + i, Math.floor(i / 2) * 2 + 1, 1, '#2a5a32');
-    for (let i = 0; i < 10; i++) p(c, 45 + Math.round(Math.sin(i * 1.7) * i * 0.9), 19 + i * 2, BUNT[i % 5]);
-    r(c, 44, 12, 3, 3, '#ffe060'); p(c, 45, 10, '#ffe060');
-    r(c, 44, 37, 3, 2, '#5a3a22');
-    mensch(c, 36, 47, 'erwachsen'); mensch(c, 54, 47, 'oma'); mensch(c, 60, 47, 'kind');
+    neueLichter();
+    verlauf(c, 0, 0, BW, 66, ['#0e1640', '#1c2656', '#30406e']);
+    sterne(c, 40, BW, 44, 13); mond(c, 158, 12);
+    for (let x = 0; x < BW; x++) { const hh = 4 + Math.round(Math.sin(x / 19) * 2); r(c, x, 64 - hh, 1, hh, '#2a3666'); }
+    schneeBoden(c, 64, BW, 36, 11);
+    haus(c, 4, 82, 30, 22, { wand: '#efe3cc', dach: '#b8554a', schnee: true, licht: 'bunt' });
+    haus(c, 40, 80, 26, 26, { wand: '#e6d2b8', dach: '#5a6e9a', schnee: true, licht: 'bunt', fachwerk: true, kamin: false });
+    haus(c, 114, 80, 28, 24, { wand: '#f4ead8', dach: '#4a8a7a', schnee: true, licht: 'bunt' });
+    haus(c, 148, 82, 28, 20, { wand: '#dcc8b0', dach: '#c0744a', schnee: true, licht: 'bunt', fachwerk: true });
+    tanne(c, 90, 92, 52, { schnee: true, lichter: 30, stern: true });
+    laterne(c, 72, 96, 22); laterne(c, 108, 96, 22);
+    for (const [x, typ] of [[24, 'erwachsen'], [32, 'kind'], [64, 'oma'], [118, 'erwachsen'], [126, 'kind'], [160, 'opa']]) mensch(c, x, 98, typ);
+    schneefall(c, BW, 96, 34, 6);
+    leuchten(c, 1);
   },
-  // Heiligabend: Kirche mit offener Tür, das Dorf kommt mit Kerzen
+  // Heiligabend: die Kirche mit offener Tür, das Dorf kommt mit Kerzen
   heiligabend(c) {
-    himmel(c, '#0e1438', '#1c2656'); sterne(c, 30, 22);
-    // großer Stern über der Kirche
-    r(c, 70, 4, 3, 3, '#fff0a0'); p(c, 71, 2, '#fff0a0'); p(c, 71, 8, '#fff0a0'); p(c, 68, 5, '#fff0a0'); p(c, 74, 5, '#fff0a0');
-    for (let i = 1; i < 6; i++) p(c, 71 - i, 5 + i, i % 2 ? '#e8c030' : '#fff0a0');
-    haeuschen(c, 2, 38, 14, 10, '#b8554a', '#efe3cc', true, 'bunt');
-    haeuschen(c, 19, 38, 12, 8, '#5a6e9a', '#e6d2b8', true, 'bunt');
-    // Kirche rechts mit Turm
-    r(c, 50, 22, 26, 16, '#f0e8dc'); for (let i = 0; i < 9; i++) r(c, 49 + i, 22 - i, 28 - i * 2, 1, i < 2 ? '#f4f8fc' : '#8a4a3a');
-    r(c, 77, 10, 9, 28, '#f4ecde'); r(c, 78, 6, 7, 4, '#3f6a5a'); r(c, 79, 4, 5, 2, '#3f6a5a'); p(c, 81, 2, '#e8c030');
-    r(c, 79, 13, 5, 5, '#ffd070'); r(c, 80, 14, 3, 3, '#c89a2a');   // Glocke
-    for (const x of [54, 60, 66]) r(c, x, 26, 3, 6, '#ffd070');
-    r(c, 61, 31, 5, 7, '#ffe090'); r(c, 60, 30, 7, 1, '#8a6a4a');   // offene Tür
-    r(c, 0, 38, BW, 12, '#dfe6ee');
-    for (let x = 58; x < 70; x++) p(c, x, 38 + ((x * 7) % 3), '#fff4c8');   // Lichtschein im Schnee
-    // Leute mit Kerzen
-    const leute = [[6, 'erwachsen'], [12, 'kind'], [18, 'oma'], [25, 'erwachsen'], [31, 'kind'], [37, 'opa'], [44, 'erwachsen']];
-    for (const [x, typ] of leute) { mensch(c, x, 47, typ); const ky = typ === 'kind' ? 40 : 38; p(c, x + 2, ky, '#f4f0e0'); p(c, x + 2, ky - 1, '#ffd060'); }
-    for (let i = 0; i < 30; i++) p(c, (i * 41 + i * i * 3) % BW, (i * 29 + i * i) % 36, '#ffffff');
+    neueLichter();
+    verlauf(c, 0, 0, BW, 72, ['#0a1030', '#161f4c', '#283466']);
+    sterne(c, 50, BW, 48, 17);
+    // Der Stern mit Schweif
+    for (let i = 1; i < 18; i++) { const f = i % 3 ? '#e8c030' : '#fff0a0'; p(c, 140 - i, 10 + Math.round(i * 0.7), f); if (i < 10) p(c, 140 - i, 11 + Math.round(i * 0.7), '#b8901e'); }
+    stern(c, 141, 9, 3, '#fff0a0');
+    haus(c, 4, 80, 30, 22, { wand: '#efe3cc', dach: '#b8554a', schnee: true, licht: 'bunt' });
+    haus(c, 40, 80, 26, 18, { wand: '#e6d2b8', dach: '#5a6e9a', schnee: true, licht: 'an', kamin: false });
+    // Kirche mit Turm, Glocke und offener Tür
+    const kx = 106;
+    r(c, kx, 44, 48, 36, '#f0e8dc'); r(c, kx + 45, 44, 3, 36, '#d8cebe');
+    for (let i = 0; i < 16; i++) r(c, kx - 2 + Math.round(i * 1.6), 44 - i, 52 - Math.round(i * 3.2), 1, i < 3 ? '#f6f9fc' : i % 3 ? '#8a4a3a' : '#6a3428');
+    r(c, kx + 50, 18, 18, 62, '#f4ecde'); r(c, kx + 65, 18, 3, 62, '#dcd2c2');
+    for (let i = 0; i < 8; i++) r(c, kx + 50 + i, 18 - i * 2, 18 - i * 2, 2, i === 0 ? '#f6f9fc' : '#3f6a5a');
+    r(c, kx + 58, 0, 2, 4, '#e8c030'); r(c, kx + 57, 1, 4, 1, '#e8c030');
+    r(c, kx + 54, 26, 10, 10, '#3a2a1e'); r(c, kx + 56, 28, 6, 5, '#e8c030'); r(c, kx + 55, 33, 8, 1, '#c89a2a'); p(c, kx + 59, 34, '#c89a2a');
+    for (const fx of [kx + 6, kx + 36]) { r(c, fx - 1, 52, 7, 14, '#6a4a32'); r(c, fx, 53, 5, 12, '#ffc860'); r(c, fx, 53, 2, 5, '#ffe6a0'); licht(fx + 2, 58, '#ffd88a', 1.5); }
+    r(c, kx + 17, 60, 14, 20, '#5a3a22'); r(c, kx + 19, 62, 10, 18, '#ffe090'); r(c, kx + 20, 63, 8, 8, '#fff4c8'); licht(kx + 24, 68, '#fff0b0', 3);
+    schneeBoden(c, 80, BW, 20, 13);
+    for (let y = 80; y < 100; y++) { const w = 5 + Math.round((y - 80) * 0.9); for (let x = kx + 24 - w; x <= kx + 24 + w; x++) if (hash(x + y * 7) < 0.55) p(c, x, y, '#fff4c8'); }
+    // Prozession mit Kerzen
+    const leute = [[8, 'erwachsen'], [16, 'kind'], [26, 'oma'], [36, 'erwachsen'], [46, 'kind'], [56, 'opa'], [68, 'erwachsen'], [78, 'kind'], [90, 'erwachsen']];
+    for (const [x, typ] of leute) {
+      mensch(c, x, 96, typ);
+      const ky = typ === 'kind' ? 87 : 84;
+      r(c, x + 3, ky, 1, 3, '#f4f0e0'); p(c, x + 3, ky - 1, '#ffd060'); licht(x + 3, ky - 1, '#ffd060', 0.8);
+    }
+    schneefall(c, BW, 96, 40, 8);
+    leuchten(c, 1);
   },
 };
 
