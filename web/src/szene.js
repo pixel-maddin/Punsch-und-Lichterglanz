@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610112114';
-import * as Z from './zeit.js?v=202610112114';
-import * as S from './spiel.js?v=202610112114';
-import { FASSADEN } from './config.js?v=202610112114';
-import * as C from './config.js?v=202610112114';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610112149';
+import * as Z from './zeit.js?v=202610112149';
+import * as S from './spiel.js?v=202610112149';
+import { FASSADEN } from './config.js?v=202610112149';
+import * as C from './config.js?v=202610112149';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1489,10 +1489,19 @@ function rodelhang(c, hz, t, schnee) {
 }
 /** Der Rodel-Wok als Trophäe an der Hauswand rechts neben dem Fenster. */
 function wandWok(c, x, y) {
-  p(c, x, y - 5, '#3a3a40');
-  for (let k = -3; k <= 3; k++) { const w = Math.round(3 * Math.sqrt(1 - k * k / 9)); r(c, x - w, y + k, w * 2 + 1, 1, k < 0 ? '#5a5a64' : '#2e2e36'); }
-  r(c, x - 1, y - 4, 3, 1, '#e8c030'); p(c, x - 2, y - 1, '#8a8a92');
-  r(c, x - 1, y + 4, 1, 3, '#6a4428');
+  // Der Rodel-Wok als Trophäe (11.10. neu gezeichnet: vorher ein fast
+  // schwarzer runder Klecks, nachts nur „schwarze Pixel"). Von vorn, leicht
+  // schräg hängend: heller Rand, Stahl mit Glanz, Holzstiel nach rechts oben
+  // am Nagel, darunter ein kleines goldenes Schild.
+  p(c, x + 6, y - 6, '#3a3a40'); p(c, x + 5, y - 5, '#8a7a5a');   // Nagel und Schlaufe
+  r(c, x + 2, y - 4, 2, 1, '#8a5a32'); r(c, x + 4, y - 5, 2, 1, '#a8703a');   // Holzstiel
+  r(c, x - 5, y - 3, 10, 1, '#dfe3ea');                     // Rand
+  r(c, x - 5, y - 2, 10, 1, '#9aa0aa');
+  r(c, x - 4, y - 1, 8, 1, '#868c96');
+  r(c, x - 3, y, 6, 1, '#727882');
+  r(c, x - 2, y + 1, 4, 1, '#5e646e');
+  p(c, x - 3, y - 2, '#eef2f6'); p(c, x - 2, y - 1, '#c8ccd4'); p(c, x - 1, y, '#a8aeb8');   // Glanz
+  r(c, x - 2, y + 3, 4, 2, '#e8c030'); p(c, x - 2, y + 3, '#fff0a0'); p(c, x + 1, y + 4, '#b8901e');   // Schild
 }
 /** Zwei Kinder ziehen einen Schlitten über den Gehweg (alle 50 s). */
 function rodelkinder(c, G, t, w) {
