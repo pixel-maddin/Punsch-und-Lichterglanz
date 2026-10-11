@@ -11,11 +11,11 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610110823';
-import * as Z from './zeit.js?v=202610110823';
-import * as T from './ton.js?v=202610110823';
-import * as MH from './minihud.js?v=202610110823';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610110823';
+import * as C from './config.js?v=202610110843';
+import * as Z from './zeit.js?v=202610110843';
+import * as T from './ton.js?v=202610110843';
+import * as MH from './minihud.js?v=202610110843';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610110843';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -164,9 +164,12 @@ function schritt(dt) {
   if (g.t >= 0 && !g.aus) {
     // Tiere kommen immer schneller, höchstens 7 gleichzeitig
     g.spawnT -= dt;
-    if (g.spawnT <= 0 && g.tiere.filter((x) => x.satt < 0).length < 7) {
+    // Im letzten Drittel kommen doppelt so viele Tiere (11.10., „sonst zu leicht"):
+    // halber Abstand und mehr gleichzeitig auf der Lichtung
+    const spurt = g.t > C.LICHTUNG_DAUER * 2 / 3;
+    if (g.spawnT <= 0 && g.tiere.filter((x) => x.satt < 0).length < (spurt ? 12 : 7)) {
       neuesTier();
-      g.spawnT = Math.max(0.35, 0.95 - g.t / C.LICHTUNG_DAUER * 0.55) * zufall(0.7, 1.3) / stufe.tempo;
+      g.spawnT = Math.max(0.35, 0.95 - g.t / C.LICHTUNG_DAUER * 0.55) * zufall(0.7, 1.3) / stufe.tempo * (spurt ? 0.5 : 1);
     }
     // Der seltene Gast kommt einmal, mitten in der Runde, und wird angesagt
     if (g.selten && g.t >= g.seltenZeit) {
@@ -535,7 +538,7 @@ function zeichne(t) {
   const rest = Math.max(0, Math.ceil(C.LICHTUNG_DAUER - Math.max(0, g.t)));
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: Math.max(0, g.ketteT) / 1.6, punkte: g.punkte });
   MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : null);
-  MH.mitte(g.aus ? 'ZEIT!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
+  MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }
 
 /** Pixelschrift vergrößert (k-fach); links=true: x ist die linke Kante, sonst die Mitte. */

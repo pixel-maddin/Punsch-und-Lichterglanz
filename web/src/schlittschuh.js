@@ -10,11 +10,11 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610110823';
-import * as Z from './zeit.js?v=202610110823';
-import * as T from './ton.js?v=202610110823';
-import * as MH from './minihud.js?v=202610110823';
-import { r, p, ton } from './pixel.js?v=202610110823';
+import * as C from './config.js?v=202610110843';
+import * as Z from './zeit.js?v=202610110843';
+import * as T from './ton.js?v=202610110843';
+import * as MH from './minihud.js?v=202610110843';
+import { r, p, ton } from './pixel.js?v=202610110843';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -468,5 +468,5 @@ function zeichne(t) {
   const kombo = g.tricks.length + (g.trick ? 1 : 0);
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.inLuft ? Math.max(1, kombo) : 1, ketteAnteil: g.trick ? g.trick.t / TRICKS[g.trick.art].dauer : 1, punkte: g.punkte });
   MH.hinweis(g.t < 0 ? `Schwierigkeit: ${C.MINI_STUFEN.indexOf(stufe) >= 0 ? stufe.name : ''}` : g.t < 4 ? 'Tippen = springen · in der Luft wischen = Trick' : null);
-  MH.mitte(g.aus ? 'ZEIT!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
+  MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }

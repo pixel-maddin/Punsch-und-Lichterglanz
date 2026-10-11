@@ -471,10 +471,15 @@ export const HEILIGABEND_STUNDE = 17;
 // „Haus schmücken" dazu und wählt frei. Die dritte ist die schräge und zeigt
 // sich erst, wenn man die zweite hat. Jede zusätzliche bringt
 // VARIANTE_HERZEN Stimmung - fürs schönste Haus braucht man keine.
-// Preis = erster Preis des Teils × FAKTOR, mindestens MIN.
+// Preis = Gesamtwert des Teils (alle Stufen) × FAKTOR, mindestens MIN.
 // ---------------------------------------------------------------------------
 export const VARIANTE_HERZEN = 2;
-export const VARIANTE_FAKTOR = [0, 1, 2];
+// 11.10.: Faktor auf den GESAMTWERT des Teils (alle Stufen), nicht mehr auf die
+// erste Stufe - sonst kosteten die Varianten einer 540.000er Lichterkette 400/800.
+// Gemessen (Saison-Bot, 30 Tage ab 24.11., siehe CLAUDE.md): Mit 0,7/1,4 hat nur
+// der Vielspieler (30 min/Tag + 3 Runden je Minispiel) am 23.12. alles samt
+// Varianten; 5 min/Tag bleiben 15 Teile und 23 Varianten offen.
+export const VARIANTE_FAKTOR = [0, 0.7, 1.4];
 export const VARIANTE_MIN = [0, 300, 800];
 export const VARIANTEN = {
   tanne:         [{ kurz: 'Tanne' },       { kurz: 'Riesentanne', name: 'Große Nordmanntanne', text: 'Ein Drittel größer, bis über die Fenster.' },
@@ -507,6 +512,51 @@ export const VARIANTEN = {
                   { kurz: 'Marshmallow', name: 'Marshmallow-Tonne', text: 'Eine Feuertonne, die Stöcke stecken schon drin.' }],
   laternen:      [{ kurz: 'Laternen' },    { kurz: 'Fackeln', name: 'Fackeln', text: 'Zwei Fackeln am Weg.' },
                   { kurz: 'Lavalampen', name: 'Lavalampen', text: 'Bunte Blasen, die langsam auf- und absteigen.' }],
+  // 11.10.: Varianten für ALLE Teile außer Luxus, Geschenktem und Minispiel-Deko
+  // (Nutzerwunsch). Lichter teilen sich EINE Idee: die Form der Birnen
+  // (birne() in szene.js) - Kette, Sterne, Retro-Kugeln.
+  lichter_dach:    [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Dachlichter mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Dachlichter in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  lichter_fenster: [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Fensterlichter mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Fensterlichter in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  lichter_zaun:    [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Zaunlichter mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Zaunlichter in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  tanne_lichter:   [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Tannenlichter mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Tannenlichter in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  baum_girlande:   [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Leuchtgirlande mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Leuchtgirlande in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  standlicht:      [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Standbeleuchtung mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Standbeleuchtung in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  schornstein:     [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Schornstein-Schmuck mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Schornstein-Schmuck in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  tuerbogenkranz:  [{ kurz: 'Kette' }, { kurz: 'Sterne', name: 'Winterkranz mit Sternen', text: 'Kleine leuchtende Sterne statt Punkte.' },
+                  { kurz: 'Retro', name: 'Winterkranz in Retro', text: 'Dicke bunte Birnen wie früher bei Oma.' }],
+  eiszapfen:     [{ kurz: 'Eiszapfen' },   { kurz: 'Flocken', name: 'Schneeflocken-Lichter', text: 'Große leuchtende Flocken unter der Traufe.' },
+                  { kurz: 'Vorhang', name: 'Lichtervorhang', text: 'Lange Lichterschnüre hängen vom Dach.' }],
+  zaun_girlande: [{ kurz: 'Schleifen' },   { kurz: 'Lametta', name: 'Lametta am Zaun', text: 'Silbern glitzernd, wie am Christbaum.' },
+                  { kurz: 'Beeren', name: 'Beerenkette', text: 'Rote Beeren und Popcorn auf einer Schnur.' }],
+  strassenlaterne: [{ kurz: 'Laterne' },   { kurz: 'Mit Kranz', name: 'Laterne mit Kranz', text: 'Tannenkranz mit roter Schleife am Mast.' },
+                  { kurz: 'Doppelt', name: 'Doppellaterne', text: 'Zwei Köpfe an einem geschwungenen Arm.' }],
+  holz:          [{ kurz: 'Holzstapel' },  { kurz: 'Mit Axt', name: 'Hackklotz mit Axt', text: 'Daneben ein Klotz, die Axt steckt noch.' },
+                  { kurz: 'Holzhütte', name: 'Kleine Holzhütte', text: 'Ein Dach über dem Stapel - das Holz bleibt trocken.' }],
+  tuer:          [{ kurz: 'Holztür' },     { kurz: 'Rot', name: 'Rote Haustür', text: 'Weihnachtsrot lackiert.' },
+                  { kurz: 'Glastür', name: 'Grüne Tür mit Glas', text: 'Tannengrün, mit einem großen Fenster.' }],
+  kamin:         [{ kurz: 'Kaminofen' },   { kurz: 'Kachelofen', name: 'Kachelofen', text: 'Grün gekachelt, mit Bank davor.' },
+                  { kurz: 'Kerzen', name: 'Kerzen im Fenster', text: 'Ein Leuchter auf jeder Fensterbank.' }],
+  tanne_kugeln:  [{ kurz: 'Rot-Gold' },    { kurz: 'Silber-Blau', name: 'Silberne und blaue Kugeln', text: 'Kühl und edel, wie Eis.' },
+                  { kurz: 'Strohsterne', name: 'Strohsterne', text: 'Goldgelbe Sterne aus Stroh.' }],
+  tanne_stern:   [{ kurz: 'Stern' },       { kurz: 'Engel', name: 'Engel auf der Spitze', text: 'Mit goldenen Flügeln.' },
+                  { kurz: 'Glasspitze', name: 'Gläserne Spitze', text: 'Silbern glänzend, wie bei Oma.' }],
+  schneefrau:    [{ kurz: 'Schneefrau' },  { kurz: 'Mit Schirm', name: 'Schneefrau mit Schirm', text: 'Ein roter Schirm gegen den Schnee.' },
+                  { kurz: 'Prinzessin', name: 'Eisprinzessin', text: 'Mit Krone und hellblauem Schal.' }],
+  schneekind:    [{ kurz: 'Schneekind' },  { kurz: 'Laterne', name: 'Schneekind mit Laterne', text: 'Hält eine kleine leuchtende Laterne.' },
+                  { kurz: 'Schlitten', name: 'Schneekind mit Schlitten', text: 'Gleich geht es den Berg hinunter.' }],
+  girlande:      [{ kurz: 'Tanne' },       { kurz: 'Wimpel', name: 'Wimpelkette', text: 'Bunte Fähnchen am Stand.' },
+                  { kurz: 'Stechpalme', name: 'Stechpalmen-Girlande', text: 'Dunkle Blätter, leuchtend rote Beeren.' }],
+  zuckerstangen: [{ kurz: 'Zuckerstangen' }, { kurz: 'Lebkuchen', name: 'Lebkuchenmänner', text: 'Zwei große Lebkuchenmänner mit Zuckerguss.' },
+                  { kurz: 'Lollis', name: 'Riesenlollis', text: 'Bunte Spirallollis, so groß wie Kinder.' }],
+  baenke:        [{ kurz: 'Bierbänke' },   { kurz: 'Mit Fellen', name: 'Bänke mit Fellen', text: 'Kuschelige Schaffelle auf den Bänken.' },
+                  { kurz: 'Stehtische', name: 'Stehtische', text: 'Hohe Tische mit Kerzen und roten Decken.' }],
 };
 
 // ---------------------------------------------------------------------------
@@ -515,7 +565,7 @@ export const VARIANTEN = {
 // „farmen"), Deko hängt am Rekord.
 // ---------------------------------------------------------------------------
 export const MINI_RUNDEN_STERNE = 3;
-export const LICHTUNG_DAUER = 30;          // s je Runde
+export const LICHTUNG_DAUER = 40;          // s je Runde (11.10.: 30 → 40, im letzten Drittel doppelt so viele Tiere)
 export const LICHTUNG_PUNKTE_JE_MIN = 400; // so viele Punkte = eine Minute Einnahmen …
 export const LICHTUNG_MAX_MIN = 3;         // … höchstens drei (perfekter Autopilot: 3.810 Punkte, 42 Tiere)
 export const LICHTUNG_DEKO = [
@@ -566,8 +616,8 @@ export const BACK_OFEN = 2.2;           // s, bis ein Plätzchen verbrennt (Norm
 export const BACK_GOLDEN = [0.52, 0.8]; // goldener Bereich im Ofenbalken
 export const BACK_FORMEN = ['stern', 'mond', 'herz', 'baum', 'kreis'];
 export const BACK_DEKOS = {
-  guss:      { kurz: 'GUSS', name: 'Zuckerguss',  f: '#fbf6ee' },
-  puder:     { kurz: 'PUDER', name: 'Puderzucker', f: '#f0ece4' },
+  guss:      { kurz: 'ZUCKERGUSS', name: 'Zuckerguss',  f: '#fbf6ee' },   // 11.10.: ausgeschrieben, GUSS und PUDER verwechselte man
+  puder:     { kurz: 'PUDERZUCKER', name: 'Puderzucker', f: '#f0ece4' },
   schoko:    { kurz: 'SCHOKO', name: 'Schokolade',  f: '#5a3220' },
   gruen:     { kurz: 'GRÜN', name: 'Grüner Guss', f: '#5aa84a' },
   marmelade: { kurz: 'MARMELADE', name: 'Marmelade',   f: '#c8283a' },
@@ -629,9 +679,11 @@ export const MINI_STUFEN = [
 // Alle Punktzahlen in den Spielen laufen über `miniStufe()`; Deko-Schwellen,
 // Rezept-Schwellen und die Sterne-Umrechnung (`jeMin`) werden unten mit
 // derselben Zahl umgerechnet (die Rohwerte oben bleiben die gemessenen),
-// alte Rekorde einmal in laden() (spiel.js, `st.miniSkala`).
+// alte Rekorde in laden() (spiel.js): Jeder Stand merkt sich in
+// `st.miniSkalaWert`, mit welchem Faktor seine Rekorde gespeichert sind, und
+// rechnet bei einer Änderung hier selbst um - `skala` darf also nachgezogen werden.
 export const MINISPIELE = {
-  lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN, skala: 0.75 },
+  lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN, skala: 0.6 },   // 0,75 bis die Runde 40 s wurde
   baum:     { deko: BAUM_DEKO,     jeMin: BAUM_PUNKTE_JE_MIN,     maxMin: BAUM_MAX_MIN,     skala: 0.65 },
   berg:     { deko: BERG_DEKO,     jeMin: BERG_PUNKTE_JE_MIN,     maxMin: BERG_MAX_MIN,     skala: 1.05 },
   eis:      { deko: EIS_DEKO,      jeMin: EIS_PUNKTE_JE_MIN,      maxMin: EIS_MAX_MIN,      skala: 1.5 },

@@ -10,11 +10,11 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610110823';
-import * as Z from './zeit.js?v=202610110823';
-import * as T from './ton.js?v=202610110823';
-import * as MH from './minihud.js?v=202610110823';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610110823';
+import * as C from './config.js?v=202610110843';
+import * as Z from './zeit.js?v=202610110843';
+import * as T from './ton.js?v=202610110843';
+import * as MH from './minihud.js?v=202610110843';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610110843';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -349,5 +349,5 @@ function zeichne(t) {
   // Kopfzeile: Restzeit, Fortschritt bis zum Ziel, Punkte (DOM, minihud.js)
   const rest = Math.max(0, Math.ceil(C.BERG_DAUER - Math.max(0, g.t)));
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, fortschritt: Math.min(1, g.dist / LAENGE), punkte: g.punkte });
-  MH.mitte(g.aus ? (g.imZiel ? 'ZIEL!' : 'ZEIT!') : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
+  MH.mitte(g.aus ? (g.imZiel ? 'ZIEL!' : 'ZEIT UM!') : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }

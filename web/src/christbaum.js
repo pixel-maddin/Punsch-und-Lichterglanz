@@ -13,11 +13,11 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610110823';
-import * as Z from './zeit.js?v=202610110823';
-import * as T from './ton.js?v=202610110823';
-import * as MH from './minihud.js?v=202610110823';
-import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610110823';
+import * as C from './config.js?v=202610110843';
+import * as Z from './zeit.js?v=202610110843';
+import * as T from './ton.js?v=202610110843';
+import * as MH from './minihud.js?v=202610110843';
+import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610110843';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -472,5 +472,5 @@ function zeichne(t) {
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)
   const rest = Math.max(0, Math.ceil(C.BAUM_DAUER - Math.max(0, g.t)));
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: g.kette > 1 ? 1 : 0, punkte: g.punkte });
-  MH.mitte(g.aus ? 'ZEIT!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
+  MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }

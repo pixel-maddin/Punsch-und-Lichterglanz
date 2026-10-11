@@ -11,8 +11,8 @@
  * Fläche umgerechnet, damit sie bei jeder Bildschirmgröße sitzen.
  * Solange kein Minispiel offen ist (z. B. im Messweg), tut alles nichts.
  */
-import { zeichneSymbol } from './symbole.js?v=202610110823';
-import { schriftBild, stilFuer } from './schrift.js?v=202610110823';
+import { zeichneSymbol } from './symbole.js?v=202610110843';
+import { schriftBild, stilFuer } from './schrift.js?v=202610110843';
 
 /**
  * Text in der Weihnachtsschrift (schrift.js) in ein Element setzen. `gr` =
@@ -98,9 +98,15 @@ export function mitte(text, farbe = '#ffe27a') {
   gross.classList.remove('plopp'); void gross.offsetWidth; gross.classList.add('plopp');
 }
 
-/** Kleine Zeile unter der Kopfzeile: was gerade dran ist. */
-export function hinweis(text) {
+/**
+ * Kleine Zeile unter der Kopfzeile: was gerade dran ist. `y` (Canvas-Pixel)
+ * setzt sie stattdessen an eine Stelle im Bild - die Backstube stellt sie
+ * über die Reihe, in der man gerade tippen muss (11.10.).
+ */
+export function hinweis(text, y = null) {
   if (!hinweisEl) return;
+  hinweisEl.style.top = y == null ? '' : py(y);
+  hinweisEl.classList.toggle('gross', y != null);
   hinweisEl.classList.toggle('versteckt', !text);   // immer setzen - am Anfang stand sonst ein leeres Kästchen
   if (hinweisEl.dataset.t === (text || '')) return;
   hinweisEl.dataset.t = text || '';

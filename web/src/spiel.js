@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610110823';
-import * as Z from './zeit.js?v=202610110823';
-import { neueFarben } from './pixel.js?v=202610110823';
+import * as C from './config.js?v=202610110843';
+import * as Z from './zeit.js?v=202610110843';
+import { neueFarben } from './pixel.js?v=202610110843';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -56,6 +56,7 @@ function neuerStand(name = '', andenken = 0) {
     startTag: 0,                     // erster Spieltag (setzeStartTag beim Losspielen); 0 = noch nicht, fehlt = alter Stand
     miniStaffel: true,               // Minispiele kommen nach und nach (10.10.); fehlt = alter Stand, siehe laden()
     miniSkala: true,                 // Minispiel-Punkte angeglichen (11.10.); fehlt = Rekorde noch in Rohpunkten
+    miniSkalaWert: Object.fromEntries(Object.entries(C.MINISPIELE).map(([n, d]) => [n, d.skala])),   // mit diesem Faktor sind die Rekorde gespeichert
   };
 }
 
@@ -73,13 +74,21 @@ function laden() {
       // fehlenden Marke `miniStaffel` (nicht an `miniGemeldet`: das hat die
       // erste Fassung schon in alte Stände geschrieben)
       // Minispiel-Punkte sind seit 11.10. je Spiel skaliert (C.MINISPIELE.skala).
-      // Alte Rekorde einmal mitrechnen, sonst passten sie nicht mehr zu den
-      // ebenso umgerechneten Deko- und Rezeptschwellen
-      if (!('miniSkala' in alt)) {
-        stand.miniSkala = true;
-        for (const [n, m] of Object.entries(stand.mini || {})) if (C.MINISPIELE[n] && m.best) m.best = Math.round(m.best * C.MINISPIELE[n].skala);
-        if (stand.lichtung && stand.lichtung.best && !(stand.mini && stand.mini.lichtung)) stand.lichtung.best = Math.round(stand.lichtung.best * C.MINISPIELE.lichtung.skala);
+      // Rekorde mitrechnen, sonst passten sie nicht mehr zu den ebenso
+      // umgerechneten Deko- und Rezeptschwellen. `miniSkalaWert` = Faktor, mit
+      // dem die Rekorde dieses Standes gespeichert sind (fehlt er, aber
+      // `miniSkala` steht: die erste Fassung vom 11.10.; fehlt beides: Rohpunkte).
+      const ERSTE = { lichtung: 0.75, baum: 0.65, berg: 1.05, eis: 1.5, back: 0.8 };
+      const gespeichert = alt.miniSkalaWert || ('miniSkala' in alt ? ERSTE : {});
+      for (const [n, def] of Object.entries(C.MINISPIELE)) {
+        const f = def.skala / (gespeichert[n] || 1);
+        if (Math.abs(f - 1) < 1e-6) continue;
+        const m = stand.mini && stand.mini[n];
+        if (m && m.best) m.best = Math.round(m.best * f);
+        if (n === 'lichtung' && stand.lichtung && stand.lichtung.best && !m) stand.lichtung.best = Math.round(stand.lichtung.best * f);
       }
+      stand.miniSkala = true;
+      stand.miniSkalaWert = Object.fromEntries(Object.entries(C.MINISPIELE).map(([n, d]) => [n, d.skala]));
       if (!('miniStaffel' in alt)) {
         stand.miniStaffel = true;
         if (alt.tipps && alt.tipps.karte_mehr) stand.miniAlle = true;
@@ -398,7 +407,7 @@ export function variante(platz) {
 }
 export function variantePreis(platz, i) {
   const a = ARTIKEL_MAP[platz];
-  const basis = Array.isArray(a.kosten) ? a.kosten[0] : a.kosten;
+  const basis = Array.isArray(a.kosten) ? a.kosten.reduce((x, y) => x + y, 0) : a.kosten;   // Gesamtwert aller Stufen
   const roh = Math.max(C.VARIANTE_MIN[i], basis * C.VARIANTE_FAKTOR[i]);
   const stelle = Math.pow(10, Math.max(0, Math.floor(Math.log10(roh)) - 1));
   return Math.round(roh / stelle) * stelle;

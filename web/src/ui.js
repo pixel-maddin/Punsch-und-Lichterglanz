@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610110823';
-import * as S from './spiel.js?v=202610110823';
-import * as Z from './zeit.js?v=202610110823';
-import * as T from './ton.js?v=202610110823';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110823';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110823';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110823';
-import * as A from './auftraege.js?v=202610110823';
-import * as E from './erfolge.js?v=202610110823';
-import * as ZL from './ziele.js?v=202610110823';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110823';
-import * as KA from './karte.js?v=202610110823';
-import { zeigeRueckblick } from './ereignis.js?v=202610110823';
-import { barbaraZweig } from './szene.js?v=202610110823';
-import * as LI from './lichtung.js?v=202610110823';
-import * as CB from './christbaum.js?v=202610110823';
-import * as SB from './schlitten.js?v=202610110823';
-import * as EB from './schlittschuh.js?v=202610110823';
-import * as BS from './backstube.js?v=202610110823';
-import { alleSymbole } from './symbole.js?v=202610110823';
+import * as C from './config.js?v=202610110843';
+import * as S from './spiel.js?v=202610110843';
+import * as Z from './zeit.js?v=202610110843';
+import * as T from './ton.js?v=202610110843';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110843';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110843';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110843';
+import * as A from './auftraege.js?v=202610110843';
+import * as E from './erfolge.js?v=202610110843';
+import * as ZL from './ziele.js?v=202610110843';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110843';
+import * as KA from './karte.js?v=202610110843';
+import { zeigeRueckblick } from './ereignis.js?v=202610110843';
+import { barbaraZweig } from './szene.js?v=202610110843';
+import * as LI from './lichtung.js?v=202610110843';
+import * as CB from './christbaum.js?v=202610110843';
+import * as SB from './schlitten.js?v=202610110843';
+import * as EB from './schlittschuh.js?v=202610110843';
+import * as BS from './backstube.js?v=202610110843';
+import { alleSymbole } from './symbole.js?v=202610110843';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -527,7 +527,8 @@ function baueLaden() {
   }
   const neu = S.st.neu || {};
   for (const a of artikel) {
-    if (a.gruppe !== gruppe) { gruppe = a.gruppe; liste.appendChild(el('div', 'gruppe', gruppe)); }
+    // Überschrift nur, wo es mehrere Gruppen gibt (11.10.: „Zutaten" im Supermarkt war überflüssig)
+    if (a.gruppe !== gruppe) { gruppe = a.gruppe; if (a.gruppe !== 'Zutaten') liste.appendChild(el('div', 'gruppe', gruppe)); }
     const versteckt = S.status(a).versteckt;
     const z = el('div', 'zeile' + (versteckt ? ' verdeckt' : '') + (neu[a.id] ? ' neu' : ''));
     const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;

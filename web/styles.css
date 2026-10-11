@@ -318,7 +318,7 @@ html, body {
 .var-erkl { margin: calc(var(--px) * 1) 0 calc(var(--px) * 1); }
 /* Haus schmücken (11.10.): Sprungleiste, eine Karte je Teil, Herkunft des Geschenkten */
 .haus-sprung { position: sticky; top: calc(var(--px) * -0.5); z-index: 2; display: flex; gap: calc(var(--px) * 1.5); padding: calc(var(--px) * 1.5) 0; background: var(--papier); border-bottom: calc(var(--px) * 0.5) solid #e0c898; }
-.hs-k { flex: 1; appearance: none; cursor: pointer; padding: calc(var(--px) * 1.6) 0; background: var(--papier2); color: var(--holz); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 3); font: bold calc(var(--px) * 4) var(--schrift); }
+.hs-k { flex: 1; appearance: none; cursor: pointer; padding: calc(var(--px) * 3.4) 0; min-height: calc(var(--px) * 13); background: var(--papier2); color: var(--holz); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 3); font: bold calc(var(--px) * 4.4) var(--schrift); }
 .hs-k:active { transform: scale(0.95); background: #fff3c4; }
 .zeile.haus.karte { flex-wrap: wrap; }
 .zeile.haus.karte .txt { flex: 1 1 40%; }
@@ -681,6 +681,8 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   background: rgba(40, 20, 10, 0.62); color: #ffe27a; font-size: calc(var(--px) * 4.6);
   padding: calc(var(--px) * 1) calc(var(--px) * 3); border-radius: calc(var(--px) * 3); white-space: nowrap;
 }
+/* Hinweis an einer Stelle im Bild (Backstube): größer und kräftiger */
+#miniHud .mh-hinweis.gross { font-size: calc(var(--px) * 5.2); background: rgba(40, 20, 10, 0.82); padding: calc(var(--px) * 1.4) calc(var(--px) * 3.5); border: calc(var(--px) * 0.6) solid #c89a5a; }
 #miniHud .mh-gross {
   position: absolute; left: 0; right: 0; top: 40%; transform: translateY(-50%); text-align: center;
   font-size: calc(var(--px) * 22); letter-spacing: calc(var(--px) * 0.5);

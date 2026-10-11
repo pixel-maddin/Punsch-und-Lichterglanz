@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610110823';
-import * as Z from './zeit.js?v=202610110823';
-import * as T from './ton.js?v=202610110823';
-import * as MH from './minihud.js?v=202610110823';
-import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610110823';
+import * as C from './config.js?v=202610110843';
+import * as Z from './zeit.js?v=202610110843';
+import * as T from './ton.js?v=202610110843';
+import * as MH from './minihud.js?v=202610110843';
+import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610110843';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -58,8 +58,12 @@ export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
   if (!deko || grad === 'verbrannt') return;
   for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < 9; xx++) {
     const i = innen(m, xx, yy), t = istTeig(m, xx, yy);
-    if (deko === 'guss' && i) px(xx, yy, yy % 3 === 0 && xx % 2 ? '#ffffff' : '#f6f0e6');
-    else if (deko === 'puder' && t && (xx + yy) % 2 === 0) px(xx, yy, '#fbf8f2');
+    // Guss (11.10. deutlicher): deckend weiß, glänzend, mit Glanzstreifen und
+    // einem Tropfen über die Unterkante. Puder: nur feiner Staub, der Teig
+    // scheint überall durch - so sind die beiden nicht mehr zu verwechseln.
+    if (deko === 'guss' && i) px(xx, yy, xx + yy === 5 || xx + yy === 6 ? '#ffffff' : (yy > 4 ? '#e6eef6' : '#f8fbff'));
+    else if (deko === 'guss' && t && !istTeig(m, xx, yy + 1) && (xx === 3 || xx === 6)) px(xx, yy, '#eef4fa');
+    else if (deko === 'puder' && t && ((xx * 5 + yy * 3) % 7 === 0 || (xx * 3 + yy * 7) % 11 === 0)) px(xx, yy, '#fffdf8');
     else if (deko === 'schoko' && i) px(xx, yy, xx + yy === 6 ? '#8a5a3a' : '#5a3220');
     else if (deko === 'gruen' && i) px(xx, yy, (xx * 7 + yy * 3) % 5 === 0 ? ['#ff5a5a', '#ffe060', '#5ad0ff'][(xx + yy) % 3] : '#5aa84a');
     else if (deko === 'marmelade') {
@@ -473,8 +477,18 @@ function schale(i, n, d) {
   r(c, x - 12, y - 4, 24, 3, f); r(c, x - 11, y - 5, 22, 1, ton(f, 0.15));
   r(c, x - 13, y - 1, 26, 2, '#e8e8f0'); r(c, x - 12, y + 1, 24, 3, '#d0d0dc'); r(c, x - 10, y + 4, 20, 2, '#b8b8c6'); r(c, x - 8, y + 6, 16, 1, '#9a9aa8');
   if (d === 'gruen') for (let k = 0; k < 6; k++) p(c, x - 10 + k * 4, y - 4, ['#ff5a5a', '#ffe060', '#5ad0ff'][k % 3]);
-  if (d === 'puder') { p(c, x - 4, y - 6, '#ffffff'); p(c, x + 3, y - 6, '#ffffff'); }
-  r(c, x + 8, y - 12, 1, 8, '#c8a878');   // Löffel / Pinsel
+  if (d === 'guss') {
+    // Glänzende Flüssigkeit: Lichtreflex, Löffel mit hängendem Tropfen
+    r(c, x - 12, y - 4, 24, 3, '#f8fbff'); r(c, x - 9, y - 4, 7, 1, '#ffffff'); r(c, x + 2, y - 3, 4, 1, '#ffffff');
+    r(c, x - 12, y - 2, 24, 1, '#dce6f0');
+    r(c, x + 6, y - 13, 2, 9, '#c8a878'); r(c, x + 5, y - 5, 4, 2, '#c8a878'); p(c, x + 6, y - 3, '#f8fbff'); p(c, x + 6, y - 2, '#f8fbff');
+  } else if (d === 'puder') {
+    // Ein Haufen Puderzucker (gewölbt, matt) und ein Sieb, aus dem es rieselt
+    for (let k = 0; k < 5; k++) r(c, x - 10 + k, y - 5 - k, 20 - k * 2, 1, k % 2 ? '#f4f0e6' : '#fbf8f2');
+    for (const [dx, dy] of [[-6, -6], [-2, -8], [3, -7], [6, -5], [0, -5]]) p(c, x + dx, y + dy, '#e8e2d6');
+    r(c, x - 4, y - 18, 9, 3, '#9a9aa8'); r(c, x - 3, y - 16, 7, 1, '#c8c8d4'); r(c, x + 5, y - 17, 5, 1, '#6a4a32');
+    for (let k = 0; k < 6; k++) p(c, x - 3 + (k * 3) % 7, y - 14 + k, '#ffffff');
+  } else r(c, x + 8, y - 12, 1, 8, '#c8a878');   // Löffel / Pinsel
   MH.label('schale' + i, x, y + 9, C.BACK_DEKOS[d].kurz, 'schild');
 }
 // Kunden doppelt so groß wie auf der Straße (sonst ging er hinter der Theke unter)
@@ -518,12 +532,15 @@ function zeichne(t) {
   // Rauch beim Verbrennen
   for (const s of g.rauch) if (s.t > 0) { const a = s.t / 1.2; c.fillStyle = `rgba(70,70,76,${(0.7 * (1 - a)).toFixed(2)})`; c.fillRect(Math.round(s.x + Math.sin(s.t * 6) * 2), Math.round(s.y - a * 24), 3 + Math.round(a * 3), 3 + Math.round(a * 3)); }
   // Hinweis, was dran ist
-  const was = !k || k.phase !== 'wartet' ? '' : g.schritt === 'stechen' ? 'AUSSTECHEN' : g.schritt === 'backen' ? 'GOLDEN HERAUSHOLEN!' : g.schritt === 'verzieren' ? 'VERZIEREN' : '';
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null);
+  // Was dran ist - direkt über der Reihe, in der man tippen muss (11.10.: oben
+  // auf dem Regal war es klein und schlecht zu lesen)
+  const was = !k || k.phase !== 'wartet' ? '' : g.schritt === 'stechen' ? 'Tippe die richtige AUSSTECHFORM' : g.schritt === 'backen' ? 'GOLDBRAUN aus dem Ofen holen - im gelben Bereich!' : g.schritt === 'verzieren' ? 'Tippe die richtige VERZIERUNG' : '';
+  const woY = g.schritt === 'stechen' ? FORM_Y() - 24 : g.schritt === 'verzieren' ? SCHALE_Y() - 26 : OFEN().y - 12;
+  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null, g.t < 0 || !was ? null : woY);
   MH.label('ofen', OFEN().x + 21, OFEN().y + OFEN().h + 4, 'OFEN', 'schild');
   for (const f of g.fehl) { const a = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - a})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe, x.text.length > 6 ? 0.8 : 1.1); }
   const rest = Math.max(0, Math.ceil(C.BACK_DAUER - Math.max(0, g.t)));
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: g.kette > 1 ? 1 : 0, punkte: g.punkte });
-  MH.mitte(g.aus ? 'ZEIT!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
+  MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }
