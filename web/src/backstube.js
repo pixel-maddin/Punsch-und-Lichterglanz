@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as T from './ton.js?v=202610110758';
-import * as MH from './minihud.js?v=202610110758';
-import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as T from './ton.js?v=202610110808';
+import * as MH from './minihud.js?v=202610110808';
+import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610110808';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -93,7 +93,7 @@ const slot = (i, n) => Math.round((i + 0.5) * W / n);
  * `gebacken` = Liste der Rezept-ids (für die Plätzchendose).
  */
 export function starte(hoehe, beiEnde, stufeNr = 1, rezeptListe) {
-  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
+  stufe = C.miniStufe('back', stufeNr);
   setzeRezepte(rezeptListe);
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
@@ -318,7 +318,7 @@ export function vorspulen(sek) {
  * `treffer` = Anteil richtiger Griffe, `gold` = Anteil goldbraun.
  */
 export function messe(takt = 0.35, treffer = 1, gold = 1, hoehe = 380, stufeNr = 1, rezeptListe) {
-  stufe = C.MINI_STUFEN[stufeNr];
+  stufe = C.miniStufe('back', stufeNr);
   setzeRezepte(rezeptListe);
   const altFertig = fertig;
   H = hoehe; fertig = null;

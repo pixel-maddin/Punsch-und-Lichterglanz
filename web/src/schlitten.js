@@ -10,11 +10,11 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as T from './ton.js?v=202610110758';
-import * as MH from './minihud.js?v=202610110758';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as T from './ton.js?v=202610110808';
+import * as MH from './minihud.js?v=202610110808';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610110808';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -39,7 +39,7 @@ const WOK_Y = () => Math.round(H * 0.32);
 function zufall(a, b) { return a + Math.random() * (b - a); }
 
 export function starte(hoehe, beiEnde, stufeNr = 1) {
-  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
+  stufe = C.miniStufe('berg', stufeNr);
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
@@ -205,7 +205,7 @@ function lenkeAuto(fehler, voraus = 110) {
  * man vorausschaut.
  */
 export function messe(reaktion = 0.1, fehler = 0, voraus = 110, hoehe = 320, stufeNr = 1) {
-  stufe = C.MINI_STUFEN[stufeNr];
+  stufe = C.miniStufe('berg', stufeNr);
   const altFertig = fertig;
   H = hoehe; fertig = null;
   spiel = neuesSpiel(0);

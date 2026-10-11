@@ -10,11 +10,11 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as T from './ton.js?v=202610110758';
-import * as MH from './minihud.js?v=202610110758';
-import { r, p, ton } from './pixel.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as T from './ton.js?v=202610110808';
+import * as MH from './minihud.js?v=202610110808';
+import { r, p, ton } from './pixel.js?v=202610110808';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -43,7 +43,7 @@ const BODEN = () => Math.round(H * 0.64);
 function zufall(a, b) { return a + Math.random() * (b - a); }
 
 export function starte(hoehe, beiEnde, stufeNr = 1) {
-  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
+  stufe = C.miniStufe('eis', stufeNr);
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
@@ -57,15 +57,24 @@ export function starte(hoehe, beiEnde, stufeNr = 1) {
   // nach oben wischen springt auch)
   let start = null;
   const pos = (e) => { const rc = cv.getBoundingClientRect(); return { x: (e.clientX - rc.left) / rc.width * W, y: (e.clientY - rc.top) / rc.height * H, t: performance.now() }; };
-  cv.onpointerdown = (e) => { start = { ...pos(e), fertig: false }; };
+  // Gesprungen wird beim AUFSETZEN (11.10., gemeldet: „der Sprung soll eher
+  // passieren, wenn man drückt") - vorher erst beim Loslassen, weil ein Wisch
+  // vom Tipp unterschieden werden musste. Wischen im selben Zug macht jetzt
+  // gleich den Trick in der Luft.
+  cv.onpointerdown = (e) => {
+    start = { ...pos(e), fertig: false, sprung: false };
+    if (spiel && !spiel.inLuft) { eingabe('tipp'); start.sprung = true; }
+  };
   cv.onpointermove = (e) => {
     if (!start || start.fertig) return;
     const q = pos(e), dx = q.x - start.x, dy = q.y - start.y;
     if (Math.hypot(dx, dy) < 9) return;
     start.fertig = true;
-    eingabe(Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? 'hoch' : 'runter') : (dx < 0 ? 'links' : 'rechts'));
+    const art = Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? 'hoch' : 'runter') : (dx < 0 ? 'links' : 'rechts');
+    // Schon beim Aufsetzen gesprungen: Ein Wisch nach oben ist dann der Salto
+    eingabe(art);
   };
-  cv.onpointerup = cv.onpointercancel = () => { if (start && !start.fertig) eingabe('tipp'); start = null; };
+  cv.onpointerup = cv.onpointercancel = () => { if (start && !start.fertig && !start.sprung) eingabe('tipp'); start = null; };
   window.addEventListener('keydown', taste);
   letzte = performance.now();
   cancelAnimationFrame(rafId);
@@ -122,7 +131,8 @@ function neuesDing(g) {
   const arten = ['schneemann', 'stein', 'holz', 'loch'];
   const art = arten[Math.floor(Math.random() * arten.length)];
   g.dinge.push({ art, x: g.naechstes, weg: false });
-  if (Math.random() < 0.7) g.dinge.push({ art: 'stern', x: g.naechstes + zufall(-6, 6), hoehe: zufall(20, 34), gross: Math.random() < 0.25, weg: false });
+  // Sternhöhe 30-40 (11.10., vorher 20-34 und damit teils auf Kopfhöhe); der Sprung hat seinen Scheitel bei 36,6
+  if (Math.random() < 0.7) g.dinge.push({ art: 'stern', x: g.naechstes + zufall(-6, 6), hoehe: zufall(30, 40), gross: Math.random() < 0.25, weg: false });
   g.naechstes += zufall(150, 240) * (0.85 + g.v / TEMPO[1] * 0.35);
 }
 
@@ -240,7 +250,7 @@ function lenkeAuto(treffer) {
 }
 /** Messweg: eine Runde ohne Bild. `takt` = Reaktionszeit, `treffer` 0..1 = Genauigkeit. */
 export function messe(takt = 0.05, treffer = 1, hoehe = 320, stufeNr = 1) {
-  stufe = C.MINI_STUFEN[stufeNr];
+  stufe = C.miniStufe('eis', stufeNr);
   const altFertig = fertig;
   H = hoehe; fertig = null;
   spiel = neuesSpiel(0);

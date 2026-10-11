@@ -11,11 +11,11 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as T from './ton.js?v=202610110758';
-import * as MH from './minihud.js?v=202610110758';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as T from './ton.js?v=202610110808';
+import * as MH from './minihud.js?v=202610110808';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610110808';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -50,7 +50,7 @@ export const mitte = (tier) => ({ x: tier.x, y: tier.y - MITTE[tier.art] });
  * `selten` = Art des seltenen Gastes dieser Runde oder null.
  */
 export function starte(hoehe, beiEnde, stufeNr = 1, selten = null) {
-  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
+  stufe = C.miniStufe('lichtung', stufeNr);
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
@@ -140,7 +140,7 @@ export function vorspulen(sek) {
  * Gibt die Punkte zurück. Nur zum Einmessen der Schwellen.
  */
 export function messe(takt = 0.42, treffer = 1, hoehe = 320, stufeNr = 1) {
-  stufe = C.MINI_STUFEN[stufeNr];
+  stufe = C.miniStufe('lichtung', stufeNr);
   const altFertig = fertig;
   H = hoehe; fertig = null;
   spiel = { t: 0, punkte: 0, kette: 1, ketteT: 0, tiere: [], spawnT: 0.4, texte: [], fehl: [], gefuettert: 0, arten: {}, aus: false };

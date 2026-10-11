@@ -13,11 +13,11 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as T from './ton.js?v=202610110758';
-import * as MH from './minihud.js?v=202610110758';
-import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as T from './ton.js?v=202610110808';
+import * as MH from './minihud.js?v=202610110808';
+import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610110808';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -46,7 +46,7 @@ const PARKPLATZ = () => ({ x: 130, y: Math.round(H * 0.9) });
 
 /** Runde starten. `beiEnde(punkte, kunden)` kommt nach Ablauf. */
 export function starte(hoehe, beiEnde, stufeNr = 1) {
-  stufe = C.MINI_STUFEN[stufeNr] || C.MINI_STUFEN[1];
+  stufe = C.miniStufe('baum', stufeNr);
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
@@ -255,7 +255,7 @@ export function vorspulen(sek) {
  * `treffer` = Anteil der Kunden, bei denen der erste Baum stimmt.
  */
 export function messe(takt = 0.3, treffer = 1, hoehe = 320, stufeNr = 1) {
-  stufe = C.MINI_STUFEN[stufeNr];
+  stufe = C.miniStufe('baum', stufeNr);
   const altFertig = fertig;
   H = hoehe; fertig = null;
   spiel = neuesSpiel(0);

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import { neueFarben } from './pixel.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import { neueFarben } from './pixel.js?v=202610110808';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -55,6 +55,7 @@ function neuerStand(name = '', andenken = 0) {
     sterne10: true,                  // Beträge in ganzen Sternen (seit 29.09. alles ×10)
     startTag: 0,                     // erster Spieltag (setzeStartTag beim Losspielen); 0 = noch nicht, fehlt = alter Stand
     miniStaffel: true,               // Minispiele kommen nach und nach (10.10.); fehlt = alter Stand, siehe laden()
+    miniSkala: true,                 // Minispiel-Punkte angeglichen (11.10.); fehlt = Rekorde noch in Rohpunkten
   };
 }
 
@@ -71,6 +72,14 @@ function laden() {
       // vorher kannte, hatte alle fünf - ihm verschwindet keins. Erkannt an der
       // fehlenden Marke `miniStaffel` (nicht an `miniGemeldet`: das hat die
       // erste Fassung schon in alte Stände geschrieben)
+      // Minispiel-Punkte sind seit 11.10. je Spiel skaliert (C.MINISPIELE.skala).
+      // Alte Rekorde einmal mitrechnen, sonst passten sie nicht mehr zu den
+      // ebenso umgerechneten Deko- und Rezeptschwellen
+      if (!('miniSkala' in alt)) {
+        stand.miniSkala = true;
+        for (const [n, m] of Object.entries(stand.mini || {})) if (C.MINISPIELE[n] && m.best) m.best = Math.round(m.best * C.MINISPIELE[n].skala);
+        if (stand.lichtung && stand.lichtung.best && !(stand.mini && stand.mini.lichtung)) stand.lichtung.best = Math.round(stand.lichtung.best * C.MINISPIELE.lichtung.skala);
+      }
       if (!('miniStaffel' in alt)) {
         stand.miniStaffel = true;
         if (alt.tipps && alt.tipps.karte_mehr) stand.miniAlle = true;

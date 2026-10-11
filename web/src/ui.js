@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610110758';
-import * as S from './spiel.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as T from './ton.js?v=202610110758';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110758';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110758';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110758';
-import * as A from './auftraege.js?v=202610110758';
-import * as E from './erfolge.js?v=202610110758';
-import * as ZL from './ziele.js?v=202610110758';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110758';
-import * as KA from './karte.js?v=202610110758';
-import { zeigeRueckblick } from './ereignis.js?v=202610110758';
-import { barbaraZweig } from './szene.js?v=202610110758';
-import * as LI from './lichtung.js?v=202610110758';
-import * as CB from './christbaum.js?v=202610110758';
-import * as SB from './schlitten.js?v=202610110758';
-import * as EB from './schlittschuh.js?v=202610110758';
-import * as BS from './backstube.js?v=202610110758';
-import { alleSymbole } from './symbole.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as S from './spiel.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as T from './ton.js?v=202610110808';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110808';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110808';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110808';
+import * as A from './auftraege.js?v=202610110808';
+import * as E from './erfolge.js?v=202610110808';
+import * as ZL from './ziele.js?v=202610110808';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110808';
+import * as KA from './karte.js?v=202610110808';
+import { zeigeRueckblick } from './ereignis.js?v=202610110808';
+import { barbaraZweig } from './szene.js?v=202610110808';
+import * as LI from './lichtung.js?v=202610110808';
+import * as CB from './christbaum.js?v=202610110808';
+import * as SB from './schlitten.js?v=202610110808';
+import * as EB from './schlittschuh.js?v=202610110808';
+import * as BS from './backstube.js?v=202610110808';
+import { alleSymbole } from './symbole.js?v=202610110808';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -308,17 +308,20 @@ export function starteLichtung(stufeNr = 1) {
  * (10.10.). Die zuletzt gewählte ist hervorgehoben (`st.miniStufe[name]`).
  */
 function miniFenster(titel, html, knoepfe, name, starte) {
-  const box = fenster(titel, html + '<div class="stufen"></div>', knoepfe);
+  // Erst wählen, dann starten (11.10., Nutzerwunsch): Die Stufenknöpfe
+  // markieren nur, gestartet wird über den eigenen Start-Knopf
+  let gewaehlt = (S.st.miniStufe || {})[name] ?? 1;
+  const start = { text: 'Start', aktion: () => { setTimeout(() => starte(gewaehlt), 60); } };
+  const box = fenster(titel, html + '<p class="stufen-titel">Schwierigkeit</p><div class="stufen"></div>', [...knoepfe, start]);
   const reihe = box.querySelector('.stufen');
-  const zuletzt = (S.st.miniStufe || {})[name] ?? 1;
   C.MINI_STUFEN.forEach((stufe, i) => {
-    const b = el('button', 'k stufe' + (i === zuletzt ? ' gewaehlt' : ''), `${stufe.name}<small>Punkte ×${String(stufe.punkte).replace('.', ',')}</small>`);
+    const b = el('button', 'k stufe' + (i === gewaehlt ? ' gewaehlt' : ''), `${stufe.name}<small>Punkte ×${String(stufe.punkte).replace('.', ',')}</small>`);
     b.onclick = () => {
       T.spiele('klick');
+      gewaehlt = i;
+      for (const x of reihe.children) x.classList.toggle('gewaehlt', x === b);
       S.st.miniStufe = { ...(S.st.miniStufe || {}), [name]: i };
       S.speichere();
-      schliesseFenster();
-      setTimeout(() => starte(i), 60);
     };
     reihe.appendChild(b);
   });
@@ -1069,6 +1072,7 @@ export function zeigeHaendler() {
   const box = fenster('Der fahrende Händler', `
     <p class="klein">${leer ? 'Heute hat er nichts mehr für dich - du hast schon alles!' : '„Seltene Ware von weit her! Gibt es nur bei mir - und ich ziehe bald weiter."'}</p>
     <div class="haendler-liste"></div>`, [{ text: 'Später', neben: true }]);
+  KA.vignette(box.querySelector('canvas'), 'festplatz', { offen: true });   // Ortsbild wie bei den Läden (11.10.)
   const liste = box.querySelector('.haendler-liste');
   for (const w of waren) {
     const preis = S.haendlerPreis(w);
@@ -1114,10 +1118,12 @@ export function zeigeMarkt() {
   const stand = `<p class="klein">Gesammelt: ${deko}/${C.MARKT_DEKO.length} Markt-Deko · ${rez}/${C.MARKT_REZEPTE.length} Rezepte</p>`;
   if (!m.heute) {
     const wann = m.inTagen === 1 ? 'morgen' : `am ${WOCHENTAG[m.datum.getDay()]}, ${m.datum.getDate()}.${m.datum.getMonth() + 1}. (in ${m.inTagen} Tagen)`;
-    fenster('Festplatz', `
+    const zu = fenster('Festplatz', `
+      <canvas class="fenster-bild"></canvas>
       <p>Noch ist der Platz leer. Der nächste <b>Weihnachtsmarkt</b> ist ${wann}.</p>
       <p class="klein">Dort gibt es Deko, die du nur auf dem Markt bekommst, und Rezepte, mit denen deine Getränke dauerhaft mehr Sterne bringen. Am Markttag kommen außerdem ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste an deinen Stand.</p>
       ${stand}`, [{ text: 'Bis dann!' }]);
+    KA.vignette(zu.querySelector('canvas'), 'festplatz', { offen: false });
     return;
   }
   S.marktBesuchen();
@@ -1125,6 +1131,7 @@ export function zeigeMarkt() {
   const a = S.marktAngebot();
   const waren = [...a.deko, ...(a.rezept ? [a.rezept] : [])];
   const box = fenster('Weihnachtsmarkt', `
+    <canvas class="fenster-bild"></canvas>
     <p class="klein">${waren.length ? `Heute ist Markt! Am Stand ist viel los: ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste. Was es hier gibt, gibt es nur auf dem Markt.` : 'Du hast schon alles, was der Markt heute hat - aber am Stand ist trotzdem mehr los!'}</p>
     <div class="haendler-liste"></div>${stand}`, [{ text: 'Später', neben: true }]);
   const liste = box.querySelector('.haendler-liste');

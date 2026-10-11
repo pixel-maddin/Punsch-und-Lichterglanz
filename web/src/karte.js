@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610110758';
-import * as S from './spiel.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as FEIN from './fein.js?v=202610110758';
-import * as T from './ton.js?v=202610110758';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610110758';
+import * as C from './config.js?v=202610110808';
+import * as S from './spiel.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as FEIN from './fein.js?v=202610110808';
+import * as T from './ton.js?v=202610110808';
+import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610110808';
 
 const $ = (s) => document.querySelector(s);
 
@@ -37,7 +37,8 @@ export const ORTE = [
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },
   { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.75, spiel: 'lichtung' },
   { id: 'eis',       name: 'Eisbahn',         x: 64,  y: 0.645, spiel: 'eis' },
-  { id: 'backstube', name: 'Backstube',       x: 60,  y: 0.29, spiel: 'back', schild: [34, -22] },   // Schild rechts daneben: darunter lag es auf dem Supermarkt
+  // Backstube 11.10. tiefer (0,29 → 0,315) und kleiner: Ihr Schild klebte unter dem Weihnachtsladen
+  { id: 'backstube', name: 'Backstube',       x: 62,  y: 0.315, spiel: 'back', schild: [30, -17] },   // Schild rechts daneben: darunter lag es auf dem Supermarkt
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
 ];
@@ -60,6 +61,16 @@ export function santaTest(i = 0) { santa = { ...VERSTECKE[i], t: 1, gefunden: -1
 
 export const istOffen = () => offen;
 const yPx = (o) => Math.round(o.y * H);
+/**
+ * Der ganze Karteninhalt liegt um VERSATZ der Höhe tiefer (11.10., Nutzerwunsch:
+ * „minimal nach unten schieben, unten weniger Wald, oben mehr Berge"). Alle
+ * Orte, Wege, der Wald usw. bleiben in Inhalts-Koordinaten (Anteil von H);
+ * das Zwischenbild ist um `vers()` höher, wird um vers() verschoben gezeichnet
+ * (unten fällt so viel Wald weg), und oben füllen höhere Berge den Platz.
+ * DOM-Schilder und Tippflächen rechnen vers() dazu.
+ */
+const VERSATZ = 0.06;
+const vers = () => Math.round(H * VERSATZ);
 const ort = (id) => ORTE.find((o) => o.id === id);
 
 /**
@@ -108,7 +119,7 @@ function baueSchilder(hervor) {
     f.className = 'ort-flaeche santa';
     f.setAttribute('aria-label', 'Weihnachtsmann');
     f.style.left = `calc(var(--px) * ${santa.x - 10})`;
-    f.style.top = `calc(var(--px) * ${Math.round(santa.y * H) - 16})`;
+    f.style.top = `calc(var(--px) * ${Math.round(santa.y * H) - 16 + vers()})`;
     f.onclick = () => {
       if (!santa || santa.gefunden >= 0) return;
       santa.gefunden = 0; f.remove();
@@ -125,7 +136,7 @@ function baueSchilder(hervor) {
     b.className = 'ort' + (o.bald ? ' bald' : '') + (o.id === hervor ? ' hervor' : '') + (o.id === 'haus' ? ' zuhause' : '');
     const [sdx, sdy] = o.schild || [0, 0];
     b.style.left = `calc(var(--px) * ${o.x + sdx})`;
-    b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy})`;
+    b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy + vers()})`;
     const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : 0;
     let unter = o.bald ? 'bald' : o.spiel ? 'Minispiel' : '';
     // Noch nie gespielt: kleines NEU am Schild
@@ -142,7 +153,7 @@ function baueSchilder(hervor) {
     const f = document.createElement('button');
     f.className = 'ort-flaeche';
     f.style.left = `calc(var(--px) * ${o.x - 16})`;
-    f.style.top = `calc(var(--px) * ${yPx(o) - 18})`;
+    f.style.top = `calc(var(--px) * ${yPx(o) - 18 + vers()})`;
     f.onclick = () => gehe(o);
     box.appendChild(f);
   }
@@ -282,9 +293,10 @@ function baueGrund(winter) {
   if (grund && grundSchl === schl) return;
   grundSchl = schl;
   grund = document.createElement('canvas');
-  grund.width = C.B; grund.height = H;
+  grund.width = C.B; grund.height = H + vers();
   const ziel = c;
   c = grund.getContext('2d');
+  c.translate(0, vers());   // alles in Inhalts-Koordinaten; putImageData unten bekommt den Versatz selbst
   belegt = new Uint8Array(C.B * H);
   lichter = [];
   const P = palette(winter);
@@ -298,7 +310,7 @@ function baueGrund(winter) {
     const i = (y * C.B + x) * 4;
     img.data[i] = f[0]; img.data[i + 1] = f[1]; img.data[i + 2] = f[2]; img.data[i + 3] = 255;
   }
-  c.putImageData(img, 0, 0);
+  c.putImageData(img, 0, vers());
 
   // 2. Berge am oberen Rand: hinten blau, vorn grau mit Schneekappen
   berge(winter);
@@ -467,13 +479,14 @@ function ellipse(cx, cy, rx, ry, f) {
 function schattenOval(x, y, w) { c.fillStyle = 'rgba(20,30,40,0.22)'; c.fillRect(Math.round(x - w / 2), Math.round(y), w, 1); c.fillRect(Math.round(x - w / 2 + 1), Math.round(y + 1), w - 2, 1); }
 
 function berge(winter) {
-  const basis = Math.round(0.1 * H);
-  // Himmel hinter den Gipfeln
-  for (let y = 0; y < basis; y++) r(c, 0, y, C.B, 1, y < basis * 0.5 ? '#9cc4e8' : '#b8d6f0');
+  const basis = Math.round(0.1 * H), oben = -vers();
+  // Himmel hinter den Gipfeln - reicht bis in den Versatz hinauf
+  for (let y = oben; y < basis; y++) r(c, 0, y, C.B, 1, y < (oben + basis) * 0.5 ? '#9cc4e8' : '#b8d6f0');
+  const plus = Math.round(vers() * 0.8);   // die Gipfel wachsen in den gewonnenen Platz
   const zug = (gipfel, farbe, hell, dunkel, kappe, kappe2, y0) => {
     for (let x = 0; x < C.B; x++) {
       let hoch = 0, seite = 0;
-      for (const [gx, gh] of gipfel) { const h = gh - Math.abs(x - gx) * 0.9; if (h > hoch) { hoch = h; seite = x - gx; } }
+      for (const [gx, gh] of gipfel) { const h = gh + plus - Math.abs(x - gx) * 0.9; if (h > hoch) { hoch = h; seite = x - gx; } }
       hoch = Math.round(hoch + (hash(x * 3.1) - 0.5) * 1.4);
       if (hoch <= 0) continue;
       for (let k = 0; k < hoch; k++) {
@@ -824,23 +837,24 @@ function eisbahn(x, y, P, winter) {
 }
 /** Backstube (10.10.): Fachwerkhaus mit warmem Schaufenster und Brezelschild. */
 function backstube(x, y, P, winter) {
-  schattenOval(x, y + 2, 30);
-  r(c, x - 12, y - 13, 24, 13, '#efe0c0');
-  r(c, x + 10, y - 13, 2, 13, '#d8c49c');
-  for (let i = -12; i < 12; i += 4) r(c, x + i, y - 13, 1, 13, '#6a4428');
-  r(c, x - 12, y - 13, 24, 1, '#6a4428'); r(c, x - 12, y - 7, 24, 1, '#6a4428');
-  dach(x - 14, y - 14, 28, 9, '#8a3a2a', ton('#8a3a2a', -0.25), P);
-  r(c, x - 9, y - 26, 3, 7, '#7a6a5a');                          // Ofenschornstein
-  if (P.dach) r(c, x - 9, y - 26, 3, 1, '#ffffff');
+  // Seit 11.10. kleiner (18 x 10 statt 24 x 13): die Schilder standen zu dicht
+  schattenOval(x, y + 2, 24);
+  r(c, x - 9, y - 10, 18, 10, '#efe0c0');
+  r(c, x + 7, y - 10, 2, 10, '#d8c49c');
+  for (let i = -9; i < 9; i += 4) r(c, x + i, y - 10, 1, 10, '#6a4428');
+  r(c, x - 9, y - 10, 18, 1, '#6a4428'); r(c, x - 9, y - 6, 18, 1, '#6a4428');
+  dach(x - 11, y - 11, 22, 7, '#8a3a2a', ton('#8a3a2a', -0.25), P);
+  r(c, x - 7, y - 21, 2, 6, '#7a6a5a');                          // Ofenschornstein
+  if (P.dach) r(c, x - 7, y - 21, 2, 1, '#ffffff');
   // Schaufenster mit Plätzchen, Tür
-  r(c, x - 10, y - 6, 9, 5, '#f8d878'); for (let i = 0; i < 4; i++) p(c, x - 9 + i * 2, y - 3, ['#c8902c', '#fbf6ee', '#5a3220', '#c8283a'][i]);
-  for (let i = 0; i < 9; i++) licht(x - 10 + i, y - 6, '#ffd890');
-  r(c, x + 3, y - 6, 4, 6, '#5a3a22'); p(c, x + 6, y - 3, '#e8c030');
-  fenster(x - 7, y - 11, 3, 2); fenster(x + 4, y - 11, 3, 2);
+  r(c, x - 8, y - 5, 7, 4, '#f8d878'); for (let i = 0; i < 3; i++) p(c, x - 7 + i * 2, y - 3, ['#c8902c', '#fbf6ee', '#c8283a'][i]);
+  for (let i = 0; i < 7; i++) licht(x - 8 + i, y - 5, '#ffd890');
+  r(c, x + 2, y - 5, 3, 5, '#5a3a22'); p(c, x + 4, y - 3, '#e8c030');
+  fenster(x - 5, y - 9, 2, 2); fenster(x + 3, y - 9, 2, 2);
   // Brezelschild am Ausleger
-  r(c, x + 12, y - 11, 5, 1, '#3a2a1a');
-  for (const [dx, dy] of [[0, 0], [1, -1], [2, -1], [3, 0], [3, 1], [2, 2], [1, 2], [0, 1], [1, 0], [2, 0]]) p(c, x + 14 + dx, y - 9 + dy, '#c8902c');
-  if (winter) r(c, x - 12, y - 1, 24, 1, '#ffffff');
+  r(c, x + 9, y - 8, 4, 1, '#3a2a1a');
+  for (const [dx, dy] of [[0, 0], [1, -1], [2, 0], [2, 1], [1, 1], [0, 1]]) p(c, x + 10 + dx, y - 6 + dy, '#c8902c');
+  if (winter) r(c, x - 9, y - 1, 18, 1, '#ffffff');
 }
 const ZEICHNER = { backstube, eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
 
@@ -853,6 +867,8 @@ function zeichne(t, dt) {
   const winter = Z.schnee() > 0;
   baueGrund(winter);
   c.drawImage(grund, 0, 0);
+  c.save();
+  c.translate(0, vers());     // alles Bewegte in Inhalts-Koordinaten, wie das Zwischenbild
   const P = palette(winter);
 
   // Kein Glitzern im Fluss mehr (09.10., Nutzerwunsch: „irritiert zu sehr")
@@ -875,7 +891,7 @@ function zeichne(t, dt) {
   rauch(h.x + 6, yPx(h) - 26, t, 0);
   rauch(d.x - 10, yPx(d) - 17, t, 1.3);
   rauch(d.x + 9, yPx(d) - 16, t, 2.1);
-  const bs = ort('backstube'); rauch(bs.x - 8, yPx(bs) - 27, t, 0.7);
+  const bs = ort('backstube'); rauch(bs.x - 6, yPx(bs) - 22, t, 0.7);
 
   // Festplatz: Wimpelkette flattert - am Markttag laufen Leute zwischen den Buden
   const f = ort('festplatz'), fy = yPx(f);
@@ -934,7 +950,7 @@ function zeichne(t, dt) {
   // Schneefall
   if (winter || Z.wetter().art === 'schnee') {
     for (const fl of flocken) {
-      fl.y += fl.v * dt; if (fl.y > H) { fl.y = -2; fl.x = Math.random() * C.B; }
+      fl.y += fl.v * dt; if (fl.y > H) { fl.y = -2 - vers(); fl.x = Math.random() * C.B; }
       p(c, fl.x + Math.sin(t + fl.s) * 2, fl.y, '#ffffff');
     }
   }
@@ -959,6 +975,7 @@ function zeichne(t, dt) {
     // Fenster und Laternen noch einmal obendrauf, damit sie aus dem Hof strahlen
     for (const q of grundLichter) p(c, q.x, q.y, q.f);
   }
+  c.restore();
 }
 
 /**
@@ -1009,7 +1026,7 @@ function nachtLichter(li, w, h, liste, staerke) {
   if (li.hell >= 0.9) return;
   const nacht = 1 - li.hell;
   c.fillStyle = `rgba(24,20,66,${(nacht * staerke).toFixed(3)})`;   // etwas violetter: Winterabend statt Mitternacht
-  c.fillRect(0, 0, w, h);
+  c.fillRect(0, -vers(), w, h + vers());   // auch über den Versatz oben
   if (nacht < 0.25) return;
   c.fillStyle = `rgba(255,200,110,${(nacht * 0.1).toFixed(3)})`;
   for (const q of liste) c.fillRect(q.x - 2, q.y - 2, 5, 5);
@@ -1037,4 +1054,4 @@ function rauch(x, y, t, ph) {
  * Auflösung und mit eigenen, detailreicheren Zeichnungen in fein.js
  * (vorher hier mit den Kartenbausteinen, 110 x 40 - „zu grob pixelig").
  */
-export function vignette(ziel, tab) { return FEIN.vignette(ziel, tab); }
+export function vignette(ziel, tab, opt) { return FEIN.vignette(ziel, tab, opt); }

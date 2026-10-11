@@ -613,14 +613,41 @@ export const MINI_STUFEN = [
   { id: 'normal', name: 'Normal', tempo: 1,    punkte: 1 },
   { id: 'schwer', name: 'Schwer', tempo: 1.25, punkte: 1.4 },
 ];
-// Welche Minispiele es gibt: Deko-Liste und Umrechnung der Punkte in Sterne
+// Welche Minispiele es gibt: Deko-Liste und Umrechnung der Punkte in Sterne.
+//
+// `skala` (11.10., gemeldet: „beim Christbaum bekommt man wesentlich mehr
+// Punkte"): gleicht die Spiele so an, dass eine REALISTISCHE menschliche
+// Runde überall bei rund 2.000 Punkten liegt. Gemessen am Autopiloten
+// (gemütlich/mittel/gut/perfekt, Rohpunkte): Lichtung 917/1.728/2.646/3.951,
+// Christbaum 1.124/1.611/2.503/3.428, Schlittenberg 1.145/1.616/1.875/2.034,
+// Eisbahn 280/932/1.311/2.967, Backstube 1.000/1.700/2.500/3.360. Für den Bot
+// liegen sie nah beieinander - für Menschen nicht: Den Christbaum (Folgen
+// antippen, kein Reaktionsdruck) schafft man fast perfekt, die Lichtung
+// höchstens „gut", die Eisbahn mit Stürzen eher „mittel". Angenommene
+// menschliche Runde: Christbaum ~3.000, Lichtung ~2.650, Backstube ~2.500,
+// Schlittenberg ~1.900, Eisbahn ~1.300.
+// Alle Punktzahlen in den Spielen laufen über `miniStufe()`; Deko-Schwellen,
+// Rezept-Schwellen und die Sterne-Umrechnung (`jeMin`) werden unten mit
+// derselben Zahl umgerechnet (die Rohwerte oben bleiben die gemessenen),
+// alte Rekorde einmal in laden() (spiel.js, `st.miniSkala`).
 export const MINISPIELE = {
-  lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN },
-  baum:     { deko: BAUM_DEKO,     jeMin: BAUM_PUNKTE_JE_MIN,     maxMin: BAUM_MAX_MIN },
-  berg:     { deko: BERG_DEKO,     jeMin: BERG_PUNKTE_JE_MIN,     maxMin: BERG_MAX_MIN },
-  eis:      { deko: EIS_DEKO,      jeMin: EIS_PUNKTE_JE_MIN,      maxMin: EIS_MAX_MIN },
-  back:     { deko: [],            jeMin: BACK_PUNKTE_JE_MIN,     maxMin: BACK_MAX_MIN },
+  lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN, skala: 0.75 },
+  baum:     { deko: BAUM_DEKO,     jeMin: BAUM_PUNKTE_JE_MIN,     maxMin: BAUM_MAX_MIN,     skala: 0.65 },
+  berg:     { deko: BERG_DEKO,     jeMin: BERG_PUNKTE_JE_MIN,     maxMin: BERG_MAX_MIN,     skala: 1.05 },
+  eis:      { deko: EIS_DEKO,      jeMin: EIS_PUNKTE_JE_MIN,      maxMin: EIS_MAX_MIN,      skala: 1.5 },
+  back:     { deko: [],            jeMin: BACK_PUNKTE_JE_MIN,     maxMin: BACK_MAX_MIN,     skala: 0.8 },
 };
+const auf50 = (n) => Math.round(n / 50) * 50;
+for (const m of Object.values(MINISPIELE)) {
+  m.jeMin = Math.round(m.jeMin * m.skala);
+  for (const d of m.deko) d.ab = auf50(d.ab * m.skala);
+}
+for (const rz of BACK_REZEPTE) rz.ab = auf50(rz.ab * MINISPIELE.back.skala);
+/** Schwierigkeit samt Punktfaktor des Spiels - jede Punktzahl im Spiel läuft hierüber. */
+export function miniStufe(name, nr) {
+  const s = MINI_STUFEN[nr] || MINI_STUFEN[1];
+  return { ...s, punkte: s.punkte * MINISPIELE[name].skala };
+}
 
 
 // Minispiele kommen nach und nach (10.10., Nutzerwunsch: „sonst zu überladen

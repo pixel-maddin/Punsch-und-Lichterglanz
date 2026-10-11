@@ -204,7 +204,9 @@ html, body {
 #kartenOrte .ort small { display: block; font-weight: normal; font-size: calc(var(--px) * 3.4); color: #8a6a4a; }
 #kartenOrte .ort.bald { background: rgba(240, 232, 214, 0.88); }
 #kartenOrte .ort.zuhause { background: #fff3c4; border-color: var(--gold); }
-#kartenOrte .ort.markt-heute { background: #fff0e0; border-color: #c83030; animation: pulsieren 1.6s infinite; }
+/* Markttag: das Schild LEUCHTET, statt zu hüpfen (11.10., Nutzerwunsch) */
+#kartenOrte .ort.markt-heute { background: #fff0e0; border-color: #c83030; animation: marktLeuchten 1.8s ease-in-out infinite; }
+@keyframes marktLeuchten { 0%, 100% { box-shadow: 0 0 calc(var(--px) * 1.5) rgba(255, 200, 80, 0.55); } 50% { box-shadow: 0 0 calc(var(--px) * 5) calc(var(--px) * 1) rgba(255, 210, 90, 0.95); } }
 #kartenOrte .ort.markt-heute small { color: #c83030; font-weight: bold; }
 #kartenOrte .ort.hervor { border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 1) var(--gold), 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3); animation: pulsieren 1.2s infinite; }
 #kartenOrte .ort:active { transform: translate(-50%, 0) scale(0.94); }
@@ -252,6 +254,8 @@ html, body {
 }
 #blattTabs { display: flex; flex-direction: column; gap: calc(var(--px) * 2); padding: calc(var(--px) * 2) calc(var(--px) * 3) 0; }
 #blattTabs .reiter { display: flex; gap: calc(var(--px) * 1); }
+/* Ortsbild im Fenster (Weihnachtsmarkt, 11.10.) - wie oben im Laden-Blatt */
+.fenster-bild { display: block; width: 100%; aspect-ratio: 220 / 80; image-rendering: pixelated; border-radius: calc(var(--px) * 2); border: calc(var(--px) * 0.6) solid #c89a5a; box-sizing: border-box; margin-bottom: calc(var(--px) * 2); }
 #blattTabs .ort-bild { display: block; width: 100%; aspect-ratio: 110 / 40; image-rendering: pixelated; border-radius: calc(var(--px) * 2); border: calc(var(--px) * 0.6) solid #c89a5a; box-sizing: border-box; }
 /* Oberster Umschalter im Laden: Einkaufen | Mein Haus */
 .modi {
@@ -670,8 +674,11 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #miniHud .mh-gross {
   position: absolute; left: 0; right: 0; top: 40%; transform: translateY(-50%); text-align: center;
   font-size: calc(var(--px) * 22); letter-spacing: calc(var(--px) * 0.5);
-  text-shadow: 0 calc(var(--px) * 1) 0 #3a2414, 0 0 calc(var(--px) * 4) rgba(0, 0, 0, 0.5);
-  background: linear-gradient(transparent, rgba(30, 20, 10, 0.45) 25%, rgba(30, 20, 10, 0.45) 75%, transparent);
+  /* Kein Balken dahinter (11.10., Nutzerwunsch) - die Kontur trägt die Lesbarkeit */
+  --k: calc(var(--px) * 0.9);
+  text-shadow: var(--k) 0 0 #5a1414, calc(var(--k) * -1) 0 0 #5a1414, 0 var(--k) 0 #5a1414, 0 calc(var(--k) * -1) 0 #5a1414,
+    var(--k) var(--k) 0 #5a1414, calc(var(--k) * -1) var(--k) 0 #5a1414, var(--k) calc(var(--k) * -1) 0 #5a1414, calc(var(--k) * -1) calc(var(--k) * -1) 0 #5a1414,
+    0 calc(var(--px) * 2.2) 0 #2a0a0a, 0 0 calc(var(--px) * 6) rgba(0, 0, 0, 0.35);
   padding: calc(var(--px) * 3) 0;
 }
 #miniHud .mh-gross.plopp { animation: mhPlopp 0.35s ease-out; }
@@ -694,7 +701,8 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #kartenOrte .ort-flaeche.santa { width: calc(var(--px) * 20); height: calc(var(--px) * 22); z-index: 3; }
 
 /* Startfenster der Minispiele: drei Knöpfe für die Schwierigkeit */
-.stufen { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 3); }
+.stufen-titel { margin: calc(var(--px) * 3) 0 0; font-size: calc(var(--px) * 4); font-weight: bold; color: #8a6a4a; text-transform: uppercase; letter-spacing: calc(var(--px) * 0.3); }
+.stufen { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 1.5); }
 .stufen .k.stufe { display: flex; flex-direction: column; align-items: center; padding: calc(var(--px) * 2) 0; font-weight: bold; font-size: calc(var(--px) * 5); background: #fff6e0; color: var(--tinte); border: calc(var(--px) * 0.6) solid #c89a5a; }
 .stufen .k.stufe small { font-weight: normal; font-size: calc(var(--px) * 3.6); color: #8a6a4a; }
 .stufen .k.stufe.gewaehlt { background: var(--rot); color: #fff; border-color: var(--rot2); }

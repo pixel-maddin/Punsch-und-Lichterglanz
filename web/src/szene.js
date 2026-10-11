@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610110758';
-import * as Z from './zeit.js?v=202610110758';
-import * as S from './spiel.js?v=202610110758';
-import { FASSADEN } from './config.js?v=202610110758';
-import * as C from './config.js?v=202610110758';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610110808';
+import * as Z from './zeit.js?v=202610110808';
+import * as S from './spiel.js?v=202610110808';
+import { FASSADEN } from './config.js?v=202610110808';
+import * as C from './config.js?v=202610110808';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -528,7 +528,9 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
     // Kaminofen: Man sieht ins Zimmer. Links der Kamin selbst (unteres linkes
     // Feld), rechts nur sein Widerschein und ein Weihnachtsbaum im Anschnitt.
     // Vorher war das ganze Fenster grell orange (gemeldet 01.10.: zu hell).
-    const fl = Math.sin(t * 7) * 0.5 + Math.sin(t * 11.3) * 0.5;   // Flackern -1..1
+    // Der Schein steht ruhig (11.10., gemeldet: „das rechte Fenster flackert"):
+    // Vorher schwankte er mit einer Flacker-Kurve - im rechten Fenster ohne
+    // sichtbares Feuer wirkte das wie ein Fehler. Es bewegt sich nur die Flamme.
     if (wo === 'links') {
       r(c, x, y, fw, fh, '#6e3a26');                     // Wand, warm angestrahlt
       r(c, x, y, fw, 4, '#5a2e20');                      // oben dunkler
@@ -543,8 +545,8 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
       p(c, kx + 3, ky + 4 - (h === 0 ? 1 : 0), '#ffb040'); p(c, kx + 3, ky + 3, h === 2 ? '#ff8a20' : '#ffb040');
       // Widerschein auf der Wand daneben
       r(c, x + 8, y + 9, fw - 8, fh - 11, '#7e4428');
-      L.push({ rect: [kx + 2, ky + 3, 3, 3], f: '#ff8a30', halo: 9, an: 0.8 + 0.15 * fl });
-      L.push({ rect: [x, y, fw, fh], f: '#ff9a40', halo: 7, an: 0.22 + 0.05 * fl });
+      L.push({ rect: [kx + 2, ky + 3, 3, 3], f: '#ff8a30', halo: 9, an: 0.85 });
+      L.push({ rect: [x, y, fw, fh], f: '#ff9a40', halo: 7, an: 0.22 });
     } else {
       r(c, x, y, fw, fh, '#4e2a20');                     // weiter weg vom Kamin: dunkler
       r(c, x, y + fh - 2, fw, 2, '#321810');
@@ -557,7 +559,7 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
         p(c, bx + dx, y + dy, f);
         L.push({ x: bx + dx, y: y + dy, f, halo: 2, an: 0.7 });
       }
-      L.push({ rect: [x, y, fw, fh], f: '#ff9a40', halo: 6, an: 0.14 + 0.03 * fl });
+      L.push({ rect: [x, y, fw, fh], f: '#ff9a40', halo: 6, an: 0.14 });
     }
     r(c, x, y, 2, fh, '#9a3028'); r(c, x + fw - 2, y, 2, fh, '#9a3028');   // Vorhänge
   } else {
@@ -1928,7 +1930,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -10], l_eich: [42, -82], l_reh: [22, -14], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -2079,9 +2081,11 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
   if (S.zeigt('m_herzen')) lebkuchenherzen(e, GW, t);
-  // Aus der Waldlichtung: Hasen vor dem Zaun, das Reh am Weg
-  if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 2, t);
-  if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 2, t);
+  // Aus der Waldlichtung: Hasen und Reh im Vorgarten VOR dem Zaun - die
+  // letzte Gartenreihe über dem Gehweg (der beginnt bei GW-12). Bis 11.10.
+  // standen sie bei GW-2 mitten auf dem Gehweg.
+  if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 13, t);
+  if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 13, t);
   if (S.zeigt('e_pinguin')) pinguin(e, 97, GW - 1, t);
   // Vor dem Stand (sonst verdeckt er sie): Flamingo vor dem Schlitten, Drehorgel rechts.
   // Garten rechts der Tür (09.10. neu verteilt, vorher standen Laterne und

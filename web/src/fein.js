@@ -10,8 +10,8 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202610110758';
-import { r, p, ton, mische, text as pixText, wichtelKlein } from './pixel.js?v=202610110758';
+import * as Z from './zeit.js?v=202610110808';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben } from './pixel.js?v=202610110808';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
@@ -283,9 +283,13 @@ export function haus(c, x, fuss, b, h, o = {}) {
 // ---------------------------------------------------------------------------
 const VW = 220, VH = 80, HOR = 40;
 
-/** Zeichnet das Geschäft `tab` in `ziel` (220 x 80). false = für diesen Tab kein Bild. */
-export function vignette(ziel, tab) {
-  const zeichner = { markt: weihnachtsladen, super: supermarkt, baumarkt, wichtel: wichtelwald }[tab];
+/**
+ * Zeichnet das Geschäft `tab` in `ziel` (220 x 80). false = für diesen Tab kein Bild.
+ * 'festplatz' (11.10.): der Weihnachtsmarkt, `opt.offen` = heute ist Markt.
+ */
+export function vignette(ziel, tab, opt = {}) {
+  const zeichner = { markt: weihnachtsladen, super: supermarkt, baumarkt, wichtel: wichtelwald,
+    festplatz: (c, x, fuss, winter) => festplatz(c, x, fuss, winter, !!opt.offen) }[tab];
   if (!zeichner) return false;
   ziel.width = VW; ziel.height = VH;
   const c = ziel.getContext('2d');
@@ -484,4 +488,58 @@ function wichtelwald(c, x, fuss, winter) {
     r(c, x + dx - g, fuss + dy - g * 2 - 1, g * 2 + 1 + (g > 1 ? 1 : 0), 1 + (g > 1 ? 1 : 0), '#d84a3a'); p(c, x + dx, fuss + dy - g * 2 - 1, '#ffffff');
   }
   laterne(c, x - 76, fuss + 6, 18);
+}
+
+/** Marktbude: Satteldach, gestreifte Markise, Tresen - offen mit Ware und Licht, zu mit Fensterladen. */
+function bude(c, x, fuss, b, farbe, offen, winter, seed) {
+  r(c, x, fuss - 18, b, 18, '#8a5a32'); r(c, x + b - 2, fuss - 18, 2, 18, '#6a4222');
+  for (let i = 3; i < b - 2; i += 4) r(c, x + i, fuss - 8, 1, 8, '#6a4222');
+  if (offen) {
+    r(c, x + 2, fuss - 16, b - 4, 7, '#7a3a1e'); r(c, x + 2, fuss - 16, b - 4, 1, '#ffb860');
+    licht(x + b / 2, fuss - 13, '#ffb860', 1.5);
+    for (let k = 0; k < (b - 6) / 4; k++) {
+      const wx = x + 3 + k * 4, f = ['#a8582a', BUNT[(k + seed) % 5], '#f4f0e8'][(k + seed) % 3];
+      r(c, wx, fuss - 12, 3, 3, f); p(c, wx, fuss - 12, ton(f, 0.4));
+    }
+  } else {
+    r(c, x + 2, fuss - 16, b - 4, 7, '#9a6a3e'); for (let i = 0; i < 7; i += 2) r(c, x + 2, fuss - 16 + i, b - 4, 1, '#7a4a28');
+  }
+  r(c, x - 1, fuss - 9, b + 2, 2, '#c89a5a');
+  for (let i = 0; i < b + 4; i++) {
+    const f = Math.floor(i / 3) % 2 ? '#f4f0e8' : farbe;
+    r(c, x - 2 + i, fuss - 21, 1, 3, f); if (i % 3 === 1) p(c, x - 2 + i, fuss - 18, f);
+  }
+  for (let i = 0; i < 6; i++) { const ww = b + 6 - i * 4; if (ww <= 0) break; r(c, x - 3 + i * 2, fuss - 22 - i, ww, 1, winter && i > 2 ? '#f6f9fc' : i % 2 ? '#6a4222' : '#7a5230'); }
+  if (winter) r(c, x - 3, fuss - 22, b + 6, 1, '#f6f9fc');
+}
+function festplatz(c, x, fuss, winter, offen) {
+  // Pflasterplatz
+  for (let yy = fuss - 6; yy < fuss + 10; yy++) for (let xx = x - 104; xx < x + 104; xx++)
+    p(c, xx, yy, ((xx >> 2) + (yy >> 1)) % 3 ? (winter ? '#d6dfea' : '#b8ab92') : (winter ? '#c4cfdc' : '#a29478'));
+  // Großer Christbaum in der Mitte
+  tanne(c, x, fuss - 2, 46, { schnee: winter, lichter: offen ? 24 : 0, stern: offen });
+  // Buden links und rechts
+  bude(c, x - 96, fuss - 2, 28, '#c83030', offen, winter, 1);
+  bude(c, x - 60, fuss + 2, 30, '#2f7a3a', offen, winter, 2);
+  bude(c, x + 30, fuss + 2, 30, '#c83030', offen, winter, 3);
+  // Kinderkarussell rechts außen: gestreiftes Kegeldach, Pferdchen
+  const kx = x + 86, kf = fuss - 2;
+  for (let i = 0; i < 10; i++) { const ww = 28 - i * 3; r(c, kx - ww / 2, kf - 26 - i, ww, 1, i % 2 ? '#f4f0e8' : '#c83030'); }
+  r(c, kx - 15, kf - 26, 30, 2, '#e8c030'); for (let i = 0; i < 30; i += 3) p(c, kx - 15 + i, kf - 24, offen ? BUNT[(i / 3) % 5] : '#a89040');
+  r(c, kx - 1, kf - 24, 2, 22, '#c8a060');
+  for (const [dx, hh] of [[-11, 0], [-4, 3], [5, 1], [11, 2]]) {
+    r(c, kx + dx, kf - 24, 1, 12 + hh, '#e8c030');
+    r(c, kx + dx - 2, kf - 12 + hh, 5, 3, ['#f4f0e8', '#8a5a32', '#f4f0e8', '#c89a5a'][Math.abs(dx) % 4]); p(c, kx + dx + 2, kf - 13 + hh, '#3a2414');
+  }
+  r(c, kx - 15, kf - 3, 30, 3, '#8a5a32'); r(c, kx - 15, kf - 3, 30, 1, '#c89a5a');
+  if (winter) r(c, kx - 6, kf - 36, 12, 1, '#ffffff');
+  if (offen) for (let i = 0; i < 30; i += 5) licht(kx - 15 + i, kf - 24, BUNT[(i / 5) % 5], 0.5);
+  // Lichterketten quer über den Platz, Laternen, Leute
+  if (offen) { kette(c, x - 82, fuss - 28, x - 8, fuss - 40, 5, 4); kette(c, x + 8, fuss - 40, x + 46, fuss - 26, 5, 4); }
+  laterne(c, x - 26, fuss + 6, 20); laterne(c, x + 24, fuss + 6, 20);
+  if (offen) {
+    for (const [dx, typ] of [[-74, 'erwachsen'], [-66, 'kind'], [-40, 'oma'], [-16, 'erwachsen'], [14, 'kind'], [20, 'erwachsen'], [56, 'opa'], [64, 'kind'], [100, 'erwachsen']])
+      figurKlein(c, { typ, farben: neueFarben(typ), phase: dx, laeuft: false }, x + dx, fuss + 9, 0);
+    for (let i = 0; i < 5; i++) p(c, x - 46 + Math.round(Math.sin(i) * 2), fuss - 22 - i * 3, '#d8dce4');   // Dampf vom Punsch
+  }
 }
