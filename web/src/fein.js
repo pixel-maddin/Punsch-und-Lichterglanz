@@ -10,8 +10,8 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202610110851';
-import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben } from './pixel.js?v=202610110851';
+import * as Z from './zeit.js?v=202610110855';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben } from './pixel.js?v=202610110855';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
@@ -289,13 +289,16 @@ const VW = 220, VH = 80, HOR = 40;
  */
 export function vignette(ziel, tab, opt = {}) {
   const zeichner = { markt: weihnachtsladen, super: supermarkt, baumarkt, wichtel: wichtelwald,
-    festplatz: (c, x, fuss, winter) => festplatz(c, x, fuss, winter, !!opt.offen) }[tab];
+    festplatz: (c, x, fuss, winter) => festplatz(c, x, fuss, winter, !!opt.offen),
+    // Minispiele (11.10.): dieselben Ortsbilder im Startfenster
+    lichtung: waldlichtung, baum: christbaumverkauf, eis: eisbahn, back: backstube, berg: schlittenberg }[tab];
   if (!zeichner) return false;
   ziel.width = VW; ziel.height = VH;
   const c = ziel.getContext('2d');
   c.imageSmoothingEnabled = false;
   neueLichter();
-  const winter = Z.schnee() > 0, li = Z.licht();
+  // Eisbahn und Schlittenberg gibt es nur mit Schnee - ihr Bild ist immer winterlich
+  const winter = Z.schnee() > 0 || tab === 'eis' || tab === 'berg', li = Z.licht();
   const himmel = li.hell > 0.6 ? ['#6aa4dc', '#94bfe8', '#c4dcf2']
     : li.hell > 0.1 ? ['#3e3e80', '#9a6a8c', '#f0a476'] : ['#0e1638', '#18224c', '#2a3666'];
   verlauf(c, 0, 0, VW, HOR + 2, himmel);
@@ -542,4 +545,151 @@ function festplatz(c, x, fuss, winter, offen) {
       figurKlein(c, { typ, farben: neueFarben(typ), phase: dx, laeuft: false }, x + dx, fuss + 9, 0);
     for (let i = 0; i < 5; i++) p(c, x - 46 + Math.round(Math.sin(i) * 2), fuss - 22 - i * 3, '#d8dce4');   // Dampf vom Punsch
   }
+}
+
+// ---------------------------------------------------------------------------
+// Ortsbilder der Minispiele (11.10.)
+// ---------------------------------------------------------------------------
+function hase(c, x, fuss, f = '#b8a898') {
+  r(c, x - 2, fuss - 3, 5, 3, f); r(c, x + 2, fuss - 5, 2, 2, f); p(c, x + 2, fuss - 7, f); p(c, x + 3, fuss - 7, f); p(c, x + 3, fuss - 6, f);
+  p(c, x + 3, fuss - 4, '#2a1a10'); p(c, x - 3, fuss - 3, '#f4f4f4'); p(c, x + 4, fuss - 4, '#e8a0a8');
+}
+function reh(c, x, fuss) {
+  const f = '#a8703a';
+  r(c, x - 5, fuss - 9, 10, 4, f); for (const dx of [-4, -2, 3, 4]) r(c, x + dx, fuss - 5, 1, 5, '#8a5a2a');
+  r(c, x + 4, fuss - 13, 2, 5, f); r(c, x + 5, fuss - 14, 4, 2, f); p(c, x + 8, fuss - 13, '#2a1a10'); p(c, x + 6, fuss - 14, '#2a1a10');
+  p(c, x + 4, fuss - 15, '#6a4a2a'); p(c, x + 6, fuss - 16, '#6a4a2a'); p(c, x - 5, fuss - 8, '#f4ead8');
+  for (const dx of [-3, 0, 2]) p(c, x + dx, fuss - 8, '#f4ead8');
+}
+function eichhorn(c, x, fuss) {
+  const f = '#c8622a';
+  r(c, x, fuss - 4, 3, 4, f); r(c, x + 2, fuss - 6, 2, 2, f); p(c, x + 3, fuss - 6, '#2a1a10'); p(c, x + 3, fuss - 7, f);
+  r(c, x - 2, fuss - 8, 2, 6, '#d88a4a'); p(c, x - 1, fuss - 9, '#d88a4a');
+}
+function waldlichtung(c, x, fuss, winter) {
+  // Lichtung: heller Grund, ringsum Tannen, in der Mitte die Futterraufe
+  for (let yy = fuss - 16; yy < fuss + 10; yy++) for (let xx = x - 70; xx < x + 70; xx++) {
+    const d = Math.pow((xx - x) / 70, 2) + Math.pow((yy - fuss + 3) / 14, 2);
+    if (d < 1) p(c, xx, yy, winter ? (hash(xx + yy * 7) < 0.08 ? '#e2eaf4' : '#f8fbfd') : (hash(xx * 3 + yy) < 0.2 ? '#7cb35c' : '#88c068'));
+  }
+  for (const [dx, dy, h] of [[-96, 6, 34], [-84, 0, 26], [-72, -6, 22], [-58, -10, 18], [58, -10, 18], [72, -6, 22], [86, 0, 28], [98, 6, 34], [-104, 10, 30], [104, 10, 30]])
+    tanne(c, x + dx, fuss + dy, h, { schnee: winter });
+  // Futterraufe: zwei Pfosten, schräge Latten, Heu, Satteldach
+  r(c, x - 14, fuss - 20, 2, 20, '#5a3a22'); r(c, x + 12, fuss - 20, 2, 20, '#5a3a22');
+  r(c, x - 12, fuss - 14, 24, 7, '#c8a050'); for (let i = 0; i < 24; i += 2) p(c, x - 12 + i, fuss - 15, '#e8c870');
+  for (let i = -12; i < 12; i += 4) for (let k = 0; k < 7; k++) p(c, x + i + Math.floor(k / 2), fuss - 14 + k, '#7a5230');
+  for (let i = 0; i < 9; i++) { const ww = 34 - i * 4; if (ww <= 0) break; r(c, x - ww / 2, fuss - 21 - i, ww, 1, winter && i > 3 ? '#f6f9fc' : i % 2 ? '#6a3a24' : '#7a4424'); }
+  if (winter) r(c, x - 17, fuss - 21, 34, 1, '#f6f9fc');
+  r(c, x - 10, fuss - 7, 20, 2, '#8a5a32');
+  // Tiere
+  hase(c, x - 34, fuss + 4); hase(c, x - 26, fuss + 6, '#a8988a'); reh(c, x + 34, fuss + 5); eichhorn(c, x + 18, fuss + 2);
+  r(c, x + 14, fuss + 2, 7, 3, '#7a4a28'); r(c, x + 14, fuss + 1, 7, 1, '#c8a070');   // Baumstumpf
+  if (winter) for (let i = 0; i < 6; i++) p(c, x - 48 + i * 4, fuss + 7 + (i % 2), '#c8d4e2');   // Spuren
+  else for (const [dx, dy] of [[-44, 2], [40, 7], [-12, 8]]) { p(c, x + dx, fuss + dy, '#f2e6cc'); r(c, x + dx - 1, fuss + dy - 1, 3, 1, '#d84a3a'); }
+  laterne(c, x - 22, fuss - 4, 14);
+}
+function christbaumverkauf(c, x, fuss, winter) {
+  // Platz mit Holzschnitzeln bzw. Schnee
+  for (let yy = fuss - 8; yy < fuss + 10; yy++) for (let xx = x - 104; xx < x + 104; xx++) p(c, xx, yy, winter ? (hash(xx + yy * 5) < 0.1 ? '#dfe8f2' : '#f2f6fb') : (hash(xx * 7 + yy) < 0.25 ? '#a87a48' : '#c09060'));
+  // Reihen geschlagener Bäume in Holzkreuzen
+  for (let row = 0; row < 2; row++) for (let i = 0; i < 6; i++) {
+    const tx = x - 60 + i * 15 + row * 7, tf = fuss - 4 + row * 9, h = 18 + ((i + row) % 3) * 4;
+    tanne(c, tx, tf, h, { schnee: winter, farben: [['#3a7a48', '#2a6038', '#1a4426'], ['#4a6a8a', '#38586e', '#28465a'], ['#4a8a4a', '#3a7038', '#2a5428']][(i + row) % 3] });
+    r(c, tx - 3, tf, 7, 1, '#8a5a32'); p(c, tx + 3, tf - 6, '#f4f0e8'); p(c, tx + 3, tf - 5, '#d83a3a');   // Kreuz und Preisschild
+  }
+  // Verkaufshütte links mit Schild und Lichterkette
+  const hx = x - 98;
+  r(c, hx, fuss - 26, 28, 26, '#8a5a32'); for (let i = 3; i < 28; i += 4) r(c, hx + i, fuss - 26, 1, 26, '#6a4222');
+  r(c, hx + 4, fuss - 20, 20, 9, '#ffcf6a'); r(c, hx + 4, fuss - 20, 20, 2, '#ffe6a0'); licht(hx + 14, fuss - 16, '#ffd88a', 1.5);
+  for (let i = 0; i < 10; i++) { const ww = 34 - i * 4; if (ww <= 0) break; r(c, hx - 3 + i * 2, fuss - 27 - i, ww, 1, winter && i > 3 ? '#f6f9fc' : i % 2 ? '#5a2e18' : '#7a4424'); }
+  r(c, hx + 2, fuss - 36, 24, 9, '#2f6a3a'); schrift(c, 'TANNEN', hx + 4, fuss - 35, '#fff8e0', '#1a3a20', 1);
+  kette(c, hx, fuss - 27, hx + 28, fuss - 27, 2, 3);
+  // Netzmaschine rechts: Trichter mit Netzrolle
+  const nx = x + 52;
+  r(c, nx - 2, fuss - 8, 4, 8, '#4a4a52'); for (let i = 0; i < 7; i++) r(c, nx - 2 - i, fuss - 15 + i, 4 + i * 2, 1, '#c83a32');
+  r(c, nx + 3, fuss - 12, 12, 3, '#e8e8f0'); for (let i = 0; i < 12; i += 2) p(c, nx + 3 + i, fuss - 11, '#b8b8c8');
+  // Auto mit Baum auf dem Dach
+  const ax = x + 72;
+  r(c, ax, fuss + 1, 30, 6, '#3a6ab8'); r(c, ax + 6, fuss - 4, 17, 5, '#3a6ab8'); r(c, ax + 8, fuss - 3, 5, 3, '#a8d0e8'); r(c, ax + 15, fuss - 3, 6, 3, '#a8d0e8');
+  r(c, ax, fuss + 1, 30, 1, ton('#3a6ab8', 0.25)); r(c, ax + 3, fuss + 6, 5, 3, '#1a1a1a'); r(c, ax + 22, fuss + 6, 5, 3, '#1a1a1a');
+  r(c, ax + 2, fuss - 6, 26, 2, '#2a6038'); for (let i = 0; i < 26; i += 2) p(c, ax + 2 + i, fuss - 7, '#3a7a48'); r(c, ax + 26, fuss - 6, 3, 2, '#5a3a22');
+  if (winter) r(c, ax + 3, fuss - 8, 22, 1, '#ffffff');
+}
+function eisbahn(c, x, fuss, winter) {
+  // Zugefrorener Weiher, oval, mit Glanz und Kufenspuren
+  for (let yy = fuss - 14; yy < fuss + 10; yy++) for (let xx = x - 80; xx < x + 80; xx++) {
+    const d = Math.pow((xx - x) / 80, 2) + Math.pow((yy - fuss + 2) / 12, 2);
+    if (d < 1) p(c, xx, yy, d > 0.86 ? '#ffffff' : hash(xx * 3 + yy * 11) < 0.04 ? '#e6f4fc' : (yy < fuss - 6 ? '#b8dcf0' : '#a4d0ea'));
+  }
+  for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2; p(c, Math.round(x + Math.cos(a) * 50), Math.round(fuss - 2 + Math.sin(a) * 6), '#d8ecf8'); p(c, Math.round(x + 10 + Math.cos(a) * 30), Math.round(fuss - 1 + Math.sin(a) * 4), '#d8ecf8'); }
+  for (const [dx, dy] of [[-40, -6], [22, -8], [50, -2]]) r(c, x + dx, fuss + dy, 9, 1, '#ffffff');
+  // Läufer: bunte kleine Figuren mit Kufen
+  for (const [dx, dy, typ] of [[-26, 2, 'erwachsen'], [-14, 5, 'kind'], [12, 0, 'erwachsen'], [30, 4, 'kind'], [46, -3, 'oma']]) {
+    figurKlein(c, { typ, farben: neueFarben(typ), phase: dx, laeuft: true }, x + dx, fuss + dy, 0.2);
+    r(c, x + dx - 2, fuss + dy + 1, 5, 1, '#8a8a96');
+  }
+  // Lichterkette auf Pfosten rundherum, Bank, Glühwein-Hütte
+  for (const px of [-86, -44, 0, 44, 86]) { r(c, x + px, fuss - 24, 1, 12, '#5a3a22'); }
+  kette(c, x - 86, fuss - 24, x - 44, fuss - 24, 4, 3); kette(c, x - 44, fuss - 24, x, fuss - 24, 4, 3); kette(c, x, fuss - 24, x + 44, fuss - 24, 4, 3); kette(c, x + 44, fuss - 24, x + 86, fuss - 24, 4, 3);
+  r(c, x - 100, fuss + 4, 12, 2, '#8a5a32'); r(c, x - 99, fuss + 6, 1, 3, '#5a3a22'); r(c, x - 90, fuss + 6, 1, 3, '#5a3a22'); r(c, x - 100, fuss + 3, 12, 1, '#ffffff');
+  tanne(c, x - 104, fuss - 6, 28, { schnee: true }); tanne(c, x + 102, fuss - 4, 30, { schnee: true }); tanne(c, x + 92, fuss + 8, 20, { schnee: true });
+}
+function backstube(c, x, fuss, winter) {
+  for (let yy = fuss - 2; yy < fuss + 10; yy++) for (let xx = x - 60; xx < x + 60; xx++) p(c, xx, yy, ((xx >> 2) + (yy >> 1)) % 3 ? (winter ? '#d6dfea' : '#b8ab92') : (winter ? '#c4cfdc' : '#a29478'));
+  // Bäckerhaus: Fachwerk oben, Erdgeschoss mit großem Schaufenster
+  const b = 70, h = 40, l = x - b / 2;
+  r(c, l, fuss - h, b, h, '#f2e6cc'); r(c, l + b - 2, fuss - h, 2, h, '#d8c8a8');
+  const bal = '#6a4428';
+  r(c, l, fuss - h, b, 1, bal); r(c, l, fuss - h + 17, b, 1, bal);
+  for (let i = 0; i < b; i += 7) r(c, l + i, fuss - h, 1, 17, bal);
+  for (let i = 0; i < 7; i++) { p(c, l + 7 + i, fuss - h + 16 - i * 2, bal); p(c, l + b - 8 - i, fuss - h + 16 - i * 2, bal); }
+  for (const fx of [l + 16, l + 30, l + 44]) fenster(c, fx, fuss - h + 5, 5, 6, true);
+  // Schaufenster mit Plätzchen auf Blechen
+  r(c, l + 4, fuss - 20, 40, 15, '#5a3420'); r(c, l + 5, fuss - 19, 38, 13, '#ffd88a'); r(c, l + 5, fuss - 19, 38, 3, '#ffe8b0'); licht(l + 24, fuss - 13, '#ffd88a', 2);
+  r(c, l + 6, fuss - 11, 36, 1, '#a8a8b8'); r(c, l + 6, fuss - 15, 36, 1, '#a8a8b8');
+  for (let i = 0; i < 6; i++) {
+    const kx = l + 8 + i * 6, f = ['#d89a48', '#c8902c', '#d89a48'][i % 3];
+    p(c, kx, fuss - 13, f); p(c, kx - 1, fuss - 12, f); p(c, kx + 1, fuss - 12, f); p(c, kx, fuss - 12, i % 2 ? '#ffffff' : '#5a3220');   // Sterne mit Guss/Schoko
+    r(c, kx - 1, fuss - 17, 3, 2, '#c8282a'); p(c, kx, fuss - 18, '#c8282a');   // Herzen
+  }
+  r(c, l + 3, fuss - 5, 42, 1, '#f0ece4');
+  // Tür, Brezelschild am Ausleger
+  r(c, l + 50, fuss - 18, 12, 18, '#3a2012'); r(c, l + 51, fuss - 17, 10, 17, '#7a4a2a'); r(c, l + 53, fuss - 15, 6, 6, '#ffd88a'); p(c, l + 59, fuss - 8, '#e8c030');
+  r(c, l + b, fuss - 30, 9, 1, '#3a2a1a'); r(c, l + b + 7, fuss - 29, 1, 2, '#3a2a1a');
+  for (const [dx, dy] of [[0, 0], [1, -1], [2, -1], [3, 0], [4, -1], [5, -1], [6, 0], [6, 1], [5, 2], [4, 3], [3, 3], [2, 3], [1, 2], [0, 1], [2, 1], [4, 1], [3, 2]]) p(c, l + b + 4 + dx, fuss - 26 + dy, '#c8902c');
+  // Dach, Ofenschornstein mit Rauch
+  for (let i = 0; i < 16; i++) { const ww = b + 6 - i * 4; if (ww <= 0) break; r(c, l - 3 + i * 2, fuss - h - 1 - i, ww, 1, winter && i > 6 ? '#f6f9fc' : i % 3 === 0 ? '#6a2a1e' : '#8a3a2a'); }
+  if (winter) r(c, l - 3, fuss - h - 1, b + 6, 1, '#f6f9fc');
+  r(c, l + 10, fuss - h - 14, 5, 12, '#7a6a5a'); r(c, l + 9, fuss - h - 15, 7, 1, winter ? '#f6f9fc' : '#5a4a3a');
+  for (let i = 0; i < 6; i++) r(c, l + 11 + Math.round(Math.sin(i) * 2 + i), fuss - h - 18 - i * 3, 3, 2, i < 3 ? '#e4e4ec' : '#cfcfd8');
+  // Mehlsäcke, Nachbarn, Laterne
+  for (const [dx, dy] of [[-48, 0], [-42, 1]]) { r(c, x + dx, fuss - 6 + dy, 6, 7, '#efe6d0'); r(c, x + dx + 1, fuss - 7 + dy, 4, 1, '#efe6d0'); p(c, x + dx + 2, fuss - 3 + dy, '#a89070'); }
+  haus(c, x - 104, fuss - 2, 26, 20, { wand: '#d8a888', dach: '#6a3a2a', schnee: winter, kamin: false });
+  haus(c, x + 78, fuss - 2, 28, 22, { wand: '#b8c8d8', dach: '#5a3a32', schnee: winter, fachwerk: true });
+  laterne(c, x + 46, fuss + 6, 20);
+}
+function schlittenberg(c, x, fuss, winter) {
+  // Ein großer Hang von rechts oben nach links unten, mit Rodelspur
+  for (let xx = 0; xx < 220; xx++) {
+    const top = Math.round(fuss - 8 - Math.max(0, (xx - 20)) * 0.26 - Math.sin(xx / 30) * 2);
+    for (let yy = top; yy < 80; yy++) p(c, xx, yy, yy === top ? '#ffffff' : hash(xx * 5 + yy * 3) < 0.05 ? '#dfe8f2' : (xx > 150 && yy < top + 6 ? '#e8eff7' : '#f6f9fc'));
+  }
+  // Rodelspuren
+  for (let xx = 30; xx < 200; xx++) { const y = Math.round(fuss - 2 - (xx - 20) * 0.2 + Math.sin(xx / 14) * 3); p(c, xx, y, '#c8d6e6'); p(c, xx, y + 3, '#c8d6e6'); }
+  // Rodler: Schlitten und Wok
+  const rodler = (rx, ry, wok) => {
+    if (wok) { r(c, rx - 4, ry, 9, 2, '#3a3a40'); r(c, rx - 3, ry + 2, 7, 1, '#2a2a30'); p(c, rx + 5, ry, '#8a6a42'); }
+    else { r(c, rx - 5, ry + 1, 10, 1, '#a8703a'); r(c, rx - 6, ry + 2, 12, 1, '#6a4222'); p(c, rx + 5, ry + 1, '#6a4222'); }
+    r(c, rx - 1, ry - 4, 3, 4, ['#d83a3a', '#3a8ad8', '#3aa84a'][(rx >> 3) % 3]); r(c, rx - 1, ry - 7, 3, 3, '#f2c9a0'); r(c, rx - 1, ry - 8, 3, 1, '#d83a3a'); p(c, rx + 1, ry - 9, '#ffffff');
+  };
+  rodler(64, fuss - 12, false); rodler(118, fuss - 24, true); rodler(160, fuss - 33, false);
+  // Fähnchen oben, Hütte, Tannen am Rand
+  r(c, 196, fuss - 50, 1, 9, '#5a3a22'); r(c, 197, fuss - 50, 5, 3, '#d83a3a');
+  const hx = 170, hf = fuss - 38;
+  r(c, hx, hf - 10, 16, 10, '#8a5a32'); r(c, hx + 5, hf - 6, 5, 6, '#4a2c1a'); r(c, hx + 11, hf - 8, 3, 3, '#ffcf6a'); licht(hx + 12, hf - 7, '#ffd88a', 1);
+  for (let i = 0; i < 6; i++) { const ww = 20 - i * 4; if (ww <= 0) break; r(c, hx - 2 + i * 2, hf - 11 - i, ww, 1, i > 1 ? '#f6f9fc' : '#6a3a24'); }
+  for (const [tx, ty, h] of [[8, fuss + 2, 26], [22, fuss - 2, 20], [140, fuss - 30, 18], [210, fuss - 46, 22], [98, fuss - 14, 16]]) tanne(c, tx, ty, h, { schnee: true });
+  // Kinder unten mit Schlitten an der Leine
+  figurKlein(c, { typ: 'kind', farben: neueFarben('kind'), phase: 1, laeuft: true }, 40, fuss + 4, 0.3);
+  r(c, 30, fuss + 3, 7, 1, '#a8703a'); for (let i = 0; i < 4; i++) p(c, 36 + i, fuss + 2 - Math.round(i * 0.4), '#c83a32');
 }

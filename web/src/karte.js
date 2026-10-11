@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610110851';
-import * as S from './spiel.js?v=202610110851';
-import * as Z from './zeit.js?v=202610110851';
-import * as FEIN from './fein.js?v=202610110851';
-import * as T from './ton.js?v=202610110851';
-import { r, p, ton, wichtelKlein, text as pixText } from './pixel.js?v=202610110851';
+import * as C from './config.js?v=202610110855';
+import * as S from './spiel.js?v=202610110855';
+import * as Z from './zeit.js?v=202610110855';
+import * as FEIN from './fein.js?v=202610110855';
+import * as T from './ton.js?v=202610110855';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610110855';
 
 const $ = (s) => document.querySelector(s);
 
@@ -317,10 +317,14 @@ function baueGrund(winter) {
   markiere(0, 0, C.B, Math.round(0.1 * H));
 
   // 3. Fluss und Weiher
+  // Der Fluss beginnt an der Waldkante unter den Hügeln (11.10., gemeldet:
+  // „geht über den Horizont hinaus") - darüber wird er abgeschnitten
   const fluss = flussPunkte();
+  c.save(); c.beginPath(); c.rect(0, Math.round(0.1 * H) + 6, C.B, H); c.clip();
   for (const q of fluss) kreis(q.x, q.y, q.b + 1.4, P.ufer);
   for (const q of fluss) { kreis(q.x, q.y, q.b, P.wasser); markiere(q.x - q.b - 2, q.y - q.b - 2, q.b * 2 + 4, q.b * 2 + 4); }
   for (const q of fluss) if (q.b > 3.4) kreis(q.x, q.y, q.b - 1.6, P.wasserTief);
+  c.restore();
   const w = WEIHER();
   ellipse(w.x, w.y, w.rx + 1.5, w.ry + 1.5, P.ufer);
   ellipse(w.x, w.y, w.rx, w.ry, P.wasser);
@@ -483,7 +487,8 @@ function berge(winter) {
   // „die Berge sehen zu mächtig aus"). Zwei Lagen runder Kuppen, hinten blass
   // und bläulich, vorn weißer mit Schattenseite und ein paar Tannen.
   const basis = Math.round(0.1 * H), oben = -vers();
-  for (let y = oben; y < basis + 2; y++) r(c, 0, y, C.B, 1, y < (oben + basis) * 0.5 ? '#a8cdec' : '#c6e0f4');
+  // Himmel als weicher Verlauf, jede Zeile eigene Farbe (11.10., vorher zwei harte Stufen)
+  for (let y = oben; y < basis + 2; y++) r(c, 0, y, C.B, 1, mische('#9cc6ea', '#dceaf6', (y - oben) / (basis + 2 - oben)));
   const huegel = (kuppen, y0, hell, schatten, kante) => {
     for (let x = 0; x < C.B; x++) {
       let hoch = 0, seite = 0;
@@ -500,11 +505,6 @@ function berge(winter) {
   const plus = Math.round(vers() * 0.35);
   huegel([[10, 9 + plus, 34], [56, 12 + plus, 40], [104, 10 + plus, 36], [150, 13 + plus, 42], [190, 9 + plus, 30]], basis, '#dce8f4', '#c4d4e6', '#ffffff');
   huegel([[-6, 7 + plus, 30], [36, 9 + plus, 36], [82, 7 + plus, 30], [126, 10 + plus, 38], [172, 8 + plus, 32]], basis + 4, '#f2f6fb', '#d8e2ee', '#ffffff');
-  // ein paar Tannen auf den vorderen Kuppen
-  for (let i = 0; i < 14; i++) {
-    const tx = Math.round(hash(i + 300) * C.B), ty = basis + 2 - Math.round(hash(i + 310) * 4);
-    r(c, tx, ty - 3, 1, 3, '#2c5236'); p(c, tx - 1, ty - 1, '#2c5236'); p(c, tx + 1, ty - 1, '#2c5236'); p(c, tx, ty - 4, '#ffffff');
-  }
   // Waldsaum am Fuß der Hügel
   for (let x = 0; x < C.B; x += 2) {
     const h = 2 + Math.floor(hash(x * 1.7) * 3);

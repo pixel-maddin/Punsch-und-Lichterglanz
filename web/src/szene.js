@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610110851';
-import * as Z from './zeit.js?v=202610110851';
-import * as S from './spiel.js?v=202610110851';
-import { FASSADEN } from './config.js?v=202610110851';
-import * as C from './config.js?v=202610110851';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610110855';
+import * as Z from './zeit.js?v=202610110855';
+import * as S from './spiel.js?v=202610110855';
+import { FASSADEN } from './config.js?v=202610110855';
+import * as C from './config.js?v=202610110855';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';

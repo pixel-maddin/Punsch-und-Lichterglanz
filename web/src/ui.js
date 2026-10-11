@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610110851';
-import * as S from './spiel.js?v=202610110851';
-import * as Z from './zeit.js?v=202610110851';
-import * as T from './ton.js?v=202610110851';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110851';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110851';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110851';
-import * as A from './auftraege.js?v=202610110851';
-import * as E from './erfolge.js?v=202610110851';
-import * as ZL from './ziele.js?v=202610110851';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110851';
-import * as KA from './karte.js?v=202610110851';
-import { zeigeRueckblick } from './ereignis.js?v=202610110851';
-import { barbaraZweig } from './szene.js?v=202610110851';
-import * as LI from './lichtung.js?v=202610110851';
-import * as CB from './christbaum.js?v=202610110851';
-import * as SB from './schlitten.js?v=202610110851';
-import * as EB from './schlittschuh.js?v=202610110851';
-import * as BS from './backstube.js?v=202610110851';
-import { alleSymbole } from './symbole.js?v=202610110851';
+import * as C from './config.js?v=202610110855';
+import * as S from './spiel.js?v=202610110855';
+import * as Z from './zeit.js?v=202610110855';
+import * as T from './ton.js?v=202610110855';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610110855';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610110855';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610110855';
+import * as A from './auftraege.js?v=202610110855';
+import * as E from './erfolge.js?v=202610110855';
+import * as ZL from './ziele.js?v=202610110855';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610110855';
+import * as KA from './karte.js?v=202610110855';
+import { zeigeRueckblick } from './ereignis.js?v=202610110855';
+import { barbaraZweig } from './szene.js?v=202610110855';
+import * as LI from './lichtung.js?v=202610110855';
+import * as CB from './christbaum.js?v=202610110855';
+import * as SB from './schlitten.js?v=202610110855';
+import * as EB from './schlittschuh.js?v=202610110855';
+import * as BS from './backstube.js?v=202610110855';
+import { alleSymbole } from './symbole.js?v=202610110855';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -312,7 +312,9 @@ function miniFenster(titel, html, knoepfe, name, starte) {
   // markieren nur, gestartet wird über den eigenen Start-Knopf
   let gewaehlt = (S.st.miniStufe || {})[name] ?? 1;
   const start = { text: 'Start', aktion: () => { setTimeout(() => starte(gewaehlt), 60); } };
-  const box = fenster(titel, html + '<p class="stufen-titel">Schwierigkeit</p><div class="stufen"></div>', [...knoepfe, start]);
+  // Oben das Ortsbild wie bei den Läden (11.10.)
+  const box = fenster(titel, '<canvas class="fenster-bild"></canvas>' + html + '<p class="stufen-titel">Schwierigkeit</p><div class="stufen"></div>', [...knoepfe, start]);
+  KA.vignette(box.querySelector('canvas.fenster-bild'), name);
   const reihe = box.querySelector('.stufen');
   C.MINI_STUFEN.forEach((stufe, i) => {
     const b = el('button', 'k stufe' + (i === gewaehlt ? ' gewaehlt' : ''), `${stufe.name}<small>Punkte ×${String(stufe.punkte).replace('.', ',')}</small>`);
