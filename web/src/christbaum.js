@@ -13,11 +13,11 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610111305';
-import * as Z from './zeit.js?v=202610111305';
-import * as T from './ton.js?v=202610111305';
-import * as MH from './minihud.js?v=202610111305';
-import { r, p, ton, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610111305';
+import * as C from './config.js?v=202610111313';
+import * as Z from './zeit.js?v=202610111313';
+import * as T from './ton.js?v=202610111313';
+import * as MH from './minihud.js?v=202610111313';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610111313';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -312,9 +312,11 @@ function baueKulisse(winter) {
   const ziel = c;
   c = kulisse.getContext('2d');
   const boden = winter ? ['#e4ecf3', '#edf2f7', '#f6f9fb'] : ['#6a9a4e', '#75a457', '#80ad60'];
-  const himmel = ['#9cc0e2', '#b4d0ea', '#cadfef'];
   const oben = Math.round(H * 0.2);
-  for (let y = 0; y < oben; y++) r(c, 0, y, W, 1, himmel[Math.min(2, Math.floor(y / oben * 3))]);
+  // Himmel als weicher Verlauf mit ein paar Wolken, dahinter Hügel (11.10.: mehr Detail)
+  for (let y = 0; y < oben; y++) r(c, 0, y, W, 1, mische('#94bce0', '#d4e6f4', y / oben));
+  for (const [wx, wy, ww] of [[20, 8, 22], [96, 5, 30], [150, 12, 18]]) for (let k = 0; k < ww; k++) { const hh = Math.round(Math.sin(k / ww * Math.PI) * 3); r(c, wx + k, wy - hh, 1, hh + 2, k < ww / 2 ? '#f4f8fc' : '#e2ecf6'); }
+  for (let x = 0; x < W; x++) { const hh = 8 + Math.round(Math.sin(x / 21) * 3 + Math.sin(x / 8) * 1.5); r(c, x, oben - hh - 4, 1, hh, winter ? '#c4d2e2' : '#8aa898'); }
   // Waldsaum hinten
   for (let x = -4; x < W + 4; x += 6) {
     const h = 10 + Math.floor(hash(x) * 8), fx = x + Math.floor(hash(x + 3) * 3);
@@ -336,15 +338,39 @@ function baueKulisse(winter) {
   for (let x = 32; x < W; x += 4) { r(c, x, oben - 1, 2, 9, '#a8784a'); p(c, x, oben - 2, '#a8784a'); }
   r(c, 32, oben + 1, W - 32, 1, '#8a5a32'); r(c, 32, oben + 5, W - 32, 1, '#8a5a32');
   if (winter) for (let x = 32; x < W; x += 4) r(c, x, oben - 2, 2, 1, '#ffffff');
+  // Lichterkette über dem Zaun
+  for (let x = 32; x < W; x++) {
+    const y = oben - 3 + Math.round(Math.sin(((x - 32) % 16) / 16 * Math.PI) * 2);
+    p(c, x, y, '#3a3a2a');
+    if ((x - 32) % 4 === 2) p(c, x, y + 1, ['#ff5a5a', '#ffe060', '#5ad0ff', '#7ae07a'][((x - 32) >> 2) % 4]);
+  }
   // Schild über der Hütte
   r(c, 34, oben - 20, 64, 11, '#c83a32'); r(c, 34, oben - 20, 64, 1, '#e85a4a'); r(c, 34, oben - 10, 64, 1, '#8a2020');
   pixText(c, 'CHRISTBÄUME', 37, oben - 17, '#ffffff', '#6a1414');
   r(c, 40, oben - 9, 1, 8, '#5a3a22'); r(c, 92, oben - 9, 1, 8, '#5a3a22');
+  // Zwischen den Reihen: festgetretene Fußspuren; in den Lücken zwischen den
+  // Spalten Baumstümpfe mit Preisschildchen (nie dort, wo Bäume stehen)
+  for (const [y0, y1] of [[0.35, 0.48], [0.48, 0.61]]) {
+    const y = Math.round(H * (y0 + y1) / 2) + 3;
+    for (let x = 4; x < W - 4; x += 3) if (hash(x * 7 + y) < 0.6) p(c, x, y + (x % 6 < 3 ? 0 : 1), winter ? '#d2dde8' : '#5e8a44');
+  }
+  REIHEN().forEach((ry, ri) => [45, 87, 129].forEach((sx, si) => {
+    if ((ri + si) % 2) return;
+    r(c, sx - 2, ry - 2, 5, 2, '#7a4a28'); r(c, sx - 2, ry - 3, 5, 1, '#c8a070'); p(c, sx, ry - 3, '#a8784a');
+    if (winter) r(c, sx - 1, ry - 4, 3, 1, '#ffffff');
+    r(c, sx + 3, ry - 8, 1, 6, '#6a4428'); r(c, sx + 1, ry - 10, 6, 3, '#f4f0e0'); p(c, sx + 2, ry - 9, '#c83a32'); p(c, sx + 4, ry - 9, '#c83a32');
+  }));
   // Unten: Parkplatz mit Reifenspuren
   const pp = Math.round(H * 0.72);
   for (let y = pp; y < H; y++) for (let x = 0; x < W; x++) if (hash(x * 13 + y * 3) < 0.5) p(c, x, y, winter ? '#d8e0ea' : '#9a8a6a');
   r(c, 0, pp, W, 2, winter ? '#c8d4e0' : '#7a6a4a');
   for (const yy of [Math.round(H * 0.9) - 1, Math.round(H * 0.9) + 3]) for (let x = 60; x < W; x += 2) p(c, x, yy, winter ? '#b8c6d4' : '#7a6a4a');
+  // Schneewall am unteren Rand, Laterne rechts, eingenetzte Bäume links
+  if (winter) for (let x = 0; x < W; x++) { const hh = 2 + Math.round(Math.sin(x / 9) * 1.5 + hash(x) * 1.5); r(c, x, H - hh, 1, hh, '#f6f9fc'); p(c, x, H - hh, '#ffffff'); }
+  const lx = W - 6, ly = pp + 4;
+  r(c, lx, ly - 22, 1, 22, '#2a2a34'); r(c, lx - 2, ly - 27, 5, 5, '#2a2a34'); r(c, lx - 1, ly - 26, 3, 3, '#ffe090'); p(c, lx, ly - 29, '#3a3a44');
+  c.fillStyle = 'rgba(255,220,140,0.12)'; c.fillRect(lx - 8, ly - 30, 17, 12);
+  for (let i = 0; i < 3; i++) baumLiegend(6 + i * 2, pp + 8 + i * 4, ['nordmann', 'blau', 'fichte'][i % 3], 0, true);
   c = ziel;
 }
 

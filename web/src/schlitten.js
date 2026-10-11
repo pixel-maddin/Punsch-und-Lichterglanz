@@ -10,11 +10,11 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610111305';
-import * as Z from './zeit.js?v=202610111305';
-import * as T from './ton.js?v=202610111305';
-import * as MH from './minihud.js?v=202610111305';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610111305';
+import * as C from './config.js?v=202610111313';
+import * as Z from './zeit.js?v=202610111313';
+import * as T from './ton.js?v=202610111313';
+import * as MH from './minihud.js?v=202610111313';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610111313';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -309,6 +309,29 @@ function zeichne(t) {
     if (v > 1.1) r(c, 0, y, W, 2, '#e2ebf3');
     if (hash(wyl) < 0.35) p(c, Math.floor(hash(wyl + 7) * W), y, '#d4e0ec');
     if (hash(wyl + 3) < 0.25) p(c, Math.floor(hash(wyl + 11) * W), y + 1, '#ffffff');
+  }
+  // 11.10. mehr Detail, alles an die Strecke gebunden (läuft mit): alte
+  // Rodelspuren anderer Fahrer, Schneebuckel, Pistenpfosten mit Fähnchen und
+  // Hasenspuren am Rand - nichts davon in der Fahrspur, wo man es mit einem
+  // Hindernis verwechseln könnte
+  for (let y = 0; y < H; y += 2) {
+    const wl = y - wy + g.dist;
+    for (const [ph, amp] of [[0, 38], [2.4, 30]]) {
+      const x = Math.round(W / 2 + Math.sin(wl / 90 + ph) * amp + Math.sin(wl / 37 + ph) * 10);
+      p(c, x - 3, y, '#dce6f0'); p(c, x + 3, y, '#dce6f0');
+    }
+  }
+  for (let wr = Math.floor((g.dist - wy) / 36) * 36; wr < g.dist - wy + H + 36; wr += 36) {
+    const yy = Math.round(welt(wr));
+    if (hash(wr * 1.7) < 0.5) { const bx = 26 + Math.floor(hash(wr * 2.3) * (W - 52)); r(c, bx - 4, yy, 9, 1, '#f8fbfd'); r(c, bx - 3, yy + 1, 8, 1, '#d4e0ec'); r(c, bx - 1, yy + 2, 5, 1, '#dce6f0'); }
+    if (wr % 108 === 0) for (const [px, s2] of [[RAND + 3, 0], [W - RAND - 4, 1]]) {
+      const py = yy + s2 * 18;
+      r(c, px, py - 7, 1, 7, '#5a3a22'); r(c, px + (s2 ? -2 : 1), py - 7, 2, 2, '#f08a20'); p(c, px, py, '#c8d4e0');
+    }
+    if (hash(wr * 3.1) < 0.18) {   // Hasenspur: zwei lange, zwei kurze Abdrücke, schräg
+      const hx = hash(wr) < 0.5 ? RAND + 8 : W - RAND - 14;
+      for (let k = 0; k < 3; k++) { p(c, hx + k * 2, yy + k * 4, '#b8c6d6'); p(c, hx + k * 2 + 1, yy + k * 4, '#b8c6d6'); p(c, hx + k * 2, yy + k * 4 + 2, '#c8d4e0'); }
+    }
   }
   // Spur hinter dem Wok
   c.fillStyle = 'rgba(150,170,195,0.6)';

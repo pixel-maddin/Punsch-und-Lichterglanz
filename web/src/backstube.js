@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610111305';
-import * as Z from './zeit.js?v=202610111305';
-import * as T from './ton.js?v=202610111305';
-import * as MH from './minihud.js?v=202610111305';
-import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610111305';
+import * as C from './config.js?v=202610111313';
+import * as Z from './zeit.js?v=202610111313';
+import * as T from './ton.js?v=202610111313';
+import * as MH from './minihud.js?v=202610111313';
+import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610111313';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -409,6 +409,28 @@ function baueKulisse(nacht) {
   const GL = ['#e8b030', '#c8283a', '#8a5a2a', '#f4f0e8', '#5aa84a', '#e8c890'];
   for (let i = 0; i < 6; i++) { const gx = 56 + i * 11; r(c, gx, 16, 8, 10, '#d8e8f0'); r(c, gx + 1, 19, 6, 7, GL[i]); r(c, gx, 15, 8, 2, '#a8763e'); }
   r(c, 132, 12, 16, 14, '#e8e0cc'); r(c, 132, 12, 16, 3, '#c8b898'); r(c, 136, 17, 8, 4, '#c8a878');   // Mehl
+  // 11.10. mehr Detail an der Wand: Zierkacheln, Girlande, Kochgeschirr, Rezeptzettel
+  for (let i = 0; i < 9; i++) {
+    const kx = 8 + Math.floor(hash(i + 60) * 20) * 8, ky = 40 + Math.floor(hash(i + 70) * 6) * 8;
+    if (ky + 8 > th - 14 || (kx > 50 && kx < 128 && ky < 56)) continue;
+    r(c, kx + 1, ky + 1, 7, 7, '#e8eef6'); p(c, kx + 4, ky + 2, '#3a6ab8'); p(c, kx + 3, ky + 4, '#3a6ab8'); p(c, kx + 5, ky + 4, '#3a6ab8'); p(c, kx + 4, ky + 6, '#3a6ab8'); p(c, kx + 4, ky + 4, '#e8c030');
+  }
+  for (let x = 0; x < W; x++) {
+    const y = 2 + Math.round(Math.sin((x % 30) / 30 * Math.PI) * 4);
+    p(c, x, y, x % 2 ? '#2f6a2a' : '#3f8a3a'); p(c, x, y + 1, '#245224');
+    if (x % 30 === 0) { r(c, x - 1, y - 1, 3, 2, '#d83a3a'); p(c, x - 1, y + 1, '#a82020'); p(c, x + 1, y + 1, '#a82020'); }
+    else if (x % 6 === 3) p(c, x, y + 2, ['#ffe060', '#ff6a6a', '#8ad0ff'][(x / 6 | 0) % 3]);
+  }
+  r(c, 56, 34, 64, 1, '#8a8e98');
+  for (const [hx, art] of [[62, 'kelle'], [76, 'besen'], [90, 'loeffel'], [104, 'sieb']]) {
+    r(c, hx, 35, 1, 2, '#5a5a62');
+    if (art === 'kelle') { r(c, hx, 37, 1, 9, '#b8bcc4'); r(c, hx - 2, 46, 5, 3, '#a8acb6'); r(c, hx - 1, 46, 3, 1, '#d8dce4'); }
+    if (art === 'besen') { r(c, hx, 37, 1, 6, '#8a5a32'); for (let k = -2; k <= 2; k++) { r(c, hx + k, 43, 1, 6 - Math.abs(k), '#c8ccd4'); } }
+    if (art === 'loeffel') { r(c, hx, 37, 1, 9, '#c8905a'); r(c, hx - 1, 46, 3, 3, '#b07a44'); }
+    if (art === 'sieb') { r(c, hx, 37, 1, 4, '#8a8e98'); r(c, hx - 4, 41, 9, 5, '#8a8e98'); r(c, hx - 3, 42, 7, 3, '#c8ccd4'); for (let k = -3; k <= 3; k += 2) p(c, hx + k, 43, '#8a8e98'); }
+  }
+  r(c, 128, 34, 16, 18, '#fbf6e8'); r(c, 135, 33, 2, 2, '#d83a3a');
+  for (let k = 0; k < 5; k++) r(c, 130, 38 + k * 3, k % 2 ? 9 : 12, 1, '#a89878');
   // Brezel-Schild
   r(c, 156, 4, 1, 6, '#5a3a22'); r(c, 150, 10, 16, 14, '#c8902c');
   for (const [dx, dy] of [[2, 2], [3, 1], [4, 1], [5, 2], [6, 3], [7, 2], [8, 1], [9, 1], [10, 2], [11, 3], [11, 5], [10, 7], [9, 8], [7, 8], [6, 7], [5, 5], [6, 4], [8, 5], [9, 6], [4, 4], [3, 5], [3, 7], [4, 8], [2, 4]]) p(c, 151 + dx, 11 + dx * 0 + dy, '#6a3a12');
@@ -418,12 +440,25 @@ function baueKulisse(nacht) {
   r(c, 0, th + 5, W, H - th - 5, '#c89058');
   for (let y = th + 8; y < H; y += 7) r(c, 0, y, W, 1, '#b07a44');
   for (let i = 0; i < 40; i++) p(c, Math.floor(hash(i + 40) * W), th + 6 + Math.floor(hash(i + 80) * (H - th - 6)), '#a86e3a');
+  // Maserung mit Astlöchern, Mehlstaub
+  for (let i = 0; i < 7; i++) {
+    const ax = Math.floor(hash(i + 120) * (W - 10)) + 5, ay = th + 9 + Math.floor(hash(i + 130) * (H - th - 14));
+    r(c, ax - 2, ay, 5, 2, '#a06a36'); p(c, ax, ay, '#7a4a22'); r(c, ax - 5, ay - 1, 3, 1, '#b8834c'); r(c, ax + 3, ay + 2, 4, 1, '#b8834c');
+  }
+  for (let i = 0; i < 30; i++) p(c, Math.floor(hash(i + 150) * W), th + 6 + Math.floor(hash(i + 160) * (H - th - 6)), '#ead8b8');
   // Teigplatte: ausgerollter Teig mit Mehlstaub
   const ty = Math.round(H * 0.42), tb = 70, tH = Math.round(H * 0.13);
   r(c, 6, ty, tb, tH, '#f0dcb0'); r(c, 6, ty + tH - 1, tb, 1, '#d8bc88'); r(c, 6, ty, 1, tH, '#e4cc9c');
   for (let i = 0; i < 24; i++) p(c, 7 + Math.floor(hash(i + 7) * (tb - 2)), ty + 1 + Math.floor(hash(i + 17) * (tH - 2)), '#fbf4e4');
   // Nudelholz
   r(c, 10, ty + tH + 3, 44, 4, '#d8a868'); r(c, 10, ty + tH + 3, 44, 1, '#ecc88a'); r(c, 5, ty + tH + 4, 5, 2, '#8a5a32'); r(c, 54, ty + tH + 4, 5, 2, '#8a5a32');
+  // Eier, Mehlhäufchen und Streusel zwischen Nudelholz und Formen
+  const ey = ty + tH + 12;
+  if (ey + 6 < FORM_Y() - 14) {
+    for (const ex of [68, 74]) { r(c, ex, ey, 4, 5, '#f4ead8'); r(c, ex + 1, ey - 1, 2, 1, '#f4ead8'); p(c, ex, ey, '#ffffff'); r(c, ex, ey + 4, 4, 1, '#d8c8a8'); }
+    for (let k = 0; k < 4; k++) r(c, 84 + k, ey + 4 - k, 10 - k * 2, 1, k % 2 ? '#f4f0e6' : '#fbf8f2');
+    for (let i = 0; i < 8; i++) p(c, 100 + Math.floor(hash(i + 200) * 22), ey + Math.floor(hash(i + 210) * 6), ['#ff5a5a', '#ffe060', '#5ad0ff', '#7ae07a'][i % 4]);
+  }
   // Backblech
   const b = BLECH();
   r(c, b.x - 16, b.y - 7, 32, 14, '#8a8e98'); r(c, b.x - 15, b.y - 6, 30, 12, '#a8acb6'); r(c, b.x - 15, b.y - 6, 30, 1, '#c8ccd4');

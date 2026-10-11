@@ -10,11 +10,11 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610111305';
-import * as Z from './zeit.js?v=202610111305';
-import * as T from './ton.js?v=202610111305';
-import * as MH from './minihud.js?v=202610111305';
-import { r, p, ton } from './pixel.js?v=202610111305';
+import * as C from './config.js?v=202610111313';
+import * as Z from './zeit.js?v=202610111313';
+import * as T from './ton.js?v=202610111313';
+import * as MH from './minihud.js?v=202610111313';
+import { r, p, ton, mische } from './pixel.js?v=202610111313';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -281,7 +281,7 @@ function baueKulisse(nacht) {
   const z = c; c = kulisse.getContext('2d');
   const boden = BODEN(), oben = boden - 26;
   const himmel = nacht ? ['#141a44', '#1e2456', '#2a2c66', '#3e3874'] : ['#7eb0dc', '#94c0e4', '#acd0ec', '#c6def2'];
-  for (let y = 0; y < oben; y++) r(c, 0, y, W, 1, himmel[Math.min(3, Math.floor(y / oben * 4))]);
+  for (let y = 0; y < oben; y++) r(c, 0, y, W, 1, mische(himmel[0], himmel[3], y / oben));   // weicher Verlauf (11.10.)
   if (nacht) {
     for (let i = 0; i < 45; i++) p(c, Math.floor(hash(i) * W), Math.floor(hash(i + 9) * (oben - 30)), i % 6 ? '#b8c0e8' : '#ffffff');
     // Mond mit Hof
@@ -362,6 +362,32 @@ function eis(g, nacht) {
     const n = Math.floor(g.x / 40) + i - 4, x = Math.round(n * 40 - g.x + hash(n) * 40) % (W + 80);
     const y = boden + 4 + Math.floor(hash(n + 5) * (H - boden - 8));
     r(c, x, y, 6 + Math.floor(hash(n + 7) * 10), 1, nacht ? '#6a7cb0' : '#e6f2fa');
+  }
+  // 11.10. mehr Detail: Spiegelung der Lichterkette, geschwungene Kufenspuren,
+  // Glitzerpunkte - und im Vordergrund ein Schneewall mit Laternen, der
+  // schneller vorbeizieht als die Bahn (Tiefe)
+  const t = performance.now() / 1000;
+  for (let x = -6; x < W + 6; x += 6) {
+    const xx = Math.round(x - (g.x * 0.7) % 6), k = Math.floor((x + g.x * 0.7) / 6);
+    const f = ['#ff8a8a', '#fff0a0', '#9ae0ff', '#a8f0a8'][((k % 4) + 4) % 4];
+    if ((Math.floor(t * 2) + k) % 3) { p(c, xx, boden + 3 + (k % 2), f); if (nacht) p(c, xx, boden + 5 + (k % 2), ton(f, -0.3)); }
+  }
+  for (let i = 0; i < 6; i++) {
+    const n = Math.floor(g.x / 70) + i - 1, x0 = Math.round(n * 70 - g.x + hash(n + 11) * 30);
+    const y0 = boden + 10 + Math.floor(hash(n + 12) * (H - boden - 24)), lang = 22 + Math.floor(hash(n + 13) * 20);
+    for (let k = 0; k < lang; k++) p(c, x0 + k, y0 + Math.round(Math.sin(k / lang * Math.PI) * 4 * (hash(n) < 0.5 ? 1 : -1)), nacht ? '#7a8cc0' : '#f4faff');
+  }
+  for (let i = 0; i < 14; i++) {
+    const x = Math.floor(hash(i * 3.3 + Math.floor(t)) * W), y = boden + 6 + Math.floor(hash(i * 7.7 + Math.floor(t)) * (H - boden - 14));
+    if ((Math.floor(t * 3) + i) % 4 === 0) { p(c, x, y, '#ffffff'); p(c, x - 1, y, '#e8f4ff'); p(c, x + 1, y, '#e8f4ff'); }
+  }
+  const sb = H - 7;
+  for (let x = 0; x < W; x++) { const hh = 5 + Math.round(Math.sin((x + g.x * 1.3) / 11) * 2 + Math.sin((x + g.x * 1.3) / 4.3)); r(c, x, H - hh, 1, hh, nacht ? '#a8b2d2' : '#f4f8fc'); p(c, x, H - hh, '#ffffff'); }
+  const lv = (g.x * 1.3) % 64;
+  for (let x = -64; x < W + 64; x += 64) {
+    const lx = Math.round(x - lv);
+    r(c, lx, sb - 16, 1, 16, '#2a2a34'); r(c, lx - 2, sb - 21, 5, 5, '#2a2a34'); r(c, lx - 1, sb - 20, 3, 3, nacht ? '#ffe090' : '#f2dc98');
+    if (nacht) { c.fillStyle = 'rgba(255,220,140,0.14)'; c.fillRect(lx - 7, sb - 25, 15, 13); }
   }
 }
 

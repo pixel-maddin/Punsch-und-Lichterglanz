@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610111305';
-import * as S from './spiel.js?v=202610111305';
-import * as Z from './zeit.js?v=202610111305';
-import * as T from './ton.js?v=202610111305';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610111305';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610111305';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610111305';
-import * as A from './auftraege.js?v=202610111305';
-import * as E from './erfolge.js?v=202610111305';
-import * as ZL from './ziele.js?v=202610111305';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610111305';
-import * as KA from './karte.js?v=202610111305';
-import { zeigeRueckblick } from './ereignis.js?v=202610111305';
-import { barbaraZweig } from './szene.js?v=202610111305';
-import * as LI from './lichtung.js?v=202610111305';
-import * as CB from './christbaum.js?v=202610111305';
-import * as SB from './schlitten.js?v=202610111305';
-import * as EB from './schlittschuh.js?v=202610111305';
-import * as BS from './backstube.js?v=202610111305';
-import { alleSymbole } from './symbole.js?v=202610111305';
+import * as C from './config.js?v=202610111313';
+import * as S from './spiel.js?v=202610111313';
+import * as Z from './zeit.js?v=202610111313';
+import * as T from './ton.js?v=202610111313';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610111313';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610111313';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610111313';
+import * as A from './auftraege.js?v=202610111313';
+import * as E from './erfolge.js?v=202610111313';
+import * as ZL from './ziele.js?v=202610111313';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610111313';
+import * as KA from './karte.js?v=202610111313';
+import { zeigeRueckblick } from './ereignis.js?v=202610111313';
+import { barbaraZweig } from './szene.js?v=202610111313';
+import * as LI from './lichtung.js?v=202610111313';
+import * as CB from './christbaum.js?v=202610111313';
+import * as SB from './schlitten.js?v=202610111313';
+import * as EB from './schlittschuh.js?v=202610111313';
+import * as BS from './backstube.js?v=202610111313';
+import { alleSymbole } from './symbole.js?v=202610111313';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -520,8 +520,27 @@ function baueLaden() {
   liste.innerHTML = '';
   liste.scrollTop = 0;
   zeilen = [];
-  // Innerhalb jeder Gruppe in der Reihenfolge, in der die Dinge frei werden
-  const artikel = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => a.tab === ladenTab));
+  // Innerhalb jeder Gruppe in der Reihenfolge, in der die Dinge frei werden.
+  // Abschnitte wie in „Haus schmücken" (11.10., einheitlich): Am Haus · Im
+  // Garten · Am Stand, der Anstrich gehört zum Haus; Sprungleiste und dunkle
+  // Balken, sobald ein Laden mehr als einen Abschnitt hat.
+  const abschnittVon = (a) => (a.gruppe === 'Anstrich' ? 'Am Haus' : a.gruppe);
+  const REIHE = ['Am Haus', 'Im Garten', 'Am Stand'];
+  const rang = (g) => (REIHE.includes(g) ? REIHE.indexOf(g) : REIHE.length);
+  const artikel = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => a.tab === ladenTab))
+    .map((a, i) => [a, i]).sort((x, y) => rang(abschnittVon(x[0])) - rang(abschnittVon(y[0])) || x[1] - y[1]).map(([a]) => a);
+  const abschnitte = [...new Set(artikel.map(abschnittVon))];
+  const mitAbschnitten = abschnitte.length > 1;
+  let sprung = null;
+  if (mitAbschnitten) {
+    sprung = el('div', 'haus-sprung');
+    for (const g of abschnitte) {
+      const b = el('button', 'hs-k', g.replace(/^(Am|Im) /, ''));
+      b.onclick = () => { T.spiele('klick'); const z = liste.querySelector(`[data-abschnitt="${g}"]`); if (z) liste.scrollTo({ top: z.offsetTop - sprung.offsetHeight - liste.offsetTop - 8, behavior: 'smooth' }); };
+      sprung.appendChild(b);
+    }
+    liste.appendChild(sprung);
+  }
   let gruppe = null;
   if (ladenTab === 'super') {
     liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.${rezeptHinweis('gluehwein')}</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
@@ -530,7 +549,12 @@ function baueLaden() {
   const neu = S.st.neu || {};
   for (const a of artikel) {
     // Überschrift nur, wo es mehrere Gruppen gibt (11.10.: „Zutaten" im Supermarkt war überflüssig)
-    if (a.gruppe !== gruppe) { gruppe = a.gruppe; if (a.gruppe !== 'Zutaten') liste.appendChild(el('div', 'gruppe', gruppe)); }
+    if (mitAbschnitten && abschnittVon(a) !== gruppe) {
+      gruppe = abschnittVon(a);
+      const h = el('div', 'gruppe haus-abschnitt', gruppe);
+      h.dataset.abschnitt = gruppe;
+      liste.appendChild(h);
+    }
     const versteckt = S.status(a).versteckt;
     const z = el('div', 'zeile' + (versteckt ? ' verdeckt' : '') + (neu[a.id] ? ' neu' : ''));
     const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
