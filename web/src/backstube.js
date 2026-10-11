@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610111247';
-import * as Z from './zeit.js?v=202610111247';
-import * as T from './ton.js?v=202610111247';
-import * as MH from './minihud.js?v=202610111247';
-import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610111247';
+import * as C from './config.js?v=202610111305';
+import * as Z from './zeit.js?v=202610111305';
+import * as T from './ton.js?v=202610111305';
+import * as MH from './minihud.js?v=202610111305';
+import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610111305';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -50,10 +50,16 @@ export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
   const px = (xx, yy, f) => { ctx.fillStyle = f; ctx.fillRect(x + xx * k, y + yy * k, k, k); };
   const teig = BACKFARBE[grad] || BACKFARBE.golden;
   const rand = ton(teig, -0.22);
+  const licht = ton(teig, 0.2), krume = ton(teig, -0.12);
   for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < 9; xx++) {
     if (!istTeig(m, xx, yy)) continue;
-    // Unterkante dunkler, damit es Dicke hat
-    px(xx, yy, istTeig(m, xx, yy + 1) ? teig : rand);
+    // Unterkante dunkler (Dicke), Oberkante und linke Kante heller (Licht von oben links),
+    // dazu ein paar Krümel/Poren im Teig - seit 11.10., vorher eine flache Fläche
+    let f = teig;
+    if (!istTeig(m, xx, yy + 1) || !istTeig(m, xx + 1, yy)) f = rand;
+    else if (!istTeig(m, xx, yy - 1) || !istTeig(m, xx - 1, yy)) f = licht;
+    else if ((xx * 7 + yy * 13) % 11 === 0 && grad !== 'roh') f = krume;
+    px(xx, yy, f);
   }
   if (!deko || grad === 'verbrannt') return;
   for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < 9; xx++) {
@@ -64,7 +70,7 @@ export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
     if (deko === 'guss' && i) px(xx, yy, xx + yy === 5 || xx + yy === 6 ? '#ffffff' : (yy > 4 ? '#e6eef6' : '#f8fbff'));
     else if (deko === 'guss' && t && !istTeig(m, xx, yy + 1) && (xx === 3 || xx === 6)) px(xx, yy, '#eef4fa');
     else if (deko === 'puder' && t && ((xx * 5 + yy * 3) % 7 === 0 || (xx * 3 + yy * 7) % 11 === 0)) px(xx, yy, '#fffdf8');
-    else if (deko === 'schoko' && i) px(xx, yy, xx + yy === 6 ? '#8a5a3a' : '#5a3220');
+    else if (deko === 'schoko' && i) px(xx, yy, (xx + yy) % 4 === 0 ? '#8a5a3a' : (xx - yy) % 5 === 0 ? '#3a1e12' : '#5a3220');   // mit Glanzstreifen
     else if (deko === 'gruen' && i) px(xx, yy, (xx * 7 + yy * 3) % 5 === 0 ? ['#ff5a5a', '#ffe060', '#5ad0ff'][(xx + yy) % 3] : '#5aa84a');
     else if (deko === 'marmelade') {
       // Spitzbube: das Loch in der Mitte zeigt rote Marmelade; sonst ein Klecks
@@ -171,7 +177,7 @@ export function tippeAuf(x, y) {
     }
     T.spiele('greifen');
     const b = BLECH();
-    g.ware = { form, grad: 'roh', deko: null, phase: 'rutscht', t: 0, x: 40, y: Math.round(H * 0.48), vonX: 40, vonY: Math.round(H * 0.48), zuX: b.x - 4, zuY: b.y - 4, ofen: 0 };
+    g.ware = { form, grad: 'roh', deko: null, phase: 'rutscht', t: 0, x: 40, y: Math.round(H * 0.48), vonX: 40, vonY: Math.round(H * 0.48), zuX: b.x - 4, zuY: b.y - 4, ofen: 0, gold: neuesGold() };
     g.schritt = 'warten';
     return;
   }
@@ -179,7 +185,7 @@ export function tippeAuf(x, y) {
   if (x >= o.x - 4 && x <= o.x + o.b + 2 && y >= o.y - 14 && y <= o.y + o.h + 4) {
     if (g.schritt !== 'backen' || !g.ware) { fehl(x, y); return; }
     const a = g.ware.ofen / ofenDauer();
-    const [von, bis] = C.BACK_GOLDEN;
+    const [von, bis] = gold(g.ware);
     g.ware.grad = a < von ? 'blass' : a <= bis ? 'golden' : 'dunkel';
     g.ware.phase = 'raus'; g.ware.t = 0; g.ware.vonX = o.x + 12; g.ware.vonY = o.y + o.h - 12;
     const b = BLECH(); g.ware.zuX = b.x - 4; g.ware.zuY = b.y - 4;
@@ -208,6 +214,16 @@ export function tippeAuf(x, y) {
 }
 function fehl(x, y) { if (spiel) spiel.fehl.push({ x, y, t: 0 }); }
 const ofenDauer = () => C.BACK_OFEN / stufe.tempo;
+/**
+ * Goldener Bereich JE PLÄTZCHEN (11.10., Nutzerwunsch: „bei jedem Plätzchen soll
+ * die Ofenanzeige anders sein"): Lage und Breite gewürfelt, im Mittel wie
+ * C.BACK_GOLDEN (0,52-0,80, also 0,28 breit). Man muss also jedes Mal hinsehen.
+ */
+function neuesGold() {
+  const breite = 0.22 + Math.random() * 0.1, von = 0.36 + Math.random() * (0.88 - breite - 0.36);
+  return [von, von + breite];
+}
+const gold = (w) => (w && w.gold) || C.BACK_GOLDEN;
 
 // ---------------------------------------------------------------------------
 // Ablauf
@@ -267,7 +283,8 @@ function schritt(dt) {
     } else if (w.phase === 'ofen') {
       w.ofen += dt;
       const a = w.ofen / ofenDauer();
-      w.grad = a < 0.3 ? 'roh' : a < C.BACK_GOLDEN[0] ? 'blass' : a <= C.BACK_GOLDEN[1] ? 'golden' : 'dunkel';
+      const [gv, gb] = gold(w);
+      w.grad = a < Math.min(0.3, gv - 0.06) ? 'roh' : a < gv ? 'blass' : a <= gb ? 'golden' : 'dunkel';
       if (a >= 1) {
         // Verbrannt: Rauch, Plätzchen weg, nochmal ausstechen
         const o = OFEN();
@@ -335,7 +352,7 @@ export function messe(takt = 0.35, treffer = 1, gold = 1, hoehe = 380, stufeNr =
     if (g.schritt === 'backen' && g.ware) {
       // Herausholen: im goldenen Bereich - oder knapp daneben
       if (zielOfen == null) {
-        const [von, bis2] = C.BACK_GOLDEN;
+        const [von, bis2] = gold(g.ware);
         zielOfen = Math.random() < gold ? von + Math.random() * (bis2 - von) : (Math.random() < 0.5 ? von - 0.12 : bis2 + 0.1);
       }
       if (g.ware.ofen / ofenDauer() >= zielOfen) { const o = OFEN(); tippeAuf(o.x + 20, o.y + 10); zielOfen = null; bis = g.t + takt; }
@@ -432,7 +449,7 @@ function ofen(t) {
   r(c, o.x + 6, o.y + o.h - 2, o.b - 12, 2, '#8a8a94');   // Griff
   // Backbalken über dem Ofen: blass - golden - dunkel, Strich = jetzt
   const bx = o.x, by = o.y - 12, bb = o.b;
-  const [von, bis] = C.BACK_GOLDEN;
+  const [von, bis] = gold(w);
   r(c, bx, by, bb, 4, '#3a2a20');
   r(c, bx, by + 1, Math.round(bb * von), 2, '#ecd09a');
   r(c, bx + Math.round(bb * von), by, Math.round(bb * (bis - von)), 4, '#ffc040');
@@ -534,9 +551,11 @@ function zeichne(t) {
   // Hinweis, was dran ist
   // Was dran ist - direkt über der Reihe, in der man tippen muss (11.10.: oben
   // auf dem Regal war es klein und schlecht zu lesen)
-  const was = !k || k.phase !== 'wartet' ? '' : g.schritt === 'stechen' ? 'Tippe die richtige AUSSTECHFORM' : g.schritt === 'backen' ? 'GOLDBRAUN aus dem Ofen holen - im gelben Bereich!' : g.schritt === 'verzieren' ? 'Tippe die richtige VERZIERUNG' : '';
-  const woY = g.schritt === 'stechen' ? FORM_Y() - 24 : g.schritt === 'verzieren' ? SCHALE_Y() - 26 : OFEN().y - 12;
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null, g.t < 0 || !was ? null : woY);
+  const was = !k || k.phase !== 'wartet' ? '' : g.schritt === 'stechen' ? 'Tippe die richtige AUSSTECHFORM' : g.schritt === 'backen' ? 'Im GELBEN Bereich rausholen!' : g.schritt === 'verzieren' ? 'Tippe die richtige VERZIERUNG' : '';
+  // Beim Backen links neben dem Ofen - darüber verdeckte er Ofen und Anzeige
+  const woY = g.schritt === 'stechen' ? FORM_Y() - 24 : g.schritt === 'verzieren' ? SCHALE_Y() - 26 : OFEN().y + 6;
+  const woX = g.schritt === 'backen' ? Math.round(OFEN().x / 2) : null;
+  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null, g.t < 0 || !was ? null : woY, woX);
   MH.label('ofen', OFEN().x + 21, OFEN().y + OFEN().h + 4, 'OFEN', 'schild');
   for (const f of g.fehl) { const a = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - a})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe, x.text.length > 6 ? 0.8 : 1.1); }

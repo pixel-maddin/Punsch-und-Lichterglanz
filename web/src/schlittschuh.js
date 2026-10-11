@@ -10,11 +10,11 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610111247';
-import * as Z from './zeit.js?v=202610111247';
-import * as T from './ton.js?v=202610111247';
-import * as MH from './minihud.js?v=202610111247';
-import { r, p, ton } from './pixel.js?v=202610111247';
+import * as C from './config.js?v=202610111305';
+import * as Z from './zeit.js?v=202610111305';
+import * as T from './ton.js?v=202610111305';
+import * as MH from './minihud.js?v=202610111305';
+import { r, p, ton } from './pixel.js?v=202610111305';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -131,8 +131,10 @@ function neuesDing(g) {
   const arten = ['schneemann', 'stein', 'holz', 'loch'];
   const art = arten[Math.floor(Math.random() * arten.length)];
   g.dinge.push({ art, x: g.naechstes, weg: false });
-  // Sternhöhe 30-40 (11.10., vorher 20-34 und damit teils auf Kopfhöhe); der Sprung hat seinen Scheitel bei 36,6
-  if (Math.random() < 0.7) g.dinge.push({ art: 'stern', x: g.naechstes + zufall(-6, 6), hoehe: zufall(30, 40), gross: Math.random() < 0.25, weg: false });
+  // Sternhöhe 26-36 (11.10.: erst 20-34, dann 30-40, jetzt etwas tiefer) und eine
+  // kleinere Fangzone (unten) - man muss den Sprung timen, statt jeden Stern
+  // im Vorbeihüpfen mitzunehmen. Der Sprung hat seinen Scheitel bei 36,6.
+  if (Math.random() < 0.7) g.dinge.push({ art: 'stern', x: g.naechstes + zufall(-6, 6), hoehe: zufall(26, 36), gross: Math.random() < 0.25, weg: false });
   g.naechstes += zufall(150, 240) * (0.85 + g.v / TEMPO[1] * 0.35);
 }
 
@@ -167,7 +169,7 @@ function schritt(dt) {
   for (const d of g.dinge) {
     if (d.weg) continue;
     if (d.art === 'stern') {
-      if (Math.abs(d.x - sx) < (d.gross ? 8 : 6) && Math.abs(g.y + 8 - d.hoehe) < (d.gross ? 11 : 9)) {
+      if (Math.abs(d.x - sx) < (d.gross ? 7 : 5) && Math.abs(g.y + 8 - d.hoehe) < (d.gross ? 7 : 5)) {   // 11.10.: Fangzone kleiner (vorher 8/6 und 11/9)
         d.weg = true;
         const pkt = Math.round(C.EIS_STERN * (d.gross ? 2 : 1) * stufe.punkte);
         g.punkte += pkt;
