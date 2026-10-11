@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610111344';
-import * as Z from './zeit.js?v=202610111344';
-import * as S from './spiel.js?v=202610111344';
-import { FASSADEN } from './config.js?v=202610111344';
-import * as C from './config.js?v=202610111344';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610112029';
+import * as Z from './zeit.js?v=202610112029';
+import * as S from './spiel.js?v=202610112029';
+import { FASSADEN } from './config.js?v=202610112029';
+import * as C from './config.js?v=202610112029';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -44,7 +44,6 @@ const flocken = [];
 for (let i = 0; i < 140; i++) flocken.push({ x: Math.random() * 180, y: Math.random() * 440, v: 8 + Math.random() * 14, s: Math.random() < 0.25 ? 2 : 1, ph: Math.random() * 6 });
 const blaetter = [];
 for (let i = 0; i < 10; i++) blaetter.push({ x: Math.random() * 180, y: Math.random() * 300, v: 6 + Math.random() * 6, ph: Math.random() * 6, f: ['#c8702a', '#a8521e', '#d89a3a'][i % 3] });
-const raketen = [];
 
 // Feste Sterne
 const STERNE = [];
@@ -1121,13 +1120,6 @@ function baenke(c, L, G, t, w, v) {
 }
 
 /** Vogelhäuschen; `haengend` = an einer Schnur im Baum statt auf einem Pfahl. */
-function vogelhaus(c, x, fuss, haengend = false) {
-  if (haengend) r(c, x, fuss - 23, 1, 5, '#8a7a5a');   // Schnur zum Ast
-  else r(c, x, fuss - 12, 1, 12, '#6a4a2a');
-  r(c, x - 3, fuss - 16, 7, 4, '#a8703a'); r(c, x - 4, fuss - 17, 9, 1, '#c82828'); r(c, x - 3, fuss - 18, 7, 1, '#c82828');
-  r(c, x - 1, fuss - 15, 2, 2, '#3a2a1a');
-  p(c, x + 3, fuss - 13, '#8a5a3a'); p(c, x + 4, fuss - 13, '#e84a2a'); p(c, x + 4, fuss - 14, '#8a5a3a');
-}
 
 function lichterRentier(c, L, x, fuss, t) {
   const bunt = S.bunt('rentier'), f = '#fff2c8';
@@ -1977,18 +1969,7 @@ function wetter(c, G, w, t, dt) {
       p(c, b.x, b.y, b.f); p(c, b.x + (Math.sin(t * 3 + b.ph) > 0 ? 1 : -1), b.y, b.f);
     }
   }
-  if (w.silvester) {
-    if (Math.random() < dt * 1.5) raketen.push({ x: 20 + Math.random() * 140, y: 30 + Math.random() * 50, t: 0, f: ['#ff5a5a', '#5aff8a', '#ffd040', '#6ab0ff', '#ff6adf'][Math.floor(Math.random() * 5)] });
-    for (const rk of raketen) {
-      rk.t += dt;
-      const rad = rk.t * 22;
-      for (let i = 0; i < 12; i++) {
-        const a = i / 12 * Math.PI * 2;
-        p(c, rk.x + Math.cos(a) * rad, rk.y + Math.sin(a) * rad + rk.t * rk.t * 8, rk.f);
-      }
-    }
-    for (let i = raketen.length - 1; i >= 0; i--) if (raketen[i].t > 1.4) raketen.splice(i, 1);
-  }
+  // Silvester: das Feuerwerk steht seit 11.10. in feuerwerk() (Raketen, Funken, Knall)
 }
 
 // ---------------------------------------------------------------------------
@@ -2268,9 +2249,9 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
     else if (zv === 2) { riesenlolli(e, 33, GW - 19, ['#e8303a', '#f8f4f0']); riesenlolli(e, 40, GW - 20, ['#3aa84a', '#ffe060']); }
     else { zuckerstange(e, 33, GW - 19, false); zuckerstange(e, 38, GW - 20, true); }
   }
-  // Das Vogelhäuschen hängt im kahlen Baum - im Vorgarten stand es den
-  // Zuckerstangen im Weg
-  if (S.zeigt('kal_vogel')) vogelhaus(e, 132, GW - 42, true);
+  // Das Futterhaus hängt im kahlen Baum - im Vorgarten stand es den
+  // Zuckerstangen im Weg (bis 11.10. das Vogelhäuschen aus Türchen 18)
+  if (S.zeigt('futterhaus')) { futterhaus(e, L, FUTTER_X, GW + FUTTER_DY, S.variante('futterhaus'), S.futterVoll(), S.hat('kal_knoedel'), t); voegel(e, GW, t); }
   if (S.zeigt('schneemann')) {
     const v = S.variante('schneemann');
     if (v === 1) schneeburg(e, 45, GW - 18);
@@ -2300,6 +2281,10 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 11, t);
   if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 11, t);
   if (S.zeigt('e_pinguin')) pinguin(e, 97, GW - 1, t);
+  // Der eigene Schneemann auf dem Gehweg vor der Schneefamilie (11.10.)
+  if (Z.schnee() > 0 && S.st.lernen >= 99) eigenerSchneemann(e, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
+  const pl = S.plakette();
+  if (pl != null) plakette(e, L, 116, GW - 62, pl, t);
   // Vor dem Stand (sonst verdeckt er sie): Flamingo vor dem Schlitten, Drehorgel rechts.
   // Garten rechts der Tür (09.10. neu verteilt, vorher standen Laterne und
   // Nussknacker auf demselben Pixel, Flamingo mitten im Lichter-Rentier)
@@ -2338,6 +2323,8 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   c.drawImage(ebene, 0, 0, 180, G, 0, 0, 180, G);
   if (S.zeigt('kal_goldstern')) goldstern(c, L, t, GW);
   lichter(c, L, Math.max(w.dunkel, 0.0));
+  const fw = opts.karte ? 0 : S.feuerwerk(d);
+  if (!opts.karte && (fw > 0 || fwRaketen.length || fwFunken.length)) feuerwerk(c, GW, fw, dt);
   wetter(c, G, w, t, dt);
   if (!opts.karte) zeichneFunkeln(c, GW);
   if (!opts.karte && S.lauf.schlitten) nikolausSchlitten(c, S.lauf.schlitten, t, G);
@@ -2348,4 +2335,163 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
     pixText(c, s, x.x - 6, GW - 26 - x.t * 14, x.boese ? '#ff5a4a' : x.gross ? '#ffe060' : '#ffffff');
   }
   return w;
+}
+
+// ---------------------------------------------------------------------------
+// Futterhaus und Vögel (11.10.)
+// ---------------------------------------------------------------------------
+export const FUTTER_X = 132, FUTTER_DY = -42;   // hängt im kahlen Baum
+/** Plätze der Vögel (Fußlinie), relativ zum Futterhaus: Dach links/rechts, Brett links/rechts */
+const VOGEL_PLATZ = [[-2, -19], [2, -19], [-5, -12], [6, -12]];
+function futterhaus(c, L, x, fuss, v, voll, knoedel, t) {
+  r(c, x, fuss - 23, 1, 5, '#8a7a5a');   // Schnur zum Ast
+  if (v === 2) {
+    // Futterglocke: Körner in Glockenform an einer roten Schleife
+    r(c, x - 1, fuss - 19, 3, 1, '#c82828'); p(c, x - 2, fuss - 20, '#c82828'); p(c, x + 2, fuss - 20, '#c82828');
+    const k = voll ? ['#c8a060', '#a87a40', '#e0c080'] : ['#8a7a6a', '#6a5a4a', '#9a8a7a'];
+    for (let i = 0; i < 6; i++) { const w = 1 + Math.min(i, 3); r(c, x - w, fuss - 18 + i, w * 2 + 1, 1, k[i % 2]); }
+    for (let i = 0; i < 6; i++) p(c, x - 2 + (i * 3) % 5, fuss - 17 + (i * 2) % 5, k[2]);
+    r(c, x - 4, fuss - 12, 9, 1, '#6a4a2a');   // Sitzring
+  } else {
+    const dach = v === 1 ? ['#f4f8fc', '#d8e4f0'] : ['#c82828', '#a82020'];
+    r(c, x - 4, fuss - 16, 9, 4, '#a8703a'); r(c, x - 4, fuss - 16, 1, 4, '#8a5a2e'); r(c, x + 4, fuss - 16, 1, 4, '#8a5a2e');
+    r(c, x - 5, fuss - 17, 11, 1, dach[0]); r(c, x - 4, fuss - 18, 9, 1, dach[0]); r(c, x - 3, fuss - 19, 7, 1, dach[1]);
+    r(c, x - 1, fuss - 15, 2, 2, '#3a2a1a');   // Flugloch
+    r(c, x - 6, fuss - 12, 13, 1, '#6a4a2a');   // Futterbrett
+    if (v === 1) { r(c, x - 1, fuss - 11, 3, 3, '#c83a2a'); p(c, x, fuss - 10, '#ffd070'); L.push({ x, y: fuss - 10, f: '#ffd070', halo: 3, an: 0.9 }); }
+  }
+  if (voll) for (let i = 0; i < 5; i++) p(c, x - 4 + i * 2 + (i % 2), fuss - 13, ['#d8b060', '#a87a40'][i % 2]);   // Körner
+  if (knoedel) {
+    r(c, x + 6, fuss - 21, 1, 4, '#8a7a5a');
+    r(c, x + 5, fuss - 17, 3, 3, '#b8945a'); p(c, x + 5, fuss - 17, '#d8b878'); p(c, x + 7, fuss - 15, '#8a6a3a'); r(c, x + 5, fuss - 18, 3, 1, '#3a8a3a');   // grünes Netz
+  }
+}
+/** Ein Vogel, Fußlinie y, Blick nach rechts (`links` = Blick nach links). */
+export function zeichneVogel(c, x, y, art, opt = {}) {
+  const v = C.VOEGEL.find((q) => q.id === art) || C.VOEGEL[0];
+  const [oben, brust, bauch] = v.f, d = opt.links ? -1 : 1;
+  const P = (dx, dy, f) => p(c, x + dx * d, y + dy, f);
+  const kopfY = opt.pickt ? -1 : -2;
+  P(-1, -1, oben); P(0, -1, oben); P(1, -1, brust); P(2, -1, brust);   // Schwanz, Rücken, Brust
+  P(0, 0, bauch); P(1, 0, bauch);
+  P(1, kopfY, oben); P(2, kopfY, art === 'kohlmeise' ? '#f4f4f0' : oben); P(3, kopfY, '#3a3020');   // Kopf, Wange, Schnabel
+  if (art === 'seidenschwanz') P(0, kopfY - 1, oben);   // Haube
+  if (art === 'blaumeise') P(1, kopfY, '#4a8ad8');
+  if (opt.fliegt) { const hoch = opt.fluegel; P(0, hoch ? -2 : 0, oben); P(-1, hoch ? -3 : 1, oben); }
+}
+function voegel(c, GW, t) {
+  const fx = FUTTER_X, fy = GW + FUTTER_DY;
+  for (const v of S.lauf.voegel) {
+    const [dx, dy] = VOGEL_PLATZ[v.platz] || VOGEL_PLATZ[0];
+    const zx = fx + dx, zy = fy + dy;
+    const FLUG = 1.2;
+    let x = zx, y = zy, fliegt = false, links = v.platz % 2 === 1;
+    if (v.t < FLUG) {
+      // Anflug von der Seite, in einem flachen Bogen
+      const k = v.t / FLUG, e = k * k * (3 - 2 * k), sx = v.links ? -8 : 188;
+      x = sx + (zx - sx) * e; y = zy - 30 * (1 - e) - Math.sin(k * Math.PI) * 6; fliegt = true; links = !v.links;
+    } else if (v.t > v.bleibt) {
+      const k = Math.min(1, (v.t - v.bleibt) / FLUG), e = k * k, ex = v.links ? 190 : -10;
+      x = zx + (ex - zx) * e; y = zy - 40 * e; fliegt = true; links = v.links;
+    }
+    const pickt = !fliegt && Math.sin(v.t * 5 + v.platz) > 0.6;
+    zeichneVogel(c, Math.round(x), Math.round(y), v.art, { links, fliegt, fluegel: Math.floor(t * 14) % 2, pickt });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Der eigene Schneemann (11.10.): wächst mit jedem Tag
+// ---------------------------------------------------------------------------
+export const SCHNEEMANN_X = 66, SCHNEEMANN_DY = -2;
+function kugel(c, x, y, rad, f = '#f6f9fc', s = '#cfd9e8') {
+  for (let dy = -rad; dy <= rad; dy++) { const w = Math.round(Math.sqrt(rad * rad - dy * dy + rad * 0.6)); r(c, x - w, y + dy, w * 2 + 1, 1, dy > rad * 0.4 ? s : f); }
+}
+function eigenerSchneemann(c, x, fuss, stufe, bereit, t) {
+  // Schneehaufen, aus dem er entsteht
+  if (stufe < 2) { r(c, x - 5, fuss - 1, 11, 1, '#dfe8f2'); r(c, x - 4, fuss - 2, 9, 1, '#eef4fa'); r(c, x - 2, fuss - 3, 5, 1, '#f6f9fc'); }
+  if (stufe === 1) kugel(c, x + 3, fuss - 2, 2);
+  const bauchY = fuss - 4, mitteY = fuss - 10, kopfY = fuss - 14;
+  if (stufe >= 2) kugel(c, x, bauchY, 4);
+  if (stufe >= 3) kugel(c, x, mitteY, 3);
+  if (stufe >= 4) kugel(c, x, kopfY, 2);
+  if (stufe >= 5) {
+    p(c, x - 1, kopfY - 1, '#1a1a22'); p(c, x + 1, kopfY - 1, '#1a1a22');
+    p(c, x + 1, kopfY, '#f08020'); p(c, x + 2, kopfY, '#f08020'); p(c, x + 3, kopfY, '#d86a10');   // Karotte
+    p(c, x, mitteY - 1, '#1a1a22'); p(c, x, mitteY + 1, '#1a1a22'); p(c, x, bauchY - 1, '#1a1a22');
+  }
+  if (stufe >= 6) {
+    r(c, x - 2, kopfY - 5, 5, 3, '#1a1a22'); r(c, x - 3, kopfY - 3, 7, 1, '#1a1a22'); r(c, x - 2, kopfY - 3, 5, 1, '#c83a3a');   // Hut mit Band
+    for (let i = 0; i < 4; i++) { p(c, x - 4 - i, mitteY - i, '#6a4a2a'); p(c, x + 4 + i, mitteY - i, '#6a4a2a'); }   // Äste
+    p(c, x - 7, mitteY - 4, '#6a4a2a'); p(c, x + 7, mitteY - 4, '#6a4a2a');
+  }
+  if (stufe >= 7) {
+    r(c, x - 3, kopfY + 2, 7, 1, '#3a8a4a'); r(c, x + 2, kopfY + 3, 2, 3, '#3a8a4a'); p(c, x - 2, kopfY + 2, '#e8e060'); p(c, x + 1, kopfY + 2, '#e8e060');   // Schal
+    r(c, x - 7, fuss - 13, 1, 12, '#8a5a2e'); for (let i = 0; i < 4; i++) r(c, x - 9 + i, fuss - 15 - (i % 2), 1, 3, '#c8a050');   // Besen
+  }
+  // Heute kann man weiterbauen: es funkelt über dem Haufen
+  if (bereit) {
+    const k = Math.floor(t * 3) % 4, sy = fuss - 6 - (stufe >= 2 ? stufe * 2 : 0);
+    const f = '#ffffff';
+    if (k < 3) { p(c, x + 4, sy, f); p(c, x + 3, sy, k === 1 ? f : '#cfe6ff'); p(c, x + 5, sy, k === 1 ? f : '#cfe6ff'); p(c, x + 4, sy - 1, '#cfe6ff'); p(c, x + 4, sy + 1, '#cfe6ff'); }
+    if (k === 2) p(c, x - 4, sy + 3, f);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Plakette „Schönstes Haus" (11.10.): an der Hauswand rechts
+// ---------------------------------------------------------------------------
+function plakette(c, L, x, y, platz, t) {
+  const f = C.WETTBEWERB.plaetze[platz].f;
+  r(c, x - 1, y + 5, 1, 3, '#c83030'); r(c, x + 2, y + 5, 1, 3, '#c83030'); p(c, x - 1, y + 8, '#a82020'); p(c, x + 2, y + 8, '#a82020');   // Bänder
+  r(c, x - 1, y, 4, 5, f); r(c, x - 2, y + 1, 6, 3, f); p(c, x, y + 1, '#ffffff'); p(c, x + 1, y + 2, ton(f, -0.3));
+  if (Math.floor(t * 2) % 5 === 0) L.push({ x, y: y + 1, f: '#ffffff', halo: 2, an: 0.5 });
+}
+
+// ---------------------------------------------------------------------------
+// Feuerwerk an Silvester (11.10.): Raketen steigen, platzen, Funken fallen
+// ---------------------------------------------------------------------------
+const fwRaketen = [], fwFunken = [];
+const FW_FARBEN = [['#ff5a5a', '#ffd0c0'], ['#ffe060', '#fff6c0'], ['#5ad0ff', '#d8f4ff'], ['#7ae07a', '#d8ffd8'], ['#ff6adf', '#ffd8f4'], ['#ffffff', '#fff8e0']];
+let fwAb = 0;
+function feuerwerk(c, GW, staerke, dt) {
+  fwAb -= dt;
+  if (staerke > 0 && fwAb <= 0) {
+    fwAb = (0.25 + Math.random() * 0.9) / staerke;
+    fwRaketen.push({ x: 15 + Math.random() * 150, y: GW - 30, zy: 14 + Math.random() * (GW * 0.3), v: 70 + Math.random() * 30, f: FW_FARBEN[Math.floor(Math.random() * FW_FARBEN.length)], spur: [] });
+  }
+  for (let i = fwRaketen.length - 1; i >= 0; i--) {
+    const q = fwRaketen[i];
+    q.spur.unshift([Math.round(q.x), Math.round(q.y)]); if (q.spur.length > 4) q.spur.pop();
+    q.y -= q.v * dt; q.x += Math.sin(q.y * 0.3) * 0.15;
+    if (q.y <= q.zy) {
+      fwRaketen.splice(i, 1);
+      // Zwei Sorten: Ring (alle gleich schnell) und gefüllte Kugel (verschieden schnell)
+      const ring = Math.random() < 0.35, n = ring ? 20 + Math.floor(Math.random() * 8) : 28 + Math.floor(Math.random() * 16), sp = 22 + Math.random() * 18;
+      for (let k = 0; k < n; k++) {
+        const w = k / n * Math.PI * 2 + Math.random() * 0.25, s = sp * (ring ? 0.85 + Math.random() * 0.15 : Math.sqrt(0.15 + 0.85 * Math.random()));
+        fwFunken.push({ x: q.x, y: q.y, vx: Math.cos(w) * s, vy: Math.sin(w) * s, t: 0, life: 1.1 + Math.random() * 0.7, f: q.f });
+      }
+      fwFunken.push({ x: q.x, y: q.y, vx: 0, vy: 0, t: 0, life: 0.18, f: ['#ffffff', '#ffffff'], blitz: true });
+      if (dt > 0) S.hooks.ton('feuerwerk');
+    }
+  }
+  // Raketen: heller Kopf, glühende Spur
+  for (const q of fwRaketen) { q.spur.forEach(([x, y], k) => { c.globalAlpha = 0.8 - k * 0.2; p(c, x, y + k, k ? '#ffb060' : '#fff4d0'); }); }
+  c.globalAlpha = 1;
+  for (let i = fwFunken.length - 1; i >= 0; i--) {
+    const f = fwFunken[i];
+    f.t += dt;
+    if (f.t >= f.life) { fwFunken.splice(i, 1); continue; }
+    f.vx *= Math.pow(0.35, dt); f.vy = f.vy * Math.pow(0.35, dt) + 22 * dt;
+    f.x += f.vx * dt; f.y += f.vy * dt;
+    const k = f.t / f.life;
+    if (f.blitz) { c.fillStyle = 'rgba(255,250,230,0.35)'; c.fillRect(Math.round(f.x) - 3, Math.round(f.y) - 3, 7, 7); continue; }
+    c.globalAlpha = Math.max(0, 1 - k * k);
+    const x = Math.round(f.x), y = Math.round(f.y);
+    p(c, x, y, k < 0.3 ? f.f[1] : f.f[0]);
+    if (k < 0.5) { c.globalAlpha *= 0.35; p(c, x - 1, y, f.f[0]); p(c, x + 1, y, f.f[0]); p(c, x, y - 1, f.f[0]); p(c, x, y + 1, f.f[0]); }
+    // Glitzern am Ende
+    if (k > 0.6 && Math.random() < 0.3) { c.globalAlpha = 1; p(c, x, y, '#ffffff'); }
+  }
+  c.globalAlpha = 1;
 }

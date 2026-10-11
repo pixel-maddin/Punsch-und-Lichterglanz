@@ -20,7 +20,7 @@
 let ctx = null, fxGain = null, musikGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -14,9 LUFS, recht laut)
-const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610111344', karte: 'audio/musik-karte.m4a?v=202610111344' };
+const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610112029', karte: 'audio/musik-karte.m4a?v=202610112029' };
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
 const spuren = {};        // name -> { el, gain }
 let szene = 'haus';       // welches Stück gerade dran ist
@@ -157,6 +157,12 @@ export function spiele(name) {
     case 'spezial': [784, 988, 1175, 1568].forEach((f, i) => glocke(f, i * 0.09, 0.09)); break;
     case 'tuer': rauschen(0.12, 2500, 3, 0.1); [880, 1109, 1319, 1760].forEach((f, i) => glocke(f, 0.1 + i * 0.08, 0.1)); break;
     case 'klick': ton(800, 0.03, 'square', 0.06); break;
+    // Silvester: dumpfer Knall, dann leises Knistern (bewusst leise - es knallt oft)
+    case 'feuerwerk': rauschen(0.35, 160, 0.8, 0.12, 0, 60); for (let i = 0; i < 5; i++) rauschen(0.05, 3500 + Math.random() * 2500, 2, 0.025, 0.12 + i * 0.07 + Math.random() * 0.05); break;
+    // Futter ins Futterhaus: Körner rieseln
+    case 'koerner': for (let i = 0; i < 6; i++) rauschen(0.04, 4200, 3, 0.05, i * 0.04); break;
+    // Schnee festklopfen
+    case 'schnee': rauschen(0.12, 700, 1.2, 0.18, 0, 300); rauschen(0.1, 500, 1.2, 0.12, 0.13, 250); break;
     // Schlittenglöckchen, leise: der Nikolaus fliegt vorbei
     case 'glocken': for (let i = 0; i < 8; i++) { glocke(2349 + (i % 2) * 300, i * 0.11, 0.05); } break;
   }

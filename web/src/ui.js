@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610111344';
-import * as S from './spiel.js?v=202610111344';
-import * as Z from './zeit.js?v=202610111344';
-import * as T from './ton.js?v=202610111344';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610111344';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610111344';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610111344';
-import * as A from './auftraege.js?v=202610111344';
-import * as E from './erfolge.js?v=202610111344';
-import * as ZL from './ziele.js?v=202610111344';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610111344';
-import * as KA from './karte.js?v=202610111344';
-import { zeigeRueckblick } from './ereignis.js?v=202610111344';
-import { barbaraZweig } from './szene.js?v=202610111344';
-import * as LI from './lichtung.js?v=202610111344';
-import * as CB from './christbaum.js?v=202610111344';
-import * as SB from './schlitten.js?v=202610111344';
-import * as EB from './schlittschuh.js?v=202610111344';
-import * as BS from './backstube.js?v=202610111344';
-import { alleSymbole } from './symbole.js?v=202610111344';
+import * as C from './config.js?v=202610112029';
+import * as S from './spiel.js?v=202610112029';
+import * as Z from './zeit.js?v=202610112029';
+import * as T from './ton.js?v=202610112029';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610112029';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610112029';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610112029';
+import * as A from './auftraege.js?v=202610112029';
+import * as E from './erfolge.js?v=202610112029';
+import * as ZL from './ziele.js?v=202610112029';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610112029';
+import * as KA from './karte.js?v=202610112029';
+import { zeigeRueckblick } from './ereignis.js?v=202610112029';
+import { barbaraZweig } from './szene.js?v=202610112029';
+import * as LI from './lichtung.js?v=202610112029';
+import * as CB from './christbaum.js?v=202610112029';
+import * as SB from './schlitten.js?v=202610112029';
+import * as EB from './schlittschuh.js?v=202610112029';
+import * as BS from './backstube.js?v=202610112029';
+import { alleSymbole } from './symbole.js?v=202610112029';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1032,7 +1032,8 @@ function zeichneIcon(cv, a) {
       return;
     case 'kal_stiefel': r(c, 5, 2, 5, 9, '#c82828'); r(c, 5, 10, 9, 4, '#c82828'); r(c, 4, 1, 7, 2, '#f4f4f4'); r(c, 6, 0, 2, 2, '#e8c030'); r(c, 9, 0, 2, 2, '#3a8ad8'); return;
     case 'kal_mistel': r(c, 7, 0, 1, 5, '#8a6a3a'); for (const [x, y] of [[4, 6], [10, 6], [5, 9], [9, 9]]) r(c, x, y, 3, 2, '#5a9a4a'); r(c, 7, 7, 2, 2, '#f4f4e8'); r(c, 6, 5, 4, 1, '#d83a3a'); return;
-    case 'kal_vogel': r(c, 7, 9, 2, 7, '#6a4222'); r(c, 3, 5, 10, 5, '#a8703a'); for (let i = 0; i < 4; i++) r(c, 2 + i, 4 - i, 12 - i * 2, 1, '#c83030'); r(c, 7, 6, 2, 2, '#2a1a10'); r(c, 11, 3, 3, 2, '#d8502a'); return;
+    case 'futterhaus': r(c, 7, 0, 1, 3, '#8a7a5a'); r(c, 3, 6, 10, 5, '#a8703a'); for (let i = 0; i < 4; i++) r(c, 2 + i, 6 - i, 12 - i * 2, 1, '#c83030'); r(c, 7, 7, 2, 2, '#2a1a10'); r(c, 1, 11, 14, 1, '#6a4a2a'); p(c, 4, 10, '#d8b060'); p(c, 9, 10, '#d8b060'); r(c, 11, 9, 3, 2, '#e8702a'); p(c, 13, 8, '#8a6a4a'); return;
+    case 'kal_knoedel': r(c, 7, 0, 1, 5, '#8a7a5a'); r(c, 4, 5, 8, 8, '#b8945a'); r(c, 5, 4, 6, 10, '#b8945a'); for (let i = 0; i < 9; i++) p(c, 4 + (i * 3) % 8, 5 + (i * 5) % 8, i % 2 ? '#8a6a3a' : '#d8b878'); for (let x = 4; x < 12; x += 2) r(c, x, 4, 1, 10, '#3a8a3a'); return;
     case 'kal_goldstern': r(c, 6, 6, 4, 4, '#ffd040'); r(c, 7, 1, 2, 14, '#ffd040'); r(c, 1, 7, 14, 2, '#ffd040'); p(c, 4, 4, '#fff6c8'); p(c, 11, 4, '#fff6c8'); p(c, 4, 11, '#fff6c8'); p(c, 11, 11, '#fff6c8'); return;
     case 'auf_lebkuchenmann': icon(c, 'lebkuchen', 3, 3, 0); return;
     // Vom fahrenden Händler
@@ -1388,6 +1389,21 @@ function baueAlbum(liste) {
   const frueher = !S.st.stats.tiere && S.miniRekord('lichtung') > 0;
   for (const [a, name] of ALBUM_TIERE) ti.appendChild(albumKarte(name, tiere[a] || (frueher && ALBUM_TIERE_ALT.includes(a) ? -1 : 0), (ctx) => LI.zeichneTierAlbum(ctx, a, 14, 24), 28, 26, '× gefüttert'));
   liste.appendChild(ti);
+  // Vögel am Futterhaus (11.10.) - erst, wenn es eins gibt; Seltene als „???"-Umriss
+  if (S.hat('futterhaus') || Object.keys(S.st.voegel || {}).length) {
+    const vg = S.st.voegel || {};
+    kopf('Vögel am Futterhaus', C.VOEGEL.filter((v) => vg[v.id]).length, C.VOEGEL.length);
+    const vr = el('div', 'album-raster');
+    for (const v of C.VOEGEL) vr.appendChild(albumKarte(v.name, vg[v.id] || 0, (ctx) => {
+      // klein malen, zweimal per Scale2x vergrößern - Pixel bleiben Spielpixel
+      const k = document.createElement('canvas'); k.width = 7; k.height = 6;
+      zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 2, 4, v.id);
+      const x2 = scale2x(k, 7, 6, document.createElement('canvas'));
+      const x4 = scale2x(x2, 14, 12, document.createElement('canvas'));
+      ctx.drawImage(x4, 0, 0);
+    }, 28, 24, '× gesehen'));
+    liste.appendChild(vr);
+  }
   // Rezepte - erst, wenn die Backstube auf der Karte steht (Minispiele kommen nach und nach)
   if (S.miniOffen('back')) {
     kopf('Rezepte aus der Backstube', S.backRezepte().length, C.BACK_REZEPTE.length);

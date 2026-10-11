@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610111344';
-import * as S from './spiel.js?v=202610111344';
-import * as Z from './zeit.js?v=202610111344';
-import * as T from './ton.js?v=202610111344';
-import * as LI from './lichtung.js?v=202610111344';
-import * as CB from './christbaum.js?v=202610111344';
-import * as KA from './karte.js?v=202610111344';
-import * as SB from './schlitten.js?v=202610111344';
-import * as EB from './schlittschuh.js?v=202610111344';
-import * as BS from './backstube.js?v=202610111344';
-import * as UI from './ui.js?v=202610111344';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610111344';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610111344';
-import * as Lernen from './lernen.js?v=202610111344';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee } from './ereignis.js?v=202610111344';
-import * as A from './auftraege.js?v=202610111344';
-import * as E from './erfolge.js?v=202610111344';
-import * as ZL from './ziele.js?v=202610111344';
+import * as C from './config.js?v=202610112029';
+import * as S from './spiel.js?v=202610112029';
+import * as Z from './zeit.js?v=202610112029';
+import * as T from './ton.js?v=202610112029';
+import * as LI from './lichtung.js?v=202610112029';
+import * as CB from './christbaum.js?v=202610112029';
+import * as KA from './karte.js?v=202610112029';
+import * as SB from './schlitten.js?v=202610112029';
+import * as EB from './schlittschuh.js?v=202610112029';
+import * as BS from './backstube.js?v=202610112029';
+import * as UI from './ui.js?v=202610112029';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610112029';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610112029';
+import * as Lernen from './lernen.js?v=202610112029';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610112029';
+import * as A from './auftraege.js?v=202610112029';
+import * as E from './erfolge.js?v=202610112029';
+import * as ZL from './ziele.js?v=202610112029';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -117,6 +117,25 @@ cv.addEventListener('pointerdown', (e) => {
   if (!tr) {
     // Das Haus angetippt (Wand und Dach): Haus schmücken
     const GW = G - 6;
+    // Das Futterhaus im Baum: füllen (11.10.)
+    if (S.zeigt('futterhaus') && x >= 123 && x <= 142 && y >= GW - 66 && y <= GW - 50) {
+      S.lauf.klicks.push({ x, y, t: 0 });
+      T.spiele('koerner');
+      UI.toast(S.fuettere() ? `Futterhaus gefüllt - jetzt kommen Vögel! (hält ${C.FUTTER_STUNDEN} Stunden)` : 'Das Futterhaus ist noch voll.', S.futterVoll() ? 'gut' : 'hinweis');
+      return;
+    }
+    // Der eigene Schneemann auf dem Gehweg (11.10.)
+    if (Z.schnee() > 0 && S.st.lernen >= 99 && x >= 57 && x <= 77 && y >= GW - 24 && y <= GW + 2) {
+      const r0 = S.baueSchneemann();
+      S.lauf.klicks.push({ x, y, t: 0 });
+      if (r0 === 'gebaut' || r0 === 'fertig') T.spiele('schnee'); else T.spiele('klick');
+      const STUFE = ['', 'Eine kleine Kugel gerollt.', 'Der Bauch steht!', 'Der Oberkörper sitzt.', 'Ein Kopf obendrauf.', 'Augen, Knöpfe und eine Karottennase.', 'Hut und Arme aus Ästen.', ''];
+      if (r0 === 'fertig') { T.spiele('spezial'); UI.toast('Dein Schneemann ist fertig - mit Schal und Besen! ♥ +' + (C.SCHNEEMANN_HERZ + C.SCHNEEMANN_FERTIG), 'neu'); }
+      else if (r0 === 'gebaut') UI.toast(`${STUFE[S.schneemannStufe()]} Morgen geht es weiter. (♥ +${C.SCHNEEMANN_HERZ})`, 'gut');
+      else if (r0 === 'morgen') UI.toast('Für heute ist genug gebaut - morgen geht es weiter.', 'hinweis');
+      else if (r0 === 'ist') UI.toast('Dein Schneemann ist fertig.', 'hinweis');
+      return;
+    }
     // Der Briefkasten neben der Tür (Wunschzettel, 10.10.)
     if (x >= 82 && x <= 98 && y >= GW - 47 && y <= GW - 32 && S.briefDa()) { T.spiele('klick'); UI.zeigeBrief(); return; }
     if (x >= 32 && x <= 128 && y >= GW - 96 && y <= GW - 22 && S.st.lernen >= 99) { T.spiele('klick'); UI.oeffneMeinHaus(); }
@@ -197,8 +216,18 @@ function ankommen(erstesMal) {
   // Wunschzettel: ein neuer Brief oder ein Dankesbild im Briefkasten
   const brief = S.briefPruefen();
   if (brief) setTimeout(() => UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'), 1500);
+  // Am 4. Advent die Jury: gleich nach dessen Fenster (11.10.)
+  if (S.wettbewerbFaellig()) meldungen.push(['wettbewerb']);
+  // Vorher, ab dem 3. Advent: einmal am Tag die Ansage
+  const inTagen = S.wettbewerbInTagen();
+  if (inTagen != null && inTagen > 0 && S.spieltag() + inTagen >= C.WETTBEWERB.abSpieltag && S.st.wettbewerbAnsage !== Z.tagesSchluessel()) {
+    S.st.wettbewerbAnsage = Z.tagesSchluessel();
+    setTimeout(() => UI.toast(inTagen === 1 ? 'Morgen kommt die Jury: Wer hat das schönste Haus im Dorf?' : `In ${inTagen} Tagen kürt das Dorf das schönste Haus - mehr Deko, mehr Stimmung!`, 'spezial'), 3600);
+  }
   // Heiligabend: das Finale, einmal je Saison (nach den Adventen)
   if (S.heiligabendFaellig()) meldungen.push(['heiligabend']);
+  // Silvester: der Abschluss der Saison (11.10.)
+  if (S.silvesterFaellig()) meldungen.push(['silvester']);
   const tueren = S.offeneTueren();
   if (tueren > 0 && !erstesMal) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
   S.speichere();
@@ -207,6 +236,8 @@ function ankommen(erstesMal) {
     if (!m) return;
     if (m[0] === 'advent') zeigeAdvent(m[1], zeige);
     else if (m[0] === 'heiligabend') zeigeHeiligabend(zeige);
+    else if (m[0] === 'wettbewerb') { if (S.wettbewerbFaellig()) zeigeWettbewerb(zeige); else zeige(); }
+    else if (m[0] === 'silvester') { if (S.silvesterFaellig()) zeigeSilvester(zeige); else zeige(); }
     else if (m[0] === 'schnee') zeigeErsterSchnee(zeige);
     else if (m[0] === 'kiste') UI.zeigeKiste(m[1], () => setTimeout(zeige, 60));
     else UI.fenster(m[0], m[1], [{ text: 'Weiter', aktion: () => { setTimeout(zeige, 60); } }]);
@@ -284,6 +315,9 @@ setInterval(() => {
   if (k !== letzterTag) { letzterTag = k; ankommen(false); }
   // Heiligabend bricht an, während man spielt: warten, bis nichts offen ist
   else if (S.heiligabendFaellig() && !UI.fensterOffen() && !UI.panelOffen()) zeigeHeiligabend();
+  // Jury und Silvester brechen an, während man spielt (11.10.)
+  else if (S.wettbewerbFaellig() && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) zeigeWettbewerb();
+  else if (S.silvesterFaellig() && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) zeigeSilvester();
   // Wunschzettel: neuer Brief oder ein erfüllter Wunsch
   else { const brief = S.briefPruefen(); if (brief) UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'); }
   // Ein neues Minispiel ist auf der Karte: eigenes Fenster, sobald nichts offen ist
@@ -300,6 +334,14 @@ setInterval(() => {
     UI.toast(neuGesammelt.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neuGesammelt[0].id)}!` : `${neuGesammelt.length} neue Dinge in den Läden!`, 'neu');
     neuGesammelt = []; neuZuletzt = Date.now();
   } else if (!S.startzieleFertig()) neuGesammelt = [];
+  // Feierabend (17-19 Uhr): einmal am Tag sagen; um Mitternacht an Silvester gratulieren
+  if (S.feierabendAnsage()) { T.spiele('glocken'); UI.toast(`Feierabend! Bis ${C.FEIERABEND.bis} Uhr kommen mehr Gäste.`, 'spezial'); S.speichere(); }
+  // Wer den ersten Schnee schon vor dem 11.10. gesehen hat, kennt den Schneehaufen nicht
+  if (Z.schnee() > 0 && S.startzieleFertig() && !S.st.schneemannHinweis && S.lauf.t > 30 && !UI.fensterOffen()) {
+    S.st.schneemannHinweis = true;
+    UI.toast('Neu: Auf dem Gehweg liegt ein Schneehaufen - tipp ihn jeden Tag an, dann wächst dein Schneemann!', 'spezial');
+  }
+  if (S.neujahrJetzt()) { T.spiele('feuerwerk'); UI.toast(`Frohes neues Jahr ${Z.jetzt().getFullYear()}!`, 'spezial'); }
   const ziel = ZL.pruefe();
   if (ziel) {
     T.spiele('kauf');

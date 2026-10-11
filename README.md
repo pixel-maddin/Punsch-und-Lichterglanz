@@ -61,6 +61,20 @@ Sterne fürs Servieren.
 **Luxus-Stücke** (✦ Extra für Profis: Lichtershow, Festbeleuchtung, Stand
 Stufe 3) braucht man fürs schönste Haus nicht - mit 10 bis 15 Minuten am
 Tag (verteilt auf mehrere kurze Besuche) ist bis Heiligabend alles andere geschafft.
+Wer viel spielt oder gezielt darauf spart, schafft sie bis Weihnachten.
+
+**Futterhaus** (Weihnachtsladen, Im Garten): hängt im alten Baum. Antippen
+füllt es für 8 Stunden, dann kommen tagsüber Vögel - Spatz, Kohlmeise,
+Blaumeise und seltener Rotkehlchen, Gimpel und (nur bei Schnee) der
+Seidenschwanz. Jede neue Art landet im Album. Der **Meisenknödel** aus
+Türchen 18 lockt die seltenen doppelt so oft an.
+
+**Dein eigener Schneemann:** Ab dem ersten Schnee liegt auf dem Gehweg ein
+Schneehaufen. Tipp ihn einmal am Tag an, dann wächst er Stufe für Stufe -
+Kugel, Bauch, Kopf, Gesicht, Hut, zuletzt Schal und Besen (je ♥ +1,
+fertig ♥ +3 obendrauf).
+
+**Feierabend:** Von 17 bis 19 Uhr kommen 30 % mehr Gäste an den Stand.
 
 **Schwung:** Wer zügig hintereinander bedient, bekommt bis zu 40 % mehr.
 **Stoßzeit:** Wer ein paar Minuten am Stück spielt, bekommt Besuch von
@@ -191,7 +205,7 @@ frühestens am Tag danach, höchstens zehn je Adventszeit.
 
 **Album** (Aufträge → Album): alle Besucher, die du schon bedient hast
 (auch Rentier, Schneemann, Grummel und Weihnachtsmann), die Tiere der
-Waldlichtung samt dem seltenen Goldhasen, das Rezeptbuch und die
+Waldlichtung samt dem seltenen Goldhasen, die Vögel am Futterhaus, das Rezeptbuch und die
 Dankesbilder der Kinder. Was du noch nicht gesehen hast, steht als dunkler
 Umriss da.
 
@@ -208,7 +222,7 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
   ein Päckchen mit Sternen.
 - **Adventskalender:** jeden Tag ein Türchen, manche mit Deko, die es nur
   dort gibt (Adventskranz, dessen Kerzen mit den Adventssonntagen
-  mitzählen; Nikolausstiefel; Mistelzweig; Vogelhäuschen; am 24. der
+  mitzählen; Nikolausstiefel; Mistelzweig; Meisenknödel; am 24. der
   goldene Stern).
 - **Jeder Adventssonntag** bringt ein Ereignis mit Bild (Weihnachtsmarkt,
   Neuschnee, Chorkonzert, das Dorf leuchtet), schaltet Neues frei und
@@ -226,7 +240,14 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
   Stimmung, Türchen, Weihnachtsmann-Funden und Blüten. Wer erst nach
   Heiligabend spielt (bis zum 6. Januar), bekommt es nachgereicht. Den
   Rückblick gibt es danach auch im Menü.
-- Silvester gibt es Feuerwerk.
+- **Das schönste Haus im Dorf:** Ab dem 3. Advent wird es angekündigt, am
+  4. Advent kommt die Jury. Je nach Stimmung gibt es Gold, Silber oder
+  Bronze (oder eine Urkunde), Sterne und eine Plakette an der Hauswand.
+  Wer erst seit ein paar Tagen spielt, ist noch nicht dabei.
+- **Silvester:** Ab 18 Uhr steigen Raketen über dem Dorf, um Mitternacht das
+  große Feuerwerk. Einmal kommt der Abschluss der Adventszeit: „Bis zum
+  nächsten Jahr! Vielen Dank fürs Spielen!" (wer später spielt, bekommt ihn
+  nachgereicht).
 - **Wetter mit Folgen:** Jeder Tag hat sein Wetter, mit Temperatur an der
   Uhr. An Tagen mit **klirrender Kälte** (nur mit Schnee) wird Punsch öfter
   bestellt und bringt 20 % mehr, die Gäste haben Atemwölkchen. An

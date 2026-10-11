@@ -222,15 +222,17 @@ export const ARTIKEL = [
   { id: 'schornstein',    tab: 'markt', gruppe: 'Am Haus', name: 'Schornstein-Schmuck',  kosten: [50000, 180000], stimmung: 6, text: 'Stufe 1: Tannengrün mit Schleife um den Schornstein. Stufe 2: Lichter dazu.' },
   { id: 'eiszapfen',      tab: 'markt', gruppe: 'Am Haus', name: 'Eiszapfen-Lichter',    kosten: 86000,  stimmung: 10, text: 'Funkeln wie echte Eiszapfen.' },
   { id: 'dach_nikolaus',  tab: 'markt', gruppe: 'Am Haus', name: 'Nikolaus auf dem Dach',kosten: 750000, stimmung: 26, text: 'Er winkt vom Schornstein.' },
-  { id: 'lichtershow',    tab: 'markt', gruppe: 'Am Haus', name: 'Große Lichtershow',    kosten: 2400000, stimmung: 40, luxus: true, text: 'Schneeflocken tanzen über die Fassade.' },
+  { id: 'lichtershow',    tab: 'markt', gruppe: 'Am Haus', name: 'Große Lichtershow',    kosten: 1450000, stimmung: 40, luxus: true, text: 'Schneeflocken tanzen über die Fassade.' },
   // Das Teuerste im Spiel: das ganze Dach in warmweißen Lichtern - wie bei „Schöne Bescherung"
-  { id: 'festbeleuchtung', tab: 'markt', gruppe: 'Am Haus', name: 'Festbeleuchtung',    kosten: 3200000, stimmung: 45, luxus: true, text: 'Das GANZE Dach voller warmweißer Lichter, dicht an dicht. Man sieht es bis ins Nachbardorf.', braucht: 'lichter_dach' },
+  { id: 'festbeleuchtung', tab: 'markt', gruppe: 'Am Haus', name: 'Festbeleuchtung',    kosten: 1900000, stimmung: 45, luxus: true, text: 'Das GANZE Dach voller warmweißer Lichter, dicht an dicht. Man sieht es bis ins Nachbardorf.', braucht: 'lichter_dach' },
   // --- Weihnachtsmarkt: Garten ---
   { id: 'tanne',          tab: 'markt', gruppe: 'Im Garten', name: 'Weihnachtstanne',   kosten: 2700,   stimmung: 8,  text: 'Eine echte Nordmanntanne im Vorgarten.' },
   { id: 'tanne_lichter',  tab: 'markt', gruppe: 'Im Garten', name: 'Lichter für die Tanne', kosten: [15000, 165000, 660000], stimmung: 8, text: 'Eine Kette rund um den Baum. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.', braucht: 'tanne' },
   { id: 'tanne_kugeln',   tab: 'markt', gruppe: 'Im Garten', name: 'Christbaumkugeln',  kosten: 70000,  stimmung: 10, text: 'Rot und Gold.', braucht: 'tanne' },
   { id: 'tanne_stern',    tab: 'markt', gruppe: 'Im Garten', name: 'Stern auf der Spitze', kosten: 160000, stimmung: 14, text: 'Das Tüpfelchen auf dem Baum.', braucht: 'tanne' },
   { id: 'baum_girlande',  tab: 'markt', gruppe: 'Im Garten', name: 'Leuchtgirlande für den alten Baum', kosten: [4400, 160000, 510000], stimmung: 7, text: 'Grüne Girlande mit Lichtern um den kahlen Baum. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
+  // Futterhaus (11.10.): hängt im kahlen Baum; antippen füllt es, dann kommen Vögel (VOEGEL)
+  { id: 'futterhaus',     tab: 'markt', gruppe: 'Im Garten', name: 'Futterhaus',        kosten: 900,    stimmung: 3,  text: 'Hängt im alten Baum. Antippen füllt es - dann kommen Vögel, manche ganz selten.' },
   { id: 'schneemann',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneemann',        kosten: 2100,   stimmung: 6,  text: 'Mit Möhre und Hut.', schnee: true },
   { id: 'schneefrau',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneefrau',        kosten: 3900,   stimmung: 7,  text: 'Mit Schal und Schleife.', schnee: true },
   { id: 'schneekind',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneekind',        kosten: 48000,   stimmung: 8,  text: 'Die Familie ist komplett.', schnee: true },
@@ -247,7 +249,7 @@ export const ARTIKEL = [
   { id: 'baenke',         tab: 'markt', gruppe: 'Am Stand', name: 'Bierbänke',       kosten: 225000, stimmung: 0, bonus: { preis: 0.10, gaeste: 0.10 }, text: 'Die Leute bleiben - und bestellen nach.' },
 
   // --- Baumarkt: Stand ---
-  { id: 'stand',   tab: 'baumarkt', gruppe: 'Am Stand', name: 'Stand ausbauen',    kosten: [120000, 480000, 2400000], stimmung: 5, bonus: { preis: 0.06 }, bonusJeStufe: true, luxusAb: 3, text: 'Stufe 1: Holzdach · Stufe 2: Laternen und Tannengrün · Stufe 3: goldener Stern und Lichter.' },
+  { id: 'stand',   tab: 'baumarkt', gruppe: 'Am Stand', name: 'Stand ausbauen',    kosten: [120000, 480000, 1450000], stimmung: 5, bonus: { preis: 0.06 }, bonusJeStufe: true, luxusAb: 3, text: 'Stufe 1: Holzdach · Stufe 2: Laternen und Tannengrün · Stufe 3: goldener Stern und Lichter.' },
   { id: 'tresen',  tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tresen verlängern', kosten: [500, 48000],        stimmung: 0, text: 'Ein Gast mehr gleichzeitig am Tresen.' },
   { id: 'topf',    tab: 'baumarkt', gruppe: 'Am Stand', name: 'Größere Töpfe',     kosten: [180, 3900, 136000], stimmung: 0, text: 'Mehr Portionen, seltener nachfüllen.' },
   { id: 'tablett', tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tablett',           kosten: [2700, 112000],      stimmung: 0, text: 'Ein Ding mehr gleichzeitig in der Hand.' },
@@ -317,7 +319,7 @@ export const FREI = {
   nussknacker: { herzen: 25 }, lichter_fenster: { herzen: 30 }, eiszapfen: { advent: 2 },
   dach_nikolaus: { advent: 4 }, lichtershow: { advent: 4 }, festbeleuchtung: { herzen: 300 }, schornstein: { herzen: 45 }, tuerbogenkranz: { herzen: 22 },
   // Weihnachtsmarkt: Garten
-  tanne: { herzen: 14 }, tanne_kugeln: { herzen: 50 }, tanne_stern: { herzen: 90 },
+  futterhaus: { herzen: 6 }, tanne: { herzen: 14 }, tanne_kugeln: { herzen: 50 }, tanne_stern: { herzen: 90 },
   schneefrau: { advent: 2 }, schneekind: { advent: 2 }, baum_girlande: { herzen: 20 },
   rentier_licht: { herzen: 80 }, schlitten: { herzen: 120 }, lichterbogen: { advent: 4 },
   // Weihnachtsmarkt: Stand
@@ -382,7 +384,8 @@ export const KALENDER_DEKO = {
   1:  { id: 'kal_kranz',     name: 'Adventskranz',      stimmung: 5,  text: 'Steht im rechten Fenster. Jeden Advent brennt eine Kerze mehr.' },
   6:  { id: 'kal_stiefel',   name: 'Nikolausstiefel',   stimmung: 4,  text: 'Steht vor der Tür. Gefüllt!' },
   12: { id: 'kal_mistel',    name: 'Mistelzweig',       stimmung: 4,  text: 'Hängt über der Haustür.' },
-  18: { id: 'kal_vogel',     name: 'Vogelhäuschen',     stimmung: 5,  text: 'Mit Rotkehlchen.' },
+  // 11.10.: vorher das Vogelhäuschen - das ist jetzt das Futterhaus im Laden
+  18: { id: 'kal_knoedel',   name: 'Meisenknödel',      stimmung: 5,  text: 'Hängt am Futterhaus. Seltene Vögel kommen doppelt so oft.' },
   24: { id: 'kal_goldstern', name: 'Goldener Stern',    stimmung: 15, text: 'Er funkelt über deinem Haus. Frohe Weihnachten!' },
 };
 export const KALENDER_GELD_ANTEIL = 0.04; // Geldgeschenk: 4 % aller bisherigen Einnahmen
@@ -495,6 +498,8 @@ export const VARIANTEN = {
                   { kurz: 'Katze', name: 'Fensterkatze', text: 'Eine Katze mit Weihnachtsmütze schaut hinaus und blinzelt.' }],
   nussknacker:   [{ kurz: 'Nussknacker' }, { kurz: 'Holzrentier', name: 'Holz-Rentier', text: 'Geschnitzt, mit roter Schleife.' },
                   { kurz: 'Gartenzwerg', name: 'Zwerg im Nikolauskostüm', text: 'Hat sich als Weihnachtsmann verkleidet. Überzeugt niemanden.' }],
+  futterhaus:    [{ kurz: 'Futterhaus' },  { kurz: 'Schneedach', name: 'Futterhaus mit Schneedach', text: 'Weißes Dach, rote Laterne darunter.' },
+                  { kurz: 'Glocke', name: 'Futterglocke', text: 'Eine Glocke aus Körnern an einer roten Schleife.' }],
   schneemann:    [{ kurz: 'Schneemann' },  { kurz: 'Schneeburg', name: 'Schneeburg', text: 'Mit zwei Türmen und Fähnchen.' },
                   { kurz: 'Urlaub', name: 'Schneemann im Liegestuhl', text: 'Sonnenbrille auf, Füße hoch. Er hat Urlaub.' }],
   dach_nikolaus: [{ kurz: 'Nikolaus' },    { kurz: 'Rentiere', name: 'Rentiere auf dem Dach', text: 'Zwei Rentiere warten auf ihren Einsatz.' },
@@ -727,3 +732,48 @@ export const MINI_ALLE_DEZ = 14;
 // der Markt kam erst an Tag 6 oder 7.
 export const EINSTIEG = { sonder: 1, ansturm: 1, haendler: 1, wetter: 1, schlitten: 2, santa: 3, markt: 4 };
 export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Großbestellung, Gruppe, Ansturm, Sondergast
+
+// ---------------------------------------------------------------------------
+// Vögel am Futterhaus (11.10.). Nur wenn das Futterhaus gefüllt ist (antippen,
+// hält FUTTER_STUNDEN echte Stunden). `w` = Gewicht, `schnee` = nur bei Schnee.
+// Der Meisenknödel (Türchen 18) verdoppelt die Gewichte der seltenen.
+// ---------------------------------------------------------------------------
+export const VOEGEL = [
+  { id: 'spatz',    name: 'Spatz',         w: 34, f: ['#8a6a4a', '#c8a880', '#5a4030'] },
+  { id: 'kohlmeise', name: 'Kohlmeise',    w: 26, f: ['#2a2a30', '#f0d040', '#f4f4f0'] },
+  { id: 'blaumeise', name: 'Blaumeise',    w: 18, f: ['#4a8ad8', '#f0d848', '#f4f4f0'] },
+  { id: 'rotkehlchen', name: 'Rotkehlchen', w: 12, f: ['#8a6a4a', '#e8702a', '#e8dcc8'], selten: true },
+  { id: 'gimpel',   name: 'Gimpel',        w: 6,  f: ['#2a2a30', '#e04a5a', '#7a7a88'], selten: true },
+  { id: 'seidenschwanz', name: 'Seidenschwanz', w: 2, f: ['#a88a78', '#e8c060', '#3a2a2a'], selten: true, schnee: true },
+];
+export const FUTTER_STUNDEN = 8;
+export const VOGEL_TAKT = [14, 32];   // s zwischen zwei Vögeln
+export const VOGEL_BLEIBT = [7, 14];  // s am Futterhaus
+export const VOGEL_MAX = 3;           // gleichzeitig
+export const KNOEDEL_SELTEN = 2;
+
+// Der eigene Schneemann (11.10.): ab dem ersten Schnee auf dem Gehweg links.
+// Einmal am Tag antippen = eine Stufe weiter; jede Stufe ♥ +1, fertig +3.
+export const SCHNEEMANN_STUFEN = 7;
+export const SCHNEEMANN_HERZ = 1;
+export const SCHNEEMANN_FERTIG = 3;
+
+// Feierabend (11.10.): von 17 bis 19 Uhr kommen mehr Gäste.
+export const FEIERABEND = { von: 17, bis: 19, gaeste: 0.3 };
+
+// Das schönste Haus im Dorf (11.10.): am 4. Advent kommt die Jury.
+// Platz nach Stimmung (Schwellen eingemessen, siehe CLAUDE.md), Lohn in
+// Minuten Einnahmen. Wer erst seit ein paar Tagen spielt, ist noch nicht dabei.
+export const WETTBEWERB = {
+  // Stimmung am 20.12. (Autopilot, Start 24.11.): 5 min/Tag 380 · 10 min 452 ·
+  // 20 min + Minispiele 567 · 30 min + 3 Runden 610-664. Ein Mensch braucht
+  // 30-40 % mehr Zeit: Gold für Vielspieler, Bronze schon bei kurzem Reinschauen.
+  plaetze: [ { name: 'Gold', ab: 560, f: '#f0c040' }, { name: 'Silber', ab: 440, f: '#d8dce4' }, { name: 'Bronze', ab: 340, f: '#d08a4a' } ],
+  lohn: [30, 20, 12, 6],     // Gold, Silber, Bronze, Urkunde
+  lohnMin: 2000,
+  abSpieltag: 4,
+};
+
+// Silvester (11.10.): ab 18 Uhr am 31.12. Feuerwerk über dem Dorf, dazu der
+// Abschluss der Saison; um Mitternacht das große Feuerwerk.
+export const SILVESTER_STUNDE = 18;

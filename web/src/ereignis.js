@@ -4,13 +4,14 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610111344';
-import * as S from './spiel.js?v=202610111344';
-import * as T from './ton.js?v=202610111344';
-import * as Z from './zeit.js?v=202610111344';
-import { r, p, figurKlein, neueFarben } from './pixel.js?v=202610111344';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse } from './fein.js?v=202610111344';
-import { fenster, karte } from './ui.js?v=202610111344';
+import * as C from './config.js?v=202610112029';
+import * as S from './spiel.js?v=202610112029';
+import * as T from './ton.js?v=202610112029';
+import * as Z from './zeit.js?v=202610112029';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610112029';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610112029';
+import { schriftBild } from './schrift.js?v=202610112029';
+import { fenster, karte } from './ui.js?v=202610112029';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -199,6 +200,72 @@ export const BILDER = {
     schneefall(c, BW, 96, 40, 8);
     leuchten(c, 1);
   },
+  // 4. Advent (11.10.): die Jury vor deinem Haus, mit Klemmbrett und Rosette
+  jury(c, platz = 0) {
+    neueLichter();
+    verlauf(c, 0, 0, BW, 60, ['#1a2458', '#3a3c78', '#8a5a7a']);
+    sterne(c, 22, BW, 30, 21);
+    for (let x = 0; x < BW; x++) { const hh = 5 + Math.round(Math.sin(x / 15) * 2); r(c, x, 60 - hh, 1, hh, '#3a4672'); }
+    schneeBoden(c, 60, BW, 40, 23);
+    haus(c, 64, 84, 52, 30, { wand: '#efe3cc', dach: '#8a4a3a', schnee: true, licht: 'bunt' });
+    // Kranz an der Tür, damit es DEIN Haus ist
+    for (let k = 0; k < 10; k++) { const w = k / 10 * Math.PI * 2; p(c, Math.round(90 + Math.cos(w) * 3), Math.round(68 + Math.sin(w) * 3), k % 3 ? '#2f6a2a' : '#c83030'); }
+    tanne(c, 36, 86, 34, { schnee: true, lichter: 16, stern: true });
+    tanne(c, 144, 86, 28, { schnee: true, lichter: 12 });
+    laterne(c, 22, 92, 20);
+    // Banner über dem Haus
+    r(c, 46, 20, 88, 11, '#c83030'); r(c, 46, 30, 88, 1, '#8a1e1e'); r(c, 44, 20, 2, 11, '#e8c030'); r(c, 134, 20, 2, 11, '#e8c030');
+    schrift(c, 'SCHÖNSTES HAUS', Math.round(90 - textBreite('SCHÖNSTES HAUS') / 2), 23, '#fff4d0', '#6a1414', 1);
+    // Die Jury: Bürgermeisterin mit Kette, zwei Beisitzer mit Klemmbrett
+    const fuss = 97;
+    figurKlein(c, { typ: 'oma', farben: neueFarben('oma'), phase: 1, laeuft: false }, 70, fuss, 0);
+    figurKlein(c, { typ: 'erwachsen', farben: neueFarben('erwachsen'), phase: 2, laeuft: false }, 84, fuss, 0);
+    figurKlein(c, { typ: 'opa', farben: neueFarben('opa'), phase: 3, laeuft: false }, 98, fuss, 0);
+    r(c, 82, fuss - 12, 1, 4, '#e8c030'); r(c, 86, fuss - 12, 1, 4, '#e8c030'); r(c, 83, fuss - 8, 3, 2, '#e8c030');   // Amtskette
+    for (const kx of [72, 100]) { r(c, kx, fuss - 11, 4, 5, '#8a5a32'); r(c, kx, fuss - 11, 4, 1, '#c8c8d0'); r(c, kx + 1, fuss - 9, 2, 1, '#f4f0e8'); r(c, kx + 1, fuss - 8, 2, 1, '#f4f0e8'); }
+    // Rosette in der Farbe des Platzes (ohne Platz: Urkunde)
+    const pl = C.WETTBEWERB.plaetze[platz];
+    if (pl) {
+      const rx = 152, ry = 14;
+      r(c, rx - 4, ry + 5, 3, 9, '#c83030'); r(c, rx + 2, ry + 5, 3, 9, '#c83030'); p(c, rx - 4, ry + 14, '#a82020'); p(c, rx + 4, ry + 14, '#a82020');
+      for (let dy = -6; dy <= 6; dy++) { const w = Math.round(Math.sqrt(36 - dy * dy)); r(c, rx - w, ry + dy, w * 2 + 1, 1, dy < -2 ? '#ffffff' : pl.f); }
+      for (let k = 0; k < 12; k++) { const w = k / 12 * Math.PI * 2; p(c, Math.round(rx + Math.cos(w) * 7), Math.round(ry + Math.sin(w) * 7), pl.f); }
+      r(c, rx - 3, ry - 3, 7, 7, pl.f); r(c, rx - 1, ry - 1, 3, 3, '#ffffff');
+      licht(rx, ry, '#fff4c8', 1.6);
+    } else {
+      r(c, 140, 8, 24, 16, '#f8f0dc'); r(c, 140, 8, 24, 1, '#c8a060'); for (let i = 0; i < 4; i++) r(c, 144, 12 + i * 3, 16, 1, '#a89a80'); p(c, 158, 21, '#c83030');
+    }
+    schneefall(c, BW, 96, 30, 25);
+    leuchten(c, 1);
+  },
+  // Silvester (11.10.): Feuerwerk über dem verschneiten Dorf
+  silvester(c) {
+    neueLichter();
+    verlauf(c, 0, 0, BW, 70, ['#060a24', '#10183e', '#24305e']);
+    sterne(c, 30, BW, 40, 31);
+    // Feuerwerk: drei große Kugeln und eine Palme
+    const kugelFw = (x, y, rad, f, f2) => {
+      for (let k = 0; k < 22; k++) { const w = k / 22 * Math.PI * 2;
+        for (let s = 2; s <= rad; s += 2) p(c, Math.round(x + Math.cos(w) * s), Math.round(y + Math.sin(w) * s * 0.9), s > rad - 3 ? f2 : f); }
+      p(c, x, y, '#ffffff'); licht(x, y, f2, 3);
+    };
+    kugelFw(40, 22, 14, '#ff5a5a', '#ffd0c0');
+    kugelFw(132, 18, 16, '#5ad0ff', '#e0f6ff');
+    kugelFw(88, 34, 10, '#ffe060', '#fff6c0');
+    for (let k = 0; k < 9; k++) { const w = Math.PI + k / 8 * Math.PI; for (let s = 1; s < 11; s++) p(c, Math.round(160 + Math.cos(w) * s), Math.round(40 + Math.sin(w) * s * 0.6 + s * s * 0.06), s > 7 ? '#fff0a0' : '#7ae07a'); }
+    for (let i = 0; i < 18; i++) p(c, 40 + Math.round(Math.sin(i * 3.1) * 18), 40 + i, i % 3 ? '#ffb060' : '#fff0c0');   // fallende Funken
+    // Raketenspuren
+    for (const [x, y0, y1] of [[64, 72, 50], [110, 70, 56]]) for (let y = y1; y < y0; y++) if (y % 2) p(c, x + Math.round((y - y1) * 0.1), y, '#ffb060');
+    for (let x = 0; x < BW; x++) { const hh = 5 + Math.round(Math.sin(x / 13) * 2); r(c, x, 72 - hh, 1, hh, '#1e2850'); }
+    schneeBoden(c, 72, BW, 28, 33);
+    haus(c, 6, 90, 30, 22, { wand: '#efe3cc', dach: '#b8554a', schnee: true, licht: 'bunt' });
+    haus(c, 60, 92, 46, 30, { wand: '#efe3cc', dach: '#8a4a3a', schnee: true, licht: 'bunt' });
+    haus(c, 136, 90, 32, 24, { wand: '#f4ead8', dach: '#4a8a7a', schnee: true, licht: 'an', fachwerk: true });
+    tanne(c, 46, 94, 28, { schnee: true, lichter: 12, stern: true });
+    for (const [x, typ] of [[116, 'erwachsen'], [124, 'kind'], [34, 'oma']]) mensch(c, x, 98, typ);
+    p(c, 127, 86, '#fff8c0'); p(c, 128, 85, '#fff8c0'); p(c, 126, 85, '#ffd060'); licht(127, 85, '#fff0a0', 1);   // Wunderkerze
+    leuchten(c, 1);
+  },
 };
 
 /**
@@ -235,6 +302,9 @@ export function zeigeRueckblick(danach) {
   if (r0.rekorde) zeilen.push(['Minispiele gespielt', z(r0.rekorde)]);
   if (r0.santa) zeilen.push(['Weihnachtsmann entdeckt', `${z(r0.santa)}-mal`]);
   if (r0.blueten) zeilen.push(['Blüten am Barbarazweig', z(r0.blueten)]);
+  if (r0.wettbewerb != null) zeilen.push(['Schönstes Haus im Dorf', C.WETTBEWERB.plaetze[r0.wettbewerb] ? `${C.WETTBEWERB.plaetze[r0.wettbewerb].name} (${r0.wettbewerb + 1}. Platz)` : 'Urkunde']);
+  if (r0.voegel) zeilen.push(['Vogelarten am Futterhaus', `${z(r0.voegel)} von ${C.VOEGEL.length}`]);
+  if (r0.schneemann) zeilen.push(['Eigener Schneemann', r0.schneemann >= C.SCHNEEMANN_STUFEN ? 'fertig gebaut' : `${r0.schneemann} von ${C.SCHNEEMANN_STUFEN} Stufen`]);
   fenster(`Der Advent von ${S.st.name || 'deinem Haus'}`, `
     <div class="statistik rueckblick">${zeilen.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join('')}</div>
     <p class="klein">Danke fürs Mitfeiern - frohe Weihnachten!</p>`,
@@ -254,7 +324,8 @@ export function zeigeAdvent(n, danach) {
     <p class="zeile-gross">${e.zeile}</p>
     <p>${e.text}</p>
     ${neu.length ? `<p class="bonus">Neu freigeschaltet: ${neu.join(', ')}</p>` : ''}
-    ${Z.adventssonntag() === n ? '<p class="klein">Heute, am Adventssonntag, kommen besonders viele Gäste.</p>' : ''}`,
+    ${Z.adventssonntag() === n ? '<p class="klein">Heute, am Adventssonntag, kommen besonders viele Gäste.</p>' : ''}
+    ${n === 3 && Z.adventKerzen() === 3 && S.spieltag() + 7 >= C.WETTBEWERB.abSpieltag ? '<p class="bonus">Am 4. Advent kürt das Dorf das schönste Haus - schmück, was das Zeug hält!</p>' : ''}`,
   [{ text: 'Wunderbar!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
   BILDER[e.bild](bildKontext(box));
 }
@@ -265,6 +336,7 @@ export function zeigeAdvent(n, danach) {
  * Display. Danach das Fenster mit dem Bild vom verschneiten Dorf.
  */
 export function zeigeErsterSchnee(danach) {
+  S.st.schneemannHinweis = true;   // das Fenster nennt den Schneehaufen
   const huelle = document.getElementById('huelle') || document.body;
   const ov = document.createElement('div');
   ov.className = 'erster-schnee';
@@ -295,8 +367,61 @@ export function zeigeErsterSchnee(danach) {
     const box = fenster('Der erste Schnee!', `
       <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
       <p class="zeile-gross">Über Nacht ist alles weiß geworden.</p>
-      <p>Im Weihnachtsladen gibt es jetzt Schneemänner, und auf dem Weiher glänzt das Eis.</p>`,
+      <p>Im Weihnachtsladen gibt es jetzt Schneemänner, und auf dem Weiher glänzt das Eis.</p>
+      <p class="bonus">Auf dem Gehweg vor deinem Haus liegt ein Schneehaufen: Tipp ihn jeden Tag einmal an, dann wächst dein eigener Schneemann.</p>`,
     [{ text: 'Wie schön!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
     BILDER.schnee(bildKontext(box));
   }, 3600);
+}
+
+/**
+ * Das schönste Haus im Dorf (11.10.): Die Jury kommt am 4. Advent (gleich
+ * nach dessen Fenster). Platz nach Stimmung, Lohn in Minuten Einnahmen, und
+ * eine Plakette an der Hauswand.
+ */
+export function zeigeWettbewerb(danach) {
+  const e = S.wettbewerbAuswerten();
+  const pl = C.WETTBEWERB.plaetze[e.platz];
+  T.spiele(pl ? 'spezialKasse' : 'kasse');
+  const kopf = pl ? `${e.platz + 1}. Platz!` : 'Eine Urkunde!';
+  const text = pl
+    ? `<p>Die Jury ist durchs ganze Dorf gegangen. Bei deinem Haus bleibt sie lange stehen, flüstert, schreibt - und dann ist es entschieden: <b>${pl.name}</b> für dich!</p><p class="klein">Die Plakette hängt ab jetzt an deiner Hauswand.</p>`
+    : '<p>Die Jury ist durchs ganze Dorf gegangen. Für einen Platz hat es diesmal nicht gereicht - aber für eine Urkunde: „Mit viel Liebe geschmückt".</p>';
+  const box = fenster('Das schönste Haus im Dorf', `
+    <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
+    <p class="zeile-gross">${kopf}</p>
+    ${text}
+    <p class="bonus">+${S.formatGeld(e.betrag)} · Stimmung ♥ ${e.stimmung.toLocaleString('de-DE')}</p>`,
+  [{ text: 'Juhu!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
+  BILDER.jury(bildKontext(box), e.platz);
+}
+
+/**
+ * Silvester (11.10.): Feuerwerk und der Abschluss der Saison. Einmal je
+ * Saison, ab dem 31.12., SILVESTER_STUNDE Uhr.
+ */
+export function zeigeSilvester(danach) {
+  S.silvesterGesehen();
+  T.spiele('feuerwerk'); setTimeout(() => T.spiele('feuerwerk'), 700); setTimeout(() => T.spiele('feuerwerk'), 1500);
+  const d = Z.jetzt(), neu = d.getMonth() === 0;
+  const jahr = neu ? d.getFullYear() : d.getFullYear() + 1;
+  const box = fenster(neu ? 'Frohes neues Jahr!' : 'Guten Rutsch!', `
+    <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
+    <p>${neu ? `Das Dorf hat ${jahr} mit einem großen Feuerwerk begrüßt` : 'Das ganze Dorf steht draußen, Raketen steigen über die Dächer'} - und dein Haus leuchtet mittendrin.</p>
+    <div class="abschied"></div>
+    <p>Vielen Dank fürs Spielen! :)</p>
+    <p class="klein">Dein Haus bleibt so geschmückt, wie es ist. Im nächsten Advent geht es von vorne los - und alles, was du dieses Jahr geschafft hast, bleibt als Andenken.</p>`,
+  [
+    { text: 'Mein Advent', aktion: () => { setTimeout(() => zeigeRueckblick(danach), 60); } },
+    { text: 'Weiter', neben: true, aktion: () => { if (danach) setTimeout(danach, 60); } },
+  ]);
+  BILDER.silvester(bildKontext(box));
+  // „Bis zum nächsten Jahr!" in der Weihnachtsschrift, 1:1 in Spielpixeln
+  // (dreizeilig: einzeilig wäre sie bei k = 2 doppelt so breit wie das Fenster)
+  for (const zeile of ['BIS ZUM', 'NÄCHSTEN', 'JAHR!']) {
+    const cv = schriftBild(zeile, 'gold', 2);
+    cv.className = 'schriftbild';
+    cv.style.height = `calc(var(--px) * ${cv.height})`;
+    box.querySelector('.abschied').appendChild(cv);
+  }
 }

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610111344';
-import * as Z from './zeit.js?v=202610111344';
-import { neueFarben } from './pixel.js?v=202610111344';
+import * as C from './config.js?v=202610112029';
+import * as Z from './zeit.js?v=202610112029';
+import { neueFarben } from './pixel.js?v=202610112029';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -97,6 +97,13 @@ function laden() {
       stand.miniSkalaWert = Object.fromEntries(Object.entries(C.MINISPIELE).map(([n, d]) => [n, d.skala]));
       // Orte gehen seit 11.10. mit der Einführung auf - wer schon weiter ist, hat alle
       if (!('orteStaffel' in alt)) { stand.orteStaffel = true; if (alt.lernen >= 99) stand.orteAlle = true; }
+      // Das Vogelhäuschen aus Türchen 18 ist seit 11.10. das Futterhaus im Laden;
+      // Türchen 18 bringt jetzt den Meisenknödel. Wer es schon hatte, bekommt beides.
+      if (stand.kalDeko && stand.kalDeko.kal_vogel) {
+        delete stand.kalDeko.kal_vogel;
+        stand.kalDeko.kal_knoedel = true;
+        stand.besitz.futterhaus = Math.max(1, stand.besitz.futterhaus || 0);
+      }
       if (!('miniStaffel' in alt)) {
         stand.miniStaffel = true;
         if (alt.tipps && alt.tipps.karte_mehr) stand.miniAlle = true;
@@ -177,6 +184,7 @@ function resetLauf() {
     haendler: null, haendlerT: 0,   // der fahrende Händler (haendlerT = s am Stand)
     haendlerAb: C.HAENDLER_ERST[0] + Math.random() * (C.HAENDLER_ERST[1] - C.HAENDLER_ERST[0]),
     sonderSeit: null,               // seit wann besondere Gäste kommen dürften (sonderBereit)
+    voegel: [], vogelAb: 4,         // Vögel am Futterhaus (11.10.)
     t: 0,
   });
 }
@@ -238,6 +246,7 @@ export function stimmung() {
   for (const d of C.MARKT_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of [...C.LICHTUNG_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO]) if (st.kalDeko[d.id]) s += d.stimmung;
   s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
+  s += schneemannHerzen();
   return s;
 }
 
@@ -328,7 +337,8 @@ export const preisFaktor = () => (1 + stimmung() * C.STIMMUNG_PREIS) * (1 + boni
 export function gastTakt() {
   const sonntag = Z.adventssonntag() ? C.ADVENT_GAESTE : 0;
   const markt = marktHeute() ? C.MARKT_GAESTE : 0;
-  const t = C.GAST_BASIS / (1 + stimmung() / C.STIMMUNG_TAKT) / (1 + boni().gaeste + sonntag + markt);
+  const fa = feierabend() ? C.FEIERABEND.gaeste : 0;
+  const t = C.GAST_BASIS / (1 + stimmung() / C.STIMMUNG_TAKT) / (1 + boni().gaeste + sonntag + markt + fa);
   return Math.max(C.GAST_MIN, t);
 }
 
@@ -429,6 +439,7 @@ export function kaufe(id) {
   if (a.wahl === 'lichtfarbe') { st.bunt = st.bunt || {}; st.bunt[a.kette] = true; }
   if (a.wahl === 'zaunfarbe') st.zaunfarbe = 'braun';
   if (id === 'musik') hooks.musik();
+  if (id === 'futterhaus') setTimeout(() => hooks.toast('Tipp das Futterhaus im alten Baum an, um es zu füllen - dann kommen Vögel.', 'spezial'), 1200);
   hooks.ton('kauf');
   hooks.geld();
   speichere();
@@ -1179,6 +1190,7 @@ export function update(dt) {
     hooks.ton('glocken');
   }
   haendlerTakt(dt);
+  vogelTakt(dt);
   marktAnsage();
   if (lauf.schlitten) { lauf.schlitten.t += dt; if (lauf.schlitten.t >= lauf.schlitten.dauer) lauf.schlitten = null; }
   for (const g of G) if (g.jubelT > 0) g.jubelT -= dt;
@@ -1638,6 +1650,8 @@ export function rueckblick() {
     getraenke: C.PRODUKTE.filter((p) => hat(p.id)).length,
     rekorde: Object.keys(C.MINISPIELE).filter((n) => miniRekord(n) > 0).length,
     blueten: st.barbara ? barbaraBlueten(st.barbara) : 0,
+    voegel: Object.keys(st.voegel || {}).length, schneemann: schneemannStufe(),
+    wettbewerb: st.wettbewerb && st.wettbewerb.saison === Z.saison() ? st.wettbewerb.platz : null,
   };
 }
 
@@ -1765,4 +1779,138 @@ export function zaehleTiere(arten) {
   st.stats.tiere = st.stats.tiere || {};
   for (const [a, n] of Object.entries(arten || {})) st.stats.tiere[a] = (st.stats.tiere[a] || 0) + n;
   speichere();
+}
+
+// ---------------------------------------------------------------------------
+// Feierabend (11.10.): 17 bis 19 Uhr mehr Gäste
+// ---------------------------------------------------------------------------
+export function feierabend(d = Z.jetzt()) {
+  const h = d.getHours();
+  return h >= C.FEIERABEND.von && h < C.FEIERABEND.bis;
+}
+/** Einmal am Tag sagen, wenn der Feierabend beginnt (aus der Sekundenschleife). */
+export function feierabendAnsage() {
+  if (st.lernen < 99 || !feierabend() || !startzieleFertig()) return false;
+  const k = Z.tagesSchluessel();
+  if (st.feierabendTag === k) return false;
+  st.feierabendTag = k;
+  return true;
+}
+
+// ---------------------------------------------------------------------------
+// Futterhaus und Vögel (11.10.)
+// ---------------------------------------------------------------------------
+export const futterVoll = () => hat('futterhaus') && (st.futterBis || 0) > Z.jetzt().getTime();
+export function fuettere() {
+  if (!hat('futterhaus')) return false;
+  const voll = futterVoll();
+  st.futterBis = Z.jetzt().getTime() + C.FUTTER_STUNDEN * 3600000;
+  if (!voll) lauf.vogelAb = Math.min(lauf.vogelAb, 3);   // gleich kommt der erste
+  speichere();
+  return !voll;
+}
+const vogelZeit = () => Z.licht().hell > 0.12;   // nachts schlafen sie
+function vogelWahl() {
+  const schnee = Z.schnee() > 0, knoedel = !!st.kalDeko.kal_knoedel;
+  const liste = C.VOEGEL.filter((v) => !v.schnee || schnee);
+  const gew = (v) => v.w * (v.selten && knoedel ? C.KNOEDEL_SELTEN : 1);
+  let r = Math.random() * liste.reduce((s, v) => s + gew(v), 0);
+  for (const v of liste) { r -= gew(v); if (r <= 0) return v; }
+  return liste[0];
+}
+function vogelTakt(dt) {
+  const V = lauf.voegel;
+  for (const v of V) v.t += dt;
+  // Wer seine Zeit abgesessen hat, fliegt los (1,2 s Flug), danach ist er weg
+  for (let i = V.length - 1; i >= 0; i--) if (V[i].t > V[i].bleibt + 2.4) V.splice(i, 1);
+  if (!zeigt('futterhaus') || !futterVoll() || !vogelZeit() || st.lernen < 99) return;
+  lauf.vogelAb -= dt;
+  if (lauf.vogelAb > 0 || V.length >= C.VOGEL_MAX) return;
+  lauf.vogelAb = C.VOGEL_TAKT[0] + Math.random() * (C.VOGEL_TAKT[1] - C.VOGEL_TAKT[0]);
+  const frei = [0, 1, 2, 3].filter((p) => !V.some((v) => v.platz === p));
+  if (!frei.length) return;
+  const art = vogelWahl();
+  V.push({ art: art.id, platz: frei[Math.floor(Math.random() * frei.length)], t: 0,
+    bleibt: C.VOGEL_BLEIBT[0] + Math.random() * (C.VOGEL_BLEIBT[1] - C.VOGEL_BLEIBT[0]), links: Math.random() < 0.5 });
+  st.voegel = st.voegel || {};
+  const neu = !st.voegel[art.id];
+  st.voegel[art.id] = (st.voegel[art.id] || 0) + 1;
+  if (neu) { hooks.toast(`${art.selten ? 'Selten! ' : ''}Ein${art.id === 'kohlmeise' || art.id === 'blaumeise' ? 'e' : ''} ${art.name} am Futterhaus - neu im Album!`, art.selten ? 'spezial' : 'neu'); hooks.ton(art.selten ? 'spezial' : 'fertig'); }
+  speichere();
+}
+
+// ---------------------------------------------------------------------------
+// Der eigene Schneemann (11.10.): einmal am Tag eine Stufe
+// ---------------------------------------------------------------------------
+export function schneemannStufe() { return (st.schneemann && st.schneemann.stufe) || 0; }
+function schneemannHerzen() {
+  const s = schneemannStufe();
+  return s * C.SCHNEEMANN_HERZ + (s >= C.SCHNEEMANN_STUFEN ? C.SCHNEEMANN_FERTIG : 0);
+}
+/** Kann man heute weiterbauen? (Funkeln am Schneehaufen) */
+export const schneemannBereit = () => Z.schnee() > 0 && st.lernen >= 99 && schneemannStufe() < C.SCHNEEMANN_STUFEN
+  && (!st.schneemann || st.schneemann.tag !== Z.tagesSchluessel());
+/** 'gebaut' | 'fertig' (gerade fertig geworden) | 'morgen' | 'kein' (kein Schnee) | 'ist' (schon fertig) */
+export function baueSchneemann() {
+  if (Z.schnee() <= 0) return 'kein';
+  const s = schneemannStufe();
+  if (s >= C.SCHNEEMANN_STUFEN) return 'ist';
+  if (st.schneemann && st.schneemann.tag === Z.tagesSchluessel()) return 'morgen';
+  st.schneemann = { stufe: s + 1, tag: Z.tagesSchluessel() };
+  speichere();
+  return s + 1 >= C.SCHNEEMANN_STUFEN ? 'fertig' : 'gebaut';
+}
+
+// ---------------------------------------------------------------------------
+// Das schönste Haus im Dorf (11.10.): die Jury am 4. Advent
+// ---------------------------------------------------------------------------
+export function wettbewerbFaellig() {
+  if (st.lernen < 99 || DEMO) return false;
+  if (st.wettbewerb && st.wettbewerb.saison === Z.saison()) return false;
+  if (Z.adventKerzen() < 4 || Z.dezemberTag() > 24) return false;
+  return spieltag() >= C.WETTBEWERB.abSpieltag;
+}
+/** Vor dem 4. Advent: in wie vielen Tagen kommt die Jury? (null = nicht dabei) */
+export function wettbewerbInTagen() {
+  if (st.lernen < 99 || Z.adventKerzen() !== 3 || Z.dezemberTag() > 24) return null;
+  const d = Z.jetzt(), n = 7 - d.getDay();   // bis zum nächsten Sonntag
+  return n === 7 ? 0 : n;
+}
+export function wettbewerbPlatz(s = stimmung()) {
+  const i = C.WETTBEWERB.plaetze.findIndex((p) => s >= p.ab);
+  return i < 0 ? C.WETTBEWERB.plaetze.length : i;   // plaetze.length = Urkunde
+}
+export function wettbewerbAuswerten() {
+  const s = stimmung(), platz = wettbewerbPlatz(s);
+  const betrag = Math.round(Math.max(C.WETTBEWERB.lohnMin, einnahmenProMinute() * C.WETTBEWERB.lohn[platz]) / 10) * 10;
+  verdiene(betrag);
+  st.wettbewerb = { saison: Z.saison(), platz, stimmung: s, betrag };
+  speichere();
+  return st.wettbewerb;
+}
+/** Plakette am Haus: Platz dieser Saison oder null. */
+export const plakette = () => (st.wettbewerb && st.wettbewerb.saison === Z.saison() && st.wettbewerb.platz < C.WETTBEWERB.plaetze.length ? st.wettbewerb.platz : null);
+
+// ---------------------------------------------------------------------------
+// Silvester (11.10.): Feuerwerk und der Abschluss der Saison
+// ---------------------------------------------------------------------------
+/** Wie viel Feuerwerk gerade am Himmel ist (0..1). */
+export function feuerwerk(d = Z.jetzt()) {
+  const m = d.getMonth(), tag = d.getDate(), h = d.getHours() + d.getMinutes() / 60;
+  if (m === 11 && tag === 31 && h >= C.SILVESTER_STUNDE) return h >= 23.75 ? 0.7 : 0.25 + (h - C.SILVESTER_STUNDE) / 6 * 0.25;
+  if (m === 0 && tag === 1 && h < 3) return h < 0.5 ? 1 : h < 1 ? 0.6 : 0.3 * (3 - h) / 2;
+  return 0;
+}
+export function silvesterJetzt(d = Z.jetzt()) {
+  const dt = Z.dezemberTag(d);
+  return (dt === 31 && d.getHours() >= C.SILVESTER_STUNDE) || (dt > 31 && dt <= 60);
+}
+export const silvesterFaellig = () => st.lernen >= 99 && !DEMO && silvesterJetzt() && st.silvester !== Z.saison();
+export function silvesterGesehen() { st.silvester = Z.saison(); speichere(); }
+/** Um Mitternacht einmal „Frohes neues Jahr!" (aus der Sekundenschleife). */
+export function neujahrJetzt() {
+  const d = Z.jetzt();
+  if (st.lernen < 99 || d.getMonth() !== 0 || d.getDate() !== 1 || d.getHours() !== 0 || st.neujahr === Z.saison()) return false;
+  st.neujahr = Z.saison(); speichere();
+  return true;
 }

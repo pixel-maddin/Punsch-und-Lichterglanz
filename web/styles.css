@@ -782,3 +782,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   60% { transform: translate(-25%, 260%) rotate(130deg); }
   100% { transform: translate(-50%, 380%) rotate(180deg) scale(1.15); }
 }
+
+/* Silvester (11.10.): „Bis zum nächsten Jahr!" in der Weihnachtsschrift, 1:1 in Spielpixeln */
+#modal .abschied { display: flex; flex-direction: column; align-items: center; gap: 0; margin: calc(var(--px) * 3) 0 calc(var(--px) * 1); }
+#modal .abschied .schriftbild { display: block; image-rendering: pixelated; margin: calc(var(--px) * -2) 0; }
