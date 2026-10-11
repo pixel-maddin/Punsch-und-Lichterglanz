@@ -11,20 +11,23 @@
  * Fläche umgerechnet, damit sie bei jeder Bildschirmgröße sitzen.
  * Solange kein Minispiel offen ist (z. B. im Messweg), tut alles nichts.
  */
-import { zeichneSymbol } from './symbole.js?v=202610111313';
-import { schriftBild, stilFuer } from './schrift.js?v=202610111313';
+import { zeichneSymbol } from './symbole.js?v=202610111332';
+import { schriftBild, stilFuer } from './schrift.js?v=202610111332';
 
 /**
- * Text in der Weihnachtsschrift (schrift.js) in ein Element setzen. `gr` =
- * Spielpixel je Schriftpixel. Nur neu zeichnen, wenn sich etwas ändert.
+ * Text in der Weihnachtsschrift (schrift.js) in ein Element setzen. Ein
+ * Schriftpixel ist immer genau EIN Spielpixel (11.10.: vorher 0,6 bis 1,3,
+ * die Schrift stand mit anderen Pixeln als das Bild darunter); größer wird
+ * sie nur über `k`, das die Glyphen in schrift.js selbst dicker zeichnet.
+ * Nur neu zeichnen, wenn sich etwas ändert.
  */
-function setzeSchrift(el, text, stil, k, gr) {
-  const schl = `${text}|${stil}|${k}|${gr}`;
+function setzeSchrift(el, text, stil, k) {
+  const schl = `${text}|${stil}|${k}`;
   if (el.dataset.s === schl) return;
   el.dataset.s = schl;
   const cv = schriftBild(text, stil, k);
   cv.className = 'schriftbild';
-  cv.style.height = `calc(var(--px) * ${(cv.height * gr).toFixed(2)})`;
+  cv.style.height = `calc(var(--px) * ${cv.height})`;
   el.replaceChildren(cv);
 }
 
@@ -68,21 +71,21 @@ export function setzeKopf({ zeit, knapp = false, kette = 1, ketteAnteil = 0, pun
   if (sig === letzterKopf) return;
   letzterKopf = sig;
   const z = kopf.querySelector('.mh-zeit');
-  setzeSchrift(z.querySelector('span'), String(zeit), knapp ? 'rot' : 'creme', 1, 0.75);
+  setzeSchrift(z.querySelector('span'), String(zeit), knapp ? 'rot' : 'creme', 1);
   z.classList.toggle('knapp', knapp);
   // Mitte: entweder die Kette (Lichtung, Christbaum) oder der Fortschritt (Schlittenberg)
   const k = kopf.querySelector('.mh-kette');
   if (fortschritt != null) {
     k.classList.remove('versteckt'); k.classList.add('fort');
-    setzeSchrift(k.querySelector('span'), 'ZIEL', 'creme', 1, 0.6);
+    setzeSchrift(k.querySelector('span'), 'ZIEL', 'creme', 1);
     k.querySelector('b').style.width = `${Math.round(fortschritt * 100)}%`;
   } else {
     k.classList.remove('fort');
     k.classList.toggle('versteckt', kette <= 1);
-    setzeSchrift(k.querySelector('span'), `×${kette}`, 'gruen', 1, 0.75);
+    setzeSchrift(k.querySelector('span'), `×${kette}`, 'gruen', 1);
     k.querySelector('b').style.width = `${Math.round(ketteAnteil * 100)}%`;
   }
-  setzeSchrift(kopf.querySelector('.mh-punkte span'), punkte.toLocaleString('de-DE'), 'gold', 1, 0.75);
+  setzeSchrift(kopf.querySelector('.mh-punkte span'), punkte.toLocaleString('de-DE'), 'gold', 1);
 }
 
 /** Großer Text in der Mitte (Countdown, LOS!, ZEIT!), null blendet aus. */
@@ -92,7 +95,7 @@ export function mitte(text, farbe = '#ffe27a') {
   if (gross.dataset.t === text) return;
   gross.dataset.t = text;
   // Countdown-Ziffern als Zuckerstange, Wörter (LOS!, ZEIT!, ZIEL!) in Gold
-  setzeSchrift(gross, text, /^\d+$/.test(text) ? 'zucker' : stilFuer(farbe), 3, 1.3);
+  setzeSchrift(gross, text, /^\d+$/.test(text) ? 'zucker' : stilFuer(farbe), 4);
   gross.classList.remove('versteckt');
   // Bei jedem neuen Wort einmal aufploppen
   gross.classList.remove('plopp'); void gross.offsetWidth; gross.classList.add('plopp');
@@ -120,7 +123,7 @@ export function schwebe(x, y, text, farbe = '#ffe27a', gr = 1) {
   if (!aktiv) return;
   const el = document.createElement('div');
   el.className = 'mh-schwebe';
-  setzeSchrift(el, text, stilFuer(farbe), 1, 0.85 * gr);
+  setzeSchrift(el, text, stilFuer(farbe), 1);   // `gr` wird nicht mehr gebraucht: eine Pixelgröße für alle
   el.style.left = px(x); el.style.top = py(y);
   box.appendChild(el);
   setTimeout(() => el.remove(), 1000);

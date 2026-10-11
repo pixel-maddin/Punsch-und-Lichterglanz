@@ -10,11 +10,11 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610111313';
-import * as Z from './zeit.js?v=202610111313';
-import * as T from './ton.js?v=202610111313';
-import * as MH from './minihud.js?v=202610111313';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610111313';
+import * as C from './config.js?v=202610111332';
+import * as Z from './zeit.js?v=202610111332';
+import * as T from './ton.js?v=202610111332';
+import * as MH from './minihud.js?v=202610111332';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610111332';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -231,15 +231,6 @@ function kreis(cx, cy, rad, f) {
 function ellipse(cx, cy, rx, ry, f) {
   c.fillStyle = f;
   for (let y = -ry; y <= ry; y++) { const w = Math.round(rx * Math.sqrt(Math.max(0, 1 - (y * y) / (ry * ry)))); c.fillRect(Math.round(cx - w), Math.round(cy + y), w * 2 + 1, 1); }
-}
-function gross(s, f, x, y, k, links) {
-  const w = textBreite(s) + 2;
-  const tmp = gross.cv || (gross.cv = document.createElement('canvas'));
-  tmp.width = w; tmp.height = 7;
-  const t = tmp.getContext('2d');
-  t.clearRect(0, 0, w, 7);
-  pixText(t, s, 0, 0, f);
-  c.drawImage(tmp, Math.round(links ? x : x - w * k / 2), Math.round(y), w * k, 7 * k);
 }
 
 function tanne(x, fuss, h) {

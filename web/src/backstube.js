@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610111313';
-import * as Z from './zeit.js?v=202610111313';
-import * as T from './ton.js?v=202610111313';
-import * as MH from './minihud.js?v=202610111313';
-import { r, p, ton, figurKlein, neueFarben } from './pixel.js?v=202610111313';
+import * as C from './config.js?v=202610111332';
+import * as Z from './zeit.js?v=202610111332';
+import * as T from './ton.js?v=202610111332';
+import * as MH from './minihud.js?v=202610111332';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610111332';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -35,23 +35,48 @@ const MASKEN = {
   baum:  ['....#....', '...###...', '..#####..', '...###...', '..#####..', '.#######.', '#########', '....#....'],
   kreis: ['..#####..', '.#######.', '####.####', '###...###', '####.####', '.#######.', '..#####..'],
 };
-const istTeig = (m, x, y) => y >= 0 && y < m.length && x >= 0 && x < 9 && m[y][x] === '#';
+const istTeig = (m, x, y) => y >= 0 && y < m.length && x >= 0 && x < m[0].length && m[y][x] === '#';
 /** Innen = alle vier Nachbarn sind Teig (dort liegt die Verzierung). */
 const innen = (m, x, y) => istTeig(m, x, y) && istTeig(m, x - 1, y) && istTeig(m, x + 1, y) && istTeig(m, x, y - 1) && istTeig(m, x, y + 1);
 // Teigfarbe je Backgrad: roh, blass, golden, dunkel, verbrannt
 const BACKFARBE = { roh: '#f0dcb0', blass: '#ecd09a', golden: '#d89a48', dunkel: '#a8662c', verbrannt: '#3a2a22' };
 
 /**
- * Ein Plätzchen malen (auch fürs Rezeptbuch in ui.js). `k` = Pixelgröße,
- * `grad` = Backgrad, `deko` = Verzierung oder null. (x, y) = linke obere Ecke.
+ * Die Maske einer Form in doppelter Größe (11.10.), mit Scale2x-Regeln auf
+ * „Teig / kein Teig": Schräge Kanten bekommen Stufen von EINEM Pixel. Vorher
+ * wurde jedes Maskenpixel als 2x2-Block gemalt, und Rand, Glanz und Streusel
+ * waren doppelt so grob wie alles andere im Bild. Jetzt wird die Form groß
+ * gemacht und Schattierung und Verzierung erst danach pixelgenau gerechnet.
+ */
+const _gross = {};
+function maske(form, k) {
+  const m = MASKEN[form];
+  if (k !== 2) return m;
+  if (_gross[form]) return _gross[form];
+  const h = m.length, w = m[0].length, T = (x, y) => istTeig(m, x, y);
+  const z = Array.from({ length: h * 2 }, () => Array(w * 2).fill('.'));
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const P = T(x, y), A = y > 0 ? T(x, y - 1) : P, D = y < h - 1 ? T(x, y + 1) : P;
+    const L = x > 0 ? T(x - 1, y) : P, R = x < w - 1 ? T(x + 1, y) : P;
+    const e = [L === A && L !== D && A !== R ? A : P, A === R && A !== L && R !== D ? R : P,
+      D === L && D !== R && L !== A ? L : P, R === D && R !== A && D !== L ? D : P];
+    e.forEach((v, i) => { z[y * 2 + (i >> 1)][x * 2 + (i & 1)] = v ? '#' : '.'; });
+  }
+  return (_gross[form] = z.map((zeile) => zeile.join('')));
+}
+
+/**
+ * Ein Plätzchen malen (auch fürs Rezeptbuch in ui.js). `k` = 1 oder 2
+ * (Größe; die Pixel bleiben Spielpixel), `grad` = Backgrad, `deko` =
+ * Verzierung oder null. (x, y) = linke obere Ecke.
  */
 export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
-  const m = MASKEN[form];
-  const px = (xx, yy, f) => { ctx.fillStyle = f; ctx.fillRect(x + xx * k, y + yy * k, k, k); };
+  const m = maske(form, k), w = m[0].length;
+  const px = (xx, yy, f) => { ctx.fillStyle = f; ctx.fillRect(x + xx, y + yy, 1, 1); };
   const teig = BACKFARBE[grad] || BACKFARBE.golden;
   const rand = ton(teig, -0.22);
   const licht = ton(teig, 0.2), krume = ton(teig, -0.12);
-  for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < 9; xx++) {
+  for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < w; xx++) {
     if (!istTeig(m, xx, yy)) continue;
     // Unterkante dunkler (Dicke), Oberkante und linke Kante heller (Licht von oben links),
     // dazu ein paar Krümel/Poren im Teig - seit 11.10., vorher eine flache Fläche
@@ -62,20 +87,22 @@ export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
     px(xx, yy, f);
   }
   if (!deko || grad === 'verbrannt') return;
-  for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < 9; xx++) {
+  const n = m.length;
+  for (let yy = 0; yy < n; yy++) for (let xx = 0; xx < w; xx++) {
     const i = innen(m, xx, yy), t = istTeig(m, xx, yy);
+    const bx = Math.floor(xx / k), by = Math.floor(yy / k);   // Stelle auf der kleinen Maske
     // Guss (11.10. deutlicher): deckend weiß, glänzend, mit Glanzstreifen und
     // einem Tropfen über die Unterkante. Puder: nur feiner Staub, der Teig
     // scheint überall durch - so sind die beiden nicht mehr zu verwechseln.
-    if (deko === 'guss' && i) px(xx, yy, xx + yy === 5 || xx + yy === 6 ? '#ffffff' : (yy > 4 ? '#e6eef6' : '#f8fbff'));
-    else if (deko === 'guss' && t && !istTeig(m, xx, yy + 1) && (xx === 3 || xx === 6)) px(xx, yy, '#eef4fa');
+    if (deko === 'guss' && i) px(xx, yy, xx + yy >= 5 * k && xx + yy < 7 * k - (k - 1) ? '#ffffff' : (by > 4 ? '#e6eef6' : '#f8fbff'));
+    else if (deko === 'guss' && t && !istTeig(m, xx, yy + 1) && (bx === 3 || bx === 6)) px(xx, yy, '#eef4fa');
     else if (deko === 'puder' && t && ((xx * 5 + yy * 3) % 7 === 0 || (xx * 3 + yy * 7) % 11 === 0)) px(xx, yy, '#fffdf8');
     else if (deko === 'schoko' && i) px(xx, yy, (xx + yy) % 4 === 0 ? '#8a5a3a' : (xx - yy) % 5 === 0 ? '#3a1e12' : '#5a3220');   // mit Glanzstreifen
     else if (deko === 'gruen' && i) px(xx, yy, (xx * 7 + yy * 3) % 5 === 0 ? ['#ff5a5a', '#ffe060', '#5ad0ff'][(xx + yy) % 3] : '#5aa84a');
     else if (deko === 'marmelade') {
       // Spitzbube: das Loch in der Mitte zeigt rote Marmelade; sonst ein Klecks
-      if (!t && yy > 1 && yy < m.length - 2 && xx > 1 && xx < 7) px(xx, yy, '#c8283a');
-      else if (form !== 'kreis' && i && Math.abs(xx - 4) <= 1 && Math.abs(yy - 4) <= 1) px(xx, yy, '#c8283a');
+      if (!t && by > 1 && by < n / k - 2 && bx > 1 && bx < 7) px(xx, yy, '#c8283a');
+      else if (form !== 'kreis' && i && Math.abs(bx - 4) <= 1 && Math.abs(by - 4) <= 1) px(xx, yy, (xx + yy) % 5 === 0 ? '#e8505a' : '#c8283a');
       else if (form === 'kreis' && t && (xx + yy) % 3 === 0) px(xx, yy, '#fbf8f2');
     }
   }
@@ -513,15 +540,19 @@ function blase(k, t) {
 
 function form(i, n, f, aktiv, t) {
   const x = slot(i, n), y = FORM_Y();
-  // Blechform: Umriss der Maske doppelt groß, innen leer
-  const m = MASKEN[f], k = 2, x0 = x - 9, y0 = y - Math.round(m.length);
+  // Blechform: Umriss der doppelt großen Maske (maske(f, 2)), innen leer -
+  // außen ein dunkler Pixel, innen ein heller (Blechkante), statt 2x2-Blöcken
+  const m = maske(f, 2), x0 = x - 9, y0 = y - Math.round(m.length / 2);
   const druck = spiel.stich && spiel.stich.form === f ? 1 : 0;
   r(c, x - 13, y - 11, 26, 22, aktiv ? '#f8ecd0' : '#e8d8b8');
   r(c, x - 13, y + 10, 26, 1, '#b8946a');
-  for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < 9; xx++) {
+  const offen = (xx, yy) => !istTeig(m, xx - 1, yy) || !istTeig(m, xx + 1, yy) || !istTeig(m, xx, yy - 1) || !istTeig(m, xx, yy + 1);
+  for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < m[0].length; xx++) {
     if (!istTeig(m, xx, yy)) continue;
-    const rand = !istTeig(m, xx - 1, yy) || !istTeig(m, xx + 1, yy) || !istTeig(m, xx, yy - 1) || !istTeig(m, xx, yy + 1);
-    if (rand) { c.fillStyle = '#9aa0ac'; c.fillRect(x0 + xx * k, y0 + yy * k + druck, k, k); }
+    const aussen = offen(xx, yy);
+    const rand = (a, b) => istTeig(m, a, b) && offen(a, b);
+    const zweite = !aussen && (rand(xx - 1, yy) || rand(xx + 1, yy) || rand(xx, yy - 1) || rand(xx, yy + 1));
+    if (aussen || zweite) { c.fillStyle = aussen ? '#8a909c' : '#c4c8d2'; c.fillRect(x0 + xx, y0 + yy + druck, 1, 1); }
   }
 }
 function schale(i, n, d) {
@@ -543,13 +574,11 @@ function schale(i, n, d) {
   } else r(c, x + 8, y - 12, 1, 8, '#c8a878');   // Löffel / Pinsel
   MH.label('schale' + i, x, y + 9, C.BACK_DEKOS[d].kurz, 'schild');
 }
-// Kunden doppelt so groß wie auf der Straße (sonst ging er hinter der Theke unter)
-const _fig = document.createElement('canvas'); _fig.width = 24; _fig.height = 24;
-function kundeGross(f, x, fuss, t) {
-  const k = _fig.getContext('2d');
-  k.clearRect(0, 0, 24, 24);
-  figurKlein(k, f, 12, 23, t);
-  c.drawImage(_fig, Math.round(x - 24), Math.round(fuss - 46), 48, 48);
+// Kunden doppelt so groß wie auf der Straße (sonst ging er hinter der Theke
+// unter). Seit 11.10. die GROSSE Figur vom Tresen, nativ gezeichnet - vorher
+// die kleine, als 2x2-Blöcke hochgezogen, mit doppelt so groben Pixeln.
+function kundeGross(f, x, theke, t) {
+  figurGross(c, { ...f, laeuft: false }, Math.round(x), theke, t, 'froh');
 }
 
 function zeichne(t) {
@@ -560,7 +589,7 @@ function zeichne(t) {
   const k = g.kunde, th = THEKE();
   // Kunde hinter der Theke (die Theke verdeckt die Beine)
   if (k) {
-    kundeGross(k.figur, k.x, th + 5, t);
+    kundeGross(k.figur, k.x, th, t);
     r(c, 0, th, W, 5, '#a8703a'); r(c, 0, th, W, 1, '#c8905a'); r(c, 0, th + 4, W, 1, '#6a4222');
     if (k.bekommen) zeichnePlaetzchen(c, Math.round(k.x) - 12, th - 9, k.bekommen.form, k.bekommen.grad, k.bekommen.deko, 1);
     if (k.phase === 'wartet') blase(k, t); else MH.label('wunsch', 0, 0, null);

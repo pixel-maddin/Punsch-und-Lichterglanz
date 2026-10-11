@@ -4,17 +4,32 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610111313';
-import * as S from './spiel.js?v=202610111313';
-import * as T from './ton.js?v=202610111313';
-import * as Z from './zeit.js?v=202610111313';
-import { r, p, figurKlein, neueFarben } from './pixel.js?v=202610111313';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT } from './fein.js?v=202610111313';
-import { fenster, karte } from './ui.js?v=202610111313';
+import * as C from './config.js?v=202610111332';
+import * as S from './spiel.js?v=202610111332';
+import * as T from './ton.js?v=202610111332';
+import * as Z from './zeit.js?v=202610111332';
+import { r, p, figurKlein, neueFarben } from './pixel.js?v=202610111332';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse } from './fein.js?v=202610111332';
+import { fenster, karte } from './ui.js?v=202610111332';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
 const BW = 180, BH = 100;
+
+/**
+ * Leinwand eines Ereignisfensters auf die feine Stufe bringen (11.10.): so
+ * breit, wie bei ¾ Spielpixel je Bildpixel ins Fenster passt (höchstens
+ * 180), gezeichnet wird weiter für 180 und die Mitte gezeigt.
+ */
+function bildKontext(box) {
+  const cv = box.querySelector('canvas.ereignisbild');
+  const b = feinBreite(cv, BW);
+  cv.width = b; cv.height = BH;
+  feinGroesse(cv);
+  const c = cv.getContext('2d');
+  c.translate(-Math.floor((BW - b) / 2), 0);
+  return c;
+}
 
 function mensch(c, x, fuss, typ) {
   figurKlein(c, { typ, farben: neueFarben(typ), phase: x, laeuft: false }, x, fuss, 0);
@@ -203,7 +218,7 @@ export function zeigeHeiligabend(danach) {
     <p>Das ganze Dorf ist auf den Beinen. Mit Kerzen in der Hand ziehen alle zur Kirche - und bleiben bei deinem Haus stehen, um zu singen.</p>
     ${zweig}`,
   [{ text: 'Mein Advent', aktion: () => { setTimeout(() => zeigeRueckblick(danach), 60); } }]);
-  BILDER.heiligabend(box.querySelector('canvas').getContext('2d'));
+  BILDER.heiligabend(bildKontext(box));
 }
 
 /** Der Rückblick: was in diesem Advent passiert ist. Auch aus dem Menü erreichbar. */
@@ -241,8 +256,7 @@ export function zeigeAdvent(n, danach) {
     ${neu.length ? `<p class="bonus">Neu freigeschaltet: ${neu.join(', ')}</p>` : ''}
     ${Z.adventssonntag() === n ? '<p class="klein">Heute, am Adventssonntag, kommen besonders viele Gäste.</p>' : ''}`,
   [{ text: 'Wunderbar!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
-  const c = box.querySelector('canvas').getContext('2d');
-  BILDER[e.bild](c);
+  BILDER[e.bild](bildKontext(box));
 }
 
 /**
@@ -254,20 +268,23 @@ export function zeigeErsterSchnee(danach) {
   const huelle = document.getElementById('huelle') || document.body;
   const ov = document.createElement('div');
   ov.className = 'erster-schnee';
-  ov.innerHTML = '<div class="frost"></div><canvas class="flocke" width="17" height="17"></canvas>';
+  // 35 x 35 in Spielpixeln (11.10.: vorher 17 x 17, auf die doppelte Größe gezogen)
+  ov.innerHTML = '<div class="frost"></div><canvas class="flocke" width="35" height="35"></canvas>';
   const c = ov.querySelector('canvas').getContext('2d');
   // Sechsstrahlige Flocke, pixelgenau
-  const f = '#ffffff', g = '#d8ecff';
-  // Sechs Arme im 60°-Abstand, jeder mit zwei kleinen Seitenzweigen
+  const f = '#ffffff', g = '#d8ecff', m = 17;
+  // Sechs Arme im 60°-Abstand, jeder mit drei Paar Seitenzweigen
   for (let k = 0; k < 6; k++) {
     const a = Math.PI / 2 + k * Math.PI / 3, dx = Math.cos(a), dy = Math.sin(a);
-    for (let i = 0; i <= 8; i++) p(c, Math.round(8 + dx * i), Math.round(8 + dy * i), i > 6 ? g : f);
-    for (const [i, l] of [[4, 2], [6, 1]]) for (const s2 of [-1, 1]) {
+    for (let i = 0; i <= 17; i++) p(c, Math.round(m + dx * i), Math.round(m + dy * i), i > 14 ? g : f);
+    for (const [i, l] of [[6, 4], [10, 3], [13, 2]]) for (const s2 of [-1, 1]) {
       const b2 = a + s2 * Math.PI / 3;
-      for (let j = 1; j <= l; j++) p(c, Math.round(8 + dx * i + Math.cos(b2) * j), Math.round(8 + dy * i + Math.sin(b2) * j), g);
+      for (let j = 1; j <= l; j++) p(c, Math.round(m + dx * i + Math.cos(b2) * j), Math.round(m + dy * i + Math.sin(b2) * j), j === l ? g : f);
     }
   }
-  p(c, 8, 8, g);
+  // Sechseck in der Mitte
+  for (let y = -2; y <= 2; y++) for (let x = -2 + Math.abs(y) / 2; x <= 2 - Math.abs(y) / 2; x++) p(c, Math.round(m + x), m + y, g);
+  p(c, m, m, f);
   huelle.appendChild(ov);
   T.musikPause(true);
   setTimeout(() => T.spiele('glocken'), 2600);
@@ -280,6 +297,6 @@ export function zeigeErsterSchnee(danach) {
       <p class="zeile-gross">Über Nacht ist alles weiß geworden.</p>
       <p>Im Weihnachtsladen gibt es jetzt Schneemänner, und auf dem Weiher glänzt das Eis.</p>`,
     [{ text: 'Wie schön!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
-    BILDER.schnee(box.querySelector('canvas').getContext('2d'));
+    BILDER.schnee(bildKontext(box));
   }, 3600);
 }

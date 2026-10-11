@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610111313';
-import * as S from './spiel.js?v=202610111313';
-import * as Z from './zeit.js?v=202610111313';
-import * as T from './ton.js?v=202610111313';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe } from './pixel.js?v=202610111313';
-import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610111313';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610111313';
-import * as A from './auftraege.js?v=202610111313';
-import * as E from './erfolge.js?v=202610111313';
-import * as ZL from './ziele.js?v=202610111313';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610111313';
-import * as KA from './karte.js?v=202610111313';
-import { zeigeRueckblick } from './ereignis.js?v=202610111313';
-import { barbaraZweig } from './szene.js?v=202610111313';
-import * as LI from './lichtung.js?v=202610111313';
-import * as CB from './christbaum.js?v=202610111313';
-import * as SB from './schlitten.js?v=202610111313';
-import * as EB from './schlittschuh.js?v=202610111313';
-import * as BS from './backstube.js?v=202610111313';
-import { alleSymbole } from './symbole.js?v=202610111313';
+import * as C from './config.js?v=202610111332';
+import * as S from './spiel.js?v=202610111332';
+import * as Z from './zeit.js?v=202610111332';
+import * as T from './ton.js?v=202610111332';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610111332';
+import { zeichneWelt, ortVon, funkeln } from './szene.js?v=202610111332';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610111332';
+import * as A from './auftraege.js?v=202610111332';
+import * as E from './erfolge.js?v=202610111332';
+import * as ZL from './ziele.js?v=202610111332';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610111332';
+import * as KA from './karte.js?v=202610111332';
+import { zeigeRueckblick } from './ereignis.js?v=202610111332';
+import { barbaraZweig } from './szene.js?v=202610111332';
+import * as LI from './lichtung.js?v=202610111332';
+import * as CB from './christbaum.js?v=202610111332';
+import * as SB from './schlitten.js?v=202610111332';
+import * as EB from './schlittschuh.js?v=202610111332';
+import * as BS from './backstube.js?v=202610111332';
+import { alleSymbole } from './symbole.js?v=202610111332';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -221,7 +221,9 @@ export function oeffneLaden(tab, zeigeId, modus) {
   if (ladenModus === 'kaufen') {
     const bild = document.createElement('canvas');
     bild.className = 'ort-bild';
-    if (KA.vignette(bild, ladenTab)) { kopf.appendChild(bild); kopf.classList.remove('versteckt'); }
+    // Erst einhängen, dann zeichnen: die Breite richtet sich nach dem Platz (fein.js, FEIN)
+    kopf.appendChild(bild); kopf.classList.remove('versteckt');
+    if (!KA.vignette(bild, ladenTab)) { bild.remove(); kopf.classList.add('versteckt'); }
   }
   if (ladenModus === 'haus') { zeilen = []; baueHaus(); return; }
   baueLaden();
@@ -440,8 +442,20 @@ function wunschText(b) {
 }
 function gruss(b) { return `${b.maedchen ? 'Deine' : 'Dein'} ${b.kind} (${b.alter})`; }
 /** Eine Kinderzeichnung: Haus, Sonne, das Kind - und das, was es sich gewünscht hat. */
-export function zeichneDankesbild(cv, b) {
-  const c = cv.getContext('2d'), W2 = cv.width, H2 = cv.height;
+/**
+ * Das Dankesbild wird als 48 x 36 gemalt und per Scale2x auf 96 x 72 gebracht
+ * (11.10.) - vorher stand das kleine Bild doppelt bzw. 1,7-fach gezogen im
+ * Fenster und im Album, mit gröberen Pixeln als alles andere.
+ */
+const _dank = document.createElement('canvas');
+export function zeichneDankesbild(ziel, b) {
+  _dank.width = 48; _dank.height = 36;
+  maleDankesbild(_dank, b);
+  ziel.width = 96; ziel.height = 72;
+  ziel.getContext('2d').drawImage(scale2x(_dank), 0, 0);
+}
+function maleDankesbild(cv, b) {
+  const c = cv.getContext('2d', { willReadFrequently: true }), W2 = cv.width, H2 = cv.height;
   let n = [...b.kind].reduce((a, z) => a + z.charCodeAt(0), 0);
   const zz = () => { n = (n * 9301 + 49297) % 233280; return n / 233280; };
   c.fillStyle = '#fffdf4'; c.fillRect(0, 0, W2, H2);
@@ -1102,11 +1116,14 @@ function zeigeErfolg(i) {
   const st = E.stand(x);
   const wann = ok ? new Date(S.st.erfolge[x.id]).toLocaleDateString('de-DE', { day: 'numeric', month: 'long' }) : '';
   const box = fenster(ok ? x.name : 'Noch verborgen',
-    `<canvas class="socke-gross" width="10" height="12"></canvas>
+    `<canvas class="socke-gross" width="20" height="24"></canvas>
      <p>${x.text}</p>
      ${ok ? `<p class="bonus">Geschafft am ${wann}!</p>`
           : x.ziel > 1 ? `<div class="balken"><i style="width:${Math.round(100 * st / x.ziel)}%"></i></div><p class="klein">${st.toLocaleString('de-DE')} / ${x.ziel.toLocaleString('de-DE')}</p>` : ''}`);
-  socke(box.querySelector('canvas').getContext('2d'), i, 0, 0, !ok);
+  // Klein malen, per Scale2x vergrößern (Pixel bleiben Spielpixel)
+  const klein = document.createElement('canvas'); klein.width = 10; klein.height = 12;
+  socke(klein.getContext('2d', { willReadFrequently: true }), i, 0, 0, !ok);
+  box.querySelector('canvas').getContext('2d').drawImage(scale2x(klein), 0, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1117,7 +1134,7 @@ export function zeigeKiste(sek, weiter) {
   const dauer = sek ? (h ? `${h} Std. ${m} Min.` : `${m} Min.`) : '';
   const gaeste = (S.st.kisteGaeste || 0).toLocaleString('de-DE');
   const box = fenster('Während du weg warst …',
-    `<canvas class="kiste" width="24" height="20"></canvas>
+    `<canvas class="kiste" width="48" height="40"></canvas>
      <p>${dauer ? `In ${dauer} haben deine Wichtel` : 'Deine Wichtel haben'} <b>${gaeste}</b> Gäste bedient und alles in diese Kiste gelegt.</p>
      ${sek >= S.offlineStunden() * 3600 ? `<p class="klein">Die Kiste war voll - mehr als ${String(S.offlineStunden()).replace('.', ',')} Stunden Arbeit passen nicht hinein. Schau öfter vorbei, dann verschenkst du nichts.</p>` : ''}`,
     [{ text: 'Kiste öffnen', aktion: (b) => {
@@ -1232,22 +1249,50 @@ export function zeigeMarkt() {
   }
 }
 
-/** Pixelkiste 24 × 20, zu oder offen mit Sternen. */
+/**
+ * Pixelkiste 48 × 40, zu oder offen mit Sternen. Seit 11.10. in voller
+ * Auflösung gezeichnet - vorher 24 × 20, im Fenster doppelt so groß, mit
+ * doppelt so groben Pixeln wie alles andere.
+ */
 function zeichneKiste(cv, offen) {
   const c = cv.getContext('2d');
-  c.clearRect(0, 0, 24, 20);
-  const holz = '#8a5230', dunkel = '#5a3219', gold = '#e8b030';
+  c.clearRect(0, 0, 48, 40);
+  const holz = '#8a5230', hell = '#a8683e', dunkel = '#5a3219', fuge = '#4a2812';
+  const gold = '#e8b030', goldH = '#fff0a0', goldD = '#a87818';
+  const bretter = (x, y, w, h) => {
+    r(c, x, y, w, h, holz);
+    for (let yy = y + 3; yy < y + h - 1; yy += 4) r(c, x, yy, w, 1, fuge);   // Brettfugen
+    for (let yy = y + 1; yy < y + h - 1; yy += 4) r(c, x + 2, yy, w - 4, 1, hell);   // Maserung
+  };
+  const stern = (x, y) => { p(c, x, y - 1, goldH); r(c, x - 1, y, 3, 1, gold); p(c, x, y, goldH); p(c, x, y + 1, gold); };
   if (offen) {
-    // Deckel nach hinten, Sterne quellen heraus
-    r(c, 3, 2, 18, 4, dunkel); r(c, 4, 3, 16, 2, holz);
-    for (const [x, y] of [[6, 7], [10, 5], [14, 6], [17, 8], [8, 9], [12, 8], [15, 10]]) { p(c, x, y, '#fff4b0'); p(c, x + 1, y, gold); p(c, x, y + 1, gold); }
+    // Deckel nach hinten geklappt, Sterne quellen heraus
+    r(c, 6, 3, 36, 9, dunkel); r(c, 7, 4, 34, 7, holz); r(c, 8, 5, 32, 1, hell); r(c, 7, 8, 34, 1, fuge);
+    r(c, 5, 3, 2, 9, gold); r(c, 41, 3, 2, 9, gold);
+    r(c, 6, 13, 36, 7, '#ffe27a');   // Glanz aus der Kiste
+    r(c, 8, 12, 32, 2, '#fff6c8');
+    for (const [x, y] of [[12, 14], [19, 11], [26, 13], [33, 15], [16, 18], [23, 17], [30, 19], [37, 12], [10, 9]]) stern(x, y);
   } else {
-    r(c, 3, 5, 18, 5, holz); r(c, 3, 5, 18, 1, '#a8683e'); r(c, 3, 9, 18, 1, dunkel);
+    // Gewölbter Deckel
+    r(c, 7, 9, 34, 2, holz); r(c, 6, 11, 36, 9, holz);
+    r(c, 9, 8, 30, 1, hell); r(c, 7, 10, 34, 1, hell);
+    r(c, 6, 14, 36, 1, fuge); r(c, 6, 17, 36, 1, fuge);
+    r(c, 6, 19, 36, 1, dunkel);
+    r(c, 5, 11, 2, 9, gold); r(c, 41, 11, 2, 9, gold); r(c, 6, 9, 1, 2, gold); r(c, 41, 9, 1, 2, gold);
+    r(c, 5, 11, 1, 9, goldH);
   }
-  r(c, 3, 10, 18, 9, holz); r(c, 3, 18, 18, 1, dunkel);
-  r(c, 3, 13, 18, 1, dunkel);
-  r(c, 2, 10, 1, 9, gold); r(c, 21, 10, 1, 9, gold);   // Beschläge
-  r(c, 11, offen ? 10 : 8, 2, 3, gold); p(c, 11, offen ? 11 : 9, dunkel);   // Schloss
+  // Korpus
+  bretter(6, 20, 36, 17);
+  r(c, 6, 37, 36, 1, dunkel); r(c, 7, 38, 34, 1, '#3a200c');
+  // Beschläge links/rechts und Eckwinkel
+  r(c, 4, 20, 3, 18, gold); r(c, 41, 20, 3, 18, gold); r(c, 4, 20, 1, 18, goldH); r(c, 43, 20, 1, 18, goldD);
+  for (const y of [22, 29, 35]) { p(c, 5, y, goldD); p(c, 42, y, goldD); }   // Nieten
+  // Querband
+  r(c, 6, 27, 36, 2, goldD); r(c, 6, 27, 36, 1, gold);
+  // Schloss
+  const sy = offen ? 20 : 16;
+  r(c, 21, sy, 6, 7, gold); r(c, 21, sy, 6, 1, goldH); r(c, 26, sy + 1, 1, 6, goldD);
+  r(c, 23, sy + 2, 2, 2, '#3a200c'); p(c, 23, sy + 4, '#3a200c'); p(c, 24, sy + 4, '#3a200c');
 }
 
 // ---------------------------------------------------------------------------
@@ -1323,6 +1368,7 @@ function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
   // n < 0: schon gesehen, aber vor dem Album (10.10.) nicht mitgezählt
   k.innerHTML = `<canvas width="${w}" height="${h}"></canvas><b>${n ? name : '???'}</b><small>${n > 0 ? `${n.toLocaleString('de-DE')}${einheit}` : n < 0 ? 'schon gesehen' : 'noch nicht gesehen'}</small>`;
   const cv = k.querySelector('canvas'), ctx = cv.getContext('2d');
+  cv.style.width = `calc(var(--px) * ${w})`; cv.style.height = `calc(var(--px) * ${h})`;   // 1:1 (11.10.: Tiere sind 28 x 26)
   male(ctx);
   if (!n) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#5a4a3e'; ctx.fillRect(0, 0, w, h); }
   return k;

@@ -11,11 +11,11 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610111313';
-import * as Z from './zeit.js?v=202610111313';
-import * as T from './ton.js?v=202610111313';
-import * as MH from './minihud.js?v=202610111313';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610111313';
+import * as C from './config.js?v=202610111332';
+import * as Z from './zeit.js?v=202610111332';
+import * as T from './ton.js?v=202610111332';
+import * as MH from './minihud.js?v=202610111332';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610111332';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -539,17 +539,6 @@ function zeichne(t) {
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: Math.max(0, g.ketteT) / 1.6, punkte: g.punkte });
   MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : null);
   MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
-}
-
-/** Pixelschrift vergrößert (k-fach); links=true: x ist die linke Kante, sonst die Mitte. */
-function gross(s, f, x, y, k, links) {
-  const w = textBreite(s) + 2;
-  const tmp = gross.cv || (gross.cv = document.createElement('canvas'));
-  tmp.width = w; tmp.height = 7;
-  const t = tmp.getContext('2d');
-  t.clearRect(0, 0, w, 7);
-  pixText(t, s, 0, 0, f);
-  c.drawImage(tmp, Math.round(links ? x : x - w * k / 2), Math.round(y), w * k, 7 * k);
 }
 
 function zeichneTier(tier, x, y, t, inDerLuft, satt, winter) {

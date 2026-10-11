@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite } from './pixel.js?v=202610111313';
-import * as C from './config.js?v=202610111313';
-import * as S from './spiel.js?v=202610111313';
-import * as Z from './zeit.js?v=202610111313';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x } from './pixel.js?v=202610111332';
+import * as C from './config.js?v=202610111332';
+import * as S from './spiel.js?v=202610111332';
+import * as Z from './zeit.js?v=202610111332';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -395,13 +395,13 @@ function grossBlase(c, g, x, y, t, anteil) {
 const HAND_B = 20;
 
 // Dinge in der Hand werden DOPPELT so groß gezeigt - gezeichnet im
-// kleinen Maßstab und dann pixelgenau hochgezogen.
+// kleinen Maßstab und mit Scale2x hochgezogen (11.10.: vorher als 2x2-Blöcke,
+// damit standen Becher und Gläser mit doppelt so groben Pixeln am Tresen).
 const _klein = document.createElement('canvas'); _klein.width = 10; _klein.height = 10;
-const _kc = _klein.getContext('2d');
-function gross(c, x, y, zeichne, faktor = 2, n = 10) {
+const _kc = _klein.getContext('2d', { willReadFrequently: true });
+function gross(c, x, y, zeichne) {
   _kc.clearRect(0, 0, 10, 10); zeichne(_kc);
-  c.imageSmoothingEnabled = false;
-  c.drawImage(_klein, 0, 0, n, n, x, y, n * faktor, n * faktor);
+  c.drawImage(scale2x(_klein), x, y);
 }
 const PLATZ = 26;   // Abstand der Dinge auf dem Servierbrett
 function handStart() { const n = S.handMax(); return Math.round(90 - (n * PLATZ) / 2); }
@@ -439,11 +439,11 @@ function brett(c, y, t) {
     const h = S.lauf.hand[i];
     if (!h) { r(c, x + 5, by + 1, 10, 2, '#b0b0bc'); continue; }   // freier Platz
     const hoch = S.lauf.neuInHand === i && S.lauf.neuInHandT > 0 ? 2 : 0;
-    if (h.art === 'glas') gross(c, x, by - 17 - hoch, (k) => glas(k, 0, 1));
+    if (h.art === 'glas') glasGross(c, x, by - 17 - hoch);
     else if (h.rest > 0) {
       // In Zubereitung: ein Glas, das sich von unten füllt, und ein Balken
       const a = Math.max(0, Math.min(1, 1 - h.rest / (h.dauer || 1)));
-      gross(c, x, by - 17, (k) => glas(k, 0, 1));
+      glasGross(c, x, by - 17);
       const f = C.PRODUKT[h.id].farbe, hFl = Math.round(12 * a);
       r(c, x + 3, by - 3 - hFl, 11, hFl, f);
       // Vom Servier-Wichtel bestellt: er steht daneben und gießt ein
@@ -549,7 +549,27 @@ function schattenriss(id) {
   k.globalCompositeOperation = 'source-in';
   k.fillStyle = '#23150b';
   k.fillRect(0, 0, 11, 11);
-  return (risse[id] = cv);
+  // Doppelt groß über Scale2x, nicht als 2x2-Blöcke (11.10.) - eigene Leinwand je Riss
+  return (risse[id] = scale2x(cv, 11, 11, document.createElement('canvas')));
+}
+
+/**
+ * Das leere Glas auf dem Servierbrett, doppelt so groß wie `glas()` - aber in
+ * Spielpixeln gezeichnet, nicht hochgezogen (11.10.): Rand, Schatten und
+ * Glanz sind ein Pixel breit wie überall sonst. Selbe Umrisse wie 2 x glas(),
+ * damit die Füllung beim Einschenken weiter passt.
+ */
+function glasGross(c, x, y) {
+  const B = y + 2, f = '#e8e4dc';
+  r(c, x, B, 14, 16, f);
+  r(c, x, B, 1, 16, '#c4bfb4'); r(c, x + 1, B + 1, 1, 14, '#d8d3c8');
+  r(c, x + 1, B, 13, 1, '#fffcf6'); r(c, x + 2, B + 1, 11, 1, '#d6d0c4');   // Rand, dahinter die Öffnung
+  r(c, x + 1, B + 15, 13, 1, '#b8b2a6'); r(c, x + 2, B + 14, 11, 1, '#d6d0c4');   // Boden
+  r(c, x + 10, B + 4, 1, 8, '#fffcf6'); p(c, x + 11, B + 5, '#f6f2ea');   // Glanz
+  // Henkel
+  r(c, x + 14, B + 4, 3, 2, f); p(c, x + 17, B + 5, f);
+  r(c, x + 16, B + 6, 2, 4, f); p(c, x + 17, B + 9, '#c4bfb4');
+  r(c, x + 14, B + 10, 3, 2, f); p(c, x + 17, B + 10, f); r(c, x + 14, B + 11, 3, 1, '#c4bfb4');
 }
 
 function glas(c, x, y) {
@@ -579,8 +599,7 @@ function zelle(c, i, x, y, t) {
     r(c, x + 1, y + 1, W - 2, H - 3, '#3a2616');
     const wz = S.lauf.wackel['z' + p0.id];   // angetippt: der Schattenriss wackelt
     const sx = x + W / 2 - 10 + (wz ? Math.round(Math.sin(wz * 60) * 2) : 0);
-    c.imageSmoothingEnabled = false;
-    c.drawImage(schattenriss(p0.id), sx, y + 3, 22, 22);
+    c.drawImage(schattenriss(p0.id), sx, y + 3);
     if (S.freiErfuellt(p0.id) && S.st.geld >= p0.kosten) { // Man KÖNNTE es kaufen: kleines Funkeln
       if (Math.floor(t * 2) % 2) p(c, x + W - 5, y + 4, '#ffe060');
       p(c, x + W - 6, y + 5, '#ffe060');

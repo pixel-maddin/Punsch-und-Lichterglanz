@@ -89,14 +89,14 @@ const SYMBOLE = {
     '.wwwwwwwww.',
     '.wwwwwwwww.',
   ],
+  // 5 x 5 statt des alten 7 x 7, das per CSS auf 80 % gestaucht war (11.10.):
+  // gestaucht hatte es kleinere Pixel als alles drumherum
   stern: [
-    '...g...',
-    '...g...',
-    'ggggggg',
-    '.ggggg.',
-    '..gGg..',
-    '.gG.Gg.',
-    '.G...G.',
+    '..g..',
+    '.ggg.',
+    'ggggg',
+    '.gGg.',
+    '.g.g.',
   ],
   uhr: [
     '..KKK..',

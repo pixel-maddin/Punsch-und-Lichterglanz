@@ -10,18 +10,21 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202610111313';
-import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben } from './pixel.js?v=202610111313';
+import * as Z from './zeit.js?v=202610111332';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610111332';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
 export function schrift(c, s, x, y, f, schatten, k = 2) {
   _tmp.width = s.length * 6 + 2; _tmp.height = 7;
-  const t = _tmp.getContext('2d');
+  const t = _tmp.getContext('2d', { willReadFrequently: true });
   t.clearRect(0, 0, _tmp.width, 7);
   pixText(t, s, 0, 0, f, schatten);
   c.imageSmoothingEnabled = false;
-  c.drawImage(_tmp, 0, 0, _tmp.width, 7, Math.round(x), Math.round(y), _tmp.width * k, 7 * k);
+  // Doppelt über Scale2x (11.10.): Die Schrift hat dann dieselbe feine
+  // Pixelgröße wie das Bild drumherum, statt 2x2-Blöcke zu zeigen
+  if (k === 2) c.drawImage(scale2x(_tmp), Math.round(x), Math.round(y));
+  else c.drawImage(_tmp, 0, 0, _tmp.width, 7, Math.round(x), Math.round(y), _tmp.width * k, 7 * k);
 }
 
 export function hash(n) { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
@@ -284,6 +287,31 @@ export function haus(c, x, fuss, b, h, o = {}) {
 const VW = 220, VH = 80, HOR = 40;
 
 /**
+ * DIE FEINE STUFE (11.10.): Ein feiner Pixel ist überall genau ¾ Spielpixel.
+ * Vorher hing seine Größe an der Breite des Fensters, in dem das Bild stand
+ * (Laden 0,75 · Ereignis 0,7 · Startfenster 0,58) - drei Pixelgrößen für
+ * dieselbe Art Bild. Jetzt bekommt die Leinwand so viele Spalten, wie bei
+ * dieser Stufe in ihren Platz passen (höchstens `max`), und die CSS-Größe
+ * wird daraus gesetzt statt umgekehrt. Gezeichnet wird weiter für die volle
+ * Breite; `feinBreite` sagt, wie viel davon an jeder Seite wegfällt.
+ */
+export const FEIN = 0.75;
+export function feinBreite(cv, max) {
+  const el = cv.parentElement;
+  if (!el) return max;
+  const cs = getComputedStyle(el);
+  const platz = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  if (!(platz > 0)) return max;   // noch nicht im Bild
+  const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 2;
+  const rand = 2 * (parseFloat(getComputedStyle(cv).borderLeftWidth) || 0);
+  return Math.max(80, Math.min(max, Math.floor((platz - rand) / (px * FEIN))));
+}
+export function feinGroesse(cv) {
+  cv.style.width = `calc(var(--px) * ${cv.width * FEIN})`;
+  cv.style.height = `calc(var(--px) * ${cv.height * FEIN})`;
+}
+
+/**
  * Zeichnet das Geschäft `tab` in `ziel` (220 x 80). false = für diesen Tab kein Bild.
  * 'festplatz' (11.10.): der Weihnachtsmarkt, `opt.offen` = heute ist Markt.
  */
@@ -293,16 +321,21 @@ export function vignette(ziel, tab, opt = {}) {
     // Minispiele (11.10.): dieselben Ortsbilder im Startfenster
     lichtung: waldlichtung, baum: christbaumverkauf, eis: eisbahn, back: backstube, berg: schlittenberg }[tab];
   if (!zeichner) return false;
-  ziel.width = VW; ziel.height = VH;
+  // Breite nach der feinen Stufe (siehe FEIN): gezeichnet wird für 220, die
+  // Leinwand zeigt die Mitte davon
+  const breite = feinBreite(ziel, VW), weg = Math.floor((VW - breite) / 2);
+  ziel.width = breite; ziel.height = VH;
+  feinGroesse(ziel);
   const c = ziel.getContext('2d');
   c.imageSmoothingEnabled = false;
+  c.translate(-weg, 0);
   neueLichter();
   // Eisbahn und Schlittenberg gibt es nur mit Schnee - ihr Bild ist immer winterlich
   const winter = Z.schnee() > 0 || tab === 'eis' || tab === 'berg', li = Z.licht();
   const himmel = li.hell > 0.6 ? ['#6aa4dc', '#94bfe8', '#c4dcf2']
     : li.hell > 0.1 ? ['#3e3e80', '#9a6a8c', '#f0a476'] : ['#0e1638', '#18224c', '#2a3666'];
   verlauf(c, 0, 0, VW, HOR + 2, himmel);
-  if (li.hell < 0.3) { sterne(c, 26, VW, HOR - 8, 4); mond(c, 196, 9); }
+  if (li.hell < 0.3) { sterne(c, 26, VW, HOR - 8, 4); mond(c, VW - weg - 24, 9); }
   // Ferne Hügel in zwei Lagen
   for (let x = 0; x < VW; x++) {
     const h1 = 10 + Math.round(Math.sin(x / 23) * 4 + Math.sin(x / 9.3) * 2);

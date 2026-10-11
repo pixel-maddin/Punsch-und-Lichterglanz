@@ -9,6 +9,35 @@
 export function r(c, x, y, w, h, f) { c.fillStyle = f; c.fillRect(Math.round(x), Math.round(y), w, h); }
 export function p(c, x, y, f) { c.fillStyle = f; c.fillRect(Math.round(x), Math.round(y), 1, 1); }
 
+/**
+ * Doppelt so groß, aber im SPIELPIXEL-Raster (Scale2x/EPX, 11.10.).
+ * Einfaches Verdoppeln macht aus jedem Pixel einen 2x2-Block - das Ding
+ * steht dann mit doppelt so groben Pixeln neben allem anderen. Scale2x
+ * füllt flache Flächen genauso, setzt aber an schrägen Kanten die Stufen
+ * einzeln: Kanten und Rundungen haben danach die Pixelgröße der Szene.
+ * Gibt eine (wiederverwendete) Leinwand der doppelten Größe zurück.
+ */
+const _x2 = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+export function scale2x(quelle, w = quelle.width, h = quelle.height, ziel = _x2) {
+  const src = new Uint32Array(quelle.getContext('2d').getImageData(0, 0, w, h).data.buffer);
+  if (ziel.width !== w * 2 || ziel.height !== h * 2) { ziel.width = w * 2; ziel.height = h * 2; }
+  const zc = ziel.getContext('2d');
+  const bild = zc.createImageData(w * 2, h * 2);
+  const out = new Uint32Array(bild.data.buffer), W2 = w * 2;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const P = src[y * w + x];
+    const A = y > 0 ? src[(y - 1) * w + x] : P, D = y < h - 1 ? src[(y + 1) * w + x] : P;
+    const L = x > 0 ? src[y * w + x - 1] : P, R = x < w - 1 ? src[y * w + x + 1] : P;
+    const o = y * 2 * W2 + x * 2;
+    out[o] = L === A && L !== D && A !== R ? A : P;
+    out[o + 1] = A === R && A !== L && R !== D ? R : P;
+    out[o + W2] = D === L && D !== R && L !== A ? L : P;
+    out[o + W2 + 1] = R === D && R !== A && D !== L ? D : P;
+  }
+  zc.putImageData(bild, 0, 0);
+  return ziel;
+}
+
 const _farbCache = new Map();
 /** Farbe heller (f > 0) oder dunkler (f < 0) machen. */
 export function ton(hex, f) {
