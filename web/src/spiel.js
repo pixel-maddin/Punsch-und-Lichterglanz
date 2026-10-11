@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610111338';
-import * as Z from './zeit.js?v=202610111338';
-import { neueFarben } from './pixel.js?v=202610111338';
+import * as C from './config.js?v=202610111344';
+import * as Z from './zeit.js?v=202610111344';
+import { neueFarben } from './pixel.js?v=202610111344';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1278,7 +1278,11 @@ export const zimtRest = () => Math.max(0, Math.ceil(((st.zimtBis || 0) - Date.no
 /** Spieltag als ganze Zahl (Tage seit 1970, nach der Spieluhr). */
 const tagNr = () => Math.round(echtMitternacht() / 86400000);
 function marktStand() {
-  if (!st.markt) st.markt = { anker: tagNr(), seed: Math.floor(Math.random() * 1e6), besucht: 0, angesagt: 0 };
+  // Anker = erster Spieltag (11.10.), nicht der Tag, an dem zum ersten Mal
+  // jemand nach dem Markt fragt - das war das erste Öffnen der Karte und
+  // konnte auch Tag 2 sein. Alte Spielstände (spieltag 99): heute.
+  const sp = spieltag();
+  if (!st.markt) st.markt = { anker: tagNr() - (sp < 99 ? sp : 0), seed: Math.floor(Math.random() * 1e6), besucht: 0, angesagt: 0 };
   return st.markt;
 }
 /** Ist an Tag `d` Markt? Erster Markt MARKT_ERST Tage nach dem Anker, dann alle 3-4 Tage. */

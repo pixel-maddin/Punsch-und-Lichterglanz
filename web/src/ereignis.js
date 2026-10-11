@@ -4,13 +4,13 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610111338';
-import * as S from './spiel.js?v=202610111338';
-import * as T from './ton.js?v=202610111338';
-import * as Z from './zeit.js?v=202610111338';
-import { r, p, figurKlein, neueFarben } from './pixel.js?v=202610111338';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse } from './fein.js?v=202610111338';
-import { fenster, karte } from './ui.js?v=202610111338';
+import * as C from './config.js?v=202610111344';
+import * as S from './spiel.js?v=202610111344';
+import * as T from './ton.js?v=202610111344';
+import * as Z from './zeit.js?v=202610111344';
+import { r, p, figurKlein, neueFarben } from './pixel.js?v=202610111344';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse } from './fein.js?v=202610111344';
+import { fenster, karte } from './ui.js?v=202610111344';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".

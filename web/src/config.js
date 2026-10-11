@@ -423,7 +423,7 @@ export const HAENDLER_GUTSCHEIN = { id: 'h_zimt', name: 'Zimtstern-Gutschein', m
 // mit Ansage. Er hat Deko, die es nur dort gibt (je Markt MARKT_ANGEBOT
 // Stücke, die man noch nicht hat), ein Rezept, das zwei Getränke dauerhaft
 // teurer verkauft, und am Markttag kommen mehr Leute am Stand vorbei.
-export const MARKT_ERST = 2;          // Tage nach dem ersten Spieltag bis zum ersten Markt
+export const MARKT_ERST = 4;          // Tage nach dem ersten Spieltag bis zum ersten Markt (= Tag 5; muss zu EINSTIEG.markt passen)
 export const MARKT_ABSTAND = [3, 4];  // Tage zwischen zwei Märkten
 export const MARKT_ANSAGE = 3;        // ab so vielen Tagen vorher wird er angekündigt
 export const MARKT_GAESTE = 0.2;      // am Markttag 20 % mehr Gäste
@@ -721,5 +721,9 @@ export const MINI_ALLE_DEZ = 14;
 //    eilige Gäste, Socken- und „Neu frei"-Einblendungen, Aufträge-Hinweis
 //  - dazu ab SPIELTAG (0 = erster Tag): siehe EINSTIEG
 // Alte Spielstände (spieltag 99) merken davon nichts.
-export const EINSTIEG = { sonder: 1, ansturm: 1, haendler: 1, wetter: 1, schlitten: 2, santa: 3, markt: 3 };
+// Markt (11.10.): Tag 5, nicht 4 - an Tag 4 kommen schon Wunschzettel und
+// Weihnachtsmann auf der Karte. MARKT_ERST muss denselben Wert haben: Vorher
+// stand dort 2 gegen 3 hier, der erste Markttermin fiel in die Sperre, und
+// der Markt kam erst an Tag 6 oder 7.
+export const EINSTIEG = { sonder: 1, ansturm: 1, haendler: 1, wetter: 1, schlitten: 2, santa: 3, markt: 4 };
 export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Großbestellung, Gruppe, Ansturm, Sondergast
