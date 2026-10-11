@@ -681,6 +681,8 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
     0 calc(var(--px) * 2.2) 0 #2a0a0a, 0 0 calc(var(--px) * 6) rgba(0, 0, 0, 0.35);
   padding: calc(var(--px) * 3) 0;
 }
+/* Weihnachtsschrift (schrift.js): Canvas, pixelgenau hochgezogen */
+#miniHud .schriftbild { display: inline-block; image-rendering: pixelated; vertical-align: middle; }
 #miniHud .mh-gross.plopp { animation: mhPlopp 0.35s ease-out; }
 @keyframes mhPlopp { from { transform: translateY(-50%) scale(1.35); opacity: 0.4; } }
 #miniHud .mh-schwebe {
