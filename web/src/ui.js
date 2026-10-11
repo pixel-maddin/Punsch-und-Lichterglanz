@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610112112';
-import * as S from './spiel.js?v=202610112112';
-import * as Z from './zeit.js?v=202610112112';
-import * as T from './ton.js?v=202610112112';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610112112';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610112112';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610112112';
-import * as A from './auftraege.js?v=202610112112';
-import * as E from './erfolge.js?v=202610112112';
-import * as ZL from './ziele.js?v=202610112112';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610112112';
-import * as KA from './karte.js?v=202610112112';
-import { zeigeRueckblick } from './ereignis.js?v=202610112112';
-import { barbaraZweig } from './szene.js?v=202610112112';
-import * as LI from './lichtung.js?v=202610112112';
-import * as CB from './christbaum.js?v=202610112112';
-import * as SB from './schlitten.js?v=202610112112';
-import * as EB from './schlittschuh.js?v=202610112112';
-import * as BS from './backstube.js?v=202610112112';
-import { alleSymbole } from './symbole.js?v=202610112112';
+import * as C from './config.js?v=202610112114';
+import * as S from './spiel.js?v=202610112114';
+import * as Z from './zeit.js?v=202610112114';
+import * as T from './ton.js?v=202610112114';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610112114';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610112114';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610112114';
+import * as A from './auftraege.js?v=202610112114';
+import * as E from './erfolge.js?v=202610112114';
+import * as ZL from './ziele.js?v=202610112114';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610112114';
+import * as KA from './karte.js?v=202610112114';
+import { zeigeRueckblick } from './ereignis.js?v=202610112114';
+import { barbaraZweig } from './szene.js?v=202610112114';
+import * as LI from './lichtung.js?v=202610112114';
+import * as CB from './christbaum.js?v=202610112114';
+import * as SB from './schlitten.js?v=202610112114';
+import * as EB from './schlittschuh.js?v=202610112114';
+import * as BS from './backstube.js?v=202610112114';
+import { alleSymbole } from './symbole.js?v=202610112114';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1674,7 +1674,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : '<p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste der Straße sein.</p>'}
+    ${umbenennen ? '' : '<p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>'}
     <label>Wie heißt euer Haus?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {
     const v = box.querySelector('#hausName').value.trim();
@@ -1718,7 +1718,7 @@ export function zeigeZiel(modus, fertig) {
     : `Heute ist der ${Z.datumLang()}.`;
   fenster('Dein Ziel', `
     <div class="gross-ico">🏡✨</div>
-    <p><b>Mach dein Haus bis Heiligabend zum schönsten der Straße!</b></p>
+    <p><b>Mach dein Haus bis Heiligabend zum schönsten im Dorf!</b></p>
     <ul class="ziel">
       <li>☕ Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
       <li>🛒 Kaufe mit den Sternen Lichter, Deko, Farbe und Helfer.</li>

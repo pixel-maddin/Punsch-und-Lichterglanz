@@ -119,7 +119,7 @@ nur lokal, eigener Speicherplatz). Das Vorstellungsbild kommt aus
 
 **Vollständige Beschreibung**
 > Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das
-> schönste der Straße werden!
+> schönste im Dorf werden!
 >
 > Vor deinem Haus steht ein kleiner Punschstand. Schenk Sternenpunsch,
 > Kinderpunsch, heißen Apfel und Kakao aus, back Crêpes und verdiene Sterne.

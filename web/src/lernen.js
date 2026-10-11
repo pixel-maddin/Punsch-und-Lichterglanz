@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610112112';
-import * as S from './spiel.js?v=202610112112';
-import * as A from './auftraege.js?v=202610112112';
-import * as E from './erfolge.js?v=202610112112';
-import * as Z from './ziele.js?v=202610112112';
-import * as KA from './karte.js?v=202610112112';
+import * as C from './config.js?v=202610112114';
+import * as S from './spiel.js?v=202610112114';
+import * as A from './auftraege.js?v=202610112114';
+import * as E from './erfolge.js?v=202610112114';
+import * as Z from './ziele.js?v=202610112114';
+import * as KA from './karte.js?v=202610112114';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -146,7 +146,7 @@ const HINWEISE = [
     text: () => 'Prima! Kinderpunsch steht jetzt im Regal. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn aus dem neuen Topf. Weitere Getränke findest du später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
   { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
-    info: () => (S.hat('kranz') ? 'Deine erste Deko hängt!' : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen.') + ' Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus der Straße werden!',
+    info: () => (S.hat('kranz') ? 'Deine erste Deko hängt!' : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen.') + ' Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus im Dorf werden!',
     text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
