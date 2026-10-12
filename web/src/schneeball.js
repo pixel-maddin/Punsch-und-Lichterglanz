@@ -13,12 +13,12 @@
  * Aufbau wie lichtung.js: eigenes Canvas #miniCv, 180 Pixel breit, Kopfzeile
  * und Texte über minihud.js, Licht über licht.js.
  */
-import * as C from './config.js?v=202610121713';
-import * as Z from './zeit.js?v=202610121713';
-import * as T from './ton.js?v=202610121713';
-import * as MH from './minihud.js?v=202610121713';
-import * as L from './licht.js?v=202610121713';
-import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610121713';
+import * as C from './config.js?v=202610122135';
+import * as Z from './zeit.js?v=202610122135';
+import * as T from './ton.js?v=202610122135';
+import * as MH from './minihud.js?v=202610122135';
+import * as L from './licht.js?v=202610122135';
+import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610122135';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -333,7 +333,7 @@ function zeichne(t) {
   for (let reihe = 0; reihe < 3; reihe++) {
     for (const pl of g.plaetze) {
       if (pl.reihe !== reihe) continue;
-      L.schatten(c, pl.x, pl.y + 1, WALL_B / 2 + 4, 4, 0.22);
+      L.schatten(c, pl.x, pl.y - 2, WALL_B / 2 + 2, 3, 0.22);   // direkt unter dem Wall (12.10.: lag zu weit unten)
       if (pl.wer) {
         c.save(); c.beginPath(); c.rect(0, 0, W, pl.y - 2); c.clip();
         figur(pl, pl.wer, t);

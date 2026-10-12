@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610121713';
-import * as S from './spiel.js?v=202610121713';
-import * as Z from './zeit.js?v=202610121713';
-import * as T from './ton.js?v=202610121713';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610121713';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610121713';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610121713';
-import * as A from './auftraege.js?v=202610121713';
-import * as E from './erfolge.js?v=202610121713';
-import * as ZL from './ziele.js?v=202610121713';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610121713';
-import * as KA from './karte.js?v=202610121713';
-import { zeigeRueckblick } from './ereignis.js?v=202610121713';
-import { barbaraZweig } from './szene.js?v=202610121713';
-import * as SW from './schneeball.js?v=202610121713';
-import * as LI from './lichtung.js?v=202610121713';
-import * as CB from './christbaum.js?v=202610121713';
-import * as SB from './schlitten.js?v=202610121713';
-import * as EB from './schlittschuh.js?v=202610121713';
-import * as BS from './backstube.js?v=202610121713';
-import { alleSymbole } from './symbole.js?v=202610121713';
+import * as C from './config.js?v=202610122135';
+import * as S from './spiel.js?v=202610122135';
+import * as Z from './zeit.js?v=202610122135';
+import * as T from './ton.js?v=202610122135';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610122135';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610122135';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610122135';
+import * as A from './auftraege.js?v=202610122135';
+import * as E from './erfolge.js?v=202610122135';
+import * as ZL from './ziele.js?v=202610122135';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610122135';
+import * as KA from './karte.js?v=202610122135';
+import { zeigeRueckblick } from './ereignis.js?v=202610122135';
+import { barbaraZweig } from './szene.js?v=202610122135';
+import * as SW from './schneeball.js?v=202610122135';
+import * as LI from './lichtung.js?v=202610122135';
+import * as CB from './christbaum.js?v=202610122135';
+import * as SB from './schlitten.js?v=202610122135';
+import * as EB from './schlittschuh.js?v=202610122135';
+import * as BS from './backstube.js?v=202610122135';
+import { alleSymbole } from './symbole.js?v=202610122135';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -2049,6 +2049,7 @@ export function verdrahte() {
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
   $('#kartenZu').onclick = () => { T.spiele('klick'); schliesseKarte(); };
+  $('#kartenText').onclick = () => { T.spiele('klick'); KA.schilderUmschalten(); };
   $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); CB.schliesse(); SB.schliesse(); SW.schliesse(); EB.schliesse(); BS.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };

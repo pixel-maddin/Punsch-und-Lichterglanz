@@ -10,12 +10,12 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610121713';
-import * as Z from './zeit.js?v=202610121713';
-import * as T from './ton.js?v=202610121713';
-import * as MH from './minihud.js?v=202610121713';
-import * as L from './licht.js?v=202610121713';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610121713';
+import * as C from './config.js?v=202610122135';
+import * as Z from './zeit.js?v=202610122135';
+import * as T from './ton.js?v=202610122135';
+import * as MH from './minihud.js?v=202610122135';
+import * as L from './licht.js?v=202610122135';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610122135';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -345,6 +345,18 @@ function zeichne(t) {
     const yy = Math.round(welt(wyr));
     for (const [x0, s] of [[4, 0], [W - 5, 1]]) tanne(x0 + Math.round((hash(wyr + s) - 0.5) * 4), yy, 12 + Math.floor(hash(wyr * 3 + s) * 6));
   }
+  // Laternen am Pistenrand (12.10., Nutzerwunsch „mehr Licht"): abwechselnd
+  // links und rechts, an die Strecke gebunden; ihr Licht kommt in die Lichtkarte
+  const lampen = [];
+  for (let wr = Math.floor((g.dist - wy) / 64) * 64; wr < g.dist - wy + H + 64; wr += 64) {
+    const yy = Math.round(welt(wr)), links = (wr / 64) % 2 === 0;
+    const lx = links ? RAND + 4 : W - RAND - 5;
+    r(c, lx, yy - 13, 1, 13, '#3a3a42'); r(c, lx - 1, yy, 3, 1, '#2a2a30');
+    r(c, lx + (links ? 1 : -2), yy - 13, 2, 1, '#3a3a42');                 // Arm zur Piste hin
+    const kx = lx + (links ? 2 : -2);
+    r(c, kx - 1, yy - 12, 3, 3, '#ffe6a0'); r(c, kx - 1, yy - 13, 3, 1, '#2a2a30');
+    lampen.push({ x: kx, y: yy - 11 });
+  }
   // Dinge in Reihenfolge der Tiefe; der Wok steht dazwischen
   const sicht = g.dinge.filter((d) => { const yy = welt(d.y); return yy > -20 && yy < H + 20; }).sort((a, b) => a.y - b.y);
   let wokGemalt = false;
@@ -363,8 +375,17 @@ function zeichne(t) {
   // liegt im Blau, Hindernisse tauchen aus dem Dunkel auf
   const li = Z.licht(), nachts = 1 - li.hell;
   // (die Hindernisse kommen von UNTEN - der Kegel liegt in Fahrtrichtung vor dem Wok)
-  L.beleuchte(c, W, H, { vignette: 0.32, grundNacht: [112, 122, 170], inseln: [{ x: g.x, y: wy + 70, r: 110, rgb: '255,230,190', a: 0.7 }, { x: g.x, y: wy + 2, r: 30, a: 0.55 }] });
+  L.beleuchte(c, W, H, { vignette: 0.32, grundNacht: [112, 122, 170], inseln: [{ x: g.x, y: wy + 70, r: 110, rgb: '255,230,190', a: 0.7 }, { x: g.x, y: wy + 2, r: 30, a: 0.55 },
+    ...lampen.map((q) => ({ x: q.x, y: q.y + 14, r: 46, a: 0.75 }))] });
   L.schein(c, Math.round(g.x), wy - 8, 8, '255,236,190', 0.35 * nachts);
+  for (const q of lampen) { r(c, q.x - 1, q.y - 1, 3, 3, '#ffe6a0'); L.schein(c, q.x, q.y, 12, '255,214,140', 0.3 + 0.6 * nachts); }
+  // Die Sterne leuchten: nach dem Licht noch einmal hell darüber, mit Schein
+  for (const d of sicht) {
+    if (d.art !== 'stern' || d.getroffen) continue;
+    const yy = Math.round(welt(d.y));
+    L.schein(c, d.x, yy - (d.gross ? 6 : 4), d.gross ? 16 : 10, '255,220,110', d.gross ? 0.75 : 0.55);
+    ding(d, yy, t);
+  }
 
   // Kopfzeile: Restzeit, Fortschritt bis zum Ziel, Punkte (DOM, minihud.js)
   const rest = Math.max(0, Math.ceil(C.BERG_DAUER - Math.max(0, g.t)));

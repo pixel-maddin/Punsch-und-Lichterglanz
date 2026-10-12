@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610121713';
-import * as S from './spiel.js?v=202610121713';
-import * as Z from './zeit.js?v=202610121713';
-import * as FEIN from './fein.js?v=202610121713';
-import * as T from './ton.js?v=202610121713';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610121713';
+import * as C from './config.js?v=202610122135';
+import * as S from './spiel.js?v=202610122135';
+import * as Z from './zeit.js?v=202610122135';
+import * as FEIN from './fein.js?v=202610122135';
+import * as T from './ton.js?v=202610122135';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610122135';
 
 const $ = (s) => document.querySelector(s);
 
@@ -41,8 +41,8 @@ export const ORTE = [
   { id: 'backstube', name: 'Backstube',       x: 62,  y: 0.315, spiel: 'back', schild: [30, -17] },   // Schild rechts daneben: darunter lag es auf dem Supermarkt
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
-  // 12.10.: links zwischen Supermarkt und Lichtung war noch Platz
-  { id: 'schnee',    name: 'Schneeballwiese', x: 30,  y: 0.57, spiel: 'schnee' },
+  // 12.10.: rechts zwischen Baumarkt und Schlittenberg (erst links, Nutzerwunsch: rechts)
+  { id: 'schnee',    name: 'Schneeballwiese', x: 156, y: 0.585, spiel: 'schnee' },
 ];
 
 let offen = false;
@@ -93,6 +93,7 @@ export function oeffne(hoehe, beiAnkunft, hervor) {
   // Selten versteckt sich der Weihnachtsmann irgendwo
   santa = S.santaWuerfeln() ? { ...VERSTECKE[Math.floor(Math.random() * VERSTECKE.length)], t: 0, gefunden: -1 } : null;
   baueSchilder(hervor);
+  el.classList.toggle('ohne-text', !!S.st.karteOhneText);
   el.classList.remove('versteckt');
   offen = true;
   S.lauf.karteOffen = true;
@@ -110,6 +111,13 @@ export function schliesse() {
   cancelAnimationFrame(rafId);
 }
 
+/** Schilder ein/aus (12.10.): Ohne Schilder sieht man nur die Orte, die leicht leuchten. */
+export function schilderUmschalten() {
+  S.st.karteOhneText = !S.st.karteOhneText;
+  S.speichere();
+  $('#landkarte').classList.toggle('ohne-text', S.st.karteOhneText);
+  return S.st.karteOhneText;
+}
 /** Schilder neu (Zähler „neu", pulsierender Ort) - nach einem Kauf. */
 export function aktualisiere(hervor) { hervorId = hervor; baueSchilder(hervor); }
 
@@ -269,11 +277,11 @@ function wege() {
     [P('dorf'), P('baeume'), [122, 0.15 * H]],
     [P('haus'), P('super'), [58, 0.53 * H]],
     [P('super'), P('festplatz'), [22, 0.3 * H]],
-    [P('super'), P('schnee'), [14, 0.5 * H]],
     [P('haus'), P('bau'), [128, 0.55 * H]],
     [P('haus'), P('wichtel'), [104, 0.7 * H]],
     [P('wichtel'), P('lichtung'), [56, 0.86 * H]],
     [P('haus'), P('berg'), [138, 0.6 * H]],
+    [P('bau'), P('schnee'), [166, 0.5 * H]],
     [P('backstube'), [84, 0.34 * H], [72, 0.33 * H]],
   ];
 }
@@ -987,25 +995,40 @@ function zeichne(t, dt) {
     }
   }
 
+  // Noch nicht offene Orte liegen unter Schneenebel (12.10.): man ahnt die
+  // Form, aber kein Licht und kein Schild - sie zeigen sich, wenn sie dran sind
+  const zu = ORTE.filter((o) => !S.ortOffen(o));
+  for (const o of zu) {
+    const ox = o.x, oy = yPx(o) - 6;
+    const g = c.createRadialGradient(ox, oy, 4, ox, oy, 24);
+    const f = winter ? '232,238,245' : '96,140,80';
+    g.addColorStop(0, `rgba(${f},0.82)`); g.addColorStop(0.6, `rgba(${f},0.6)`); g.addColorStop(1, `rgba(${f},0)`);
+    c.fillStyle = g; c.fillRect(ox - 24, oy - 24, 48, 48);
+  }
+  const imNebel = (q) => zu.some((o) => Math.abs(q.x - o.x) < 20 && q.y > yPx(o) - 32 && q.y < yPx(o) + 6);
+  const lichterOffen = zu.length ? grundLichter.filter((q) => !imNebel(q)) : grundLichter;
   // Nachts dunkler, dann leuchten Fenster, Laternen und Lichterketten
-  nachtLichter(li, C.B, H, grundLichter, 0.5);
+  nachtLichter(li, C.B, H, lichterOffen, 0.5);
   // Gemütlich (10.10.): Jeder Ort hat nachts einen warmen Lichthof, der sanft
   // atmet, und die Schilder glühen (CSS-Klasse .nacht) - man sieht sofort,
   // wohin man tippen kann
   const nacht = 1 - li.hell;
   $('#landkarte').classList.toggle('nacht', nacht > 0.4);
-  if (nacht > 0.25) {
+  // Ohne Schilder (12.10.) leuchten die offenen Orte auch tagsüber leicht
+  const hof = Math.max(nacht > 0.25 ? nacht : 0, S.st.karteOhneText ? 0.75 : 0);
+  if (hof > 0) {
     for (const o of ORTE) {
+      if (zu.includes(o)) continue;
       const ox = o.x, oy = yPx(o) - 8, atem = 0.85 + Math.sin(t * 1.2 + o.x) * 0.15;
       const g = c.createRadialGradient(ox, oy, 2, ox, oy, 30);
-      g.addColorStop(0, `rgba(255,190,100,${(nacht * 0.45 * atem).toFixed(3)})`);
-      g.addColorStop(0.5, `rgba(255,170,80,${(nacht * 0.18 * atem).toFixed(3)})`);
+      g.addColorStop(0, `rgba(255,190,100,${(hof * 0.45 * atem).toFixed(3)})`);
+      g.addColorStop(0.5, `rgba(255,170,80,${(hof * 0.18 * atem).toFixed(3)})`);
       g.addColorStop(1, 'rgba(255,160,70,0)');
       c.fillStyle = g;
       c.fillRect(ox - 30, oy - 30, 60, 60);
     }
     // Fenster und Laternen noch einmal obendrauf, damit sie aus dem Hof strahlen
-    for (const q of grundLichter) p(c, q.x, q.y, q.f);
+    if (nacht > 0.25) for (const q of lichterOffen) p(c, q.x, q.y, q.f);
   }
   c.restore();
 }
