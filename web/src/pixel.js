@@ -147,32 +147,37 @@ export function icon(c, id, x, y, t = 0, roh = false) {
     eierpunsch: '#f3e38a', jaegertee: '#3f7a3a', weisser: '#efe7c0', feuerzange: '#a01818',
   };
   const f = P[id] || '#888888';
-  // Tasse in Produktfarbe, heller Rand, Henkel rechts
-  r(c, x + 1, y + 3, 6, 7, f); r(c, x + 1, y + 3, 1, 7, ton(f, -0.25)); r(c, x + 2, y + 9, 5, 1, ton(f, -0.3));
-  r(c, x + 7, y + 4, 2, 1, f); r(c, x + 8, y + 5, 1, 2, f); r(c, x + 7, y + 7, 2, 1, f);
-  r(c, x + 1, y + 3, 6, 1, ton(f, 0.35));
+  // Tasse in Produktfarbe (12.10. detailreicher, wie iconGross im Kleinen):
+  // heller Rand, Oberfläche des Getränks, Schattenkante, Glanzpunkt, Henkel
+  const innen = (FARBE_GROSS[id] || [f, ton(f, -0.4)])[1];
+  r(c, x + 1, y + 3, 6, 7, f); r(c, x + 1, y + 4, 1, 5, ton(f, -0.25)); r(c, x + 2, y + 9, 4, 1, ton(f, -0.35)); p(c, x + 1, y + 9, ton(f, -0.45)); p(c, x + 6, y + 9, ton(f, -0.45));
+  r(c, x + 1, y + 3, 6, 1, ton(f, 0.45)); r(c, x + 2, y + 4, 4, 1, innen);
+  p(c, x + 6, y + 5, ton(f, 0.4)); p(c, x + 6, y + 6, ton(f, 0.2));
+  r(c, x + 7, y + 4, 2, 1, f); r(c, x + 8, y + 5, 1, 2, ton(f, -0.2)); r(c, x + 7, y + 7, 2, 1, ton(f, -0.3));
+  // Motiv 3 x 3
+  // (kein Pluszeichen: ein rotes Kreuz las sich schon einmal als Erste Hilfe)
+  const M3 = { gluehwein: ['.#.', '###', '#.#'], kinderpunsch: ['#.#', '.#.', '#.#'], eierpunsch: ['#.#', '###', '.#.'],
+    jaegertee: ['.#.', '###', '###'], schoko: ['#.#', '.#.', '#.#'], feuerzange: ['.#.', '.#.', '###'] };
+  if (id === 'apfel') { r(c, x + 2, y + 6, 3, 2, '#d83a2a'); p(c, x + 2, y + 6, '#f06a5a'); p(c, x + 3, y + 5, '#3a8a2a'); }   // Apfel mit Stiel
+  const m3 = M3[id], mf = MOTIV_FARBE[id];
+  if (m3) m3.forEach((z, j) => { for (let i = 0; i < 3; i++) if (z[i] === '#') p(c, x + 2 + i, y + 5 + j, mf); });
   if (id === 'weisser') {
-    r(c, x + 1, y + 3, 6, 1, '#d4a82c'); p(c, x + 4, y + 6, '#d4a82c');
+    r(c, x + 1, y + 3, 6, 1, '#d4a82c'); p(c, x + 3, y + 6, '#d4a82c'); p(c, x + 5, y + 7, '#d4a82c'); p(c, x + 3, y + 8, '#d4a82c');
     if (hat('schaum')) { r(c, x + 1, y + 2, 6, 2, '#fffaf2'); p(c, x + 2, y + 1, '#fffaf2'); p(c, x + 4, y + 1, '#fffaf2'); }   // Milchschaum
     if (hat('zimt')) { p(c, x + 5, y + 2, '#8a4a1e'); p(c, x + 6, y + 1, '#8a4a1e'); p(c, x + 6, y, '#a8602a'); }   // Zimtstange
   }
-  if (id === 'gluehwein') {   // Sternenpunsch: fünfzackiger goldener Stern (ein Kreuz las sich als Erste Hilfe)
-    const g = '#ffd040';
-    p(c, x + 4, y + 4, g); r(c, x + 2, y + 5, 5, 1, g); r(c, x + 3, y + 6, 3, 1, g); p(c, x + 3, y + 7, g); p(c, x + 5, y + 7, g); p(c, x + 4, y + 5, '#fff4b0');
-  }
+
   if (id === 'kinderpunsch') {
-    p(c, x + 4, y + 5, '#fff'); p(c, x + 3, y + 6, '#fff'); p(c, x + 5, y + 6, '#fff'); p(c, x + 4, y + 7, '#fff');
     if (hat('zuckerstange')) { p(c, x + 5, y, '#d83a3a'); p(c, x + 6, y, '#fff'); p(c, x + 6, y + 1, '#d83a3a'); p(c, x + 6, y + 2, '#fff'); }
   }
   if (id === 'apfel') {
-    p(c, x + 4, y + 1, '#3a8a2a'); p(c, x + 5, y + 0, '#3a8a2a'); r(c, x + 3, y + 6, 3, 2, '#d83a2a');
+    p(c, x + 4, y + 1, '#3a8a2a'); p(c, x + 5, y + 0, '#3a8a2a');
     if (hat('ruehren')) { p(c, x + 2, y, '#d0d4dc'); p(c, x + 2, y + 1, '#b8bcc6'); p(c, x + 3, y + 2, '#b8bcc6'); }   // Löffel
   }
   const sahne = (id === 'schoko' || id === 'eierpunsch') && hat('sahne');
   if (sahne) { r(c, x + 2, y + 1, 4, 2, '#fffaf2'); p(c, x + 3, y, '#fffaf2'); if (id === 'schoko') p(c, x + 4, y + 1, '#6b3a22'); }
   if (id === 'eierpunsch' && hat('zimtpulver')) { p(c, x + 3, y + 1, '#a8602a'); p(c, x + 5, y + 2, '#8a4a1e'); p(c, x + 4, y, '#a8602a'); }
   if (id === 'jaegertee') {
-    p(c, x + 3, y + 6, '#e0c060'); p(c, x + 4, y + 5, '#e0c060'); p(c, x + 5, y + 6, '#e0c060');
     if (!hat('beutel')) { p(c, x + 2, y + 2, '#d8d0b0'); p(c, x + 2, y + 1, '#d8d0b0'); r(c, x + 1, y, 2, 1, '#e8d8a8'); }   // Teebeutel hängt noch drin
   }
   if (id === 'feuerzange' && !hat('zucker')) {
