@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610121546';
-import * as Z from './zeit.js?v=202610121546';
-import * as S from './spiel.js?v=202610121546';
-import { FASSADEN } from './config.js?v=202610121546';
-import * as C from './config.js?v=202610121546';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610121558';
+import * as Z from './zeit.js?v=202610121558';
+import * as S from './spiel.js?v=202610121558';
+import { FASSADEN } from './config.js?v=202610121558';
+import * as C from './config.js?v=202610121558';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2038,6 +2038,84 @@ function lichter(c, L, dunkel) {
  * Gezeichnet in 4-facher Auflösung, damit der Verlauf beim Verkleinern weich bleibt.
  */
 const scheine = new Map();
+// ---------------------------------------------------------------------------
+// Lichtkarte fürs Haus (12.10.) - wie licht.js in den Minispielen, aber mit
+// den Lichtern aus `L` als Lichtinseln. Nachts deutlich heller als der
+// Grundton der Minispiele, weil hier gespielt wird (Gäste, Tresen, Deko).
+// ---------------------------------------------------------------------------
+let lkE = null, lkC = null, mkE = null, mkC = null;
+const LK_TAG = [214, 218, 234], LK_NACHT = [122, 132, 184], LK_ABEND = [196, 140, 150];
+function lichtKarte(w, wd, G, GW, L) {
+  if (!lkE) { lkE = document.createElement('canvas'); lkC = lkE.getContext('2d'); }
+  if (lkE.width !== wd || lkE.height !== G) { lkE.width = wd; lkE.height = G; }
+  const li = w.li, hell = li.hell, c = lkC;
+  const misch = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
+  let g = misch(LK_NACHT, LK_TAG, hell);
+  if (li.daemmer > 0) g = misch(g, LK_ABEND, li.daemmer * 0.6);
+  c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+  c.fillStyle = `rgb(${g})`; c.fillRect(0, 0, wd, G);
+  c.globalCompositeOperation = 'lighter';
+  // Die Wintersonne: tief und seitlich, wandert über den Tag; in der Dämmerung orange
+  if (hell > 0) {
+    const sx = wd * (0.05 + 0.9 * Math.max(0, Math.min(1, li.sonne))), sy = GW - 120, rad = 200;
+    const grd = c.createRadialGradient(sx, sy, 0, sx, sy, rad);
+    const f = li.daemmer > 0.05 ? '255,170,110' : '255,244,220';
+    grd.addColorStop(0, `rgba(${f},${(0.6 * hell).toFixed(3)})`); grd.addColorStop(0.5, `rgba(${f},${(0.25 * hell).toFixed(3)})`); grd.addColorStop(1, `rgba(${f},0)`);
+    c.fillStyle = grd; c.fillRect(0, 0, wd, G);
+  }
+  // Mondlicht von oben: der Schnee am Boden bleibt nachts lesbar
+  if (hell < 1) {
+    const lg = c.createLinearGradient(0, GW - 30, 0, G);
+    lg.addColorStop(0, 'rgba(150,170,220,0)'); lg.addColorStop(1, `rgba(150,170,220,${(0.18 * (1 - hell)).toFixed(3)})`);
+    c.fillStyle = lg; c.fillRect(0, GW - 30, wd, G - GW + 30);
+  }
+  // Jedes Licht hellt seine Umgebung auf - nachts voll, tagsüber kaum
+  const st = 0.15 + 0.85 * w.dunkel;
+  for (const l of L) {
+    if (l.verdeckt) continue;
+    const a = l.an * st * (l.sichtbar ?? 1);
+    if (a <= 0.02) continue;
+    if (l.fleck) {
+      const [x, y, rx, ry] = l.fleck;
+      c.save(); c.translate(x, y); c.scale(1, ry / rx);
+      c.globalAlpha = Math.min(1, a * 1.3);
+      c.drawImage(scheinBild(l.f, Math.round(rx * 1.2)), -rx * 1.2, -rx * 1.2, rx * 2.4, rx * 2.4);
+      c.restore();
+      continue;
+    }
+    const cx = l.rect ? l.rect[0] + l.rect[2] / 2 : l.x + 0.5;
+    const cy = l.rect ? l.rect[1] + l.rect[3] / 2 : l.y + 0.5;
+    // Kleine Birnen (Lichterketten) gibt es zu Hunderten - einzeln kaum,
+    // zusammen sonst eine milchige Fläche. Fenster und Laternen tragen das Licht.
+    const gross = l.halo >= 5;
+    const h = Math.round(gross ? l.halo * 2.4 + 4 : l.halo * 1.6 + 2);
+    c.globalAlpha = Math.min(1, a * (gross ? 1.1 : 0.22));
+    c.drawImage(scheinBild(l.f, h), cx - h, cy - h, h * 2, h * 2);
+  }
+  c.globalAlpha = 1;
+  // Weiche dunkle Ränder, nachts etwas stärker
+  c.globalCompositeOperation = 'source-over';
+  const v = 0.12 + 0.14 * w.dunkel;
+  const vg = c.createRadialGradient(wd / 2, G * 0.55, G * 0.3, wd / 2, G * 0.55, G * 0.85);
+  vg.addColorStop(0, 'rgba(14,16,40,0)'); vg.addColorStop(1, `rgba(14,16,40,${v.toFixed(3)})`);
+  c.fillStyle = vg; c.fillRect(0, 0, wd, G);
+  return lkE;
+}
+/** Ebene `e` mit der Lichtkarte multiplizieren - nur dort, wo auf ihr etwas
+ *  steht (der Himmel liegt nicht auf der Ebene). `weiss` 0..1 schwächt ab. */
+function multipliziere(e, karte, G, weiss) {
+  const wd = e.canvas.width;
+  if (!mkE) { mkE = document.createElement('canvas'); mkC = mkE.getContext('2d'); }
+  if (mkE.width !== wd || mkE.height !== G) { mkE.width = wd; mkE.height = G; }
+  mkC.globalCompositeOperation = 'source-over'; mkC.globalAlpha = 1;
+  if (weiss > 0) { mkC.fillStyle = '#fff'; mkC.fillRect(0, 0, wd, G); mkC.globalAlpha = 1 - weiss; }
+  else mkC.clearRect(0, 0, wd, G);
+  mkC.drawImage(karte, 0, 0); mkC.globalAlpha = 1;
+  mkC.globalCompositeOperation = 'destination-in';
+  mkC.drawImage(e.canvas, 0, 0, wd, G, 0, 0, wd, G);
+  mkC.globalCompositeOperation = 'source-over';
+  e.save(); e.globalCompositeOperation = 'multiply'; e.drawImage(mkE, 0, 0); e.restore();
+}
 function scheinBild(farbe, halo) {
   const k = farbe + '|' + halo;
   let b = scheine.get(k);
@@ -2307,26 +2385,17 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   else if (pruefen) deckungNehmen(L);
   if (!opts.karte) deckung.nNeu = L.length;
 
-  // Nacht und Dämmerung - nur auf dem, was auf der Ebene steht
-  if (w.dunkel > 0) {
-    e.globalCompositeOperation = 'source-atop';
-    e.fillStyle = `rgba(20,26,70,${(0.42 * w.dunkel).toFixed(3)})`;
-    e.fillRect(0, 0, e.canvas.width, G);
-    if (w.li.daemmer > 0) {
-      e.fillStyle = `rgba(255,120,60,${(0.12 * w.li.daemmer).toFixed(3)})`;
-      e.fillRect(0, 0, e.canvas.width, G);
-    }
-    e.globalCompositeOperation = 'source-over';
-  }
+  // Licht und Schatten (12.10., vorher eine flache Abdunklung): die Ebene
+  // wird mit einer LICHTKARTE multipliziert - Grundton je Tageszeit, die
+  // Wintersonne seitlich, und jedes Licht aus `L` hellt seine Umgebung auf
+  const karte = lichtKarte(w, e.canvas.width, G, GW, L);
+  multipliziere(e, karte, G, 0);
   // Menschen nachts heller: noch einmal auf eine eigene Ebene, nur halb so
-  // stark abgedunkelt, und über die dunkle Welt gelegt (gleiche Pixel)
+  // stark beleuchtet, und über die Welt gelegt (gleiche Pixel)
   if (w.dunkel > 0.05 && !opts.ohneGaeste) {
     const ge = gastEbeneFuer(e.canvas.width, e.canvas.height);
     strasse(ge, GW, t);
-    ge.globalCompositeOperation = 'source-atop';
-    ge.fillStyle = `rgba(20,26,70,${(0.42 * w.dunkel * 0.45).toFixed(3)})`;
-    ge.fillRect(0, 0, ge.canvas.width, G);
-    ge.globalCompositeOperation = 'source-over';
+    multipliziere(ge, karte, G, 0.5);
     e.drawImage(ge.canvas, 0, 0);
   }
   c.drawImage(ebene, 0, 0, 180, G, 0, 0, 180, G);
