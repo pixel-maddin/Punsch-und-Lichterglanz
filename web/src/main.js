@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610121244';
-import * as S from './spiel.js?v=202610121244';
-import * as Z from './zeit.js?v=202610121244';
-import * as T from './ton.js?v=202610121244';
-import * as LI from './lichtung.js?v=202610121244';
-import * as CB from './christbaum.js?v=202610121244';
-import * as KA from './karte.js?v=202610121244';
-import * as SB from './schlitten.js?v=202610121244';
-import * as EB from './schlittschuh.js?v=202610121244';
-import * as BS from './backstube.js?v=202610121244';
-import * as UI from './ui.js?v=202610121244';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610121244';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610121244';
-import * as Lernen from './lernen.js?v=202610121244';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610121244';
-import * as A from './auftraege.js?v=202610121244';
-import * as E from './erfolge.js?v=202610121244';
-import * as ZL from './ziele.js?v=202610121244';
+import * as C from './config.js?v=202610121303';
+import * as S from './spiel.js?v=202610121303';
+import * as Z from './zeit.js?v=202610121303';
+import * as T from './ton.js?v=202610121303';
+import * as LI from './lichtung.js?v=202610121303';
+import * as CB from './christbaum.js?v=202610121303';
+import * as KA from './karte.js?v=202610121303';
+import * as SB from './schlitten.js?v=202610121303';
+import * as EB from './schlittschuh.js?v=202610121303';
+import * as BS from './backstube.js?v=202610121303';
+import * as UI from './ui.js?v=202610121303';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610121303';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610121303';
+import * as Lernen from './lernen.js?v=202610121303';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610121303';
+import * as A from './auftraege.js?v=202610121303';
+import * as E from './erfolge.js?v=202610121303';
+import * as ZL from './ziele.js?v=202610121303';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -69,7 +69,7 @@ function groesse() {
   document.documentElement.style.setProperty('--px', skala + 'px');
   const huelle = document.getElementById('huelle');
   huelle.style.width = w + 'px'; huelle.style.height = h + 'px';
-  G = H - C.LEISTE - C.STAND_H;
+  G = H - C.LEISTE - C.LEISTE_LUFT - C.STAND_H;
   Lernen.layout(G, H);
   c.imageSmoothingEnabled = false;
 }

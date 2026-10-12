@@ -14,6 +14,10 @@ export const H_MIN = 300;      // Mindesthöhe; darunter wird nach Höhe skalier
 export const H_MAX = 440;      // Höher wird es nicht, der Rest ist Rand
 export const LEISTE = 26;      // DOM-Leiste unten (Laden, Kalender, …)
 export const STAND_H = 128;    // Tresenansicht über der Leiste
+// Abstand zwischen unterster Regalreihe und Leiste (12.10., gemeldet: beim
+// schnellen Ausschenken landete man auf Karte/Aufträge statt auf dem Topf).
+// Eine Holzleiste; ein Tipp darauf zählt noch für den Topf darüber.
+export const LEISTE_LUFT = 6;
 export const HUD_H = 20;       // DOM-Kopfzeile oben
 
 // Tresenansicht, relativ zu ihrer Oberkante

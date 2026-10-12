@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610121244';
-import * as S from './spiel.js?v=202610121244';
-import * as A from './auftraege.js?v=202610121244';
-import * as E from './erfolge.js?v=202610121244';
-import * as Z from './ziele.js?v=202610121244';
-import * as KA from './karte.js?v=202610121244';
+import * as C from './config.js?v=202610121303';
+import * as S from './spiel.js?v=202610121303';
+import * as A from './auftraege.js?v=202610121303';
+import * as E from './erfolge.js?v=202610121303';
+import * as Z from './ziele.js?v=202610121303';
+import * as KA from './karte.js?v=202610121303';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -392,7 +392,7 @@ function zeige(z) {
   if (z.weiter && !unten) {
     // Blasen mit „Weiter" stehen seit 02.10. unten über der Leiste: Dort ist
     // der Daumen. Das Spiel steht ohnehin, die Töpfe darf sie verdecken.
-    tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${C.LEISTE + 5})`;
+    tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${C.LEISTE + C.LEISTE_LUFT + 5})`;
     tipp.dataset.pfeil = '';
   } else if (unten) {
     tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${H - G + 6})`;

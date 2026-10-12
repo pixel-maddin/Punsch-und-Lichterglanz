@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610121244';
-import * as C from './config.js?v=202610121244';
-import * as S from './spiel.js?v=202610121244';
-import * as Z from './zeit.js?v=202610121244';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610121303';
+import * as C from './config.js?v=202610121303';
+import * as S from './spiel.js?v=202610121303';
+import * as Z from './zeit.js?v=202610121303';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -21,6 +21,12 @@ export function zeichneTresen(c, y0, t, w) {
   gaestezone(c, y0, t, w);
   brett(c, yb, t);
   regal(c, yr, t);
+  // Holzsockel als Abstand zur Leiste (C.LEISTE_LUFT). Ein Tipp darauf zählt noch
+  // für den Topf darüber (treffer() ist nach unten offen) - zu tief getippt
+  // landet also im Getränk, nicht im Menü
+  const ys = y0 + C.STAND_H;
+  r(c, 0, ys, C.B, C.LEISTE_LUFT, '#3a2414'); r(c, 0, ys, C.B, 1, '#6a4222'); r(c, 0, ys + C.LEISTE_LUFT - 1, C.B, 1, '#24160c');
+  for (let x = 6; x < C.B; x += 30) r(c, x, ys + 2, 2, 2, '#8a5a32');   // Schraubenköpfe
   gedrueckt(c, y0, yb, yr);
   // Ringe an der Tippstelle
   for (const k of S.lauf.klicks) {
