@@ -10,12 +10,12 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610121327';
-import * as Z from './zeit.js?v=202610121327';
-import * as T from './ton.js?v=202610121327';
-import * as MH from './minihud.js?v=202610121327';
-import * as L from './licht.js?v=202610121327';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610121327';
+import * as C from './config.js?v=202610121546';
+import * as Z from './zeit.js?v=202610121546';
+import * as T from './ton.js?v=202610121546';
+import * as MH from './minihud.js?v=202610121546';
+import * as L from './licht.js?v=202610121546';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610121546';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -363,7 +363,7 @@ function zeichne(t) {
   // liegt im Blau, Hindernisse tauchen aus dem Dunkel auf
   const li = Z.licht(), nachts = 1 - li.hell;
   // (die Hindernisse kommen von UNTEN - der Kegel liegt in Fahrtrichtung vor dem Wok)
-  L.beleuchte(c, W, H, { vignette: 0.32, grundNacht: [84, 94, 146], inseln: [{ x: g.x, y: wy + 70, r: 110, rgb: '255,230,190', a: 0.7 }, { x: g.x, y: wy + 2, r: 30, a: 0.55 }] });
+  L.beleuchte(c, W, H, { vignette: 0.32, grundNacht: [112, 122, 170], inseln: [{ x: g.x, y: wy + 70, r: 110, rgb: '255,230,190', a: 0.7 }, { x: g.x, y: wy + 2, r: 30, a: 0.55 }] });
   L.schein(c, Math.round(g.x), wy - 8, 8, '255,236,190', 0.35 * nachts);
 
   // Kopfzeile: Restzeit, Fortschritt bis zum Ziel, Punkte (DOM, minihud.js)

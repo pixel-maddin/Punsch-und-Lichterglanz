@@ -11,12 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610121327';
-import * as Z from './zeit.js?v=202610121327';
-import * as T from './ton.js?v=202610121327';
-import * as MH from './minihud.js?v=202610121327';
-import * as L from './licht.js?v=202610121327';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610121327';
+import * as C from './config.js?v=202610121546';
+import * as Z from './zeit.js?v=202610121546';
+import * as T from './ton.js?v=202610121546';
+import * as MH from './minihud.js?v=202610121546';
+import * as L from './licht.js?v=202610121546';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610121546';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -529,7 +529,7 @@ function zeichne(t) {
   // Waldrand bleibt dunkel
   const { x: kx0, y: ky0 } = KRAUFE(), lx = kx0 - 22, ly = ky0 - 13;
   L.beleuchte(c, W, H, {
-    vignette: 0.36, grundNacht: [88, 98, 150],   // Mondlicht auf dem Schnee: die Tiere müssen sichtbar bleiben
+    vignette: 0.36, grundNacht: [116, 126, 174],   // Mondlicht auf dem Schnee: die Tiere müssen sichtbar bleiben
     flecken: [{ x: 46, y: H * 0.46, r: 40 }, { x: 128, y: H * 0.62, r: 46 }, { x: 74, y: H * 0.82, r: 38, a: 0.3 }],
     inseln: [{ x: lx, y: ly + 6, r: 44, a: 0.9 }],
   });

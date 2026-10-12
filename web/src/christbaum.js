@@ -13,12 +13,12 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610121327';
-import * as Z from './zeit.js?v=202610121327';
-import * as T from './ton.js?v=202610121327';
-import * as MH from './minihud.js?v=202610121327';
-import * as L from './licht.js?v=202610121327';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610121327';
+import * as C from './config.js?v=202610121546';
+import * as Z from './zeit.js?v=202610121546';
+import * as T from './ton.js?v=202610121546';
+import * as MH from './minihud.js?v=202610121546';
+import * as L from './licht.js?v=202610121546';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610121546';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -477,7 +477,7 @@ function zeichne(t) {
   // Laterne am Parkplatz, Lichterkette am Zaun
   const li = Z.licht(), oben = Math.round(H * 0.2), py = Math.round(H * 0.72), nachts = 1 - li.hell;
   L.beleuchte(c, W, H, {
-    himmel: oben - 8, vignette: 0.3, grundNacht: [84, 94, 146],
+    himmel: oben - 8, vignette: 0.3, grundNacht: [112, 122, 170],
     inseln: [{ x: 10, y: oben - 4, r: 30, a: 0.9 }, { x: W - 6, y: py - 20, r: 50, a: 0.9 }, { x: W / 2, y: oben - 3, r: 70, rgb: '255,210,150', a: 0.35 },
       { x: W / 2, y: H * 0.47, r: 110, rgb: '255,226,180', a: 0.55 }],   // Arbeitslicht über dem Baumfeld: die Sorten müssen erkennbar bleiben
   });

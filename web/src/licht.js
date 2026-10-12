@@ -17,7 +17,7 @@
  * `schatten()` ist ein weicher Bodenschatten unter Dingen; er fällt weg von
  * der Sonne (`schattenRichtung()`).
  */
-import * as Z from './zeit.js?v=202610121327';
+import * as Z from './zeit.js?v=202610121546';
 
 const karte = typeof document !== 'undefined' ? document.createElement('canvas') : null;
 const lk = karte ? karte.getContext('2d') : null;
@@ -69,7 +69,7 @@ export function beleuchte(c, w, h, opt = {}) {
   if (!karte) return;
   const li = Z.licht(), hell = li.hell, d = li.daemmer;
   if (karte.width !== w || karte.height !== h) { karte.width = w; karte.height = h; }
-  const tag = opt.grundTag || [160, 170, 198], nacht = opt.grundNacht || [78, 88, 138], abend = [150, 118, 138];
+  const tag = opt.grundTag || [160, 170, 198], nacht = opt.grundNacht || [106, 116, 162], abend = [150, 118, 138];
   let g = misch(nacht, tag, hell);
   if (d > 0) g = misch(g, abend, d * 0.6);
   lk.globalCompositeOperation = 'source-over';
@@ -91,7 +91,7 @@ export function beleuchte(c, w, h, opt = {}) {
   for (const q of opt.inseln || []) fleck(lk, q.x, q.y, q.r, q.rgb || '255,196,120', (q.a ?? 0.8) * lampen);
   // Weiche dunkle Ränder
   lk.globalCompositeOperation = 'source-over';
-  const v = opt.vignette ?? 0.32;
+  const v = (opt.vignette ?? 0.32) * (0.7 + 0.3 * hell);   // nachts weichere Ränder (12.10.: Nacht war zu dunkel)
   if (v > 0) {
     const vg = lk.createRadialGradient(w / 2, h * 0.5, Math.min(w, h) * 0.35, w / 2, h * 0.5, Math.max(w, h) * 0.75);
     vg.addColorStop(0, 'rgba(14,16,40,0)'); vg.addColorStop(1, `rgba(14,16,40,${v})`);
