@@ -13,12 +13,12 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610121558';
-import * as Z from './zeit.js?v=202610121558';
-import * as T from './ton.js?v=202610121558';
-import * as MH from './minihud.js?v=202610121558';
-import * as L from './licht.js?v=202610121558';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610121558';
+import * as C from './config.js?v=202610121603';
+import * as Z from './zeit.js?v=202610121603';
+import * as T from './ton.js?v=202610121603';
+import * as MH from './minihud.js?v=202610121603';
+import * as L from './licht.js?v=202610121603';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610121603';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -489,7 +489,7 @@ function zeichne(t) {
   for (let x = 34, i = 0; x < W; x += 4, i++) {
     const y = oben - 3 + Math.round(Math.sin(((x - 32) % 16) / 16 * Math.PI) * 2) + 1, an = Math.sin(t * 2 + i) > -0.5;
     p(c, x, y, an ? FARB[i % 4] : ton(FARB[i % 4], -0.4));
-    if (an) L.schein(c, x, y, 4, RGB[i % 4], 0.12 + 0.3 * nachts);
+    if (an) L.schein(c, x, y, 4, RGB[i % 4], 0.06 + 0.16 * nachts);
   }
 
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)

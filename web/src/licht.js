@@ -17,15 +17,18 @@
  * `schatten()` ist ein weicher Bodenschatten unter Dingen; er fällt weg von
  * der Sonne (`schattenRichtung()`).
  */
-import * as Z from './zeit.js?v=202610121558';
+import * as Z from './zeit.js?v=202610121603';
 
 const karte = typeof document !== 'undefined' ? document.createElement('canvas') : null;
 const lk = karte ? karte.getContext('2d') : null;
+// Dämpfung für Schein und Lichtinseln (12.10.: „die Lichtkegel sieht man zu stark“)
+const SCHEIN = 0.6, INSEL = 0.55;
 const klemme = (v) => Math.max(0, Math.min(1, v));
 const misch = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
 
 /** Weiches Licht (additiv) - für Lampen, Kerzen, Glut, NACH beleuchte(). */
 export function schein(ctx, x, y, rad, rgb, a) {
+  a *= SCHEIN;   // 12.10.: Lichter und Kegel waren zu kräftig
   if (a <= 0.005) return;
   const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
   g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(0.45, `rgba(${rgb},${(a * 0.4).toFixed(3)})`); g.addColorStop(1, `rgba(${rgb},0)`);
@@ -88,7 +91,7 @@ export function beleuchte(c, w, h, opt = {}) {
   }
   for (const q of opt.flecken || []) fleck(lk, q.x, q.y, q.r, '255,240,200', (q.a ?? 0.35) * hell);
   const lampen = 0.25 + 0.75 * (1 - hell);
-  for (const q of opt.inseln || []) fleck(lk, q.x, q.y, q.r, q.rgb || '255,196,120', (q.a ?? 0.8) * lampen);
+  for (const q of opt.inseln || []) fleck(lk, q.x, q.y, q.r, q.rgb || '255,196,120', (q.a ?? 0.8) * lampen * INSEL);
   // Weiche dunkle Ränder
   lk.globalCompositeOperation = 'source-over';
   const v = (opt.vignette ?? 0.32) * (0.7 + 0.3 * hell);   // nachts weichere Ränder (12.10.: Nacht war zu dunkel)
