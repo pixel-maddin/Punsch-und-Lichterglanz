@@ -11,11 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610121303';
-import * as Z from './zeit.js?v=202610121303';
-import * as T from './ton.js?v=202610121303';
-import * as MH from './minihud.js?v=202610121303';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610121303';
+import * as C from './config.js?v=202610121327';
+import * as Z from './zeit.js?v=202610121327';
+import * as T from './ton.js?v=202610121327';
+import * as MH from './minihud.js?v=202610121327';
+import * as L from './licht.js?v=202610121327';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610121327';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -523,16 +524,16 @@ function zeichne(t) {
     else if (fl.s < 1.2) { const f = ['#d88a3a', '#c8622a', '#e8b040'][Math.floor(fl.s * 2.5)]; p(c, x, fl.y, f); p(c, x + 1, fl.y + (Math.sin(t * 3 + fl.s) > 0 ? 1 : 0), f); }
   }
 
-  // Abends und nachts: dunkler, die Laterne an der Raufe leuchtet
-  if (li.hell < 0.9) {
-    const nacht = 1 - li.hell;
-    c.fillStyle = `rgba(14,20,62,${(nacht * 0.5).toFixed(3)})`;
-    c.fillRect(0, 0, W, H);
-    const { x: kx0, y: ky0 } = KRAUFE(), kx = kx0 - 22, ky = ky0 - 13;
-    c.fillStyle = `rgba(255,200,110,${(nacht * 0.08).toFixed(3)})`;
-    for (let rr = 5; rr <= 22; rr += 6) for (let yy = -rr; yy <= rr; yy++) { const w = Math.round(Math.sqrt(rr * rr - yy * yy)); c.fillRect(kx - w, ky + yy, w * 2 + 1, 1); }
-    r(c, kx - 1, ky - 1, 3, 3, '#ffe090');
-  }
+  // Licht und Schatten (12.10., licht.js): Sonne seitlich durch die Wipfel,
+  // Sonnenflecken auf der Lichtung, abends die Laterne an der Raufe; der
+  // Waldrand bleibt dunkel
+  const { x: kx0, y: ky0 } = KRAUFE(), lx = kx0 - 22, ly = ky0 - 13;
+  L.beleuchte(c, W, H, {
+    vignette: 0.36, grundNacht: [88, 98, 150],   // Mondlicht auf dem Schnee: die Tiere müssen sichtbar bleiben
+    flecken: [{ x: 46, y: H * 0.46, r: 40 }, { x: 128, y: H * 0.62, r: 46 }, { x: 74, y: H * 0.82, r: 38, a: 0.3 }],
+    inseln: [{ x: lx, y: ly + 6, r: 44, a: 0.9 }],
+  });
+  if (li.hell < 0.9) { r(c, lx - 1, ly - 1, 3, 3, '#ffe090'); L.schein(c, lx, ly, 10, '255,210,130', 0.55 * (1 - li.hell)); }
 
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)
   const rest = Math.max(0, Math.ceil(C.LICHTUNG_DAUER - Math.max(0, g.t)));

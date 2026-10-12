@@ -10,11 +10,12 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610121303';
-import * as Z from './zeit.js?v=202610121303';
-import * as T from './ton.js?v=202610121303';
-import * as MH from './minihud.js?v=202610121303';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610121303';
+import * as C from './config.js?v=202610121327';
+import * as Z from './zeit.js?v=202610121327';
+import * as T from './ton.js?v=202610121327';
+import * as MH from './minihud.js?v=202610121327';
+import * as L from './licht.js?v=202610121327';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610121327';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -234,6 +235,7 @@ function ellipse(cx, cy, rx, ry, f) {
 }
 
 function tanne(x, fuss, h) {
+  L.schatten(c, x + L.schattenRichtung() * h * 0.5, fuss, h * 0.45, 2.5, 0.28);
   c.fillStyle = 'rgba(80,100,140,0.18)'; c.fillRect(Math.round(x - 4), fuss, 10, 2);
   r(c, x, fuss - 2, 2, 3, '#5a3a22');
   const b = Math.round(h * 0.42);
@@ -356,9 +358,13 @@ function zeichne(t) {
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || (x.text.length > 3 ? '#ffb040' : '#ffe27a'), x.text.length > 5 ? 0.8 : 1.1); }
   // Daumen-Hinweis am Anfang
   MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : g.t < 2.5 ? 'Daumen ziehen zum Lenken' : null);
-  // Leicht dunkler bei Nacht
-  const li = Z.licht();
-  if (li.hell < 0.9) { c.fillStyle = `rgba(14,20,62,${((1 - li.hell) * 0.35).toFixed(3)})`; c.fillRect(0, 0, W, H); }
+  // Licht und Schatten (12.10., licht.js): Wintersonne über dem Hang, und
+  // abends ein warmer Lichtkegel um den Wok (Stirnlampe) - der Hang davor
+  // liegt im Blau, Hindernisse tauchen aus dem Dunkel auf
+  const li = Z.licht(), nachts = 1 - li.hell;
+  // (die Hindernisse kommen von UNTEN - der Kegel liegt in Fahrtrichtung vor dem Wok)
+  L.beleuchte(c, W, H, { vignette: 0.32, grundNacht: [84, 94, 146], inseln: [{ x: g.x, y: wy + 70, r: 110, rgb: '255,230,190', a: 0.7 }, { x: g.x, y: wy + 2, r: 30, a: 0.55 }] });
+  L.schein(c, Math.round(g.x), wy - 8, 8, '255,236,190', 0.35 * nachts);
 
   // Kopfzeile: Restzeit, Fortschritt bis zum Ziel, Punkte (DOM, minihud.js)
   const rest = Math.max(0, Math.ceil(C.BERG_DAUER - Math.max(0, g.t)));

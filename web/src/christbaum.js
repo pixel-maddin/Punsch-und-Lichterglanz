@@ -13,11 +13,12 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610121303';
-import * as Z from './zeit.js?v=202610121303';
-import * as T from './ton.js?v=202610121303';
-import * as MH from './minihud.js?v=202610121303';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610121303';
+import * as C from './config.js?v=202610121327';
+import * as Z from './zeit.js?v=202610121327';
+import * as T from './ton.js?v=202610121327';
+import * as MH from './minihud.js?v=202610121327';
+import * as L from './licht.js?v=202610121327';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610121327';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -431,6 +432,7 @@ function zeichne(t) {
   // Bäume, von hinten nach vorn; der gewählte bekommt eine Säge
   for (const b of [...g.baeume].sort((x, y) => x.y - y.y)) {
     if (b.weg) { r(c, b.x - 1, b.y - 2, 4, 2, '#c8a070'); p(c, b.x, b.y - 2, '#a8805a'); continue; }
+    L.schatten(c, b.x + 1 + L.schattenRichtung() * 5, b.y, 9 + b.gr * 2, 3, 0.32);   // weicher Bodenschatten, weg von der Sonne
     baumStehend(b.x, b.y, b.art, b.gr, b.wachs, winter, b.wackel);
     if (b === g.aktiv) {
       const sx = b.x + 4, sy = b.y - 3, hin = Math.floor(t * 10) % 2;
@@ -461,7 +463,6 @@ function zeichne(t) {
     auto(a, pp, winter);
     if (a.phase !== 'faehrt') {
       figurKlein(c, a.kunde, a.x - 28, pp.y, t);
-      blase(a, pp, t);
     } else MH.label('wunsch', 0, 0, null);
   } else MH.label('wunsch', 0, 0, null);
   // Hinweis, was als Nächstes dran ist
@@ -472,18 +473,23 @@ function zeichne(t) {
   // Schwebende Texte als DOM (minihud.js) - einmal anstoßen, sie steigen selbst
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || (x.text.length > 3 ? '#ffb040' : '#ffe27a'), x.text.length > 5 ? 0.8 : 1.1); }
 
-  // Nacht
-  const li = Z.licht();
-  if (li.hell < 0.9) {
-    const nacht = 1 - li.hell;
-    c.fillStyle = `rgba(14,20,62,${(nacht * 0.45).toFixed(3)})`;
-    c.fillRect(0, 0, W, H);
-    // Lichterkette am Zaun leuchtet
-    const oben = Math.round(H * 0.2);
-    for (let x = 34; x < W; x += 6) p(c, x, oben - 3 + (x % 12 === 4 ? 1 : 0), ['#ff5a5a', '#ffe060', '#5ad0ff', '#7ae07a'][(x / 6) % 4 | 0]);
-  } else {
-    const oben = Math.round(H * 0.2);
-    for (let x = 34; x < W; x += 6) p(c, x, oben - 3 + (x % 12 === 4 ? 1 : 0), ['#c84040', '#c8a030', '#3a90b0', '#4aa04a'][(x / 6) % 4 | 0]);
+  // Licht und Schatten (12.10., licht.js): Wintersonne, warmes Hüttenfenster,
+  // Laterne am Parkplatz, Lichterkette am Zaun
+  const li = Z.licht(), oben = Math.round(H * 0.2), py = Math.round(H * 0.72), nachts = 1 - li.hell;
+  L.beleuchte(c, W, H, {
+    himmel: oben - 8, vignette: 0.3, grundNacht: [84, 94, 146],
+    inseln: [{ x: 10, y: oben - 4, r: 30, a: 0.9 }, { x: W - 6, y: py - 20, r: 50, a: 0.9 }, { x: W / 2, y: oben - 3, r: 70, rgb: '255,210,150', a: 0.35 },
+      { x: W / 2, y: H * 0.47, r: 110, rgb: '255,226,180', a: 0.55 }],   // Arbeitslicht über dem Baumfeld: die Sorten müssen erkennbar bleiben
+  });
+  // Die Wunschblase liegt ÜBER dem Licht - sie muss immer lesbar sein
+  if (a && a.phase !== 'faehrt') blase(a, PARKPLATZ(), t);
+  r(c, 7, oben - 7, 6, 6, nachts > 0.3 ? '#ffe28a' : '#f8d878'); L.schein(c, 10, oben - 4, 9, '255,210,120', 0.5 * nachts);
+  r(c, W - 7, py - 22, 3, 3, '#ffe090'); L.schein(c, W - 6, py - 21, 12, '255,214,140', 0.25 + 0.45 * nachts);
+  const FARB = ['#ff5a5a', '#ffe060', '#5ad0ff', '#7ae07a'], RGB = ['255,90,90', '255,224,96', '90,208,255', '122,224,122'];
+  for (let x = 34, i = 0; x < W; x += 4, i++) {
+    const y = oben - 3 + Math.round(Math.sin(((x - 32) % 16) / 16 * Math.PI) * 2) + 1, an = Math.sin(t * 2 + i) > -0.5;
+    p(c, x, y, an ? FARB[i % 4] : ton(FARB[i % 4], -0.4));
+    if (an) L.schein(c, x, y, 4, RGB[i % 4], 0.12 + 0.3 * nachts);
   }
 
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)

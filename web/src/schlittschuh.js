@@ -10,11 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610121303';
-import * as Z from './zeit.js?v=202610121303';
-import * as T from './ton.js?v=202610121303';
-import * as MH from './minihud.js?v=202610121303';
-import { r, p, ton, mische } from './pixel.js?v=202610121303';
+import * as C from './config.js?v=202610121327';
+import * as Z from './zeit.js?v=202610121327';
+import * as T from './ton.js?v=202610121327';
+import * as MH from './minihud.js?v=202610121327';
+import * as L from './licht.js?v=202610121327';
+import { r, p, ton, mische } from './pixel.js?v=202610121327';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -430,7 +431,7 @@ function skater(g, t, nacht) {
   const fx = SKATER_X, fy = boden - Math.round(g.y);
   // Schatten auf dem Eis, kleiner je höher
   const sw = Math.max(4, 12 - Math.round(g.y / 5));
-  c.fillStyle = nacht ? 'rgba(10,10,40,0.35)' : 'rgba(60,90,130,0.25)'; c.fillRect(fx - sw / 2, boden + 1, sw, 2);
+  L.schatten(c, fx + L.schattenRichtung() * 4, boden + 2, sw * 0.8, 2.5, 0.4);   // weicher Schatten auf dem Eis
   if (g.sturz > 0) {
     // Gestürzt: liegt quer und rutscht
     figur('stand', t);
@@ -494,6 +495,13 @@ function zeichne(t) {
   for (const d of g.dinge) ding(d, g, t);
   skater(g, t, nacht);
   for (const f of g.funken) p(c, f.x, f.y, '#ffffff');
+  // Licht und Schatten (12.10., licht.js): Wintersonne, heller Himmel, und
+  // abends die Laternen im Vordergrund - ihr Schein liegt auch auf dem Eis
+  const li = Z.licht(), nachts = 1 - li.hell, sb = H - 7, lv = (g.x * 1.3) % 64, inseln = [];
+  for (let x = -64; x < W + 64; x += 64) { const lx = Math.round(x - lv); inseln.push({ x: lx, y: sb - 19, r: 34, a: 0.85 }, { x: lx, y: BODEN() + 18, r: 46, rgb: '255,200,140', a: 0.4 }); }
+  inseln.push({ x: W * 0.4, y: BODEN() - 14, r: 110, rgb: '255,232,196', a: 0.55 });   // Flutlicht über der Bahn: Läufer und Sterne bleiben sichtbar
+  L.beleuchte(c, W, H, { himmel: Math.round(H * 0.4), vignette: 0.28, inseln });
+  for (let x = -64; x < W + 64; x += 64) { const lx = Math.round(x - lv); L.schein(c, lx, sb - 19, 9, '255,220,140', 0.15 + 0.5 * nachts); }
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe, x.klein ? 0.75 : 1.1); }
   // Kopfzeile: Zeit, in der Luft die laufende Kombo, Punkte
   const rest = Math.max(0, Math.ceil(C.EIS_DAUER - Math.max(0, g.t)));
