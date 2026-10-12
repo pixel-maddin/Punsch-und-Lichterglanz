@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610112149';
-import * as S from './spiel.js?v=202610112149';
-import * as Z from './zeit.js?v=202610112149';
-import * as T from './ton.js?v=202610112149';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610112149';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610112149';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610112149';
-import * as A from './auftraege.js?v=202610112149';
-import * as E from './erfolge.js?v=202610112149';
-import * as ZL from './ziele.js?v=202610112149';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610112149';
-import * as KA from './karte.js?v=202610112149';
-import { zeigeRueckblick } from './ereignis.js?v=202610112149';
-import { barbaraZweig } from './szene.js?v=202610112149';
-import * as LI from './lichtung.js?v=202610112149';
-import * as CB from './christbaum.js?v=202610112149';
-import * as SB from './schlitten.js?v=202610112149';
-import * as EB from './schlittschuh.js?v=202610112149';
-import * as BS from './backstube.js?v=202610112149';
-import { alleSymbole } from './symbole.js?v=202610112149';
+import * as C from './config.js?v=202610121105';
+import * as S from './spiel.js?v=202610121105';
+import * as Z from './zeit.js?v=202610121105';
+import * as T from './ton.js?v=202610121105';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610121105';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610121105';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610121105';
+import * as A from './auftraege.js?v=202610121105';
+import * as E from './erfolge.js?v=202610121105';
+import * as ZL from './ziele.js?v=202610121105';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610121105';
+import * as KA from './karte.js?v=202610121105';
+import { zeigeRueckblick } from './ereignis.js?v=202610121105';
+import { barbaraZweig } from './szene.js?v=202610121105';
+import * as LI from './lichtung.js?v=202610121105';
+import * as CB from './christbaum.js?v=202610121105';
+import * as SB from './schlitten.js?v=202610121105';
+import * as EB from './schlittschuh.js?v=202610121105';
+import * as BS from './backstube.js?v=202610121105';
+import { alleSymbole } from './symbole.js?v=202610121105';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1502,6 +1502,33 @@ export function oeffneKalender() {
 // Menü
 // ---------------------------------------------------------------------------
 let titelTipps = 0;
+/** Was das Feedback-Formular über die Lage erfährt: keine Namen, kein Spielstand. */
+function feedbackInfo() {
+  const ua = navigator.userAgent;
+  const geraet = /iPhone/.test(ua) ? 'iPhone' : /iPad|Macintosh.*Mobile/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Mac/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : 'anderes Gerät';
+  const browser = /Edg\//.test(ua) ? 'Edge' : /SamsungBrowser/.test(ua) ? 'Samsung' : /Firefox|FxiOS/.test(ua) ? 'Firefox' : /Chrome|CriOS/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : 'Browser';
+  const app = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches ? 'als App' : 'im Browser';
+  const version = new URL(import.meta.url).searchParams.get('v') || 'lokal';
+  const d = Z.jetzt();
+  return [`Version ${version}`, S.st.modus === 'eigen' ? 'Individuell' : 'Klassisch', `Spieltag ${S.spieltag() >= 99 ? '?' : S.spieltag() + 1}`,
+    `Spieldatum ${d.getDate()}.${d.getMonth() + 1}. ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`,
+    `Stimmung ${S.stimmung()}`, `Ziel ${S.st.ziel || 0}`, `${geraet}, ${browser} ${app}`, `${window.innerWidth}x${window.innerHeight}`].join(' · ');
+}
+function zeigeFeedback() {
+  const info = feedbackInfo();
+  fenster('Feedback geben', `
+    <p>Danke, dass du testest! Was ist dir aufgefallen - ein Fehler, etwas Unklares, eine Idee? Schreib es einfach rein.</p>
+    <p class="klein">Das Formular öffnet sich in einem neuen Fenster (Google Formulare). Mitgeschickt wird nur diese Zeile, damit wir die Meldung einordnen können - kein Name, kein Spielstand:</p>
+    <p class="klein"><code>${esc(info)}</code></p>`, [
+    { text: 'Zum Formular', aktion: () => {
+      const u = new URL(C.FEEDBACK.url);
+      if (C.FEEDBACK.infoFeld) { u.searchParams.set('usp', 'pp_url'); u.searchParams.set(C.FEEDBACK.infoFeld, info); }
+      window.open(u.toString(), '_blank', 'noopener');
+    } },
+    { text: 'Abbrechen', neben: true },
+  ]);
+}
+
 export function oeffneMenue() {
   oeffneBlatt('menue', 'Punsch & Lichterglanz');
   $('#blattTabs').classList.add('versteckt');
@@ -1560,6 +1587,12 @@ export function oeffneMenue() {
     ]);
   };
   zeile.appendChild(nm); zeile.appendChild(hilfe); zeile.appendChild(neu);
+  // Feedback der Testspieler (12.10.): erst, wenn ein Formular eingetragen ist
+  if (C.FEEDBACK.url) {
+    const fb = el('button', 'k k--neben', 'Feedback geben');
+    fb.onclick = () => zeigeFeedback();
+    zeile.appendChild(fb);
+  }
   // Ab Heiligabend: den Rückblick noch einmal ansehen
   if (S.heiligabendJetzt() && S.st.heiligabend === Z.saison()) {
     const rb = el('button', 'k k--neben', 'Mein Advent');

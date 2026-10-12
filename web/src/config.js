@@ -782,3 +782,9 @@ export const WETTBEWERB = {
 // Silvester (11.10.): ab 18 Uhr am 31.12. Feuerwerk über dem Dorf, dazu der
 // Abschluss der Saison; um Mitternacht das große Feuerwerk.
 export const SILVESTER_STUNDE = 18;
+
+// Feedback der Testspieler (12.10.): ein Google-Formular. `url` = der Link
+// zum Formular (…/viewform), `infoFeld` = die Kennung des Kurzantwort-Felds
+// für die Spielinfos („entry.123456789", aus „Vorausgefüllten Link abrufen").
+// Solange `url` leer ist, gibt es keinen Feedback-Knopf.
+export const FEEDBACK = { url: '', infoFeld: '' };

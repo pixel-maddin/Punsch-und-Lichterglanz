@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610112149';
-import * as S from './spiel.js?v=202610112149';
-import * as Z from './zeit.js?v=202610112149';
-import * as T from './ton.js?v=202610112149';
-import * as LI from './lichtung.js?v=202610112149';
-import * as CB from './christbaum.js?v=202610112149';
-import * as KA from './karte.js?v=202610112149';
-import * as SB from './schlitten.js?v=202610112149';
-import * as EB from './schlittschuh.js?v=202610112149';
-import * as BS from './backstube.js?v=202610112149';
-import * as UI from './ui.js?v=202610112149';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610112149';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610112149';
-import * as Lernen from './lernen.js?v=202610112149';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610112149';
-import * as A from './auftraege.js?v=202610112149';
-import * as E from './erfolge.js?v=202610112149';
-import * as ZL from './ziele.js?v=202610112149';
+import * as C from './config.js?v=202610121105';
+import * as S from './spiel.js?v=202610121105';
+import * as Z from './zeit.js?v=202610121105';
+import * as T from './ton.js?v=202610121105';
+import * as LI from './lichtung.js?v=202610121105';
+import * as CB from './christbaum.js?v=202610121105';
+import * as KA from './karte.js?v=202610121105';
+import * as SB from './schlitten.js?v=202610121105';
+import * as EB from './schlittschuh.js?v=202610121105';
+import * as BS from './backstube.js?v=202610121105';
+import * as UI from './ui.js?v=202610121105';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610121105';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610121105';
+import * as Lernen from './lernen.js?v=202610121105';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610121105';
+import * as A from './auftraege.js?v=202610121105';
+import * as E from './erfolge.js?v=202610121105';
+import * as ZL from './ziele.js?v=202610121105';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
