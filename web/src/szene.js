@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610121603';
-import * as Z from './zeit.js?v=202610121603';
-import * as S from './spiel.js?v=202610121603';
-import { FASSADEN } from './config.js?v=202610121603';
-import * as C from './config.js?v=202610121603';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610121658';
+import * as Z from './zeit.js?v=202610121658';
+import * as S from './spiel.js?v=202610121658';
+import { FASSADEN } from './config.js?v=202610121658';
+import * as C from './config.js?v=202610121658';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -229,8 +229,8 @@ function hintergrund(c, G, w, L, t = 0) {
   r(c, kx + 2, kf - 22, 3, 3, '#e8e0c8'); p(c, kx + 3, kf - 21, '#3a3a3a');   // Uhr
   r(c, kx + 2, kf - 15, 3, 4, '#5a6070');
   L.push({ rect: [kx + 2, kf - 15, 3, 4], f: '#ffd88a', halo: hab ? 6 : 4, an: hab ? 1 : 0.75 });
-  if (hab) {
-    const sw = Math.round(Math.sin(t * 3));   // Glocke schwingt
+  if (hab || S.glockeSchwingt()) {
+    const sw = Math.round(Math.sin(t * 3));   // Glocke schwingt (Heiligabend und zur vollen Stunde)
     r(c, kx + 2 + (sw > 0 ? 1 : 0), kf - 14, 2, 2, '#c89a2a'); p(c, kx + 3 + sw, kf - 12, '#8a6a1a');
   }
   r(c, kx + 2, kf - 5, 3, 5, '#6a4a32'); p(c, kx + 2, kf - 5, '#f4ecde'); p(c, kx + 4, kf - 5, '#f4ecde');   // Tür
@@ -933,6 +933,17 @@ function boden(c, G, w) {
   r(c, 0, G - 12, 180, 1, schnee ? '#f0f4f8' : '#a4a2a0');
   r(c, 0, G - 1, 180, 1, schnee ? '#b8c2ce' : '#6a6866');
   if (schnee) r(c, 0, G - 7, 180, 3, '#c8d0da'); // Trampelpfad
+}
+
+/** Kufen und Hufe quer über den verschneiten Gehweg (12.10.; im Vorgarten
+ *  verschwanden sie hinter Zaun und Deko). Liegt direkt auf dem Boden. */
+function rentierspuren(c, G) {
+  const k = '#8a98b0', h = '#7a88a2';
+  for (let x = 0; x < 180; x++) {
+    const y = G - 10 + Math.round(Math.sin(x / 23));
+    p(c, x, y, k); p(c, x, y + 3, k);                                  // zwei Kufen
+    if (x % 7 === 0) { p(c, x + 22, y - 1 + (x % 14 ? 0 : 1), h); p(c, x + 23, y + 4 - (x % 14 ? 0 : 1), h); }   // Hufe davor, im Wechsel
+  }
 }
 
 function tanne(c, G, w, t, L) {
@@ -1927,7 +1938,7 @@ function saenger(c, L, fuss, t) {
 
 function strasse(c, G, t, L = null) {
   const fuss = G - 3;
-  if (S.heiligabendAbend()) saenger(c, L, fuss - 1, t);
+  if (S.heiligabendAbend() || S.chorJetzt()) saenger(c, L, fuss - 1, t);   // Heiligabend und Adventssonntag
   if (S.lauf.haendler) haendlerKarren(c, S.lauf.haendler, fuss, t);
   const liste = [...S.lauf.gaeste].sort((a, b) => a.x - b.x);
   const frost = Z.tagesWetter().art === 'frost';
@@ -2307,6 +2318,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('m_stern')) herrnhuter(e, L, 147, GW - 85, t);
   if (S.zeigt('c_kugeln')) riesenkugeln(e, L, GW);
   boden(e, GW, w);
+  if (S.rentierSpuren(w.d)) rentierspuren(e, GW);
   fahrbahn(e, GW, G, w);
   haus(e, GW, w, t, L);
   briefkasten(e, 86, GW - 40, t, L);

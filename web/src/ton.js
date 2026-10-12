@@ -20,7 +20,7 @@
 let ctx = null, fxGain = null, musikGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -14,9 LUFS, recht laut)
-const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610121603', karte: 'audio/musik-karte.m4a?v=202610121603' };
+const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610121658', karte: 'audio/musik-karte.m4a?v=202610121658' };
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
 const spuren = {};        // name -> { el, gain }
 let szene = 'haus';       // welches Stück gerade dran ist
@@ -54,6 +54,7 @@ export function musikPause(an) {
 export function musikKarte(an) { karteOffen = an; wechsle(); }
 /** Minispiel läuft/ist vorbei - dort läuft ebenfalls das Kartenstück. */
 export function musikMinispiel(an) { miniOffen = an; wechsle(); }
+export const imMinispiel = () => miniOffen;
 
 function wechsle() {
   const neu = karteOffen || miniOffen ? 'karte' : 'haus';
@@ -163,6 +164,9 @@ export function spiele(name) {
     case 'koerner': for (let i = 0; i < 6; i++) rauschen(0.04, 4200, 3, 0.05, i * 0.04); break;
     // Schnee festklopfen
     case 'schnee': rauschen(0.12, 700, 1.2, 0.18, 0, 300); rauschen(0.1, 500, 1.2, 0.12, 0.13, 250); break;
+    // Kirchturm (12.10.): ein tiefer Schlag aus der Ferne - Grundton, Unteroktave und zwei Teiltöne
+    case 'kirchglocke': ton(330, 2.4, 'sine', 0.07); ton(165, 2.8, 'sine', 0.05); ton(330 * 2.4, 1.2, 'sine', 0.025); ton(330 * 3, 0.8, 'sine', 0.015); break;
+    case 'kirchglocke2': ton(277, 2.4, 'sine', 0.06); ton(138.5, 2.8, 'sine', 0.04); ton(277 * 2.4, 1.2, 'sine', 0.02); break;
     // Schlittenglöckchen, leise: der Nikolaus fliegt vorbei
     case 'glocken': for (let i = 0; i < 8; i++) { glocke(2349 + (i % 2) * 300, i * 0.11, 0.05); } break;
   }

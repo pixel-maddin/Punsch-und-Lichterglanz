@@ -342,6 +342,12 @@ export const FREI = {
 // steht in FREI als `advent: n` und wird im Text automatisch aufgezählt.
 // An diesem Sonntag selbst kommen mehr Gäste.
 // ---------------------------------------------------------------------------
+// Kirchenglocken zur vollen Stunde (12.10.)
+export const GLOCKEN_VON = 7, GLOCKEN_BIS = 22;   // nachts Ruhe
+export const GLOCKEN_TAKT = 1.6;                  // s zwischen zwei Schlägen
+export const GLOCKEN_ABEND = 18, GLOCKEN_ABEND_DAUER = 12;   // Abendläuten nach dem Stundenschlag
+// Adventssonntag (12.10.): Nachmittags/abends singt ein Chor vor dem Haus, alle zahlen mehr
+export const CHOR = { von: 15, bis: 20, bonus: 0.5 };
 export const ADVENT_GAESTE = 0.5;   // +50 % Gäste am Adventssonntag
 export const ADVENT_EREIGNIS = {
   1: { titel: '1. Advent', zeile: 'Weihnachtsmarkt in der Stadt!', bild: 'markt',

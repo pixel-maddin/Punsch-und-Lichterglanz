@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610121603';
-import * as Z from './zeit.js?v=202610121603';
-import { neueFarben } from './pixel.js?v=202610121603';
+import * as C from './config.js?v=202610121658';
+import * as Z from './zeit.js?v=202610121658';
+import { neueFarben } from './pixel.js?v=202610121658';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -938,6 +938,7 @@ function bediene(g, auto, faktor = 1) {
   // Wetter mit Folgen: die passende Sorte zahlt heute mehr (auch bei den Wichteln)
   const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
   if (lage && lage.gruppe.includes(p.id)) betrag *= 1 + lage.bonus;
+  if (chorJetzt()) betrag *= 1 + C.CHOR.bonus;   // Adventssonntag: der Chor singt vor dem Haus
   const schwungVorher = lauf.schwung;
   if (!auto) {
     // Selbst serviert zählt doppelt (09.10., Nutzerwunsch: „wesentlich mehr
@@ -1449,11 +1450,51 @@ export function fangeSanta() {
   return betrag;
 }
 
+// ---------------------------------------------------------------------------
+// Kirchenglocken (12.10.): zur vollen Stunde schlägt die Kirche die Stunde,
+// um 18 Uhr kommt danach das Abendläuten. Nachts (22-7 Uhr) ist Ruhe.
+// ---------------------------------------------------------------------------
+/** Gibt { schlaege, abend } zurück, wenn es JETZT läuten soll - einmal je Stunde. */
+export function glockenFaellig() {
+  const d = Z.jetzt(), h = d.getHours();
+  if (d.getMinutes() > 1 || h < C.GLOCKEN_VON || h > C.GLOCKEN_BIS) return null;
+  const k = Z.tagesSchluessel() + '-' + h;
+  if (lauf.glockeK === k) return null;
+  lauf.glockeK = k;
+  const schlaege = h % 12 || 12, abend = h === C.GLOCKEN_ABEND;
+  // Die Glocke im Turm schwingt so lange, wie es läutet
+  lauf.glockeBis = Date.now() + (schlaege * C.GLOCKEN_TAKT + (abend ? C.GLOCKEN_ABEND_DAUER : 0) + 2) * 1000;
+  return { schlaege, abend };
+}
+/** Rentierspuren (12.10.): am Morgen nach einem gefangenen Nikolaus (bis
+ *  12 Uhr) und am ganzen 1. Weihnachtstag - nur bei Schnee. */
+export function rentierSpuren(d = Z.jetzt()) {
+  if (Z.schnee(d) <= 0) return false;
+  if (Z.dezemberTag(d) === 25) return true;
+  const gestern = Z.tagesSchluessel(new Date(d.getTime() - 86400000));
+  return st.nikolausTag === gestern && d.getHours() < 12;
+}
+/** Adventssonntag (12.10.): Von 15 bis 20 Uhr singt ein Chor vor dem Haus. */
+export function chorJetzt(d = Z.jetzt()) {
+  const h = d.getHours();
+  return !!Z.adventssonntag(d) && h >= C.CHOR.von && h < C.CHOR.bis && st.lernen >= 99;
+}
+/** Einmal je Adventssonntag ansagen, wenn der Chor anfängt. */
+export function chorAnsage() {
+  if (!chorJetzt()) return false;
+  const k = Z.tagesSchluessel();
+  if (st.chorTag === k) return false;
+  st.chorTag = k;
+  return true;
+}
+export const glockeSchwingt = () => (lauf.glockeBis || 0) > Date.now();
+
 /** Den Nikolaus angetippt: Sterne! Gibt den Betrag zurück (oder 0). */
 export function fangeSchlitten() {
   const sl = lauf.schlitten;
   if (!sl || sl.gefangen != null) return 0;
   sl.gefangen = sl.t;
+  st.nikolausTag = Z.tagesSchluessel();   // am Morgen danach: Rentierspuren im Schnee
   zaehleErfolg('nikolaus');
   const betrag = Math.round(Math.max(C.SCHLITTEN_MIN, einnahmenProMinute() * C.SCHLITTEN_MINUTEN) * dev.geld);
   verdiene(betrag);
