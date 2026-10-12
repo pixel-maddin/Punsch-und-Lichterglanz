@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610121704';
-import * as S from './spiel.js?v=202610121704';
-import * as Z from './zeit.js?v=202610121704';
-import * as FEIN from './fein.js?v=202610121704';
-import * as T from './ton.js?v=202610121704';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610121704';
+import * as C from './config.js?v=202610121713';
+import * as S from './spiel.js?v=202610121713';
+import * as Z from './zeit.js?v=202610121713';
+import * as FEIN from './fein.js?v=202610121713';
+import * as T from './ton.js?v=202610121713';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610121713';
 
 const $ = (s) => document.querySelector(s);
 
@@ -41,6 +41,8 @@ export const ORTE = [
   { id: 'backstube', name: 'Backstube',       x: 62,  y: 0.315, spiel: 'back', schild: [30, -17] },   // Schild rechts daneben: darunter lag es auf dem Supermarkt
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
+  // 12.10.: links zwischen Supermarkt und Lichtung war noch Platz
+  { id: 'schnee',    name: 'Schneeballwiese', x: 30,  y: 0.57, spiel: 'schnee' },
 ];
 
 let offen = false;
@@ -267,6 +269,7 @@ function wege() {
     [P('dorf'), P('baeume'), [122, 0.15 * H]],
     [P('haus'), P('super'), [58, 0.53 * H]],
     [P('super'), P('festplatz'), [22, 0.3 * H]],
+    [P('super'), P('schnee'), [14, 0.5 * H]],
     [P('haus'), P('bau'), [128, 0.55 * H]],
     [P('haus'), P('wichtel'), [104, 0.7 * H]],
     [P('wichtel'), P('lichtung'), [56, 0.86 * H]],
@@ -853,6 +856,17 @@ function eisbahn(x, y, P, winter) {
   r(c, x + 13, y - 10, 1, 10, '#5a3a22'); r(c, x + 11, y - 13, 6, 4, '#3a6ab8'); p(c, x + 13, y - 12, '#ffffff'); p(c, x + 14, y - 11, '#ffffff');
   licht(x + 14, y - 12, '#a8d8ff');
 }
+/** Schneeballwiese (12.10.): zwei Schneewälle, ein Grummel lugt hervor. */
+function schneewiese(x, y, P, winter) {
+  schattenOval(x, y + 2, 26);
+  for (const [wx, wy, b] of [[x - 6, y - 4, 12], [x + 6, y, 12]]) {
+    for (let i = 0; i < b; i++) { const rd = Math.min(i, b - 1 - i); r(c, wx - b / 2 + i, wy - 4 + (rd < 2 ? 2 - rd : 0), 1, 4 - (rd < 2 ? 2 - rd : 0), '#f4f8fc'); }
+    r(c, wx - b / 2 + 1, wy - 1, b - 2, 1, '#c8d4e2');
+  }
+  r(c, x - 7, y - 10, 4, 3, '#6aaa38'); p(c, x - 6, y - 9, '#f0e040'); r(c, x - 7, y - 11, 4, 1, '#c82828');   // Grummel
+  r(c, x + 5, y - 6, 3, 2, '#2f8a3a'); p(c, x + 6, y - 7, '#f2c9a0'); p(c, x + 6, y - 8, '#d83a3a');          // Wichtel
+  r(c, x + 1, y - 9, 2, 2, '#ffffff');                                                                          // Schneeball
+}
 /** Backstube (10.10.): Fachwerkhaus mit warmem Schaufenster und Brezelschild. */
 function backstube(x, y, P, winter) {
   // Seit 11.10. kleiner (18 x 10 statt 24 x 13): die Schilder standen zu dicht
@@ -874,7 +888,7 @@ function backstube(x, y, P, winter) {
   for (const [dx, dy] of [[0, 0], [1, -1], [2, 0], [2, 1], [1, 1], [0, 1]]) p(c, x + 10 + dx, y - 6 + dy, '#c8902c');
   if (winter) r(c, x - 9, y - 1, 18, 1, '#ffffff');
 }
-const ZEICHNER = { backstube, eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
+const ZEICHNER = { backstube, schnee: schneewiese, eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
 
 // ---------------------------------------------------------------------------
 // Je Bild: was sich bewegt

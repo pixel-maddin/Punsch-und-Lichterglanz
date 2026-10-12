@@ -684,6 +684,16 @@ export const EIS_DEKO = [
   { id: 'e_pinguin',       name: 'Pinguin',                ab: 1400, stimmung: 5, text: 'Ein kleiner Pinguin mit Mütze steht auf dem Gehweg.' },
   { id: 'e_schnuppen',     name: 'Sternschnuppen',         ab: 2400, stimmung: 7, text: 'Nachts ziehen Sternschnuppen über dein Haus.' },
 ];
+// Minispiel Schneeballschlacht (12.10.): Grummel hinter Schneewällen
+// abwerfen, Wichtel verschonen. Deko-Kürzel g_ (Grummel).
+export const SCHNEE_DAUER = 40;
+export const SCHNEE_PUNKTE_JE_MIN = 600;
+export const SCHNEE_MAX_MIN = 3;
+export const SCHNEE_DEKO = [
+  { id: 'g_vorrat',  name: 'Schneeballvorrat',     ab: 700,  stimmung: 5, text: 'Ein Berg Schneebälle liegt griffbereit am Gehweg.' },
+  { id: 'g_lauscher', name: 'Neugieriger Grummel', ab: 1400, stimmung: 5, text: 'Ein kleiner Grummel lugt hinter dem alten Baum hervor - ganz friedlich.' },
+  { id: 'g_fahne',   name: 'Siegerfahne',          ab: 2400, stimmung: 7, text: 'Auf dem Stand weht die Fahne der Schneeballschlacht.' },
+];
 // Minispiel Backstube (10.10.): Plätzchen nach Rezept - ausstechen, backen
 // (im goldenen Bereich aus dem Ofen holen), verzieren. Statt Deko fürs Haus
 // gibt es REZEPTE fürs Rezeptbuch; neue Rezepte kommen auch in die Runden.
@@ -767,6 +777,7 @@ export const MINISPIELE = {
   berg:     { deko: BERG_DEKO,     jeMin: BERG_PUNKTE_JE_MIN,     maxMin: BERG_MAX_MIN,     skala: 1.05 },
   eis:      { deko: EIS_DEKO,      jeMin: EIS_PUNKTE_JE_MIN,      maxMin: EIS_MAX_MIN,      skala: 1.5 },
   back:     { deko: [],            jeMin: BACK_PUNKTE_JE_MIN,     maxMin: BACK_MAX_MIN,     skala: 0.8 },
+  schnee:   { deko: SCHNEE_DEKO,   jeMin: SCHNEE_PUNKTE_JE_MIN,   maxMin: SCHNEE_MAX_MIN,   skala: 0.75 },   // 12.10.: Bot 1.843/2.565/3.022/3.753 roh
 };
 const auf50 = (n) => Math.round(n / 50) * 50;
 for (const m of Object.values(MINISPIELE)) {
@@ -786,7 +797,7 @@ export function miniStufe(name, nr) {
 // der Karte steht - abwechselnd zwei und drei Tage Abstand. Wer spät anfängt,
 // bekommt sie zusammengeschoben: Spätestens am MINI_ALLE_DEZ. Dezember ist
 // das letzte offen, die anderen entsprechend früher (siehe miniOffen()).
-export const MINI_AB_TAG = { lichtung: 0, baum: 2, back: 5, eis: 7, berg: 10 };
+export const MINI_AB_TAG = { lichtung: 0, baum: 2, back: 5, eis: 7, berg: 10, schnee: 12 };
 export const MINI_ALLE_DEZ = 14;
 
 // Einstieg in Wellen (11.10., Nutzerwunsch: „am Anfang zu viele Popups

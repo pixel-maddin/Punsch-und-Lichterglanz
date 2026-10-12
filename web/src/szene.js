@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610121704';
-import * as Z from './zeit.js?v=202610121704';
-import * as S from './spiel.js?v=202610121704';
-import { FASSADEN } from './config.js?v=202610121704';
-import * as C from './config.js?v=202610121704';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610121713';
+import * as Z from './zeit.js?v=202610121713';
+import * as S from './spiel.js?v=202610121713';
+import { FASSADEN } from './config.js?v=202610121713';
+import * as C from './config.js?v=202610121713';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -944,6 +944,34 @@ function rentierspuren(c, G) {
     p(c, x, y, k); p(c, x, y + 3, k);                                  // zwei Kufen
     if (x % 7 === 0) { p(c, x + 22, y - 1 + (x % 14 ? 0 : 1), h); p(c, x + 23, y + 4 - (x % 14 ? 0 : 1), h); }   // Hufe davor, im Wechsel
   }
+}
+
+// ---------------------------------------------------------------------------
+// Deko von der Schneeballwiese (12.10.)
+// ---------------------------------------------------------------------------
+/** Pyramide aus sechs Schneebällen auf dem Gehweg. */
+function schneeballVorrat(c, x, fuss) {
+  r(c, x - 6, fuss, 13, 1, '#9aa8bc');   // Schatten
+  for (const [dx, dy] of [[-4, 0], [0, 0], [4, 0], [-2, -3], [2, -3], [0, -6]]) {
+    const bx = x + dx, by = fuss + dy;
+    r(c, bx - 1, by - 3, 3, 3, '#ffffff'); r(c, bx - 2, by - 2, 1, 1, '#8a9ab0'); r(c, bx + 2, by - 2, 1, 2, '#8a9ab0');
+    p(c, bx - 1, by - 4, '#8a9ab0'); p(c, bx, by - 4, '#8a9ab0'); p(c, bx + 1, by - 4, '#8a9ab0'); p(c, bx + 1, by - 1, '#b4c2d4');
+  }
+}
+/** Ein kleiner Grummel lugt an der linken Hausecke hervor und zieht ab und zu den Kopf ein. */
+function grummelLauscher(c, G, t) {
+  const weg = (t % 9) > 7.6 ? 2 : 0, x = HX0 - 4 + weg, y = G - 46;
+  r(c, x, y, 5, 5, '#7cbc44'); r(c, x, y + 4, 5, 1, '#5a9a30');
+  p(c, x + 1, y + 1, '#f0e040'); p(c, x + 1, y + 2, '#1a1a1a'); r(c, x + 1, y + 3, 2, 1, '#2a4a14');
+  r(c, x, y - 2, 5, 2, '#c82828'); p(c, x - 1, y - 1, '#c82828'); p(c, x - 2, y, '#ffffff');
+  r(c, x + 3, y + 6, 2, 2, '#5a9a30');   // Hand an der Ecke
+}
+/** Grüne Siegerfahne mit Schneeball an einer Stange links am Stand. */
+function siegerfahne(c, x, markise, t) {
+  r(c, x, markise - 18, 1, 18, '#7a5230'); p(c, x, markise - 19, '#e8c030');
+  const wehen = Math.floor(t * 3) % 2;
+  for (let i = 0; i < 8; i++) r(c, x + 1 + i, markise - 18 + ((i + wehen) % 4 === 0 ? 1 : 0), 1, 5, i % 2 ? '#3a8a3a' : '#2f7a30');
+  r(c, x + 4, markise - 16, 2, 2, '#ffffff');
 }
 
 function tanne(c, G, w, t, L) {
@@ -2216,7 +2244,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [124, -66], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -2321,6 +2349,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.rentierSpuren(w.d)) rentierspuren(e, GW);
   fahrbahn(e, GW, G, w);
   haus(e, GW, w, t, L);
+  if (S.zeigt('g_lauscher')) grummelLauscher(e, GW, t);   // lugt an der linken Hausecke hervor
   briefkasten(e, 86, GW - 40, t, L);
   if (S.zeigt('m_fenster')) fensterbilder(e, GW);
   if (S.zeigt('c_dachbaum')) dachbaum(e, L, 92, GW - 94, t, w);
@@ -2367,11 +2396,13 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(e, 28, GW - 18);
   // Vom fahrenden Händler (09.10.)
   if (S.zeigt('h_kugel')) schneekugel(e, L, 7, GW - 13, t, w);
+  if (S.zeigt('g_vorrat')) schneeballVorrat(e, 12, GW - 1);
 
   // Rechts hinter dem Stand, neben dem Baum; der Mast ist lang, damit der
   // Kopf auf halber Dachhöhe über dem Stand steht
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
+  if (S.zeigt('g_fahne')) siegerfahne(e, 125, GW - 44, t);
   if (S.zeigt('baenke')) baenke(e, L, GW, t, w, S.variante('baenke'));   // bis 11.10. gar nicht gezeichnet
   if (S.zeigt('m_herzen')) lebkuchenherzen(e, GW, t);
   // Aus der Waldlichtung: Hasen und Reh vor dem Zaun, mit den Füßen gerade

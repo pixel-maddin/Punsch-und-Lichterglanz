@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610121704';
-import * as S from './spiel.js?v=202610121704';
-import * as Z from './zeit.js?v=202610121704';
-import * as T from './ton.js?v=202610121704';
-import * as LI from './lichtung.js?v=202610121704';
-import * as CB from './christbaum.js?v=202610121704';
-import * as KA from './karte.js?v=202610121704';
-import * as SB from './schlitten.js?v=202610121704';
-import * as EB from './schlittschuh.js?v=202610121704';
-import * as BS from './backstube.js?v=202610121704';
-import * as UI from './ui.js?v=202610121704';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610121704';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610121704';
-import * as Lernen from './lernen.js?v=202610121704';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610121704';
-import * as A from './auftraege.js?v=202610121704';
-import * as E from './erfolge.js?v=202610121704';
-import * as ZL from './ziele.js?v=202610121704';
+import * as C from './config.js?v=202610121713';
+import * as S from './spiel.js?v=202610121713';
+import * as Z from './zeit.js?v=202610121713';
+import * as T from './ton.js?v=202610121713';
+import * as LI from './lichtung.js?v=202610121713';
+import * as CB from './christbaum.js?v=202610121713';
+import * as KA from './karte.js?v=202610121713';
+import * as SB from './schlitten.js?v=202610121713';
+import * as EB from './schlittschuh.js?v=202610121713';
+import * as BS from './backstube.js?v=202610121713';
+import * as UI from './ui.js?v=202610121713';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610121713';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610121713';
+import * as Lernen from './lernen.js?v=202610121713';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610121713';
+import * as A from './auftraege.js?v=202610121713';
+import * as E from './erfolge.js?v=202610121713';
+import * as ZL from './ziele.js?v=202610121713';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -427,7 +427,7 @@ function demo(art) {
     for (const d of C.AUFTRAG_DEKO) st.kalDeko[d.id] = true;
     // Händler-Szenen: drei Stücke schon gekauft, zwei noch im Angebot
     // Varianten-Szenen: alle Plätze auf Variante 2 bzw. 3
-    if (art === 'alles' || art === 'marktdeko') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO]) st.kalDeko[d.id] = true;
+    if (art === 'alles' || art === 'marktdeko') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO]) st.kalDeko[d.id] = true;
     // Markttag erzwingen: Anker so legen, dass heute der erste Markt ist
     if (art === 'markt' || art === 'marktkarte') st.markt = { anker: Math.round(new Date(Z.jetzt()).setHours(0, 0, 0, 0) / 86400000) - C.MARKT_ERST, seed: 1, besucht: 0, angesagt: 0 };
     if (art === 'meinhaus') { st.var = { 'tanne:1': true, 'kranz:1': true, 'kranz:2': true }; st.wahl = { kranz: 2 }; }

@@ -10,8 +10,8 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202610121704';
-import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610121704';
+import * as Z from './zeit.js?v=202610121713';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610121713';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
@@ -319,7 +319,7 @@ export function vignette(ziel, tab, opt = {}) {
   const zeichner = { markt: weihnachtsladen, super: supermarkt, baumarkt, wichtel: wichtelwald,
     festplatz: (c, x, fuss, winter) => festplatz(c, x, fuss, winter, !!opt.offen),
     // Minispiele (11.10.): dieselben Ortsbilder im Startfenster
-    lichtung: waldlichtung, baum: christbaumverkauf, eis: eisbahn, back: backstube, berg: schlittenberg }[tab];
+    lichtung: waldlichtung, baum: christbaumverkauf, eis: eisbahn, back: backstube, berg: schlittenberg, schnee: schneeballwiese }[tab];
   if (!zeichner) return false;
   // Breite nach der feinen Stufe (siehe FEIN): gezeichnet wird für 220, die
   // Leinwand zeigt die Mitte davon
@@ -331,7 +331,7 @@ export function vignette(ziel, tab, opt = {}) {
   c.translate(-weg, 0);
   neueLichter();
   // Eisbahn und Schlittenberg gibt es nur mit Schnee - ihr Bild ist immer winterlich
-  const winter = Z.schnee() > 0 || tab === 'eis' || tab === 'berg', li = Z.licht();
+  const winter = Z.schnee() > 0 || tab === 'eis' || tab === 'berg' || tab === 'schnee', li = Z.licht();
   const himmel = li.hell > 0.6 ? ['#6aa4dc', '#94bfe8', '#c4dcf2']
     : li.hell > 0.1 ? ['#3e3e80', '#9a6a8c', '#f0a476'] : ['#0e1638', '#18224c', '#2a3666'];
   verlauf(c, 0, 0, VW, HOR + 2, himmel);
@@ -666,6 +666,21 @@ function eisbahn(c, x, fuss, winter) {
   kette(c, x - 86, fuss - 24, x - 44, fuss - 24, 4, 3); kette(c, x - 44, fuss - 24, x, fuss - 24, 4, 3); kette(c, x, fuss - 24, x + 44, fuss - 24, 4, 3); kette(c, x + 44, fuss - 24, x + 86, fuss - 24, 4, 3);
   r(c, x - 100, fuss + 4, 12, 2, '#8a5a32'); r(c, x - 99, fuss + 6, 1, 3, '#5a3a22'); r(c, x - 90, fuss + 6, 1, 3, '#5a3a22'); r(c, x - 100, fuss + 3, 12, 1, '#ffffff');
   tanne(c, x - 104, fuss - 6, 28, { schnee: true }); tanne(c, x + 102, fuss - 4, 30, { schnee: true }); tanne(c, x + 92, fuss + 8, 20, { schnee: true });
+}
+/** Schneeballwiese (12.10.): Schneewälle, dahinter Grummel und ein Wichtel. */
+function schneeballwiese(c, x, fuss, winter) {
+  const wall = (wx, wy, b) => {
+    for (let i = 0; i < b; i++) { const rd = Math.min(i, b - 1 - i), dy = rd < 3 ? 3 - rd : 0; r(c, wx - b / 2 + i, wy - 9 + dy, 1, 9 - dy, '#f4f8fc'); p(c, wx - b / 2 + i, wy - 10 + dy, '#9aaabe'); if (rd < 1) r(c, wx - b / 2 + i, wy - 9 + dy, 1, 9 - dy, '#b4c2d4'); }
+    r(c, wx - b / 2 + 2, wy - 2, b - 4, 2, '#c8d4e2');
+  };
+  const grummel = (gx, gy) => { r(c, gx - 3, gy - 7, 7, 7, '#5a9a30'); r(c, gx - 2, gy - 6, 5, 4, '#7cbc44'); p(c, gx - 1, gy - 5, '#f0e040'); p(c, gx + 1, gy - 5, '#f0e040'); r(c, gx - 1, gy - 3, 3, 1, '#2a4a14'); r(c, gx - 3, gy - 9, 6, 2, '#c82828'); p(c, gx - 4, gy - 8, '#ffffff'); r(c, gx + 4, gy - 4, 2, 2, '#ffffff'); };
+  grummel(x - 40, fuss - 14); wall(x - 40, fuss - 6, 30);
+  wichtelKlein(c, x + 6, fuss - 8, 0.3); wall(x + 4, fuss - 2, 30);
+  grummel(x + 46, fuss - 10); wall(x + 46, fuss - 2, 32);
+  // Fliegender Schneeball und ein Treffer
+  r(c, x - 14, fuss - 26, 3, 3, '#ffffff'); p(c, x - 18, fuss - 24, '#e8f0f8'); p(c, x - 22, fuss - 22, '#e8f0f8');
+  for (const [dx, dy] of [[-2, 0], [2, -1], [0, -3], [1, 2]]) p(c, x + 46 + dx, fuss - 18 + dy, '#ffffff');
+  tanne(c, x - 96, fuss - 4, 28, { schnee: true }); tanne(c, x + 96, fuss - 2, 30, { schnee: true });
 }
 function backstube(c, x, fuss, winter) {
   for (let yy = fuss - 2; yy < fuss + 10; yy++) for (let xx = x - 60; xx < x + 60; xx++) p(c, xx, yy, ((xx >> 2) + (yy >> 1)) % 3 ? (winter ? '#d6dfea' : '#b8ab92') : (winter ? '#c4cfdc' : '#a29478'));
