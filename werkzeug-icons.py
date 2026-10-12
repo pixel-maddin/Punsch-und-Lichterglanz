@@ -234,13 +234,36 @@ rect(kx0 + 1, ky0 + kh, kw - 1, 1, "#b8c4dc")
 # ---------------------------------------------------------------------------
 # Schreiben
 # ---------------------------------------------------------------------------
-def png(pfad, groesse):
+def grundfarbe(ry, n):
+    """Farbe des Randes ohne Sterne, Funkeln und Figuren: Himmel, Hügel, Schnee."""
+    if ry < 0:
+        return oben
+    if ry >= 52:
+        return hexf("#dbe4f2")
+    if ry >= 42:
+        return hexf("#2a2a5a")
+    tt = round(min(1, ry / 44) * 7) / 7
+    return tuple(int(oben[i] + (unten[i] - oben[i]) * tt) for i in range(3))
+
+def png(pfad, groesse, k, rand=0, schnitt=0):
+    """Ganzzahlig hochskaliert (jeder Rasterpunkt k x k Bildpunkte - sonst
+    sind manche Pixel breiter als andere). `schnitt` = Rasterpunkte, die an
+    jeder Seite wegfallen; `rand` = Bildpunkte Rand rundherum, gefüllt mit
+    der jeweils nächsten Randfarbe (Himmel oben, Schnee unten)."""
+    n = N - 2 * schnitt
+    assert n * k + 2 * rand == groesse, (pfad, n * k + 2 * rand, groesse)
     zeilen = bytearray()
     for y in range(groesse):
         zeilen.append(0)
-        reihe = bild[min(N - 1, y * N // groesse)]
+        ry = (y - rand) // k if y >= rand else -1
+        gy = min(n - 1, max(0, ry)) + schnitt
+        reihe = bild[gy]
         for x in range(groesse):
-            zeilen.extend(reihe[min(N - 1, x * N // groesse)])
+            rx = (x - rand) // k if x >= rand else -1
+            if 0 <= ry < n and 0 <= rx < n:
+                zeilen.extend(reihe[rx + schnitt])
+            else:
+                zeilen.extend(grundfarbe(ry if ry >= 0 else -1, n))
     def chunk(typ, daten):
         return struct.pack(">I", len(daten)) + typ + daten + struct.pack(">I", zlib.crc32(typ + daten) & 0xffffffff)
     roh = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", groesse, groesse, 8, 2, 0, 0, 0))
@@ -249,7 +272,11 @@ def png(pfad, groesse):
 
 ziel = Path(__file__).resolve().parent / "web" / "icons"
 ziel.mkdir(parents=True, exist_ok=True)
-png(ziel / "icon-192.png", 192)
-png(ziel / "icon-512.png", 512)
-png(ziel / "icon-180.png", 180)   # iPhone (apple-touch-icon)
+png(ziel / "icon-192.png", 192, 3)                  # 64 x 3
+png(ziel / "icon-512.png", 512, 8)                  # 64 x 8
+png(ziel / "icon-180.png", 180, 3, schnitt=2)       # iPhone: 60 x 3 (Rand des Rasters ist nur Himmel/Schnee)
+# Android „maskable": Das System schneidet einen Kreis (oder eine andere
+# Form) aus, sicher ist nur die Mitte (80 %). Deshalb das Motiv kleiner
+# (64 x 6 = 384) mit 64 px Rand in den Randfarben.
+png(ziel / "icon-maskable-512.png", 512, 6, rand=64)
 print("icons geschrieben:", ziel)

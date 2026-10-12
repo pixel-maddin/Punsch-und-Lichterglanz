@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x } from './pixel.js?v=202610121115';
-import * as C from './config.js?v=202610121115';
-import * as S from './spiel.js?v=202610121115';
-import * as Z from './zeit.js?v=202610121115';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610121208';
+import * as C from './config.js?v=202610121208';
+import * as S from './spiel.js?v=202610121208';
+import * as Z from './zeit.js?v=202610121208';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -394,15 +394,8 @@ function grossBlase(c, g, x, y, t, anteil) {
 // ---------------------------------------------------------------------------
 const HAND_B = 20;
 
-// Dinge in der Hand werden DOPPELT so groß gezeigt - gezeichnet im
-// kleinen Maßstab und mit Scale2x hochgezogen (11.10.: vorher als 2x2-Blöcke,
-// damit standen Becher und Gläser mit doppelt so groben Pixeln am Tresen).
-const _klein = document.createElement('canvas'); _klein.width = 10; _klein.height = 10;
-const _kc = _klein.getContext('2d', { willReadFrequently: true });
-function gross(c, x, y, zeichne) {
-  _kc.clearRect(0, 0, 10, 10); zeichne(_kc);
-  c.drawImage(scale2x(_klein), x, y);
-}
+// Dinge in der Hand werden DOPPELT so groß gezeigt: leeres Glas `glasGross()`,
+// Getränke `iconGross()` (pixel.js) - beide in Spielpixeln gezeichnet, nicht hochgezogen.
 const PLATZ = 26;   // Abstand der Dinge auf dem Servierbrett
 function handStart() { const n = S.handMax(); return Math.round(90 - (n * PLATZ) / 2); }
 
@@ -456,7 +449,7 @@ function brett(c, y, t) {
       // Offene Handgriffe: nur die erledigten zeichnen (Liste), fertig = alles
       // Verpasst (Timing): wie „roh" zeichnen - Zuckerhut aus, Beutel noch drin
       const roh = h.verpasst ? true : h.griffe && !h.extraFertig ? h.griffe.slice(0, h.schritt) : false;
-      gross(c, x, by - 19 - hoch, (k) => icon(k, h.id, 0, 0, t, roh));
+      iconGross(c, h.id, x, by - 19 - hoch, t, roh);   // in Spielpixeln groß gezeichnet (12.10.)
       if (h.brennT > 0) {
         // Der Zuckerhut brennt: große, flackernde Flamme
         const fl = Math.floor(t * 12) % 2;

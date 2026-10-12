@@ -261,6 +261,13 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
 - Ab September beginnt eine neue Adventszeit - das Haus fängt wieder kahl
   an, ein Andenken bleibt.
 
+## Als App speichern
+
+Auf dem iPhone kommt einmal ein Tipp, das Spiel auf den Home-Bildschirm zu
+legen (Safari → Teilen → „Zum Home-Bildschirm“). Wichtig: Safari löscht die
+Daten einer Webseite nach 7 Tagen ohne Besuch - als App passiert das nicht.
+Im Menü steht die Anleitung jederzeit unter „Als App speichern“.
+
 ## Feedback
 
 Im Menü: **Feedback geben** öffnet ein kurzes Google-Formular. Eine Zeile mit

@@ -188,6 +188,122 @@ export function icon(c, id, x, y, t = 0, roh = false) {
   }
 }
 
+/**
+ * Die Getränke GROSS (20 x 20) fürs Servierbrett, in Spielpixeln gezeichnet
+ * (12.10.). Vorher das kleine 10er-Symbol per Scale2x verdoppelt - jedes
+ * Detail war 2 Pixel dick. Gleiche Formen und Farben wie `icon()`, damit man
+ * das Getränk wiedererkennt; `roh` wie dort (Handgriffe schon gemacht?).
+ * Der Becher sitzt wie 2 x icon(): Körper x+2..x+13, y+6..y+19.
+ */
+const FARBE_GROSS = {
+  gluehwein: ['#8a1830', '#4e0c1c'], kinderpunsch: ['#ee6d9a', '#c43c6a'], apfel: ['#e8942e', '#b8661a'],
+  schoko: ['#6b3a22', '#3e1e10'], eierpunsch: ['#f3e38a', '#e0b84a'], jaegertee: ['#3f7a3a', '#9a6a28'],
+  weisser: ['#efe7c0', '#d8c48a'], feuerzange: ['#a01818', '#5a0a0e'],
+};
+const MOTIV = {   // je 5 x 5, '#' = Motivfarbe, '+' = Glanzpunkt
+  gluehwein: ['..#..', '#####', '.#+#.', '.#.#.', '#...#'],
+  kinderpunsch: ['#.#.#', '.###.', '##+##', '.###.', '#.#.#'],
+  apfel: ['..##.', '.###.', '##+##', '#####', '.###.'],
+  eierpunsch: ['.#.#.', '##+##', '#####', '.###.', '..#..'],
+  jaegertee: ['..#..', '.###.', '..#..', '.###.', '#####'],
+  schoko: ['#...#', '.#.#.', '..#..', '.#.#.', '#...#'],
+  weisser: ['.#.#.', '#.#.#', '.#.#.', '#.#.#', '.#.#.'],
+  feuerzange: ['..#..', '.#+#.', '.###.', '##.##', '.###.'],
+};
+const MOTIV_FARBE = { gluehwein: '#ffd040', kinderpunsch: '#ffffff', apfel: '#d83a2a', eierpunsch: '#e04a5a', jaegertee: '#e0c060', schoko: '#f0dcc0', weisser: '#d4a82c', feuerzange: '#ffb040' };
+export function iconGross(c, id, x, y, t = 0, roh = false) {
+  x = Math.round(x); y = Math.round(y);
+  const hat = (g) => roh === false || (Array.isArray(roh) && roh.includes(g));
+  if (id === 'lebkuchen') {
+    // Lebkuchenherz an einer Schleife, mit Zuckergussrand
+    const b = '#9a5a2a', d = '#7a4220', h = '#b8743a', k = '#fff4e6';
+    const herz = ['..####....####..', '.######..######.', '################', '################', '################',
+      '.##############.', '..############..', '...##########...', '....########....', '.....######.....', '......####......', '.......##.......'];
+    herz.forEach((z, j) => { for (let i = 0; i < 16; i++) if (z[i] === '#') p(c, x + 2 + i, y + 6 + j, b); });
+    herz.forEach((z, j) => { for (let i = 0; i < 16; i++) if (z[i] === '#' && (z[i - 1] !== '#' || j === 0 || herz[j - 1][i] !== '#')) p(c, x + 2 + i, y + 6 + j, i < 8 ? h : b); });
+    herz.forEach((z, j) => { for (let i = 0; i < 16; i++) if (z[i] === '#' && (z[i + 1] !== '#' || !herz[j + 1] || herz[j + 1][i] !== '#')) p(c, x + 2 + i, y + 6 + j, d); });
+    r(c, x + 9, y + 2, 2, 4, '#c83a3a'); p(c, x + 8, y + 2, '#c83a3a'); p(c, x + 11, y + 2, '#c83a3a'); p(c, x + 9, y + 2, '#e85a5a');   // Schleife
+    if (hat('guss')) {
+      // Zuckerguss: Wellenrand innen, Pünktchen, ein Herzchen in der Mitte
+      const rand = [[4, 9], [5, 8], [6, 9], [7, 10], [8, 10], [11, 10], [12, 10], [13, 9], [14, 8], [15, 9], [16, 10], [15, 12], [14, 13], [13, 14], [12, 15], [11, 16], [10, 16], [9, 16], [8, 15], [7, 14], [6, 13], [5, 12], [4, 11]];
+      for (const [i, j] of rand) p(c, x + i, y + j, k);
+      for (const [i, j] of [[7, 12], [12, 12], [10, 14]]) p(c, x + i, y + j, '#ffffff');
+      p(c, x + 9, y + 11, '#d83a3a'); p(c, x + 11, y + 11, '#d83a3a'); r(c, x + 9, y + 12, 3, 1, '#d83a3a'); p(c, x + 10, y + 13, '#d83a3a');
+    } else p(c, x + 10, y + 12, '#d83a3a');
+    return;
+  }
+  if (id === 'crepe') {
+    // Gefaltetes Crêpe-Dreieck, gebräunt, mit Schokolade und Puderzucker
+    const b = '#f0c070', g = '#d89a50', d = '#c8923e', s = '#6b3a22';
+    for (let j = 0; j < 14; j++) { const w = 16 - j; r(c, x + 2 + Math.floor(j / 2), y + 5 + j, w, 1, j % 4 === 3 ? d : b); }
+    for (const [i, j] of [[5, 7], [9, 6], [13, 7], [7, 10], [11, 9], [9, 13], [12, 12]]) p(c, x + i, y + j, g);
+    r(c, x + 2, y + 5, 16, 1, '#e0a858'); r(c, x + 2, y + 4, 16, 1, '#fff0d0');   // umgeschlagene Kante
+    for (let i = 0; i < 14; i++) p(c, x + 3 + i, y + 6 + (i % 3 === 1 ? 1 : 0) + Math.floor(i / 5), s);   // Schokostreifen
+    for (const [i, j] of [[6, 8], [10, 8], [14, 6], [8, 11], [11, 12]]) p(c, x + i, y + j, '#ffffff');   // Puderzucker
+    // Unten in der Papiertüte, wie auf dem Weihnachtsmarkt
+    for (let j = 8; j < 14; j++) { const w = 16 - j, l = x + 2 + Math.floor(j / 2); r(c, l, y + 5 + j, w, 1, '#f4ecd8'); p(c, l, y + 5 + j, '#d8ccb0'); p(c, l + w - 1, y + 5 + j, '#c8bca0'); }
+    r(c, x + 6, y + 13, 9, 1, '#d8ccb0'); p(c, x + 10, y + 15, '#c83a3a'); p(c, x + 9, y + 16, '#c83a3a'); p(c, x + 11, y + 16, '#c83a3a');   // Tütenrand, rotes Muster
+    return;
+  }
+  const [f, innen] = FARBE_GROSS[id] || ['#888888', '#555555'];
+  // Becher: Körper, Fuß, Schattenkante links, Glanzstreifen, Rand
+  r(c, x + 2, y + 6, 12, 14, f);
+  r(c, x + 2, y + 7, 1, 12, ton(f, -0.28)); r(c, x + 3, y + 7, 1, 12, ton(f, -0.1));
+  r(c, x + 12, y + 8, 1, 9, ton(f, 0.18)); r(c, x + 10, y + 8, 1, 7, ton(f, 0.4)); p(c, x + 10, y + 16, ton(f, 0.25));
+  r(c, x + 3, y + 18, 10, 1, ton(f, -0.22)); r(c, x + 3, y + 19, 10, 1, ton(f, -0.4));
+  r(c, x + 2, y + 6, 12, 1, ton(f, 0.45)); r(c, x + 3, y + 7, 10, 1, innen); r(c, x + 4, y + 7, 3, 1, ton(innen, 0.25));   // Rand, Oberfläche
+  // Henkel
+  r(c, x + 14, y + 9, 3, 2, f); r(c, x + 16, y + 11, 2, 4, f); r(c, x + 14, y + 15, 3, 2, f);
+  p(c, x + 14, y + 9, ton(f, 0.3)); r(c, x + 17, y + 12, 1, 3, ton(f, -0.3)); r(c, x + 14, y + 16, 3, 1, ton(f, -0.3));
+  // Motiv auf dem Becher
+  const m = MOTIV[id], mf = MOTIV_FARBE[id];
+  if (m) m.forEach((z, j) => { for (let i = 0; i < 5; i++) if (z[i] !== '.') p(c, x + 5 + i, y + 10 + j, z[i] === '+' ? ton(mf, 0.5) : mf); });
+  if (id === 'weisser') r(c, x + 2, y + 8, 12, 1, '#d4a82c');   // Goldband unter dem Rand
+  // Was obendrauf kommt (Handgriffe)
+  const sahne = (id === 'schoko' || id === 'eierpunsch') && hat('sahne');
+  const haube = (yy) => {
+    r(c, x + 3, yy + 3, 10, 2, '#fffaf2'); r(c, x + 4, yy + 2, 8, 1, '#fffaf2'); r(c, x + 5, yy + 1, 6, 1, '#fffaf2'); r(c, x + 7, yy, 2, 1, '#fffaf2');
+    r(c, x + 4, yy + 4, 9, 1, '#e8e0d2'); p(c, x + 6, yy + 2, '#e8e0d2'); p(c, x + 9, yy + 1, '#e8e0d2');
+  };
+  if (sahne) {
+    haube(y + 3);
+    if (id === 'schoko') { p(c, x + 6, y + 4, '#6b3a22'); p(c, x + 9, y + 5, '#6b3a22'); p(c, x + 8, y + 3, '#8a5232'); }
+    if (id === 'eierpunsch' && hat('zimtpulver')) { p(c, x + 5, y + 5, '#a8602a'); p(c, x + 8, y + 4, '#8a4a1e'); p(c, x + 10, y + 5, '#a8602a'); p(c, x + 7, y + 3, '#8a4a1e'); }
+  }
+  if (id === 'weisser' && hat('schaum')) haube(y + 3);
+  if (id === 'weisser' && hat('zimt')) { for (let i = 0; i < 5; i++) { p(c, x + 9 + Math.floor(i / 2), y + 5 - i, '#8a4a1e'); p(c, x + 10 + Math.floor(i / 2), y + 5 - i, '#a8602a'); } }
+  if (id === 'kinderpunsch' && hat('zuckerstange')) {
+    for (let j = 0; j < 7; j++) p(c, x + 11, y + 1 + j, j % 2 ? '#ffffff' : '#d83a3a');
+    p(c, x + 10, y, '#d83a3a'); p(c, x + 9, y, '#ffffff'); p(c, x + 8, y + 1, '#d83a3a');
+  }
+  if (id === 'apfel') {
+    p(c, x + 12, y + 5, '#d83a2a'); p(c, x + 13, y + 5, '#d83a2a'); p(c, x + 12, y + 4, '#f0e0a0'); p(c, x + 13, y + 4, '#3a8a2a');   // Apfelspalte am Rand
+    if (hat('ruehren')) { for (let j = 0; j < 5; j++) p(c, x + 4 - Math.floor(j / 2), y + 6 - j, '#b8bcc6'); r(c, x + 1, y, 2, 2, '#d0d4dc'); p(c, x + 1, y, '#f0f2f6'); }   // Löffel
+  }
+  if (id === 'jaegertee' && !hat('beutel')) {
+    for (let j = 0; j < 5; j++) p(c, x + 4, y + 2 + j, '#d8d0b0');   // Faden über den Rand
+    r(c, x + 2, y, 4, 3, '#e8d8a8'); p(c, x + 3, y + 1, '#c83a3a');   // Etikett
+  }
+  if (id === 'feuerzange') {
+    r(c, x + 1, y + 5, 14, 1, '#d8dce4'); p(c, x + 1, y + 5, '#a8acb4'); p(c, x + 14, y + 5, '#a8acb4');   // Zange über dem Becher
+    if (!hat('zucker')) { r(c, x + 6, y + 2, 4, 3, '#fffaf2'); r(c, x + 7, y + 1, 2, 1, '#fffaf2'); p(c, x + 9, y + 3, '#e8e0d2'); }   // Zuckerhut, noch kalt
+    else {
+      const fl = Math.floor(t * 8) % 2;
+      r(c, x + 6, y + 3, 4, 2, '#e8c070'); p(c, x + 7, y + 2, '#e8c070');   // karamellisiert
+      p(c, x + 6 + fl, y + 1, '#6ab0ff'); p(c, x + 7, y, '#ffd040'); p(c, x + 8 - fl, y + 1, '#ff8a20'); p(c, x + 9, y + 2 - fl, '#ffd040'); p(c, x + 8, y + 2, '#ff8a20');
+    }
+  }
+  // Dampf, wo nichts obendrauf liegt
+  if (!sahne && !(id === 'weisser' && hat('schaum')) && id !== 'feuerzange' && !(id === 'apfel' && hat('ruehren'))) {
+    // Zwei geschwungene Schwaden, die sich langsam hin- und herwiegen
+    const s = Math.floor(t * 2.5) % 2;
+    const a = s ? [[6, 5], [6, 4], [7, 3], [7, 2], [6, 1]] : [[7, 5], [7, 4], [6, 3], [6, 2], [7, 1]];
+    const b = s ? [[10, 4], [9, 3], [9, 2]] : [[9, 4], [10, 3], [10, 2]];
+    a.forEach(([dx, dy], i) => p(c, x + dx, y + dy, i < 2 ? '#ffffff' : i < 4 ? '#e8eef4' : '#d0d8e2'));
+    b.forEach(([dx, dy], i) => p(c, x + dx, y + dy, i < 1 ? '#f0f4f8' : '#d8e0ea'));
+  }
+}
+
 /** Kleines Gesicht über einem Gast: froh (bedient) oder traurig (gegangen). */
 export function smiley(c, x, y, froh) {
   x = Math.round(x); y = Math.round(y);

@@ -786,3 +786,12 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Silvester (11.10.): „Bis zum nächsten Jahr!" in der Weihnachtsschrift, 1:1 in Spielpixeln */
 #modal .abschied { display: flex; flex-direction: column; align-items: center; gap: 0; margin: calc(var(--px) * 3) 0 calc(var(--px) * 1); }
 #modal .abschied .schriftbild { display: block; image-rendering: pixelated; margin: calc(var(--px) * -2) 0; }
+
+/* Tipp „Als App speichern" (12.10.): nummerierte Schritte, Teilen-Zeichen wie in Safari */
+#modal .anleitung { text-align: left; margin: calc(var(--px) * 2) 0; padding-left: calc(var(--px) * 7); }
+#modal .anleitung li { margin: calc(var(--px) * 1.5) 0; }
+#modal .teilen-zeichen { display: inline-block; position: relative; width: calc(var(--px) * 4.4); height: calc(var(--px) * 4.4); margin-left: calc(var(--px) * 1); vertical-align: -10%;
+  border: calc(var(--px) * 0.5) solid #2a6ad8; border-top-color: transparent; border-radius: calc(var(--px) * 0.6); box-sizing: border-box; }
+#modal .teilen-zeichen::before { content: ''; position: absolute; left: 50%; top: calc(var(--px) * -2.2); width: calc(var(--px) * 0.5); height: calc(var(--px) * 4); margin-left: calc(var(--px) * -0.25); background: #2a6ad8; }
+#modal .teilen-zeichen::after { content: ''; position: absolute; left: 50%; top: calc(var(--px) * -2.4); width: calc(var(--px) * 1.8); height: calc(var(--px) * 1.8); margin-left: calc(var(--px) * -0.9);
+  border-left: calc(var(--px) * 0.5) solid #2a6ad8; border-top: calc(var(--px) * 0.5) solid #2a6ad8; transform: rotate(45deg); box-sizing: border-box; }

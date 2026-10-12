@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610121115';
-import * as S from './spiel.js?v=202610121115';
-import * as Z from './zeit.js?v=202610121115';
-import * as T from './ton.js?v=202610121115';
-import * as LI from './lichtung.js?v=202610121115';
-import * as CB from './christbaum.js?v=202610121115';
-import * as KA from './karte.js?v=202610121115';
-import * as SB from './schlitten.js?v=202610121115';
-import * as EB from './schlittschuh.js?v=202610121115';
-import * as BS from './backstube.js?v=202610121115';
-import * as UI from './ui.js?v=202610121115';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610121115';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610121115';
-import * as Lernen from './lernen.js?v=202610121115';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610121115';
-import * as A from './auftraege.js?v=202610121115';
-import * as E from './erfolge.js?v=202610121115';
-import * as ZL from './ziele.js?v=202610121115';
+import * as C from './config.js?v=202610121208';
+import * as S from './spiel.js?v=202610121208';
+import * as Z from './zeit.js?v=202610121208';
+import * as T from './ton.js?v=202610121208';
+import * as LI from './lichtung.js?v=202610121208';
+import * as CB from './christbaum.js?v=202610121208';
+import * as KA from './karte.js?v=202610121208';
+import * as SB from './schlitten.js?v=202610121208';
+import * as EB from './schlittschuh.js?v=202610121208';
+import * as BS from './backstube.js?v=202610121208';
+import * as UI from './ui.js?v=202610121208';
+import { zeichneWelt, schlittenPos } from './szene.js?v=202610121208';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610121208';
+import * as Lernen from './lernen.js?v=202610121208';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610121208';
+import * as A from './auftraege.js?v=202610121208';
+import * as E from './erfolge.js?v=202610121208';
+import * as ZL from './ziele.js?v=202610121208';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -334,6 +334,10 @@ setInterval(() => {
     UI.toast(neuGesammelt.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neuGesammelt[0].id)}!` : `${neuGesammelt.length} neue Dinge in den Läden!`, 'neu');
     neuGesammelt = []; neuZuletzt = Date.now();
   } else if (!S.startzieleFertig()) neuGesammelt = [];
+  // iPhone im Browser: einmal der Tipp zum Home-Bildschirm (12.10.) - nach
+  // den Startzielen und eineinhalb ruhigen Minuten, nie über etwas anderem
+  if (!S.st.installTipp && UI.iosImBrowser() && S.startzieleFertig() && S.lauf.t > 90 && S.nachStartRuhe()
+      && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) UI.zeigeInstallTipp();
   // Feierabend (17-19 Uhr): einmal am Tag sagen; um Mitternacht an Silvester gratulieren
   if (S.feierabendAnsage()) { T.spiele('glocken'); UI.toast(`Feierabend! Bis ${C.FEIERABEND.bis} Uhr kommen mehr Gäste.`, 'spezial'); S.speichere(); }
   // Wer den ersten Schnee schon vor dem 11.10. gesehen hat, kennt den Schneehaufen nicht

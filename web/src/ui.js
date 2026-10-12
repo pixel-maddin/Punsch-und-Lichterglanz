@@ -5,26 +5,26 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610121115';
-import * as S from './spiel.js?v=202610121115';
-import * as Z from './zeit.js?v=202610121115';
-import * as T from './ton.js?v=202610121115';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610121115';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610121115';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610121115';
-import * as A from './auftraege.js?v=202610121115';
-import * as E from './erfolge.js?v=202610121115';
-import * as ZL from './ziele.js?v=202610121115';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610121115';
-import * as KA from './karte.js?v=202610121115';
-import { zeigeRueckblick } from './ereignis.js?v=202610121115';
-import { barbaraZweig } from './szene.js?v=202610121115';
-import * as LI from './lichtung.js?v=202610121115';
-import * as CB from './christbaum.js?v=202610121115';
-import * as SB from './schlitten.js?v=202610121115';
-import * as EB from './schlittschuh.js?v=202610121115';
-import * as BS from './backstube.js?v=202610121115';
-import { alleSymbole } from './symbole.js?v=202610121115';
+import * as C from './config.js?v=202610121208';
+import * as S from './spiel.js?v=202610121208';
+import * as Z from './zeit.js?v=202610121208';
+import * as T from './ton.js?v=202610121208';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610121208';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610121208';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610121208';
+import * as A from './auftraege.js?v=202610121208';
+import * as E from './erfolge.js?v=202610121208';
+import * as ZL from './ziele.js?v=202610121208';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610121208';
+import * as KA from './karte.js?v=202610121208';
+import { zeigeRueckblick } from './ereignis.js?v=202610121208';
+import { barbaraZweig } from './szene.js?v=202610121208';
+import * as LI from './lichtung.js?v=202610121208';
+import * as CB from './christbaum.js?v=202610121208';
+import * as SB from './schlitten.js?v=202610121208';
+import * as EB from './schlittschuh.js?v=202610121208';
+import * as BS from './backstube.js?v=202610121208';
+import { alleSymbole } from './symbole.js?v=202610121208';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1502,6 +1502,30 @@ export function oeffneKalender() {
 // Menü
 // ---------------------------------------------------------------------------
 let titelTipps = 0;
+/**
+ * iPhone/iPad im Browser, nicht als App vom Home-Bildschirm (12.10.). Dort
+ * löscht Safari die Daten einer Seite, die 7 Tage nicht geöffnet wurde - als
+ * App gilt das nicht. iPadOS meldet sich als Mac, verrät sich aber über Touch.
+ */
+export function iosImBrowser() {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const app = navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches);
+  return ios && !app;
+}
+export function zeigeInstallTipp() {
+  S.st.installTipp = Date.now(); S.speichere();
+  fenster('Tipp: Als App speichern', `
+    <p>Leg das Spiel auf deinen Home-Bildschirm - dann startet es wie eine App, im Vollbild, auch ohne Internet.</p>
+    <ol class="anleitung">
+      <li>In Safari auf <b>Teilen</b> tippen <span class="teilen-zeichen" aria-hidden="true"></span> (unten in der Leiste oder im <b>···</b>-Menü)</li>
+      <li><b>„Zum Home-Bildschirm"</b> wählen (evtl. etwas nach unten scrollen)</li>
+      <li>Oben rechts auf <b>Hinzufügen</b></li>
+    </ol>
+    <p class="klein">Warum? Safari löscht die Daten einer Webseite, die 7 Tage lang nicht geöffnet wurde - auch deinen Spielstand. Als App auf dem Home-Bildschirm passiert das nicht. Danach startest du das Spiel nur noch über das neue Symbol.</p>`,
+  [{ text: 'Alles klar' }]);
+}
+
 /** Was das Feedback-Formular über die Lage erfährt: keine Namen, kein Spielstand. */
 function feedbackInfo() {
   const ua = navigator.userAgent;
@@ -1587,6 +1611,12 @@ export function oeffneMenue() {
     ]);
   };
   zeile.appendChild(nm); zeile.appendChild(hilfe); zeile.appendChild(neu);
+  // iPhone im Browser: die Anleitung zum Home-Bildschirm jederzeit wieder (12.10.)
+  if (iosImBrowser()) {
+    const ins = el('button', 'k k--neben', 'Als App speichern');
+    ins.onclick = () => zeigeInstallTipp();
+    zeile.appendChild(ins);
+  }
   // Feedback der Testspieler (12.10.): erst, wenn ein Formular eingetragen ist
   if (C.FEEDBACK.url) {
     const fb = el('button', 'k k--neben', 'Feedback geben');
