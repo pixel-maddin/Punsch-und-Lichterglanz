@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610121658';
-import * as Z from './zeit.js?v=202610121658';
-import { neueFarben } from './pixel.js?v=202610121658';
+import * as C from './config.js?v=202610121704';
+import * as Z from './zeit.js?v=202610121704';
+import { neueFarben } from './pixel.js?v=202610121704';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -589,6 +589,8 @@ function waehleTyp(erlaubeSpezial) {
   // Besondere Gäste: selten, und nie zwei kurz hintereinander
   // Sie kommen nur, wenn DU am Stand bist - die Wichtel bedienen sie nicht,
   // und wer weg ist, soll nicht vom Grummel bestohlen werden.
+  // Stammgäste (12.10.): einmal am Tag, zu ihrer Uhrzeit, nur wenn DU da bist
+  if (erlaubeSpezial && chefAktiv() && sonderBereit()) { const s = stammFaellig(); if (s) return s; }
   if (erlaubeSpezial && chefAktiv() && sonderBereit() && lauf.t >= lauf.spezialAb && Math.random() < C.SPEZIAL_CHANCE) {
     const m = spezialMoeglich();
     if (m.length) { lauf.spezialAb = lauf.t + C.SPEZIAL_PAUSE; return zufallGewichtet(m, (x) => x[1])[0]; }
@@ -611,7 +613,7 @@ export function neuerGast(typ, gross) {
   const geduld = gross ? gross.zeit : def.geduld * (1 + boni().geduld) * druck * (eilig ? C.EILIG_GEDULD : 1);
   const g = {
     id: lauf.naechsteId++, typ, wunsch,
-    x: START_X, y: 0, farben: neueFarben(typ), phase: Math.random() * 10,
+    x: START_X, y: 0, farben: def.farben ? { ...def.farben } : neueFarben(typ), phase: Math.random() * 10,
     platz: null, am: false, laeuft: true, eilig,
     geduld, geduldMax: geduld, schlange: C.SCHLANGE_GEDULD * (1 + boni().geduld),
     gehen: false, froh: false, bedient: false, t0: lauf.t,
@@ -627,6 +629,40 @@ export function neuerGast(typ, gross) {
   }
   return g;
 }
+
+// ---------------------------------------------------------------------------
+// Stammgäste (12.10.)
+// ---------------------------------------------------------------------------
+function stammFaellig() {
+  if (lauf.t < (lauf.stammAb ?? C.STAMM_PAUSE)) return null;
+  const h = Z.jetzt().getHours(), heute = Z.tagesSchluessel();
+  // Wer gerade dran ist (Uhrzeit), heute noch nicht bedient wurde und nicht schon da steht
+  const dran = Object.entries(C.STAMMGAESTE).filter(([id, s]) => h >= s.von && h < s.bis
+    && (st.stamm || {})[id]?.tag !== heute && !lauf.gaeste.some((g) => g.typ === id));
+  if (!dran.length || Math.random() >= C.STAMM_CHANCE) return null;
+  lauf.stammAb = lauf.t + C.STAMM_PAUSE;
+  return dran[Math.floor(Math.random() * dran.length)][0];
+}
+/** Bedient: ein Satz aus der Geschichte - oder an Weihnachten das Geschenk. */
+export function stammBedient(g) {   // exportiert nur für Tests
+  const s = C.STAMMGAESTE[g.typ], def = C.GAESTE[g.typ];
+  st.stamm = st.stamm || {};
+  const e = st.stamm[g.typ] = st.stamm[g.typ] || { n: 0 };
+  e.tag = Z.tagesSchluessel();
+  const dt = Z.dezemberTag();
+  if (dt >= 24 && dt <= 26 && e.n >= 3 && e.geschenk !== Z.saison()) {   // nur wer sich schon kennt
+    e.geschenk = Z.saison();
+    const betrag = Math.round(einnahmenProMinute() * C.STAMM_GESCHENK_MIN * dev.geld);
+    if (betrag > 0) verdiene(betrag);
+    setTimeout(() => { hooks.ton('spezial'); hooks.toast(`${s.geschenk} (+${formatGeld(betrag)})`, 'spezial'); }, 900);
+    return;
+  }
+  const satz = e.n < s.saetze.length ? s.saetze[e.n] : s.immer[(e.n - s.saetze.length) % s.immer.length];
+  const erster = e.n === 0;
+  e.n++;
+  setTimeout(() => hooks.toast(`${def.name}: „${satz}“` + (erster ? ` - ${def.name} kommt jetzt jeden Tag vorbei.` : ''), 'spezial'), 900);
+}
+export const stammBesuche = (id) => (st.stamm || {})[id]?.n || 0;
 
 function wartende() { return lauf.gaeste.filter((g) => !g.gehen); }
 
@@ -963,6 +999,7 @@ function bediene(g, auto, faktor = 1) {
   g.bedient = true;
   hooks.ton(def.spezial ? 'spezialKasse' : 'kasse');
   if (g.typ === 'grummel') hooks.toast('Der Grummel lächelt! Zum ersten Mal seit Jahren.', 'spezial');
+  if (def.stamm) stammBedient(g);
   g.gehT = 0.7;   // kurz stehen bleiben und sich freuen
 }
 

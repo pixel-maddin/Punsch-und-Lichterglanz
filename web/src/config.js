@@ -174,6 +174,67 @@ export const GAESTE = {
   // Der Grummel: grüner Weihnachtsmuffel. Wer ihn bedient, macht ihn froh;
   // wer ihn warten lässt, dem brummelt er etwas (klaut seit 29.09. nichts mehr). (Name bewusst eigen.)
   grummel:        { geduld: 10, tempo: 28, spezial: true, mult: 6, name: 'Der Grummel' },
+  // Stammgäste (12.10.): kommen einmal am Tag zu ihrer Zeit, bestellen „das
+  // Übliche" und erzählen bei jedem Besuch ein Stück weiter (STAMMGAESTE)
+  hilde: { geduld: 26, tempo: 20, spezial: true, stamm: true, mult: 2, name: 'Oma Hilde', wunsch: ['apfel', 'lebkuchen'],
+    farben: { mantel: '#7a4a8a', schal: '#e8d8a0', haut: '#f2c9a0', haar: '#e8e8ec', hut: '#7a4a8a' } },
+  paul:  { geduld: 18, tempo: 32, spezial: true, stamm: true, mult: 2, name: 'Postbote Paul', wunsch: ['gluehwein', 'schoko'],
+    farben: { mantel: '#2a4a8a', schal: '#f0c020', haut: '#e8b890', haar: '#5a3a22', hut: '#f0c020' } },
+  lena:  { geduld: 20, tempo: 36, spezial: true, stamm: true, mult: 2, name: 'Lena', wunsch: ['kinderpunsch', 'schoko'], ohneAlk: true,
+    farben: { mantel: '#3a8ac8', schal: '#f4f4f4', haut: '#f6d2b0', haar: '#c8862a', hut: '#d82a2a' } },
+  franz: { geduld: 26, tempo: 24, spezial: true, stamm: true, mult: 2, name: 'Förster Franz', wunsch: ['jaegertee', 'gluehwein'],
+    farben: { mantel: '#3e5a2e', schal: '#8a6a3a', haut: '#e0a888', haar: '#d8d4cc', hut: '#3e5a2e' } },
+};
+
+// Stammgäste (12.10.): Uhrzeit (von-bis), Sätze in Reihenfolge (einer je
+// Besuch), danach im Wechsel `immer`. Zwischen 24. und 26.12. einmal das
+// Abschiedsgeschenk (Sterne für GESCHENK_MIN Minuten Einnahmen).
+export const STAMM_CHANCE = 0.3, STAMM_PAUSE = 45, STAMM_GESCHENK_MIN = 15;
+export const STAMMGAESTE = {
+  hilde: { von: 7, bis: 13, saetze: [
+    'Guten Morgen! Ich bin die Hilde von gegenüber. Und das ist Waldi.',
+    'Waldi hat heute Nacht von Würstchen geträumt. Er hat im Schlaf gebellt.',
+    'Ich stricke gerade Socken. Für wen, verrate ich noch nicht.',
+    'Mein Enkel Jonas kommt zu Weihnachten! Zum ersten Mal seit drei Jahren.',
+    'Waldi mag keinen Schnee. Er trägt jetzt ein Mäntelchen.',
+    'Die Socken werden rot-grün gestreift. Hoffentlich passen sie.',
+    'Ich hab Jonas\' altes Zimmer gelüftet. Es riecht noch nach Zinnsoldaten.',
+    'Nur noch ein paar Mal schlafen. Ich bin aufgeregter als Waldi.'],
+    immer: ['Wie immer, Kindchen.', 'Waldi lässt grüßen. Wuff!', 'Bei dir schmeckt\'s wie früher.'],
+    geschenk: 'Oma Hilde schenkt dir die rot-grünen Socken. Die waren für dich!' },
+  paul: { von: 10, bis: 16, saetze: [
+    'Post für dich! Nein, Spaß. Nur ich, Paul. Einen Becher, bitte.',
+    'Im Advent trag ich dreimal so viele Pakete. Meine Knie wissen das.',
+    'Einer im Dorf bestellt jeden Tag eine Lichterkette. Ich sag nicht, wer.',
+    'Heute hat mich ein Hund verfolgt. Es war Waldi. Er wollte nur spielen.',
+    'Im Briefkasten lag ein Brief an den Weihnachtsmann. Mit Briefmarke!',
+    'Den Brief hab ich zum Nordpol weitergeschickt. Ehrensache.',
+    'Mein Fahrrad hat jetzt Schneeketten. Eigenbau.',
+    'Am 24. trag ich die letzten Pakete aus. Dann bin ich selbst der Weihnachtsmann.'],
+    immer: ['Kurze Pause, dann weiter.', 'Das Übliche, wie immer.', 'Heute nur Rechnungen. Darauf einen Becher.'],
+    geschenk: 'Paul bringt dir ein Päckchen - von allen im Dorf, für den schönsten Stand!' },
+  lena: { von: 13, bis: 19, saetze: [
+    'Hallo! Ich bin Lena. Ich bin sieben. Fast acht!',
+    'Ich hab einen Wunschzettel geschrieben. Er ist drei Seiten lang.',
+    'Ich wünsch mir ein Pony. Oder einen Schlitten. Ein Pony mit Schlitten!',
+    'In der Schule basteln wir Sterne. Meiner hat sieben Zacken. Aus Versehen.',
+    'Hast du den Nikolaus gesehen? Ich glaub, der fliegt hier manchmal vorbei!',
+    'Ich lern ein Gedicht für Heiligabend. Die erste Zeile kann ich schon.',
+    'Jetzt kann ich schon zwei Zeilen!',
+    'Ich kann nicht schlafen, weil bald Weihnachten ist. Mama sagt, das geht allen so.'],
+    immer: ['Mit extra Sahne, bitte!', 'Ich hab mein Taschengeld gespart!', 'Schneit\'s morgen? Bitte sag ja!'],
+    geschenk: 'Lena schenkt dir ein gemaltes Bild von deinem Stand. Mit Pony.' },
+  franz: { von: 16, bis: 22, saetze: [
+    '\'n Abend. Franz, Förster. War den ganzen Tag im Wald.',
+    'Die Rehe lassen grüßen. Sie mögen dein Dorf.',
+    'Heute einen Fuchs gesehen. Der war schneller als ich.',
+    'Ich such jedes Jahr den Baum für die Kirche aus. Dieses Jahr ist es schwer.',
+    'Ich hab ihn! Gerade gewachsen, dicht wie ein Pelz.',
+    'Der Baum steht jetzt in der Kirche. Ich bin ein bisschen stolz.',
+    'Im Wald ist es abends ganz still. Fast so still wie hier, wenn keiner bestellt.',
+    'An Heiligabend bring ich den Rehen noch Heu in den Wald.'],
+    immer: ['Das Wärmste, was du hast.', 'Kalte Finger heute.', 'Im Wald liegt mehr Schnee als hier.'],
+    geschenk: 'Franz schenkt dir einen Zweig vom Kirchenbaum. Er duftet nach Wald.' },
 };
 
 // ---------------------------------------------------------------------------

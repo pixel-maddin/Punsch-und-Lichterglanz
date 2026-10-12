@@ -339,8 +339,33 @@ export function neueFarben(typ) {
 // ---------------------------------------------------------------------------
 // Figuren KLEIN (Straße). (x, y) = Fußpunkt, Blick nach rechts.
 // ---------------------------------------------------------------------------
+// Stammgäste (12.10.): gezeichnet wie ihre Grundfigur (feste Farben aus
+// C.GAESTE) plus ein Erkennungszeichen
+const STAMM_BASIS = { hilde: 'oma', paul: 'erwachsen', lena: 'kind', franz: 'opa' };
+
 export function figurKlein(c, g, x, y, t) {
   x = Math.round(x); y = Math.round(y);
+  if (STAMM_BASIS[g.typ]) {
+    figurKlein(c, { ...g, typ: STAMM_BASIS[g.typ] }, x, y, t);
+    const schritt = g.laeuft ? Math.floor(t * 7 + g.phase) % 2 : 0;
+    if (g.typ === 'hilde') {
+      // Dackel Waldi trippelt hinterher, im roten Mäntelchen
+      const d = '#8a4a22', dd = '#5a2e14', dx = x - 11;
+      r(c, dx, y - 3, 7, 2, d); r(c, dx + 2, y - 3, 3, 1, '#c83a3a');
+      p(c, dx + 1, y - 1 - schritt, dd); p(c, dx + 5, y - 2 + schritt, dd); p(c, dx + 1, y - 1, dd); p(c, dx + 5, y - 1, dd);
+      r(c, dx + 6, y - 5, 2, 2, d); p(c, dx + 6, y - 3, dd); p(c, dx + 8, y - 4, '#1a1a1a'); p(c, dx - 1, y - 4, d);
+      r(c, dx + 3, y - 9, 1, 1, '#c8b890');   // Leine
+      for (let i = 0; i < 4; i++) p(c, dx + 7 + i, y - 6 - i, '#6a5a4a');
+    } else if (g.typ === 'paul') {
+      r(c, x - 5, y - 8, 2, 4, '#f0c020'); p(c, x - 4, y - 7, '#2a2a2a');   // Posttasche
+      p(c, x - 2, y - 9, '#c89a10'); p(c, x - 1, y - 10, '#c89a10');
+    } else if (g.typ === 'lena') {
+      r(c, x - 2, y - 15, 2, 2, '#ffffff');   // dicke Bommel
+    } else if (g.typ === 'franz') {
+      p(c, x + 2, y - 18, '#3a8a3a'); p(c, x + 3, y - 19, '#3a8a3a'); p(c, x + 3, y - 18, '#2a6a2a');   // Feder am Hut
+    }
+    return;
+  }
   const F = g.farben;
   const schritt = g.laeuft ? Math.floor(t * 7 + g.phase) % 2 : 0;
   const bein = (bx, hoch) => { r(c, bx, y - 3 + hoch, 1, 3 - hoch, '#2c2c38'); p(c, bx, y - 1 + (hoch ? 0 : 0), '#1a1a22'); };
@@ -428,6 +453,26 @@ function augen(c, cx, y, abst, zu) {
 
 export function figurGross(c, g, cx, basis, t, laune) {
   cx = Math.round(cx);
+  if (STAMM_BASIS[g.typ]) {
+    figurGross(c, { ...g, typ: STAMM_BASIS[g.typ] }, cx, basis, t, laune);
+    const b = basis + Math.round(Math.sin(t * 2 + g.phase) * 0.6);
+    if (g.typ === 'hilde') {
+      // Waldi schaut neben ihr über den Tresen
+      const d = '#8a4a22', hx = cx + 12, ko = basis - 7;
+      r(c, hx, ko, 6, 6, d); r(c, hx + 1, ko - 1, 4, 1, d); r(c, hx - 1, ko + 1, 2, 5, '#5a2e14'); r(c, hx + 5, ko + 1, 2, 5, '#5a2e14');
+      p(c, hx + 1, ko + 2, '#1a1a1a'); p(c, hx + 4, ko + 2, '#1a1a1a'); r(c, hx + 2, ko + 4, 2, 1, '#1a1a1a');
+    } else if (g.typ === 'paul') {
+      for (let i = 0; i < 12; i++) p(c, cx - 8 + i, b - 16 + i, '#c89a10');   // Riemen der Posttasche
+      r(c, cx - 6, b - 31, 13, 2, '#1a2a5a');   // Schirm der Mütze
+    } else if (g.typ === 'lena') {
+      const ko = b - 22;
+      r(c, cx - 2, ko - 8, 5, 4, '#ffffff'); r(c, cx - 1, ko - 9, 3, 1, '#ffffff');   // dicke Bommel
+    } else if (g.typ === 'franz') {
+      const ko = b - 29;
+      r(c, cx + 4, ko - 7, 1, 5, '#3a8a3a'); r(c, cx + 5, ko - 8, 1, 3, '#2a6a2a');   // Feder am Hut
+    }
+    return;
+  }
   const F = g.farben;
   const blinzeln = (Math.floor(t * 10 + g.phase * 7) % 37) === 0;
   const atmen = Math.round(Math.sin(t * 2 + g.phase) * 0.6);
