@@ -261,6 +261,12 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
 - Ab September beginnt eine neue Adventszeit - das Haus fängt wieder kahl
   an, ein Andenken bleibt.
 
+## Feedback
+
+Im Menü: **Feedback geben** öffnet ein kurzes Google-Formular. Eine Zeile mit
+Spielversion, Spieltag, Gerät und Bildgröße ist schon ausgefüllt, damit sich
+die Meldung einordnen lässt - kein Name, kein Spielstand.
+
 ## Teilen
 
 **Foto** in der Leiste macht aus dem aktuellen Bild eine Weihnachtskarte

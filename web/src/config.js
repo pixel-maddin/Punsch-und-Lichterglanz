@@ -787,4 +787,4 @@ export const SILVESTER_STUNDE = 18;
 // zum Formular (…/viewform), `infoFeld` = die Kennung des Kurzantwort-Felds
 // für die Spielinfos („entry.123456789", aus „Vorausgefüllten Link abrufen").
 // Solange `url` leer ist, gibt es keinen Feedback-Knopf.
-export const FEEDBACK = { url: '', infoFeld: '' };
+export const FEEDBACK = { url: 'https://docs.google.com/forms/d/e/1FAIpQLSe54k8PrZGDBAHZaaTWH2LiJfo0OlOnMgKxy0DlxTuXnf-vzw/viewform', infoFeld: 'entry.364683706' };
