@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610121227';
-import * as Z from './zeit.js?v=202610121227';
-import * as T from './ton.js?v=202610121227';
-import * as MH from './minihud.js?v=202610121227';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610121227';
+import * as C from './config.js?v=202610121244';
+import * as Z from './zeit.js?v=202610121244';
+import * as T from './ton.js?v=202610121244';
+import * as MH from './minihud.js?v=202610121244';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610121244';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -415,9 +415,18 @@ function schein(ctx, x, y, rad, rgb, a) {
   ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2); ctx.restore();
 }
 // Wo die Lichter hängen (für das Funkeln in zeichne())
-const LAMPE = { x: 148, y: 60 };   // über dem Ofen (oben rechts lag sie unter der Kopfzeile)
+const LAMPE = { x: 92, y: 50 };   // Hängelampe über der Arbeitsfläche
+const STERN = { x: 152, y: 66 };  // Herrnhuter Stern über dem Ofen (leuchtet selbst)
 const KERZEN = [[16, 34], [20, 32], [25, 31], [30, 32], [34, 34]];   // Schwibbogen auf dem Fensterbrett
-let kulisse = null, kulisseSchl = '';
+let kulisse = null, kulisseSchl = '', lichtKarte = null;
+/**
+ * Die Küche (12.10., zweite Fassung, gemeldet: „zu viel los, zu steril, wo
+ * sind die Lichter?"). Wenig Dinge, warme Putzwand statt Kacheln - und
+ * richtiges LICHT: Die ganze Szene wird am Ende mit einer Lichtkarte
+ * multipliziert (`lichtKarte`). Die ist im Grund dämmrig und hat helle
+ * Inseln, wo Licht ist: Lampe und Arbeitsfläche, Fenster, Schwibbogen.
+ * So entstehen echte Abstufungen von hell nach dunkel, auch tagsüber.
+ */
 function baueKulisse(nacht) {
   const schl = `${H}|${nacht}|${Z.schnee() > 0}`;
   if (kulisse && kulisseSchl === schl) return;
@@ -427,170 +436,118 @@ function baueKulisse(nacht) {
   const ziel = c;
   c = kulisse.getContext('2d');
   const th = THEKE();
-  // Kachelwand, warm
-  r(c, 0, 0, W, th, '#f2e2c4');
-  for (let y = 0; y < th; y += 8) { r(c, 0, y, W, 1, '#e0caa4'); for (let x = (y / 8) % 2 ? 4 : 0; x < W; x += 8) r(c, x, y, 1, 8, '#e0caa4'); }
-  for (let y = 1; y < th; y += 8) for (let x = ((y - 1) / 8) % 2 ? 5 : 1; x < W; x += 8) p(c, x, y, '#fbf2e0');   // Glanz auf jeder Kachel
-  // Zierkacheln (blau-weiß)
-  for (let i = 0; i < 9; i++) {
-    const kx = 8 + Math.floor(hash(i + 60) * 20) * 8, ky = 40 + Math.floor(hash(i + 70) * 6) * 8;
-    if (ky + 8 > th - 18 || (kx > 50 && kx < 128 && ky < 56) || (kx > 120)) continue;
-    r(c, kx + 1, ky + 1, 7, 7, '#e8eef6'); p(c, kx + 4, ky + 2, '#3a6ab8'); p(c, kx + 3, ky + 4, '#3a6ab8'); p(c, kx + 5, ky + 4, '#3a6ab8'); p(c, kx + 4, ky + 6, '#3a6ab8'); p(c, kx + 4, ky + 4, '#e8c030');
-  }
+  // Warme Putzwand mit leichter Struktur
+  r(c, 0, 0, W, th, '#e6cfa8');
+  for (let i = 0; i < 260; i++) p(c, Math.floor(hash(i + 500) * W), Math.floor(hash(i + 510) * th), hash(i + 520) < 0.5 ? '#dcc29a' : '#eedab6');
   // Holzvertäfelung unten an der Wand
-  r(c, 0, th - 16, W, 16, '#a8703a'); r(c, 0, th - 16, W, 2, '#7a4a22'); r(c, 0, th - 14, W, 1, '#c88a4e');
-  for (let x = 0; x < W; x += 12) { r(c, x, th - 13, 1, 13, '#8a5a2e'); r(c, x + 1, th - 13, 1, 13, '#bc8048'); }
+  r(c, 0, th - 18, W, 18, '#8a5a32'); r(c, 0, th - 18, W, 2, '#6a4222'); r(c, 0, th - 16, W, 1, '#a8703c');
+  for (let x = 0; x < W; x += 15) { r(c, x, th - 15, 1, 15, '#6e4626'); r(c, x + 1, th - 15, 1, 15, '#9a6838'); }
   // Fenster mit Himmel, Vorhängen und Schwibbogen
   const fx = 10, fy = 10, fb = 30, fh = 22;
-  r(c, fx - 2, fy - 2, fb + 4, fh + 4, '#7a4c28'); r(c, fx - 2, fy - 2, fb + 4, 1, '#9a6a3a');
-  const himmel = nacht ? ['#101640', '#1e2858', '#2a3466'] : ['#8cb4dc', '#a8c8e6', '#c8dcee'];
+  r(c, fx - 2, fy - 2, fb + 4, fh + 4, '#6a4222'); r(c, fx - 2, fy - 2, fb + 4, 1, '#8a5a32');
+  const himmel = nacht ? ['#101640', '#1a2454', '#24305e'] : ['#8cb4dc', '#a8c8e6', '#c8dcee'];
   for (let y = 0; y < fh; y++) r(c, fx, fy + y, fb, 1, himmel[Math.min(2, Math.floor(y / fh * 3))]);
-  if (nacht) { for (let i = 0; i < 9; i++) p(c, fx + Math.floor(hash(i) * fb), fy + Math.floor(hash(i + 9) * fh * 0.6), '#fff4d0'); r(c, fx + 22, fy + 3, 3, 3, '#f4ecc8'); p(c, fx + 23, fy + 3, '#2a3466'); }
+  if (nacht) { for (let i = 0; i < 9; i++) p(c, fx + Math.floor(hash(i) * fb), fy + Math.floor(hash(i + 9) * fh * 0.6), '#fff4d0'); r(c, fx + 22, fy + 3, 3, 3, '#f4ecc8'); p(c, fx + 23, fy + 3, '#24305e'); }
   if (Z.schnee() > 0) {
-    r(c, fx, fy + fh - 4, fb, 4, '#f4f8fc');
-    for (let x = 0; x < fb; x += 4) { const h = 2 + Math.floor(hash(x + 31) * 3); r(c, fx + x, fy + fh - 4 - h, 3, h, nacht ? '#3a4a78' : '#d8e2ee'); }   // Dächer in der Ferne
-    for (let i = 0; i < 10; i++) p(c, fx + Math.floor(hash(i + 3) * fb), fy + Math.floor(hash(i + 5) * (fh - 4)), '#ffffff');
-    // Frost in den Ecken
-    for (const [ex, ey, dx, dy] of [[fx, fy, 1, 1], [fx + fb - 1, fy, -1, 1]]) for (let k = 0; k < 4; k++) { p(c, ex + dx * k, ey, '#e8f2fc'); p(c, ex, ey + dy * k, '#e8f2fc'); p(c, ex + dx, ey + dy, '#ffffff'); }
+    r(c, fx, fy + fh - 4, fb, 4, nacht ? '#c8d4ea' : '#f4f8fc');
+    for (let x = 0; x < fb; x += 4) { const h = 2 + Math.floor(hash(x + 31) * 3); r(c, fx + x, fy + fh - 4 - h, 3, h, nacht ? '#2e3a66' : '#d8e2ee'); if (nacht && x % 8 === 0) p(c, fx + x + 1, fy + fh - 3 - h, '#ffd070'); }
   }
-  r(c, fx + fb / 2, fy, 1, fh, '#7a4c28'); r(c, fx, fy + fh / 2, fb, 1, '#7a4c28');
-  r(c, fx - 4, fy + fh + 2, fb + 8, 3, '#8a5a32'); r(c, fx - 4, fy + fh + 2, fb + 8, 1, '#b07a44');   // Fensterbrett
-  // Vorhänge rot-weiß kariert, gerafft
+  r(c, fx + fb / 2, fy, 1, fh, '#6a4222'); r(c, fx, fy + fh / 2, fb, 1, '#6a4222');
+  r(c, fx - 4, fy + fh + 2, fb + 8, 3, '#7a4c28'); r(c, fx - 4, fy + fh + 2, fb + 8, 1, '#a8703a');
   for (const [vx, rechts] of [[fx - 6, false], [fx + fb + 1, true]]) {
     for (let y = 0; y < fh + 2; y++) {
-      const w = y < 12 ? 5 : y < 16 ? 3 : 4 + (y - 16 > 2 ? 1 : 0);
-      for (let i = 0; i < w; i++) {
-        const xx = rechts ? vx + i : vx + 5 - w + i;
-        p(c, xx, fy - 3 + y, ((xx >> 1) + ((fy - 3 + y) >> 1)) % 2 ? '#d83a3a' : '#f4ece0');
-      }
+      const w = y < 12 ? 5 : y < 16 ? 3 : 5;
+      for (let i = 0; i < w; i++) { const xx = rechts ? vx + i : vx + 5 - w + i; p(c, xx, fy - 3 + y, ((xx >> 1) + ((fy - 3 + y) >> 1)) % 2 ? '#b83030' : '#e8dccc'); }
     }
-    r(c, rechts ? vx : vx + 1, fy + 10, 5, 1, '#a82020');   // Raffband
   }
-  r(c, fx - 7, fy - 4, fb + 14, 2, '#6a4222');   // Gardinenstange
-  // Schwibbogen (Kerzen-Bogen) auf dem Fensterbrett
+  r(c, fx - 7, fy - 4, fb + 14, 2, '#5a3a22');
   for (let k = 0; k <= 20; k++) { const bx = 14 + k, by = 36 - Math.round(Math.sin(k / 20 * Math.PI) * 6); p(c, bx, by, '#3a2414'); p(c, bx, by + 1, '#5a3a22'); }
   r(c, 13, 36, 23, 1, '#3a2414');
   for (const [kx, ky] of KERZEN) r(c, kx, ky - 3, 1, 3, '#f4f0e0');
-  // Regal mit Gläsern, Keksdose und Windlicht
-  r(c, 52, 26, 74, 2, '#8a5a32'); r(c, 52, 26, 74, 1, '#b07a44'); r(c, 54, 28, 2, 4, '#6a4222'); r(c, 122, 28, 2, 4, '#6a4222');
-  const GL = ['#e8b030', '#c8283a', '#8a5a2a', '#f4f0e8', '#5aa84a', '#e8c890'];
-  for (let i = 0; i < 6; i++) {
-    const gx = 56 + i * 11;
-    r(c, gx, 16, 8, 10, '#d8e8f0'); r(c, gx + 1, 19, 6, 7, GL[i]); r(c, gx, 15, 8, 2, '#a8763e'); r(c, gx + 1, 15, 6, 1, '#c8945a');
-    r(c, gx + 2, 21, 4, 2, '#f8f2e4'); p(c, gx + 1, 17, '#ffffff'); r(c, gx + 1, 18, 1, 6, 'rgba(255,255,255,0.5)');   // Etikett, Glanz
+  // Ein Regal mit Vorratsgläsern
+  r(c, 120, 30, 54, 2, '#7a4c28'); r(c, 120, 30, 54, 1, '#a8703a'); r(c, 122, 32, 2, 4, '#5a3a22'); r(c, 170, 32, 2, 4, '#5a3a22');
+  const GL = ['#e8b030', '#c8283a', '#8a5a2a', '#f4f0e8'];
+  for (let i = 0; i < 4; i++) {
+    const gx = 124 + i * 12, gh = 10 + (i % 2) * 2;
+    r(c, gx, 30 - gh, 9, gh, '#cfdde6'); r(c, gx + 1, 30 - gh + 3, 7, gh - 3, GL[i]); r(c, gx, 29 - gh, 9, 2, '#9a6a38');
+    p(c, gx + 1, 30 - gh + 1, '#ffffff'); r(c, gx + 1, 30 - gh + 2, 1, gh - 3, 'rgba(255,255,255,0.45)');
   }
-  // Mehlsack neben dem Regal, Brezel-Schild
-  r(c, 130, 16, 10, 10, '#e8e0cc'); r(c, 131, 14, 8, 2, '#d8ccb0'); r(c, 133, 13, 4, 1, '#c8b898'); r(c, 132, 19, 6, 3, '#c8a878'); p(c, 134, 20, '#f4ecd8');
-  r(c, 160, 4, 1, 6, '#5a3a22'); r(c, 153, 10, 16, 14, '#c8902c'); r(c, 153, 10, 16, 1, '#e0a840'); r(c, 153, 23, 16, 1, '#8a6018');
-  for (const [dx, dy] of [[2, 2], [3, 1], [4, 1], [5, 2], [6, 3], [7, 2], [8, 1], [9, 1], [10, 2], [11, 3], [11, 5], [10, 7], [9, 8], [7, 8], [6, 7], [5, 5], [6, 4], [8, 5], [9, 6], [4, 4], [3, 5], [3, 7], [4, 8], [2, 4]]) p(c, 154 + dx, 11 + dy, '#6a3a12');
-  // Hängelampe (Kabel von der Decke, Messingschirm)
-  r(c, LAMPE.x, 0, 1, LAMPE.y - 5, '#3a2a20');
-  // Wanduhr, gerahmtes Bild, Strohsterne an Fäden
-  const ux = 30, uy = 66;
-  for (let dy = -6; dy <= 6; dy++) { const w = Math.round(Math.sqrt(36 - dy * dy)); r(c, ux - w, uy + dy, w * 2 + 1, 1, Math.abs(dy) === 6 || w < 2 ? '#7a4c28' : '#fbf6e8'); p(c, ux - w, uy + dy, '#7a4c28'); p(c, ux + w, uy + dy, '#7a4c28'); }
-  for (const [dx, dy] of [[0, -4], [4, 0], [0, 4], [-4, 0]]) p(c, ux + dx, uy + dy, '#5a3a22');
-  r(c, ux, uy - 3, 1, 3, '#2a1a10'); r(c, ux + 1, uy, 2, 1, '#2a1a10'); p(c, ux, uy, '#c83a3a');
-  r(c, ux - 1, uy + 7, 3, 6, '#b8862a'); r(c, ux - 2, uy + 12, 5, 2, '#d8a838');   // Pendel
-  const bx0 = 88, by0 = 58;
-  r(c, bx0, by0, 22, 17, '#8a5a32'); r(c, bx0, by0, 22, 1, '#b07a44'); r(c, bx0 + 2, by0 + 2, 18, 13, '#1e2858');
-  for (let i = 0; i < 6; i++) p(c, bx0 + 3 + Math.floor(hash(i + 400) * 16), by0 + 3 + Math.floor(hash(i + 410) * 6), '#fff4d0');
-  r(c, bx0 + 2, by0 + 12, 18, 3, '#eef3fa'); r(c, bx0 + 7, by0 + 7, 8, 5, '#c8392f'); for (let k = 0; k < 4; k++) r(c, bx0 + 7 + k, by0 + 6 - k, 8 - k * 2, 1, '#eef3fa');
-  p(c, bx0 + 9, by0 + 9, '#ffd060'); p(c, bx0 + 12, by0 + 9, '#ffd060'); p(c, bx0 + 4, by0 + 11, '#2f6a2a'); p(c, bx0 + 4, by0 + 10, '#2f6a2a');   // Haus im Bild
-  r(c, bx0 + 10, by0 - 4, 1, 4, '#8a7a5a'); p(c, bx0 + 10, by0 - 5, '#5a5a62');
-  for (const [sx, sy, oben] of [[49, 48, 6], [118, 66, 35], [70, 76, 35]]) {   // am Girlandenseil bzw. an der Hakenleiste
-    r(c, sx, oben, 1, sy - oben - 3, 'rgba(120,90,60,0.5)');
-    const f = '#e8c060', d = '#b8902a';
-    for (let k = -3; k <= 3; k++) { p(c, sx + k, sy, f); p(c, sx, sy + k, f); }
-    for (let k = -2; k <= 2; k++) { p(c, sx + k, sy + k, d); p(c, sx + k, sy - k, d); }
-    p(c, sx, sy, '#fff0a0');
+  // Hängelampe (Kabel, Messingschirm)
+  r(c, LAMPE.x, 0, 1, LAMPE.y - 5, '#2a1e18');
+  r(c, LAMPE.x - 5, LAMPE.y - 5, 11, 1, '#9a6e20'); r(c, LAMPE.x - 6, LAMPE.y - 4, 13, 2, '#c8962c'); r(c, LAMPE.x - 7, LAMPE.y - 2, 15, 1, '#8a5e18');
+  r(c, LAMPE.x - 2, LAMPE.y - 1, 5, 2, '#fff4c0');
+  // Tannenkranz mit roter Schleife an der Wand
+  const kx = 44, ky = 66;
+  for (let k = 0; k < 28; k++) { const w = k / 28 * Math.PI * 2; const x = Math.round(kx + Math.cos(w) * 9), y = Math.round(ky + Math.sin(w) * 9); r(c, x - 1, y - 1, 3, 3, k % 3 ? '#2f6a2a' : '#3f8a3a'); }
+  for (let k = 0; k < 28; k += 4) { const w = k / 28 * Math.PI * 2 + 0.3; p(c, Math.round(kx + Math.cos(w) * 9), Math.round(ky + Math.sin(w) * 9), '#c83030'); }
+  r(c, kx - 3, ky + 8, 7, 3, '#c83030'); r(c, kx - 1, ky + 11, 1, 4, '#a82020'); r(c, kx + 1, ky + 11, 1, 3, '#a82020'); p(c, kx, ky + 9, '#e85050');
+  r(c, kx, ky - 22, 1, 13, 'rgba(90,60,40,0.6)');
+  // Herrnhuter Stern (Stern aus Zacken, warm leuchtend)
+  r(c, STERN.x, 32, 1, STERN.y - 38, '#2a1e18');   // hängt am Regalbrett
+  for (const [dx, dy] of [[0, -6], [0, 6], [-6, 0], [6, 0], [-4, -4], [4, -4], [-4, 4], [4, 4]]) {
+    const n = Math.max(Math.abs(dx), Math.abs(dy));
+    for (let i = 1; i <= n; i++) { const x = STERN.x + Math.round(dx * i / n), y = STERN.y + Math.round(dy * i / n); p(c, x, y, i === n ? '#fff6d0' : '#ffd88a'); if (i < n - 1) { p(c, x + 1, y, '#f4b850'); p(c, x, y + 1, '#e8a040'); } }
   }
-  r(c, LAMPE.x - 5, LAMPE.y - 5, 11, 1, '#b8862a'); r(c, LAMPE.x - 6, LAMPE.y - 4, 13, 2, '#d8a838'); r(c, LAMPE.x - 7, LAMPE.y - 2, 15, 1, '#a87420');
-  r(c, LAMPE.x - 2, LAMPE.y - 1, 5, 2, '#fff4c0'); p(c, LAMPE.x, LAMPE.y, '#ffffff');
-  // Lichterkette (Girlande) oben
+  r(c, STERN.x - 2, STERN.y - 2, 5, 5, '#ffe6a0'); p(c, STERN.x, STERN.y, '#ffffff');
+  // Girlande oben (die Lichter funkeln in lichter())
   for (let x = 0; x < W; x++) {
     const y = 2 + Math.round(Math.sin((x % 30) / 30 * Math.PI) * 4);
     p(c, x, y, x % 2 ? '#2f6a2a' : '#3f8a3a'); p(c, x, y + 1, '#245224');
-    if (x % 30 === 0) { r(c, x - 1, y - 1, 3, 2, '#d83a3a'); p(c, x - 1, y + 1, '#a82020'); p(c, x + 1, y + 1, '#a82020'); }
+    if (x % 30 === 0) { r(c, x - 1, y - 1, 3, 2, '#c83030'); }
   }
-  // Hakenleiste mit Kochgeschirr, Rezeptzettel
-  r(c, 56, 34, 64, 1, '#8a8e98'); r(c, 56, 33, 64, 1, '#b8bcc4');
-  for (const [hx, art] of [[62, 'kelle'], [76, 'besen'], [90, 'loeffel'], [104, 'sieb']]) {
-    r(c, hx, 35, 1, 2, '#5a5a62');
-    if (art === 'kelle') { r(c, hx, 37, 1, 9, '#b8bcc4'); r(c, hx - 2, 46, 5, 3, '#a8acb6'); r(c, hx - 1, 46, 3, 1, '#d8dce4'); }
-    if (art === 'besen') { r(c, hx, 37, 1, 6, '#8a5a32'); for (let k = -2; k <= 2; k++) { r(c, hx + k, 43, 1, 6 - Math.abs(k), '#c8ccd4'); } }
-    if (art === 'loeffel') { r(c, hx, 37, 1, 9, '#c8905a'); r(c, hx - 1, 46, 3, 3, '#b07a44'); }
-    if (art === 'sieb') { r(c, hx, 37, 1, 4, '#8a8e98'); r(c, hx - 4, 41, 9, 5, '#8a8e98'); r(c, hx - 3, 42, 7, 3, '#c8ccd4'); for (let k = -3; k <= 3; k += 2) p(c, hx + k, 43, '#8a8e98'); }
-  }
-  r(c, 124, 36, 14, 17, '#fbf6e8'); r(c, 130, 35, 2, 2, '#d83a3a'); r(c, 125, 52, 13, 1, '#d8ccb0');
-  for (let k = 0; k < 5; k++) r(c, 126, 39 + k * 3, k % 2 ? 8 : 10, 1, '#a89878');
-  // Topflappen am Haken links vom Ofen
-  const o = OFEN(), lx = o.x - 12, ly = th - 15;
-  r(c, lx + 3, ly - 2, 1, 2, '#5a5a62');
-  for (let y = 0; y < 9; y++) for (let x = 0; x < 6; x++) p(c, lx + x, ly + y, (x + y) % 3 ? '#c83a3a' : '#f4ece0');
-  r(c, lx, ly + 9, 6, 1, '#8a2020');
   // Theke vorn
-  r(c, 0, th, W, 5, '#a8703a'); r(c, 0, th, W, 1, '#c8905a'); r(c, 0, th + 4, W, 1, '#6a4222');
-  // Arbeitstisch (Holzdielen mit Maserung)
-  r(c, 0, th + 5, W, H - th - 5, '#c89058');
-  for (let y = th + 8; y < H; y += 7) { r(c, 0, y, W, 1, '#a8703c'); r(c, 0, y + 1, W, 1, '#d4a068'); }
-  for (let i = 0; i < 40; i++) p(c, Math.floor(hash(i + 40) * W), th + 6 + Math.floor(hash(i + 80) * (H - th - 6)), '#b07a44');
-  for (let i = 0; i < 7; i++) {
-    const ax = Math.floor(hash(i + 120) * (W - 10)) + 5, ay = th + 9 + Math.floor(hash(i + 130) * (H - th - 14));
-    r(c, ax - 2, ay, 5, 2, '#a06a36'); p(c, ax, ay, '#7a4a22'); r(c, ax - 5, ay - 1, 3, 1, '#b8834c'); r(c, ax + 3, ay + 2, 4, 1, '#b8834c');
-  }
-  for (let i = 0; i < 30; i++) p(c, Math.floor(hash(i + 150) * W), th + 6 + Math.floor(hash(i + 160) * (H - th - 6)), '#ead8b8');
+  r(c, 0, th, W, 5, '#9a6434'); r(c, 0, th, W, 1, '#c8905a'); r(c, 0, th + 4, W, 1, '#5a3a1e');
+  // Arbeitstisch: ruhige Dielen
+  r(c, 0, th + 5, W, H - th - 5, '#c08a52');
+  for (let y = th + 12; y < H; y += 10) { r(c, 0, y, W, 1, '#a07040'); r(c, 0, y + 1, W, 1, '#cc9a60'); }
+  for (let i = 0; i < 14; i++) p(c, Math.floor(hash(i + 40) * W), th + 6 + Math.floor(hash(i + 80) * (H - th - 6)), '#a87444');
   // Schneidbrett mit ausgerolltem Teig
   const ty = Math.round(H * 0.42), tb = 70, tH = Math.round(H * 0.13);
-  r(c, 3, ty - 3, tb + 6, tH + 6, '#9a6434'); r(c, 3, ty - 3, tb + 6, 1, '#c8905a'); r(c, 3, ty + tH + 2, tb + 6, 1, '#6a4222');
-  r(c, tb + 6, ty + tH / 2 - 2, 3, 4, '#c89058');   // Griffloch
+  r(c, 3, ty - 3, tb + 6, tH + 6, '#8a5a30'); r(c, 3, ty - 3, tb + 6, 1, '#b07a44'); r(c, 3, ty + tH + 2, tb + 6, 1, '#5a3a1e');
   r(c, 6, ty, tb, tH, '#f0dcb0'); r(c, 6, ty + tH - 1, tb, 1, '#d8bc88'); r(c, 6, ty, 1, tH, '#e4cc9c'); r(c, 7, ty, tb - 2, 1, '#faecc8');
-  for (let i = 0; i < 24; i++) p(c, 7 + Math.floor(hash(i + 7) * (tb - 2)), ty + 1 + Math.floor(hash(i + 17) * (tH - 2)), '#fbf4e4');
-  // Nudelholz mit Griffen
+  for (let i = 0; i < 18; i++) p(c, 7 + Math.floor(hash(i + 7) * (tb - 2)), ty + 1 + Math.floor(hash(i + 17) * (tH - 2)), '#fbf4e4');
   const ny = ty + tH + 5;
-  r(c, 12, ny, 42, 5, '#d8a868'); r(c, 12, ny, 42, 1, '#f0c88a'); r(c, 12, ny + 4, 42, 1, '#b07a44'); r(c, 14, ny + 1, 38, 1, '#ecc080');
-  for (const gx of [4, 55]) { r(c, gx, ny + 1, 7, 3, '#8a5a32'); r(c, gx, ny + 1, 7, 1, '#a8703a'); p(c, gx === 4 ? 4 : 61, ny + 2, '#6a4222'); }
-  // Eier, Mehlhäufchen und Streusel zwischen Nudelholz und Formen
-  const ey = ny + 9;
-  if (ey + 6 < FORM_Y() - 14) {
-    for (const ex of [68, 74]) { r(c, ex, ey, 4, 5, '#f4ead8'); r(c, ex + 1, ey - 1, 2, 1, '#f4ead8'); p(c, ex, ey, '#ffffff'); r(c, ex, ey + 4, 4, 1, '#d8c8a8'); }
-    for (let k = 0; k < 4; k++) r(c, 84 + k, ey + 4 - k, 10 - k * 2, 1, k % 2 ? '#f4f0e6' : '#fbf8f2');
-    for (let i = 0; i < 8; i++) p(c, 100 + Math.floor(hash(i + 200) * 22), ey + Math.floor(hash(i + 210) * 6), ['#ff5a5a', '#ffe060', '#5ad0ff', '#7ae07a'][i % 4]);
-  }
+  r(c, 12, ny, 42, 5, '#d8a868'); r(c, 12, ny, 42, 1, '#f0c88a'); r(c, 12, ny + 4, 42, 1, '#a87040');
+  for (const gx of [4, 55]) { r(c, gx, ny + 1, 7, 3, '#7a4c28'); r(c, gx, ny + 1, 7, 1, '#9a6434'); }
   // Backblech mit Backpapier
   const b = BLECH();
-  r(c, b.x - 16, b.y - 7, 32, 14, '#5a5e68'); r(c, b.x - 16, b.y - 7, 32, 1, '#8a8e98'); r(c, b.x - 16, b.y + 6, 32, 1, '#3a3e48');
-  r(c, b.x - 14, b.y - 5, 28, 10, '#f4ecd8'); r(c, b.x - 14, b.y - 5, 28, 1, '#fffaf0'); p(c, b.x + 12, b.y + 3, '#e0d4b8'); p(c, b.x - 10, b.y + 2, '#e0d4b8');
-  // Backpapier für die Ausstechformen, kariertes Tuch für die Schalen
+  r(c, b.x - 16, b.y - 7, 32, 14, '#4a4e58'); r(c, b.x - 16, b.y - 7, 32, 1, '#7a7e88');
+  r(c, b.x - 14, b.y - 5, 28, 10, '#f4ecd8'); r(c, b.x - 14, b.y - 5, 28, 1, '#fffaf0');
+  // Backpapier für die Formen, Leinenläufer für die Schalen
   const fy0 = FORM_Y() - 13;
-  r(c, 2, fy0, W - 4, 26, '#f6efe0'); r(c, 2, fy0 + 26, W - 4, 1, 'rgba(60,30,10,0.35)'); r(c, 2, fy0, W - 4, 1, '#fffaf2');
-  for (let i = 0; i < 40; i++) p(c, 3 + Math.floor(hash(i + 300) * (W - 6)), fy0 + 1 + Math.floor(hash(i + 310) * 24), '#ffffff');   // Mehlstaub
-  for (let i = 0; i < 12; i++) p(c, 3 + Math.floor(hash(i + 320) * (W - 6)), fy0 + 1 + Math.floor(hash(i + 330) * 24), '#e8dcc4');
+  r(c, 2, fy0, W - 4, 26, '#f4ecdc'); r(c, 2, fy0 + 26, W - 4, 1, 'rgba(50,25,10,0.35)'); r(c, 2, fy0, W - 4, 1, '#fffaf2');
+  for (let i = 0; i < 20; i++) p(c, 3 + Math.floor(hash(i + 300) * (W - 6)), fy0 + 1 + Math.floor(hash(i + 310) * 24), '#ffffff');
   const sy0 = SCHALE_Y() - 13;
-  for (let y = 0; y < 26; y++) for (let x = 2; x < W - 2; x++) {
-    const a = (x >> 2) % 2, bq = ((y + 1) >> 2) % 2;
-    p(c, x, sy0 + y, a && bq ? '#c84848' : a || bq ? '#e8b0a8' : '#f6eee6');
-  }
-  r(c, 2, sy0 + 26, W - 4, 1, 'rgba(60,30,10,0.35)');
-  // Licht: Abends dunkler, dann die Lampe warm darüber; tagsüber kühles Fensterlicht
-  if (nacht) { c.fillStyle = 'rgba(60,30,50,0.2)'; c.fillRect(0, 0, W, H); }
-  schein(c, LAMPE.x, LAMPE.y + 2, 130, '255,186,100', nacht ? 0.34 : 0.18);
-  schein(c, LAMPE.x - 30, H * 0.5, 100, '255,170,90', nacht ? 0.16 : 0.07);   // Lichtfleck auf dem Tisch
-  schein(c, 60, H * 0.35, 120, '255,200,140', nacht ? 0.08 : 0.05);   // Grundwärme
-  if (!nacht) schein(c, 25, 22, 60, '200,225,255', 0.18);
-  schein(c, 25, 33, 26, '255,190,100', nacht ? 0.35 : 0.12);   // Schwibbogen
-  // Weiche dunkle Ecken (gemütlich, lenkt den Blick zur Mitte)
-  const v = c.createRadialGradient(W / 2, H * 0.45, H * 0.3, W / 2, H * 0.45, H * 0.85);
-  v.addColorStop(0, 'rgba(40,20,10,0)'); v.addColorStop(1, `rgba(50,24,10,${nacht ? 0.3 : 0.18})`);
-  c.fillStyle = v; c.fillRect(0, 0, W, H);
+  r(c, 2, sy0, W - 4, 26, '#e8dcc4'); r(c, 2, sy0 + 1, W - 4, 1, '#c84040'); r(c, 2, sy0 + 24, W - 4, 1, '#c84040'); r(c, 2, sy0 + 26, W - 4, 1, 'rgba(50,25,10,0.35)');
+  for (let i = 0; i < 30; i++) p(c, 3 + Math.floor(hash(i + 340) * (W - 6)), sy0 + 3 + Math.floor(hash(i + 350) * 20), '#ddd0b6');   // Leinenstruktur
   c = ziel;
+
+  // Lichtkarte: dämmriger Grund, helle Inseln - wird über die fertige Szene multipliziert
+  lichtKarte = document.createElement('canvas');
+  lichtKarte.width = W; lichtKarte.height = H;
+  const l = lichtKarte.getContext('2d');
+  l.fillStyle = nacht ? '#4a3a4e' : '#9c887a'; l.fillRect(0, 0, W, H);
+  const insel = (x, y, rad, farbe, a) => {
+    const g = l.createRadialGradient(x, y, 0, x, y, rad);
+    g.addColorStop(0, `rgba(${farbe},${a})`); g.addColorStop(0.5, `rgba(${farbe},${(a * 0.45).toFixed(3)})`); g.addColorStop(1, `rgba(${farbe},0)`);
+    l.save(); l.globalCompositeOperation = 'lighter'; l.fillStyle = g; l.fillRect(x - rad, y - rad, rad * 2, rad * 2); l.restore();
+  };
+  insel(LAMPE.x, LAMPE.y + 4, 90, '255,226,170', nacht ? 0.75 : 0.5);          // Lampe
+  insel(LAMPE.x, H * 0.66, 130, '255,214,160', nacht ? 0.55 : 0.4);           // Arbeitsfläche darunter
+  insel(25, 22, 44, nacht ? '120,140,200' : '200,220,255', nacht ? 0.25 : 0.55);   // Fenster
+  insel(25, 32, 26, '255,190,110', nacht ? 0.5 : 0.25);                       // Schwibbogen
+  insel(STERN.x, STERN.y, 50, '255,200,120', nacht ? 0.55 : 0.3);            // Herrnhuter Stern
+  insel(155, H * 0.5, 60, '255,170,110', nacht ? 0.2 : 0.12);                // Ofenecke
 }
 
-/** Was flackert und funkelt (jedes Bild): Kerzen, Lichterkette, Windlicht. */
+/** Was flackert und funkelt (jedes Bild, NACH der Lichtkarte): Kerzen, Lichterkette, Lampe. */
 function lichter(t, nacht) {
+  schein(c, LAMPE.x, LAMPE.y, 16, '255,230,170', nacht ? 0.55 : 0.35);
+  schein(c, STERN.x, STERN.y, 14 + Math.sin(t * 1.5) * 1.5, '255,210,130', nacht ? 0.6 : 0.35);
   for (const [kx, ky] of KERZEN) {
     const fl = Math.sin(t * 9 + kx) > 0 ? 1 : 0;
-    p(c, kx, ky - 4, '#ffd040'); p(c, kx, ky - 5 - fl, '#fff4b0'); p(c, kx + (fl ? 0 : 1) - 0, ky - 5, '#ff9a30');
-    schein(c, kx, ky - 5, 6, '255,200,110', (nacht ? 0.35 : 0.15) + fl * 0.05);
+    p(c, kx, ky - 4, '#ffd040'); p(c, kx, ky - 5 - fl, '#fff4b0');
+    schein(c, kx, ky - 5, 7, '255,200,110', (nacht ? 0.45 : 0.25) + fl * 0.06);
   }
   for (let x = 3; x < W; x += 6) {
     if (x % 30 === 0) continue;
@@ -598,7 +555,7 @@ function lichter(t, nacht) {
     const f = ['#ffe060', '#ff6a6a', '#8ad0ff', '#9aff8a'][(x / 6 | 0) % 4];
     const an = Math.sin(t * 2.2 + x * 0.7) > -0.6;
     p(c, x, y, an ? f : ton(f, -0.45));
-    if (an) schein(c, x, y, 5, f === '#ffe060' ? '255,224,96' : f === '#ff6a6a' ? '255,106,106' : f === '#8ad0ff' ? '138,208,255' : '154,255,138', nacht ? 0.35 : 0.15);
+    if (an) schein(c, x, y, 5, f === '#ffe060' ? '255,224,96' : f === '#ff6a6a' ? '255,106,106' : f === '#8ad0ff' ? '138,208,255' : '154,255,138', nacht ? 0.4 : 0.22);
   }
 }
 
@@ -642,8 +599,6 @@ function ofen(t) {
   if (drin) {
     const a = Math.min(1, w.ofen / ofenDauer()), m = bx + Math.min(bb - 1, Math.round(bb * a));
     r(c, m, by - 2, 1, 8, '#ffffff');
-    // Glut strahlt in die Küche
-    schein(c, fx + fb / 2, fy + fh / 2, 46, '255,140,60', (nacht ? 0.32 : 0.18) + fl * 0.05);
     // Im goldenen Bereich blinkt der Ofen auf - jetzt tippen!
     if (a >= von && a <= bis && Math.floor(t * 8) % 2) { c.strokeStyle = '#ffe060'; c.lineWidth = 1; c.strokeRect(o.x - 1.5, o.y - 9.5, o.b + 3, o.h + 11); }
   }
@@ -720,7 +675,6 @@ function zeichne(t) {
   const nacht = Z.licht().hell < 0.5;
   baueKulisse(nacht);
   c.drawImage(kulisse, 0, 0);
-  lichter(t, nacht);
   const k = g.kunde, th = THEKE();
   // Kunde hinter der Theke (die Theke verdeckt die Beine)
   if (k) {
@@ -747,6 +701,11 @@ function zeichne(t) {
   else if (w) { const o = OFEN(); zeichnePlaetzchen(c, o.x + 12, o.y + o.h - 32, w.form, w.grad, null, 2); }   // auf dem Rost (12.10.: neuer Ofen, Fenster höher)
   // Rauch beim Verbrennen
   for (const s of g.rauch) if (s.t > 0) { const a = s.t / 1.2; c.fillStyle = `rgba(70,70,76,${(0.7 * (1 - a)).toFixed(2)})`; c.fillRect(Math.round(s.x + Math.sin(s.t * 6) * 2), Math.round(s.y - a * 24), 3 + Math.round(a * 3), 3 + Math.round(a * 3)); }
+  // Licht (12.10.): die ganze Szene mit der Lichtkarte multiplizieren - dämmrig,
+  // mit hellen Inseln -, danach leuchten die Quellen selbst darüber
+  c.save(); c.globalCompositeOperation = 'multiply'; c.drawImage(lichtKarte, 0, 0); c.restore();
+  lichter(t, nacht);
+  if (w && w.phase === 'ofen') { const o = OFEN(), fl = Math.sin(t * 9) * 0.5 + 0.5; schein(c, o.x + o.b / 2, o.y + o.h / 2 - 3, 56, '255,140,60', (nacht ? 0.42 : 0.3) + fl * 0.06); }
   // Hinweis, was dran ist
   // Was dran ist - direkt über der Reihe, in der man tippen muss (11.10.: oben
   // auf dem Regal war es klein und schlecht zu lesen)
