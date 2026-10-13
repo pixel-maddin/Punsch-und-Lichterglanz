@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610131706';
-import * as Z from './zeit.js?v=202610131706';
-import { neueFarben } from './pixel.js?v=202610131706';
+import * as C from './config.js?v=202610131806';
+import * as Z from './zeit.js?v=202610131806';
+import { neueFarben } from './pixel.js?v=202610131806';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -316,6 +316,14 @@ export const offlineStunden = () => nachTag(C.OFFLINE_JE_TAG.stunden);
 /** Gilt der Chef-Bonus schon? Erst ab dem Hinweis „Du bist der Chef!“ (13.10.) - vorher gibt es ihn noch nicht. */
 export const chefBonus = () => !!(st.chefBonus || (st.tipps && st.tipps.chef));
 export const wichtelTempo = () => chefAktiv() ? (chefBonus() ? C.CHEF_TEMPO : 1) : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() : 1;
+/**
+ * Spül- und Nachfüll-Wichtel (13.10.): solange die App offen ist, nie langsamer
+ * als normal - gemeldet zweimal „Wichtel füllen nicht mehr nach": Nach 5 Minuten
+ * ohne Tipp am Tresen arbeiteten sie mit 15 % (Nachfüllen 33 statt 5 s). Das
+ * gemütliche Tempo gilt nur noch fürs Bedienen (der Ertrag bleibt fair).
+ */
+export const helferTempo = () => Math.max(1, wichtelTempo());
+export const wichtelRuhen = () => !chefAktiv() && lauf.chefT >= C.INAKTIV_AB;
 
 export const hatWichtel = () => ['spuel', 'servier', 'nachfuell', 'crepe_w'].some((id) => hat(id));
 
@@ -1030,6 +1038,7 @@ export function update(dt) {
   lauf.chefT += dt;
   const G = lauf.gaeste;
   const wt = dt * wichtelTempo();   // Wichtel-Zeit: schneller, wenn du da bist
+  const ht = dt * helferTempo();    // Spülen und Nachfüllen: nie langsamer als normal
 
   // Großbestellung: nur wenn du da bist und der Stand zwei Plätze hat -
   // sonst blockiert sie den einzigen Platz
@@ -1163,7 +1172,7 @@ export function update(dt) {
   }
   // Spül-Wichtel: stellt nach und nach saubere Gläser aufs Tablett
   if (hat('spuel') && lauf.hand.length < handMax()) {
-    lauf.spuelT = (lauf.spuelT || 0) + wt;
+    lauf.spuelT = (lauf.spuelT || 0) + ht;
     if (lauf.spuelT >= C.SPUEL_ZEIT) { lauf.hand.push({ art: 'glas' }); lauf.spuelT = 0; hooks.ton('glas'); }
   } else lauf.spuelT = 0;
 
@@ -1176,7 +1185,7 @@ export function update(dt) {
     if (p.art === 'platte') continue;
     if ((st.toepfe[p.id] || 0) > 0) { lauf.nachfuellT[p.id] = 0; continue; }
     if (!nf) continue;
-    lauf.nachfuellT[p.id] = (lauf.nachfuellT[p.id] || 0) + wt;
+    lauf.nachfuellT[p.id] = (lauf.nachfuellT[p.id] || 0) + ht;
     if (lauf.nachfuellT[p.id] >= C.NACHFUELL_ZEIT[nf]) {
       st.toepfe[p.id] = topfMax(); lauf.nachfuellT[p.id] = 0; lauf.fuellen[p.id] = 0;
       lauf.gefuellt[p.id] = 0.6;   // der Wichtel hüpft davon

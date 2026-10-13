@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610131706';
-import * as Z from './zeit.js?v=202610131706';
-import * as S from './spiel.js?v=202610131706';
-import { FASSADEN } from './config.js?v=202610131706';
-import * as C from './config.js?v=202610131706';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610131806';
+import * as Z from './zeit.js?v=202610131806';
+import * as S from './spiel.js?v=202610131806';
+import { FASSADEN } from './config.js?v=202610131806';
+import * as C from './config.js?v=202610131806';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1783,6 +1783,11 @@ function stand(c, G, w, t, L) {
   // Wichtel, die schon mitarbeiten, schauen über den Tresen
   const helfer = ['spuel', 'nachfuell', 'servier', 'crepe_w', 'kasse'].filter((id) => S.zeigt(id));
   helfer.forEach((id, i) => wichtelKlein(c, x0 + 10 + i * 8, G - 21, t, i));
+  // Gemütliche Pause (du warst 5 Minuten nicht da): kleine „z" steigen auf
+  if (helfer.length && S.wichtelRuhen()) for (let i = 0; i < 2; i++) {
+    const a = (t * 0.6 + i * 0.5) % 1, zx = x0 + 12 + i * 12 + Math.round(a * 4), zy = G - 32 - Math.round(a * 8);
+    if (a < 0.85) { r(c, zx, zy, 3, 1, '#e8eef8'); p(c, zx + 1, zy + 1, '#e8eef8'); r(c, zx, zy + 2, 3, 1, '#e8eef8'); }
+  }
   // Pfosten (die Zuckerstangen stehen seit dem 29.09. im Vorgarten)
   for (const px of [x0, x1 - 2]) r(c, px, markise, 2, G - 10 - markise, '#7a5230');
   // Ausbaustufen des Stands: Holzdach, dann Laternen und Grün, dann Stern und Lichter

@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610131706';
-import * as S from './spiel.js?v=202610131706';
-import * as Z from './zeit.js?v=202610131706';
-import * as T from './ton.js?v=202610131706';
-import * as LI from './lichtung.js?v=202610131706';
-import * as CB from './christbaum.js?v=202610131706';
-import * as KA from './karte.js?v=202610131706';
-import * as SB from './schlitten.js?v=202610131706';
-import * as EB from './schlittschuh.js?v=202610131706';
-import * as BS from './backstube.js?v=202610131706';
-import * as UI from './ui.js?v=202610131706';
-import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131706';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131706';
-import * as Lernen from './lernen.js?v=202610131706';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131706';
-import * as A from './auftraege.js?v=202610131706';
-import * as E from './erfolge.js?v=202610131706';
-import * as ZL from './ziele.js?v=202610131706';
+import * as C from './config.js?v=202610131806';
+import * as S from './spiel.js?v=202610131806';
+import * as Z from './zeit.js?v=202610131806';
+import * as T from './ton.js?v=202610131806';
+import * as LI from './lichtung.js?v=202610131806';
+import * as CB from './christbaum.js?v=202610131806';
+import * as KA from './karte.js?v=202610131806';
+import * as SB from './schlitten.js?v=202610131806';
+import * as EB from './schlittschuh.js?v=202610131806';
+import * as BS from './backstube.js?v=202610131806';
+import * as UI from './ui.js?v=202610131806';
+import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131806';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131806';
+import * as Lernen from './lernen.js?v=202610131806';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131806';
+import * as A from './auftraege.js?v=202610131806';
+import * as E from './erfolge.js?v=202610131806';
+import * as ZL from './ziele.js?v=202610131806';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -89,6 +89,9 @@ cv.addEventListener('pointerdown', (e) => {
   T.init();
   if (UI.fensterOffen()) return;
   if (UI.panelOffen()) { UI.schliesseBlatt(); return; }
+  // Jeder Tipp im Spiel heißt „ich bin da" - nicht nur am Tresen (13.10.: wer nur
+  // am Haus tippte oder zuschaute, hatte nach 5 Minuten langsame Wichtel)
+  S.lauf.chefT = Math.min(S.lauf.chefT, C.CHEF_ZEIT);
   const rc = cv.getBoundingClientRect();
   const x = (e.clientX - rc.left) / rc.width * C.B;
   const y = (e.clientY - rc.top) / rc.height * H;

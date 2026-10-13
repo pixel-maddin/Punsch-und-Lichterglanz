@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610131706';
-import * as Z from './zeit.js?v=202610131706';
-import * as T from './ton.js?v=202610131706';
-import * as MH from './minihud.js?v=202610131706';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610131706';
+import * as C from './config.js?v=202610131806';
+import * as Z from './zeit.js?v=202610131806';
+import * as T from './ton.js?v=202610131806';
+import * as MH from './minihud.js?v=202610131806';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610131806';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
