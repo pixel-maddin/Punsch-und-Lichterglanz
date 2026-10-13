@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610130845';
-import * as S from './spiel.js?v=202610130845';
-import * as Z from './zeit.js?v=202610130845';
-import * as FEIN from './fein.js?v=202610130845';
-import * as T from './ton.js?v=202610130845';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610130845';
+import * as C from './config.js?v=202610130918';
+import * as S from './spiel.js?v=202610130918';
+import * as Z from './zeit.js?v=202610130918';
+import * as FEIN from './fein.js?v=202610130918';
+import * as T from './ton.js?v=202610130918';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610130918';
 
 const $ = (s) => document.querySelector(s);
 
@@ -1029,6 +1029,27 @@ function zeichne(t, dt) {
     }
     // Fenster und Laternen noch einmal obendrauf, damit sie aus dem Hof strahlen
     if (nacht > 0.25) for (const q of lichterOffen) p(c, q.x, q.y, q.f);
+  }
+  // Ohne Schilder (13.10.): ein leuchtender Punkt je offenem Ort, wo sonst
+  // das Schild hängt - für den Überblick. Rot, wenn das Minispiel noch neu ist.
+  if (S.st.karteOhneText) {
+    for (const o of ORTE) {
+      if (zu.includes(o) || o.id === hervorId) continue;   // ein hervorgehobener Ort hat sein Schild
+      const [sdx, sdy] = o.schild || [0, 0];
+      const px2 = Math.round(o.x + sdx), py2 = Math.round(yPx(o) + 7 + sdy);
+      const neu = o.spiel && !S.miniRekord(o.spiel);
+      const atem = 0.75 + Math.sin(t * 2.2 + o.x * 0.3) * 0.25;
+      const rgb = neu ? '255,110,90' : '255,214,110';
+      const g = c.createRadialGradient(px2, py2, 0, px2, py2, 7);
+      g.addColorStop(0, `rgba(${rgb},${(0.9 * atem).toFixed(3)})`); g.addColorStop(0.4, `rgba(${rgb},${(0.35 * atem).toFixed(3)})`); g.addColorStop(1, `rgba(${rgb},0)`);
+      c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(px2 - 7, py2 - 7, 14, 14); c.restore();
+      // Runder Punkt (5 x 5) mit dunklem Rand, damit er auch auf Schnee steht
+      const rand = neu ? '#7a1a10' : '#6a4410', kern = neu ? '#ff6a50' : '#ffd040';
+      r(c, px2 - 1, py2 - 3, 3, 1, rand); r(c, px2 - 1, py2 + 3, 3, 1, rand); r(c, px2 - 3, py2 - 1, 1, 3, rand); r(c, px2 + 3, py2 - 1, 1, 3, rand);
+      p(c, px2 - 2, py2 - 2, rand); p(c, px2 + 2, py2 - 2, rand); p(c, px2 - 2, py2 + 2, rand); p(c, px2 + 2, py2 + 2, rand);
+      r(c, px2 - 1, py2 - 2, 3, 5, kern); r(c, px2 - 2, py2 - 1, 5, 3, kern);
+      p(c, px2 - 1, py2 - 1, '#ffffff'); p(c, px2, py2 - 1, '#fff6d0');
+    }
   }
   c.restore();
 }
