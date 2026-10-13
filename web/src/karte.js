@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610131429';
-import * as S from './spiel.js?v=202610131429';
-import * as Z from './zeit.js?v=202610131429';
-import * as FEIN from './fein.js?v=202610131429';
-import * as T from './ton.js?v=202610131429';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610131429';
+import * as C from './config.js?v=202610131434';
+import * as S from './spiel.js?v=202610131434';
+import * as Z from './zeit.js?v=202610131434';
+import * as FEIN from './fein.js?v=202610131434';
+import * as T from './ton.js?v=202610131434';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610131434';
 
 const $ = (s) => document.querySelector(s);
 
@@ -139,9 +139,21 @@ function baueSchilder(hervor) {
   }
   const neu = S.st.neu || {};
   for (const o of ORTE) {
-    // Noch nicht aufgegangenes Minispiel (10.10.): nur die Grafik, kein
-    // Schild und keine Tippfläche - es soll sich erst zeigen, wenn es dran ist
-    if (!S.ortOffen(o)) continue;   // auch Läden gehen mit der Einführung auf (11.10.)
+    // Noch nicht offen (seit 13.10. ein leerer Platz mit „?"-Schild): kein
+    // Namensschild, aber das Holzschild ist antippbar und sagt kurz Bescheid
+    if (!S.ortOffen(o)) {
+      const f = document.createElement('button');
+      f.className = 'ort-flaeche';
+      f.setAttribute('aria-label', 'Noch nicht freigeschaltet');
+      f.style.left = `calc(var(--px) * ${o.x - 16})`;
+      f.style.top = `calc(var(--px) * ${yPx(o) - 20 + vers()})`;
+      f.onclick = () => {
+        T.spiele('klick');
+        S.hooks.toast(o.spiel ? 'Hier kommt bald ein neues Minispiel hin - es wird noch freigeschaltet.' : 'Wird noch freigeschaltet - spiel weiter, dann geht es hier auf.', 'hinweis');
+      };
+      box.appendChild(f);
+      continue;
+    }
     const b = document.createElement('button');
     b.className = 'ort' + (o.bald ? ' bald' : '') + (o.id === hervor ? ' hervor' : '') + (o.id === 'haus' ? ' zuhause' : '');
     const [sdx, sdy] = o.schild || [0, 0];
@@ -895,11 +907,13 @@ function schneewiese(x, y, P, winter) {
 }
 /** Ein Ort, der noch nicht offen ist (13.10.): leerer Platz, Holzschild mit „?". */
 function leererPlatz(x, y, P, winter) {
-  r(c, x - 1, y - 9, 2, 9, '#6a4428'); r(c, x, y - 9, 1, 9, '#8a5a32');           // Pfosten
-  r(c, x - 5, y - 13, 11, 6, '#a8703a'); r(c, x - 5, y - 13, 11, 1, '#c89058'); r(c, x - 5, y - 8, 11, 1, '#6a4428');   // Brett
-  const q = [[-1, -12], [0, -12], [1, -11], [0, -10], [0, -8]];   // Fragezeichen
-  for (const [dx, dy] of q) p(c, x + dx, y + dy + 1, '#3a2414');
-  if (winter) r(c, x - 5, y - 14, 11, 1, '#ffffff');
+  // 13.10.: höher (Brett 9 statt 6 Zeilen) - das Fragezeichen war nur halb zu sehen
+  r(c, x - 1, y - 9, 2, 9, '#6a4428'); r(c, x, y - 9, 1, 9, '#8a5a32');            // Pfosten
+  r(c, x - 5, y - 18, 11, 9, '#a8703a'); r(c, x - 5, y - 18, 11, 1, '#c89058'); r(c, x - 5, y - 10, 11, 1, '#6a4428');   // Brett
+  r(c, x - 5, y - 18, 1, 9, '#8a5a32'); r(c, x + 5, y - 18, 1, 9, '#8a5a32');
+  // Fragezeichen, 3 x 5
+  for (const [dx, dy] of [[-1, -16], [0, -16], [1, -16], [1, -15], [0, -14], [0, -12]]) p(c, x + dx, y + dy, '#3a2414');
+  if (winter) r(c, x - 5, y - 19, 11, 1, '#ffffff');
 }
 /** Backstube (10.10.): Fachwerkhaus mit warmem Schaufenster und Brezelschild. */
 function backstube(x, y, P, winter) {
