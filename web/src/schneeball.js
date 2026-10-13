@@ -13,12 +13,12 @@
  * Aufbau wie lichtung.js: eigenes Canvas #miniCv, 180 Pixel breit, Kopfzeile
  * und Texte über minihud.js, Licht über licht.js.
  */
-import * as C from './config.js?v=202610131102';
-import * as Z from './zeit.js?v=202610131102';
-import * as T from './ton.js?v=202610131102';
-import * as MH from './minihud.js?v=202610131102';
-import * as L from './licht.js?v=202610131102';
-import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610131102';
+import * as C from './config.js?v=202610131110';
+import * as Z from './zeit.js?v=202610131110';
+import * as T from './ton.js?v=202610131110';
+import * as MH from './minihud.js?v=202610131110';
+import * as L from './licht.js?v=202610131110';
+import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610131110';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -32,6 +32,9 @@ const ARTEN = {
 const HOCH = { grummel: 34, helm: 36, boss: 34, wichtel: 26 };   // sichtbare Höhe über der Fußlinie
 const WALL_H = 16, WALL_B = 38;
 const AUF = 0.16;   // s zum Auf- und Abtauchen
+// Anfliegende Schneebälle (13.10., Nutzerwunsch): Flugzeit (Normal) und Größe
+// am Ende. Antippen zerschlägt sie - dafür gibt es ABWEHR Punkte.
+const FLUG = 1.25, FLUG_GROSS = 26, ABWEHR = 5;
 
 let cv = null, c = null, H = 340;
 let stufe = C.MINI_STUFEN[1];
@@ -66,7 +69,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1) {
 }
 function neueRunde(t0) {
   return { t: t0, punkte: 0, kette: 1, ketteT: 0, plaetze: waelle().map((w) => ({ ...w, wer: null })), spawnT: 0.5,
-    baelle: [], flecken: [], puffs: [], texte: [], treffer: 0, wichtel: 0, abbekommen: 0, aus: false };
+    baelle: [], flecken: [], puffs: [], texte: [], anflug: [], wurfT: 3, treffer: 0, wichtel: 0, abbekommen: 0, abgewehrt: 0, aus: false };
 }
 export function schliesse() {
   spiel = null;
@@ -106,10 +109,30 @@ function hoehe(w) {
 /** Wo steht die Figur (Fußlinie)? Oben schaut sie mit dem Oberkörper über den Wall. */
 const fuss = (pl, w) => pl.y - WALL_H + 4 + Math.round((1 - hoehe(w)) * (HOCH[w.art] + 8));
 
+/** Wo ist ein anfliegender Ball gerade, und wie groß? Erst klein und weit weg, am Ende groß vor dir. */
+function anflugPos(a) {
+  const k = Math.min(1, a.t / a.dauer), e = k * k;
+  return { x: a.x0 + (a.x1 - a.x0) * e, y: a.y0 + (a.y1 - a.y0) * e - Math.sin(k * Math.PI) * 26 * (1 - k), r: 1.5 + e * FLUG_GROSS / 2 };
+}
+
 /** Tipp in Feldkoordinaten. Exportiert für den Autopiloten (`messe`). */
 export function tippeAuf(x, y) {
   const g = spiel;
   if (!g || g.t < 0 || g.aus) return;
+  // Zuerst: ein anfliegender Schneeball? Der größte (nächste) gewinnt
+  let ball = null;
+  for (const a of g.anflug) { const p2 = anflugPos(a); if (Math.hypot(x - p2.x, y - p2.y) <= p2.r + 5 && (!ball || p2.r > anflugPos(ball).r)) ball = a; }
+  if (ball) {
+    const p2 = anflugPos(ball);
+    g.anflug.splice(g.anflug.indexOf(ball), 1);
+    g.abgewehrt++;
+    const pkt = Math.round(ABWEHR * stufe.punkte);
+    g.punkte += pkt;
+    for (let k = 0; k < 3; k++) g.puffs.push({ x: p2.x + (k - 1) * p2.r * 0.4, y: p2.y + (k % 2) * 3, t: -k * 0.04, gr: Math.max(1, p2.r / 6) });
+    g.texte.push({ x: p2.x, y: p2.y - p2.r - 6, text: 'ABGEWEHRT! +' + pkt, farbe: '#bfe6ff', t: 0 });
+    T.spiele('schnee');
+    return;
+  }
   // Vorne zuerst: wer weiter vorn steht, verdeckt die hinteren
   let ziel = null;
   for (const pl of [...g.plaetze].sort((a, b) => b.reihe - a.reihe)) {
@@ -178,29 +201,55 @@ function schritt(dt) {
       setTimeout(() => { if (spiel === g && fertig) fertig(g.punkte, g.treffer, g.wichtel); }, 900);
     }
   }
+  // Ab und zu wirft einer, der gerade oben ist - auch wenn man schnell trifft
+  // (sonst bekam ein guter Spieler nie einen Ball zu sehen)
+  if (g.t >= 0 && !g.aus) {
+    g.wurfT -= dt;
+    if (g.wurfT <= 0) {
+      const oben = g.plaetze.filter((x) => x.wer && x.wer.art !== 'wichtel' && x.wer.getroffen < 0 && hoehe(x.wer) > 0.8);
+      if (oben.length) {
+        const pl = oben[Math.floor(Math.random() * oben.length)];
+        const f = fuss(pl, pl.wer);
+        g.anflug.push({ x0: pl.x - 12, y0: f - 15, x1: zufall(34, W - 34), y1: zufall(H * 0.42, H * 0.78), t: 0, dauer: FLUG / stufe.tempo });
+        pl.wer.wirft = 0.3;
+        T.spiele('greifen');
+        g.wurfT = zufall(3.5, 6) / stufe.tempo;
+      } else g.wurfT = 0.3;
+    }
+  }
   for (const pl of g.plaetze) {
     const w = pl.wer;
     if (!w) continue;
     w.t += dt;
+    if (w.wirft > 0) w.wirft -= dt;
     if (w.helmWeg != null) w.helmWeg += dt;
     if (w.getroffen >= 0) { w.getroffen += dt; if (w.getroffen > 0.6) pl.wer = null; continue; }
     // Zu lange oben gelassen: Der Grummel wirft zurück (Wichtel winken nur)
     if (w.art !== 'wichtel' && !w.geworfen && w.t > w.oben && !g.aus) {
       w.geworfen = true;
       if (Math.random() < 0.45) {
-        g.flecken.push({ x: zufall(30, W - 30), y: zufall(H * 0.3, H * 0.8), t: 0, gr: zufall(16, 24) });
-        g.kette = 1; g.ketteT = 0; g.abbekommen++;
-        T.spiele('schnee');
+        // Der Ball fliegt erst auf dich zu und wird dabei größer - antippen zerschlägt ihn
+        const f = fuss(pl, w);
+        g.anflug.push({ x0: pl.x - 12, y0: f - 15, x1: zufall(34, W - 34), y1: zufall(H * 0.42, H * 0.78), t: 0, dauer: FLUG / stufe.tempo });
+        T.spiele('greifen');
       }
     }
     if (w.t > w.oben + AUF * 2) pl.wer = null;
   }
+  // Anfliegende Bälle: am Ende klatschen sie aufs Bild
+  for (const a of g.anflug) a.t += dt;
+  for (const a of g.anflug.filter((a) => a.t >= a.dauer)) {
+    g.flecken.push({ x: a.x1, y: a.y1, t: 0, gr: zufall(18, 24) });
+    if (!g.aus) { g.kette = 1; g.ketteT = 0; g.abbekommen++; }
+    T.spiele('schnee');
+  }
+  g.anflug = g.anflug.filter((a) => a.t < a.dauer);
   for (const b of g.baelle) b.t += dt;
   g.baelle = g.baelle.filter((b) => b.t < 0.2);
   for (const f of g.flecken) f.t += dt;
   g.flecken = g.flecken.filter((f) => f.t < 1.6);
   for (const x of g.puffs) x.t += dt;
-  g.puffs = g.puffs.filter((x) => x.t < 0.3);
+  g.puffs = g.puffs.filter((x) => x.t < 0.35);
   for (const x of g.texte) x.t += dt;
   g.texte = g.texte.filter((x) => x.t < 0.9);
 }
@@ -210,7 +259,7 @@ function schritt(dt) {
  * Grummel getroffen wird, `treffer` = Anteil, der sitzt, `irrtum` = Anteil der
  * Würfe, die versehentlich einen Wichtel treffen. Gibt Punkte und Zähler zurück.
  */
-export function messe(reaktion = 0.45, treffer = 0.9, irrtum = 0.05, hoeheFeld = 340, stufeNr = 1) {
+export function messe(reaktion = 0.45, treffer = 0.9, irrtum = 0.05, hoeheFeld = 340, stufeNr = 1, abwehr = 0.6) {
   stufe = C.miniStufe('schnee', stufeNr);
   const altFertig = fertig, altH = H;
   H = hoeheFeld; fertig = null;
@@ -218,6 +267,8 @@ export function messe(reaktion = 0.45, treffer = 0.9, irrtum = 0.05, hoeheFeld =
   const dt = 1 / 60;
   while (!spiel.aus) {
     schritt(dt);
+    // Anfliegende Bälle: nach halber Flugzeit mit Wahrscheinlichkeit `abwehr` abgewehrt
+    for (const a of spiel.anflug) if (!a.gesehen && a.t > a.dauer * 0.5) { a.gesehen = true; if (Math.random() < abwehr) { const p2 = anflugPos(a); tippeAuf(p2.x, p2.y); break; } }
     for (const pl of spiel.plaetze) {
       const w = pl.wer;
       if (!w || w.getroffen >= 0 || w.art === 'wichtel' || w.t < reaktion || hoehe(w) < 0.5) continue;
@@ -232,7 +283,7 @@ export function messe(reaktion = 0.45, treffer = 0.9, irrtum = 0.05, hoeheFeld =
       if (pl) tippeAuf(pl.x, fuss(pl, pl.wer) - 10);
     }
   }
-  const erg = { punkte: spiel.punkte, treffer: spiel.treffer, wichtel: spiel.wichtel, abbekommen: spiel.abbekommen };
+  const erg = { punkte: spiel.punkte, treffer: spiel.treffer, wichtel: spiel.wichtel, abbekommen: spiel.abbekommen, abgewehrt: spiel.abgewehrt };
   spiel = null; fertig = altFertig; H = altH;
   return erg;
 }
@@ -319,7 +370,8 @@ function figur(pl, w, t) {
     r(c, pl.x + 9, f - 18, 8, 9, '#8a6a3a'); r(c, pl.x + 10, f - 20, 6, 2, '#6a4a2a'); p(c, pl.x + 12, f - 21, '#c83a32'); p(c, pl.x + 14, f - 22, '#3a8a3a');
   }
   // Schneeball in der Hand, bereit zum Wurf
-  if (!getroffen) { r(c, pl.x - 13, f - 16, 3, 3, '#ffffff'); p(c, pl.x - 13, f - 14, '#c8d4e2'); }
+  if (!getroffen && w.wirft > 0) { r(c, pl.x - 13, f - 24, 2, 6, '#5a9a30'); }   // Arm hoch: gerade geworfen
+  else if (!getroffen) { r(c, pl.x - 13, f - 16, 3, 3, '#ffffff'); p(c, pl.x - 13, f - 14, '#c8d4e2'); }
   else { r(c, pl.x - 5, f - 30, 10, 5, '#ffffff'); p(c, pl.x - 6, f - 28, '#ffffff'); p(c, pl.x + 5, f - 27, '#ffffff'); }   // Schnee im Gesicht
 }
 
@@ -348,11 +400,6 @@ function zeichne(t) {
     const gr = Math.max(2, Math.round(5 - k * 3));
     r(c, x - gr / 2, y - gr / 2, gr, gr, '#ffffff'); p(c, x + gr / 2 - 1, y + gr / 2 - 1, '#c8d4e2');
   }
-  for (const f of g.puffs) {
-    const a = f.t / 0.3, rr = 2 + a * 7;
-    c.fillStyle = `rgba(255,255,255,${1 - a})`;
-    for (let k = 0; k < 8; k++) { const w = k / 8 * Math.PI * 2; c.fillRect(Math.round(f.x + Math.cos(w) * rr), Math.round(f.y + Math.sin(w) * rr * 0.6), 2, 2); }
-  }
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || '#ffe27a', 1); }
   for (const fl of flocken) {
     fl.y += fl.v / 60; if (fl.y > H) { fl.y = 0; fl.x = Math.random() * W; }
@@ -365,6 +412,27 @@ function zeichne(t) {
     inseln: [{ x: W - 14, y: H * 0.4, r: 60, a: 0.8 }],
   });
   if (li.hell < 0.9) { r(c, W - 15, H * 0.4 - 10, 3, 3, '#ffe090'); L.schein(c, W - 14, H * 0.4 - 9, 10, '255,210,130', 0.6 * (1 - li.hell)); }
+  // Anfliegende Schneebälle (über dem Licht - sie sind ja vor dir): runder
+  // Ball mit Schattenseite, ein heller Lichtpunkt, bläulicher Rand
+  for (const a of g.anflug) {
+    const p2 = anflugPos(a), rr = p2.r, cx = Math.round(p2.x), cy = Math.round(p2.y), R = Math.ceil(rr);
+    for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
+      const d = Math.hypot(dx, dy);
+      if (d > rr) continue;
+      const rand = d > rr - 1.2, schatten = (dx + dy) / (rr * 1.6);
+      p(c, cx + dx, cy + dy, rand ? '#9ab0c8' : schatten > 0.35 ? '#c8d6e6' : schatten > 0 ? '#e6eef6' : '#ffffff');
+    }
+    if (rr > 4) { r(c, cx - Math.round(rr * 0.4), cy - Math.round(rr * 0.45), Math.max(1, Math.round(rr / 5)), Math.max(1, Math.round(rr / 5)), '#ffffff'); }
+    // Kurz vor dem Aufprall blinkt ein roter Ring: schnell antippen!
+    if (a.t > a.dauer * 0.7 && Math.floor(a.t * 12) % 2) { c.strokeStyle = 'rgba(255,90,80,0.8)'; c.lineWidth = 1; c.beginPath(); c.arc(cx + 0.5, cy + 0.5, rr + 2, 0, Math.PI * 2); c.stroke(); }
+  }
+  // Schneewolken: daneben geworfen (klein) oder abgewehrter Ball (groß, `gr`)
+  for (const f of g.puffs) {
+    if (f.t < 0) continue;
+    const a = Math.min(1, f.t / 0.35), gr = f.gr || 1, rr = (2 + a * 7) * gr, s2 = Math.max(2, Math.round(2 * gr));
+    c.fillStyle = `rgba(255,255,255,${(1 - a).toFixed(2)})`;
+    for (let k = 0; k < 10; k++) { const w = k / 10 * Math.PI * 2 + gr; c.fillRect(Math.round(f.x + Math.cos(w) * rr), Math.round(f.y + Math.sin(w) * rr * 0.7), s2, s2); }
+  }
   // Getroffen: weißer Fleck auf dem Bild, der langsam abrutscht (über dem Licht)
   for (const f of g.flecken) {
     const a = f.t < 1.1 ? 1 : 1 - (f.t - 1.1) / 0.5, y = f.y + f.t * 8;
