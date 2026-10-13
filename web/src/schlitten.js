@@ -10,16 +10,16 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610131019';
-import * as Z from './zeit.js?v=202610131019';
-import * as T from './ton.js?v=202610131019';
-import * as MH from './minihud.js?v=202610131019';
-import * as L from './licht.js?v=202610131019';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610131019';
+import * as C from './config.js?v=202610131102';
+import * as Z from './zeit.js?v=202610131102';
+import * as T from './ton.js?v=202610131102';
+import * as MH from './minihud.js?v=202610131102';
+import * as L from './licht.js?v=202610131102';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610131102';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
-const LAENGE = 3900;            // Strecke in Pixeln (09.10.: 50 % länger, Nutzerwunsch)
+const LAENGE = 5850;            // Strecke in Pixeln (09.10.: 50 % länger, 13.10. noch einmal 50 % - Nutzerwunsch)
 const RAND = 14;                // Bäume am Rand: weiter geht es nicht
 const TEMPO = [60, 160], BESCHL = 18, CRASH_TEMPO = 20;
 const ARTEN = {

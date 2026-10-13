@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610131019';
-import * as Z from './zeit.js?v=202610131019';
-import { neueFarben } from './pixel.js?v=202610131019';
+import * as C from './config.js?v=202610131102';
+import * as Z from './zeit.js?v=202610131102';
+import { neueFarben } from './pixel.js?v=202610131102';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1205,7 +1205,18 @@ export function update(dt) {
       const h = lauf.hand[i];
       if (!h.vonWichtel || h.rest > 0 || h.brennT > 0) continue;
       const g = G.find((x) => x.id === h.fuer && x.am && !x.bedient && !x.gehen);
-      if (!g) { h.fuer = null; continue; }   // Gast weg: das Glas bleibt, passt vielleicht zum nächsten
+      if (!g) {
+        // Gast weg: Das Glas geht an den nächsten, der dasselbe will. Will es
+        // länger keiner, kippt der Wichtel es weg - sonst stand das Tablett
+        // irgendwann voll, und Spül- und Servier-Wichtel kamen nicht mehr
+        // dran (gemeldet 13.10.: Wichtel füllen nicht mehr nach).
+        const neu = G.find((x) => x.am && !x.bedient && !x.gehen && x.wunsch === h.id && !lauf.hand.some((o) => o.fuer === x.id));
+        if (neu) { h.fuer = neu.id; h.wartetT = 0; h.liegtT = 0; continue; }
+        h.fuer = null;
+        h.liegtT = (h.liegtT || 0) + dt;
+        if (h.liegtT >= C.WICHTEL_WEGKIPPEN) { lauf.hand.splice(i, 1); hooks.ton('ausguss'); }
+        continue;
+      }
       h.wartetT = (h.wartetT || 0) + dt;
       if (h.wartetT >= C.WICHTEL_WARTEN || !chefAktiv()) {
         lauf.hand.splice(i, 1);

@@ -90,6 +90,7 @@ export const TRESEN = [1, 2, 3];                 // Gäste gleichzeitig am Trese
 export const CREPE_ZEIT = 3.5;                   // Backzeit (s)
 export const SPUEL_ZEIT = 1.5;                   // Spül-Wichtel: alle so viele s ein Glas aufs Tablett
 export const WICHTEL_EINSCHENKEN = 0.8;          // s, die der Wichtel länger braucht als du (Glas holen, eingießen)
+export const WICHTEL_WEGKIPPEN = 15;           // s: ein Wichtel-Glas, das keiner mehr will, kippt er weg (sonst staute das Tablett, 13.10.)
 export const WICHTEL_WARTEN = 4;               // s, die ein eingeschenktes Glas auf dich wartet, bevor der Wichtel selbst serviert
 export const JUBEL_ZEIT = 0.375;                 // s Freudensprung, wenn du selbst bedienst (20 % flotter als 0,45)
 
@@ -334,9 +335,9 @@ export const ARTIKEL = [
 
   // --- Baumarkt: Stand ---
   { id: 'stand',   tab: 'baumarkt', gruppe: 'Am Stand', name: 'Stand ausbauen',    kosten: [120000, 480000, 1450000], stimmung: 5, bonus: { preis: 0.06 }, bonusJeStufe: true, luxusAb: 3, text: 'Stufe 1: Holzdach · Stufe 2: Laternen und Tannengrün · Stufe 3: goldener Stern und Lichter.' },
-  { id: 'tresen',  tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tresen verlängern', kosten: [500, 48000],        stimmung: 0, text: 'Ein Gast mehr gleichzeitig am Tresen.' },
+  { id: 'tresen',  tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tresen verlängern', kosten: [2700, 112000],        stimmung: 0, text: 'Ein Gast mehr gleichzeitig am Tresen.' },
   { id: 'topf',    tab: 'baumarkt', gruppe: 'Am Stand', name: 'Größere Töpfe',     kosten: [180, 3900, 136000], stimmung: 0, text: 'Mehr Portionen, seltener nachfüllen.' },
-  { id: 'tablett', tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tablett',           kosten: [2700, 112000],      stimmung: 0, text: 'Ein Ding mehr gleichzeitig in der Hand.' },
+  { id: 'tablett', tab: 'baumarkt', gruppe: 'Am Stand', name: 'Tablett',           kosten: [500, 48000],      stimmung: 0, text: 'Ein Ding mehr gleichzeitig in der Hand.' },
   // --- Baumarkt: Haus ---
   { id: 'strassenlaterne', tab: 'baumarkt', gruppe: 'Am Haus', name: 'Alte Straßenlaterne', kosten: 900, stimmung: 4, text: 'Gusseisern, mit vier Scheiben. Leuchtet, wenn es dunkel wird.' },
   { id: 'holz',     tab: 'baumarkt', gruppe: 'Am Haus', name: 'Holzstapel',       kosten: 1200,   stimmung: 3,  text: 'Brennholz an der Hauswand.' },
@@ -682,7 +683,7 @@ export const BAUM_DEKO = [
   { id: 'c_wald',     name: 'Lichterwald',            ab: 2700, stimmung: 7, text: 'Die Tannen hinter deinem Stand tragen Lichterketten.' },
 ];
 // Minispiel Schlittenberg (09.10.): im Wok den Hang hinunter, gegen die Zeit.
-export const BERG_DAUER = 60;     // s - wer bis dahin nicht im Ziel ist, bekommt nur die Sterne (45 bis die Piste länger wurde)
+export const BERG_DAUER = 75;     // s - wer bis dahin nicht im Ziel ist, bekommt nur die Sterne (45, dann 60; 75 seit der Piste vom 13.10.)
 export const BERG_STERN = 20;     // Punkte je Stern auf der Strecke
 export const BERG_ZIEL = 400;     // Punkte fürs Ankommen …
 export const BERG_JE_S = 40;      // … plus so viele je Sekunde, die noch übrig war

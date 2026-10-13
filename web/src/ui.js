@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610131019';
-import * as S from './spiel.js?v=202610131019';
-import * as Z from './zeit.js?v=202610131019';
-import * as T from './ton.js?v=202610131019';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131019';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131019';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131019';
-import * as A from './auftraege.js?v=202610131019';
-import * as E from './erfolge.js?v=202610131019';
-import * as ZL from './ziele.js?v=202610131019';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131019';
-import * as KA from './karte.js?v=202610131019';
-import { zeigeRueckblick } from './ereignis.js?v=202610131019';
-import { barbaraZweig } from './szene.js?v=202610131019';
-import * as SW from './schneeball.js?v=202610131019';
-import * as LI from './lichtung.js?v=202610131019';
-import * as CB from './christbaum.js?v=202610131019';
-import * as SB from './schlitten.js?v=202610131019';
-import * as EB from './schlittschuh.js?v=202610131019';
-import * as BS from './backstube.js?v=202610131019';
-import { alleSymbole } from './symbole.js?v=202610131019';
+import * as C from './config.js?v=202610131102';
+import * as S from './spiel.js?v=202610131102';
+import * as Z from './zeit.js?v=202610131102';
+import * as T from './ton.js?v=202610131102';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131102';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131102';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131102';
+import * as A from './auftraege.js?v=202610131102';
+import * as E from './erfolge.js?v=202610131102';
+import * as ZL from './ziele.js?v=202610131102';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131102';
+import * as KA from './karte.js?v=202610131102';
+import { zeigeRueckblick } from './ereignis.js?v=202610131102';
+import { barbaraZweig } from './szene.js?v=202610131102';
+import * as SW from './schneeball.js?v=202610131102';
+import * as LI from './lichtung.js?v=202610131102';
+import * as CB from './christbaum.js?v=202610131102';
+import * as SB from './schlitten.js?v=202610131102';
+import * as EB from './schlittschuh.js?v=202610131102';
+import * as BS from './backstube.js?v=202610131102';
+import { alleSymbole } from './symbole.js?v=202610131102';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1640,6 +1640,8 @@ export function oeffneMenue() {
   wert.textContent = stufe() === 0 ? 'aus' : stufe();
   liste.appendChild(regler);
   ton.appendChild(mk('Geräusche', S.st.ton.fx, () => { S.st.ton.fx = !S.st.ton.fx; T.setzeFx(S.st.ton.fx); S.speichere(); }));
+  // Nach den Startzielen: nächstes Ziel vorschlagen lassen oder selbst erkunden (13.10.)
+  if (ZL.fertig()) ton.appendChild(mk('Nächstes Ziel zeigen', S.st.zieleWeiter === true, () => { S.st.zieleWeiter = S.st.zieleWeiter !== true; S.speichere(); zielLeiste(); }));
   liste.appendChild(ton);
 
   const zeile = el('div', 'schalter');
@@ -1818,6 +1820,17 @@ export function waehleModus(fertig) {
     ${bis > 7 ? individuell + klassisch : klassisch + individuell}
     <p class="klein">Die Uhrzeit ist in beiden Fällen die echte: Nachts ist es dunkel.</p>`, []);
   for (const b of box.querySelectorAll('.modus')) b.onclick = () => { T.spiele('klick'); schliesseFenster(); fertig(b.dataset.m); };
+}
+
+/** Einmal nach den Startzielen (13.10.): Ziele weiter vorschlagen oder selbst erkunden? */
+export function zeigeZieleFrage() {
+  T.spiele('spezial');
+  fenster('Wie geht es weiter?', `
+    <p><b>Die ersten Schritte hast du geschafft!</b> Ab jetzt entscheidest du.</p>
+    <p>Soll dir das Spiel oben in der Leiste immer ein <b>nächstes Ziel</b> vorschlagen - das günstigste Teil, das du gerade kaufen kannst? Oder möchtest du lieber <b>selbst erkunden</b>, was es in den Läden gibt?</p>
+    <p class="klein">Du kannst das jederzeit im Menü umstellen.</p>`,
+  [{ text: 'Selbst erkunden', neben: true, aktion: () => { S.st.zieleWeiter = false; S.speichere(); zielLeiste(); } },
+    { text: 'Ziele vorschlagen', aktion: () => { S.st.zieleWeiter = true; S.speichere(); zielLeiste(); } }]);
 }
 
 /** Einmal beim ersten Start: worum es geht. */

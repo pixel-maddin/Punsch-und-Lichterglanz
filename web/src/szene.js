@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610131019';
-import * as Z from './zeit.js?v=202610131019';
-import * as S from './spiel.js?v=202610131019';
-import { FASSADEN } from './config.js?v=202610131019';
-import * as C from './config.js?v=202610131019';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610131102';
+import * as Z from './zeit.js?v=202610131102';
+import * as S from './spiel.js?v=202610131102';
+import { FASSADEN } from './config.js?v=202610131102';
+import * as C from './config.js?v=202610131102';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1546,7 +1546,8 @@ function wandWok(c, x, y) {
 function rodelkinder(c, G, t, w) {
   const phase = (t + 30) % 50;
   if (phase > 14) return;
-  const x = Math.round(196 - phase * 16), fuss = G - 2, schritt = Math.floor(t * 6) % 2;
+  // Auf der Straße, nicht auf dem Gehweg - dort ist schon alles voll (13.10.)
+  const x = Math.round(196 - phase * 16), fuss = G + STRASSE - 1, schritt = Math.floor(t * 6) % 2;
   // Schlitten hinter ihnen (sie gehen nach links)
   r(c, x + 12, fuss - 4, 11, 2, '#a8703a'); r(c, x + 11, fuss - 2, 13, 1, '#6a4428'); p(c, x + 23, fuss - 3, '#6a4428');
   for (let i = 0; i < 6; i++) p(c, x + 4 + i, fuss - 6 + Math.round(i * 0.3), '#3a3a40');   // Seil
@@ -2396,7 +2397,6 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(e, 28, GW - 18);
   // Vom fahrenden Händler (09.10.)
   if (S.zeigt('h_kugel')) schneekugel(e, L, 7, GW - 13, t, w);
-  if (S.zeigt('g_vorrat')) schneeballVorrat(e, 12, GW - 1);
 
   // Rechts hinter dem Stand, neben dem Baum; der Mast ist lang, damit der
   // Kopf auf halber Dachhöhe über dem Stand steht
@@ -2422,6 +2422,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t, L);
+  if (S.zeigt('g_vorrat')) schneeballVorrat(e, 12, GW - 1);   // vor den Leuten auf dem Gehweg (13.10.)
   if (S.zeigt('m_kutsche') && !opts.karte) kutsche(e, L, G, t, w);
   if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(e, GW, t, w);
   if (neuPruefen) { verdecke(L, stufen, pixel(e, G)); if (!opts.karte) deckungMerken(L, t); }
@@ -2438,6 +2439,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (w.dunkel > 0.05 && !opts.ohneGaeste) {
     const ge = gastEbeneFuer(e.canvas.width, e.canvas.height);
     strasse(ge, GW, t);
+    if (S.zeigt('g_vorrat')) schneeballVorrat(ge, 12, GW - 1);   // nachts liegt die Gäste-Ebene darüber
     multipliziere(ge, karte, G, 0.5);
     e.drawImage(ge.canvas, 0, 0);
   }

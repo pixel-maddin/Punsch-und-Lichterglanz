@@ -14,7 +14,7 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=202610131019';
+import * as S from './spiel.js?v=202610131102';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -72,7 +72,9 @@ export const fertig = () => idx() >= ZIELE.length;
  * Neue Getränke gehen vor (sie bringen mehr Sterne), sonst das billigste.
  */
 export function naechstes() {
-  if (S.st.lernen < 99 || !fertig()) return null;
+  // Nur wer es will (13.10., Nutzerwunsch: nur das Tutorial soll Ziele haben -
+  // oder man entscheidet, ob man selbst erkundet): st.zieleWeiter
+  if (S.st.lernen < 99 || !fertig() || S.st.zieleWeiter !== true) return null;
   let best = null, preis = Infinity, getraenk = null, gPreis = Infinity;
   for (const a of S.ARTIKEL_LISTE) {
     if (a.luxus || (a.luxusAb && S.stufe(a.id) >= a.luxusAb - 1)) continue;
