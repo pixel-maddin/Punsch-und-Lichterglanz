@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610122135';
-import * as Z from './zeit.js?v=202610122135';
-import { neueFarben } from './pixel.js?v=202610122135';
+import * as C from './config.js?v=202610130845';
+import * as Z from './zeit.js?v=202610130845';
+import { neueFarben } from './pixel.js?v=202610130845';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -104,6 +104,8 @@ function laden() {
         stand.kalDeko.kal_knoedel = true;
         stand.besitz.futterhaus = Math.max(1, stand.besitz.futterhaus || 0);
       }
+      // Stammgäste (13.10.): Postbote Paul ist jetzt Postbotin Sophia - Besuche mitnehmen
+      if (stand.stamm && stand.stamm.paul) { stand.stamm.sophia = stand.stamm.sophia || stand.stamm.paul; delete stand.stamm.paul; }
       if (!('miniStaffel' in alt)) {
         stand.miniStaffel = true;
         if (alt.tipps && alt.tipps.karte_mehr) stand.miniAlle = true;

@@ -341,7 +341,7 @@ export function neueFarben(typ) {
 // ---------------------------------------------------------------------------
 // Stammgäste (12.10.): gezeichnet wie ihre Grundfigur (feste Farben aus
 // C.GAESTE) plus ein Erkennungszeichen
-const STAMM_BASIS = { hilde: 'oma', paul: 'erwachsen', lena: 'kind', franz: 'opa' };
+const STAMM_BASIS = { hilde: 'oma', sophia: 'erwachsen', lena: 'kind', franz: 'opa', karl: 'opa' };
 
 export function figurKlein(c, g, x, y, t) {
   x = Math.round(x); y = Math.round(y);
@@ -356,12 +356,20 @@ export function figurKlein(c, g, x, y, t) {
       r(c, dx + 6, y - 5, 2, 2, d); p(c, dx + 6, y - 3, dd); p(c, dx + 8, y - 4, '#1a1a1a'); p(c, dx - 1, y - 4, d);
       r(c, dx + 3, y - 9, 1, 1, '#c8b890');   // Leine
       for (let i = 0; i < 4; i++) p(c, dx + 7 + i, y - 6 - i, '#6a5a4a');
-    } else if (g.typ === 'paul') {
+    } else if (g.typ === 'sophia') {
       r(c, x - 5, y - 8, 2, 4, '#f0c020'); p(c, x - 4, y - 7, '#2a2a2a');   // Posttasche
       p(c, x - 2, y - 9, '#c89a10'); p(c, x - 1, y - 10, '#c89a10');
+      r(c, x - 3, y - 13, 1, 4, g.farben.haar); p(c, x - 3, y - 9, '#f0c020');   // Zopf mit Gummi
+    } else if (g.typ === 'karl') {
+      r(c, x + 3, y - 9, 1, 6, g.farben.mantel);                            // etwas kräftiger
+      p(c, x - 1, y - 9, '#b84a3a'); p(c, x + 1, y - 8, '#e8d8c8'); p(c, x - 1, y - 7, '#e8d8c8');   // kariertes Hemd
+      p(c, x, y - 7, '#e8c030'); p(c, x, y - 5, '#e8c030');               // Knöpfe der Strickjacke
+      p(c, x - 2, y - 13, '#a8a8a8');                                        // graue Schläfe
+      r(c, x - 3, y - 17, 6, 3, '#8a8478'); r(c, x + 1, y - 15, 3, 1, '#5e5a52'); p(c, x - 2, y - 16, '#a8a296');   // graue Schiebermütze
     } else if (g.typ === 'lena') {
       r(c, x - 2, y - 15, 2, 2, '#ffffff');   // dicke Bommel
     } else if (g.typ === 'franz') {
+      r(c, x - 2, y - 17, 4, 2, '#3e5a2e'); r(c, x - 3, y - 15, 6, 1, '#2e4a22'); p(c, x - 2, y - 16, '#8a6a3a');   // grüner Försterhut
       p(c, x + 2, y - 18, '#3a8a3a'); p(c, x + 3, y - 19, '#3a8a3a'); p(c, x + 3, y - 18, '#2a6a2a');   // Feder am Hut
     }
     return;
@@ -461,14 +469,24 @@ export function figurGross(c, g, cx, basis, t, laune) {
       const d = '#8a4a22', hx = cx + 12, ko = basis - 7;
       r(c, hx, ko, 6, 6, d); r(c, hx + 1, ko - 1, 4, 1, d); r(c, hx - 1, ko + 1, 2, 5, '#5a2e14'); r(c, hx + 5, ko + 1, 2, 5, '#5a2e14');
       p(c, hx + 1, ko + 2, '#1a1a1a'); p(c, hx + 4, ko + 2, '#1a1a1a'); r(c, hx + 2, ko + 4, 2, 1, '#1a1a1a');
-    } else if (g.typ === 'paul') {
+    } else if (g.typ === 'sophia') {
       for (let i = 0; i < 12; i++) p(c, cx - 8 + i, b - 16 + i, '#c89a10');   // Riemen der Posttasche
-      r(c, cx - 6, b - 31, 13, 2, '#1a2a5a');   // Schirm der Mütze
+      const ko = b - 29;
+      r(c, cx - 8, ko + 3, 2, 12, g.farben.haar); r(c, cx - 8, ko + 15, 2, 1, '#f0c020'); r(c, cx - 8, ko + 16, 2, 3, g.farben.haar);   // langer Zopf
+    } else if (g.typ === 'karl') {
+      const ko = b - 29;
+      // Strickjacke offen über kariertem Hemd, Knöpfe; graue Schläfen
+      for (let y = b - 16; y < b; y++) for (let x = cx - 3; x < cx + 3; x++) p(c, x, y, (x + y) % 3 === 0 ? '#e8d8c8' : (x + (y >> 1)) % 2 ? '#b84a3a' : '#8a2a22');
+      for (let i = 0; i < 3; i++) p(c, cx + 4, b - 13 + i * 4, '#e8c030');
+      r(c, cx - 7, ko + 3, 1, 3, '#b0aca8'); r(c, cx + 6, ko + 3, 1, 3, '#b0aca8');
+      r(c, cx - 6, ko - 3, 12, 4, '#8a8478'); r(c, cx - 7, ko + 1, 10, 1, '#8a8478'); r(c, cx + 2, ko + 1, 7, 2, '#5e5a52'); r(c, cx - 4, ko - 2, 4, 1, '#a8a296');   // graue Schiebermütze
+      r(c, cx - 11, b - 15, 1, 15, ton(g.farben.mantel, -0.2)); r(c, cx + 10, b - 15, 1, 15, ton(g.farben.mantel, -0.2));   // breiter
     } else if (g.typ === 'lena') {
       const ko = b - 22;
       r(c, cx - 2, ko - 8, 5, 4, '#ffffff'); r(c, cx - 1, ko - 9, 3, 1, '#ffffff');   // dicke Bommel
     } else if (g.typ === 'franz') {
       const ko = b - 29;
+      r(c, cx - 5, ko - 3, 10, 4, '#3e5a2e'); r(c, cx - 7, ko + 1, 14, 2, '#2e4a22'); r(c, cx - 5, ko, 10, 1, '#8a6a3a');   // grüner Försterhut
       r(c, cx + 4, ko - 7, 1, 5, '#3a8a3a'); r(c, cx + 5, ko - 8, 1, 3, '#2a6a2a');   // Feder am Hut
     }
     return;
