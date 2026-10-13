@@ -767,6 +767,19 @@ export const DOSE_BONUS = 0.25;
 // Drei Schwierigkeiten für alle Minispiele (10.10.): `tempo` macht Tiere,
 // Wok und Kundenungeduld schneller, `punkte` zahlt dafür mehr. Ein Rekord
 // für alle Stufen - wer schwer spielt, kommt schneller an die Deko.
+// Minuspunkte für Fehler (13.10., Nutzerwunsch: „wenn man was falsch macht,
+// soll man schon Minuspunkte bekommen"). Rohwerte wie die Pluspunkte -
+// sie laufen über miniStufe().punkte (Schwierigkeit und `skala`). Der
+// Punktestand fällt nie unter 0. Bemessen an dem, was ein Erfolg bringt
+// (Hase 10, Kunde Christbaum 50-120, Plätzchen 22-90, Stern 15-20).
+export const MINI_MINUS = {
+  lichtung: { daneben: 5 },
+  baum:     { falsch: 20, langsam: 30 },
+  back:     { falsch: 10, verbrannt: 15, langsam: 20 },
+  berg:     { crash: 30 },
+  eis:      { sturz: 25 },
+  schnee:   { daneben: 3, abbekommen: 10 },   // Wichtel getroffen: ARTEN.wichtel.wert (-15)
+};
 export const MINI_STUFEN = [
   { id: 'leicht', name: 'Leicht', tempo: 0.8,  punkte: 0.7 },
   { id: 'normal', name: 'Normal', tempo: 1,    punkte: 1 },

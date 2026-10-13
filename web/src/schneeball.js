@@ -13,12 +13,12 @@
  * Aufbau wie lichtung.js: eigenes Canvas #miniCv, 180 Pixel breit, Kopfzeile
  * und Texte über minihud.js, Licht über licht.js.
  */
-import * as C from './config.js?v=202610131110';
-import * as Z from './zeit.js?v=202610131110';
-import * as T from './ton.js?v=202610131110';
-import * as MH from './minihud.js?v=202610131110';
-import * as L from './licht.js?v=202610131110';
-import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610131110';
+import * as C from './config.js?v=202610131233';
+import * as Z from './zeit.js?v=202610131233';
+import * as T from './ton.js?v=202610131233';
+import * as MH from './minihud.js?v=202610131233';
+import * as L from './licht.js?v=202610131233';
+import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610131233';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -143,7 +143,12 @@ export function tippeAuf(x, y) {
   }
   g.baelle.push({ x0: W / 2, y0: H + 4, x, y, t: 0 });
   T.spiele('greifen');
-  if (!ziel) { g.kette = 1; g.ketteT = 0; g.puffs.push({ x, y, t: 0 }); return; }
+  if (!ziel) {
+    const minus = Math.round(C.MINI_MINUS.schnee.daneben * stufe.punkte);
+    g.punkte = Math.max(0, g.punkte - minus);
+    g.texte.push({ x, y: y - 8, text: '-' + minus, farbe: '#ff7a6a', t: 0 });
+    g.kette = 1; g.ketteT = 0; g.puffs.push({ x, y, t: 0 }); return;
+  }
   const w = ziel.wer;
   if (w.art === 'wichtel') {
     // Daneben! Wichtel sind Freunde
@@ -240,7 +245,12 @@ function schritt(dt) {
   for (const a of g.anflug) a.t += dt;
   for (const a of g.anflug.filter((a) => a.t >= a.dauer)) {
     g.flecken.push({ x: a.x1, y: a.y1, t: 0, gr: zufall(18, 24) });
-    if (!g.aus) { g.kette = 1; g.ketteT = 0; g.abbekommen++; }
+    if (!g.aus) {
+      g.kette = 1; g.ketteT = 0; g.abbekommen++;
+      const minus = Math.round(C.MINI_MINUS.schnee.abbekommen * stufe.punkte);
+      g.punkte = Math.max(0, g.punkte - minus);
+      g.texte.push({ x: a.x1, y: a.y1 - 16, text: 'PLATSCH! -' + minus, farbe: '#ff7a6a', t: 0 });
+    }
     T.spiele('schnee');
   }
   g.anflug = g.anflug.filter((a) => a.t < a.dauer);

@@ -13,12 +13,12 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610131110';
-import * as Z from './zeit.js?v=202610131110';
-import * as T from './ton.js?v=202610131110';
-import * as MH from './minihud.js?v=202610131110';
-import * as L from './licht.js?v=202610131110';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610131110';
+import * as C from './config.js?v=202610131233';
+import * as Z from './zeit.js?v=202610131233';
+import * as T from './ton.js?v=202610131233';
+import * as MH from './minihud.js?v=202610131233';
+import * as L from './licht.js?v=202610131233';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610131233';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -111,7 +111,9 @@ export function tippeAuf(x, y) {
       if (b.art !== a.wunsch.art || b.gr !== a.wunsch.gr) {
         // Falscher Baum: Kopfschütteln, Geduld weg, Kette reißt
         a.fehler = true; a.geduld -= 2; g.kette = 1; b.wackel = 0.4;
-        g.texte.push({ x: b.x, y: b.y - HOEHE[b.gr] - 6, text: 'NEIN!', farbe: '#ff7a6a', t: 0 });
+        const minus = Math.round(C.MINI_MINUS.baum.falsch * stufe.punkte);
+        g.punkte = Math.max(0, g.punkte - minus);
+        g.texte.push({ x: b.x, y: b.y - HOEHE[b.gr] - 6, text: 'NEIN! -' + minus, farbe: '#ff7a6a', t: 0 });
         T.spiele('falsch');
         return;
       }
@@ -197,7 +199,9 @@ function schritt(dt) {
       a.geduld -= dt;
       if (a.geduld <= 0) {
         // Zu langsam: Er fährt ohne Baum
-        g.texte.push({ x: a.x - 26, y: PARKPLATZ().y - 40, text: 'ZU LANGSAM!', farbe: '#ff7a6a', t: 0 });
+        const minus = Math.round(C.MINI_MINUS.baum.langsam * stufe.punkte);
+        g.punkte = Math.max(0, g.punkte - minus);
+        g.texte.push({ x: a.x - 26, y: PARKPLATZ().y - 40, text: 'ZU LANGSAM! -' + minus, farbe: '#ff7a6a', t: 0 });
         T.spiele('falsch');
         g.kette = 1; g.ware = null; g.aktiv = null; g.schritt = 'suchen';
         for (const b of g.baeume) b.schnitte = b.weg ? b.schnitte : 0;

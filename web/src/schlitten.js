@@ -10,12 +10,12 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610131110';
-import * as Z from './zeit.js?v=202610131110';
-import * as T from './ton.js?v=202610131110';
-import * as MH from './minihud.js?v=202610131110';
-import * as L from './licht.js?v=202610131110';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610131110';
+import * as C from './config.js?v=202610131233';
+import * as Z from './zeit.js?v=202610131233';
+import * as T from './ton.js?v=202610131233';
+import * as MH from './minihud.js?v=202610131233';
+import * as L from './licht.js?v=202610131233';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610131233';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -165,7 +165,9 @@ function schritt(dt) {
       g.v = CRASH_TEMPO; g.crash = 0.6;
       g.vx = (g.x < d.x ? -1 : 1) * 70;
       for (let i = 0; i < 8; i++) g.gischt.push({ x: g.x, y: WOK_Y(), vx: zufall(-50, 50), vy: zufall(-50, 10), t: 0 });
-      g.texte.push({ x: g.x, y: WOK_Y() - 14, text: 'AUTSCH!', farbe: '#ff7a6a', t: 0 });
+      const minus = Math.round(C.MINI_MINUS.berg.crash * stufe.punkte);
+      g.punkte = Math.max(0, g.punkte - minus);
+      g.texte.push({ x: g.x, y: WOK_Y() - 14, text: 'AUTSCH! -' + minus, farbe: '#ff7a6a', t: 0 });
       T.spiele('falsch');
     }
   }

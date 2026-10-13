@@ -11,12 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610131110';
-import * as Z from './zeit.js?v=202610131110';
-import * as T from './ton.js?v=202610131110';
-import * as MH from './minihud.js?v=202610131110';
-import * as L from './licht.js?v=202610131110';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610131110';
+import * as C from './config.js?v=202610131233';
+import * as Z from './zeit.js?v=202610131233';
+import * as T from './ton.js?v=202610131233';
+import * as MH from './minihud.js?v=202610131233';
+import * as L from './licht.js?v=202610131233';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610131233';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -103,7 +103,13 @@ export function tippeAuf(x, y) {
     const d = Math.hypot(m.x - x, m.y - y);
     if (d < ARTEN[tier.art].radius + 6 && d < bd) { bd = d; best = tier; }
   }
-  if (!best) { spiel.kette = 1; spiel.fehl.push({ x, y, t: 0 }); T.spiele('falsch'); return; }
+  if (!best) {
+    // Daneben: Kette weg und ein paar Punkte (13.10.)
+    const minus = Math.round(C.MINI_MINUS.lichtung.daneben * stufe.punkte);
+    spiel.punkte = Math.max(0, spiel.punkte - minus);
+    spiel.texte.push({ x, y: y - 10, text: '-' + minus, farbe: '#ff7a6a', t: 0 });
+    spiel.kette = 1; spiel.fehl.push({ x, y, t: 0 }); T.spiele('falsch'); return;
+  }
   // Gefüttert! Kette wächst, wenn es schnell genug ging
   spiel.kette = spiel.ketteT > 0 ? Math.min(5, spiel.kette + 1) : 1;
   spiel.ketteT = 1.6;

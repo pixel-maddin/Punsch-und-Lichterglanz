@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610131110';
-import * as Z from './zeit.js?v=202610131110';
-import * as T from './ton.js?v=202610131110';
-import * as MH from './minihud.js?v=202610131110';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610131110';
+import * as C from './config.js?v=202610131233';
+import * as Z from './zeit.js?v=202610131233';
+import * as T from './ton.js?v=202610131233';
+import * as MH from './minihud.js?v=202610131233';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610131233';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -198,7 +198,8 @@ export function tippeAuf(x, y) {
     g.stich = { form, t: 0 };
     if (form !== k.rezept.form) {
       k.fehler = true; nimmGeduld(g, 2); g.kette = 1;
-      g.texte.push({ x: slot(i, formen.length), y: fy - 18, text: 'NEIN!', farbe: '#ff7a6a', t: 0 });
+      const minus = abzug(g, 'falsch');
+      g.texte.push({ x: slot(i, formen.length), y: fy - 18, text: 'NEIN! -' + minus, farbe: '#ff7a6a', t: 0 });
       T.spiele('falsch');
       return;
     }
@@ -228,7 +229,8 @@ export function tippeAuf(x, y) {
     const d = dekos[i];
     if (d !== k.rezept.deko) {
       k.fehler = true; nimmGeduld(g, 2); g.kette = 1;
-      g.texte.push({ x: slot(i, dekos.length), y: sy - 18, text: 'NEIN!', farbe: '#ff7a6a', t: 0 });
+      const minus = abzug(g, 'falsch');
+      g.texte.push({ x: slot(i, dekos.length), y: sy - 18, text: 'NEIN! -' + minus, farbe: '#ff7a6a', t: 0 });
       T.spiele('falsch');
       return;
     }
@@ -240,6 +242,8 @@ export function tippeAuf(x, y) {
   fehl(x, y);
 }
 function fehl(x, y) { if (spiel) spiel.fehl.push({ x, y, t: 0 }); }
+/** Minuspunkte für einen Fehler (13.10.), nie unter 0. Gibt den Abzug zurück. */
+function abzug(g, art) { const m = Math.round(C.MINI_MINUS.back[art] * stufe.punkte); g.punkte = Math.max(0, g.punkte - m); return m; }
 const ofenDauer = () => C.BACK_OFEN / stufe.tempo;
 /**
  * Goldener Bereich JE PLÄTZCHEN (11.10., Nutzerwunsch: „bei jedem Plätzchen soll
@@ -283,7 +287,7 @@ function schritt(dt) {
     else if (k.phase === 'wartet' && !g.aus) {
       k.geduld -= dt;
       if (k.geduld <= 0) {
-        g.texte.push({ x: k.x - 20, y: THEKE() - 30, text: 'ZU LANGSAM!', farbe: '#ff7a6a', t: 0 });
+        g.texte.push({ x: k.x - 20, y: THEKE() - 30, text: 'ZU LANGSAM! -' + abzug(g, 'langsam'), farbe: '#ff7a6a', t: 0 });
         T.spiele('falsch');
         g.kette = 1; g.ware = null; g.schritt = 'stechen';
         k.phase = 'geht'; k.figur.laeuft = true;
@@ -316,7 +320,7 @@ function schritt(dt) {
         // Verbrannt: Rauch, Plätzchen weg, nochmal ausstechen
         const o = OFEN();
         for (let i = 0; i < 6; i++) g.rauch.push({ x: o.x + 10 + i * 4, y: o.y, t: -i * 0.06 });
-        g.texte.push({ x: o.x + 20, y: o.y - 18, text: 'VERBRANNT!', farbe: '#ff7a6a', t: 0 });
+        g.texte.push({ x: o.x + 20, y: o.y - 18, text: 'VERBRANNT! -' + abzug(g, 'verbrannt'), farbe: '#ff7a6a', t: 0 });
         T.spiele('falsch');
         if (g.kunde) g.kunde.fehler = true;
         nimmGeduld(g, 1.5); g.kette = 1;
@@ -365,7 +369,7 @@ export function vorspulen(sek) {
  * Messweg: eine Runde ohne Bildschleife. `takt` = Sekunden je Handgriff,
  * `treffer` = Anteil richtiger Griffe, `gold` = Anteil goldbraun.
  */
-export function messe(takt = 0.35, treffer = 1, gold = 1, hoehe = 380, stufeNr = 1, rezeptListe) {
+export function messe(takt = 0.35, treffer = 1, goldAnteil = 1, hoehe = 380, stufeNr = 1, rezeptListe) {   // goldAnteil hieß gold und verdeckte die Funktion gold() (13.10.)
   stufe = C.miniStufe('back', stufeNr);
   setzeRezepte(rezeptListe);
   const altFertig = fertig;
@@ -380,7 +384,7 @@ export function messe(takt = 0.35, treffer = 1, gold = 1, hoehe = 380, stufeNr =
       // Herausholen: im goldenen Bereich - oder knapp daneben
       if (zielOfen == null) {
         const [von, bis2] = gold(g.ware);
-        zielOfen = Math.random() < gold ? von + Math.random() * (bis2 - von) : (Math.random() < 0.5 ? von - 0.12 : bis2 + 0.1);
+        zielOfen = Math.random() < goldAnteil ? von + Math.random() * (bis2 - von) : (Math.random() < 0.5 ? von - 0.12 : bis2 + 0.1);
       }
       if (g.ware.ofen / ofenDauer() >= zielOfen) { const o = OFEN(); tippeAuf(o.x + 20, o.y + 10); zielOfen = null; bis = g.t + takt; }
       continue;
