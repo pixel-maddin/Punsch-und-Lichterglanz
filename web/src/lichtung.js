@@ -11,12 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610131233';
-import * as Z from './zeit.js?v=202610131233';
-import * as T from './ton.js?v=202610131233';
-import * as MH from './minihud.js?v=202610131233';
-import * as L from './licht.js?v=202610131233';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610131233';
+import * as C from './config.js?v=202610131238';
+import * as Z from './zeit.js?v=202610131238';
+import * as T from './ton.js?v=202610131238';
+import * as MH from './minihud.js?v=202610131238';
+import * as L from './licht.js?v=202610131238';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610131238';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -103,13 +103,8 @@ export function tippeAuf(x, y) {
     const d = Math.hypot(m.x - x, m.y - y);
     if (d < ARTEN[tier.art].radius + 6 && d < bd) { bd = d; best = tier; }
   }
-  if (!best) {
-    // Daneben: Kette weg und ein paar Punkte (13.10.)
-    const minus = Math.round(C.MINI_MINUS.lichtung.daneben * stufe.punkte);
-    spiel.punkte = Math.max(0, spiel.punkte - minus);
-    spiel.texte.push({ x, y: y - 10, text: '-' + minus, farbe: '#ff7a6a', t: 0 });
-    spiel.kette = 1; spiel.fehl.push({ x, y, t: 0 }); T.spiele('falsch'); return;
-  }
+  // Daneben: nur die Kette reißt - Minuspunkte gibt es hier bewusst nicht (13.10.)
+  if (!best) { spiel.kette = 1; spiel.fehl.push({ x, y, t: 0 }); T.spiele('falsch'); return; }
   // Gefüttert! Kette wächst, wenn es schnell genug ging
   spiel.kette = spiel.ketteT > 0 ? Math.min(5, spiel.kette + 1) : 1;
   spiel.ketteT = 1.6;
@@ -174,9 +169,10 @@ function schritt(dt) {
     // Im letzten Drittel kommen doppelt so viele Tiere (11.10., „sonst zu leicht"):
     // halber Abstand und mehr gleichzeitig auf der Lichtung
     const spurt = g.t > C.LICHTUNG_DAUER * 2 / 3;
-    if (g.spawnT <= 0 && g.tiere.filter((x) => x.satt < 0).length < (spurt ? 12 : 7)) {
+    // 13.10.: im Spurt 10 % weniger Tiere (11 statt 12 gleichzeitig, Abstand 0,55 statt 0,5) - „am Ende etwas viel"
+    if (g.spawnT <= 0 && g.tiere.filter((x) => x.satt < 0).length < (spurt ? 11 : 7)) {
       neuesTier();
-      g.spawnT = Math.max(0.35, 0.95 - g.t / C.LICHTUNG_DAUER * 0.55) * zufall(0.7, 1.3) / stufe.tempo * (spurt ? 0.5 : 1);
+      g.spawnT = Math.max(0.35, 0.95 - g.t / C.LICHTUNG_DAUER * 0.55) * zufall(0.7, 1.3) / stufe.tempo * (spurt ? 0.55 : 1);
     }
     // Der seltene Gast kommt einmal, mitten in der Runde, und wird angesagt
     if (g.selten && g.t >= g.seltenZeit) {

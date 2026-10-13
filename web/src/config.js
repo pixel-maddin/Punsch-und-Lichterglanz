@@ -773,7 +773,7 @@ export const DOSE_BONUS = 0.25;
 // Punktestand fällt nie unter 0. Bemessen an dem, was ein Erfolg bringt
 // (Hase 10, Kunde Christbaum 50-120, Plätzchen 22-90, Stern 15-20).
 export const MINI_MINUS = {
-  lichtung: { daneben: 5 },
+  lichtung: {},                              // keine Minuspunkte (13.10., Nutzerwunsch)
   baum:     { falsch: 20, langsam: 30 },
   back:     { falsch: 10, verbrannt: 15, langsam: 20 },
   berg:     { crash: 30 },
