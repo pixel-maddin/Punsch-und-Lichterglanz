@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610131702';
-import * as S from './spiel.js?v=202610131702';
-import * as Z from './zeit.js?v=202610131702';
-import * as T from './ton.js?v=202610131702';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131702';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131702';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131702';
-import * as A from './auftraege.js?v=202610131702';
-import * as E from './erfolge.js?v=202610131702';
-import * as ZL from './ziele.js?v=202610131702';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131702';
-import * as KA from './karte.js?v=202610131702';
-import { zeigeRueckblick } from './ereignis.js?v=202610131702';
-import { barbaraZweig } from './szene.js?v=202610131702';
-import * as SW from './schneeball.js?v=202610131702';
-import * as LI from './lichtung.js?v=202610131702';
-import * as CB from './christbaum.js?v=202610131702';
-import * as SB from './schlitten.js?v=202610131702';
-import * as EB from './schlittschuh.js?v=202610131702';
-import * as BS from './backstube.js?v=202610131702';
-import { alleSymbole } from './symbole.js?v=202610131702';
+import * as C from './config.js?v=202610131706';
+import * as S from './spiel.js?v=202610131706';
+import * as Z from './zeit.js?v=202610131706';
+import * as T from './ton.js?v=202610131706';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131706';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131706';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131706';
+import * as A from './auftraege.js?v=202610131706';
+import * as E from './erfolge.js?v=202610131706';
+import * as ZL from './ziele.js?v=202610131706';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131706';
+import * as KA from './karte.js?v=202610131706';
+import { zeigeRueckblick } from './ereignis.js?v=202610131706';
+import { barbaraZweig } from './szene.js?v=202610131706';
+import * as SW from './schneeball.js?v=202610131706';
+import * as LI from './lichtung.js?v=202610131706';
+import * as CB from './christbaum.js?v=202610131706';
+import * as SB from './schlitten.js?v=202610131706';
+import * as EB from './schlittschuh.js?v=202610131706';
+import * as BS from './backstube.js?v=202610131706';
+import { alleSymbole } from './symbole.js?v=202610131706';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1647,6 +1647,8 @@ export function oeffneMenue() {
   liste.appendChild(regler);
   ton.appendChild(mk('Geräusche', S.st.ton.fx, () => { S.st.ton.fx = !S.st.ton.fx; T.setzeFx(S.st.ton.fx); S.speichere(); }));
   // Nach den Startzielen: nächstes Ziel vorschlagen lassen oder selbst erkunden (13.10.)
+  // Vorschau „Morgen wartet …“ abschaltbar (13.10.)
+  ton.appendChild(mk('Vorschau auf morgen', S.st.vorschauAus !== true, () => { S.st.vorschauAus = S.st.vorschauAus !== true; S.speichere(); }));
   if (ZL.fertig()) ton.appendChild(mk('Nächstes Ziel zeigen', S.st.zieleWeiter === true, () => { S.st.zieleWeiter = S.st.zieleWeiter !== true; S.speichere(); zielLeiste(); }));
   liste.appendChild(ton);
 

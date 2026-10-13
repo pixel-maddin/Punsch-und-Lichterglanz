@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610131702';
-import * as S from './spiel.js?v=202610131702';
-import * as Z from './zeit.js?v=202610131702';
-import * as T from './ton.js?v=202610131702';
-import * as LI from './lichtung.js?v=202610131702';
-import * as CB from './christbaum.js?v=202610131702';
-import * as KA from './karte.js?v=202610131702';
-import * as SB from './schlitten.js?v=202610131702';
-import * as EB from './schlittschuh.js?v=202610131702';
-import * as BS from './backstube.js?v=202610131702';
-import * as UI from './ui.js?v=202610131702';
-import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131702';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131702';
-import * as Lernen from './lernen.js?v=202610131702';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131702';
-import * as A from './auftraege.js?v=202610131702';
-import * as E from './erfolge.js?v=202610131702';
-import * as ZL from './ziele.js?v=202610131702';
+import * as C from './config.js?v=202610131706';
+import * as S from './spiel.js?v=202610131706';
+import * as Z from './zeit.js?v=202610131706';
+import * as T from './ton.js?v=202610131706';
+import * as LI from './lichtung.js?v=202610131706';
+import * as CB from './christbaum.js?v=202610131706';
+import * as KA from './karte.js?v=202610131706';
+import * as SB from './schlitten.js?v=202610131706';
+import * as EB from './schlittschuh.js?v=202610131706';
+import * as BS from './backstube.js?v=202610131706';
+import * as UI from './ui.js?v=202610131706';
+import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131706';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131706';
+import * as Lernen from './lernen.js?v=202610131706';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131706';
+import * as A from './auftraege.js?v=202610131706';
+import * as E from './erfolge.js?v=202610131706';
+import * as ZL from './ziele.js?v=202610131706';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -374,7 +374,7 @@ setInterval(() => {
     S.st.sockenStill = 0; S.speichere();
   }
   // Vorschau auf morgen (13.10.): einmal am Tag nach ein paar Minuten
-  if (S.startzieleFertig() && S.lauf.t > C.VORSCHAU_NACH && S.st.vorschauTag !== Z.tagesSchluessel() && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) {
+  if (S.st.vorschauAus !== true && S.startzieleFertig() && S.lauf.t > C.VORSCHAU_NACH && S.st.vorschauTag !== Z.tagesSchluessel() && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) {
     S.st.vorschauTag = Z.tagesSchluessel(); S.speichere();
     UI.toast(UI.vorschauText(), 'neu');
   }
