@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610130929';
-import * as S from './spiel.js?v=202610130929';
-import * as Z from './zeit.js?v=202610130929';
-import * as T from './ton.js?v=202610130929';
-import * as LI from './lichtung.js?v=202610130929';
-import * as CB from './christbaum.js?v=202610130929';
-import * as KA from './karte.js?v=202610130929';
-import * as SB from './schlitten.js?v=202610130929';
-import * as EB from './schlittschuh.js?v=202610130929';
-import * as BS from './backstube.js?v=202610130929';
-import * as UI from './ui.js?v=202610130929';
-import { zeichneWelt, schlittenPos } from './szene.js?v=202610130929';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610130929';
-import * as Lernen from './lernen.js?v=202610130929';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610130929';
-import * as A from './auftraege.js?v=202610130929';
-import * as E from './erfolge.js?v=202610130929';
-import * as ZL from './ziele.js?v=202610130929';
+import * as C from './config.js?v=202610131019';
+import * as S from './spiel.js?v=202610131019';
+import * as Z from './zeit.js?v=202610131019';
+import * as T from './ton.js?v=202610131019';
+import * as LI from './lichtung.js?v=202610131019';
+import * as CB from './christbaum.js?v=202610131019';
+import * as KA from './karte.js?v=202610131019';
+import * as SB from './schlitten.js?v=202610131019';
+import * as EB from './schlittschuh.js?v=202610131019';
+import * as BS from './backstube.js?v=202610131019';
+import * as UI from './ui.js?v=202610131019';
+import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131019';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131019';
+import * as Lernen from './lernen.js?v=202610131019';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131019';
+import * as A from './auftraege.js?v=202610131019';
+import * as E from './erfolge.js?v=202610131019';
+import * as ZL from './ziele.js?v=202610131019';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -355,8 +355,12 @@ setInterval(() => {
   if (S.neujahrJetzt()) { T.spiele('feuerwerk'); UI.toast(`Frohes neues Jahr ${Z.jetzt().getFullYear()}!`, 'spezial'); }
   const ziel = ZL.pruefe();
   if (ziel) {
-    T.spiele('kauf');
-    UI.toast(`Ziel ${ZL.nummer() - 1} geschafft! +${ziel.lohn} Sterne`, 'neu');
+    // Ein geschafftes Startziel ist ein Moment (13.10., Betatest: „nur eine
+    // kleine Einblendung"): Glockenspiel, Funkeln am Haus, die Leiste pulst
+    T.spiele('spezial');
+    funkeln(80, -60, `Ziel geschafft! +${ziel.lohn} ★`);
+    UI.toast(ZL.fertig() ? `Alle Startziele geschafft! +${ziel.lohn} Sterne - oben steht jetzt immer dein nächstes Ziel.` : `Ziel ${ZL.nummer() - 1} geschafft! +${ziel.lohn} Sterne`, 'neu');
+    UI.zielPuls();
   }
   UI.zielLeiste();
   const erfolge = E.pruefe();

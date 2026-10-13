@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610130929';
-import * as S from './spiel.js?v=202610130929';
-import * as Z from './zeit.js?v=202610130929';
-import * as T from './ton.js?v=202610130929';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610130929';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610130929';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610130929';
-import * as A from './auftraege.js?v=202610130929';
-import * as E from './erfolge.js?v=202610130929';
-import * as ZL from './ziele.js?v=202610130929';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610130929';
-import * as KA from './karte.js?v=202610130929';
-import { zeigeRueckblick } from './ereignis.js?v=202610130929';
-import { barbaraZweig } from './szene.js?v=202610130929';
-import * as SW from './schneeball.js?v=202610130929';
-import * as LI from './lichtung.js?v=202610130929';
-import * as CB from './christbaum.js?v=202610130929';
-import * as SB from './schlitten.js?v=202610130929';
-import * as EB from './schlittschuh.js?v=202610130929';
-import * as BS from './backstube.js?v=202610130929';
-import { alleSymbole } from './symbole.js?v=202610130929';
+import * as C from './config.js?v=202610131019';
+import * as S from './spiel.js?v=202610131019';
+import * as Z from './zeit.js?v=202610131019';
+import * as T from './ton.js?v=202610131019';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131019';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131019';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131019';
+import * as A from './auftraege.js?v=202610131019';
+import * as E from './erfolge.js?v=202610131019';
+import * as ZL from './ziele.js?v=202610131019';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131019';
+import * as KA from './karte.js?v=202610131019';
+import { zeigeRueckblick } from './ereignis.js?v=202610131019';
+import { barbaraZweig } from './szene.js?v=202610131019';
+import * as SW from './schneeball.js?v=202610131019';
+import * as LI from './lichtung.js?v=202610131019';
+import * as CB from './christbaum.js?v=202610131019';
+import * as SB from './schlitten.js?v=202610131019';
+import * as EB from './schlittschuh.js?v=202610131019';
+import * as BS from './backstube.js?v=202610131019';
+import { alleSymbole } from './symbole.js?v=202610131019';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -69,10 +69,12 @@ export function hud() {
 // Startziele: eine Leiste unter der Kopfzeile (ziele.js)
 // ---------------------------------------------------------------------------
 let letztesZiel = '';
+/** Die Leiste pulst einmal kurz (Ziel geschafft). */
+export function zielPuls() { const b = $('#ziel'); b.classList.remove('puls'); void b.offsetWidth; b.classList.add('puls'); }
 let leistenModus = '';   // 'ziel' | 'ansturm' | ''
 export function zielLeiste() {
   const z = ZL.aktuell();
-  const k = z && ZL.kaufziel();
+  const k = ZL.kaufziel();   // nach den Startzielen das laufende nächste Ziel (13.10.)
   const bereit = !!(k && k.leisten);
   // Der Kontostand gehört in die Signatur: „noch 186 Sterne" blieb sonst
   // stehen, während man längst 179 hatte (Betatest 02.10.)
@@ -80,8 +82,11 @@ export function zielLeiste() {
   const ansturm = S.lauf.ansturm ? Math.max(0, Math.ceil(S.lauf.stossBis - S.lauf.t)) : 0;
   const zimt = !ansturm && !z ? S.zimtRest() : 0;
   const markt = !ansturm && !z && !zimt && S.marktHeute() && !S.marktBesucht();
-  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : '';
+  // Nach den Startzielen: das laufende nächste Ziel (13.10.)
+  const weiter = !ansturm && !z && !zimt && !markt && k && k.laufend ? k : null;
+  leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : weiter ? 'weiter' : '';
   const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}` : markt ? 'markt'
+    : weiter ? `w|${weiter.id}|${weiter.kosten}|${bereit}|${bereit ? '' : Math.floor(S.st.geld)}`
     : z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
@@ -108,6 +113,20 @@ export function zielLeiste() {
   if (markt) {
     b.innerHTML = `<span class="nr">MARKTTAG</span><span class="was">Weihnachtsmarkt auf dem Festplatz</span><span class="los">Hin ▸</span>`;
     b.classList.remove('bereit', 'versteckt');
+    $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
+    return;
+  }
+  b.classList.toggle('weiter', !!weiter);
+  if (weiter) {
+    const a = S.ARTIKEL_MAP[weiter.id];
+    const stufe = Array.isArray(a.kosten) ? ` <i>Stufe ${S.stufe(a.id) + 1}</i>` : '';
+    const herz = Array.isArray(a.stimmung) ? a.stimmung[S.stufe(a.id)] : a.stimmung;
+    const was = `${a.name}${stufe}${herz ? ` <i>♥+${herz}</i>` : a.tab === 'super' ? ' <i>neues Getränk</i>' : ''}`;
+    b.innerHTML = `<span class="nr">Nächstes</span><span class="was">${was}</span>`
+      + (bereit ? '<span class="los">Los ▸</span>' : `<small>noch ${S.formatGeld(weiter.kosten - S.st.geld)}</small>`)
+      + `<span class="fort"><span style="width:${Math.round(Math.max(0, Math.min(1, S.st.geld / weiter.kosten)) * 100)}%"></span></span>`;
+    b.classList.toggle('bereit', bereit);
+    b.classList.remove('versteckt');
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
   }

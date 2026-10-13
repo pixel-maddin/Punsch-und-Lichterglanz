@@ -14,7 +14,7 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=202610130929';
+import * as S from './spiel.js?v=202610131019';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -65,9 +65,35 @@ export const nummer = () => idx() + 1;
 export const fertig = () => idx() >= ZIELE.length;
 
 
+/**
+ * Das laufende nächste Ziel NACH den Startzielen (13.10., Betatest: „nach
+ * Minute 12 steht man ohne Ziel da, bei 6.000 Sternen"): das günstigste
+ * Teil, das man gerade kaufen könnte - sichtbar, ohne Hindernis, kein Luxus.
+ * Neue Getränke gehen vor (sie bringen mehr Sterne), sonst das billigste.
+ */
+export function naechstes() {
+  if (S.st.lernen < 99 || !fertig()) return null;
+  let best = null, preis = Infinity, getraenk = null, gPreis = Infinity;
+  for (const a of S.ARTIKEL_LISTE) {
+    if (a.luxus || (a.luxusAb && S.stufe(a.id) >= a.luxusAb - 1)) continue;
+    const s = S.status(a);
+    if (s.versteckt || s.fertig || s.grund || s.kosten == null) continue;
+    if (a.tab === 'super' && s.kosten < gPreis) { gPreis = s.kosten; getraenk = a; }
+    if (s.kosten < preis) { preis = s.kosten; best = a; }
+  }
+  // Ein neues Getränk, das höchstens doppelt so teuer ist wie das billigste Teil, kommt zuerst
+  return getraenk && gPreis <= preis * 2 ? getraenk : best;
+}
+
 /** Was soll gerade gekauft werden, und wo? { tab, id } oder null. */
 export function kaufziel() {
   const z = aktuell();
+  if (!z) {   // nach den Startzielen: das laufende nächste Ziel
+    const a = naechstes();
+    if (!a) return null;
+    const s = S.status(a);
+    return { tab: a.tab, id: a.id, leisten: s.leisten, kosten: s.kosten, laufend: true };
+  }
   const id = z && z.kauf();
   const a = id && S.ARTIKEL_MAP[id];
   if (!a) return null;

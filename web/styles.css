@@ -634,6 +634,11 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #ziel .lohn { color: #9a6a10; }
 #ziel small { color: #7a5a44; font-weight: normal; }
 #ziel .los { background: var(--gruen); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.8) calc(var(--px) * 2); }
+/* Laufendes nächstes Ziel nach den Startzielen (13.10.) */
+#ziel.weiter .nr { background: var(--gruen); }
+/* Ziel geschafft: einmal kurz aufleuchten */
+#ziel.puls { animation: zielGeschafft 0.9s ease-out 1; }
+@keyframes zielGeschafft { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 210, 80, 0.9); } 40% { transform: scale(1.04); box-shadow: 0 0 calc(var(--px) * 6) calc(var(--px) * 2) rgba(255, 210, 80, 0.8); } 100% { transform: scale(1); box-shadow: 0 calc(var(--px) * 0.8) 0 var(--holz2); } }
 #ziel.ansturm { background: rgba(255, 226, 150, 0.95); border-color: var(--rot); animation: zielPuls 0.8s ease-in-out infinite; }
 #ziel.ansturm .nr { background: var(--rot); }
 #ziel.ansturm .fort span { background: var(--rot); }

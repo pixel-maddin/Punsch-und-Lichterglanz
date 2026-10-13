@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610130929';
-import * as Z from './zeit.js?v=202610130929';
-import { neueFarben } from './pixel.js?v=202610130929';
+import * as C from './config.js?v=202610131019';
+import * as Z from './zeit.js?v=202610131019';
+import { neueFarben } from './pixel.js?v=202610131019';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -427,6 +427,7 @@ export function fertigOhneLuxus(a) {
   return status(a).fertig;
 }
 export const zumZiel = () => C.ARTIKEL.filter((a) => !a.luxus);
+export const ARTIKEL_LISTE = C.ARTIKEL;
 
 export function kaufe(id) {
   const a = ARTIKEL_MAP[id];
