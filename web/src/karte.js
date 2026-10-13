@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610131238';
-import * as S from './spiel.js?v=202610131238';
-import * as Z from './zeit.js?v=202610131238';
-import * as FEIN from './fein.js?v=202610131238';
-import * as T from './ton.js?v=202610131238';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610131238';
+import * as C from './config.js?v=202610131429';
+import * as S from './spiel.js?v=202610131429';
+import * as Z from './zeit.js?v=202610131429';
+import * as FEIN from './fein.js?v=202610131429';
+import * as T from './ton.js?v=202610131429';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610131429';
 
 const $ = (s) => document.querySelector(s);
 
@@ -313,7 +313,8 @@ function bezier(a, b, k, n) {
 let grund = null, grundSchl = '', grundLichter = [];
 
 function baueGrund(winter) {
-  const schl = `${H}|${winter}|${S.st.fassade}|${S.marktHeute()}`;
+  // Gesperrte Orte gehören in den Schlüssel: geht einer auf, wird neu gemalt
+  const schl = `${H}|${winter}|${S.st.fassade}|${S.marktHeute()}|${ORTE.filter((o) => !S.ortOffen(o)).map((o) => o.id).join(',')}`;
   if (grund && grundSchl === schl) return;
   grundSchl = schl;
   grund = document.createElement('canvas');
@@ -482,7 +483,10 @@ function baueGrund(winter) {
   }
 
   // 8. Die Orte
-  for (const o of ORTE) ZEICHNER[o.id](o.x, yPx(o), P, winter);
+  // Noch nicht offene Orte (13.10.): gar nicht malen - nur ein leerer Platz am
+  // Ende des Weges mit einem kleinen Holzschild. Vorher lag ein Fleck in
+  // Bodenfarbe darüber, der wie eine grüne Fläche aussah.
+  for (const o of ORTE) (S.ortOffen(o) ? ZEICHNER[o.id] : leererPlatz)(o.x, yPx(o), P, winter);
   // Wegweiser an der Kreuzung vor dem Haus
   wegweiser(ort('haus').x - 12, yPx(ort('haus')) + 10);
 
@@ -889,6 +893,14 @@ function schneewiese(x, y, P, winter) {
   r(c, x + 5, y - 6, 3, 2, '#2f8a3a'); p(c, x + 6, y - 7, '#f2c9a0'); p(c, x + 6, y - 8, '#d83a3a');          // Wichtel
   r(c, x + 1, y - 9, 2, 2, '#ffffff');                                                                          // Schneeball
 }
+/** Ein Ort, der noch nicht offen ist (13.10.): leerer Platz, Holzschild mit „?". */
+function leererPlatz(x, y, P, winter) {
+  r(c, x - 1, y - 9, 2, 9, '#6a4428'); r(c, x, y - 9, 1, 9, '#8a5a32');           // Pfosten
+  r(c, x - 5, y - 13, 11, 6, '#a8703a'); r(c, x - 5, y - 13, 11, 1, '#c89058'); r(c, x - 5, y - 8, 11, 1, '#6a4428');   // Brett
+  const q = [[-1, -12], [0, -12], [1, -11], [0, -10], [0, -8]];   // Fragezeichen
+  for (const [dx, dy] of q) p(c, x + dx, y + dy + 1, '#3a2414');
+  if (winter) r(c, x - 5, y - 14, 11, 1, '#ffffff');
+}
 /** Backstube (10.10.): Fachwerkhaus mit warmem Schaufenster und Brezelschild. */
 function backstube(x, y, P, winter) {
   // Seit 11.10. kleiner (18 x 10 statt 24 x 13): die Schilder standen zu dicht
@@ -943,13 +955,13 @@ function zeichne(t, dt) {
   // Rauch aus den Schornsteinen
   const h = ort('haus'), d = ort('dorf');
   rauch(h.x + 6, yPx(h) - 30, t, 0);
-  rauch(d.x - 10, yPx(d) - 17, t, 1.3);
-  rauch(d.x + 9, yPx(d) - 16, t, 2.1);
-  const bs = ort('backstube'); rauch(bs.x - 6, yPx(bs) - 22, t, 0.7);
+  if (S.ortOffen(d)) { rauch(d.x - 10, yPx(d) - 17, t, 1.3); rauch(d.x + 9, yPx(d) - 16, t, 2.1); }
+  const bs = ort('backstube'); if (S.ortOffen(bs)) rauch(bs.x - 6, yPx(bs) - 22, t, 0.7);
 
   // Festplatz: Wimpelkette flattert - am Markttag laufen Leute zwischen den Buden
   const f = ort('festplatz'), fy = yPx(f);
-  if (S.marktHeute()) for (let i = 0; i < 6; i++) {
+  if (!S.ortOffen(f)) { /* Festplatz noch zu: keine Wimpel */ }
+  else if (S.marktHeute()) for (let i = 0; i < 6; i++) {
     const a = t * (0.25 + i * 0.05) + i * 1.9, lx = f.x + Math.cos(a) * (8 + i % 3 * 3), ly = fy - 2 + Math.sin(a) * 3;
     r(c, lx, ly - 2, 1, 2, ['#c83a32', '#3a6ab8', '#2f8a3a', '#e8a030', '#6a3a8a', '#8a5a32'][i]); p(c, lx, ly - 3, '#f2c9a0');
   }
@@ -960,7 +972,7 @@ function zeichne(t, dt) {
 
   // Wichtelwald: Glühwürmchen und Funken
   const wi = ort('wichtel'), wy = yPx(wi);
-  for (let i = 0; i < 6; i++) {
+  if (S.ortOffen(wi)) for (let i = 0; i < 6; i++) {
     const a = t * (0.6 + i * 0.13) + i * 1.7;
     const fx = wi.x + Math.cos(a) * (12 + i * 1.5), fy2 = wy - 10 + Math.sin(a * 1.3) * 6;
     if ((Math.floor(t * 3 + i) % 4) !== 0) p(c, fx, fy2, i % 2 ? '#fff4a0' : '#a8f0ff');
@@ -968,24 +980,26 @@ function zeichne(t, dt) {
 
   // Lichtung: ein Hase hüpft, ein Reh senkt den Kopf zum Fressen
   const l = ort('lichtung'), ly = yPx(l);
+  if (S.ortOffen(l)) {
   const hx = l.x - 12 + ((t * 6) % 10), hy = ly - 1 - Math.abs(Math.sin(t * 6)) * 2;
   r(c, hx, hy - 2, 3, 2, '#b8a898'); p(c, hx + 2, hy - 3, '#b8a898'); p(c, hx + 2, hy - 5, '#b8a898'); p(c, hx + 3, hy - 4, '#b8a898'); p(c, hx, hy - 2, '#ffffff');
   const rx = l.x + 9, ry = ly - 3;
   r(c, rx - 2, ry - 3, 5, 2, '#a8703a'); p(c, rx - 2, ry - 1, '#a8703a'); p(c, rx + 2, ry - 1, '#a8703a'); p(c, rx - 2, ry, '#a8703a'); p(c, rx + 2, ry, '#a8703a');
   const unten = Math.floor(t / 2) % 3 === 0;
   r(c, rx + 3, ry - (unten ? 3 : 5), 1, 2, '#a8703a'); r(c, rx + 3, ry - (unten ? 2 : 6), 2, 1, '#8a5a2a');
+  }
 
   // Schlittenberg: ein Wok saust die Bahn hinunter
   const b = ort('berg'), by = yPx(b);
   const k = (t * 0.45) % 1.3;
-  if (k < 1) {
+  if (k < 1 && S.ortOffen(b)) {
     const i = k * 21, bx = b.x - 4 + Math.sin(i / 3.2) * 6 + 1, byy = by - 21 + i;
     r(c, bx - 1, byy, 4, 1, '#2a2a30'); r(c, bx, byy - 1, 2, 1, '#3a3a40'); p(c, bx, byy - 2, '#c83a32'); p(c, bx, byy - 3, '#f2c9a0');
   }
 
   // Christbaumverkauf: Lichterkette am Hüttendach blinkt
   const cb = ort('baeume'), cy = yPx(cb);
-  for (let i = 0; i < 5; i++) if ((Math.floor(t * 2) + i) % 2) p(c, cb.x + 9 + i * 2, cy - 11, ['#ff5a5a', '#ffe060', '#5ad0ff'][i % 3]);
+  if (S.ortOffen(cb)) for (let i = 0; i < 5; i++) if ((Math.floor(t * 2) + i) % 2) p(c, cb.x + 9 + i * 2, cy - 11, ['#ff5a5a', '#ffe060', '#5ad0ff'][i % 3]);
 
   // Vögel ziehen vorbei (nur ohne Schnee, tagsüber)
   const li = Z.licht();
@@ -1011,14 +1025,7 @@ function zeichne(t, dt) {
 
   // Noch nicht offene Orte liegen unter Schneenebel (12.10.): man ahnt die
   // Form, aber kein Licht und kein Schild - sie zeigen sich, wenn sie dran sind
-  const zu = ORTE.filter((o) => !S.ortOffen(o));
-  for (const o of zu) {
-    const ox = o.x, oy = yPx(o) - 6;
-    const g = c.createRadialGradient(ox, oy, 4, ox, oy, 24);
-    const f = winter ? '232,238,245' : '96,140,80';
-    g.addColorStop(0, `rgba(${f},0.82)`); g.addColorStop(0.6, `rgba(${f},0.6)`); g.addColorStop(1, `rgba(${f},0)`);
-    c.fillStyle = g; c.fillRect(ox - 24, oy - 24, 48, 48);
-  }
+  const zu = ORTE.filter((o) => !S.ortOffen(o));   // (ohne Nebel seit 13.10. - sie werden gar nicht gemalt)
   const imNebel = (q) => zu.some((o) => Math.abs(q.x - o.x) < 20 && q.y > yPx(o) - 32 && q.y < yPx(o) + 6);
   const lichterOffen = zu.length ? grundLichter.filter((q) => !imNebel(q)) : grundLichter;
   // Nachts dunkler, dann leuchten Fenster, Laternen und Lichterketten
