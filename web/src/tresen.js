@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610130918';
-import * as C from './config.js?v=202610130918';
-import * as S from './spiel.js?v=202610130918';
-import * as Z from './zeit.js?v=202610130918';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610130919';
+import * as C from './config.js?v=202610130919';
+import * as S from './spiel.js?v=202610130919';
+import * as Z from './zeit.js?v=202610130919';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -265,7 +265,7 @@ function balken(c, y0) {
  * der Balken darunter ist die Zeit, bis sie dich vermissen.
  */
 function chefAnzeige(c, y0, rechts) {
-  if (!S.hatWichtel() || !S.chefAktiv()) return;
+  if (!S.hatWichtel() || !S.chefAktiv() || !S.chefBonus()) return;
   const s = 'x' + String(C.CHEF_TEMPO).replace('.', ',');
   const b = textBreite(s) + 14, x = rechts - b, y = y0 - 4;
   r(c, x - 1, y - 1, b + 2, 14, '#3a2010');

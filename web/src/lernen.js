@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610130918';
-import * as S from './spiel.js?v=202610130918';
-import * as A from './auftraege.js?v=202610130918';
-import * as E from './erfolge.js?v=202610130918';
-import * as Z from './ziele.js?v=202610130918';
-import * as KA from './karte.js?v=202610130918';
+import * as C from './config.js?v=202610130919';
+import * as S from './spiel.js?v=202610130919';
+import * as A from './auftraege.js?v=202610130919';
+import * as E from './erfolge.js?v=202610130919';
+import * as Z from './ziele.js?v=202610130919';
+import * as KA from './karte.js?v=202610130919';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -228,7 +228,7 @@ const HINWEISE = [
     text: () => { const g = S.lauf.gaeste.find((x) => x.gross); return g ? `Großbestellung! ${g.gross.name} will ${g.gross.n} × ${C.PRODUKT[g.gross.id].name}. Bring alle, bevor die Zeit abläuft - das gibt richtig viele Sterne. Die Wichtel trauen sich da nicht ran.` : ''; },
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.gross && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 9 },
   { id: 'chef', ruhig: true, wann: () => S.hat('servier') && S.chefAktiv() && S.st.stats.bedient >= 60,
-    text: () => `Du bist der Chef! Solange du am Stand mit anpackst, arbeiten die Wichtel ×${String(C.CHEF_TEMPO).replace('.', ',')} so schnell (Tafel links oben). Besondere Gäste bedienst nur du.`,
+    text: () => `Du bist der Chef! Solange du am Stand mit anpackst, arbeiten die Wichtel ${C.CHEF_TEMPO === 2 ? 'doppelt' : '×' + String(C.CHEF_TEMPO).replace('.', ',')} so schnell (Tafel links oben). Besondere Gäste bedienst nur du.`,
     ziel: () => ({ x: 40, y: G + 2 }), dauer: 8 },
   { id: 'schild', ruhig: true, wann: () => S.st.stats.bedient >= 40 && !S.st.standName,
     text: () => 'Tipp: Tippe auf das rote Schild über dem Stand - dann kannst du ihm einen eigenen Namen geben.',
@@ -335,6 +335,7 @@ function hinweise(dt) {
   for (const h of HINWEISE) {
     if (st.tipps[h.id] || ruheT < (h.sofort ? HINWEIS_PAUSE_SOFORT : HINWEIS_PAUSE) || !h.wann()) continue;
     aktuell = { h, t: 0 };
+    if (h.id === 'chef') { st.chefBonus = true; S.speichere(); }   // der Bonus gilt, sobald er erklärt wird
     // Verwandte Hinweise gelten mit als erklärt (Aufträge kam sonst doppelt)
     for (const id of h.ersetzt || []) st.tipps[id] = true;
     return hinweise(0);

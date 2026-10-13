@@ -115,7 +115,7 @@ export const SPEZIAL_PAUSE = 90;    // s Mindestabstand zwischen zwei besonderen
 // hat, ist da - dann arbeiten alle Wichtel schneller, und nur dann kommen
 // besondere Gäste und Großbestellungen (die bedient ohnehin nur die Hand).
 export const CHEF_ZEIT = 20;
-export const CHEF_TEMPO = 1.5;
+export const CHEF_TEMPO = 2;   // 13.10.: vorher 1,5 - und erst, sobald der Hinweis „Du bist der Chef!“ kommt (S.chefBonus)
 
 // Der Nikolaus fliegt vorbei: ganz selten, nur solange das Spiel offen ist.
 // Antippen schenkt so viele Minuten normaler Einnahmen (mindestens 20).

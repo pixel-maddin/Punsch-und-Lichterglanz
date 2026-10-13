@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610130918';
-import * as Z from './zeit.js?v=202610130918';
-import { neueFarben } from './pixel.js?v=202610130918';
+import * as C from './config.js?v=202610130919';
+import * as Z from './zeit.js?v=202610130919';
+import { neueFarben } from './pixel.js?v=202610130919';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -313,7 +313,9 @@ export function ortOffen(o) {
 }
 export const offlineAnteil = () => nachTag(C.OFFLINE_JE_TAG.anteil);
 export const offlineStunden = () => nachTag(C.OFFLINE_JE_TAG.stunden);
-export const wichtelTempo = () => chefAktiv() ? C.CHEF_TEMPO : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() : 1;
+/** Gilt der Chef-Bonus schon? Erst ab dem Hinweis „Du bist der Chef!“ (13.10.) - vorher gibt es ihn noch nicht. */
+export const chefBonus = () => !!(st.chefBonus || (st.tipps && st.tipps.chef));
+export const wichtelTempo = () => chefAktiv() ? (chefBonus() ? C.CHEF_TEMPO : 1) : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() : 1;
 
 export const hatWichtel = () => ['spuel', 'servier', 'nachfuell', 'crepe_w'].some((id) => hat(id));
 
