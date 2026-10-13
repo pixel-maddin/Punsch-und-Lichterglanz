@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610131446';
-import * as S from './spiel.js?v=202610131446';
-import * as Z from './zeit.js?v=202610131446';
-import * as T from './ton.js?v=202610131446';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131446';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131446';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131446';
-import * as A from './auftraege.js?v=202610131446';
-import * as E from './erfolge.js?v=202610131446';
-import * as ZL from './ziele.js?v=202610131446';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131446';
-import * as KA from './karte.js?v=202610131446';
-import { zeigeRueckblick } from './ereignis.js?v=202610131446';
-import { barbaraZweig } from './szene.js?v=202610131446';
-import * as SW from './schneeball.js?v=202610131446';
-import * as LI from './lichtung.js?v=202610131446';
-import * as CB from './christbaum.js?v=202610131446';
-import * as SB from './schlitten.js?v=202610131446';
-import * as EB from './schlittschuh.js?v=202610131446';
-import * as BS from './backstube.js?v=202610131446';
-import { alleSymbole } from './symbole.js?v=202610131446';
+import * as C from './config.js?v=202610131702';
+import * as S from './spiel.js?v=202610131702';
+import * as Z from './zeit.js?v=202610131702';
+import * as T from './ton.js?v=202610131702';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131702';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131702';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131702';
+import * as A from './auftraege.js?v=202610131702';
+import * as E from './erfolge.js?v=202610131702';
+import * as ZL from './ziele.js?v=202610131702';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131702';
+import * as KA from './karte.js?v=202610131702';
+import { zeigeRueckblick } from './ereignis.js?v=202610131702';
+import { barbaraZweig } from './szene.js?v=202610131702';
+import * as SW from './schneeball.js?v=202610131702';
+import * as LI from './lichtung.js?v=202610131702';
+import * as CB from './christbaum.js?v=202610131702';
+import * as SB from './schlitten.js?v=202610131702';
+import * as EB from './schlittschuh.js?v=202610131702';
+import * as BS from './backstube.js?v=202610131702';
+import { alleSymbole } from './symbole.js?v=202610131702';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1428,6 +1428,12 @@ function baueAlbum(liste) {
   const g = el('div', 'album-raster');
   for (const [t, name] of ALBUM_GAESTE) g.appendChild(albumKarte(name, typ[t] || 0, (ctx) => figurKlein(ctx, { typ: t, farben: neueFarben(t), phase: 0, laeuft: false }, 12, 22, 0), 24, 24, '× bedient'));
   liste.appendChild(g);
+  // Stammgäste (13.10.): wer schon da war, mit der Zahl der Besuche
+  const stamm = Object.keys(C.STAMMGAESTE);
+  kopf('Stammgäste', stamm.filter((id) => S.stammBesuche(id)).length, stamm.length);
+  const sg = el('div', 'album-raster');
+  for (const id of stamm) sg.appendChild(albumKarte(C.GAESTE[id].name, S.stammBesuche(id), (ctx) => figurKlein(ctx, { typ: id, farben: { ...C.GAESTE[id].farben }, phase: 0, laeuft: false }, id === 'hilde' ? 16 : 12, 22, 0), id === 'hilde' ? 28 : 24, 24, '× da gewesen'));
+  liste.appendChild(sg);
   // Tiere der Waldlichtung
   kopf('Tiere der Waldlichtung', ALBUM_TIERE.filter(([a]) => tiere[a] || (!S.st.stats.tiere && S.miniRekord('lichtung') > 0 && ALBUM_TIERE_ALT.includes(a))).length, ALBUM_TIERE.length);
   const ti = el('div', 'album-raster');
@@ -1819,7 +1825,40 @@ export function waehleModus(fertig) {
   const box = fenster('Wie möchtest du spielen?', `
     ${bis > 7 ? individuell + klassisch : klassisch + individuell}
     <p class="klein">Die Uhrzeit ist in beiden Fällen die echte: Nachts ist es dunkel.</p>`, []);
-  for (const b of box.querySelectorAll('.modus')) b.onclick = () => { T.spiele('klick'); schliesseFenster(); fertig(b.dataset.m); };
+  // 13.10.: Das Fenster blendet ein - ein Tipp in den ersten 0,7 s zählt nicht
+  // (Betatest: der Tipp auf „Individuell" landete auf „Klassisch"). Und wer im
+  // Herbst „Klassisch" wählt, bestätigt es noch einmal.
+  const ab = performance.now() + 700;
+  for (const b of box.querySelectorAll('.modus')) b.onclick = () => {
+    if (performance.now() < ab) return;
+    T.spiele('klick');
+    if (b.dataset.m === 'echt' && bis > 7) {
+      fenster('Wirklich Klassisch?', `<p>Dann läuft das Spiel mit dem echten Kalender: Das erste Türchen und der Schnee kommen erst in <b>${bis} Tagen</b>.</p><p class="klein">Mit „Individuell" geht es schon in einer Woche los.</p>`,
+        [{ text: 'Doch Individuell', neben: true, aktion: () => { setTimeout(() => fertig('eigen'), 50); } },
+          { text: 'Ja, Klassisch', aktion: () => { setTimeout(() => fertig('echt'), 50); } }]);
+      return;
+    }
+    schliesseFenster(); fertig(b.dataset.m);
+  };
+}
+
+/** „Morgen wartet …" (13.10.): was es morgen Neues gibt - ohne zu verraten, WAS genau aufgeht. */
+export function vorschauText() {
+  const teile = [];
+  const dt = Z.dezemberTag();
+  if (dt >= 1 && dt < 24) teile.push(`Türchen ${dt + 1}`);
+  else if (dt < 1) teile.push('ein Vorfreude-Päckchen');
+  teile.push('neue Aufträge');
+  const m = S.marktInfo();
+  if (m.inTagen === 1) teile.push('Weihnachtsmarkt');
+  const tag = S.spieltag();
+  if (tag < 99) {
+    const bald = Object.entries(C.MINI_AB_TAG).filter(([n]) => !S.miniOffen(n)).map(([, ab]) => ab - tag).filter((d) => d > 0);
+    const n = bald.length ? Math.min(...bald) : 0;
+    if (n === 1) teile.push('ein neuer Ort auf der Karte');
+    else if (n > 1 && n <= 3) teile.push(`in ${n} Tagen ein neuer Ort auf der Karte`);
+  }
+  return `Morgen wartet: ${teile.join(' · ')}. Schau wieder vorbei!`;
 }
 
 /** Einmal nach den Startzielen (13.10.): Ziele weiter vorschlagen oder selbst erkunden? */

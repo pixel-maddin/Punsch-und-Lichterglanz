@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610131446';
-import * as C from './config.js?v=202610131446';
-import * as S from './spiel.js?v=202610131446';
-import * as Z from './zeit.js?v=202610131446';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610131702';
+import * as C from './config.js?v=202610131702';
+import * as S from './spiel.js?v=202610131702';
+import * as Z from './zeit.js?v=202610131702';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -293,7 +293,7 @@ export function trifftSchild(x, y, y0) {
 /** Schwung: kleine Tafel rechts neben dem Schild, gut sichtbar über dem Stand. */
 function schwungAnzeige(c, y0, x) {
   const sw = S.lauf.schwung;
-  if (!(sw > 0)) return;
+  if (!(sw >= 2)) return;   // 13.10.: erst ab dem zweiten zügigen Servieren - zusammen mit seinem Hinweis
   const t = S.lauf.t;
   const m = 1 + sw * C.SCHWUNG_PRO;
   const s = 'x' + m.toFixed(2).replace('.', ',');

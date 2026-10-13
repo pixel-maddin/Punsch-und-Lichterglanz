@@ -372,6 +372,25 @@ for (const p of PRODUKTE) {
   });
 }
 
+// Preiskurve (13.10., Betatest + Saison-Autopilot): Ab 10.000 Sternen wurden
+// die Preise viel schneller teurer als die Einnahmen (×380 gegen ×4) - ab
+// Anfang Dezember endete fast jede dritte Sitzung ohne Kauf. Darüber wird
+// jetzt gestaucht: p' = 10.000 · (p / 10.000)^PREIS_KURVE, auf zwei Stellen
+// gerundet. Luxus (luxus / Stufen ab luxusAb) bleibt, wie er ist. Varianten
+// folgen von selbst (sie rechnen aus dem Artikelpreis).
+export const PREIS_KURVE = 0.85, PREIS_KURVE_AB = 10000;
+const kurve = (k) => {
+  if (k <= PREIS_KURVE_AB) return k;
+  const roh = PREIS_KURVE_AB * Math.pow(k / PREIS_KURVE_AB, PREIS_KURVE);
+  const stelle = Math.pow(10, Math.floor(Math.log10(roh)) - 1);
+  return Math.round(roh / stelle) * stelle;
+};
+for (const a of ARTIKEL) {
+  if (a.luxus) continue;
+  if (Array.isArray(a.kosten)) a.kosten = a.kosten.map((k, i) => (a.luxusAb && i + 1 >= a.luxusAb ? k : kurve(k)));
+  else if (typeof a.kosten === 'number') a.kosten = kurve(a.kosten);
+}
+
 // ---------------------------------------------------------------------------
 // Lichter: Artikel → Kette. Nach dem Kauf kann jede Kette unter „Mein Haus"
 // AUS, WEISS oder BUNT leuchten - ohne Extra-Kauf (Nutzerwunsch). Wo die
@@ -845,7 +864,10 @@ export const MINI_ALLE_DEZ = 14;
 // Weihnachtsmann auf der Karte. MARKT_ERST muss denselben Wert haben: Vorher
 // stand dort 2 gegen 3 hier, der erste Markttermin fiel in die Sperre, und
 // der Markt kam erst an Tag 6 oder 7.
-export const EINSTIEG = { sonder: 1, ansturm: 1, haendler: 1, wetter: 1, schlitten: 2, santa: 3, markt: 4 };
+// 13.10.: sonder 1 → 0 (Betatest: am ersten Tag nach den Startzielen passierte nichts mehr - jetzt kommt
+// der erste besondere Gast und mit ihm die Stammgäste noch in der ersten Sitzung)
+export const EINSTIEG = { sonder: 0, ansturm: 1, haendler: 1, wetter: 1, schlitten: 2, santa: 3, markt: 4 };
+export const VORSCHAU_NACH = 480;   // s in der Sitzung, bis „Morgen wartet …“ kommt (einmal am Tag)
 export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Großbestellung, Gruppe, Ansturm, Sondergast
 
 // ---------------------------------------------------------------------------
@@ -888,7 +910,10 @@ export const WETTBEWERB = {
   // Stimmung am 20.12. (Autopilot, Start 24.11.): 5 min/Tag 380 · 10 min 452 ·
   // 20 min + Minispiele 567 · 30 min + 3 Runden 610-664. Ein Mensch braucht
   // 30-40 % mehr Zeit: Gold für Vielspieler, Bronze schon bei kurzem Reinschauen.
-  plaetze: [ { name: 'Gold', ab: 560, f: '#f0c040' }, { name: 'Silber', ab: 440, f: '#d8dce4' }, { name: 'Bronze', ab: 340, f: '#d08a4a' } ],
+  // 13.10.: mit der flacheren Preiskurve (PREIS_KURVE) liegt die Stimmung am 20.12.
+  // gemessen um 13 % höher (3×10 min + 1 Minispielrunde: 522 → 590; 3×5 min: 554) -
+  // die Schwellen sind im selben Verhältnis mitgezogen (vorher 560 / 440 / 340).
+  plaetze: [ { name: 'Gold', ab: 630, f: '#f0c040' }, { name: 'Silber', ab: 500, f: '#d8dce4' }, { name: 'Bronze', ab: 380, f: '#d08a4a' } ],
   lohn: [30, 20, 12, 6],     // Gold, Silber, Bronze, Urkunde
   lohnMin: 2000,
   abSpieltag: 4,

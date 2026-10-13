@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610131446';
-import * as S from './spiel.js?v=202610131446';
-import * as A from './auftraege.js?v=202610131446';
-import * as E from './erfolge.js?v=202610131446';
-import * as Z from './ziele.js?v=202610131446';
-import * as KA from './karte.js?v=202610131446';
+import * as C from './config.js?v=202610131702';
+import * as S from './spiel.js?v=202610131702';
+import * as A from './auftraege.js?v=202610131702';
+import * as E from './erfolge.js?v=202610131702';
+import * as Z from './ziele.js?v=202610131702';
+import * as KA from './karte.js?v=202610131702';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -155,20 +155,20 @@ const HINWEISE = [
   { id: 'gegangen', ruhig: true, wann: () => S.st.stats.verpasst >= 1,
     text: () => 'Ein Gast ist weitergegangen - nicht schlimm, es kommen neue! Aber Achtung: Manchmal kommt jemand GANZ BESONDERES vorbei - den solltest du nicht warten lassen.',
     ziel: () => gastZiel(0), dauer: 8 },
-  { id: 'schwung', ruhig: true, wann: () => S.lauf.schwung >= 3,
+  { id: 'schwung', ruhig: true, wann: () => S.lauf.schwung >= 2,
     text: () => 'Schwung! Wenn du zügig hintereinander servierst, gibt es mehr Sterne (bis ×1,40).',
     ziel: () => ({ x: 140, y: G + 2 }), dauer: 5 },
   // Die drei ersten Wichtel (Startziele 3-5): erst erklären, was sie tun, dann zum Laden
   { id: 'w_spuel', sofort: true, wann: () => zielDran('spuel', 'spuel'),
-    info: () => 'Zeit für Hilfe! Wichtel nehmen dir am Stand Arbeit ab. Der erste ist der SPÜL-WICHTEL: Er stellt dir laufend saubere Gläser aufs Tablett - dann musst du nicht jedes Mal auf die Gläser tippen.',
+    info: () => (S.hat('spuel') ? 'Gut gemacht - der SPÜL-WICHTEL ist schon da! Wichtel nehmen dir am Stand Arbeit ab: Er stellt dir laufend saubere Gläser aufs Tablett - dann musst du nicht jedes Mal auf die Gläser tippen.' : 'Zeit für Hilfe! Wichtel nehmen dir am Stand Arbeit ab. Der erste ist der SPÜL-WICHTEL: Er stellt dir laufend saubere Gläser aufs Tablett - dann musst du nicht jedes Mal auf die Gläser tippen.'),
     text: () => 'Tippe auf KARTE - im Wichtelwald wartet er schon.',
     ziel: ladenZiel, fertig: () => S.hat('spuel'), laden: { tab: 'wichtel', id: 'spuel' }, lang: true },
   { id: 'w_nachfuell', sofort: true, wann: () => zielDran('nachfuell', 'nachfuell'),
-    info: () => 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.',
+    info: () => (S.hat('nachfuell') ? 'Den NACHFÜLL-WICHTEL hast du auch schon: Er füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.' : 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.'),
     text: () => 'Tippe auf KARTE - im Wichtelwald findest du ihn.',
     ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, lang: true },
   { id: 'w_servier', sofort: true, wann: () => zielDran('servier', 'servier'),
-    info: () => 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand dann von selbst - sogar wenn du nicht da bist.',
+    info: () => (S.hat('servier') ? 'Und der wichtigste Helfer ist auch schon da: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand jetzt von selbst - sogar wenn du nicht da bist.' : 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand dann von selbst - sogar wenn du nicht da bist.'),
     text: () => 'Tippe auf KARTE - im Wichtelwald wartet der Servier-Wichtel.',
     ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
@@ -186,7 +186,8 @@ const HINWEISE = [
   { id: 'baumarkt', sofort: true, wann: () => !!S.st.tipps.wichtel_weg && (S.st.ziel || 0) >= 5,
     info: () => 'Neu auf der Karte: der BAUMARKT! Dort gibt es größere Töpfe, einen längeren Tresen für mehr Gäste, ein Tablett für mehr Gläser - und neue Farbe für dein Haus.',
     text: () => 'Tippe auf KARTE - der Baumarkt ist jetzt offen.',
-    ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, laden: { tab: 'baumarkt' }, lang: true },
+    // 13.10.: ohne `lang` - wer nicht hingeht, hatte den Zeiger sonst für immer über dem Stand
+    ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, laden: { tab: 'baumarkt' } },
   { id: 'karte_mehr', sofort: true, wann: () => !!S.st.tipps.wichtel_weg && !!S.st.tipps.baumarkt,
     // Nennt nur, was schon offen ist (10.10.: Minispiele kommen nach und nach)
     info: () => {
@@ -196,7 +197,7 @@ const HINWEISE = [
       return `Auf der Karte gibt es noch mehr zu entdecken: ${offen.length > 1 ? 'MINISPIELE' : 'ein MINISPIEL'} - ${liste}. ${offen.length > 1 ? 'Sie bringen' : 'Es bringt'} Sterne und besondere Deko fürs Haus.${alle ? '' : ' Alle paar Tage kommt ein neues dazu.'} Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.`;
     },
     text: () => 'Tippe auf KARTE und schau dich um.',
-    ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, lang: true },
+    ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen },
   { id: 'herz_ziel', wann: () => istZiel('herz'),
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },

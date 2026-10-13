@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610131446';
-import * as S from './spiel.js?v=202610131446';
-import * as Z from './zeit.js?v=202610131446';
-import * as T from './ton.js?v=202610131446';
-import * as LI from './lichtung.js?v=202610131446';
-import * as CB from './christbaum.js?v=202610131446';
-import * as KA from './karte.js?v=202610131446';
-import * as SB from './schlitten.js?v=202610131446';
-import * as EB from './schlittschuh.js?v=202610131446';
-import * as BS from './backstube.js?v=202610131446';
-import * as UI from './ui.js?v=202610131446';
-import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131446';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131446';
-import * as Lernen from './lernen.js?v=202610131446';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131446';
-import * as A from './auftraege.js?v=202610131446';
-import * as E from './erfolge.js?v=202610131446';
-import * as ZL from './ziele.js?v=202610131446';
+import * as C from './config.js?v=202610131702';
+import * as S from './spiel.js?v=202610131702';
+import * as Z from './zeit.js?v=202610131702';
+import * as T from './ton.js?v=202610131702';
+import * as LI from './lichtung.js?v=202610131702';
+import * as CB from './christbaum.js?v=202610131702';
+import * as KA from './karte.js?v=202610131702';
+import * as SB from './schlitten.js?v=202610131702';
+import * as EB from './schlittschuh.js?v=202610131702';
+import * as BS from './backstube.js?v=202610131702';
+import * as UI from './ui.js?v=202610131702';
+import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131702';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131702';
+import * as Lernen from './lernen.js?v=202610131702';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131702';
+import * as A from './auftraege.js?v=202610131702';
+import * as E from './erfolge.js?v=202610131702';
+import * as ZL from './ziele.js?v=202610131702';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -366,6 +366,18 @@ setInterval(() => {
   // Nach den Startzielen einmal fragen: weiter Ziele vorgeschlagen bekommen oder selbst erkunden?
   if (ZL.fertig() && S.st.zieleWeiter == null && S.st.lernen >= 99 && S.lauf.t > 20 && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) UI.zeigeZieleFrage();
   const erfolge = E.pruefe();
+  // Socken aus der Einführung kamen still dazu - nach den Startzielen einmal sagen (13.10.)
+  if (erfolge.length && !S.startzieleFertig()) S.st.sockenStill = (S.st.sockenStill || 0) + erfolge.length;
+  if (S.st.sockenStill && S.startzieleFertig() && S.lauf.t > 40 && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) {
+    T.spiele('spezial');
+    UI.toast(`Du hast schon ${S.st.sockenStill} ${S.st.sockenStill === 1 ? 'Socke' : 'Socken'} an der Erfolgswand verdient! Schau unter Aufträge → Erfolge.`, 'neu');
+    S.st.sockenStill = 0; S.speichere();
+  }
+  // Vorschau auf morgen (13.10.): einmal am Tag nach ein paar Minuten
+  if (S.startzieleFertig() && S.lauf.t > C.VORSCHAU_NACH && S.st.vorschauTag !== Z.tagesSchluessel() && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) {
+    S.st.vorschauTag = Z.tagesSchluessel(); S.speichere();
+    UI.toast(UI.vorschauText(), 'neu');
+  }
   if (erfolge.length && S.startzieleFertig()) {   // Socken zählen immer, gemeldet erst nach den Startzielen
     T.spiele('spezial');
     UI.toast(erfolge.length === 1 ? `Neue Socke an der Erfolgswand: ${erfolge[0].name}!` : `${erfolge.length} neue Socken an der Erfolgswand!`, 'neu');
