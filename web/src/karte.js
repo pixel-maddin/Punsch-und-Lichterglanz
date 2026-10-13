@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610130919';
-import * as S from './spiel.js?v=202610130919';
-import * as Z from './zeit.js?v=202610130919';
-import * as FEIN from './fein.js?v=202610130919';
-import * as T from './ton.js?v=202610130919';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610130919';
+import * as C from './config.js?v=202610130929';
+import * as S from './spiel.js?v=202610130929';
+import * as Z from './zeit.js?v=202610130929';
+import * as FEIN from './fein.js?v=202610130929';
+import * as T from './ton.js?v=202610130929';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610130929';
 
 const $ = (s) => document.querySelector(s);
 
@@ -32,7 +32,7 @@ export const ORTE = [
   { id: 'dorf',      name: 'Weihnachtsladen', x: 90,  y: 0.17, tab: 'markt' },
   { id: 'festplatz', name: 'Festplatz',       x: 30,  y: 0.19, markt: true },
   { id: 'baeume',    name: 'Christbaumverkauf', x: 150, y: 0.21, spiel: 'baum' },
-  { id: 'super',     name: 'Supermarkt',      x: 34,  y: 0.40, tab: 'super' },
+  { id: 'super',     name: 'Supermarkt',      x: 34,  y: 0.445, tab: 'super' },   // 13.10. tiefer (0,40): stand zu dicht an der Backstube
   { id: 'bau',       name: 'Baumarkt',        x: 148, y: 0.41, tab: 'baumarkt' },
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },
   { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.75, spiel: 'lichtung' },
@@ -42,7 +42,7 @@ export const ORTE = [
   { id: 'wichtel',   name: 'Wichtelwald',     x: 92,  y: 0.84, tab: 'wichtel' },
   { id: 'berg',      name: 'Schlittenberg',   x: 150, y: 0.74, spiel: 'berg' },
   // 12.10.: rechts zwischen Baumarkt und Schlittenberg (erst links, Nutzerwunsch: rechts)
-  { id: 'schnee',    name: 'Schneeballwiese', x: 156, y: 0.585, spiel: 'schnee' },
+  { id: 'schnee',    name: 'Schneeballwiese', x: 156, y: 0.55, spiel: 'schnee' },
 ];
 
 let offen = false;
@@ -285,11 +285,24 @@ function wege() {
     [P('backstube'), [84, 0.34 * H], [72, 0.33 * H]],
   ];
 }
+/**
+ * Weg als Kurve. Seit 13.10. mit sanftem Schlenker (Nutzerwunsch: „zu
+ * geradlinig"): zwei Wellen quer zur Richtung, an den Enden null, damit der
+ * Weg weiter genau am Ort ankommt. Hängt nur an Start, Ziel und s - die
+ * Laternen auf halbem Weg (andere `n`) sitzen deshalb auf demselben Weg.
+ */
 function bezier(a, b, k, n) {
   const pts = [];
+  const lang = Math.hypot(b[0] - a[0], b[1] - a[1]), amp = Math.min(4.5, lang / 22);
+  const saat = a[0] * 0.37 + b[1] * 0.11 + a[1] * 0.05;
   for (let i = 0; i <= n; i++) {
     const s = i / n, u = 1 - s;
-    pts.push({ x: u * u * a[0] + 2 * u * s * k[0] + s * s * b[0], y: u * u * a[1] + 2 * u * s * k[1] + s * s * b[1] });
+    const x = u * u * a[0] + 2 * u * s * k[0] + s * s * b[0], y = u * u * a[1] + 2 * u * s * k[1] + s * s * b[1];
+    // Richtung der Kurve an dieser Stelle -> Querrichtung
+    const tx = 2 * u * (k[0] - a[0]) + 2 * s * (b[0] - k[0]), ty = 2 * u * (k[1] - a[1]) + 2 * s * (b[1] - k[1]);
+    const tl = Math.hypot(tx, ty) || 1;
+    const w = Math.sin(Math.PI * s) * amp * (Math.sin(s * Math.PI * 2.3 + saat) * 0.7 + Math.sin(s * Math.PI * 5.1 + saat * 2) * 0.3);
+    pts.push({ x: x - ty / tl * w, y: y + tx / tl * w });
   }
   return pts;
 }
@@ -362,7 +375,8 @@ function baueGrund(winter) {
   const bruecken = [];
   for (const pts of alle) for (const q of pts) {
     if (wasserBei(q.x, q.y)) { bruecken.push(q); continue; }
-    r(c, q.x - 2, q.y - 1, 5, 4, P.wegRand);
+    const breit = hash2(Math.round(q.x), Math.round(q.y)) < 0.3 ? 1 : 0;   // mal etwas breiter ausgetreten
+    r(c, q.x - 2 - breit, q.y - 1, 5 + breit, 4, P.wegRand);
   }
   for (const pts of alle) for (const q of pts) {
     if (wasserBei(q.x, q.y)) continue;
@@ -1015,7 +1029,7 @@ function zeichne(t, dt) {
   const nacht = 1 - li.hell;
   $('#landkarte').classList.toggle('nacht', nacht > 0.4);
   // Ohne Schilder (12.10.) leuchten die offenen Orte auch tagsüber leicht
-  const hof = Math.max(nacht > 0.25 ? nacht : 0, S.st.karteOhneText ? 0.75 : 0);
+  const hof = nacht > 0.25 ? nacht : 0;   // tagsüber ohne Schilder kein großer Hof mehr (13.10.) - dafür die Punkte
   if (hof > 0) {
     for (const o of ORTE) {
       if (zu.includes(o)) continue;
@@ -1035,14 +1049,15 @@ function zeichne(t, dt) {
   if (S.st.karteOhneText) {
     for (const o of ORTE) {
       if (zu.includes(o) || o.id === hervorId) continue;   // ein hervorgehobener Ort hat sein Schild
-      const [sdx, sdy] = o.schild || [0, 0];
-      const px2 = Math.round(o.x + sdx), py2 = Math.round(yPx(o) + 7 + sdy);
+      // Direkt unter dem Ort - nicht am Schild (die Backstube hat ihr Schild daneben)
+      const px2 = Math.round(o.x), py2 = Math.round(yPx(o) + 6);
       const neu = o.spiel && !S.miniRekord(o.spiel);
       const atem = 0.75 + Math.sin(t * 2.2 + o.x * 0.3) * 0.25;
       const rgb = neu ? '255,110,90' : '255,214,110';
-      const g = c.createRadialGradient(px2, py2, 0, px2, py2, 7);
-      g.addColorStop(0, `rgba(${rgb},${(0.9 * atem).toFixed(3)})`); g.addColorStop(0.4, `rgba(${rgb},${(0.35 * atem).toFixed(3)})`); g.addColorStop(1, `rgba(${rgb},0)`);
-      c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(px2 - 7, py2 - 7, 14, 14); c.restore();
+      // Nur ein ganz kleiner Schein (13.10.: vorher 7 px, „viel zu groß")
+      const g = c.createRadialGradient(px2, py2, 1, px2, py2, 4.5);
+      g.addColorStop(0, `rgba(${rgb},${(0.6 * atem).toFixed(3)})`); g.addColorStop(1, `rgba(${rgb},0)`);
+      c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(px2 - 5, py2 - 5, 10, 10); c.restore();
       // Runder Punkt (5 x 5) mit dunklem Rand, damit er auch auf Schnee steht
       const rand = neu ? '#7a1a10' : '#6a4410', kern = neu ? '#ff6a50' : '#ffd040';
       r(c, px2 - 1, py2 - 3, 3, 1, rand); r(c, px2 - 1, py2 + 3, 3, 1, rand); r(c, px2 - 3, py2 - 1, 1, 3, rand); r(c, px2 + 3, py2 - 1, 1, 3, rand);

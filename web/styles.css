@@ -225,7 +225,7 @@ html, body {
 /* Schilder aus (12.10.): nur noch die Orte, die leicht leuchten. Ein
    hervorgehobener Ort (Führung) behält sein Schild. */
 #kartenText {
-  position: absolute; right: calc(var(--px) * 19); top: calc(var(--px) * 21); z-index: 3;
+  position: absolute; left: calc(var(--px) * 3); top: calc(var(--px) * 21); z-index: 3;
   appearance: none; border: 0; cursor: pointer; width: calc(var(--px) * 13); height: calc(var(--px) * 13);
   border-radius: calc(var(--px) * 2.5); background: var(--holz); color: #fff; font: bold calc(var(--px) * 5) var(--schrift);
   box-shadow: 0 calc(var(--px) * 1) 0 rgba(0, 0, 0, 0.35);
