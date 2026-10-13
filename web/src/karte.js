@@ -149,7 +149,7 @@ function baueSchilder(hervor) {
       f.style.top = `calc(var(--px) * ${yPx(o) - 20 + vers()})`;
       f.onclick = () => {
         T.spiele('klick');
-        S.hooks.toast(o.spiel ? 'Hier kommt bald ein neues Minispiel hin - es wird noch freigeschaltet.' : 'Wird noch freigeschaltet - spiel weiter, dann geht es hier auf.', 'hinweis');
+        S.hooks.toast('Wird noch freigeschaltet - was hier hinkommt, bleibt noch geheim!', 'hinweis');   // nichts verraten (13.10.)
       };
       box.appendChild(f);
       continue;
