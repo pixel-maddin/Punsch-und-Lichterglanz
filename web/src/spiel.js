@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610141753';
-import * as Z from './zeit.js?v=202610141753';
-import { neueFarben } from './pixel.js?v=202610141753';
+import * as C from './config.js?v=202610141811';
+import * as Z from './zeit.js?v=202610141811';
+import { neueFarben } from './pixel.js?v=202610141811';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -133,12 +133,51 @@ if (!st.sterne10) {
 // Alte Spielstände: Musik war ein Schalter (true/false), jetzt eine Stufe
 if (typeof st.ton.musik === 'boolean') st.ton.musik = st.ton.musik ? 3 : 0;
 
+let speichernGesperrt = false;   // nach dem Einlesen einer Datei bis zum Neuladen
 export function speichere() {
+  if (speichernGesperrt) return;
   // „Zuletzt da" nur stempeln, solange die App sichtbar ist. Im Hintergrund
   // laufen Zeitgeber teils weiter (Android, Desktop) - dann rückte der
   // Stempel mit, und beim Zurückkommen gab es kein Wichtel-Einkommen.
   if (typeof document === 'undefined' || !document.hidden) st.zuletzt = Date.now();
   try { localStorage.setItem(SCHLUESSEL, JSON.stringify(st)); } catch (e) { /* voll/privat */ }
+}
+
+// ---------------------------------------------------------------------------
+// Spielstand als Datei (14.10., Nutzerwunsch: „auf ein anderes Handy
+// importieren"). Die Datei ist der ganze Stand plus eine Kennung. `zuletzt`
+// ist der Zeitpunkt der Sicherung - beim Laden rechnet die Kiste die Zeit
+// dazwischen ab wie jede Abwesenheit (gedeckelt wie immer).
+// ---------------------------------------------------------------------------
+const DATEI_KENNUNG = 'punsch-lichterglanz';
+export function standAlsDatei() {
+  speichere();
+  return JSON.stringify({ spiel: DATEI_KENNUNG, format: 1, gesichert: Date.now(), stand: st });
+}
+/** Prüft eine eingelesene Datei. Gibt { stand, name, gesamt, gesichert } oder { fehler }. */
+export function pruefeDatei(text) {
+  let d;
+  try { d = JSON.parse(text); } catch (e) { return { fehler: 'Die Datei ist kein Spielstand von Punsch & Lichterglanz.' }; }
+  const s = d && d.stand;
+  if (!d || d.spiel !== DATEI_KENNUNG || !s || typeof s !== 'object' || typeof s.geld !== 'number' || typeof s.gesamt !== 'number')
+    return { fehler: 'Die Datei ist kein Spielstand von Punsch & Lichterglanz.' };
+  if (d.format > 1) return { fehler: 'Dieser Spielstand ist von einer neueren Version - bitte das Spiel erst neu laden.' };
+  return { stand: s, name: s.name || null, gesamt: s.gesamt, gesichert: d.gesichert || s.zuletzt || null };
+}
+/**
+ * Übernimmt den geprüften Stand. Danach MUSS neu geladen werden (laden()
+ * stellt alte Stände um). Der bisherige Stand bleibt als Notnagel unter
+ * `<Schlüssel>.vorImport` liegen. Bis zum Neuladen wird nichts mehr
+ * gespeichert - sonst schriebe `pagehide` den alten Stand wieder darüber.
+ */
+export function uebernehmeStand(stand) {
+  try {
+    const alt = localStorage.getItem(SCHLUESSEL);
+    if (alt) localStorage.setItem(SCHLUESSEL + '.vorImport', alt);
+    localStorage.setItem(SCHLUESSEL, JSON.stringify(stand));
+  } catch (e) { return false; }
+  speichernGesperrt = true;
+  return true;
 }
 
 export function allesLoeschen() {

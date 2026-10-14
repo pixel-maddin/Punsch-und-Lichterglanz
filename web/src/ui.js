@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610141753';
-import * as S from './spiel.js?v=202610141753';
-import * as Z from './zeit.js?v=202610141753';
-import * as T from './ton.js?v=202610141753';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610141753';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610141753';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610141753';
-import * as A from './auftraege.js?v=202610141753';
-import * as E from './erfolge.js?v=202610141753';
-import * as ZL from './ziele.js?v=202610141753';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610141753';
-import * as KA from './karte.js?v=202610141753';
-import { zeigeRueckblick } from './ereignis.js?v=202610141753';
-import { barbaraZweig } from './szene.js?v=202610141753';
-import * as SW from './schneeball.js?v=202610141753';
-import * as LI from './lichtung.js?v=202610141753';
-import * as CB from './christbaum.js?v=202610141753';
-import * as SB from './schlitten.js?v=202610141753';
-import * as EB from './schlittschuh.js?v=202610141753';
-import * as BS from './backstube.js?v=202610141753';
-import { alleSymbole } from './symbole.js?v=202610141753';
+import * as C from './config.js?v=202610141811';
+import * as S from './spiel.js?v=202610141811';
+import * as Z from './zeit.js?v=202610141811';
+import * as T from './ton.js?v=202610141811';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610141811';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610141811';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610141811';
+import * as A from './auftraege.js?v=202610141811';
+import * as E from './erfolge.js?v=202610141811';
+import * as ZL from './ziele.js?v=202610141811';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610141811';
+import * as KA from './karte.js?v=202610141811';
+import { zeigeRueckblick } from './ereignis.js?v=202610141811';
+import { barbaraZweig } from './szene.js?v=202610141811';
+import * as SW from './schneeball.js?v=202610141811';
+import * as LI from './lichtung.js?v=202610141811';
+import * as CB from './christbaum.js?v=202610141811';
+import * as SB from './schlitten.js?v=202610141811';
+import * as EB from './schlittschuh.js?v=202610141811';
+import * as BS from './backstube.js?v=202610141811';
+import { alleSymbole } from './symbole.js?v=202610141811';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1710,6 +1710,15 @@ export function oeffneMenue() {
   }
   liste.appendChild(zeile);
 
+  // Spielstand als Datei (14.10.): sichern und auf einem anderen Gerät laden
+  const datei = el('div', 'schalter');
+  const sich = el('button', 'k k--neben', 'Spielstand sichern');
+  sich.onclick = () => standSichern();
+  const lade = el('button', 'k k--neben', 'Spielstand laden');
+  lade.onclick = () => standLaden();
+  datei.appendChild(sich); datei.appendChild(lade);
+  liste.appendChild(datei);
+
   // Neustart: ganz unten und abgesetzt, mit Rückfrage
   const neustart = el('div', 'schalter neustart');
   const nk = el('button', 'k k--leise', 'Neu anfangen');   // bewusst unauffällig: grau, nicht rot
@@ -1749,6 +1758,54 @@ export function schildBeschriften() {
     { text: 'Zurücksetzen', neben: true, aktion: () => { S.st.standName = null; S.speichere(); } },
   ]);
   setTimeout(() => { const i = box.querySelector('#schildName'); if (i) i.focus(); }, 100);
+}
+
+/**
+ * Spielstand als Datei (14.10.). Auf dem Handy über das Teilen-Menü
+ * (AirDrop, Nachricht, „In Dateien sichern") - ein Download-Link tut in der
+ * iOS-Home-Bildschirm-App nichts. Am Rechner als Download. Android teilt
+ * kein application/json, deshalb text/plain mit der Endung .json.
+ */
+async function standSichern() {
+  const text = S.standAlsDatei();
+  const d = new Date(), zwei = (n) => String(n).padStart(2, '0');
+  const name = `punsch-spielstand-${d.getFullYear()}-${zwei(d.getMonth() + 1)}-${zwei(d.getDate())}.json`;
+  const handy = matchMedia('(pointer: coarse)').matches;
+  try {
+    const f = new File([text], name, { type: 'text/plain' });
+    if (handy && navigator.canShare && navigator.canShare({ files: [f] })) {
+      await navigator.share({ files: [f], title: 'Punsch & Lichterglanz - Spielstand' });
+      toast('Spielstand gesichert.', 'gut');
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;   // Teilen abgebrochen
+  }
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast('Spielstand gesichert.', 'gut');
+}
+function standLaden() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json,text/plain';
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    const info = S.pruefeDatei(await f.text());
+    if (info.fehler) { fenster('Das klappt nicht', `<p>${info.fehler}</p>`); return; }
+    const wann = info.gesichert ? new Date(info.gesichert).toLocaleString('de-DE', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : null;
+    fenster('Spielstand laden?', `
+      <div class="gross-ico">📂</div>
+      <p><b>${info.name ? esc(info.name) : 'Dein Haus'}</b>${wann ? `, gesichert am ${wann}` : ''}</p>
+      <p class="klein">Insgesamt ${S.formatGeld(info.gesamt)} verdient.</p>
+      <p><b>Dein jetziger Spielstand auf diesem Gerät wird ersetzt.</b></p>`, [
+      { text: 'Laden', aktion: () => { if (S.uebernehmeStand(info.stand)) { schliesseBlatt(); location.reload(); } else toast('Speichern ging nicht - ist der Speicher voll?', 'hinweis'); } },
+      { text: 'Abbrechen', neben: true },
+    ]);
+  };
+  inp.click();
 }
 
 /** Rückfrage vor dem Löschen - der Spielstand ist danach weg. */
