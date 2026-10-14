@@ -324,17 +324,25 @@ export function smiley(c, x, y, froh) {
 // ---------------------------------------------------------------------------
 const MAENTEL = ['#3a5a8c', '#8c3a3a', '#3a7a4a', '#6a4a8a', '#c07030', '#34364a', '#7a5a3a', '#b04060', '#2f6f7a'];
 const HUETE = ['#d83a3a', '#e8e0d0', '#2f7a3a', '#3a5aa8', '#e8b030', '#8a3aa0', '#f07a9a'];
-const HAUT = ['#f2c9a0', '#e0b088', '#c68a5c', '#8d5a3a', '#f5d6b8'];
+// 14.10. (Nutzerwunsch „unterschiedliche Hautfarben"): sieben Töne statt
+// fünf, die dunklen mit dunklem Haar
+const HAUT = ['#f5d6b8', '#f2c9a0', '#e0b088', '#c68a5c', '#a8714a', '#8d5a3a', '#6a4028'];
 const HAARE = ['#3a2a1a', '#6a4a2a', '#c8a060', '#1a1a1a', '#a04a2a'];
+const HAARE_DUNKEL = ['#1a1a1a', '#2a1a12', '#3a2a1a'];
 function wahl(a) { return a[Math.floor(Math.random() * a.length)]; }
 
 export function neueFarben(typ) {
+  const hi = Math.floor(Math.random() * HAUT.length), haut = HAUT[hi];
   return {
     mantel: typ === 'oma' ? wahl(['#6a4a8a', '#7a5a3a', '#4a6a8a', '#8a4a5a']) : wahl(MAENTEL),
-    hut: wahl(HUETE), schal: wahl(HUETE), haut: wahl(HAUT),
-    haar: typ === 'oma' || typ === 'opa' ? '#d0d0d4' : wahl(HAARE),
+    hut: wahl(HUETE), schal: wahl(HUETE), haut,
+    haar: typ === 'oma' || typ === 'opa' ? '#d0d0d4' : wahl(hi >= 4 ? HAARE_DUNKEL : HAARE),
+    // Spaziergängerinnen (14.10.): lange Haare unter der Mütze, längerer Mantel
+    frau: typ === 'erwachsen' && Math.random() < 0.5,
   };
 }
+/** Wangenrot passend zur Haut (auf dunkler Haut wäre Rosa ein Fleck). */
+const wange = (haut) => mische(haut || '#f2c9a0', '#e85a5a', 0.3);
 
 // ---------------------------------------------------------------------------
 // Figuren KLEIN (Straße). (x, y) = Fußpunkt, Blick nach rechts.
@@ -387,12 +395,13 @@ export function figurKlein(c, g, x, y, t) {
     }
     case 'oma': case 'opa': case 'erwachsen': {
       bein(x - 2, schritt); bein(x + 1, 1 - schritt);
-      const lang = g.typ === 'oma';
+      const lang = g.typ === 'oma' || F.frau;
       r(c, x - 3, y - 10, 6, lang ? 8 : 7, F.mantel); r(c, x - 3, y - 10, 1, lang ? 8 : 7, ton(F.mantel, -0.25));
       r(c, x - 3, y - 10, 6, 1, F.schal);
       r(c, x - 2, y - 14, 4, 4, F.haut); p(c, x + 1, y - 12, '#2a1a1a');
       if (g.typ === 'oma') { r(c, x - 2, y - 15, 4, 2, F.haar); p(c, x - 3, y - 14, F.haar); p(c, x - 3, y - 13, F.haar); }
       else if (g.typ === 'opa') { r(c, x - 3, y - 15, 6, 1, '#5a4030'); r(c, x - 2, y - 17, 4, 2, '#6a4a36'); r(c, x, y - 11, 2, 1, F.haar); }
+      else if (F.frau) { r(c, x - 2, y - 15, 4, 2, F.hut); r(c, x - 3, y - 14, 2, 4, F.haar); p(c, x - 1, y - 16, '#ffffff'); }
       else { r(c, x - 2, y - 15, 4, 2, F.hut); r(c, x - 2, y - 14, 1, 2, F.haar); p(c, x - 1, y - 16, '#ffffff'); }
       break;
     }
@@ -508,7 +517,7 @@ export function figurGross(c, g, cx, basis, t, laune) {
       const kh = k ? 11 : 12;
       const ko = b - 17 + o - kh;
       kopf(c, cx, ko, k ? 11 : 12, kh, F.haut);
-      p(c, cx - 4, ko + 8, '#f09a8a'); p(c, cx + 4, ko + 8, '#f09a8a');
+      p(c, cx - 4, ko + 8, wange(F.haut)); p(c, cx + 4, ko + 8, wange(F.haut));
       augen(c, cx, ko + 5, 2, blinzeln);
       mund(c, cx, ko + 9, laune);
       if (g.typ === 'oma') {
@@ -519,7 +528,9 @@ export function figurGross(c, g, cx, basis, t, laune) {
         r(c, cx - 7, ko + 1, 14, 2, '#5a4030'); r(c, cx - 5, ko - 3, 10, 4, '#6a4a36'); r(c, cx - 5, ko, 10, 1, '#3a2a1c');
         r(c, cx - 3, ko + 7, 6, 2, F.haar); r(c, cx - 6, ko + 3, 1, 4, F.haar); r(c, cx + 5, ko + 3, 1, 4, F.haar);
       } else {
-        r(c, cx - 6, ko + 2, 1, 5, F.haar); r(c, cx + 5, ko + 2, 1, 5, F.haar);
+        // Frauen: Haare fallen bis auf die Schultern
+        if (F.frau && !k) { r(c, cx - 7, ko + 2, 2, 12, F.haar); r(c, cx + 5, ko + 2, 2, 12, F.haar); r(c, cx - 7, ko + 13, 2, 1, ton(F.haar, 0.2)); }
+        else { r(c, cx - 6, ko + 2, 1, 5, F.haar); r(c, cx + 5, ko + 2, 1, 5, F.haar); }
         r(c, cx - 6, ko - 3, 12, 5, F.hut); r(c, cx - 6, ko + 1, 12, 1, ton(F.hut, 0.3));
         r(c, cx - 1, ko - 5, 3, 2, '#ffffff');
       }

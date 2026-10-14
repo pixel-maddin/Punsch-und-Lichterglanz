@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610131806';
-import * as S from './spiel.js?v=202610131806';
-import * as Z from './zeit.js?v=202610131806';
-import * as T from './ton.js?v=202610131806';
-import * as LI from './lichtung.js?v=202610131806';
-import * as CB from './christbaum.js?v=202610131806';
-import * as KA from './karte.js?v=202610131806';
-import * as SB from './schlitten.js?v=202610131806';
-import * as EB from './schlittschuh.js?v=202610131806';
-import * as BS from './backstube.js?v=202610131806';
-import * as UI from './ui.js?v=202610131806';
-import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610131806';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610131806';
-import * as Lernen from './lernen.js?v=202610131806';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610131806';
-import * as A from './auftraege.js?v=202610131806';
-import * as E from './erfolge.js?v=202610131806';
-import * as ZL from './ziele.js?v=202610131806';
+import * as C from './config.js?v=202610141753';
+import * as S from './spiel.js?v=202610141753';
+import * as Z from './zeit.js?v=202610141753';
+import * as T from './ton.js?v=202610141753';
+import * as LI from './lichtung.js?v=202610141753';
+import * as CB from './christbaum.js?v=202610141753';
+import * as KA from './karte.js?v=202610141753';
+import * as SB from './schlitten.js?v=202610141753';
+import * as EB from './schlittschuh.js?v=202610141753';
+import * as BS from './backstube.js?v=202610141753';
+import * as UI from './ui.js?v=202610141753';
+import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610141753';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610141753';
+import * as Lernen from './lernen.js?v=202610141753';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610141753';
+import * as A from './auftraege.js?v=202610141753';
+import * as E from './erfolge.js?v=202610141753';
+import * as ZL from './ziele.js?v=202610141753';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -325,6 +325,8 @@ setInterval(() => {
   else { const brief = S.briefPruefen(); if (brief) UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'); }
   // Ein neues Minispiel ist auf der Karte: eigenes Fenster, sobald nichts offen ist
   const miniNeu = S.pruefeMiniFrei();
+  // Neue Vogelart am Futterhaus (14.10.): Steckbrief, sobald nichts offen ist
+  if (S.st.vogelNeu && S.st.vogelNeu.length && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { UI.zeigeVogel(S.st.vogelNeu.shift()); S.speichere(); }
   // erst nach einer Minute im Spiel - beim Ankommen kommen Kiste, Wetter und Briefe zuerst
   if (miniNeu.length && S.lauf.t > 60 && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { UI.zeigeMiniNeu(miniNeu.shift()); S.speichere(); }
   // Neu Freigeschaltetes: während der Startziele nur die NEU-Marken (sonst

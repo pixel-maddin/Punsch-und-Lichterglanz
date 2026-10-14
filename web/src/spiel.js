@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610131806';
-import * as Z from './zeit.js?v=202610131806';
-import { neueFarben } from './pixel.js?v=202610131806';
+import * as C from './config.js?v=202610141753';
+import * as Z from './zeit.js?v=202610141753';
+import { neueFarben } from './pixel.js?v=202610141753';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1148,7 +1148,7 @@ export function update(dt) {
     g.am = g.platz != null && !g.laeuft;
     if (lauf.lernen) continue;
     if (g.am && !g.bedient) {
-      if (reserviert.has(g.id)) g.geduld = Math.max(Math.min(g.geduld, C.GEDULD_RESERVIERT), g.geduld - dt);
+      if (reserviert.has(g.id) && (g.reservT = (g.reservT || 0) + dt) < C.GEDULD_RESERVIERT_MAX) g.geduld = Math.max(Math.min(g.geduld, C.GEDULD_RESERVIERT), g.geduld - dt);
       else g.geduld -= dt;
       if (g.geduld <= 0) gehe(g, false);
     } else if (g.platz == null && !g.laeuft) {
@@ -1938,7 +1938,9 @@ function vogelTakt(dt) {
   st.voegel = st.voegel || {};
   const neu = !st.voegel[art.id];
   st.voegel[art.id] = (st.voegel[art.id] || 0) + 1;
-  if (neu) { hooks.toast(`${art.selten ? 'Selten! ' : ''}Ein${art.id === 'kohlmeise' || art.id === 'blaumeise' ? 'e' : ''} ${art.name} am Futterhaus - neu im Album!`, art.selten ? 'spezial' : 'neu'); hooks.ton(art.selten ? 'spezial' : 'fertig'); }
+  // Neue Art (14.10., gemeldet: „man checkt nicht, dass neue Vögel da sind"):
+  // eigenes Fenster mit Bild und Steckbrief, sobald nichts anderes offen ist (main.js)
+  if (neu) { st.vogelNeu = st.vogelNeu || []; st.vogelNeu.push(art.id); }
   speichere();
 }
 

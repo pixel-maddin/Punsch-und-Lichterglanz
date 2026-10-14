@@ -508,6 +508,13 @@ export const VORFREUDE_MIN = 150;
 // Wer am Tresen sieht, dass sein Getränk gerade gemacht wird, geht nicht
 // mehr weg (die Geduld sinkt weiter, aber nie unter diesen Rest in s)
 export const GEDULD_RESERVIERT = 1.5;
+// … aber nur so lange (14.10.): Vorher wartete ein reservierter Gast für
+// immer. Ein Glas, das auf dem Tablett stehen blieb, hielt so einen Gast am
+// Tresen fest - war es ein Stammgast (den bedienen die Wichtel nicht), war
+// der Platz für immer zu, und bei einem Platz stand der ganze Stand still
+// (gemessen: Karl 300 s am Tresen, Geduld eingefroren; gemeldet als
+// „die Wichtel schenken nicht mehr ein"). Ausguss löste es.
+export const GEDULD_RESERVIERT_MAX = 15;
 // Selbst servieren zählt doppelt (09.10.; die Tagesschicht vom 03.10. ist
 // dafür wieder raus - 30 Pflichtgäste fühlten sich nach Arbeit an)
 export const SELBST_MULT = 2;
@@ -683,9 +690,17 @@ export const VARIANTEN = {
 // „farmen"), Deko hängt am Rekord.
 // ---------------------------------------------------------------------------
 export const MINI_RUNDEN_STERNE = 3;
+// Sterne je Runde, für alle Spiele gleich (14.10., gemeldet: „im Gegensatz
+// zum Servieren bekommt man da zu viel"): MINI_JE_MIN Punkte (nach `skala`,
+// also eine gute Runde) = eine Minute Einnahmen (einnahmenProMinute), höchstens
+// MINI_MAX_MIN. Gemessen (Saison-Bot): Selbst bedienen bringt je Minute 2,3-
+// 2,5 × einnahmenProMinute (Tag 1-10), am 20. Tag 4-5 × - egal ob alle 0,35
+// oder alle 1,3 s getippt wird, die Gäste geben den Takt vor. Vorher brachte
+// eine gute Runde (40-75 s) 3 Minuten, je Spielminute also 1,4 × so viel wie
+// Bedienen. Jetzt rund die Hälfte; dafür gibt es Deko.
+export const MINI_JE_MIN = 2000;
+export const MINI_MAX_MIN = 1.5;
 export const LICHTUNG_DAUER = 40;          // s je Runde (11.10.: 30 → 40, im letzten Drittel doppelt so viele Tiere)
-export const LICHTUNG_PUNKTE_JE_MIN = 400; // so viele Punkte = eine Minute Einnahmen …
-export const LICHTUNG_MAX_MIN = 3;         // … höchstens drei (perfekter Autopilot: 3.810 Punkte, 42 Tiere)
 export const LICHTUNG_DEKO = [
   { id: 'l_hasen', name: 'Hasenfamilie',            ab: 800,  stimmung: 5, text: 'Drei Hasen sitzen vor dem Zaun und mümmeln.' },
   { id: 'l_eich',  name: 'Eichhörnchen auf dem Dach', ab: 1800, stimmung: 5, text: 'Sitzt auf dem Dach und knabbert eine Nuss.' },
@@ -694,8 +709,6 @@ export const LICHTUNG_DEKO = [
 // Minispiel Christbaumverkauf (09.10.): 60 s, Kunden wollen einen bestimmten
 // Baum (Sorte und Größe). Fällen (3x tippen), einnetzen (3x), aufs Autodach.
 export const BAUM_DAUER = 60;
-export const BAUM_PUNKTE_JE_MIN = 600;
-export const BAUM_MAX_MIN = 3;
 export const BAUM_DEKO = [
   { id: 'c_kugeln',   name: 'Riesenkugeln im Baum',   ab: 900,  stimmung: 5, text: 'Drei große Kugeln hängen im kahlen Baum.' },
   { id: 'c_dachbaum', name: 'Bäumchen auf dem First', ab: 1700, stimmung: 5, text: 'Ein kleiner Christbaum mit Lichtern ganz oben auf dem Dach.' },
@@ -706,8 +719,6 @@ export const BERG_DAUER = 75;     // s - wer bis dahin nicht im Ziel ist, bekomm
 export const BERG_STERN = 20;     // Punkte je Stern auf der Strecke
 export const BERG_ZIEL = 400;     // Punkte fürs Ankommen …
 export const BERG_JE_S = 40;      // … plus so viele je Sekunde, die noch übrig war
-export const BERG_PUNKTE_JE_MIN = 500;
-export const BERG_MAX_MIN = 3;
 export const BERG_DEKO = [
   { id: 's_kinder', name: 'Rodelkinder',          ab: 1000,  stimmung: 5, text: 'Zwei Kinder ziehen ihren Schlitten am Haus vorbei.' },
   { id: 's_wok',    name: 'Wok an der Hauswand',  ab: 1550, stimmung: 5, text: 'Dein Rodel-Wok hängt als Trophäe neben dem Fenster.' },
@@ -716,8 +727,6 @@ export const BERG_DEKO = [
 // Minispiel Eisbahn (10.10.): Schlittschuh-Läufer, springen und Tricks.
 export const EIS_DAUER = 45;
 export const EIS_STERN = 15;
-export const EIS_PUNKTE_JE_MIN = 600;
-export const EIS_MAX_MIN = 3;
 export const EIS_DEKO = [
   { id: 'e_schlittschuhe', name: 'Schlittschuhe am Nagel', ab: 700,  stimmung: 5, text: 'Ein Paar Schlittschuhe hängt neben der Haustür.' },
   { id: 'e_pinguin',       name: 'Pinguin',                ab: 1400, stimmung: 5, text: 'Ein kleiner Pinguin mit Mütze steht auf dem Gehweg.' },
@@ -726,8 +735,6 @@ export const EIS_DEKO = [
 // Minispiel Schneeballschlacht (12.10.): Grummel hinter Schneewällen
 // abwerfen, Wichtel verschonen. Deko-Kürzel g_ (Grummel).
 export const SCHNEE_DAUER = 40;
-export const SCHNEE_PUNKTE_JE_MIN = 600;
-export const SCHNEE_MAX_MIN = 3;
 export const SCHNEE_DEKO = [
   { id: 'g_vorrat',  name: 'Schneeballvorrat',     ab: 700,  stimmung: 5, text: 'Ein Berg Schneebälle liegt griffbereit am Gehweg.' },
   { id: 'g_lauscher', name: 'Neugieriger Grummel', ab: 1400, stimmung: 5, text: 'Ein kleiner Grummel lugt hinter dem alten Baum hervor - ganz friedlich.' },
@@ -738,8 +745,6 @@ export const SCHNEE_DEKO = [
 // gibt es REZEPTE fürs Rezeptbuch; neue Rezepte kommen auch in die Runden.
 // Gebackene Plätzchen wandern in die Dose auf dem Stand (DOSE_*).
 export const BACK_DAUER = 60;
-export const BACK_PUNKTE_JE_MIN = 600;
-export const BACK_MAX_MIN = 3;
 export const BACK_OFEN = 2.2;           // s, bis ein Plätzchen verbrennt (Normal)
 export const BACK_GOLDEN = [0.52, 0.8]; // goldener Bereich im Ofenbalken
 export const BACK_FORMEN = ['stern', 'mond', 'herz', 'baum', 'kreis'];
@@ -824,16 +829,16 @@ export const MINI_STUFEN = [
 // `st.miniSkalaWert`, mit welchem Faktor seine Rekorde gespeichert sind, und
 // rechnet bei einer Änderung hier selbst um - `skala` darf also nachgezogen werden.
 export const MINISPIELE = {
-  lichtung: { deko: LICHTUNG_DEKO, jeMin: LICHTUNG_PUNKTE_JE_MIN, maxMin: LICHTUNG_MAX_MIN, skala: 0.6 },   // 0,75 bis die Runde 40 s wurde
-  baum:     { deko: BAUM_DEKO,     jeMin: BAUM_PUNKTE_JE_MIN,     maxMin: BAUM_MAX_MIN,     skala: 0.65 },
-  berg:     { deko: BERG_DEKO,     jeMin: BERG_PUNKTE_JE_MIN,     maxMin: BERG_MAX_MIN,     skala: 1.05 },
-  eis:      { deko: EIS_DEKO,      jeMin: EIS_PUNKTE_JE_MIN,      maxMin: EIS_MAX_MIN,      skala: 1.5 },
-  back:     { deko: [],            jeMin: BACK_PUNKTE_JE_MIN,     maxMin: BACK_MAX_MIN,     skala: 0.8 },
-  schnee:   { deko: SCHNEE_DEKO,   jeMin: SCHNEE_PUNKTE_JE_MIN,   maxMin: SCHNEE_MAX_MIN,   skala: 0.75 },   // 12.10.: Bot 1.843/2.565/3.022/3.753 roh
+  lichtung: { deko: LICHTUNG_DEKO, skala: 0.6 },   // 0,75 bis die Runde 40 s wurde
+  baum:     { deko: BAUM_DEKO, skala: 0.65 },
+  berg:     { deko: BERG_DEKO, skala: 1.05 },
+  eis:      { deko: EIS_DEKO, skala: 1.5 },
+  back:     { deko: [], skala: 0.8 },
+  schnee:   { deko: SCHNEE_DEKO, skala: 0.75 },   // 12.10.: Bot 1.843/2.565/3.022/3.753 roh
 };
 const auf50 = (n) => Math.round(n / 50) * 50;
 for (const m of Object.values(MINISPIELE)) {
-  m.jeMin = Math.round(m.jeMin * m.skala);
+  m.jeMin = MINI_JE_MIN; m.maxMin = MINI_MAX_MIN;   // gilt schon nach `skala`
   for (const d of m.deko) d.ab = auf50(d.ab * m.skala);
 }
 for (const rz of BACK_REZEPTE) rz.ab = auf50(rz.ab * MINISPIELE.back.skala);
@@ -873,19 +878,20 @@ export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Groß
 // ---------------------------------------------------------------------------
 // Vögel am Futterhaus (11.10.). Nur wenn das Futterhaus gefüllt ist (antippen,
 // hält FUTTER_STUNDEN echte Stunden). `w` = Gewicht, `schnee` = nur bei Schnee,
-// `nacht` = nur nachts, `nachtAuch` = auch nachts.
+// `nacht` = nur nachts, `nachtAuch` = auch nachts. `text` steht im Fenster beim
+// ersten Besuch und beim Antippen im Album (14.10.).
 // Der Meisenknödel (Türchen 18) verdoppelt die Gewichte der seltenen.
 // ---------------------------------------------------------------------------
 export const VOEGEL = [
-  { id: 'spatz',    name: 'Spatz',         w: 34, f: ['#8a6a4a', '#c8a880', '#5a4030'] },
-  { id: 'kohlmeise', name: 'Kohlmeise',    w: 26, f: ['#2a2a30', '#f0d040', '#f4f4f0'] },
-  { id: 'blaumeise', name: 'Blaumeise',    w: 18, f: ['#4a8ad8', '#f0d848', '#f4f4f0'] },
-  { id: 'rotkehlchen', name: 'Rotkehlchen', w: 12, f: ['#8a6a4a', '#e8702a', '#e8dcc8'], selten: true, nachtAuch: true },
-  { id: 'gimpel',   name: 'Gimpel',        w: 6,  f: ['#2a2a30', '#e04a5a', '#7a7a88'], selten: true },
-  { id: 'seidenschwanz', name: 'Seidenschwanz', w: 2, f: ['#a88a78', '#e8c060', '#3a2a2a'], selten: true, schnee: true },
+  { id: 'spatz',    name: 'Spatz',         w: 34, f: ['#8a6a4a', '#c8a880', '#5a4030'], text: 'Der Haussperling ist nie gern allein und tschilpt den ganzen Tag mit seinen Freunden. Im Winter plustert er sich zu einer kleinen Federkugel auf.' },
+  { id: 'kohlmeise', name: 'Kohlmeise',    w: 26, f: ['#2a2a30', '#f0d040', '#f4f4f0'], text: 'Die häufigste Meise im Garten. Ihr Ruf klingt wie „Zi-zi-bäh“ - und beim Fressen hängt sie gern kopfüber am Futterhaus.' },
+  { id: 'blaumeise', name: 'Blaumeise',    w: 18, f: ['#4a8ad8', '#f0d848', '#f4f4f0'], text: 'Ein kleiner Turner mit blauem Käppchen: Sie hangelt sich an die dünnsten Zweige und wiegt dabei nur etwa elf Gramm.' },
+  { id: 'rotkehlchen', name: 'Rotkehlchen', w: 12, f: ['#8a6a4a', '#e8702a', '#e8dcc8'], selten: true, nachtAuch: true, text: 'Singt sogar mitten im Winter - und manchmal nachts unter einer Laterne. Es ist neugierig und kommt Menschen erstaunlich nah.' },
+  { id: 'gimpel',   name: 'Gimpel',        w: 6,  f: ['#2a2a30', '#e04a5a', '#7a7a88'], selten: true, text: 'Auch Dompfaff genannt. Das Männchen trägt eine leuchtend rote Brust und ein schwarzes Käppchen, und meist ist das Pärchen zusammen unterwegs.' },
+  { id: 'seidenschwanz', name: 'Seidenschwanz', w: 2, f: ['#a88a78', '#e8c060', '#3a2a2a'], selten: true, schnee: true, text: 'Ein Wintergast aus dem hohen Norden. Er kommt nur in manchen Jahren, wenn es dort zu wenig Beeren gibt - dann aber gleich im Schwarm.' },
   // Nur nachts (11.10., Betatest: im Dezember ist es nur 8-17 Uhr hell - wer
   // morgens früh und abends spielt, sah sonst nie einen Vogel)
-  { id: 'waldkauz', name: 'Waldkauz',    w: 4,  f: ['#7a5a3e', '#b8946a', '#5a4030'], selten: true, nacht: true },
+  { id: 'waldkauz', name: 'Waldkauz',    w: 4,  f: ['#7a5a3e', '#b8946a', '#5a4030'], selten: true, nacht: true, text: 'Die Eule mit dem bekannten „Huhuu“. Tagsüber schläft sie gut versteckt, und ihren Kopf kann sie fast ganz nach hinten drehen.' },
 ];
 export const VOGEL_NACHT_TAKT = 2.2;   // nachts so viel seltener (nur Rotkehlchen und Waldkauz)
 export const FUTTER_STUNDEN = 12;   // vom Morgen- bis zum Abendbesuch (11.10.: vorher 8)

@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610131806';
-import * as Z from './zeit.js?v=202610131806';
-import * as S from './spiel.js?v=202610131806';
-import { FASSADEN } from './config.js?v=202610131806';
-import * as C from './config.js?v=202610131806';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610141753';
+import * as Z from './zeit.js?v=202610141753';
+import * as S from './spiel.js?v=202610141753';
+import { FASSADEN } from './config.js?v=202610141753';
+import * as C from './config.js?v=202610141753';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1949,7 +1949,7 @@ const SAENGER = [
   { x: 19, typ: 'oma', farben: { mantel: '#6a4a8a', hut: '#c83030', schal: '#e8c030', haut: '#f2c9a0', haar: '#d8d8e0' } },
   { x: 26, typ: 'opa', farben: { mantel: '#4a5a3a', hut: '#6a4a36', schal: '#c83030', haut: '#e8b890', haar: '#d8d8e0' } },
   { x: 32, typ: 'kind', farben: { mantel: '#2f6a8a', hut: '#e8c030', schal: '#c83030', haut: '#c89070', haar: '#2a1a1a' } },
-  { x: 38, typ: 'erwachsen', farben: { mantel: '#8a3a4a', hut: '#f4f0e8', schal: '#2f7a3a', haut: '#c89070', haar: '#2a1a1a' } },
+  { x: 38, typ: 'erwachsen', farben: { mantel: '#8a3a4a', hut: '#f4f0e8', schal: '#2f7a3a', haut: '#6a4028', haar: '#1a1a1a', frau: true } },
 ];
 function saenger(c, L, fuss, t) {
   for (const g of SAENGER) {
@@ -2241,7 +2241,7 @@ function fahrbahn(c, GW, G, w) {
 // Wo steht was? Für das Funkeln nach dem Kauf. y relativ zur Bodenlinie.
 // ---------------------------------------------------------------------------
 const ORTE = {
-  kranz: [80, -38], tuerbogenkranz: [80, -55], lichter_dach: [80, -66], fensterstern: [80, -80], schwibbogen: [56, -44],
+  futterhaus: [132, -48], kranz: [80, -38], tuerbogenkranz: [80, -55], lichter_dach: [80, -66], fensterstern: [80, -80], schwibbogen: [56, -44],
   lichter_bunt: [80, -66], nussknacker: [96, -32], lichter_fenster: [104, -50], lichter_zaun: [60, -18],
   eiszapfen: [80, -64], dach_nikolaus: [110, -90], lichtershow: [80, -50],
   tanne: [18, -40], tanne_lichter: [18, -40], tanne_kugeln: [18, -35], tanne_stern: [18, -56],

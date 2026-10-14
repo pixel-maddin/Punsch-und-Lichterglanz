@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610131806';
-import * as S from './spiel.js?v=202610131806';
-import * as Z from './zeit.js?v=202610131806';
-import * as T from './ton.js?v=202610131806';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610131806';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610131806';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610131806';
-import * as A from './auftraege.js?v=202610131806';
-import * as E from './erfolge.js?v=202610131806';
-import * as ZL from './ziele.js?v=202610131806';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610131806';
-import * as KA from './karte.js?v=202610131806';
-import { zeigeRueckblick } from './ereignis.js?v=202610131806';
-import { barbaraZweig } from './szene.js?v=202610131806';
-import * as SW from './schneeball.js?v=202610131806';
-import * as LI from './lichtung.js?v=202610131806';
-import * as CB from './christbaum.js?v=202610131806';
-import * as SB from './schlitten.js?v=202610131806';
-import * as EB from './schlittschuh.js?v=202610131806';
-import * as BS from './backstube.js?v=202610131806';
-import { alleSymbole } from './symbole.js?v=202610131806';
+import * as C from './config.js?v=202610141753';
+import * as S from './spiel.js?v=202610141753';
+import * as Z from './zeit.js?v=202610141753';
+import * as T from './ton.js?v=202610141753';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610141753';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610141753';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610141753';
+import * as A from './auftraege.js?v=202610141753';
+import * as E from './erfolge.js?v=202610141753';
+import * as ZL from './ziele.js?v=202610141753';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610141753';
+import * as KA from './karte.js?v=202610141753';
+import { zeigeRueckblick } from './ereignis.js?v=202610141753';
+import { barbaraZweig } from './szene.js?v=202610141753';
+import * as SW from './schneeball.js?v=202610141753';
+import * as LI from './lichtung.js?v=202610141753';
+import * as CB from './christbaum.js?v=202610141753';
+import * as SB from './schlitten.js?v=202610141753';
+import * as EB from './schlittschuh.js?v=202610141753';
+import * as BS from './backstube.js?v=202610141753';
+import { alleSymbole } from './symbole.js?v=202610141753';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1420,6 +1420,39 @@ function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
   if (!n) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#5a4a3e'; ctx.fillRect(0, 0, w, h); }
   return k;
 }
+/** Vogel auf 28 x 28: klein malen, zweimal per Scale2x vergrößern - Pixel bleiben Spielpixel. */
+function maleVogel(ctx, id) {
+  // Der Waldkauz ist doppelt so groß wie die anderen: nur zweifach, mittig
+  if (id === 'waldkauz') {
+    const k = document.createElement('canvas'); k.width = 9; k.height = 10;
+    zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 4, 8, id);
+    ctx.drawImage(scale2x(k, 9, 10, document.createElement('canvas')), 5, 3);
+    return;
+  }
+  const k = document.createElement('canvas'); k.width = 7; k.height = 7;
+  zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 2, 5, id);
+  const x2 = scale2x(k, 7, 7, document.createElement('canvas'));
+  ctx.drawImage(scale2x(x2, 14, 14, document.createElement('canvas')), 0, 0);
+}
+/**
+ * Steckbrief eines Vogels (14.10.): beim ersten Besuch am Futterhaus (`neu`,
+ * aus main.js, sobald nichts anderes offen ist) und beim Antippen im Album.
+ */
+export function zeigeVogel(id, neu = true) {
+  const v = C.VOEGEL.find((q) => q.id === id);
+  if (!v) return;
+  const vg = S.st.voegel || {};
+  const wann = v.nacht ? 'Kommt nur nachts.' : v.schnee ? 'Kommt nur, wenn Schnee liegt.' : v.nachtAuch ? 'Kommt auch nachts.' : '';
+  if (neu) T.spiele(v.selten ? 'spezial' : 'fertig');
+  const box = fenster(neu ? `Neu am Futterhaus: ${v.name}!` : v.name, `
+    <canvas class="vogel-gross" width="28" height="28"></canvas>
+    ${v.selten ? '<p class="bonus">Ein seltener Gast!</p>' : ''}
+    <p>${v.text}</p>
+    ${wann ? `<p class="klein">${wann}</p>` : ''}
+    <p class="klein">${neu ? 'Neu im Album · ' : `${(vg[id] || 0).toLocaleString('de-DE')}× gesehen · `}${C.VOEGEL.filter((q) => vg[q.id]).length} von ${C.VOEGEL.length} Vogelarten entdeckt</p>`,
+  [{ text: neu ? 'Schön!' : 'Weiter', aktion: () => { if (neu) { const o = ortVon('futterhaus'); if (o) funkeln(o.x, o.y); } } }]);
+  maleVogel(box.querySelector('canvas').getContext('2d'), id);
+}
 function baueAlbum(liste) {
   const typ = S.st.stats.typ || {}, tiere = S.st.stats.tiere || {};
   const kopf = (titel, da, alle) => liste.appendChild(el('p', 'gruppe', `${titel}: ${da} / ${alle}`));
@@ -1446,21 +1479,11 @@ function baueAlbum(liste) {
     const vg = S.st.voegel || {};
     kopf('Vögel am Futterhaus', C.VOEGEL.filter((v) => vg[v.id]).length, C.VOEGEL.length);
     const vr = el('div', 'album-raster');
-    for (const v of C.VOEGEL) vr.appendChild(albumKarte(v.name, vg[v.id] || 0, (ctx) => {
-      // klein malen, zweimal per Scale2x vergrößern - Pixel bleiben Spielpixel
-      // Der Waldkauz ist doppelt so groß wie die anderen: nur zweifach, mittig
-      if (v.id === 'waldkauz') {
-        const k = document.createElement('canvas'); k.width = 9; k.height = 10;
-        zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 4, 8, v.id);
-        ctx.drawImage(scale2x(k, 9, 10, document.createElement('canvas')), 5, 3);
-        return;
-      }
-      const k = document.createElement('canvas'); k.width = 7; k.height = 7;
-      zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 2, 5, v.id);
-      const x2 = scale2x(k, 7, 7, document.createElement('canvas'));
-      const x4 = scale2x(x2, 14, 14, document.createElement('canvas'));
-      ctx.drawImage(x4, 0, 0);
-    }, 28, 28, '× gesehen'));
+    for (const v of C.VOEGEL) {
+      const k = vr.appendChild(albumKarte(v.name, vg[v.id] || 0, (ctx) => maleVogel(ctx, v.id), 28, 28, '× gesehen'));
+      // Gesehene Vögel lassen sich antippen: Steckbrief wie beim ersten Besuch (14.10.)
+      if (vg[v.id]) { k.classList.add('tippbar'); k.onclick = () => { T.spiele('klick'); zeigeVogel(v.id, false); }; }
+    }
     liste.appendChild(vr);
   }
   // Rezepte - erst, wenn die Backstube auf der Karte steht (Minispiele kommen nach und nach)

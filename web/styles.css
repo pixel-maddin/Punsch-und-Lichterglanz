@@ -605,6 +605,11 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 }
 .wand-zeile { text-align: center; margin: calc(var(--px) * 2) 0 0; font-size: calc(var(--px) * 4.6); }
 .wand-zeile + .klein { text-align: center; }
+#modal .vogel-gross {   /* 14.10.: Steckbrief, 28 x 28 doppelt */
+  display: block; margin: 0 auto calc(var(--px) * 2);
+  width: calc(var(--px) * 56); height: calc(var(--px) * 56); image-rendering: pixelated;
+}
+.album-karte.tippbar { cursor: pointer; }
 #modal .socke-gross {
   display: block; margin: 0 auto calc(var(--px) * 2);
   width: calc(var(--px) * 20); height: calc(var(--px) * 24); image-rendering: pixelated;   /* Socke per Scale2x, 1:1 (11.10.; vorher 10x12 dreifach gezogen) */
