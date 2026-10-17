@@ -2,16 +2,19 @@
  * auftraege.js - drei Tagesaufträge: leicht, mittel, schwer.
  *
  * Jeden Tag neu (aus dem Datum gewürfelt, also für alle Spieler an einem
- * Tag gleich). Gezählt wird nur, was man SELBST am Tresen tut - der
- * Servier-Wichtel erfüllt keine Aufträge.
+ * Tag gleich). Gezählt wird, was man SELBST am Tresen tut - ab der Aufsicht
+ * (17.10.) auch, was die Wichtel bedienen, während man da ist.
+ *
+ * Dazu die Bitten der Stammgäste (17.10., C.STAMM_BITTEN): eine am Tag,
+ * von einem Stammgast, den man schon kennt, ohne Frist.
  *
  * Lohn in „Minuten normaler Einnahmen" - am Anfang wenige, mit jedem
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610172100';
-import * as S from './spiel.js?v=202610172100';
-import * as Z from './zeit.js?v=202610172100';
+import * as C from './config.js?v=202610172230';
+import * as S from './spiel.js?v=202610172230';
+import * as Z from './zeit.js?v=202610172230';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -62,7 +65,90 @@ export function heute() {
 }
 export function text(a) { return TYPEN[a.typ].text(a.ziel, a.param); }
 export function fertig(a) { return a.stand >= a.ziel; }
-export function abholbar() { return S.st.lernen >= 99 ? heute().filter((a) => fertig(a) && !a.abgeholt).length : 0; }
+export function abholbar() {
+  if (S.st.lernen < 99) return 0;
+  const b = bitte();
+  return heute().filter((a) => fertig(a) && !a.abgeholt).length + (b && bitteFertig(b) && !b.abgeholt ? 1 : 0);
+}
+
+// ---------------------------------------------------------------------------
+// Bitten der Stammgäste (17.10.)
+// S.st.bitte = { gast, i, start, tag, abgeholt } - die laufende (oder heute
+// schon erledigte) Bitte; S.st.bittenStand[gast] = wie viele erledigt sind.
+// Gezählt wird wie bei den Wunschzetteln: Zählerstand beim Anlegen merken.
+// ---------------------------------------------------------------------------
+export const MINI_NAME = { lichtung: 'Waldlichtung', baum: 'Christbaumverkauf', back: 'Backstube', eis: 'Eisbahn', berg: 'Schlittenberg', schnee: 'Schneeballwiese' };
+const karteDa = () => !!(S.st.tipps && S.st.tipps.karte_mehr);
+function bitteGeht(d) {
+  if (d.art === 'getraenk') return S.hat(d.p);
+  if (d.art === 'backen') return karteDa() && S.miniOffen('back');
+  if (d.art === 'mini') return karteDa() && S.miniOffen(d.spiel);
+  if (d.art === 'futter') return S.hat('futterhaus');
+  if (d.art === 'santa') return karteDa() && S.einstieg('santa');
+  if (d.art === 'gold') return S.aufsicht();
+  return false;
+}
+function bitteZaehler(d) {
+  const s = S.st.stats;
+  if (d.art === 'getraenk') return ((d.griff ? s.griffProdukt : s.produkt) || {})[d.p] || 0;
+  if (d.art === 'backen') return s.gebacken || 0;
+  if (d.art === 'mini') return (s.runden || {})[d.spiel] || 0;
+  if (d.art === 'futter') return s.futter || 0;
+  if (d.art === 'santa') return s.santa || 0;
+  if (d.art === 'gold') return s.gold || 0;
+  return 0;
+}
+export const bitteDef = (b) => C.STAMM_BITTEN[b.gast][b.i];
+export const bitteName = (b) => C.GAESTE[b.gast].name;
+export const bitteZiel = (b) => bitteDef(b).n || 1;
+export const bitteStand = (b) => Math.min(bitteZiel(b), Math.max(0, bitteZaehler(bitteDef(b)) - b.start));
+export const bitteFertig = (b) => bitteStand(b) >= bitteZiel(b);
+/** Was zu tun ist, kurz (unter dem Text der Bitte). */
+export function bitteAufgabe(b) {
+  const d = bitteDef(b), n = bitteZiel(b);
+  if (d.art === 'getraenk') return `${n} × ${C.PRODUKT[d.p].name}${d.griff ? ' mit Handgriff' : ''} selbst servieren`;
+  if (d.art === 'backen') return `${n} Plätzchen in der Backstube backen`;
+  if (d.art === 'mini') return `Eine Runde ${MINI_NAME[d.spiel]} spielen`;
+  if (d.art === 'futter') return 'Das Futterhaus füllen';
+  if (d.art === 'santa') return 'Den Weihnachtsmann auf der Karte finden';
+  return `${n} goldene Gäste bedienen`;
+}
+/**
+ * Die Bitte von heute: Eine offene wartet (keine Frist, keine neue dazu).
+ * Ist die letzte abgeholt und ein neuer Tag da, kommt der Stammgast dran,
+ * der am längsten keine hatte und dessen nächste Bitte schon geht.
+ */
+export function bitte() {
+  if (S.st.lernen < 99 || !S.startzieleFertig()) return null;
+  const tag = Z.tagesSchluessel();
+  const alt = S.st.bitte;
+  if (alt && (!alt.abgeholt || alt.tag === tag)) return alt;
+  const stand = S.st.bittenStand = S.st.bittenStand || {};
+  const zuletzt = S.st.bitteZuletzt = S.st.bitteZuletzt || {};
+  const wer = Object.keys(C.STAMM_BITTEN).filter((id) => {
+    const kette = C.STAMM_BITTEN[id], i = stand[id] || 0;
+    return S.stammBesuche(id) >= 1 && i < kette.length && bitteGeht(kette[i]);
+  }).sort((x, y) => (zuletzt[x] || 0) - (zuletzt[y] || 0));
+  if (!wer.length) return null;
+  const gast = wer[0], i = stand[gast] || 0;
+  S.st.bitte = { gast, i, start: bitteZaehler(C.STAMM_BITTEN[gast][i]), tag, abgeholt: false };
+  zuletzt[gast] = Date.now();
+  S.speichere();
+  S.hooks.toast(`${C.GAESTE[gast].name} hat eine Bitte an dich - steht unter Aufträge.`, 'neu');
+  return S.st.bitte;
+}
+/** Erfüllte Bitte abholen: Sterne und der Dank. */
+export function bitteAbholen() {
+  const b = S.st.bitte;
+  if (!b || b.abgeholt || !bitteFertig(b)) return null;
+  b.abgeholt = true; b.tag = Z.tagesSchluessel();
+  S.st.bittenStand[b.gast] = b.i + 1;
+  S.st.stats.bitten = (S.st.stats.bitten || 0) + 1;
+  const lohn = Math.max(100, Math.round(S.einnahmenProMinute() * C.BITTE_MINUTEN * S.dev.geld));
+  S.verdiene(lohn);
+  S.speichere();
+  return { lohn, name: bitteName(b), dank: bitteDef(b).dank };
+}
 
 /** Welches Sammelstück gäbe es beim schweren Auftrag? */
 export function naechstesSammelstueck() { return C.AUFTRAG_DEKO.find((d) => !S.st.kalDeko[d.id]) || null; }

@@ -413,6 +413,8 @@ html, body {
 .auftrag .balken, #modal .balken { height: calc(var(--px) * 3); background: #e8d8b8; border-radius: calc(var(--px) * 2); margin: calc(var(--px) * 1.5) 0; overflow: hidden; }
 .auftrag .balken i, #modal .balken i { display: block; height: 100%; background: linear-gradient(90deg, #e8b030, #f0d060); }
 .auftrag small { font-size: calc(var(--px) * 4.4); color: #7a5a44; }
+/* Bitte eines Stammgastes (17.10.): der Satz in seiner Stimme */
+.auftrag .bitte-text { display: block; font-size: calc(var(--px) * 4.6); font-style: italic; color: #5a3a24; margin: calc(var(--px) * 1) 0; }
 .auftrag .k { min-width: calc(var(--px) * 34); font-size: calc(var(--px) * 5); }
 .auftrag.erledigt { opacity: 0.55; }
 .sammlung { display: flex; gap: calc(var(--px) * 2); flex-wrap: wrap; margin-top: calc(var(--px) * 2); }

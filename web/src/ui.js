@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610172100';
-import * as S from './spiel.js?v=202610172100';
-import * as Z from './zeit.js?v=202610172100';
-import * as T from './ton.js?v=202610172100';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610172100';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610172100';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610172100';
-import * as A from './auftraege.js?v=202610172100';
-import * as E from './erfolge.js?v=202610172100';
-import * as ZL from './ziele.js?v=202610172100';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610172100';
-import * as KA from './karte.js?v=202610172100';
-import { zeigeRueckblick } from './ereignis.js?v=202610172100';
-import { barbaraZweig } from './szene.js?v=202610172100';
-import * as SW from './schneeball.js?v=202610172100';
-import * as LI from './lichtung.js?v=202610172100';
-import * as CB from './christbaum.js?v=202610172100';
-import * as SB from './schlitten.js?v=202610172100';
-import * as EB from './schlittschuh.js?v=202610172100';
-import * as BS from './backstube.js?v=202610172100';
-import { alleSymbole } from './symbole.js?v=202610172100';
+import * as C from './config.js?v=202610172230';
+import * as S from './spiel.js?v=202610172230';
+import * as Z from './zeit.js?v=202610172230';
+import * as T from './ton.js?v=202610172230';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610172230';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610172230';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610172230';
+import * as A from './auftraege.js?v=202610172230';
+import * as E from './erfolge.js?v=202610172230';
+import * as ZL from './ziele.js?v=202610172230';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610172230';
+import * as KA from './karte.js?v=202610172230';
+import { zeigeRueckblick } from './ereignis.js?v=202610172230';
+import { barbaraZweig } from './szene.js?v=202610172230';
+import * as SW from './schneeball.js?v=202610172230';
+import * as LI from './lichtung.js?v=202610172230';
+import * as CB from './christbaum.js?v=202610172230';
+import * as SB from './schlitten.js?v=202610172230';
+import * as EB from './schlittschuh.js?v=202610172230';
+import * as BS from './backstube.js?v=202610172230';
+import { alleSymbole } from './symbole.js?v=202610172230';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1364,6 +1364,30 @@ function rufKarte() {
   return z;
 }
 
+/** Bitte eines Stammgastes (17.10.): Text, Aufgabe mit Balken, Abholen → Dank. */
+function bitteKarte() {
+  const b = A.bitte();
+  if (!b) return null;
+  const fertig = A.bitteFertig(b), stand = A.bitteStand(b), ziel = A.bitteZiel(b);
+  const z = el('div', 'auftrag bitte' + (b.abgeholt ? ' erledigt' : ''));
+  z.innerHTML = `<span class="stufe s1">♥</span>
+    <div class="mitte"><b>Bitte von ${A.bitteName(b)}</b>
+      <span class="bitte-text">„${A.bitteDef(b).text}“</span>
+      <div class="balken"><i style="width:${Math.round(100 * (b.abgeholt ? 1 : stand / ziel))}%"></i></div>
+      <small>${b.abgeholt ? 'Erledigt - morgen hat wieder jemand eine Bitte.' : `${A.bitteAufgabe(b)}${ziel > 1 ? ` · ${stand} / ${ziel}` : ''} · keine Eile`}</small></div>`;
+  const k = el('button', 'k k--kauf', b.abgeholt ? '✓' : 'Abholen');
+  k.disabled = b.abgeholt || !fertig;
+  k.onclick = () => {
+    const e = A.bitteAbholen();
+    if (!e) return;
+    T.spiele('kauf');
+    oeffneAuftraege('heute');
+    fenster(e.name, `<p>„${e.dank}“</p><p class="bonus">+ ${S.formatGeld(e.lohn)}</p>`, [{ text: 'Schön!' }]);
+  };
+  z.appendChild(k);
+  return z;
+}
+
 // ---------------------------------------------------------------------------
 // Tagesaufträge
 // ---------------------------------------------------------------------------
@@ -1395,6 +1419,8 @@ export function oeffneAuftraege(reiter) {
   if (auftragReiter === 'album') return baueAlbum(liste);
   if (S.st.lernen < 99) { liste.appendChild(el('p', 'hinweis', 'Nach der Einführung gibt es hier jeden Tag drei Aufträge.')); return; }
   liste.appendChild(rufKarte());
+  const bk = bitteKarte();
+  if (bk) liste.appendChild(bk);
   const stufenName = ['leicht', 'mittel', 'schwer'];
   A.heute().forEach((a, i) => {
     const z = el('div', 'auftrag' + (a.abgeholt ? ' erledigt' : ''));

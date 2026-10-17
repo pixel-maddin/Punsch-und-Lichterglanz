@@ -261,6 +261,104 @@ export const STAMMGAESTE = {
     geschenk: 'Franz schenkt dir einen Fichtenzapfen. „Kein Tannenzapfen - die gibt\'s am Boden ja nicht!“' },
 };
 
+// Bitten der Stammgäste (17.10.): Einmal am Tag hat ein Stammgast, den man
+// schon kennt, eine Bitte (Karte unter Aufträge, zusätzlich zu den drei
+// Aufträgen). Je Gast eine Kette von fünf, die seine Geschichte weitererzählt.
+// Keine Frist - eine offene Bitte wartet, bis sie erfüllt ist.
+//   art: 'getraenk' (p, n, griff = nur mit Handgriff) · 'backen' (n Plätzchen)
+//        'mini' (spiel, eine Runde mit Punkten) · 'futter' (Futterhaus füllen)
+//        'santa' (Weihnachtsmann auf der Karte finden) · 'gold' (n goldene Gäste)
+// Geht eine Bitte noch nicht (Getränk fehlt, Minispiel zu …), kommt an dem
+// Tag ein anderer Gast dran. Lohn: BITTE_MINUTEN Minuten Einnahmen.
+export const BITTE_MINUTEN = 5;
+export const STAMM_BITTEN = {
+  hilde: [
+    { art: 'getraenk', p: 'kinderpunsch', n: 5, griff: true,
+      text: 'Kindchen, heute ist Strickrunde bei mir. Fünf Damen, alle durstig. Machst du mir fünf Kinderpunsch mit Zuckerstange? Die Zuckerstangen sind für Waldi tabu.',
+      dank: 'Die Strickrunde war begeistert. Waldi hat trotzdem eine Zuckerstange erwischt. Er bereut nichts.' },
+    { art: 'backen', n: 6,
+      text: 'Waldi hat Geburtstag! Er wird neun - in Hundejahren ein alter Herr. Backst du sechs Plätzchen für die Gäste? Waldi kriegt Wurst.',
+      dank: 'Waldi hat gefeiert. Die Plätzchen hat er nicht angerührt. Ich schon.' },
+    { art: 'futter',
+      text: 'Am Fenster sitzt jeden Morgen ein Rotkehlchen und schaut mir beim Stricken zu. Füllst du dein Futterhaus? Dann hat es was Besseres zu tun.',
+      dank: 'Das Rotkehlchen war heute bei dir. Ich hab ganz ohne Zuschauer gestrickt - drei Reihen mehr!' },
+    { art: 'getraenk', p: 'weisser', n: 4, griff: true,
+      text: 'Die Wolle für Jonas\' Schal ist alle. Sophia bringt Nachschub, aber ich bin ganz kribbelig. Vier Zimtwolken, bitte - mit allem.',
+      dank: 'Das Paket ist da! Sophia hat es bis an die Tür getragen und wollte wissen, was drin ist. Hab nichts verraten.' },
+    { art: 'mini', spiel: 'schnee',
+      text: 'Jonas schreibt, er macht eine Schneeballschlacht mit mir. Mit MIR! Übst du auf der Schneeballwiese für mich? Ich muss doch wissen, wie das geht.',
+      dank: 'Ich hab\'s verstanden: werfen, ducken, nicht den Wichtel treffen. Jonas hat keine Chance.' },
+  ],
+  sophia: [
+    { art: 'getraenk', p: 'gluehwein', n: 6,
+      text: 'So viele Pakete heute, ich brauch Treibstoff. Sechs Sternenpunsch für mich und die Kollegen?',
+      dank: 'Die Kollegen sagen danke. Und dass dein Stand Stadtgespräch ist. Also, Dorfgespräch.' },
+    { art: 'santa',
+      text: 'Alle sagen, der Weihnachtsmann versteckt sich hier irgendwo in der Gegend. Ich glaub\'s erst, wenn du ihn findest. Schau mal auf der Karte!',
+      dank: 'Du hast ihn gesehen? Wirklich? ... Ich muss los, das muss ich sofort jemandem erzählen.' },
+    { art: 'gold', n: 5,
+      text: 'Ich mach eine Umfrage: Wer hat den schönsten Stand im Dorf? Bedien mal ein paar goldene Gäste - die frag ich danach.',
+      dank: 'Ergebnis: Fünf von fünf sagen: du. Einer hat noch „und Waldi" gesagt. Das war Hilde.' },
+    { art: 'getraenk', p: 'apfel', n: 5, griff: true,
+      text: 'Der Bürgermeister hat schon wieder eine Lichterkette bestellt. Die zwölfte! Ich brauch fünf heiße Äpfel, gut umgerührt, sonst rutscht mir was raus.',
+      dank: 'Die Kette hängt. Jetzt blinkt sein Haus im Takt von Jingle Bells. Hören kann man\'s nicht. Sehen schon.' },
+    { art: 'getraenk', p: 'feuerzange', n: 3, griff: true,
+      text: 'Ich hab schon wieder einen Brief mit Herzchen für Franz. Ich trau mich kaum, ihn abzugeben. Ich brauch Mut: drei Feuerzauber - solange sie brennen!',
+      dank: 'Er hat ihn gelesen und ist rot geworden wie ein Gimpel. Absender: die Frau vom Christbaumverkauf. Du hast\'s nicht von mir.' },
+  ],
+  karl: [
+    { art: 'mini', spiel: 'baum',
+      text: 'Ich hab einen Witz über Tannenbäume, aber mir fehlt die Pointe. Verkauf mal ein paar Bäume - vielleicht kommt mir dabei was.',
+      dank: 'Warum ist der Tannenbaum nie einsam? Er hat immer seine Zweige dabei. ... Ich arbeite noch dran.' },
+    { art: 'getraenk', p: 'lebkuchen', n: 6, griff: true,
+      text: 'Ich muss einen Lebkuchenwitz am lebenden Objekt üben. Also, am Lebkuchen. Sechs Stück mit Zuckerguss, bitte.',
+      dank: 'Was sagt der Lebkuchen zum Zuckerguss? „Ohne dich bin ich nur Kuchen." ... Die Lebkuchen waren besser als der Witz.' },
+    { art: 'gold', n: 4,
+      text: 'Ich brauch Publikum. Gute Laune, volle Becher. Bedienst du ein paar goldene Gäste? Die lachen immer am lautesten.',
+      dank: 'Vier Lacher! Gut, einer hat gehustet. Ich zähl ihn trotzdem.' },
+    { art: 'mini', spiel: 'berg',
+      text: 'Ich hab am Schlittenberg einen gesehen, der rodelt im Wok. Kein Witz! Fährst du mal runter und erzählst mir, wie das ist?',
+      dank: 'Im Wok den Berg runter. Da hat einer echt den Dreh raus! ... Den hab ich mir extra für dich aufgehoben.' },
+    { art: 'getraenk', p: 'eierpunsch', n: 5, griff: true,
+      text: 'Ich trete beim Seniorennachmittag auf. Hilde sitzt in der ersten Reihe. Ich brauch was fürs Herz: fünf Herzwärmer, bitte.',
+      dank: 'Hilde hat gelacht. Zweimal! Einmal über den Witz, einmal über mich. Zählt beides.' },
+  ],
+  lena: [
+    { art: 'getraenk', p: 'kinderpunsch', n: 4, griff: true,
+      text: 'Meine Freundinnen kommen gleich! Machst du uns vier Kinderpunsch? Mit Zuckerstange, sonst ist es kein richtiger.',
+      dank: 'Wir haben angestoßen. Auf den Schnee, auf die Ferien und auf Waldi.' },
+    { art: 'backen', n: 5,
+      text: 'Ich will Papa Plätzchen nach Kanada schicken. Sophia sagt, das klappt, wenn sie nicht zerbröseln. Backst du mir fünf?',
+      dank: 'Sophia hat das Päckchen ganz vorsichtig mitgenommen. Wie ein rohes Ei. Ein Plätzchen-Ei.' },
+    { art: 'mini', spiel: 'eis',
+      text: 'Ich lerne Pirouette! Aber ich fall immer um. Zeigst du mir auf der Eisbahn, wie das geht?',
+      dank: 'Ich hab mich dreimal gedreht und bin erst danach umgefallen. Das ist ein Rekord!' },
+    { art: 'getraenk', p: 'schoko', n: 3, griff: true,
+      text: 'Meine Tante hat aus Australien geschrieben: Da essen sie Eis am Strand! Ich will das Gegenteil. Drei heiße Schokoladen mit Sahne - für Mama, mich und den Schneemann.',
+      dank: 'Der Schneemann wollte seine nicht. Hab ich getrunken. Er wär sonst geschmolzen.' },
+    { art: 'mini', spiel: 'baum',
+      text: 'Wir haben noch keinen Christbaum. Mama sagt, dieses Jahr brauchen wir einen GANZ großen. Suchst du schon mal einen schönen aus?',
+      dank: 'Mama hat gelächelt, als ich vom großen Baum erzählt hab. So ein Geheimnis-Lächeln. Weißt du was?' },
+  ],
+  franz: [
+    { art: 'futter',
+      text: 'Die Meisen haben\'s diese Woche schwer, der Boden ist gefroren. Füllst du dein Futterhaus? Ich hab dir gleich angesehen, dass du ein Herz für Vögel hast.',
+      dank: 'Eine Kohlmeise muss im Winter etwa ein Drittel ihres Gewichts am Tag fressen, sonst kommt sie nicht durch die Nacht. Deine sind heute satt.' },
+    { art: 'getraenk', p: 'jaegertee', n: 4, griff: true,
+      text: 'Waldtee trink ich am liebsten, wenn er genau richtig gezogen hat. Nicht zu schwach, nicht bitter. Machst du mir vier, wie es sich gehört?',
+      dank: 'Genau richtig. Ein Eichelhäher versteckt im Herbst Tausende Eicheln - und findet im Winter die meisten wieder. Ich find nicht mal meine Mütze.' },
+    { art: 'mini', spiel: 'lichtung',
+      text: 'Bei dem Schnee kommen die Rehe schlecht ans Futter. Hilfst du mir auf der Waldlichtung? Die Raufe ist schon voll.',
+      dank: 'Rehe tragen im Winter ein dickeres, graueres Fell als im Sommer. Und deine Rehe haben heute einen vollen Bauch.' },
+    { art: 'backen', n: 4,
+      text: 'Ich hab den Waldkindern Plätzchen versprochen. Ich kann Spuren lesen, Bäume zählen - aber backen nicht. Machst du mir vier?',
+      dank: 'Die Kinder haben Spuren gelesen und Plätzchen gegessen. Die Krümel haben übrigens die Meisen gefunden.' },
+    { art: 'getraenk', p: 'gluehwein', n: 8,
+      text: 'Vor Heiligabend gehen wir vom Forst noch auf einen Punsch. Acht Sternenpunsch, bitte - das Heu für die Rehe ist schon geladen.',
+      dank: 'Die Kollegen sagen danke. Rehe sind übrigens keine kleinen Hirsche, sondern eine eigene Art. Das hab ich ihnen auch erzählt. Dreimal.' },
+  ],
+};
+
 
 // ---------------------------------------------------------------------------
 // Fassaden (Anstrich im Baumarkt)

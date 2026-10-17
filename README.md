@@ -51,6 +51,12 @@ selbst bedienen), steigt der Ruf um eine Stufe, und alle Preise steigen um
 2 %. Ein verpasster Tag kostet nichts. Der Stand steht oben unter Aufträge.
 Im Laden steht unter jedem Preis, wie lange der Stand ungefähr noch dafür
 braucht.
+
+**Bitten der Stammgäste:** Einmal am Tag hat einer der Stammgäste, die du
+schon kennst, eine Bitte an dich - fünf Kinderpunsch für Hildes Strickrunde,
+eine Runde Christbaumverkauf für Karls neuen Witz, Futter für Franz' Meisen.
+Sie steht unter Aufträge, hat keine Frist und erzählt die Geschichte des
+Gastes weiter. Erfüllt gibt es Sterne und einen Dank.
 Einmal am Tag kommt ein **Ansturm**: 60 Sekunden dreifaches Trinkgeld, die
 Wichtel schauen nur zu.
 

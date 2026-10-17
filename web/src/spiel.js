@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610172100';
-import * as Z from './zeit.js?v=202610172100';
-import { neueFarben } from './pixel.js?v=202610172100';
+import * as C from './config.js?v=202610172230';
+import * as Z from './zeit.js?v=202610172230';
+import { neueFarben } from './pixel.js?v=202610172230';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1115,6 +1115,10 @@ function zaehleBedient(g, auto, faktor, schwungVorher) {
   zaehleErfolg('serie');
   if (st.stats.serie > (st.stats.serieBest || 0)) st.stats.serieBest = st.stats.serie;
   if (auto) return;
+  // Für die Bitten der Stammgäste (17.10.): je Sorte selbst serviert, mit Handgriff, goldene
+  st.stats.produkt = st.stats.produkt || {}; st.stats.produkt[g.wunsch] = (st.stats.produkt[g.wunsch] || 0) + 1;
+  if (faktor > 1) { st.stats.griffProdukt = st.stats.griffProdukt || {}; st.stats.griffProdukt[g.wunsch] = (st.stats.griffProdukt[g.wunsch] || 0) + 1; }
+  if (g.gold) zaehleErfolg('gold');
   if (g.eilig) zaehleErfolg('eilig');
   if (faktor > 1) zaehleErfolg('extras');
   if (lauf.schwung >= C.SCHWUNG_MAX && schwungVorher < C.SCHWUNG_MAX) zaehleErfolg('schwungVoll');
@@ -2001,7 +2005,7 @@ export function fuettere() {
   if (!hat('futterhaus')) return false;
   const voll = futterVoll();
   st.futterBis = Z.jetzt().getTime() + C.FUTTER_STUNDEN * 3600000;
-  if (!voll) lauf.vogelAb = Math.min(lauf.vogelAb, 3);   // gleich kommt der erste
+  if (!voll) { lauf.vogelAb = Math.min(lauf.vogelAb, 3); zaehleErfolg('futter'); }   // gleich kommt der erste
   speichere();
   return !voll;
 }
