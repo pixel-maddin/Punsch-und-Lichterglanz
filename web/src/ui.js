@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610141811';
-import * as S from './spiel.js?v=202610141811';
-import * as Z from './zeit.js?v=202610141811';
-import * as T from './ton.js?v=202610141811';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610141811';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610141811';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610141811';
-import * as A from './auftraege.js?v=202610141811';
-import * as E from './erfolge.js?v=202610141811';
-import * as ZL from './ziele.js?v=202610141811';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610141811';
-import * as KA from './karte.js?v=202610141811';
-import { zeigeRueckblick } from './ereignis.js?v=202610141811';
-import { barbaraZweig } from './szene.js?v=202610141811';
-import * as SW from './schneeball.js?v=202610141811';
-import * as LI from './lichtung.js?v=202610141811';
-import * as CB from './christbaum.js?v=202610141811';
-import * as SB from './schlitten.js?v=202610141811';
-import * as EB from './schlittschuh.js?v=202610141811';
-import * as BS from './backstube.js?v=202610141811';
-import { alleSymbole } from './symbole.js?v=202610141811';
+import * as C from './config.js?v=202610172100';
+import * as S from './spiel.js?v=202610172100';
+import * as Z from './zeit.js?v=202610172100';
+import * as T from './ton.js?v=202610172100';
+import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610172100';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610172100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610172100';
+import * as A from './auftraege.js?v=202610172100';
+import * as E from './erfolge.js?v=202610172100';
+import * as ZL from './ziele.js?v=202610172100';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610172100';
+import * as KA from './karte.js?v=202610172100';
+import { zeigeRueckblick } from './ereignis.js?v=202610172100';
+import { barbaraZweig } from './szene.js?v=202610172100';
+import * as SW from './schneeball.js?v=202610172100';
+import * as LI from './lichtung.js?v=202610172100';
+import * as CB from './christbaum.js?v=202610172100';
+import * as SB from './schlitten.js?v=202610172100';
+import * as EB from './schlittschuh.js?v=202610172100';
+import * as BS from './backstube.js?v=202610172100';
+import { alleSymbole } from './symbole.js?v=202610172100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -906,7 +906,10 @@ export function aktualisiereLaden() {
     else if (s.grund) { html = `🔒`; an = false; cls = 'k k--zu'; }
     else {
       const stufe = s.max > 1 ? `<small>Stufe ${s.stufe + 1}/${s.max}</small>` : '';
-      html = `${stufe}${S.formatGeld(s.kosten)}`;
+      // Wie lange noch? (17.10.) In Einnahmen des Standes gerechnet - wer
+      // selbst mitarbeitet, ist schneller da
+      const rest = s.leisten ? '' : `<small>${S.nochZeit(s.kosten - S.st.geld)}</small>`;
+      html = `${stufe}${S.formatGeld(s.kosten)}${rest}`;
       an = s.leisten;
     }
     if (knopf.innerHTML !== html) knopf.innerHTML = html;
@@ -1343,6 +1346,25 @@ function zeichneKiste(cv, offen) {
 }
 
 // ---------------------------------------------------------------------------
+// Ruf des Standes (17.10.): oben in den Aufträgen - dort schaut man täglich rein
+// ---------------------------------------------------------------------------
+function rufKarte() {
+  const r = S.ruf();
+  const z = el('div', 'auftrag ruf' + (r.fertig || r.max ? ' erledigt' : ''));
+  const anteil = r.fertig || r.max ? 1 : Math.min(1, r.punkte / C.RUF_PUNKTE);
+  const preis = Math.round(r.stufe * C.RUF_JE_STUFE * 100);
+  const heute = r.max ? 'Höchste Stufe erreicht!'
+    : r.fertig ? 'Heute geschafft - morgen geht es weiter.'
+    : S.aufsicht() ? `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.gold)} goldene oder besondere Gäste - oder eine Minispielrunde`
+    : `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.normal)} Gäste selbst bedienen - oder eine Minispielrunde`;
+  z.innerHTML = `<span class="stufe s2">★</span>
+    <div class="mitte"><b>Ruf deines Standes: Stufe ${r.stufe}</b>
+      <div class="balken"><i style="width:${Math.round(100 * anteil)}%"></i></div>
+      <small>${heute} · alle Preise ${preis ? '+' + preis + ' %' : 'noch normal'}</small></div>`;
+  return z;
+}
+
+// ---------------------------------------------------------------------------
 // Tagesaufträge
 // ---------------------------------------------------------------------------
 let auftragReiter = 'heute';   // 'heute' | 'erfolge'
@@ -1372,6 +1394,7 @@ export function oeffneAuftraege(reiter) {
   if (auftragReiter === 'erfolge') return baueErfolge(liste);
   if (auftragReiter === 'album') return baueAlbum(liste);
   if (S.st.lernen < 99) { liste.appendChild(el('p', 'hinweis', 'Nach der Einführung gibt es hier jeden Tag drei Aufträge.')); return; }
+  liste.appendChild(rufKarte());
   const stufenName = ['leicht', 'mittel', 'schwer'];
   A.heute().forEach((a, i) => {
     const z = el('div', 'auftrag' + (a.abgeholt ? ' erledigt' : ''));
@@ -1394,7 +1417,9 @@ export function oeffneAuftraege(reiter) {
     z.appendChild(k);
     liste.appendChild(z);
   });
-  liste.appendChild(el('p', 'klein', 'Morgen gibt es neue Aufträge. Zählt nur, was du selbst am Tresen machst.'));
+  liste.appendChild(el('p', 'klein', S.aufsicht()
+    ? 'Morgen gibt es neue Aufträge. Es zählt, was am Tresen passiert, während du da bist - Besonderes nur, wenn du selbst bedienst.'
+    : 'Morgen gibt es neue Aufträge. Zählt nur, was du selbst am Tresen machst.'));
   const samm = el('div', 'sammlung');
   for (const d of C.AUFTRAG_DEKO) samm.appendChild(el('span', S.st.kalDeko[d.id] ? 'hat' : '', S.st.kalDeko[d.id] ? '★ ' + d.name : '???'));
   liste.appendChild(el('p', 'gruppe', `Sammlung: ${C.AUFTRAG_DEKO.filter((d) => S.st.kalDeko[d.id]).length} / ${C.AUFTRAG_DEKO.length}`));
@@ -1985,7 +2010,8 @@ export function zeigeHilfe() {
     <p>Wer zügig hintereinander bedient, baut <b>Schwung</b> auf (bis ×1,40). Wer länger bleibt, bekommt Besuch von ganzen Gruppen - und manchmal von jemand ganz Besonderem.</p>
     <p>Mit den Sternen kaufst du Deko, Farbe, Zutaten und Wichtel. Je gemütlicher das Haus, desto mehr Gäste kommen und desto mehr zahlen sie.</p>
     <p>Auf der <b>Karte</b> warten Läden, Minispiele (zuerst nur die Waldlichtung, alle paar Tage kommt ein neues dazu) und alle paar Tage der Weihnachtsmarkt.${S.miniOffen('back') ? ' Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr.' : ''} Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an. Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
-    <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.</p>
+    <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.${S.aufsicht() ? ' Deine Wichtel bedienen normale Gäste jetzt allein - du kümmerst dich um die <b>goldenen Gäste</b>: Sie drängeln vor und zahlen viel mehr.' : ''}</p>
+    <p><b>Ruf:</b> Jeden Tag, an dem du ein bisschen mitarbeitest, steigt der Ruf deines Standes - und alle Preise mit. Wie weit du heute bist, steht unter Aufträge.</p>
     <p class="klein">Das Spiel läuft mit deiner echten Uhr: Nachts ist es dunkel, ab dem 1. Dezember liegt Schnee und jeden Tag geht ein Türchen auf.</p>`);
 }
 

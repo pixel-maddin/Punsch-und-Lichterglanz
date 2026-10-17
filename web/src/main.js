@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610141811';
-import * as S from './spiel.js?v=202610141811';
-import * as Z from './zeit.js?v=202610141811';
-import * as T from './ton.js?v=202610141811';
-import * as LI from './lichtung.js?v=202610141811';
-import * as CB from './christbaum.js?v=202610141811';
-import * as KA from './karte.js?v=202610141811';
-import * as SB from './schlitten.js?v=202610141811';
-import * as EB from './schlittschuh.js?v=202610141811';
-import * as BS from './backstube.js?v=202610141811';
-import * as UI from './ui.js?v=202610141811';
-import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610141811';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610141811';
-import * as Lernen from './lernen.js?v=202610141811';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610141811';
-import * as A from './auftraege.js?v=202610141811';
-import * as E from './erfolge.js?v=202610141811';
-import * as ZL from './ziele.js?v=202610141811';
+import * as C from './config.js?v=202610172100';
+import * as S from './spiel.js?v=202610172100';
+import * as Z from './zeit.js?v=202610172100';
+import * as T from './ton.js?v=202610172100';
+import * as LI from './lichtung.js?v=202610172100';
+import * as CB from './christbaum.js?v=202610172100';
+import * as KA from './karte.js?v=202610172100';
+import * as SB from './schlitten.js?v=202610172100';
+import * as EB from './schlittschuh.js?v=202610172100';
+import * as BS from './backstube.js?v=202610172100';
+import * as UI from './ui.js?v=202610172100';
+import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610172100';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610172100';
+import * as Lernen from './lernen.js?v=202610172100';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610172100';
+import * as A from './auftraege.js?v=202610172100';
+import * as E from './erfolge.js?v=202610172100';
+import * as ZL from './ziele.js?v=202610172100';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -184,6 +184,12 @@ S.hooks.ton = (n) => { try { T.spiele(n); } catch (e) { console.warn('Ton', n, e
 S.hooks.toast = (t, a) => { if (a === 'hinweis' && S.st.lernen < 99) return; UI.toast(t, a); };
 S.hooks.geld = () => UI.aktualisiereLaden();
 S.hooks.bedient = (g, auto, stoss) => A.bedient(g, auto, stoss);
+// Ruf des Standes (17.10.): eine Stufe mehr - während der Startziele still
+S.hooks.ruf = (n) => {
+  if (!S.startzieleFertig()) return;
+  T.spiele('spezial');
+  UI.toast(`Dein Stand spricht sich herum! Ruf ${n}: alle Preise +${Math.round(n * C.RUF_JE_STUFE * 100)} %`, 'spezial');
+};
 // Während der Startziele still - die Aufträge stellt ein eigener Hinweis danach vor
 A.beiErfuellt((a) => { if (!S.startzieleFertig()) return; T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
 

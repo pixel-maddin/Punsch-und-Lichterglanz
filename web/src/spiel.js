@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610141811';
-import * as Z from './zeit.js?v=202610141811';
-import { neueFarben } from './pixel.js?v=202610141811';
+import * as C from './config.js?v=202610172100';
+import * as Z from './zeit.js?v=202610172100';
+import { neueFarben } from './pixel.js?v=202610172100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -17,7 +17,7 @@ export const DEMO = typeof location !== 'undefined' && /^(localhost|127\.0\.0\.1
   ? new URLSearchParams(location.search).get('demo') : null;
 const SCHLUESSEL = DEMO ? 'adventshaus.demo' : 'adventshaus.v1';
 
-export const hooks = { ton() {}, toast() {}, geld() {}, musik() {}, bedient() {} };
+export const hooks = { ton() {}, toast() {}, geld() {}, musik() {}, bedient() {}, ruf() {} };
 
 // Positionen auf der Straße (Weltpixel x)
 export const TRESEN_X = [136, 150, 164];
@@ -226,6 +226,7 @@ function resetLauf() {
     haendlerAb: C.HAENDLER_ERST[0] + Math.random() * (C.HAENDLER_ERST[1] - C.HAENDLER_ERST[0]),
     sonderSeit: null,               // seit wann besondere Gäste kommen dürften (sonderBereit)
     voegel: [], vogelAb: 4,         // Vögel am Futterhaus (11.10.)
+    goldAb: 20,                     // frühestens dann der nächste goldene Gast (17.10.)
     t: 0,
   });
 }
@@ -383,7 +384,7 @@ export const topfMax = () => C.TOPF_PORTIONEN[stufe('topf')];
 export const handMax = () => C.TABLETT[stufe('tablett')];
 export const tresenPlaetze = () => C.TRESEN[stufe('tresen')];
 export const produkteFrei = () => C.PRODUKTE.filter((p) => hat(p.id));
-export const preisFaktor = () => (1 + stimmung() * C.STIMMUNG_PREIS) * (1 + boni().preis);
+export const preisFaktor = () => (1 + stimmung() * C.STIMMUNG_PREIS) * (1 + boni().preis) * rufFaktor();
 
 export function gastTakt() {
   const sonntag = Z.adventssonntag() ? C.ADVENT_GAESTE : 0;
@@ -391,6 +392,40 @@ export function gastTakt() {
   const fa = feierabend() ? C.FEIERABEND.gaeste : 0;
   const t = C.GAST_BASIS / (1 + stimmung() / C.STIMMUNG_TAKT) / (1 + boni().gaeste + sonntag + markt + fa);
   return Math.max(C.GAST_MIN, t);
+}
+
+// ---------------------------------------------------------------------------
+// Aufsicht und goldene Gäste (17.10., siehe C.AUFSICHT_AB)
+// ---------------------------------------------------------------------------
+/** Bedienen die Wichtel normale Gäste selbst, auch wenn du da bist? */
+export const aufsicht = () => stufe('servier') >= C.AUFSICHT_AB;
+/** Kommt als Nächstes ein goldener Gast? Höchstens einer zur Zeit. */
+function goldFaellig() {
+  return aufsicht() && chefAktiv() && nachStartRuhe() && !lauf.lernen && lauf.t >= lauf.goldAb
+    && !lauf.gaeste.some((g) => g.gold && !g.gehen && !g.bedient);
+}
+
+// ---------------------------------------------------------------------------
+// Ruf des Standes (17.10., siehe C.RUF_PUNKTE)
+// ---------------------------------------------------------------------------
+/** { stufe, punkte (heute), fertig (heute schon gestiegen) } */
+export function ruf() {
+  const r = st.ruf || {};
+  const heute = tagNr();
+  return { stufe: r.stufe || 0, punkte: r.heute === heute ? r.punkte || 0 : 0, fertig: r.tag === heute, max: (r.stufe || 0) >= C.RUF_MAX };
+}
+export const rufFaktor = () => 1 + ((st.ruf && st.ruf.stufe) || 0) * C.RUF_JE_STUFE;
+/** Etwas für den Ruf getan: 'gold' (goldener/besonderer Gast), 'mini' (Minispielrunde), 'normal'. */
+function rufPunkt(art) {
+  const r = st.ruf = st.ruf || { stufe: 0, punkte: 0, heute: null, tag: null };
+  const heute = tagNr();
+  if (r.heute !== heute) { r.heute = heute; r.punkte = 0; }
+  if (r.tag === heute || r.stufe >= C.RUF_MAX) return;
+  r.punkte += C.RUF_JE[art] || 0;
+  if (r.punkte < C.RUF_PUNKTE - 1e-9) return;
+  r.stufe++; r.tag = heute;
+  hooks.ruf(r.stufe);
+  speichere();
 }
 
 export function artikelName(id) {
@@ -583,6 +618,15 @@ export function verdiene(betrag) {
   hooks.geld();
 }
 
+/** „noch ~12 Min." - wie lange der Stand für so viele Sterne braucht (17.10.). */
+export function nochZeit(fehlt) {
+  const min = fehlt / Math.max(1, einnahmenProMinute());
+  if (min < 1) return 'noch &lt;1 Min.';
+  if (min < 60) return `noch ~${Math.ceil(min)} Min.`;
+  const h = min / 60;
+  return h < 10 ? `noch ~${h < 2 ? h.toFixed(1).replace('.', ',') : Math.round(h)} Std.` : 'noch 10+ Std.';
+}
+
 export function formatGeld(n) {
   // Die Währung heißt STERNE (vorher „Geld", davor „Taler"), seit 29.09. nur
   // ganze Zahlen. Im Code bleibt es `geld`.
@@ -662,11 +706,14 @@ export function neuerGast(typ, gross) {
   // Je dichter der Andrang, desto ungeduldiger die Leute (bis 60 %)
   const druck = Math.min(1, Math.max(0.6, 0.45 + gastTakt() / C.GAST_BASIS * 0.55));
   const eilig = !gross && !def.spezial && !lauf.lernen && st.stats.bedient >= 30 && nachStartRuhe() && Math.random() < C.EILIG_ANTEIL;
+  // Goldener Gast (17.10.): einer alle GOLD_TAKT s, nur du bedienst ihn
+  const gold = !gross && !def.spezial && !eilig && goldFaellig();
+  if (gold) lauf.goldAb = lauf.t + C.GOLD_TAKT[0] + Math.random() * (C.GOLD_TAKT[1] - C.GOLD_TAKT[0]);
   const geduld = gross ? gross.zeit : def.geduld * (1 + boni().geduld) * druck * (eilig ? C.EILIG_GEDULD : 1);
   const g = {
     id: lauf.naechsteId++, typ, wunsch,
     x: START_X, y: 0, farben: def.farben ? { ...def.farben } : neueFarben(typ), phase: Math.random() * 10,
-    platz: null, am: false, laeuft: true, eilig,
+    platz: null, am: false, laeuft: true, eilig, gold,
     geduld, geduldMax: geduld, schlange: C.SCHLANGE_GEDULD * (1 + boni().geduld),
     gehen: false, froh: false, bedient: false, t0: lauf.t,
     gross: gross || null,
@@ -921,7 +968,7 @@ export function tippeGast(platz) {
  * Chefs) und keinen, für den schon ein Glas auf dem Tablett steht.
  */
 function servierKandidat() {
-  return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !x.ansturm && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
+  return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !x.ansturm && !x.gold && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
     && !lauf.hand.some((h) => h.fuer === x.id))
     .sort((a, b) => a.geduld - b.geduld)[0] || null;
 }
@@ -999,6 +1046,7 @@ function liefereGross(g, faktor) {
   verdiene(betrag);
   st.stats.bedient++;
   zaehleErfolg('gross');
+  rufPunkt('gold');
   lauf.texte.push({ platz: g.platz, x: g.x, text: '+' + Math.round(betrag), t: 0, gross: true });
   hooks.bedient(g, false, false);
   lauf.herzen.push({ x: g.x, t: 0 });
@@ -1038,6 +1086,9 @@ function bediene(g, auto, faktor = 1) {
     lauf.schwung = lauf.schwungT > 0 ? Math.min(C.SCHWUNG_MAX, lauf.schwung + 1) : 1;
     lauf.schwungT = C.SCHWUNG_FENSTER;
     betrag *= 1 + lauf.schwung * C.SCHWUNG_PRO;
+    // Goldener Gast: mindestens GOLD_MINUTEN Einnahmen (17.10.)
+    if (g.gold) betrag = Math.max(betrag, einnahmenProMinute() * C.GOLD_MINUTEN * (1 + lauf.schwung * C.SCHWUNG_PRO));
+    rufPunkt(g.gold || def.spezial ? 'gold' : 'normal');
   }
   betrag *= faktor * dev.geld;
   verdiene(betrag);
@@ -1149,7 +1200,8 @@ export function update(dt) {
   const belegt = new Set(G.filter((g) => g.platz != null).map((g) => g.platz));
   for (let i = 0; i < n; i++) {
     if (belegt.has(i)) continue;
-    const naechster = G.find((g) => !g.gehen && g.platz == null);
+    // Goldene Gäste drängeln vor - in der Schlange gingen sie sonst oft verloren
+    const naechster = G.find((g) => !g.gehen && g.platz == null && g.gold) || G.find((g) => !g.gehen && g.platz == null);
     if (!naechster) break;
     naechster.platz = i; belegt.add(i);
   }
@@ -1275,7 +1327,9 @@ export function update(dt) {
     if (lauf.servierT >= C.SERVIER_TAKT[sv]) {
       const g = servierKandidat();
       if (g) {
-        if (!(chefAktiv() && wichtelGlas(g))) {
+        // Ab der Aufsicht (17.10.) bedient er normale Gäste auch dann direkt,
+        // wenn du da bist - davor schenkt er auf dein Tablett ein
+        if (!(chefAktiv() && !aufsicht() && wichtelGlas(g))) {
           const p = C.PRODUKT[g.wunsch];
           if (p.art === 'platte') lauf.crepe.fertig = false; else st.toepfe[p.id]--;
           bediene(g, true);
@@ -1485,7 +1539,7 @@ export function miniErgebnis(name, punkte) {
   st.stats.runden[name] = (st.stats.runden[name] || 0) + 1;   // für Wunschzettel und Album
   const mitSternen = l.runden < C.MINI_RUNDEN_STERNE;
   // Eine Runde ohne Punkte (abgebrochen, nichts getroffen) verbraucht keine der Sternerunden
-  if (punkte > 0) l.runden++;
+  if (punkte > 0) { l.runden++; rufPunkt('mini'); }
   const sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(def.maxMin, punkte / def.jeMin))) : 0;
   if (sterne) verdiene(sterne);
   const vorher = l.best;

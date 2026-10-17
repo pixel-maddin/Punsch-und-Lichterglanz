@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610141811';
-import * as S from './spiel.js?v=202610141811';
-import * as A from './auftraege.js?v=202610141811';
-import * as E from './erfolge.js?v=202610141811';
-import * as Z from './ziele.js?v=202610141811';
-import * as KA from './karte.js?v=202610141811';
+import * as C from './config.js?v=202610172100';
+import * as S from './spiel.js?v=202610172100';
+import * as A from './auftraege.js?v=202610172100';
+import * as E from './erfolge.js?v=202610172100';
+import * as Z from './ziele.js?v=202610172100';
+import * as KA from './karte.js?v=202610172100';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -238,6 +238,13 @@ const HINWEISE = [
     text: () => 'Ein eiliger Gast (orange Blase)! Er wartet nur kurz, zahlt aber doppelt.',
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.eilig && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 6 },
   // Aufträge und Socken erst nach den Startzielen (Einstieg in Wellen, 11.10.)
+  // Aufsicht und goldene Gäste (17.10.): beim ersten goldenen Gast am Tresen
+  { id: 'gold', sofort: true, wann: () => S.lauf.gaeste.some((g) => g.gold && g.am && !g.bedient),
+    text: () => 'Ein GOLDENER Gast! Deine Wichtel sind jetzt so gut, dass sie normale Gäste allein bedienen - auch wenn du da bist. Du kümmerst dich um die goldenen: Nur du kannst sie bedienen, sie drängeln vor und zahlen viel mehr. Alle paar Sekunden kommt einer.',
+    ziel: () => { const g = S.lauf.gaeste.find((x) => x.gold && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 10 },
+  { id: 'ruf', ruhig: true, wann: () => Z.fertig() && S.ruf().stufe >= 1,
+    text: () => 'Dein Stand spricht sich herum! Jeden Tag, an dem du ein bisschen mitarbeitest, steigt sein RUF - und alle Preise mit. Wie weit du heute bist, steht unter AUFTRÄGE.',
+    ziel: auftragZiel, dauer: 10 },
   { id: 'auftrag', ruhig: true, ersetzt: ['auftraege_neu'], wann: () => Z.fertig() && A.abholbar() > 0,
     text: () => 'Auftrag erfüllt! Unter AUFTRÄGE wartet deine Belohnung. Jeden Tag gibt es drei neue.',
     ziel: auftragZiel, fertig: () => A.abholbar() === 0, dauer: 10 },

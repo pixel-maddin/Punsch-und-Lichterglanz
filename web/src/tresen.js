@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610141811';
-import * as C from './config.js?v=202610141811';
-import * as S from './spiel.js?v=202610141811';
-import * as Z from './zeit.js?v=202610141811';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610172100';
+import * as C from './config.js?v=202610172100';
+import * as S from './spiel.js?v=202610172100';
+import * as Z from './zeit.js?v=202610172100';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -357,15 +357,21 @@ function figurSkaliert(c, g, cx, basis, s, t, laune, alpha, w) {
 function blase(c, g, x, y, t, anteil) {
   if (g.gross) return grossBlase(c, g, x, y, t, anteil);
   const spez = C.GAESTE[g.typ].spezial;
-  const rand = spez ? '#e8b030' : g.eilig ? '#e8742a' : '#6a4a3a';
+  const rand = spez || g.gold ? '#e8b030' : g.eilig ? '#e8742a' : '#6a4a3a';
+  // Goldener Gast (17.10.): goldener Grund und ein Funkeln - nur du bedienst ihn
+  const grund = g.gold ? '#fff0b8' : '#fffaf0';
   r(c, x + 1, y, 14, 16, rand); r(c, x, y + 1, 16, 14, rand);
-  r(c, x + 1, y + 1, 14, 14, '#fffaf0');
-  r(c, x - 1, y + 13, 3, 2, rand); p(c, x - 2, y + 15, rand); p(c, x, y + 13, '#fffaf0'); p(c, x + 1, y + 13, '#fffaf0');
+  r(c, x + 1, y + 1, 14, 14, grund);
+  r(c, x - 1, y + 13, 3, 2, rand); p(c, x - 2, y + 15, rand); p(c, x, y + 13, grund); p(c, x + 1, y + 13, grund);
   if (g.bedient) {
     smiley(c, x + 8, y + 8, true);
     return;
   }
   icon(c, g.wunsch, x + 3, y + 3, t);
+  if (g.gold) {   // Funkelstern oben rechts, pulsiert
+    const f = Math.floor(t * 3) % 2 ? '#ffffff' : '#ffe060';
+    p(c, x + 15, y - 3, f); p(c, x + 15, y - 1, f); p(c, x + 14, y - 2, f); p(c, x + 16, y - 2, f); p(c, x + 15, y - 2, '#ffffff');
+  }
   if (g.eilig) {   // kleine Uhr oben rechts: „ich hab's eilig"
     r(c, x + 11, y - 3, 7, 7, '#e8742a'); r(c, x + 12, y - 2, 5, 5, '#fff4e0');
     p(c, x + 14, y - 1, '#3a2410'); p(c, x + 14, y, '#3a2410'); p(c, x + 15, y, '#3a2410');

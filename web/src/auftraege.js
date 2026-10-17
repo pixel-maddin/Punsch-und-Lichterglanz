@@ -9,9 +9,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610141811';
-import * as S from './spiel.js?v=202610141811';
-import * as Z from './zeit.js?v=202610141811';
+import * as C from './config.js?v=202610172100';
+import * as S from './spiel.js?v=202610172100';
+import * as Z from './zeit.js?v=202610172100';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -23,10 +23,11 @@ const TYPEN = {
   schwung:  { stufen: [1, 1, 3],     text: (n) => n > 1 ? `Erreiche ${n}-mal vollen Schwung` : 'Erreiche vollen Schwung (×1,40)' },
   spezial:  { stufen: [1, 1, 2],     text: (n) => n > 1 ? `Bediene ${n} besondere Gäste` : 'Bediene einen besonderen Gast' },
   stoss:    { stufen: [3, 5, 6],     text: (n) => `Bediene ${n} Gäste einer Stoßzeit` },
+  gold:     { stufen: [3, 6, 10],    text: (n) => `Bediene ${n} goldene Gäste`, geht: () => S.aufsicht() },
 };
 const LEICHT = ['bediene', 'produkt', 'kinder', 'omas'];
-const MITTEL = ['bediene', 'produkt', 'kinder', 'omas', 'eilig', 'schwung', 'stoss'];
-const SCHWER = ['bediene', 'produkt', 'eilig', 'schwung', 'spezial', 'stoss'];
+const MITTEL = ['bediene', 'produkt', 'kinder', 'omas', 'eilig', 'schwung', 'stoss', 'gold'];
+const SCHWER = ['bediene', 'produkt', 'eilig', 'schwung', 'spezial', 'stoss', 'gold'];
 
 function zufall(seed) { let n = seed; return () => { n = (n * 1103515245 + 12345) & 0x7fffffff; return n / 0x7fffffff; }; }
 
@@ -94,11 +95,18 @@ function zaehle(typ, pruef, menge = 1) {
 
 let warVoll = false;
 export function bedient(g, auto, stoss) {
-  if (auto || S.st.lernen < 99) return;
+  if (S.st.lernen < 99) return;
+  // Unter deiner Aufsicht (17.10.): Bist du am Stand und bedienen die Wichtel
+  // normale Gäste für dich, zählen die mit - sonst hieße „Bediene 90 Gäste"
+  // wieder jeden Gast selbst antippen. Alles Besondere zählt nur von Hand.
+  const aufsicht = auto && S.aufsicht() && S.chefAktiv();
+  if (auto && !aufsicht) return;
   zaehle('bediene');
   zaehle('produkt', (a) => a.param === g.wunsch);
   if (g.typ === 'kind') zaehle('kinder');
   if (g.typ === 'oma' || g.typ === 'opa') zaehle('omas');
+  if (auto) return;
+  if (g.gold) zaehle('gold');
   if (g.eilig) zaehle('eilig');
   if (C.GAESTE[g.typ].spezial) zaehle('spezial');
   if (stoss) zaehle('stoss');

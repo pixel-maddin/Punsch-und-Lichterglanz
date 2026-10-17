@@ -39,6 +39,18 @@ Handgriff) den Gast nochmal antippen zum Servieren.
 
 **Selbst servieren lohnt sich:** Was du selbst servierst, bringt doppelt so
 viele Sterne wie bei den Wichteln, und Trinkgeld gibt es nur von dir.
+
+**Goldene Gäste:** Ab der zweiten Stufe des Servier-Wichtels bedienen die
+Wichtel normale Gäste allein, auch wenn du da bist. Du kümmerst dich dann um
+die goldenen Gäste (goldene Blase mit Funkeln): Alle paar Sekunden kommt
+einer, er drängelt vor, nur du kannst ihn bedienen, und er zahlt viel mehr.
+
+**Ruf deines Standes:** Jeden Tag, an dem du ein bisschen mitarbeitest
+(5 goldene oder besondere Gäste oder eine Minispielrunde - vorher 25 Gäste
+selbst bedienen), steigt der Ruf um eine Stufe, und alle Preise steigen um
+2 %. Ein verpasster Tag kostet nichts. Der Stand steht oben unter Aufträge.
+Im Laden steht unter jedem Preis, wie lange der Stand ungefähr noch dafür
+braucht.
 Einmal am Tag kommt ein **Ansturm**: 60 Sekunden dreifaches Trinkgeld, die
 Wichtel schauen nur zu.
 
@@ -84,8 +96,8 @@ wird nicht verraten.
 **Großbestellung:** Manchmal bestellt eine ganze Gruppe viele Gläser auf
 einmal, mit Zeitlimit - schafft man alle, gibt es richtig viele Sterne.
 **Du bist der Chef:** Solange du am Stand mitarbeitest, sind die Wichtel
-anderthalbmal so schnell. Besondere Gäste und Großbestellungen bedienst
-nur du.
+doppelt so schnell. Besondere Gäste, goldene Gäste und Großbestellungen
+bedienst nur du.
 
 ## Erste Schritte
 

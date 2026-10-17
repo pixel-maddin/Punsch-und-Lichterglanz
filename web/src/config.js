@@ -98,7 +98,12 @@ export const JUBEL_ZEIT = 0.375;                 // s Freudensprung, wenn du sel
 // Gäste
 // ---------------------------------------------------------------------------
 export const GAST_BASIS = 4.0;      // s zwischen zwei Gästen ohne jede Deko
-export const GAST_MIN = 1.0;        // schneller kommen sie nie
+// Schneller kommen sie nie (17.10.: vorher 1,0 - ab ♥ ~105 kam jede Sekunde
+// einer, und das Tippen wurde nur hektischer). Ein Preisausgleich für die
+// fehlenden Gäste war gemessen viel zu stark (Wichtel und Kiste hängen am
+// Servier-Takt, nicht an den Gästen: 28 statt 15 Mio. Sterne). Das Wachstum
+// im späten Spiel trägt stattdessen der Ruf (RUF_JE_STUFE).
+export const GAST_MIN = 1.6;
 export const STIMMUNG_TAKT = 35;    // bei so viel Stimmung kommen doppelt so viele
 export const STIMMUNG_PREIS = 0.001;// je Stimmungspunkt zahlen Gäste 0,1 % mehr
 export const TRINKGELD_MAX = 0.30;  // bei sofortigem Servieren
@@ -357,7 +362,7 @@ export const ARTIKEL = [
 
   // --- Wichtel ---
   { id: 'spuel',     tab: 'wichtel', gruppe: 'Helfer', name: 'Spül-Wichtel',     kosten: 180,   stimmung: 0, text: `Stellt dir alle ${String(1.5).replace('.', ',')} Sekunden ein sauberes Glas aufs Tablett.` },
-  { id: 'servier',   tab: 'wichtel', gruppe: 'Helfer', name: 'Servier-Wichtel',  kosten: [400, 15000, 112000, 225000, 675000, 825000], stimmung: 0, text: 'Bedient Gäste von allein - auch wenn du weg bist.' },
+  { id: 'servier',   tab: 'wichtel', gruppe: 'Helfer', name: 'Servier-Wichtel',  kosten: [400, 15000, 112000, 225000, 675000, 825000], stimmung: 0, text: 'Bedient Gäste von allein - auch wenn du weg bist. Ab Stufe 2 auch, wenn du da bist: Dann kümmerst du dich um die goldenen Gäste.' },
   { id: 'nachfuell', tab: 'wichtel', gruppe: 'Helfer', name: 'Nachfüll-Wichtel', kosten: [350, 15000, 160000], stimmung: 0, text: 'Füllt leere Töpfe von selbst nach.' },
   { id: 'crepe_w',   tab: 'wichtel', gruppe: 'Helfer', name: 'Crêpe-Wichtel',    kosten: 70000, stimmung: 0, text: 'Bäckt immer einen Crêpe vor.', braucht: 'crepe' },
   { id: 'kasse',     tab: 'wichtel', gruppe: 'Helfer', name: 'Kassen-Wichtel',   kosten: 180000, stimmung: 0, bonus: { preis: 0.10 }, text: 'Rundet freundlich auf.' },
@@ -518,6 +523,28 @@ export const GEDULD_RESERVIERT_MAX = 15;
 // Selbst servieren zählt doppelt (09.10.; die Tagesschicht vom 03.10. ist
 // dafür wieder raus - 30 Pflichtgäste fühlten sich nach Arbeit an)
 export const SELBST_MULT = 2;
+
+// Aufsicht und goldene Gäste (17.10.). Gemeldet: „je mehr Tage, desto mehr
+// fühlt es sich nach Arbeit an". Ab Servier-Stufe AUFSICHT_AB bedienen die
+// Wichtel normale Gäste selbst, auch wenn du da bist (vorher schenkten sie
+// dann auf dein Tablett ein, und du hast jeden Gast angetippt). Dein Teil
+// sind die GOLDENEN Gäste: einer alle GOLD_TAKT s, egal wie voll der Stand
+// ist - nur du bedienst sie, sie drängeln vor und zahlen GOLD_MINUTEN
+// Minuten Einnahmen (dazu wie immer Schwung und Handgriff). Normale Gäste
+// selbst bedienen geht weiter (×SELBST_MULT), ist aber kein Muss mehr.
+export const AUFSICHT_AB = 2;
+export const GOLD_TAKT = [8, 12];
+export const GOLD_MINUTEN = 0.3;
+
+// Ruf des Standes (17.10.): steigt höchstens einmal je Spieltag um eine
+// Stufe, sobald man an dem Tag RUF_PUNKTE gesammelt hat - ein goldener oder
+// besonderer Gast 1, eine Minispielrunde mit Punkten 5, ein normaler Gast
+// selbst bedient 0,2. Jede Stufe +RUF_JE_STUFE auf alle Preise (auch bei
+// den Wichteln und in der Kiste). Ein verpasster Tag kostet nichts.
+export const RUF_PUNKTE = 5;
+export const RUF_JE = { gold: 1, mini: 5, normal: 0.2 };
+export const RUF_JE_STUFE = 0.02;
+export const RUF_MAX = 30;
 
 // Der fahrende Händler (09.10.): kommt höchstens HAENDLER_PRO_TAG-mal am Tag
 // mit seinem Karren, bleibt HAENDLER_BLEIBT Sekunden am Haus stehen und hat
