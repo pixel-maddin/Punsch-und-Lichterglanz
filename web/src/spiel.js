@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610180130';
-import * as Z from './zeit.js?v=202610180130';
-import { neueFarben } from './pixel.js?v=202610180130';
+import * as C from './config.js?v=202610180300';
+import * as Z from './zeit.js?v=202610180300';
+import { neueFarben } from './pixel.js?v=202610180300';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -779,8 +779,24 @@ export function stammBedient(g) {   // exportiert nur für Tests
 /** Ein Story-Fenster vormerken; main.js zeigt es, sobald nichts anderes offen ist. */
 function stammFenster(f) {
   st.stammNeu = st.stammNeu || [];
-  st.stammNeu.push(f);
+  st.stammNeu.push({ ...f, wann: Z.jetzt().getTime() });
   speichere();
+}
+/**
+ * Das nächste Story-Fenster - oder null. Wer die App direkt nach dem Bedienen
+ * schloss, bekam den Satz sonst beim nächsten Besuch (17.10., Betatest:
+ * Förster Franz sagte morgens um acht „'n Abend"). Älter als 20 Minuten:
+ * verwerfen und den Satz beim nächsten Besuch des Gastes erzählen.
+ */
+export function naechstesStammFenster() {
+  while (st.stammNeu && st.stammNeu.length) {
+    const f = st.stammNeu.shift();
+    // Das Abschiedsgeschenk verfällt nie - die Sterne sind schon gutgeschrieben
+    if (f.geschenk || !f.wann || Z.jetzt().getTime() - f.wann < 20 * 60000) return f;
+    const e = st.stamm && st.stamm[f.id];
+    if (e && f.nr) e.n = Math.min(e.n, f.nr - 1);
+  }
+  return null;
 }
 export const stammBesuche = (id) => (st.stamm || {})[id]?.n || 0;
 
@@ -1019,7 +1035,8 @@ function wichtelEinschenken(g) {
   if (p.art === 'platte') return false;
   if ((st.toepfe[p.id] || 0) <= 0) {
     lauf.wackel['z' + p.id] = 0.3; hooks.ton('falsch');
-    hooks.toast(`${p.name} ist leer - erst nachfüllen!`, 'hinweis');
+    // 17.10.: mit Nachfüll-Wichtel nicht zum Topf schicken - der füllt gleich selbst nach
+    hooks.toast(stufe('nachfuell') ? `${p.name} ist leer - der Nachfüll-Wichtel ist schon unterwegs!` : `${p.name} ist leer - erst nachfüllen!`, 'hinweis');
     return true;
   }
   if (!wichtelGlas(g)) {

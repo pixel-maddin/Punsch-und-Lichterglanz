@@ -4,14 +4,14 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610180130';
-import * as S from './spiel.js?v=202610180130';
-import * as T from './ton.js?v=202610180130';
-import * as Z from './zeit.js?v=202610180130';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610180130';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610180130';
-import { schriftBild } from './schrift.js?v=202610180130';
-import { fenster, karte } from './ui.js?v=202610180130';
+import * as C from './config.js?v=202610180300';
+import * as S from './spiel.js?v=202610180300';
+import * as T from './ton.js?v=202610180300';
+import * as Z from './zeit.js?v=202610180300';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610180300';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610180300';
+import { schriftBild } from './schrift.js?v=202610180300';
+import { fenster, karte } from './ui.js?v=202610180300';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -386,7 +386,7 @@ export function zeigeWettbewerb(danach) {
   const kopf = pl ? `${e.platz + 1}. Platz!` : 'Eine Urkunde!';
   const text = pl
     ? `<p>Die Jury ist durchs ganze Dorf gegangen. Bei deinem Haus bleibt sie lange stehen, flüstert, schreibt - und dann ist es entschieden: <b>${pl.name}</b> für dich!</p><p class="klein">Die Plakette hängt ab jetzt an deiner Hauswand.</p>`
-    : '<p>Die Jury ist durchs ganze Dorf gegangen. Für einen Platz hat es diesmal nicht gereicht - aber für eine Urkunde: „Mit viel Liebe geschmückt".</p>';
+    : '<p>Die Jury ist durchs ganze Dorf gegangen. Für einen Platz hat es diesmal nicht gereicht - aber für eine Urkunde: „Mit viel Liebe geschmückt“.</p>';
   const box = fenster('Das schönste Haus im Dorf', `
     <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
     <p class="zeile-gross">${kopf}</p>

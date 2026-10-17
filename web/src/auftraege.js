@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610180130';
-import * as S from './spiel.js?v=202610180130';
-import * as Z from './zeit.js?v=202610180130';
+import * as C from './config.js?v=202610180300';
+import * as S from './spiel.js?v=202610180300';
+import * as Z from './zeit.js?v=202610180300';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -120,18 +120,24 @@ export function bitteAufgabe(b) {
  */
 export function bitte() {
   if (S.st.lernen < 99 || !S.startzieleFertig()) return null;
-  const tag = Z.tagesSchluessel();
+  const tag = Z.tagesSchluessel(), jetzt = Z.jetzt().getTime();
   const alt = S.st.bitte;
-  if (alt && (!alt.abgeholt || alt.tag === tag)) return alt;
+  if (alt && !alt.ab) alt.ab = jetzt;   // Bitten aus der ersten Fassung (ohne Startzeit): ab jetzt zählen
+  // Eine offene Bitte wartet - aber nicht ewig (17.10., Betatest: Lenas
+  // Kinderpunsch MIT Zuckerstange stand 15 Tage offen, und wer keine
+  // Handgriffe macht, hätte nie wieder eine Bitte bekommen). Nach
+  // BITTE_TAGE kommt ein anderer dran; diese Bitte kehrt später zurück.
+  const liegtZuLange = alt && !alt.abgeholt && alt.ab && jetzt - alt.ab > C.BITTE_TAGE * 86400000 && !bitteFertig(alt);
+  if (alt && !liegtZuLange && (!alt.abgeholt || alt.tag === tag)) return alt;
   const stand = S.st.bittenStand = S.st.bittenStand || {};
   const zuletzt = S.st.bitteZuletzt = S.st.bitteZuletzt || {};
   const wer = Object.keys(C.STAMM_BITTEN).filter((id) => {
     const kette = C.STAMM_BITTEN[id], i = stand[id] || 0;
-    return S.stammBesuche(id) >= 1 && i < kette.length && bitteGeht(kette[i]);
+    return S.stammBesuche(id) >= 1 && i < kette.length && bitteGeht(kette[i]) && !(liegtZuLange && id === alt.gast);
   }).sort((x, y) => (zuletzt[x] || 0) - (zuletzt[y] || 0));
-  if (!wer.length) return null;
+  if (!wer.length) return liegtZuLange ? alt : null;
   const gast = wer[0], i = stand[gast] || 0;
-  S.st.bitte = { gast, i, start: bitteZaehler(C.STAMM_BITTEN[gast][i]), tag, abgeholt: false };
+  S.st.bitte = { gast, i, start: bitteZaehler(C.STAMM_BITTEN[gast][i]), tag, ab: jetzt, abgeholt: false };
   zuletzt[gast] = Date.now();
   S.speichere();
   S.hooks.toast(`${C.GAESTE[gast].name} hat eine Bitte an dich - steht unter Aufträge.`, 'neu');

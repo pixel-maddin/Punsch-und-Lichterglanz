@@ -19,7 +19,9 @@ new MutationObserver(() => { const m = $('#modal'); if (!m.classList.contains('v
 new MutationObserver(() => { const b = $('#tipp'); if (!b.classList.contains('versteckt')) log('hinweis', b.textContent); }).observe($('#tipp'), { childList: true, attributes: true, subtree: true });
 window.addEventListener('error', (e) => log('FEHLER', e.message));
 
-window.__raf = [__spiel.bildschleife]; window.requestAnimationFrame = (cb) => { __raf.push(cb); return 1; };
+// chefT = 0 je Bild (17.10.): Der Bot tippt über S.tippeGast statt über den Bildschirm -
+// ohne das galt er nach 20 s als „weg", und goldene, besondere und Stammgäste kamen nie
+window.__raf = [__spiel.bildschleife]; window.requestAnimationFrame = (cb) => { __raf.push((t) => { S.lauf.chefT = 0; cb(t); }); return 1; };
 let tt = performance.now();
 function schritt(ms) { const l = __raf.splice(0); tt += ms; for (const cb of l) try { cb(tt); } catch (e) { log('FEHLER', 'frame ' + e.message); } }
 
@@ -103,7 +105,8 @@ window.__besuch = async (datum, sek, extra = {}) => {
   for (let i = 0; i < 40 && (__spiel.UI.fensterOffen() || __spiel.UI.panelOffen()); i++) { mensch(); schritt(100); await new Promise((r) => setTimeout(r, 350)); }
   if (__spiel.UI.fensterOffen()) log('TEST', 'Fenster bleibt offen: ' + ($('#modal h2')?.textContent || ''));
   if (extra.futter && S.hat('futterhaus')) { __tippeWelt(132, __GW() - 56); log('tipp', 'Futterhaus'); }
-  if (extra.schnee && Z.schnee() > 0) { __tippeWelt(66, __GW() - 8); log('tipp', 'Schneemann (Stufe jetzt ' + S.schneemannStufe() + ')'); }
+  // Schneemann bei SCHNEEMANN_X 27 (17.10.: vorher 66)
+  if (extra.schnee && Z.schnee() > 0) { __tippeWelt(27, __GW() - 8); log('tipp', 'Schneemann (Stufe jetzt ' + S.schneemannStufe() + ')'); }
   await __sitzung(sek);
 };
 window.__GW = () => $('#cv').height - C.LEISTE - C.STAND_H - 6;

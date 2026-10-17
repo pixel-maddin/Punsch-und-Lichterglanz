@@ -223,7 +223,9 @@ export const STAMMGAESTE = {
     immer: ['Wie immer, Kindchen.', 'Waldi lässt grüßen. Wuff!', 'Masche für Masche, so wird\'s was.'],
     geschenk: 'Oma Hilde schenkt dir die rot-grünen Socken - sechs und sieben Streifen. Die waren für dich!' },
   // Postbotin Sophia: Klatsch und Tratsch aus dem Dorf
-  sophia: { von: 10, bis: 16, saetze: [
+  // 17.10.: Sophia 8-14 und Karl 14-20 (vorher 10-16 und 11-17) - wer morgens
+  // vor der Arbeit und abends spielt, traf die beiden sonst nie (Betatest)
+  sophia: { von: 8, bis: 14, saetze: [
     'Post für dich! Nein, Spaß. Nur ich, Sophia. Einen Becher, bitte.',
     'Hast du\'s schon gehört? Beim Bäcker ist die Lichterkette durchgebrannt. Schon wieder.',
     'Einer im Dorf bestellt jeden Tag eine Lichterkette. Ich sag nicht, wer. ... Der Bürgermeister.',
@@ -235,7 +237,7 @@ export const STAMMGAESTE = {
     immer: ['Kurze Pause, dann weiter.', 'Du hast\'s nicht von mir.', 'Im Dorf reden alle über deinen Stand. Nur Gutes!'],
     geschenk: 'Sophia bringt dir ein Päckchen - von allen im Dorf, für den schönsten Stand!' },
   // Karl: gemütlicher Kerl Mitte 50, weihnachtliche Flachwitze
-  karl: { von: 11, bis: 17, saetze: [
+  karl: { von: 14, bis: 20, saetze: [
     'Tach! Karl mein Name. Was ist ein Keks unter einem Baum? Ein schattiges Plätzchen!',
     'Treffen sich zwei Schneemänner. Sagt der eine: ‚Komisch, hier riecht\'s nach Möhren.‘',
     'Was trinkt ein Schneemann am liebsten? Eistee!',
@@ -282,6 +284,7 @@ export const STAMMGAESTE = {
 // Geht eine Bitte noch nicht (Getränk fehlt, Minispiel zu …), kommt an dem
 // Tag ein anderer Gast dran. Lohn: BITTE_MINUTEN Minuten Einnahmen.
 export const BITTE_MINUTEN = 5;
+export const BITTE_TAGE = 2;   // so lange wartet eine offene Bitte, dann ist ein anderer Stammgast dran (17.10.)
 export const STAMM_BITTEN = {
   hilde: [
     { art: 'getraenk', p: 'kinderpunsch', n: 5, griff: true,
@@ -294,8 +297,8 @@ export const STAMM_BITTEN = {
       text: 'Am Fenster sitzt jeden Morgen ein Rotkehlchen und schaut mir beim Stricken zu. Füllst du dein Futterhaus? Dann hat es was Besseres zu tun.',
       dank: 'Das Rotkehlchen war heute bei dir. Ich hab ganz ohne Zuschauer gestrickt - drei Reihen mehr!' },
     { art: 'getraenk', p: 'weisser', n: 4, griff: true,
-      text: 'Die Wolle für Jonas\' Schal ist alle. Sophia bringt Nachschub, aber ich bin ganz kribbelig. Vier Zimtwolken, bitte - mit allem.',
-      dank: 'Das Paket ist da! Sophia hat es bis an die Tür getragen und wollte wissen, was drin ist. Hab nichts verraten.' },
+      text: 'Waldi kriegt noch eine Mütze zum Pullover. Beim Stricken brauch ich was Warmes: vier Zimtwolken, bitte - mit allem.',
+      dank: 'Die Mütze ist fertig. Waldi trägt sie mit Würde. Also, eine Minute lang.' },
     { art: 'mini', spiel: 'schnee',
       text: 'Jonas schreibt, er macht eine Schneeballschlacht mit mir. Mit MIR! Übst du auf der Schneeballwiese für mich? Ich muss doch wissen, wie das geht.',
       dank: 'Ich hab\'s verstanden: werfen, ducken, nicht den Wichtel treffen. Jonas hat keine Chance.' },
@@ -309,7 +312,7 @@ export const STAMM_BITTEN = {
       dank: 'Du hast ihn gesehen? Wirklich? ... Ich muss los, das muss ich sofort jemandem erzählen.' },
     { art: 'gold', n: 5,
       text: 'Ich mach eine Umfrage: Wer hat den schönsten Stand im Dorf? Bedien mal ein paar goldene Gäste - die frag ich danach.',
-      dank: 'Ergebnis: Fünf von fünf sagen: du. Einer hat noch „und Waldi" gesagt. Das war Hilde.' },
+      dank: 'Ergebnis: Fünf von fünf sagen: du. Einer hat noch ‚und Waldi‘ gesagt. Das war Hilde.' },
     { art: 'getraenk', p: 'apfel', n: 5, griff: true,
       text: 'Der Bürgermeister hat schon wieder eine Lichterkette bestellt. Die zwölfte! Ich brauch fünf heiße Äpfel, gut umgerührt, sonst rutscht mir was raus.',
       dank: 'Die Kette hängt. Jetzt blinkt sein Haus im Takt von Jingle Bells. Hören kann man\'s nicht. Sehen schon.' },
@@ -323,7 +326,7 @@ export const STAMM_BITTEN = {
       dank: 'Warum ist der Tannenbaum nie einsam? Er hat immer seine Zweige dabei. ... Ich arbeite noch dran.' },
     { art: 'getraenk', p: 'lebkuchen', n: 6, griff: true,
       text: 'Ich muss einen Lebkuchenwitz am lebenden Objekt üben. Also, am Lebkuchen. Sechs Stück mit Zuckerguss, bitte.',
-      dank: 'Was sagt der Lebkuchen zum Zuckerguss? „Ohne dich bin ich nur Kuchen." ... Die Lebkuchen waren besser als der Witz.' },
+      dank: 'Was sagt der Lebkuchen zum Zuckerguss? ‚Ohne dich bin ich nur Kuchen.‘ ... Die Lebkuchen waren besser als der Witz.' },
     { art: 'gold', n: 4,
       text: 'Ich brauch Publikum. Gute Laune, volle Becher. Bedienst du ein paar goldene Gäste? Die lachen immer am lautesten.',
       dank: 'Vier Lacher! Gut, einer hat gehustet. Ich zähl ihn trotzdem.' },
@@ -349,7 +352,7 @@ export const STAMM_BITTEN = {
       dank: 'Der Schneemann wollte seine nicht. Hab ich getrunken. Er wär sonst geschmolzen.' },
     { art: 'mini', spiel: 'baum',
       text: 'Wir haben noch keinen Christbaum. Mama sagt, dieses Jahr brauchen wir einen GANZ großen. Suchst du schon mal einen schönen aus?',
-      dank: 'Mama hat gelächelt, als ich vom großen Baum erzählt hab. So ein Geheimnis-Lächeln. Weißt du was?' },
+      dank: 'Mama hat gelächelt, als ich vom großen Baum erzählt hab. So ein Geheimnis-Lächeln. Weißt du etwa was?' },
   ],
   franz: [
     { art: 'futter',

@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610180130';
-import * as S from './spiel.js?v=202610180130';
-import * as A from './auftraege.js?v=202610180130';
-import * as E from './erfolge.js?v=202610180130';
-import * as Z from './ziele.js?v=202610180130';
-import * as KA from './karte.js?v=202610180130';
+import * as C from './config.js?v=202610180300';
+import * as S from './spiel.js?v=202610180300';
+import * as A from './auftraege.js?v=202610180300';
+import * as E from './erfolge.js?v=202610180300';
+import * as Z from './ziele.js?v=202610180300';
+import * as KA from './karte.js?v=202610180300';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -281,7 +281,7 @@ function griffText(k) {
   const g = C.HANDGRIFF[k], p = h ? C.PRODUKT[h.id] : null;
   const bonus = Math.round(((p && p.bonus) || C.EXTRA_BONUS) * 100);
   const satz = g.satz.charAt(0).toUpperCase() + g.satz.slice(1);
-  return `${p ? p.name + ': ' : ''}Tippe das Glas auf dem Tablett an - ${satz}!`
+  return `${p ? p.name + ': ' : ''}Tippe das Glas auf dem Tablett an. ${satz}!`
     + (g.n > 1 ? ' Die Zahl über dem Glas zeigt, wie oft noch.' : '')
     + (g.timing ? ' Achte auf den Balken: Der weiße Strich muss im grünen Bereich sein, zu früh oder zu spät gibt es keinen Bonus.' : '')
     + (k === 'zucker' ? ` Danach brennt er ${C.FEUER_FENSTER} Sekunden - nur so lange gibt es den Bonus.` : '')

@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610180130';
-import * as S from './spiel.js?v=202610180130';
-import * as Z from './zeit.js?v=202610180130';
-import * as T from './ton.js?v=202610180130';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610180130';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610180130';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610180130';
-import * as A from './auftraege.js?v=202610180130';
-import * as E from './erfolge.js?v=202610180130';
-import * as ZL from './ziele.js?v=202610180130';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610180130';
-import * as KA from './karte.js?v=202610180130';
-import { zeigeRueckblick } from './ereignis.js?v=202610180130';
-import { barbaraZweig } from './szene.js?v=202610180130';
-import * as SW from './schneeball.js?v=202610180130';
-import * as LI from './lichtung.js?v=202610180130';
-import * as CB from './christbaum.js?v=202610180130';
-import * as SB from './schlitten.js?v=202610180130';
-import * as EB from './schlittschuh.js?v=202610180130';
-import * as BS from './backstube.js?v=202610180130';
-import { alleSymbole } from './symbole.js?v=202610180130';
+import * as C from './config.js?v=202610180300';
+import * as S from './spiel.js?v=202610180300';
+import * as Z from './zeit.js?v=202610180300';
+import * as T from './ton.js?v=202610180300';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610180300';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610180300';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610180300';
+import * as A from './auftraege.js?v=202610180300';
+import * as E from './erfolge.js?v=202610180300';
+import * as ZL from './ziele.js?v=202610180300';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610180300';
+import * as KA from './karte.js?v=202610180300';
+import { zeigeRueckblick } from './ereignis.js?v=202610180300';
+import { barbaraZweig } from './szene.js?v=202610180300';
+import * as SW from './schneeball.js?v=202610180300';
+import * as LI from './lichtung.js?v=202610180300';
+import * as CB from './christbaum.js?v=202610180300';
+import * as SB from './schlitten.js?v=202610180300';
+import * as EB from './schlittschuh.js?v=202610180300';
+import * as BS from './backstube.js?v=202610180300';
+import { alleSymbole } from './symbole.js?v=202610180300';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -634,7 +634,8 @@ function baueLaden() {
       if (S.kaufe(a.id)) {
         z.classList.add('blitz'); setTimeout(() => z.classList.remove('blitz'), 500);
         const hinweis = (a.id in C.LICHTER || S.istDeko(a) || a.wahl) && !(S.st.tipps && S.st.tipps.meinHaus);
-        toast(hinweis ? `${a.name} gekauft! Ein- und ausschalten und Farbe wählen: unter „Mein Haus".` : `${a.name} gekauft!`, 'gut');
+        // 17.10.: „Mein Haus" heißt seit 09.10. „Haus schmücken" und öffnet sich über das Haus
+        toast(hinweis ? `${a.name} gekauft! Ein- und ausschalten, Farbe und Varianten: Tippe auf dein Haus.` : `${a.name} gekauft!`, 'gut');
         if (hinweis) { S.st.tipps = S.st.tipps || {}; S.st.tipps.meinHaus = true; }
         zeigeKauf(a.id);
       }
@@ -1209,7 +1210,7 @@ export function zeigeHaendler() {
   const waren = [...h.angebot.map((id) => C.HAENDLER_DEKO.find((d) => d.id === id)), ...(h.gutschein ? [C.HAENDLER_GUTSCHEIN] : [])];
   const leer = !waren.length;
   const box = fenster('Der fahrende Händler', `
-    <p class="klein">${leer ? 'Heute hat er nichts mehr für dich - du hast schon alles!' : '„Seltene Ware von weit her! Gibt es nur bei mir - und ich ziehe bald weiter."'}</p>
+    <p class="klein">${leer ? 'Heute hat er nichts mehr für dich - du hast schon alles!' : '„Seltene Ware von weit her! Gibt es nur bei mir - und ich ziehe bald weiter.“'}</p>
     <div class="haendler-liste"></div>`, [{ text: 'Später', neben: true }]);
   const liste = box.querySelector('.haendler-liste');
   for (const w of waren) {
@@ -1551,8 +1552,8 @@ export function zeigeStamm(f) {
        ${f.erster ? `<p class="klein">${def.name} kommt jetzt jeden Tag vorbei - und erzählt jedes Mal ein Stück weiter.</p>` : ''}`;
   const box = fenster(def.name, `
     <canvas class="stamm-portraet" width="${PORTRAET_W * 2}" height="${PORTRAET_H * 2}"></canvas>
-    <p class="story-text">„${f.text}“</p>
-    ${fuss}`, [{ text: 'Weiter' }]);
+    <p class="story-text">${f.geschenk ? f.text : `„${f.text}“`}</p>
+    ${fuss}`, [{ text: 'Weiter' }]);   // Geschenk = Erzähltext, ohne Anführungszeichen (17.10., sonst doppelt verschachtelt)
   maleStamm(box.querySelector('canvas'), f.id);
 }
 
@@ -1697,7 +1698,7 @@ export function zeigeInstallTipp() {
     <p>Leg das Spiel auf deinen Home-Bildschirm - dann startet es wie eine App, im Vollbild, auch ohne Internet.</p>
     <ol class="anleitung">
       <li>In Safari auf <b>Teilen</b> tippen <span class="teilen-zeichen" aria-hidden="true"></span> (unten in der Leiste oder im <b>···</b>-Menü)</li>
-      <li><b>„Zum Home-Bildschirm"</b> wählen (evtl. etwas nach unten scrollen)</li>
+      <li><b>„Zum Home-Bildschirm“</b> wählen (evtl. etwas nach unten scrollen)</li>
       <li>Oben rechts auf <b>Hinzufügen</b></li>
     </ol>
     <p class="klein">Warum? Safari löscht die Daten einer Webseite, die 7 Tage lang nicht geöffnet wurde - auch deinen Spielstand. Als App auf dem Home-Bildschirm passiert das nicht. Danach startest du das Spiel nur noch über das neue Symbol.</p>`,
@@ -2018,7 +2019,7 @@ export function waehleModus(fertig) {
     if (performance.now() < ab) return;
     T.spiele('klick');
     if (b.dataset.m === 'echt' && bis > 7) {
-      fenster('Wirklich Klassisch?', `<p>Dann läuft das Spiel mit dem echten Kalender: Das erste Türchen und der Schnee kommen erst in <b>${bis} Tagen</b>.</p><p class="klein">Mit „Individuell" geht es schon in einer Woche los.</p>`,
+      fenster('Wirklich Klassisch?', `<p>Dann läuft das Spiel mit dem echten Kalender: Das erste Türchen und der Schnee kommen erst in <b>${bis} Tagen</b>.</p><p class="klein">Mit „Individuell“ geht es schon in einer Woche los.</p>`,
         [{ text: 'Doch Individuell', neben: true, aktion: () => { setTimeout(() => fertig('eigen'), 50); } },
           { text: 'Ja, Klassisch', aktion: () => { setTimeout(() => fertig('echt'), 50); } }]);
       return;
@@ -2215,7 +2216,7 @@ function kartenText(nr, ohneLeute, gruss) {
   fenster('Text der Karte', `
     <label>Gruß<br><input type="text" id="ktGruss" maxlength="32" value="${esc(k.gruss || gruss)}"></label>
     <label>Grußzeile (dahinter steht euer Hausname)<br><input type="text" id="ktVon" maxlength="30" value="${esc(k.von || VON_VORGABE)}"></label>
-    <p class="klein">… ${esc(S.st.name || 'uns')} · Datum und „Punsch &amp; Lichterglanz" stehen immer darunter.</p>`, [
+    <p class="klein">… ${esc(S.st.name || 'uns')} · Datum und „Punsch &amp; Lichterglanz“ stehen immer darunter.</p>`, [
     { text: 'Übernehmen', aktion: (box) => {
       const g = box.querySelector('#ktGruss').value.trim(), v = box.querySelector('#ktVon').value.trim();
       S.st.karteText = { gruss: g || null, von: v || null };
