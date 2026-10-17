@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610172345';
-import * as S from './spiel.js?v=202610172345';
-import * as Z from './zeit.js?v=202610172345';
-import * as T from './ton.js?v=202610172345';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610172345';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610172345';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610172345';
-import * as A from './auftraege.js?v=202610172345';
-import * as E from './erfolge.js?v=202610172345';
-import * as ZL from './ziele.js?v=202610172345';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610172345';
-import * as KA from './karte.js?v=202610172345';
-import { zeigeRueckblick } from './ereignis.js?v=202610172345';
-import { barbaraZweig } from './szene.js?v=202610172345';
-import * as SW from './schneeball.js?v=202610172345';
-import * as LI from './lichtung.js?v=202610172345';
-import * as CB from './christbaum.js?v=202610172345';
-import * as SB from './schlitten.js?v=202610172345';
-import * as EB from './schlittschuh.js?v=202610172345';
-import * as BS from './backstube.js?v=202610172345';
-import { alleSymbole } from './symbole.js?v=202610172345';
+import * as C from './config.js?v=202610180010';
+import * as S from './spiel.js?v=202610180010';
+import * as Z from './zeit.js?v=202610180010';
+import * as T from './ton.js?v=202610180010';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610180010';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610180010';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610180010';
+import * as A from './auftraege.js?v=202610180010';
+import * as E from './erfolge.js?v=202610180010';
+import * as ZL from './ziele.js?v=202610180010';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610180010';
+import * as KA from './karte.js?v=202610180010';
+import { zeigeRueckblick } from './ereignis.js?v=202610180010';
+import { barbaraZweig } from './szene.js?v=202610180010';
+import * as SW from './schneeball.js?v=202610180010';
+import * as LI from './lichtung.js?v=202610180010';
+import * as CB from './christbaum.js?v=202610180010';
+import * as SB from './schlitten.js?v=202610180010';
+import * as EB from './schlittschuh.js?v=202610180010';
+import * as BS from './backstube.js?v=202610180010';
+import { alleSymbole } from './symbole.js?v=202610180010';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1350,17 +1350,19 @@ function zeichneKiste(cv, offen) {
 // ---------------------------------------------------------------------------
 function rufKarte() {
   const r = S.ruf();
-  const z = el('div', 'auftrag ruf' + (r.fertig || r.max ? ' erledigt' : ''));
-  const anteil = r.fertig || r.max ? 1 : Math.min(1, r.punkte / C.RUF_PUNKTE);
+  const fertig = r.fertig || r.max;
+  const z = el('div', 'ruf-kopf' + (fertig ? ' fertig' : ''));
+  const anteil = fertig ? 1 : Math.min(1, r.punkte / C.RUF_PUNKTE);
   const preis = Math.round(r.stufe * C.RUF_JE_STUFE * 100);
   const heute = r.max ? 'Höchste Stufe erreicht!'
     : r.fertig ? 'Heute geschafft - morgen geht es weiter.'
-    : S.aufsicht() ? `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.gold)} goldene oder besondere Gäste - oder eine Minispielrunde`
-    : `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.normal)} Gäste selbst bedienen - oder eine Minispielrunde`;
-  z.innerHTML = `<span class="stufe s2">★</span>
-    <div class="mitte"><b>Ruf deines Standes: Stufe ${r.stufe}</b>
-      <div class="balken"><i style="width:${Math.round(100 * anteil)}%"></i></div>
-      <small>${heute} · alle Preise ${preis ? '+' + preis + ' %' : 'noch normal'}</small></div>`;
+    : S.aufsicht() ? `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.gold)} goldene Gäste oder eine Minispielrunde`
+    : `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.normal)} Gäste selbst bedienen oder eine Minispielrunde`;
+  z.innerHTML = `<div class="ruf-stern"><small>Stufe</small><b>${r.stufe}</b></div>
+    <div class="mitte">
+      <div class="ruf-titel"><b>Ruf deines Standes</b><span>${preis ? `Preise +${preis} %` : 'Preise normal'}</span></div>
+      <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * anteil)}%"></i></div><span class="zahl">${fertig ? '✓' : Math.round(100 * anteil) + ' %'}</span></div>
+      <small>${heute}</small></div>`;
   return z;
 }
 
@@ -1369,12 +1371,13 @@ function bitteKarte() {
   const b = A.bitte();
   if (!b) return null;
   const fertig = A.bitteFertig(b), stand = A.bitteStand(b), ziel = A.bitteZiel(b);
-  const z = el('div', 'auftrag bitte' + (b.abgeholt ? ' erledigt' : ''));
-  z.innerHTML = `<span class="stufe s1">♥</span>
-    <div class="mitte"><b>Bitte von ${A.bitteName(b)}</b>
-      <span class="bitte-text">„${A.bitteDef(b).text}“</span>
-      <div class="balken"><i style="width:${Math.round(100 * (b.abgeholt ? 1 : stand / ziel))}%"></i></div>
-      <small>${b.abgeholt ? 'Erledigt - morgen hat wieder jemand eine Bitte.' : `${A.bitteAufgabe(b)}${ziel > 1 ? ` · ${stand} / ${ziel}` : ''} · keine Eile`}</small></div>`;
+  const z = el('div', 'bitte-zettel' + (b.abgeholt ? ' erledigt' : ''));
+  z.innerHTML = `<div class="bitte-kopf"><canvas width="32" height="48"></canvas>
+      <div class="mitte"><b>${A.bitteName(b)}</b><span class="bitte-text">„${A.bitteDef(b).text}“</span></div></div>
+    <div class="bitte-fuss">
+      <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * (b.abgeholt ? 1 : stand / ziel))}%"></i></div><span class="zahl">${b.abgeholt ? '✓' : `${stand} / ${ziel}`}</span></div>
+      <div class="bitte-knopf"><small>${b.abgeholt ? 'Erledigt - morgen hat wieder jemand eine Bitte.' : A.bitteAufgabe(b)}</small></div></div>`;
+  maleStammKlein(z.querySelector('canvas'), b.gast);
   const k = el('button', 'k k--kauf', b.abgeholt ? '✓' : 'Abholen');
   k.disabled = b.abgeholt || !fertig;
   k.onclick = () => {
@@ -1384,8 +1387,17 @@ function bitteKarte() {
     oeffneAuftraege('heute');
     fenster(e.name, `<p>„${e.dank}“</p><p class="bonus">+ ${S.formatGeld(e.lohn)}</p>`, [{ text: 'Schön!' }]);
   };
-  z.appendChild(k);
+  z.querySelector('.bitte-knopf').appendChild(k);
   return z;
+}
+/** Kleines Porträt für den Zettel: die Straßenfigur (16 x 24), per Scale2x 32 x 48. */
+function maleStammKlein(cv, id) {
+  const k = document.createElement('canvas'); k.width = 16; k.height = 24;
+  const c = k.getContext('2d', { willReadFrequently: true });
+  for (let y = 0; y < 24; y++) r(c, 0, y, 16, 1, mische('#3a2440', '#6a4228', y / 24));
+  const def = C.GAESTE[id];
+  figurKlein(c, { typ: id, farben: def.farben ? { ...def.farben } : neueFarben(id), phase: 0, laeuft: false }, 8, 23, 0);
+  cv.getContext('2d').drawImage(scale2x(k, 16, 24, document.createElement('canvas')), 0, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -1418,17 +1430,19 @@ export function oeffneAuftraege(reiter) {
   if (auftragReiter === 'erfolge') return baueErfolge(liste);
   if (auftragReiter === 'album') return baueAlbum(liste);
   if (S.st.lernen < 99) { liste.appendChild(el('p', 'hinweis', 'Nach der Einführung gibt es hier jeden Tag drei Aufträge.')); return; }
+  // 17.10.: drei Bereiche, optisch getrennt - Ruf (Kopf), Bitte (Zettel), Tagesaufträge
   liste.appendChild(rufKarte());
   const bk = bitteKarte();
-  if (bk) liste.appendChild(bk);
+  if (bk) { liste.appendChild(el('p', 'aufgaben-titel', 'Bitte eines Stammgasts')); liste.appendChild(bk); }
+  liste.appendChild(el('p', 'aufgaben-titel', 'Tagesaufträge'));
   const stufenName = ['leicht', 'mittel', 'schwer'];
   A.heute().forEach((a, i) => {
     const z = el('div', 'auftrag' + (a.abgeholt ? ' erledigt' : ''));
     const deko = a.stufe === 2 ? A.naechstesSammelstueck() : null;
     z.innerHTML = `<span class="stufe s${a.stufe}">${i + 1}</span>
       <div class="mitte"><b>${A.text(a)}</b>
-        <div class="balken"><i style="width:${Math.round(100 * a.stand / a.ziel)}%"></i></div>
-        <small>${a.stand} / ${a.ziel} · ${stufenName[a.stufe]} · Lohn: ${S.formatGeld(a.lohn)}${deko ? ' + Sammelstück' : ''}</small></div>`;
+        <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * a.stand / a.ziel)}%"></i></div><span class="zahl">${a.stand} / ${a.ziel}</span></div>
+        <small>${stufenName[a.stufe]} · ${S.formatGeld(a.lohn)}${deko ? ' + Sammelstück' : ''}</small></div>`;
     const k = el('button', 'k k--kauf', a.abgeholt ? '✓' : 'Abholen');
     k.disabled = a.abgeholt || !A.fertig(a);
     k.onclick = () => {

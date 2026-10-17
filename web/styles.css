@@ -410,11 +410,44 @@ html, body {
 .auftrag .stufe.s0 { background: #6a9a4a; } .auftrag .stufe.s1 { background: #d8942a; } .auftrag .stufe.s2 { background: #b83a2e; }
 .auftrag .mitte { flex: 1; min-width: 0; }
 .auftrag b { font-size: calc(var(--px) * 5.6); display: block; }
-.auftrag .balken, #modal .balken { height: calc(var(--px) * 3); background: #e8d8b8; border-radius: calc(var(--px) * 2); margin: calc(var(--px) * 1.5) 0; overflow: hidden; }
-.auftrag .balken i, #modal .balken i { display: block; height: 100%; background: linear-gradient(90deg, #e8b030, #f0d060); }
+.auftrag .balken, #modal .balken, .balken-zeile .balken { height: calc(var(--px) * 3); background: #e8d8b8; border-radius: calc(var(--px) * 2); margin: calc(var(--px) * 1.5) 0; overflow: hidden; }
+.auftrag .balken i, #modal .balken i, .balken-zeile .balken i { display: block; height: 100%; background: linear-gradient(90deg, #e8b030, #f0d060); }
 .auftrag small { font-size: calc(var(--px) * 4.4); color: #7a5a44; }
-/* Bitte eines Stammgastes (17.10.): der Satz in seiner Stimme */
-.auftrag .bitte-text { display: block; font-size: calc(var(--px) * 4.6); font-style: italic; color: #5a3a24; margin: calc(var(--px) * 1) 0; }
+/* Balken mit dem Stand rechts daneben (17.10.: vorher im Fließtext, brach um) */
+.balken-zeile { display: flex; align-items: center; gap: calc(var(--px) * 2); }
+.balken-zeile .balken { flex: 1; }
+.balken-zeile .zahl { flex: none; white-space: nowrap; font-size: calc(var(--px) * 4.4); font-weight: bold; color: #7a5a44; }
+.aufgaben-titel { margin: calc(var(--px) * 4) 0 calc(var(--px) * 1); font-size: calc(var(--px) * 4.6); font-weight: bold; letter-spacing: 0.06em; text-transform: uppercase; color: #9a6a3a; }
+
+/* Ruf des Standes (17.10.): eigener Kopf, dunkel mit Gold - kein Auftrag */
+.ruf-kopf { display: flex; align-items: center; gap: calc(var(--px) * 3); padding: calc(var(--px) * 3); border-radius: calc(var(--px) * 3);
+  background: linear-gradient(#2a3a6a, #1c2650); border: calc(var(--px) * 0.8) solid #e8b030; color: #fff4dc; box-shadow: inset 0 calc(var(--px) * 0.6) 0 rgba(255, 255, 255, 0.12); }
+.ruf-kopf .ruf-stern { flex: none; width: calc(var(--px) * 18); height: calc(var(--px) * 18); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(#ffe27a, #e8a020); color: #4a2a08; font-weight: bold; line-height: 1; }
+.ruf-kopf .ruf-stern small { font-size: calc(var(--px) * 3.4); }
+.ruf-kopf .ruf-stern b { font-size: calc(var(--px) * 7.5); }
+.ruf-kopf .mitte { flex: 1; min-width: 0; }
+.ruf-kopf .ruf-titel { display: flex; justify-content: space-between; align-items: baseline; gap: calc(var(--px) * 2); }
+.ruf-kopf .ruf-titel b { font-size: calc(var(--px) * 5.4); color: #ffe27a; }
+.ruf-kopf .ruf-titel span { white-space: nowrap; font-size: calc(var(--px) * 4.6); font-weight: bold; }
+.ruf-kopf .balken { background: rgba(255, 255, 255, 0.18); }
+.ruf-kopf .zahl, .ruf-kopf small { color: #d8d0f0; }
+.ruf-kopf small { font-size: calc(var(--px) * 4.2); }
+.ruf-kopf .ruf-stern small { color: #6a3a08; font-size: calc(var(--px) * 3.4); }
+.ruf-kopf.fertig .balken i { background: linear-gradient(90deg, #5ac85a, #9ae07a); }
+
+/* Bitte eines Stammgastes (17.10.): ein Zettel mit Porträt, der Satz in seiner Stimme */
+.bitte-zettel { padding: calc(var(--px) * 3); border-radius: calc(var(--px) * 2); background: #fff8e6; border: calc(var(--px) * 0.6) dashed #c89a5a; }
+.bitte-zettel .bitte-kopf { display: flex; gap: calc(var(--px) * 3); align-items: flex-start; }
+.bitte-zettel canvas { flex: none; width: calc(var(--px) * 32); height: calc(var(--px) * 48); image-rendering: pixelated; border-radius: calc(var(--px) * 1.5); background: #3a2440; }
+.bitte-zettel .mitte { flex: 1; min-width: 0; }
+.bitte-zettel b { font-size: calc(var(--px) * 5.6); display: block; }
+.bitte-zettel .bitte-text { display: block; font-size: calc(var(--px) * 4.6); font-style: italic; color: #5a3a24; margin: calc(var(--px) * 1) 0 0; }
+.bitte-zettel .bitte-fuss { margin-top: calc(var(--px) * 2); }
+.bitte-zettel small { font-size: calc(var(--px) * 4.4); color: #7a5a44; }
+.bitte-zettel .bitte-knopf { display: flex; justify-content: space-between; align-items: center; gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 1); }
+.bitte-zettel .k { min-width: calc(var(--px) * 34); font-size: calc(var(--px) * 5); }
+.bitte-zettel.erledigt .bitte-text, .bitte-zettel.erledigt canvas { opacity: 0.6; }
 .auftrag .k { min-width: calc(var(--px) * 34); font-size: calc(var(--px) * 5); }
 .auftrag.erledigt { opacity: 0.55; }
 .sammlung { display: flex; gap: calc(var(--px) * 2); flex-wrap: wrap; margin-top: calc(var(--px) * 2); }
