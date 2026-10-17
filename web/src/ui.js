@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610172230';
-import * as S from './spiel.js?v=202610172230';
-import * as Z from './zeit.js?v=202610172230';
-import * as T from './ton.js?v=202610172230';
-import { icon, wichtelKlein, r, p, figurKlein, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610172230';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610172230';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610172230';
-import * as A from './auftraege.js?v=202610172230';
-import * as E from './erfolge.js?v=202610172230';
-import * as ZL from './ziele.js?v=202610172230';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610172230';
-import * as KA from './karte.js?v=202610172230';
-import { zeigeRueckblick } from './ereignis.js?v=202610172230';
-import { barbaraZweig } from './szene.js?v=202610172230';
-import * as SW from './schneeball.js?v=202610172230';
-import * as LI from './lichtung.js?v=202610172230';
-import * as CB from './christbaum.js?v=202610172230';
-import * as SB from './schlitten.js?v=202610172230';
-import * as EB from './schlittschuh.js?v=202610172230';
-import * as BS from './backstube.js?v=202610172230';
-import { alleSymbole } from './symbole.js?v=202610172230';
+import * as C from './config.js?v=202610172345';
+import * as S from './spiel.js?v=202610172345';
+import * as Z from './zeit.js?v=202610172345';
+import * as T from './ton.js?v=202610172345';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610172345';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610172345';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610172345';
+import * as A from './auftraege.js?v=202610172345';
+import * as E from './erfolge.js?v=202610172345';
+import * as ZL from './ziele.js?v=202610172345';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610172345';
+import * as KA from './karte.js?v=202610172345';
+import { zeigeRueckblick } from './ereignis.js?v=202610172345';
+import { barbaraZweig } from './szene.js?v=202610172345';
+import * as SW from './schneeball.js?v=202610172345';
+import * as LI from './lichtung.js?v=202610172345';
+import * as CB from './christbaum.js?v=202610172345';
+import * as SB from './schlitten.js?v=202610172345';
+import * as EB from './schlittschuh.js?v=202610172345';
+import * as BS from './backstube.js?v=202610172345';
+import { alleSymbole } from './symbole.js?v=202610172345';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1504,6 +1504,44 @@ export function zeigeVogel(id, neu = true) {
   [{ text: neu ? 'Schön!' : 'Weiter', aktion: () => { if (neu) { const o = ortVon('futterhaus'); if (o) funkeln(o.x, o.y); } } }]);
   maleVogel(box.querySelector('canvas').getContext('2d'), id);
 }
+/**
+ * Porträt eines Stammgastes (17.10.): am Tresen, hinter ihm die Bretterwand
+ * des Standes mit Lichterkette. 64 x 52 in Spielpixeln, per Scale2x doppelt.
+ */
+const PORTRAET_W = 64, PORTRAET_H = 52;
+function maleStamm(cv, id) {
+  const k = document.createElement('canvas'); k.width = PORTRAET_W; k.height = PORTRAET_H;
+  const c = k.getContext('2d', { willReadFrequently: true });
+  for (let y = 0; y < PORTRAET_H; y++) r(c, 0, y, PORTRAET_W, 1, mische('#3a2440', '#6a4228', y / PORTRAET_H));
+  for (let x = 7; x < PORTRAET_W; x += 12) r(c, x, 0, 1, 44, '#2e1c26');   // Bretterfugen
+  const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
+  for (let x = 0; x < PORTRAET_W; x++) p(c, x, 5 + Math.round(Math.sin(x / 5) * 1.5), '#1e3a1e');   // Kabel der Lichterkette
+  for (let x = 3, i = 0; x < PORTRAET_W; x += 6, i++) { const y = 7 + Math.round(Math.sin(x / 5) * 1.5); p(c, x, y, BUNT[i % 5]); p(c, x, y + 1, mische(BUNT[i % 5], '#000000', 0.3)); }
+  const def = C.GAESTE[id];
+  figurGross(c, { typ: id, farben: def.farben ? { ...def.farben } : neueFarben(id), phase: 0 }, 32, 46, 0, 'froh');
+  r(c, 0, 44, PORTRAET_W, 8, '#a8703a'); r(c, 0, 44, PORTRAET_W, 1, '#d09050'); r(c, 0, 51, PORTRAET_W, 1, '#6a4222');   // Tresen
+  cv.getContext('2d').drawImage(scale2x(k, PORTRAET_W, PORTRAET_H, document.createElement('canvas')), 0, 0);
+}
+/**
+ * Geschichte eines Stammgastes (17.10.): Bild, Satz, „Geschichte 3 / 8" mit
+ * Balken. Kommt aus st.stammNeu (main.js), sobald nichts anderes offen ist;
+ * das offene Fenster hält das Spiel an.
+ */
+export function zeigeStamm(f) {
+  const def = C.GAESTE[f.id];
+  if (!def) return;
+  T.spiele('spezial');
+  const fuss = f.geschenk
+    ? `<p class="bonus">Ein Geschenk für dich! + ${S.formatGeld(f.betrag || 0)}</p>`
+    : `<div class="story-stand"><span>Geschichte ${f.nr} / ${f.von}</span><div class="balken"><i style="width:${Math.round(100 * f.nr / f.von)}%"></i></div></div>
+       ${f.erster ? `<p class="klein">${def.name} kommt jetzt jeden Tag vorbei - und erzählt jedes Mal ein Stück weiter.</p>` : ''}`;
+  const box = fenster(def.name, `
+    <canvas class="stamm-portraet" width="${PORTRAET_W * 2}" height="${PORTRAET_H * 2}"></canvas>
+    <p class="story-text">„${f.text}“</p>
+    ${fuss}`, [{ text: 'Weiter' }]);
+  maleStamm(box.querySelector('canvas'), f.id);
+}
+
 function baueAlbum(liste) {
   const typ = S.st.stats.typ || {}, tiere = S.st.stats.tiere || {};
   const kopf = (titel, da, alle) => liste.appendChild(el('p', 'gruppe', `${titel}: ${da} / ${alle}`));

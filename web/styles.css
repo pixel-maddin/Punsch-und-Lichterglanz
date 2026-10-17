@@ -607,6 +607,15 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 }
 .wand-zeile { text-align: center; margin: calc(var(--px) * 2) 0 0; font-size: calc(var(--px) * 4.6); }
 .wand-zeile + .klein { text-align: center; }
+/* Geschichte eines Stammgastes (17.10.): Porträt 64 x 52, per Scale2x 128 x 104, 1:1 */
+#modal .stamm-portraet {
+  display: block; margin: 0 auto calc(var(--px) * 2); box-sizing: content-box;
+  width: calc(var(--px) * 128); height: calc(var(--px) * 104); image-rendering: pixelated;
+  border: calc(var(--px) * 0.6) solid #c89a5a; border-radius: calc(var(--px) * 2);
+}
+#modal .story-text { font-style: italic; }
+#modal .story-stand { margin: calc(var(--px) * 2) auto 0; max-width: calc(var(--px) * 110); font-size: calc(var(--px) * 4.4); color: #7a5a44; text-align: center; }
+#modal .story-stand .balken { margin-top: calc(var(--px) * 1); }
 #modal .vogel-gross {   /* 14.10.: Steckbrief, 28 x 28 doppelt */
   display: block; margin: 0 auto calc(var(--px) * 2);
   width: calc(var(--px) * 56); height: calc(var(--px) * 56); image-rendering: pixelated;

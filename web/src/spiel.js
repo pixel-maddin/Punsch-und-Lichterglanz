@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610172230';
-import * as Z from './zeit.js?v=202610172230';
-import { neueFarben } from './pixel.js?v=202610172230';
+import * as C from './config.js?v=202610172345';
+import * as Z from './zeit.js?v=202610172345';
+import { neueFarben } from './pixel.js?v=202610172345';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -753,13 +753,26 @@ export function stammBedient(g) {   // exportiert nur für Tests
     e.geschenk = Z.saison();
     const betrag = Math.round(einnahmenProMinute() * C.STAMM_GESCHENK_MIN * dev.geld);
     if (betrag > 0) verdiene(betrag);
-    setTimeout(() => { hooks.ton('spezial'); hooks.toast(`${s.geschenk} (+${formatGeld(betrag)})`, 'spezial'); }, 900);
+    stammFenster({ id: g.typ, geschenk: true, text: s.geschenk, betrag });
     return;
   }
-  const satz = e.n < s.saetze.length ? s.saetze[e.n] : s.immer[(e.n - s.saetze.length) % s.immer.length];
-  const erster = e.n === 0;
+  // Die Geschichte (17.10.): als eigenes Fenster, das das Spiel anhält -
+  // als Einblendung ging sie beim Weiterbedienen unter. Ist die Geschichte
+  // erzählt, kommen die kurzen Sätze wie bisher als Einblendung.
+  if (e.n < s.saetze.length) {
+    stammFenster({ id: g.typ, text: s.saetze[e.n], nr: e.n + 1, von: s.saetze.length, erster: e.n === 0 });
+    e.n++;
+    return;
+  }
+  const satz = s.immer[(e.n - s.saetze.length) % s.immer.length];
   e.n++;
-  setTimeout(() => hooks.toast(`${def.name}: „${satz}“` + (erster ? ` - ${def.name} kommt jetzt jeden Tag vorbei.` : ''), 'spezial'), 900);
+  setTimeout(() => hooks.toast(`${def.name}: „${satz}“`, 'spezial'), 900);
+}
+/** Ein Story-Fenster vormerken; main.js zeigt es, sobald nichts anderes offen ist. */
+function stammFenster(f) {
+  st.stammNeu = st.stammNeu || [];
+  st.stammNeu.push(f);
+  speichere();
 }
 export const stammBesuche = (id) => (st.stamm || {})[id]?.n || 0;
 

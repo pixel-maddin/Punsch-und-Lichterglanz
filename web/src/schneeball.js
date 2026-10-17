@@ -13,12 +13,12 @@
  * Aufbau wie lichtung.js: eigenes Canvas #miniCv, 180 Pixel breit, Kopfzeile
  * und Texte über minihud.js, Licht über licht.js.
  */
-import * as C from './config.js?v=202610172230';
-import * as Z from './zeit.js?v=202610172230';
-import * as T from './ton.js?v=202610172230';
-import * as MH from './minihud.js?v=202610172230';
-import * as L from './licht.js?v=202610172230';
-import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610172230';
+import * as C from './config.js?v=202610172345';
+import * as Z from './zeit.js?v=202610172345';
+import * as T from './ton.js?v=202610172345';
+import * as MH from './minihud.js?v=202610172345';
+import * as L from './licht.js?v=202610172345';
+import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610172345';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
