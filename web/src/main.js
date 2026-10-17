@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610180010';
-import * as S from './spiel.js?v=202610180010';
-import * as Z from './zeit.js?v=202610180010';
-import * as T from './ton.js?v=202610180010';
-import * as LI from './lichtung.js?v=202610180010';
-import * as CB from './christbaum.js?v=202610180010';
-import * as KA from './karte.js?v=202610180010';
-import * as SB from './schlitten.js?v=202610180010';
-import * as EB from './schlittschuh.js?v=202610180010';
-import * as BS from './backstube.js?v=202610180010';
-import * as UI from './ui.js?v=202610180010';
-import { zeichneWelt, schlittenPos, funkeln } from './szene.js?v=202610180010';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610180010';
-import * as Lernen from './lernen.js?v=202610180010';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610180010';
-import * as A from './auftraege.js?v=202610180010';
-import * as E from './erfolge.js?v=202610180010';
-import * as ZL from './ziele.js?v=202610180010';
+import * as C from './config.js?v=202610180130';
+import * as S from './spiel.js?v=202610180130';
+import * as Z from './zeit.js?v=202610180130';
+import * as T from './ton.js?v=202610180130';
+import * as LI from './lichtung.js?v=202610180130';
+import * as CB from './christbaum.js?v=202610180130';
+import * as KA from './karte.js?v=202610180130';
+import * as SB from './schlitten.js?v=202610180130';
+import * as EB from './schlittschuh.js?v=202610180130';
+import * as BS from './backstube.js?v=202610180130';
+import * as UI from './ui.js?v=202610180130';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X } from './szene.js?v=202610180130';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610180130';
+import * as Lernen from './lernen.js?v=202610180130';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610180130';
+import * as A from './auftraege.js?v=202610180130';
+import * as E from './erfolge.js?v=202610180130';
+import * as ZL from './ziele.js?v=202610180130';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -128,7 +128,7 @@ cv.addEventListener('pointerdown', (e) => {
       return;
     }
     // Der eigene Schneemann auf dem Gehweg (11.10.)
-    if (Z.schnee() > 0 && S.st.lernen >= 99 && x >= 57 && x <= 77 && y >= GW - 24 && y <= GW + 2) {
+    if (Z.schnee() > 0 && S.st.lernen >= 99 && x >= SCHNEEMANN_X - 9 && x <= SCHNEEMANN_X + 9 && y >= GW - 24 && y <= GW + 2) {
       const r0 = S.baueSchneemann();
       S.lauf.klicks.push({ x, y, t: 0 });
       if (r0 === 'gebaut' || r0 === 'fertig') T.spiele('schnee'); else T.spiele('klick');
@@ -439,6 +439,7 @@ function demo(art) {
   S.allesLoeschen();   // immer frisch - im Vorführ-Speicher können Reste von Messläufen liegen
   const st = S.st;
   st.zuletzt = Date.now(); st.startTag = null;
+  st.zieleWeiter = false;   // 17.10.: sonst kam „Wie geht es weiter?" über jede Vorführszene
   S.hooks.toast = () => {};
   st.intro = true;
   st.name = 'Haus Schneeflocke'; st.standName = 'LICHTERGLANZ';

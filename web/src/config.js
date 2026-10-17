@@ -147,6 +147,17 @@ export const STOSS_NACH = 240;
 export const STOSS_DAUER = 40;
 export const STOSS_GAESTE = 6;
 export const STOSS_GRUPPEN = ['Der Kirchenchor', 'Die Nachbarschaft', 'Der Kegelclub', 'Die Feuerwehr', 'Der Posaunenchor'];
+// Wie die Gruppen aussehen (17.10., Nutzerwunsch: „wenn die Feuerwehr kommt,
+// sollen auch Leute kommen, die so aussehen"). Gilt für Gruppenbesuch und
+// Großbestellung. typen: wer mitkommt; farben überschreiben Mantel/Mütze/
+// Schal (ohneMuetze = Haare statt Mütze); extra: Erkennungszeichen in pixel.js.
+export const GRUPPEN_KLEIDUNG = {
+  'Der Kirchenchor':   { typen: ['erwachsen', 'oma', 'opa', 'kind'], farben: { mantel: '#a82a2a', schal: '#f4f0e8', ohneMuetze: true, lang: true }, extra: 'noten' },
+  'Die Feuerwehr':     { typen: ['erwachsen'], farben: { mantel: '#1e2a4a', schal: '#e8d040', hut: '#d8dce4' }, extra: 'helm' },
+  'Der Posaunenchor':  { typen: ['erwachsen', 'opa'], farben: { mantel: '#2a2a3a', schal: '#e8c030', hut: '#2a2a3a' }, extra: 'posaune' },
+  'Der Kegelclub':     { typen: ['erwachsen', 'oma', 'opa'], farben: { mantel: '#2f7a3a', schal: '#f4f0e8', hut: '#f4f0e8' }, extra: 'kegel' },
+  // Die Nachbarschaft: wie immer bunt gemischt
+};
 
 // Während die App zu ist, arbeiten nur die Wichtel - und nicht so gut wie du.
 // Die Kiste fasst seit 09.10. höchstens 3 Stunden (vorher 8): Wer mehrmals am

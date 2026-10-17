@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610180010';
-import * as S from './spiel.js?v=202610180010';
-import * as Z from './zeit.js?v=202610180010';
-import * as FEIN from './fein.js?v=202610180010';
-import * as T from './ton.js?v=202610180010';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610180010';
+import * as C from './config.js?v=202610180130';
+import * as S from './spiel.js?v=202610180130';
+import * as Z from './zeit.js?v=202610180130';
+import * as FEIN from './fein.js?v=202610180130';
+import * as T from './ton.js?v=202610180130';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610180130';
 
 const $ = (s) => document.querySelector(s);
 
@@ -1043,7 +1043,7 @@ function zeichne(t, dt) {
   const imNebel = (q) => zu.some((o) => Math.abs(q.x - o.x) < 20 && q.y > yPx(o) - 32 && q.y < yPx(o) + 6);
   const lichterOffen = zu.length ? grundLichter.filter((q) => !imNebel(q)) : grundLichter;
   // Nachts dunkler, dann leuchten Fenster, Laternen und Lichterketten
-  nachtLichter(li, C.B, H, lichterOffen, 0.5);
+  nachtLichter(li, C.B, H, lichterOffen, ORTE.filter((o) => !zu.includes(o)), winter);
   // Gemütlich (10.10.): Jeder Ort hat nachts einen warmen Lichthof, der sanft
   // atmet, und die Schilder glühen (CSS-Klasse .nacht) - man sieht sofort,
   // wohin man tippen kann
@@ -1056,8 +1056,9 @@ function zeichne(t, dt) {
       if (zu.includes(o)) continue;
       const ox = o.x, oy = yPx(o) - 8, atem = 0.85 + Math.sin(t * 1.2 + o.x) * 0.15;
       const g = c.createRadialGradient(ox, oy, 2, ox, oy, 30);
-      g.addColorStop(0, `rgba(255,190,100,${(hof * 0.45 * atem).toFixed(3)})`);
-      g.addColorStop(0.5, `rgba(255,170,80,${(hof * 0.18 * atem).toFixed(3)})`);
+      // Der Hof steckt jetzt in der Lichtkarte (17.10.) - hier nur noch das sanfte Atmen
+      g.addColorStop(0, `rgba(255,190,100,${(hof * 0.2 * atem).toFixed(3)})`);
+      g.addColorStop(0.5, `rgba(255,170,80,${(hof * 0.08 * atem).toFixed(3)})`);
       g.addColorStop(1, 'rgba(255,160,70,0)');
       c.fillStyle = g;
       c.fillRect(ox - 30, oy - 30, 60, 60);
@@ -1133,17 +1134,64 @@ function zeichneSanta(t, dt, winter) {
   }
 }
 
-/** Nachtschleier über das Bild legen und die gesammelten Lichter darauf. */
-function nachtLichter(li, w, h, liste, staerke) {
+/**
+ * Nacht auf der Karte (17.10., gemeldet: „wirkt flach"). Vorher ein flacher
+ * violetter Schleier. Jetzt wie am Haus eine LICHTKARTE, die das Bild
+ * multipliziert: kühler Grundton (Schnee etwas heller), Mondlicht von oben
+ * rechts, warme Inseln um jedes Fenster und jede Laterne, große Höfe um die
+ * offenen Orte, dunklere Ränder. Danach leuchten die Lichter selbst
+ * (additiv). Die Karte wird nur neu gebaut, wenn sich etwas ändert.
+ */
+let nachtKarte = null, nachtSchluessel = '';
+function nachtLichter(li, w, h, liste, orte, winter) {
   if (li.hell >= 0.9) return;
-  const nacht = 1 - li.hell;
-  c.fillStyle = `rgba(24,20,66,${(nacht * staerke).toFixed(3)})`;   // etwas violetter: Winterabend statt Mitternacht
-  c.fillRect(0, -vers(), w, h + vers());   // auch über den Versatz oben
+  const nacht = 1 - li.hell, v = vers(), hh = h + v;
+  const schl = [w, hh, Math.round(nacht * 40), liste.length, orte.map((o) => o.id).join(), winter].join('|');
+  if (schl !== nachtSchluessel) {
+    nachtSchluessel = schl;
+    nachtKarte = nachtKarte || document.createElement('canvas');
+    nachtKarte.width = w; nachtKarte.height = hh;
+    const k = nachtKarte.getContext('2d');
+    // Grundton: Tag weiß (ändert nichts), Nacht kühles Blau
+    const ziel = winter ? [78, 84, 142] : [62, 64, 122];
+    const ton = ziel.map((z) => Math.round(255 - (255 - z) * nacht));
+    k.globalCompositeOperation = 'source-over';
+    k.fillStyle = `rgb(${ton.join(',')})`; k.fillRect(0, 0, w, hh);
+    k.globalCompositeOperation = 'lighter';
+    // Mondlicht von oben rechts
+    const m = k.createRadialGradient(w * 0.85, 0, 4, w * 0.85, 0, hh * 0.8);
+    m.addColorStop(0, `rgba(70,80,110,${(0.6 * nacht).toFixed(3)})`); m.addColorStop(1, 'rgba(70,80,110,0)');
+    k.fillStyle = m; k.fillRect(0, 0, w, hh);
+    // Große warme Höfe um die offenen Orte
+    for (const o of orte) {
+      const ox = o.x, oy = yPx(o) - 8 + v;
+      const g = k.createRadialGradient(ox, oy, 2, ox, oy, 28);
+      g.addColorStop(0, `rgba(190,120,50,${(0.75 * nacht).toFixed(3)})`); g.addColorStop(0.55, `rgba(150,90,40,${(0.3 * nacht).toFixed(3)})`); g.addColorStop(1, 'rgba(120,70,30,0)');
+      k.fillStyle = g; k.fillRect(ox - 28, oy - 28, 56, 56);
+    }
+    // Kleine Inseln um jedes Licht (Fenster, Laternen, Ketten)
+    for (const q of liste) {
+      const g = k.createRadialGradient(q.x, q.y + v, 0, q.x, q.y + v, 7);
+      g.addColorStop(0, `rgba(200,140,70,${(0.7 * nacht).toFixed(3)})`); g.addColorStop(1, 'rgba(200,140,70,0)');
+      k.fillStyle = g; k.fillRect(q.x - 7, q.y + v - 7, 14, 14);
+    }
+    // Dunklere Ränder
+    k.globalCompositeOperation = 'source-over';
+    const vg = k.createRadialGradient(w / 2, hh * 0.55, Math.min(w, hh) * 0.35, w / 2, hh * 0.55, Math.max(w, hh) * 0.75);
+    vg.addColorStop(0, 'rgba(10,10,30,0)'); vg.addColorStop(1, `rgba(10,10,30,${(0.45 * nacht).toFixed(3)})`);
+    k.fillStyle = vg; k.fillRect(0, 0, w, hh);
+  }
+  c.save();
+  c.globalCompositeOperation = 'multiply';
+  c.drawImage(nachtKarte, 0, -v);
+  c.restore();
   if (nacht < 0.25) return;
-  c.fillStyle = `rgba(255,200,110,${(nacht * 0.1).toFixed(3)})`;
-  for (const q of liste) c.fillRect(q.x - 2, q.y - 2, 5, 5);
-  c.fillStyle = `rgba(255,210,130,${(nacht * 0.22).toFixed(3)})`;
+  // Die Lichter selbst: kleiner heller Schein, dann der Lichtpunkt
+  c.save();
+  c.globalCompositeOperation = 'lighter';
+  c.fillStyle = `rgba(255,190,100,${(nacht * 0.22).toFixed(3)})`;
   for (const q of liste) c.fillRect(q.x - 1, q.y - 1, 3, 3);
+  c.restore();
   for (const q of liste) p(c, q.x, q.y, q.f);
 }
 

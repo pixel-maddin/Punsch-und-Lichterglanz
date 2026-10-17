@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610180010';
-import * as Z from './zeit.js?v=202610180010';
-import { neueFarben } from './pixel.js?v=202610180010';
+import * as C from './config.js?v=202610180130';
+import * as Z from './zeit.js?v=202610180130';
+import { neueFarben } from './pixel.js?v=202610180130';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -729,6 +729,14 @@ export function neuerGast(typ, gross) {
   return g;
 }
 
+/** Einheitliche Kleidung einer Gruppe (C.GRUPPEN_KLEIDUNG): Farben drüber, Erkennungszeichen dazu. */
+function kleideGruppe(g, name) {
+  const kl = C.GRUPPEN_KLEIDUNG[name];
+  if (!kl || C.GAESTE[g.typ].spezial) return;
+  Object.assign(g.farben, kl.farben);
+  g.farben.extra = kl.extra;
+}
+
 // ---------------------------------------------------------------------------
 // Stammgäste (12.10.)
 // ---------------------------------------------------------------------------
@@ -1158,6 +1166,7 @@ export function update(dt) {
     const n = 3 + 2 * handMax();
     const name = C.STOSS_GRUPPEN[Math.floor(Math.random() * C.STOSS_GRUPPEN.length)];
     const g = neuerGast('erwachsen', { id: p.id, n, stand: 0, wert: 0, name, zeit: C.GROSS_ZEIT_BASIS + n * C.GROSS_ZEIT_JE });
+    if (g) kleideGruppe(g, name);
     if (g) { hooks.toast(`${name} bestellt ${n} × ${p.name}!`, 'spezial'); hooks.ton('spezial'); }
   }
 
@@ -1206,7 +1215,14 @@ export function update(dt) {
     // bei vollem Stand erst, wenn die 60 s fast um sind
     const grenze = lauf.lernen ? 1 : C.SCHLANGE_MAX + tresenPlaetze() + (lauf.ansturm ? 4 : 0);
     if (unterwegs < grenze) {
-      if (lauf.stossRest > 0) { const g = neuerGast(waehleTyp(false)); if (g && lauf.ansturm) g.ansturm = true; lauf.stossRest--; }
+      if (lauf.stossRest > 0) {
+        // Gruppenbesuch (17.10.): die Leute sehen aus wie ihre Gruppe
+        const kl = !lauf.ansturm && C.GRUPPEN_KLEIDUNG[lauf.stossName];
+        const g = neuerGast(kl ? kl.typen[Math.floor(Math.random() * kl.typen.length)] : waehleTyp(false));
+        if (g && lauf.ansturm) g.ansturm = true;
+        else if (g) kleideGruppe(g, lauf.stossName);
+        lauf.stossRest--;
+      }
       else neuerGast();
     }
     lauf.spawnT = lauf.stossRest > 0 ? 0.9 : gastTakt() * (0.6 + Math.random() * 0.8);

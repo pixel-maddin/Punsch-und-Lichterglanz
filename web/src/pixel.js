@@ -390,16 +390,18 @@ export function figurKlein(c, g, x, y, t) {
       bein(x - 1, schritt); bein(x + 1, 1 - schritt);
       r(c, x - 2, y - 7, 5, 4, F.mantel); r(c, x - 2, y - 7, 5, 1, F.schal);
       r(c, x - 2, y - 11, 4, 4, F.haut); p(c, x + 1, y - 9, '#2a1a1a');
-      r(c, x - 2, y - 12, 4, 2, F.hut); p(c, x - 1, y - 13, '#ffffff');
+      if (F.ohneMuetze) r(c, x - 2, y - 12, 4, 2, F.haar);
+      else { r(c, x - 2, y - 12, 4, 2, F.hut); p(c, x - 1, y - 13, '#ffffff'); }
       break;
     }
     case 'oma': case 'opa': case 'erwachsen': {
       bein(x - 2, schritt); bein(x + 1, 1 - schritt);
-      const lang = g.typ === 'oma' || F.frau;
+      const lang = g.typ === 'oma' || F.frau || F.lang;
       r(c, x - 3, y - 10, 6, lang ? 8 : 7, F.mantel); r(c, x - 3, y - 10, 1, lang ? 8 : 7, ton(F.mantel, -0.25));
       r(c, x - 3, y - 10, 6, 1, F.schal);
       r(c, x - 2, y - 14, 4, 4, F.haut); p(c, x + 1, y - 12, '#2a1a1a');
       if (g.typ === 'oma') { r(c, x - 2, y - 15, 4, 2, F.haar); p(c, x - 3, y - 14, F.haar); p(c, x - 3, y - 13, F.haar); }
+      else if (F.ohneMuetze) { r(c, x - 2, y - 15, 4, 2, F.haar); p(c, x - 3, y - 14, F.haar); if (g.typ === 'opa') r(c, x, y - 11, 2, 1, F.haar); }
       else if (g.typ === 'opa') { r(c, x - 3, y - 15, 6, 1, '#5a4030'); r(c, x - 2, y - 17, 4, 2, '#6a4a36'); r(c, x, y - 11, 2, 1, F.haar); }
       else if (F.frau) { r(c, x - 2, y - 15, 4, 2, F.hut); r(c, x - 3, y - 14, 2, 4, F.haar); p(c, x - 1, y - 16, '#ffffff'); }
       else { r(c, x - 2, y - 15, 4, 2, F.hut); r(c, x - 2, y - 14, 1, 2, F.haar); p(c, x - 1, y - 16, '#ffffff'); }
@@ -448,6 +450,27 @@ export function figurKlein(c, g, x, y, t) {
       break;
     }
   }
+  if (F && F.extra) gruppeKlein(c, g, x, y);
+}
+/** Erkennungszeichen der Gruppen (17.10., C.GRUPPEN_KLEIDUNG) - klein, auf der Straße. */
+function gruppeKlein(c, g, x, y) {
+  const k = g.typ === 'kind' ? 3 : 0;   // Kinder sind kleiner
+  switch (g.farben.extra) {
+    case 'helm':   // silberner Feuerwehrhelm mit Krempe, Leuchtstreifen an der Jacke
+      r(c, x - 3, y - 17, 6, 3, '#d8dce4'); p(c, x - 2, y - 17, '#ffffff'); r(c, x - 3, y - 14, 7, 1, '#a8acb4');
+      r(c, x - 3, y - 6, 6, 1, '#e8e060');
+      break;
+    case 'noten':  // dunkelblaues Notenheft vor der Brust
+      r(c, x + 1, y - 9 + k, 3, 3, '#1e2a6a'); p(c, x + 2, y - 8 + k, '#f4f0e8');
+      break;
+    case 'posaune':   // goldene Posaune vor dem Gesicht, Trichter nach vorn
+      r(c, x + 1, y - 12, 5, 1, '#e8c030'); r(c, x + 5, y - 13, 2, 3, '#e8c030'); p(c, x + 6, y - 12, '#fff0a0');
+      r(c, x + 1, y - 10, 4, 1, '#c8a020');
+      break;
+    case 'kegel':   // ein Kegel unter dem Arm
+      r(c, x + 3, y - 8, 1, 4, '#f4f0e8'); p(c, x + 3, y - 9, '#f4f0e8'); p(c, x + 3, y - 6, '#d83a3a');
+      break;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -466,6 +489,28 @@ function kopf(c, cx, oben, w, h, f) {
 function augen(c, cx, y, abst, zu) {
   if (zu) { r(c, cx - abst - 1, y, 2, 1, '#2a1a1a'); r(c, cx + abst, y, 2, 1, '#2a1a1a'); }
   else { r(c, cx - abst - 1, y - 1, 1, 2, '#2a1a1a'); r(c, cx + abst, y - 1, 1, 2, '#2a1a1a'); }
+}
+
+/** Erkennungszeichen der Gruppen (17.10.) - groß, am Tresen. ko = Oberkante Kopf, o = Kinder tiefer. */
+function gruppeGross(c, extra, cx, b, ko, o, bw) {
+  switch (extra) {
+    case 'helm':   // Feuerwehrhelm über der Mütze, Nackenschutz, Leuchtstreifen
+      r(c, cx - 7, ko - 4, 14, 6, '#d8dce4'); r(c, cx - 6, ko - 5, 12, 1, '#d8dce4'); r(c, cx - 4, ko - 4, 3, 2, '#ffffff');
+      r(c, cx - 8, ko + 2, 16, 1, '#a8acb4'); r(c, cx - 1, ko - 5, 2, 7, '#b8bcc4');
+      r(c, cx - bw / 2, b - 6 + o, bw, 2, '#e8e060'); r(c, cx - bw / 2, b - 5 + o, bw, 1, '#c8c040');
+      break;
+    case 'noten':  // aufgeschlagenes Notenheft
+      r(c, cx - 6, b - 8 + o, 12, 6, '#1e2a6a'); r(c, cx - 5, b - 7 + o, 5, 4, '#f4f0e8'); r(c, cx + 1, b - 7 + o, 4, 4, '#f4f0e8');
+      for (let i = 0; i < 2; i++) { r(c, cx - 4, b - 6 + o + i * 2, 3, 1, '#4a4a5a'); r(c, cx + 2, b - 6 + o + i * 2, 2, 1, '#4a4a5a'); }
+      break;
+    case 'posaune':   // Posaune quer vor der Brust, Trichter nach rechts
+      r(c, cx - 8, b - 12, 16, 1, '#e8c030'); r(c, cx - 8, b - 9, 12, 1, '#c8a020'); r(c, cx - 8, b - 12, 1, 4, '#e8c030');
+      r(c, cx + 7, b - 14, 3, 5, '#e8c030'); r(c, cx + 9, b - 15, 2, 7, '#f0d050'); p(c, cx + 8, b - 13, '#fff0a0');
+      break;
+    case 'kegel':   // Vereinswappen: ein Kegel auf der Brust
+      r(c, cx - 5, b - 11 + o, 3, 6, '#f4f0e8'); r(c, cx - 4, b - 13 + o, 1, 2, '#f4f0e8'); r(c, cx - 5, b - 9 + o, 3, 1, '#d83a3a');
+      break;
+  }
 }
 
 export function figurGross(c, g, cx, basis, t, laune) {
@@ -525,15 +570,17 @@ export function figurGross(c, g, cx, basis, t, laune) {
         r(c, cx - 2, ko - 4, 5, 3, F.haar);
         c.fillStyle = '#6a5a4a'; c.fillRect(cx - 5, ko + 3, 4, 1); c.fillRect(cx + 1, ko + 3, 4, 1); c.fillRect(cx - 1, ko + 4, 2, 1);
       } else if (g.typ === 'opa') {
-        r(c, cx - 7, ko + 1, 14, 2, '#5a4030'); r(c, cx - 5, ko - 3, 10, 4, '#6a4a36'); r(c, cx - 5, ko, 10, 1, '#3a2a1c');
+        if (F.ohneMuetze) r(c, cx - 5, ko - 1, 10, 3, F.haar);   // Chor (17.10.): ohne Hut
+        else { r(c, cx - 7, ko + 1, 14, 2, '#5a4030'); r(c, cx - 5, ko - 3, 10, 4, '#6a4a36'); r(c, cx - 5, ko, 10, 1, '#3a2a1c'); }
         r(c, cx - 3, ko + 7, 6, 2, F.haar); r(c, cx - 6, ko + 3, 1, 4, F.haar); r(c, cx + 5, ko + 3, 1, 4, F.haar);
       } else {
         // Frauen: Haare fallen bis auf die Schultern
         if (F.frau && !k) { r(c, cx - 7, ko + 2, 2, 12, F.haar); r(c, cx + 5, ko + 2, 2, 12, F.haar); r(c, cx - 7, ko + 13, 2, 1, ton(F.haar, 0.2)); }
         else { r(c, cx - 6, ko + 2, 1, 5, F.haar); r(c, cx + 5, ko + 2, 1, 5, F.haar); }
-        r(c, cx - 6, ko - 3, 12, 5, F.hut); r(c, cx - 6, ko + 1, 12, 1, ton(F.hut, 0.3));
-        r(c, cx - 1, ko - 5, 3, 2, '#ffffff');
+        if (F.ohneMuetze) { r(c, cx - 5, ko - 1, 10, 3, F.haar); r(c, cx - 6, ko + 1, 12, 1, F.haar); }   // Chor (17.10.): Haare statt Mütze
+        else { r(c, cx - 6, ko - 3, 12, 5, F.hut); r(c, cx - 6, ko + 1, 12, 1, ton(F.hut, 0.3)); r(c, cx - 1, ko - 5, 3, 2, '#ffffff'); }
       }
+      if (F.extra) gruppeGross(c, F.extra, cx, b, ko, o, bw);
       break;
     }
     case 'weihnachtsmann': {

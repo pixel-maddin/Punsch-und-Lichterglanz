@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610180010';
-import * as Z from './zeit.js?v=202610180010';
-import * as S from './spiel.js?v=202610180010';
-import { FASSADEN } from './config.js?v=202610180010';
-import * as C from './config.js?v=202610180010';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610180130';
+import * as Z from './zeit.js?v=202610180130';
+import * as S from './spiel.js?v=202610180130';
+import { FASSADEN } from './config.js?v=202610180130';
+import * as C from './config.js?v=202610180130';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1970,6 +1970,19 @@ function saenger(c, L, fuss, t) {
   }
 }
 
+/**
+ * Was VOR den Leuten steht oder fährt (17.10. zusammengefasst): Schneeball-
+ * vorrat und eigener Schneemann vorn auf dem Gehweg, Kutsche und Rodelkinder
+ * auf der Straße. Nachts kommt das auch auf die Gäste-Ebene - gemeldet waren
+ * Rodelkinder HINTER den Gästen, weil nur die Leute nochmal gemalt wurden.
+ */
+function vorDenLeuten(c, L, G, GW, t, w, opts) {
+  if (S.zeigt('g_vorrat')) schneeballVorrat(c, 12, GW - 1);
+  if (Z.schnee() > 0 && S.st.lernen >= 99) eigenerSchneemann(c, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
+  if (S.zeigt('m_kutsche') && !opts.karte) kutsche(c, L, G, t, w);
+  if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(c, GW, t, w);
+}
+
 function strasse(c, G, t, L = null) {
   const fuss = G - 3;
   if (S.heiligabendAbend() || S.chorJetzt()) saenger(c, L, fuss - 1, t);   // Heiligabend und Adventssonntag
@@ -2416,8 +2429,6 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 11, t);
   if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 11, t);
   if (S.zeigt('e_pinguin')) pinguin(e, 97, GW - 1, t);
-  // Der eigene Schneemann auf dem Gehweg vor der Schneefamilie (11.10.)
-  if (Z.schnee() > 0 && S.st.lernen >= 99) eigenerSchneemann(e, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
   const pl = S.plakette();
   if (pl != null) plakette(e, L, 116, GW - 62, pl, t);
   // Vor dem Stand (sonst verdeckt er sie): Flamingo vor dem Schlitten, Drehorgel rechts.
@@ -2427,9 +2438,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t, L);
-  if (S.zeigt('g_vorrat')) schneeballVorrat(e, 12, GW - 1);   // vor den Leuten auf dem Gehweg (13.10.)
-  if (S.zeigt('m_kutsche') && !opts.karte) kutsche(e, L, G, t, w);
-  if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(e, GW, t, w);
+  vorDenLeuten(e, L, G, GW, t, w, opts);
   if (neuPruefen) { verdecke(L, stufen, pixel(e, G)); if (!opts.karte) deckungMerken(L, t); }
   else if (pruefen) deckungNehmen(L);
   if (!opts.karte) deckung.nNeu = L.length;
@@ -2444,7 +2453,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (w.dunkel > 0.05 && !opts.ohneGaeste) {
     const ge = gastEbeneFuer(e.canvas.width, e.canvas.height);
     strasse(ge, GW, t);
-    if (S.zeigt('g_vorrat')) schneeballVorrat(ge, 12, GW - 1);   // nachts liegt die Gäste-Ebene darüber
+    vorDenLeuten(ge, [], G, GW, t, w, opts);   // nachts liegt die Gäste-Ebene darüber - sonst stünden diese hinter den Leuten
     multipliziere(ge, karte, G, 0.5);
     e.drawImage(ge.canvas, 0, 0);
   }
@@ -2470,7 +2479,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
 // ---------------------------------------------------------------------------
 export const FUTTER_X = 132, FUTTER_DY = -42;   // hängt im kahlen Baum
 /** Plätze der Vögel (Fußlinie), relativ zum Futterhaus: Dach links/rechts, Brett links/rechts */
-const VOGEL_PLATZ = [[-2, -19], [2, -19], [-5, -12], [6, -12]];
+const VOGEL_PLATZ = [[-3, -19], [3, -19], [-7, -12], [7, -12]];   // 17.10.: weiter auseinander, die runden Vögel sind breiter
 function futterhaus(c, L, x, fuss, v, voll, knoedel, t) {
   r(c, x, fuss - 23, 1, 5, '#8a7a5a');   // Schnur zum Ast
   if (v === 2) {
@@ -2510,15 +2519,30 @@ export function zeichneVogel(c, x, y, art, opt = {}) {
     if (opt.fliegt) { const hoch = opt.fluegel; r(c, x - 4, y - (hoch ? 5 : 2), 2, 1, r0); r(c, x + 3, y - (hoch ? 5 : 2), 2, 1, r0); }
     return;
   }
+  // 17.10.: aufgeplusterte Federkugel statt 4 x 3 Strichvogel (Nutzerwunsch
+  // „chonky und süßer"): runder Bauch, runder Kopf mit Auge und Bäckchen,
+  // kleiner Schnabel, Schwanz keck nach oben. Passt in 7 x 7 (dx -3..3,
+  // dy -6..0) - so bleiben Album und Steckbrief (×4 = 28) unverändert.
   const [oben, brust, bauch] = v.f, d = opt.links ? -1 : 1;
   const P = (dx, dy, f) => p(c, x + dx * d, y + dy, f);
-  const kopfY = opt.pickt ? -1 : -2;
-  P(-1, -1, oben); P(0, -1, oben); P(1, -1, brust); P(2, -1, brust);   // Schwanz, Rücken, Brust
-  P(0, 0, bauch); P(1, 0, bauch);
-  P(1, kopfY, oben); P(2, kopfY, art === 'kohlmeise' ? '#f4f4f0' : oben); P(3, kopfY, '#3a3020');   // Kopf, Wange, Schnabel
-  if (art === 'seidenschwanz') P(0, kopfY - 1, oben);   // Haube
-  if (art === 'blaumeise') P(1, kopfY, '#4a8ad8');
-  if (opt.fliegt) { const hoch = opt.fluegel; P(0, hoch ? -2 : 0, oben); P(-1, hoch ? -3 : 1, oben); }
+  const dunkel = ton(oben, -0.25);
+  const wange = { kohlmeise: '#f4f4f0', blaumeise: '#f4f4f0', spatz: '#d8c8b0' }[art] || brust;
+  const k = opt.pickt ? 1 : 0;   // beim Picken nickt der Kopf nach vorn
+  // Körper: Rücken und Flügel hinten, Brust vorn, Bauch unten
+  P(-3, -4, oben); P(-3, -3, dunkel);                                    // Schwanz
+  P(-2, -3, oben); P(-1, -3, oben); P(2, -3, brust);
+  P(-2, -2, dunkel); P(-1, -2, dunkel); P(0, -2, brust); P(1, -2, brust); P(2, -2, brust);
+  P(-1, -1, bauch); P(0, -1, bauch); P(1, -1, bauch); P(2, -1, ton(bauch, -0.12));
+  // Kopf: Käppchen, Auge, Wange mit rosa Bäckchen, Schnabel
+  P(0, -5 + k, oben); P(1, -5 + k, oben);
+  P(-1, -4 + k, oben); P(0, -4 + k, oben); P(1, -4 + k, '#1a1a22'); P(2, -4 + k, wange); P(3, -4 + k, '#e0a040');
+  P(0, -3 + k, wange); P(1, -3 + k, mische(wange, '#ff7088', 0.45));
+  if (art === 'seidenschwanz') { P(-1, -6 + k, oben); P(0, -6 + k, oben); P(2, -4 + k, '#2a1a1a'); }   // Haube, Maske
+  if (art === 'blaumeise') P(0, -4 + k, '#2a3a6a');                                                     // Augenstreif
+  if (opt.fliegt) {
+    const hoch = opt.fluegel;   // Flügelschlag
+    if (hoch) { P(-1, -4, dunkel); P(-2, -5, dunkel); } else { P(-1, 0, dunkel); P(-2, 0, dunkel); }
+  } else { P(0, 0, '#b07a50'); P(1, 0, '#b07a50'); }                                                   // Füßchen
 }
 function voegel(c, GW, t, L) {
   const fx = FUTTER_X, fy = GW + FUTTER_DY;
@@ -2543,7 +2567,9 @@ function voegel(c, GW, t, L) {
 // ---------------------------------------------------------------------------
 // Der eigene Schneemann (11.10.): wächst mit jedem Tag
 // ---------------------------------------------------------------------------
-export const SCHNEEMANN_X = 66, SCHNEEMANN_DY = -2;
+// 17.10.: neben dem Schneeballvorrat (x 12) und VOR den Leuten gezeichnet -
+// bei x 66 hinter den Gästen ging er unter
+export const SCHNEEMANN_X = 27, SCHNEEMANN_DY = -1;
 function kugel(c, x, y, rad, f = '#f6f9fc', s = '#cfd9e8') {
   for (let dy = -rad; dy <= rad; dy++) { const w = Math.round(Math.sqrt(rad * rad - dy * dy + rad * 0.6)); r(c, x - w, y + dy, w * 2 + 1, 1, dy > rad * 0.4 ? s : f); }
 }
