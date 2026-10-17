@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610180300';
-import * as Z from './zeit.js?v=202610180300';
-import { neueFarben } from './pixel.js?v=202610180300';
+import * as C from './config.js?v=202610180330';
+import * as Z from './zeit.js?v=202610180330';
+import { neueFarben } from './pixel.js?v=202610180330';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -741,14 +741,21 @@ function kleideGruppe(g, name) {
 // Stammgäste (12.10.)
 // ---------------------------------------------------------------------------
 function stammFaellig() {
-  if (lauf.t < (lauf.stammAb ?? C.STAMM_PAUSE)) return null;
+  if (lauf.t < (lauf.stammAb ?? C.STAMM_ERST)) return null;
   const h = Z.jetzt().getHours(), heute = Z.tagesSchluessel();
-  // Wer gerade dran ist (Uhrzeit), heute noch nicht bedient wurde und nicht schon da steht
-  const dran = Object.entries(C.STAMMGAESTE).filter(([id, s]) => h >= s.von && h < s.bis
-    && (st.stamm || {})[id]?.tag !== heute && !lauf.gaeste.some((g) => g.typ === id));
+  // Wer heute noch nicht bedient wurde und nicht schon da steht - zu jeder
+  // Uhrzeit (17.10.). Zur Lieblingszeit (von-bis) kommt man lieber.
+  const dran = Object.entries(C.STAMMGAESTE).filter(([id]) => (st.stamm || {})[id]?.tag !== heute && !lauf.gaeste.some((g) => g.typ === id));
   if (!dran.length || Math.random() >= C.STAMM_CHANCE) return null;
   lauf.stammAb = lauf.t + C.STAMM_PAUSE;
-  return dran[Math.floor(Math.random() * dran.length)][0];
+  return zufallGewichtet(dran, ([, s]) => (h >= s.von && h < s.bis ? C.STAMM_LIEBLING : 1))[0];
+}
+/** Begrüßung passend zur Uhrzeit (17.10.) - ersetzt {gruss} im ersten Satz. */
+function mitGruss(id, satz) {
+  if (!satz.includes('{gruss}')) return satz;
+  const h = Z.jetzt().getHours();
+  const i = h >= 5 && h < 11 ? 0 : h >= 11 && h < 17 ? 1 : h >= 17 && h < 22 ? 2 : 3;
+  return satz.replace('{gruss}', (C.STAMM_GRUSS[id] || ['Hallo!'])[i] || 'Hallo!');
 }
 /** Bedient: ein Satz aus der Geschichte - oder an Weihnachten das Geschenk. */
 export function stammBedient(g) {   // exportiert nur für Tests
@@ -768,7 +775,7 @@ export function stammBedient(g) {   // exportiert nur für Tests
   // als Einblendung ging sie beim Weiterbedienen unter. Ist die Geschichte
   // erzählt, kommen die kurzen Sätze wie bisher als Einblendung.
   if (e.n < s.saetze.length) {
-    stammFenster({ id: g.typ, text: s.saetze[e.n], nr: e.n + 1, von: s.saetze.length, erster: e.n === 0 });
+    stammFenster({ id: g.typ, text: mitGruss(g.typ, s.saetze[e.n]), nr: e.n + 1, von: s.saetze.length, erster: e.n === 0 });
     e.n++;
     return;
   }

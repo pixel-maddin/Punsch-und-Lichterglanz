@@ -52,6 +52,11 @@ selbst bedienen), steigt der Ruf um eine Stufe, und alle Preise steigen um
 Im Laden steht unter jedem Preis, wie lange der Stand ungefähr noch dafür
 braucht.
 
+**Stammgäste:** Oma Hilde mit Dackel Waldi, Postbotin Sophia, Karl mit
+seinen Witzen, die kleine Lena und Förster Franz kommen jeden Tag einmal
+vorbei - zu jeder Uhrzeit, sobald du am Stand bist (jeder hat aber seine
+Lieblingszeit). Jeder erzählt Stück für Stück seine Geschichte.
+
 **Bitten der Stammgäste:** Einmal am Tag hat einer der Stammgäste, die du
 schon kennst, eine Bitte an dich - fünf Kinderpunsch für Hildes Strickrunde,
 eine Runde Christbaumverkauf für Karls neuen Witz, Futter für Franz' Meisen.

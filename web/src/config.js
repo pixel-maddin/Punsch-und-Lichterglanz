@@ -205,14 +205,25 @@ export const GAESTE = {
     farben: { mantel: '#3e5a2e', schal: '#8a6a3a', haut: '#e0a888', haar: '#d8d4cc', hut: '#3e5a2e' } },
 };
 
-// Stammgäste (12.10.): Uhrzeit (von-bis), Sätze in Reihenfolge (einer je
-// Besuch), danach im Wechsel `immer`. Zwischen 24. und 26.12. einmal das
-// Abschiedsgeschenk (Sterne für GESCHENK_MIN Minuten Einnahmen).
-export const STAMM_CHANCE = 0.3, STAMM_PAUSE = 45, STAMM_GESCHENK_MIN = 15;
+// Stammgäste (12.10.): Sätze in Reihenfolge (einer je Besuch), danach im
+// Wechsel `immer`. Zwischen 24. und 26.12. einmal das Abschiedsgeschenk
+// (Sterne für GESCHENK_MIN Minuten Einnahmen).
+// Seit 17.10. KEINE festen Zeitfenster mehr (Nutzerwunsch: „es gibt Spieler,
+// die nur nachts reinschauen"): Jeder kommt einmal am Tag, wann immer man am
+// Stand ist - der erste nach STAMM_ERST s, dann alle STAMM_PAUSE s der
+// nächste. von-bis ist nur noch die LIEBLINGSZEIT: dann STAMM_LIEBLING-mal
+// so wahrscheinlich. Die Begrüßung im ersten Satz ({gruss}) folgt der Uhrzeit.
+export const STAMM_CHANCE = 0.3, STAMM_ERST = 30, STAMM_PAUSE = 90, STAMM_LIEBLING = 3, STAMM_GESCHENK_MIN = 15;
+// Begrüßung je Tageszeit: Morgen 5-11, Tag 11-17, Abend 17-22, Nacht 22-5
+export const STAMM_GRUSS = {
+  hilde: ['Guten Morgen!', 'Guten Tag!', 'Guten Abend!', 'Huch, so spät noch auf?'],
+  karl:  ['Moin!', 'Tach!', '\'n Abend!', 'Nanu, auch noch wach?'],
+  franz: ['Morgen.', 'Tag.', '\'n Abend.', 'Späte Runde, was?'],
+};
 export const STAMMGAESTE = {
   // Oma Hilde: Strickgeschichten
   hilde: { von: 7, bis: 13, saetze: [
-    'Guten Morgen! Ich bin die Hilde von gegenüber. Und das ist Waldi.',
+    '{gruss} Ich bin die Hilde von gegenüber. Und das ist Waldi.',
     'Ich stricke gerade Socken. Rot-grün gestreift. Für wen, verrate ich noch nicht.',
     'Waldi hat mir ein Wollknäuel geklaut. Jetzt zieht sich ein roter Faden quer durchs Wohnzimmer.',
     'Mein Enkel Jonas kommt zu Weihnachten! Ich stricke ihm einen Schal. Drei Meter - er ist ja gewachsen.',
@@ -223,8 +234,7 @@ export const STAMMGAESTE = {
     immer: ['Wie immer, Kindchen.', 'Waldi lässt grüßen. Wuff!', 'Masche für Masche, so wird\'s was.'],
     geschenk: 'Oma Hilde schenkt dir die rot-grünen Socken - sechs und sieben Streifen. Die waren für dich!' },
   // Postbotin Sophia: Klatsch und Tratsch aus dem Dorf
-  // 17.10.: Sophia 8-14 und Karl 14-20 (vorher 10-16 und 11-17) - wer morgens
-  // vor der Arbeit und abends spielt, traf die beiden sonst nie (Betatest)
+  // von-bis = Lieblingszeit (siehe oben), kein Zeitfenster mehr
   sophia: { von: 8, bis: 14, saetze: [
     'Post für dich! Nein, Spaß. Nur ich, Sophia. Einen Becher, bitte.',
     'Hast du\'s schon gehört? Beim Bäcker ist die Lichterkette durchgebrannt. Schon wieder.',
@@ -238,7 +248,7 @@ export const STAMMGAESTE = {
     geschenk: 'Sophia bringt dir ein Päckchen - von allen im Dorf, für den schönsten Stand!' },
   // Karl: gemütlicher Kerl Mitte 50, weihnachtliche Flachwitze
   karl: { von: 14, bis: 20, saetze: [
-    'Tach! Karl mein Name. Was ist ein Keks unter einem Baum? Ein schattiges Plätzchen!',
+    '{gruss} Karl mein Name. Was ist ein Keks unter einem Baum? Ein schattiges Plätzchen!',
     'Treffen sich zwei Schneemänner. Sagt der eine: ‚Komisch, hier riecht\'s nach Möhren.‘',
     'Was trinkt ein Schneemann am liebsten? Eistee!',
     'Unterhalten sich zwei Kerzen: ‚Ist Wasser gefährlich für uns?‘ - ‚Davon kannst du ausgehen.‘',
@@ -262,7 +272,7 @@ export const STAMMGAESTE = {
     geschenk: 'Lena strahlt: „Sie sind alle da! Papa, Tante, Oma und Opa!“ Sie schenkt dir ein gemaltes Bild - die ganze Familie vor deinem Stand.' },
   // Förster Franz: Fun Facts aus dem Wald
   franz: { von: 16, bis: 22, saetze: [
-    '\'n Abend. Franz, Förster. Merkspruch für dich: Fichte sticht, Tanne nicht.',
+    '{gruss} Franz, Förster. Merkspruch für dich: Fichte sticht, Tanne nicht.',
     'Eichhörnchen vergraben im Herbst Tausende Nüsse und finden längst nicht alle wieder. So pflanzen sie ganze Wälder.',
     'Rehböcke werfen im Winter ihr Geweih ab. Im Frühjahr wächst ein neues.',
     'Igel halten Winterschlaf. Ihr Herz schlägt dann nur noch ein paar Mal pro Minute.',
