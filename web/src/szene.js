@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181800';
-import * as Z from './zeit.js?v=202610181800';
-import * as S from './spiel.js?v=202610181800';
-import { FASSADEN } from './config.js?v=202610181800';
-import * as C from './config.js?v=202610181800';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181900';
+import * as Z from './zeit.js?v=202610181900';
+import * as S from './spiel.js?v=202610181900';
+import { FASSADEN } from './config.js?v=202610181900';
+import * as C from './config.js?v=202610181900';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2546,59 +2546,64 @@ export function zeichneVogel(c, x, y, art, opt = {}) {
   } else { P(0, 0, '#b07a50'); P(1, 0, '#b07a50'); }                                                   // Füßchen
 }
 /**
- * Vogel fürs Album und den Steckbrief (18.10.), gemalt in Spielpixeln auf 28 x 28:
- * dieselbe Pixelgröße wie Gäste und Tiere im Album. Vorher waren es die kleinen
- * 7 x 7-Vögel, 3-4-fach hochgezogen - dicke Pixel, die nicht zum Rest passten.
- * Blick nach rechts, Füße auf y 25.
+ * Vogel fürs Album, den Steckbrief und das große Futterhaus (18.10.), in
+ * Spielpixeln auf 28 x 28, Blick nach rechts, Füße auf Zeile 25. Nach dem
+ * Wunsch-Vorbild: runder Federball mit großem Kopf, dunkler Umriss, ein Auge,
+ * kleiner Schnabel, dunklerer Flügel, Schwanz nach links unten - sonst nichts.
  */
+const VOGEL_FARBEN = {
+  spatz:     { base: '#a88660', licht: '#c8a880', dunkel: '#6a4c34', rand: '#4a3424', schnabel: '#d8b060', kappe: '#7a5a3c', brust: (x, y) => (y >= 9 && x >= 11 ? '#dccaac' : null) },
+  kohlmeise: { base: '#7a9a6a', licht: '#a8c488', dunkel: '#4e6a50', rand: '#2a3a2a', schnabel: '#3a3a40', kappe: '#26262c', brust: (x, y) => (y >= 11 && x >= 9 ? '#f0d040' : x >= 12 && y >= 4 && y <= 8 ? '#f4f4f0' : null) },
+  blaumeise: { base: '#6a9ae0', licht: '#a0c4f4', dunkel: '#3a68b0', rand: '#24488a', schnabel: '#f0b030', kappe: '#4a80d0', brust: (x, y) => (y >= 12 && x >= 12 ? '#f0e060' : x >= 12 && y >= 5 && y <= 8 ? '#f4f8ff' : null) },
+  rotkehlchen: { base: '#a08060', licht: '#c0a078', dunkel: '#6a4c34', rand: '#4a3424', schnabel: '#3a3a40', brust: (x, y) => (x >= 14 && y >= 3 ? '#ee7a30' : y >= 9 && x >= 12 ? '#ee7a30' : null) },
+  gimpel:    { base: '#8a8a9a', licht: '#aaaabc', dunkel: '#4a4a58', rand: '#2e2e3a', schnabel: '#2a2a30', kappe: '#1e1e24', brust: (x, y) => (x >= 13 && y >= 5 ? '#e8505e' : y >= 10 && x >= 10 ? '#e8505e' : null) },
+  seidenschwanz: { base: '#b89a88', licht: '#d8c0a8', dunkel: '#7a5a4a', rand: '#5a3e32', schnabel: '#3a3a40', kappe: '#a07860', haube: true },
+};
 export function zeichneVogelAlbum(c, art) {
-  const v = C.VOEGEL.find((q) => q.id === art) || C.VOEGEL[0];
-  const [oben, brust, bauch] = v.f;
-  const dunkel = ton(oben, -0.28), umriss = ton(oben, -0.55);
-  const flaeche = (cx, cy, rx, ry, farbe) => {
-    for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
-      const d = ((x + 0.5 - cx) / rx) ** 2 + ((y + 0.5 - cy) / ry) ** 2;
-      if (d <= 1) { const f = farbe(x, y, d); if (f) p(c, x, y, f); }
-    }
-  };
+  const ox = 4, oy = 3;
+  const P = (x, y, f) => p(c, ox + x, oy + y, f);
   if (art === 'waldkauz') {
-    const hell = ton(brust, 0.25), streif = ton(bauch, -0.1);
-    // Standbein-Krallen, Körper (aufrecht), Flügel seitlich, Brust mit Strichen
-    r(c, 10, 25, 3, 1, '#3a2a1a'); r(c, 16, 25, 3, 1, '#3a2a1a');
-    flaeche(14, 17, 7.5, 8, (x, y, d) => d > 0.8 ? umriss : y > 17 ? ((x + y) % 3 === 0 ? streif : brust) : oben);
-    flaeche(14, 18.5, 3.6, 5.5, (x, y) => ((x + y * 2) % 4 === 0 ? streif : hell));
-    flaeche(8.5, 18, 2, 5.5, (x, y, d) => d > 0.7 ? umriss : dunkel); flaeche(19.5, 18, 2, 5.5, (x, y, d) => d > 0.7 ? umriss : dunkel);
-    // Kopf mit Gesichtsschleier: zwei helle Scheiben, große dunkle Augen
-    flaeche(14, 9, 7, 6, (x, y, d) => d > 0.8 ? umriss : oben);
-    flaeche(10.7, 9.5, 3.4, 3.4, (x, y, d) => d > 0.7 ? brust : hell); flaeche(17.3, 9.5, 3.4, 3.4, (x, y, d) => d > 0.7 ? brust : hell);
-    flaeche(10.7, 9.5, 1.7, 1.9, () => '#2a1a10'); flaeche(17.3, 9.5, 1.7, 1.9, () => '#2a1a10');
-    p(c, 10, 8, '#ffd040'); p(c, 17, 8, '#ffd040');
-    r(c, 13, 10, 2, 3, '#d8b060'); p(c, 13, 12, '#a88040'); p(c, 14, 12, '#a88040');   // Schnabel
-    r(c, 8, 4, 2, 1, dunkel); r(c, 18, 4, 2, 1, dunkel);                               // Brauen
+    const v = C.VOEGEL.find((q) => q.id === art);
+    const [braun, hellbraun, dunkelbraun] = v.f, rand = '#3a2a1a';
+    const maske = (x, y) => ((x - 14) / 8.2) ** 2 + ((y - 15.5) / 9) ** 2 <= 1;
+    for (let y = 2; y <= 25; y++) for (let x = 4; x <= 24; x++) {
+      if (!maske(x, y)) continue;
+      const rand4 = !maske(x - 1, y) || !maske(x + 1, y) || !maske(x, y - 1) || !maske(x, y + 1);
+      p(c, x, y, rand4 ? rand : (((x - 14) / 5) ** 2 + ((y - 19) / 5.5) ** 2 <= 1) ? hellbraun : y < 12 && x < 11 ? ton(braun, 0.12) : braun);
+    }
+    for (const ex of [10.5, 17.5]) { for (let y = 8; y <= 14; y++) for (let x = 6; x <= 22; x++) if (((x - ex) / 3.8) ** 2 + ((y - 11) / 3.8) ** 2 <= 1) p(c, x, y, ton(hellbraun, 0.25)); }
+    for (const ex of [10, 17]) { r(c, ex, 10, 3, 3, '#2a1a10'); p(c, ex, 10, '#ffffff'); }
+    r(c, 13, 13, 2, 2, '#e8b840'); p(c, 13, 15, '#a88030');
+    r(c, 11, 25, 3, 1, '#a07040'); r(c, 15, 25, 3, 1, '#a07040');
+    for (let y = 17; y <= 22; y += 2) { p(c, 13, y, dunkelbraun); p(c, 15, y, dunkelbraun); }
     return;
   }
-  // Schwanz (hinten links, keck nach oben), Füßchen
-  for (let i = 0; i < 5; i++) { p(c, 5 + i, 20 - i, i < 2 ? dunkel : oben); p(c, 6 + i, 20 - i, dunkel); }
-  r(c, 12, 24, 1, 2, '#b07a50'); r(c, 16, 24, 1, 2, '#b07a50'); p(c, 11, 25, '#b07a50'); p(c, 15, 25, '#b07a50');
-  // Körper: Rücken oben, Brust vorn, Bauch unten, dunkler Umriss
-  flaeche(13.5, 18, 8, 6, (x, y, d) => d > 0.78 ? umriss : y >= 21 ? bauch : x >= 17 && y >= 16 ? brust : y >= 18 ? ton(brust, -0.05) : oben);
-  // Flügel mit Federkante
-  flaeche(11.5, 17.5, 4.5, 3, (x, y, d) => d > 0.65 ? umriss : y >= 19 && x % 2 === 0 ? ton(dunkel, 0.12) : dunkel);
-  // Kopf: Käppchen, Wange, Auge mit Glanzpunkt, Schnabel, rosa Bäckchen
-  flaeche(19, 11, 4.6, 4.4, (x, y, d) => d > 0.72 ? umriss : y <= 9 ? oben : ({ kohlmeise: '#f4f4f0', blaumeise: '#f4f4f0', spatz: '#d8c8b0' }[art] || brust));
-  p(c, 20, 9, '#0e0e14'); p(c, 21, 9, '#0e0e14'); p(c, 20, 8, '#ffffff');
-  p(c, 22, 12, mische(brust, '#ff7088', 0.5)); p(c, 21, 12, mische(brust, '#ff7088', 0.5));
-  r(c, 23, 10, 2, 2, '#e0a040'); p(c, 25, 11, '#b07830');   // Schnabel
-  if (art === 'kohlmeise') { r(c, 19, 15, 3, 7, '#2a2a30'); r(c, 17, 7, 6, 1, '#2a2a30'); }           // Bauchstreif, schwarzer Kopf
-  if (art === 'blaumeise') { r(c, 17, 9, 5, 1, '#2a3a6a'); p(c, 20, 9, '#0e0e14'); }                  // Augenstreif
-  if (art === 'spatz') { r(c, 19, 14, 3, 2, '#3a2a1c'); }                                            // Latz
-  if (art === 'gimpel') { r(c, 17, 6, 6, 3, '#1a1a20'); r(c, 17, 14, 7, 4, '#e04a5a'); }             // schwarzes Käppchen, rote Brust
-  if (art === 'rotkehlchen') { flaeche(21, 13, 3, 3, (x, y) => (y >= 11 ? '#e8702a' : null)); p(c, 20, 9, '#0e0e14'); p(c, 20, 8, '#ffffff'); }
-  if (art === 'seidenschwanz') {
-    r(c, 14, 6, 6, 1, oben); r(c, 12, 5, 5, 1, oben); r(c, 11, 4, 3, 1, dunkel);                    // Haube
-    r(c, 18, 9, 5, 2, '#2a1a1a'); p(c, 20, 9, '#e8e060'); r(c, 6, 15, 2, 1, '#e8c060');             // Maske, gelbe Schwanzspitze
+  const f = VOGEL_FARBEN[art] || VOGEL_FARBEN.spatz;
+  const kopf = (x, y) => ((x - 12.5) / 5.4) ** 2 + ((y - 6) / 5.2) ** 2 <= 1;
+  const rumpf = (x, y) => ((x - 11) / 7.8) ** 2 + ((y - 14) / 6.2) ** 2 <= 1;
+  const schwanz = (x, y) => x >= 1 && x <= 6 && y >= 12 + (6 - x) * 0.5 && y <= 15 + (6 - x) * 0.6;
+  const drin = (x, y) => kopf(x, y) || rumpf(x, y) || schwanz(x, y);
+  const fluegel = (x, y) => ((x - 9.5) / 5.8) ** 2 + ((y - 14.5) / 3.2) ** 2 <= 1;
+  for (let y = -1; y <= 22; y++) for (let x = 0; x <= 21; x++) {
+    if (!drin(x, y)) continue;
+    if (!drin(x - 1, y) || !drin(x + 1, y) || !drin(x, y - 1) || !drin(x, y + 1)) { P(x, y, f.rand); continue; }
+    let col = f.base;
+    if (schwanz(x, y) && !rumpf(x, y)) col = f.dunkel;
+    else if (fluegel(x, y)) col = (y >= 16 && x <= 11) ? ton(f.dunkel, 0.18) : f.dunkel;
+    else {
+      if (kopf(x, y) && y <= 3 && f.kappe) col = f.kappe;
+      else if (kopf(x, y) && x <= 10 && y <= 4) col = f.licht;
+      if (f.brust) { const b = f.brust(x, y); if (b) col = b; }
+      else if (rumpf(x, y) && x >= 14 && y >= 11) col = f.licht;
+    }
+    P(x, y, col);
   }
+  if (f.haube) { P(8, 0, f.base); P(9, 0, f.kappe); P(7, 1, f.base); P(8, 1, f.rand); P(14, 5, '#2a1a1a'); P(15, 6, '#2a1a1a'); P(1, 16, '#e8c060'); P(2, 17, '#e8c060'); }
+  P(15, 5, '#16161e'); P(15, 6, '#16161e');                                  // Auge
+  P(18, 6, f.schnabel); P(19, 6, f.schnabel); P(18, 7, f.schnabel); P(19, 7, ton(f.schnabel, -0.2)); P(18, 8, ton(f.schnabel, -0.25));   // Schnabel
+  for (const lx of [8, 12]) { P(lx, 21, '#8a5a2e'); P(lx, 22, '#8a5a2e'); P(lx - 1, 22, '#8a5a2e'); }                                   // Beine
 }
+
 // ---------------------------------------------------------------------------
 // Futterhaus groß (18.10.): die Szene im Fenster. 132 x 92 Spielpixel, 1:1.
 // ---------------------------------------------------------------------------
@@ -2611,7 +2616,7 @@ function albumSprite(art) {
 }
 /** Plätze im großen Bild: Fußpunkt (x, y) je Platz 0 Dach links, 1 Dach rechts, 2 Brett links, 3 Brett rechts. */
 const FSZ_CX = 66;
-const FSZ_PLATZ = [[FSZ_CX - 21, 27], [FSZ_CX + 21, 27], [FSZ_CX - 25, 64], [FSZ_CX + 25, 64]];
+const FSZ_PLATZ = [[FSZ_CX - 21, 27], [FSZ_CX + 21, 27], [FSZ_CX - 36, 60], [FSZ_CX + 36, 60]];   // Brett: Füße AUF der Oberkante (y 60)
 /**
  * Zeichnet Himmel, Ast, Futterhaus mit Futterberg (`stufe` 0..5), Meisenknödel
  * und die Vögel aus `S.lauf.voegel`. `zu` hält Krümel und Schritt-Merker
@@ -2625,11 +2630,16 @@ export function zeichneFutterSzene(c, t, o, zu) {
     r(c, 0, y, W, 1, mische(nacht, tag, hell));
   }
   if (hell < 0.4) for (let i = 0; i < 12; i++) { const sx = Math.floor(Z.hash(i * 7) * W), sy = Math.floor(Z.hash(i * 11) * 40); if (Math.sin(t * 2 + i) > -0.3) p(c, sx, sy, '#fff6d0'); }
-  // Boden: Schnee oder Reif, Tannen links und rechts
-  r(c, 0, 84, W, 8, o.schnee ? '#eef4fa' : '#7a8a6a'); r(c, 0, 84, W, 1, o.schnee ? '#cfd9e8' : '#5a6a4a');
-  for (const tx of [10, 24, 112, 124]) {
-    const hh = 22 + (tx % 7);
-    for (let i = 0; i < hh; i++) r(c, tx - 1 - Math.floor(i / 3), 84 - hh + i, 3 + Math.floor(i / 3) * 2, 1, i % 6 < 2 && o.schnee ? '#e8f0f8' : '#2a5a3a');
+  // Eine ganze Reihe Tannen am unteren Rand, unten angeschnitten (hinten heller, vorn dunkler)
+  r(c, 0, 84, W, 8, '#1f4a30');
+  for (const [reihe, kopf0, versatz, hellen] of [[0, 70, 0, 0.18], [1, 77, 6, 0]]) {
+    for (let tx = -2 + versatz; tx < W + 6; tx += 12) {
+      const top = kopf0 + Math.floor(Z.hash(tx * 3 + reihe * 17) * 6);
+      for (let i = 0; top + i < H; i++) {
+        const half = Math.floor(i / 2.6) + 1, sn = o.schnee && i % 7 < 2;
+        r(c, tx - half, top + i, half * 2 + 1, 1, sn ? '#e8f0f8' : ton(i % 7 === 3 ? '#2a5a3a' : '#2f6240', hellen));
+      }
+    }
   }
   // Ast mit Zweigen, Schnee obendrauf
   r(c, 0, 8, W, 4, '#5a4030'); r(c, 0, 8, W, 1, '#7a5a42'); r(c, 0, 11, W, 1, '#3a2a20');
@@ -2664,10 +2674,10 @@ export function zeichneFutterSzene(c, t, o, zu) {
     r(c, cx - 5, 40, 11, 14, '#2a1a10'); r(c, cx - 4, 39, 9, 1, '#2a1a10'); r(c, cx - 3, 38, 7, 1, '#2a1a10');
     r(c, cx - 2, 55, 5, 2, woodL);   // Sitzstange am Flugloch
     // Futterbrett mit Rand
-    r(c, cx - 33, 60, 68, 3, '#6a4a2a'); r(c, cx - 33, 60, 68, 1, '#8a6a42'); r(c, cx - 33, 56, 2, 5, '#6a4a2a'); r(c, cx + 34, 56, 2, 5, '#6a4a2a');
-    // Futterberg: je Stufe breiter und höher
+    r(c, cx - 43, 60, 87, 3, '#6a4a2a'); r(c, cx - 43, 60, 87, 1, '#8a6a42'); r(c, cx - 43, 63, 87, 1, '#4a3018'); r(c, cx - 43, 57, 2, 6, '#6a4a2a'); r(c, cx + 42, 57, 2, 6, '#6a4a2a');
+    // Futterberg (18.10. kleiner): je Stufe breiter und höher
     if (stufe > 0) {
-      const bw = [0, 14, 26, 38, 50, 62][stufe], bh = [0, 2, 4, 6, 8, 10][stufe];
+      const bw = [0, 10, 18, 26, 34, 42][stufe], bh = [0, 1, 3, 4, 6, 7][stufe];
       for (let x = -bw / 2; x <= bw / 2; x++) {
         const hx = Math.round(bh * (1 - Math.pow(Math.abs(x) / (bw / 2), 1.5)));
         for (let k = 0; k < Math.max(1, hx); k++) p(c, cx + Math.round(x), 59 - k, korn[(Math.round(x) * 3 + k * 5 + 40) % 7 === 0 ? 3 : (Math.round(x) + k) % 3 === 0 ? 1 : (Math.round(x) + k) % 3 === 1 ? 0 : 2]);
@@ -2698,7 +2708,7 @@ export function zeichneFutterSzene(c, t, o, zu) {
       // Hüpfer: ein kurzer Satz alle paar Sekunden, am Brett auch ein Schritt zur Seite
       const hk = ((sit * 0.32 + seed * 0.37) % 1);
       if (hk < 0.1) { y -= Math.sin(hk / 0.1 * Math.PI) * (unten ? 4 : 6); if (unten) x += Math.round(Math.sin((sit * 0.32 + seed * 0.37 | 0) * 2.3 + seed) * 6 * hk / 0.1); }
-      if (pickt) { y += 3; x += schaut * 2; }
+      if (pickt) { y += 1; x += schaut * 2; }   // Füße bleiben auf dem Brett
       const m = zu.merk[b.art + b.platz];
       if (pickt && !m) zu.krumen.push({ x: x + schaut * 11, y: 58, vx: (Math.random() - 0.5) * 14, vy: -18, t: 0 });
       zu.merk[b.art + b.platz] = pickt;
