@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181900';
-import * as Z from './zeit.js?v=202610181900';
-import * as S from './spiel.js?v=202610181900';
-import { FASSADEN } from './config.js?v=202610181900';
-import * as C from './config.js?v=202610181900';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610182000';
+import * as Z from './zeit.js?v=202610182000';
+import * as S from './spiel.js?v=202610182000';
+import { FASSADEN } from './config.js?v=202610182000';
+import * as C from './config.js?v=202610182000';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2616,7 +2616,7 @@ function albumSprite(art) {
 }
 /** Plätze im großen Bild: Fußpunkt (x, y) je Platz 0 Dach links, 1 Dach rechts, 2 Brett links, 3 Brett rechts. */
 const FSZ_CX = 66;
-const FSZ_PLATZ = [[FSZ_CX - 21, 27], [FSZ_CX + 21, 27], [FSZ_CX - 36, 60], [FSZ_CX + 36, 60]];   // Brett: Füße AUF der Oberkante (y 60)
+const FSZ_PLATZ = [[FSZ_CX - 21, 27], [FSZ_CX + 21, 27], [FSZ_CX - 26, 60], [FSZ_CX + 26, 60]];   // Brett: Füße AUF der Oberkante (y 60)
 /**
  * Zeichnet Himmel, Ast, Futterhaus mit Futterberg (`stufe` 0..5), Meisenknödel
  * und die Vögel aus `S.lauf.voegel`. `zu` hält Krümel und Schritt-Merker
@@ -2674,7 +2674,7 @@ export function zeichneFutterSzene(c, t, o, zu) {
     r(c, cx - 5, 40, 11, 14, '#2a1a10'); r(c, cx - 4, 39, 9, 1, '#2a1a10'); r(c, cx - 3, 38, 7, 1, '#2a1a10');
     r(c, cx - 2, 55, 5, 2, woodL);   // Sitzstange am Flugloch
     // Futterbrett mit Rand
-    r(c, cx - 43, 60, 87, 3, '#6a4a2a'); r(c, cx - 43, 60, 87, 1, '#8a6a42'); r(c, cx - 43, 63, 87, 1, '#4a3018'); r(c, cx - 43, 57, 2, 6, '#6a4a2a'); r(c, cx + 42, 57, 2, 6, '#6a4a2a');
+    r(c, cx - 43, 60, 87, 3, '#6a4a2a'); r(c, cx - 43, 60, 87, 1, '#8a6a42'); r(c, cx - 43, 63, 87, 1, '#4a3018');
     // Futterberg (18.10. kleiner): je Stufe breiter und höher
     if (stufe > 0) {
       const bw = [0, 10, 18, 26, 34, 42][stufe], bh = [0, 1, 3, 4, 6, 7][stufe];
@@ -2704,11 +2704,15 @@ export function zeichneFutterSzene(c, t, o, zu) {
       const sit = b.t - FLUG;
       if (Math.floor(sit / (3 + (seed % 2.5)) + seed) % 3 === 0) schaut = -schaut;   // schaut sich mal um
       const unten = b.platz >= 2;
-      const pickt = unten && stufe > 0 && Math.sin(sit * 4.2 + seed * 7) > 0.45;
-      // Hüpfer: ein kurzer Satz alle paar Sekunden, am Brett auch ein Schritt zur Seite
-      const hk = ((sit * 0.32 + seed * 0.37) % 1);
-      if (hk < 0.1) { y -= Math.sin(hk / 0.1 * Math.PI) * (unten ? 4 : 6); if (unten) x += Math.round(Math.sin((sit * 0.32 + seed * 0.37 | 0) * 2.3 + seed) * 6 * hk / 0.1); }
-      if (pickt) { y += 1; x += schaut * 2; }   // Füße bleiben auf dem Brett
+      // Hüpfer (18.10. öfter): alle ~1,3 s ein Satz zu einer neuen Stelle, dort bleibt der Vogel
+      // sitzen (am Brett ±12, auf dem Dach ±5 Pixel um den Platz) - kein Zurückspringen mehr
+      const ph = sit * 0.75 + seed * 0.37, hn = Math.floor(ph), hk = ph - hn;
+      const stelle = (k) => Math.sin(k * 2.3 + seed * 3.1) * (unten ? 12 : 5);
+      const von = stelle(hn - 1), nach = stelle(hn), hupf = hk < 0.2;
+      x += Math.round(von + (nach - von) * Math.min(1, hk / 0.2));
+      if (hupf) { y -= Math.sin(hk / 0.2 * Math.PI) * (unten ? 5 : 4); schaut = nach >= von ? 1 : -1; }
+      const pickt = !hupf && unten && stufe > 0 && Math.sin(sit * 4.2 + seed * 7) > 0.45;
+      if (pickt) { y += 1; x += schaut * 2; }
       const m = zu.merk[b.art + b.platz];
       if (pickt && !m) zu.krumen.push({ x: x + schaut * 11, y: 58, vx: (Math.random() - 0.5) * 14, vy: -18, t: 0 });
       zu.merk[b.art + b.platz] = pickt;

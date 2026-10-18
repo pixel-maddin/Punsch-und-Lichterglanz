@@ -23,12 +23,12 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610181900';
-import * as S from './spiel.js?v=202610181900';
-import * as A from './auftraege.js?v=202610181900';
-import * as E from './erfolge.js?v=202610181900';
-import * as Z from './ziele.js?v=202610181900';
-import * as KA from './karte.js?v=202610181900';
+import * as C from './config.js?v=202610182000';
+import * as S from './spiel.js?v=202610182000';
+import * as A from './auftraege.js?v=202610182000';
+import * as E from './erfolge.js?v=202610182000';
+import * as Z from './ziele.js?v=202610182000';
+import * as KA from './karte.js?v=202610182000';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -173,7 +173,7 @@ const HINWEISE = [
     ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
-    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist oder die App zu ist, und verdienen dir Sterne - die ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher. Ihre Kiste fasst bis zu ${C.OFFLINE_MAX_H} Stunden Arbeit - schau also ruhig mehrmals am Tag vorbei. Und: Was DU selbst servierst, bringt doppelt so viele Sterne.`,
+    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist, und verdienen dir Sterne - ist die App länger als eine Stunde zu, wartet eine Kiste auf dich. Am Stand arbeiten sie in den ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher. Ihre Kiste fasst bis zu ${C.OFFLINE_MAX_H} Stunden Arbeit - schau also ruhig mehrmals am Tag vorbei. Und: Was DU selbst servierst, bringt doppelt so viele Sterne.`,
     ziel: null, dauer: 12 },
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
