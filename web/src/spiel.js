@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610182010';
-import * as Z from './zeit.js?v=202610182010';
-import { neueFarben } from './pixel.js?v=202610182010';
+import * as C from './config.js?v=202610182100';
+import * as Z from './zeit.js?v=202610182100';
+import { neueFarben } from './pixel.js?v=202610182100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2085,6 +2085,14 @@ function vogelWahl() {
   let r = Math.random() * liste.reduce((s, v) => s + gew(v), 0);
   for (const v of liste) { r -= gew(v); if (r <= 0) return v; }
   return liste[0];
+}
+/** Vogel im Futterhaus-Fenster angetippt: VOGEL_STERNE, einmal je Besuch. true = gab Sterne. */
+export function vogelAntippen(b) {
+  if (!b || b.belohnt || b.t < 1.2 || b.t > b.bleibt) return false;   // nur solange er sitzt
+  b.belohnt = true;
+  verdiene(C.VOGEL_STERNE);
+  speichere();
+  return true;
 }
 /** Auch vom Futterhaus-Fenster aufgerufen: dort steht das Spiel, aber die Vögel kommen und gehen weiter. */
 export function vogelTakt(dt) {

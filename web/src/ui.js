@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610182010';
-import * as S from './spiel.js?v=202610182010';
-import * as Z from './zeit.js?v=202610182010';
-import * as T from './ton.js?v=202610182010';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610182010';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610182010';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610182010';
-import * as A from './auftraege.js?v=202610182010';
-import * as E from './erfolge.js?v=202610182010';
-import * as ZL from './ziele.js?v=202610182010';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610182010';
-import * as KA from './karte.js?v=202610182010';
-import { zeigeRueckblick } from './ereignis.js?v=202610182010';
-import { barbaraZweig } from './szene.js?v=202610182010';
-import * as SW from './schneeball.js?v=202610182010';
-import * as LI from './lichtung.js?v=202610182010';
-import * as CB from './christbaum.js?v=202610182010';
-import * as SB from './schlitten.js?v=202610182010';
-import * as EB from './schlittschuh.js?v=202610182010';
-import * as BS from './backstube.js?v=202610182010';
-import { alleSymbole } from './symbole.js?v=202610182010';
+import * as C from './config.js?v=202610182100';
+import * as S from './spiel.js?v=202610182100';
+import * as Z from './zeit.js?v=202610182100';
+import * as T from './ton.js?v=202610182100';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610182100';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610182100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610182100';
+import * as A from './auftraege.js?v=202610182100';
+import * as E from './erfolge.js?v=202610182100';
+import * as ZL from './ziele.js?v=202610182100';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610182100';
+import * as KA from './karte.js?v=202610182100';
+import { zeigeRueckblick } from './ereignis.js?v=202610182100';
+import { barbaraZweig } from './szene.js?v=202610182100';
+import * as SW from './schneeball.js?v=202610182100';
+import * as LI from './lichtung.js?v=202610182100';
+import * as CB from './christbaum.js?v=202610182100';
+import * as SB from './schlitten.js?v=202610182100';
+import * as EB from './schlittschuh.js?v=202610182100';
+import * as BS from './backstube.js?v=202610182100';
+import { alleSymbole } from './symbole.js?v=202610182100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1548,20 +1548,26 @@ function maleVogel(ctx, id) {
  * das Fenster offen ist; die Vögel kommen und gehen trotzdem (S.vogelTakt).
  */
 export function zeigeFutterhaus() {
-  const NAMEN = Object.fromEntries(C.VOEGEL.map((v) => [v.id, v.name]));
   const box = fenster('Dein Futterhaus', `
     <canvas class="futter-szene" width="${FSZ_W}" height="${FSZ_H}"></canvas>
     <div class="futter-stand"><i></i><i></i><i></i><i></i><i></i></div>
-    <p class="futter-text"></p>
-    <p class="klein futter-gast"></p>`,
+    <p class="futter-text"></p>`,
   [{ text: 'Futter nachfüllen', aktion: () => {
       if (S.futterStand().stufe >= 5) return false;
       T.spiele('koerner'); S.fuettere(); toast(`Futterhaus gefüllt - hält ${C.FUTTER_STUNDEN} Stunden.`, 'gut'); anzeige(); return false;
     } }, { text: 'Schließen', neben: true }]);
   const cv = box.querySelector('canvas'), c = cv.getContext('2d');
   const knopf = box.querySelector('.k'), segs = box.querySelectorAll('.futter-stand i');
-  const text = box.querySelector('.futter-text'), gast = box.querySelector('.futter-gast');
-  const zu = {};
+  const text = box.querySelector('.futter-text');
+  const zu = cv.__zu = {};   // (zum Testen von außen erreichbar)
+  // Vogel antippen: +VOGEL_STERNE, einmal je Besuch (S.vogelAntippen prüft das)
+  cv.onclick = (e) => {
+    const rc = cv.getBoundingClientRect(), x = (e.clientX - rc.left) / rc.width * FSZ_W, y = (e.clientY - rc.top) / rc.height * FSZ_H;
+    const hit = (zu.treffer || []).filter((q) => Math.abs(x - q.x) <= 12 && y >= q.y - 26 && y <= q.y + 2).sort((a, b) => Math.abs(x - a.x) - Math.abs(x - b.x))[0];
+    if (!hit) return;
+    if (S.vogelAntippen(hit.b)) { T.spiele('kasse'); zu.texte = zu.texte || []; zu.texte.push({ x: hit.x, y: hit.y - 28, text: '+' + C.VOGEL_STERNE, t: 0 }); }
+    else T.spiele('klick');
+  };
   const uhr = (ms) => { const d = new Date(Z.jetzt().getTime() + ms); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
   function anzeige() {
     const f = S.futterStand();
@@ -1575,8 +1581,6 @@ export function zeigeFutterhaus() {
     }
     knopf.disabled = f.stufe >= 5;
     knopf.textContent = f.stufe >= 5 ? 'Futter ist voll' : f.stufe === 0 ? 'Futter einfüllen' : 'Futter nachfüllen';
-    const da = S.lauf.voegel.filter((b) => b.t > 1.2 && b.t < b.bleibt).map((b) => NAMEN[b.art]);
-    gast.textContent = da.length ? `Gerade da: ${[...new Set(da)].join(', ')}` : f.stufe > 0 ? 'Gerade ist kein Vogel da - sie kommen alle paar Sekunden vorbei.' : 'Keine Vögel ohne Futter.';
   }
   anzeige();
   let letzt = performance.now(), akt = 0;

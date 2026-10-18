@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610182010';
-import * as Z from './zeit.js?v=202610182010';
-import * as S from './spiel.js?v=202610182010';
-import { FASSADEN } from './config.js?v=202610182010';
-import * as C from './config.js?v=202610182010';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610182100';
+import * as Z from './zeit.js?v=202610182100';
+import * as S from './spiel.js?v=202610182100';
+import { FASSADEN } from './config.js?v=202610182100';
+import * as C from './config.js?v=202610182100';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2693,7 +2693,7 @@ export function zeichneFutterSzene(c, t, o, zu) {
     for (let i = 0; i < 6; i++) p(c, 110 + (i * 3) % 5, 33 + (i * 2) % 5, i % 2 ? '#8a6a3a' : '#d8b878');
   }
   // Vögel: Anflug, Sitzen, Abflug (wie draußen, nur größer)
-  zu.krumen = zu.krumen || []; zu.merk = zu.merk || {};
+  zu.krumen = zu.krumen || []; zu.merk = zu.merk || {}; zu.treffer = []; zu.texte = zu.texte || [];
   for (const b of o.voegel) {
     const [zx, zy] = spots[b.platz] || spots[0], FLUG = 1.2;
     const seed = (b.platz * 1.7 + b.art.length * 0.9);
@@ -2719,6 +2719,7 @@ export function zeichneFutterSzene(c, t, o, zu) {
     }
     const sp = albumSprite(b.art);
     const fl = fliegt ? Math.sin(t * 26) * 2 : 0;
+    if (!fliegt) zu.treffer.push({ b, x: Math.round(x), y: Math.round(y) });   // für das Antippen (ui.js)
     c.save();
     c.translate(Math.round(x), Math.round(y + fl));
     if (schaut < 0) c.scale(-1, 1);
@@ -2728,6 +2729,9 @@ export function zeichneFutterSzene(c, t, o, zu) {
   // Krümel fallen
   zu.krumen = zu.krumen.filter((k) => k.t < 1);
   for (const k of zu.krumen) { k.t += 1 / 60; k.vy += 90 * (1 / 60); k.x += k.vx / 60; k.y += k.vy / 60; if (k.y < 84) p(c, Math.round(k.x), Math.round(k.y), '#d8b060'); }
+  // "+10 ★" steigt über dem angetippten Vogel auf
+  zu.texte = zu.texte.filter((x) => x.t < 1.1);
+  for (const x of zu.texte) { x.t += 1 / 60; const s = x.text + ' ★'; pixText(c, s, Math.round(x.x - textBreite(s) / 2), Math.round(x.y - x.t * 16), x.t > 0.8 ? '#fff0a0' : '#ffe060'); }
   // Schneefall, nachts Abdunkelung
   if (o.schnee) for (let i = 0; i < 16; i++) p(c, Math.floor((i * 37 + Math.sin(t + i) * 4 + t * 6) % W), Math.floor((i * 23 + t * (12 + (i % 4) * 4)) % H), '#ffffff');
   if (hell < 0.9) { c.fillStyle = `rgba(14,20,50,${(0.9 - hell) * 0.45})`; c.fillRect(0, 0, W, H); }
