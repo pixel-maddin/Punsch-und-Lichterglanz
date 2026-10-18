@@ -176,7 +176,7 @@ export const OFFLINE_JE_TAG = {
   stunden: [2, 2.5, OFFLINE_MAX_H],
 };
 export const INAKTIV_AB = 300;       // s ohne dich - bis dahin arbeiten sie voll weiter
-export const OFFLINE_AB = 3600;      // s weg, ab denen die Wichtel abrechnen (18.10.: war 15 s - jede kurze Pause gab eine Meldung, jetzt erst nach einer Stunde)
+export const OFFLINE_AB = 1800;      // s weg, ab denen die Wichtel abrechnen (18.10.: war 15 s - jede kurze Pause gab eine Meldung, jetzt erst nach 30 Minuten)
 export const OFFLINE_FENSTER = 300;  // kürzer weg: nur eine Einblendung statt Fenster
 
 // typ: Aussehen und Verhalten. gewicht nur für normale Gäste.
