@@ -445,7 +445,7 @@ export const ARTIKEL = [
   { id: 'tanne_stern',    tab: 'markt', gruppe: 'Im Garten', name: 'Stern auf der Spitze', kosten: 160000, stimmung: 14, text: 'Das Tüpfelchen auf dem Baum.', braucht: 'tanne' },
   { id: 'baum_girlande',  tab: 'markt', gruppe: 'Im Garten', name: 'Leuchtgirlande für den alten Baum', kosten: [4400, 160000, 510000], stimmung: 7, text: 'Grüne Girlande mit Lichtern um den kahlen Baum. Stufe 2: doppelt so viele Lichter, Stufe 3: Lauflicht.' },
   // Futterhaus (11.10.): hängt im kahlen Baum; antippen füllt es, dann kommen Vögel (VOEGEL)
-  { id: 'futterhaus',     tab: 'markt', gruppe: 'Im Garten', name: 'Futterhaus',        kosten: 900,    stimmung: 3,  text: 'Hängt im alten Baum. Antippen füllt es - dann kommen Vögel, manche ganz selten.' },
+  { id: 'futterhaus',     tab: 'markt', gruppe: 'Im Garten', name: 'Futterhaus',        kosten: 900,    stimmung: 3,  text: 'Hängt im alten Baum. Antippen zeigt es groß: nachfüllen und Vögel beobachten - manche ganz selten.' },
   { id: 'schneemann',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneemann',        kosten: 2100,   stimmung: 6,  text: 'Mit Möhre und Hut.', schnee: true },
   { id: 'schneefrau',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneefrau',        kosten: 3900,   stimmung: 7,  text: 'Mit Schal und Schleife.', schnee: true },
   { id: 'schneekind',     tab: 'markt', gruppe: 'Im Garten', name: 'Schneekind',        kosten: 48000,   stimmung: 8,  text: 'Die Familie ist komplett.', schnee: true },

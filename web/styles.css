@@ -947,3 +947,17 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 15); padding: calc(var(--px) * 2); font-size: calc(var(--px) * 5); line-height: 1.15; }
 #blatt[data-art="menue"] .schalter .k:last-child:nth-child(odd) { grid-column: 1 / -1; }
 #blatt[data-art="menue"] .neustart .k { width: 100%; }
+
+/* Futterhaus-Fenster (18.10.): Szene 1:1 in Spielpixeln, Futterstand in fünf Stufen */
+#modal .futter-szene {
+  display: block; margin: 0 auto calc(var(--px) * 2); width: calc(var(--px) * 132); height: calc(var(--px) * 92);
+  max-width: 100%; image-rendering: pixelated; box-sizing: border-box;
+  border: calc(var(--px) * 1) solid var(--holz); border-radius: calc(var(--px) * 1.5);
+}
+.futter-stand { display: flex; gap: calc(var(--px) * 1.5); margin: 0 auto calc(var(--px) * 2); width: calc(var(--px) * 100); max-width: 100%; }
+.futter-stand i { flex: 1; height: calc(var(--px) * 5); border-radius: calc(var(--px) * 1.2); background: #e8d8b8; border: calc(var(--px) * 0.6) solid #c89a5a; box-sizing: border-box; }
+.futter-stand i.voll { background: linear-gradient(#f0d060, #d8a830); }
+.futter-stand i.knapp { background: linear-gradient(#e86a4a, #c8402a); }
+.futter-text { margin: calc(var(--px) * 1) 0 !important; font-size: calc(var(--px) * 5); }
+.futter-knapp { color: var(--rot2); font-weight: bold; }
+.futter-gast { margin: calc(var(--px) * 1) 0 0 !important; }

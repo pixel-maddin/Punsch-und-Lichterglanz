@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610181710';
-import * as Z from './zeit.js?v=202610181710';
-import { neueFarben } from './pixel.js?v=202610181710';
+import * as C from './config.js?v=202610181800';
+import * as Z from './zeit.js?v=202610181800';
+import { neueFarben } from './pixel.js?v=202610181800';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -526,7 +526,7 @@ export function kaufe(id) {
   if (a.wahl === 'lichtfarbe') { st.bunt = st.bunt || {}; st.bunt[a.kette] = true; }
   if (a.wahl === 'zaunfarbe') st.zaunfarbe = 'braun';
   if (id === 'musik') hooks.musik();
-  if (id === 'futterhaus') setTimeout(() => hooks.toast('Tipp das Futterhaus im alten Baum an, um es zu füllen - dann kommen Vögel.', 'spezial'), 1200);
+  if (id === 'futterhaus') setTimeout(() => hooks.toast('Tipp das Futterhaus im alten Baum an, um es zu füllen und die Vögel zu beobachten.', 'spezial'), 1200);
   hooks.ton('kauf');
   hooks.geld();
   speichere();
@@ -2068,6 +2068,15 @@ export function fuettere() {
   speichere();
   return !voll;
 }
+/**
+ * Wie voll ist das Futterhaus? (18.10.) Das Futter sinkt über FUTTER_STUNDEN
+ * gleichmäßig: stufe 5 (voll) bis 1 (fast leer), 0 = leer.
+ */
+export function futterStand() {
+  const rest = hat('futterhaus') ? Math.max(0, (st.futterBis || 0) - Z.jetzt().getTime()) : 0;
+  const anteil = Math.min(1, rest / (C.FUTTER_STUNDEN * 3600000));
+  return { rest, anteil, stufe: rest <= 0 ? 0 : Math.min(5, Math.ceil(anteil * 5)) };
+}
 const istNacht = () => Z.licht().hell <= 0.12;   // nachts nur Rotkehlchen und Waldkauz
 function vogelWahl() {
   const schnee = Z.schnee() > 0, knoedel = !!st.kalDeko.kal_knoedel, nacht = istNacht();
@@ -2077,7 +2086,8 @@ function vogelWahl() {
   for (const v of liste) { r -= gew(v); if (r <= 0) return v; }
   return liste[0];
 }
-function vogelTakt(dt) {
+/** Auch vom Futterhaus-Fenster aufgerufen: dort steht das Spiel, aber die Vögel kommen und gehen weiter. */
+export function vogelTakt(dt) {
   const V = lauf.voegel;
   for (const v of V) v.t += dt;
   // Wer seine Zeit abgesessen hat, fliegt los (1,2 s Flug), danach ist er weg

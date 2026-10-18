@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181710';
-import * as Z from './zeit.js?v=202610181710';
-import * as S from './spiel.js?v=202610181710';
-import { FASSADEN } from './config.js?v=202610181710';
-import * as C from './config.js?v=202610181710';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181800';
+import * as Z from './zeit.js?v=202610181800';
+import * as S from './spiel.js?v=202610181800';
+import { FASSADEN } from './config.js?v=202610181800';
+import * as C from './config.js?v=202610181800';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2598,6 +2598,126 @@ export function zeichneVogelAlbum(c, art) {
     r(c, 14, 6, 6, 1, oben); r(c, 12, 5, 5, 1, oben); r(c, 11, 4, 3, 1, dunkel);                    // Haube
     r(c, 18, 9, 5, 2, '#2a1a1a'); p(c, 20, 9, '#e8e060'); r(c, 6, 15, 2, 1, '#e8c060');             // Maske, gelbe Schwanzspitze
   }
+}
+// ---------------------------------------------------------------------------
+// Futterhaus groß (18.10.): die Szene im Fenster. 132 x 92 Spielpixel, 1:1.
+// ---------------------------------------------------------------------------
+export const FSZ_W = 132, FSZ_H = 92;
+const albumSprites = new Map();
+function albumSprite(art) {
+  let k = albumSprites.get(art);
+  if (!k) { k = document.createElement('canvas'); k.width = 28; k.height = 28; zeichneVogelAlbum(k.getContext('2d'), art); albumSprites.set(art, k); }
+  return k;
+}
+/** Plätze im großen Bild: Fußpunkt (x, y) je Platz 0 Dach links, 1 Dach rechts, 2 Brett links, 3 Brett rechts. */
+const FSZ_CX = 66;
+const FSZ_PLATZ = [[FSZ_CX - 21, 27], [FSZ_CX + 21, 27], [FSZ_CX - 25, 64], [FSZ_CX + 25, 64]];
+/**
+ * Zeichnet Himmel, Ast, Futterhaus mit Futterberg (`stufe` 0..5), Meisenknödel
+ * und die Vögel aus `S.lauf.voegel`. `zu` hält Krümel und Schritt-Merker
+ * zwischen den Bildern (vom Fenster angelegt).
+ */
+export function zeichneFutterSzene(c, t, o, zu) {
+  const W = FSZ_W, H = FSZ_H, cx = FSZ_CX, hell = o.hell;
+  // Himmel in Bändern, nachts dunkler
+  for (let y = 0; y < H; y++) {
+    const tag = mische('#9cc0e4', '#e2eef8', y / H), nacht = mische('#141c3c', '#2c3a6a', y / H);
+    r(c, 0, y, W, 1, mische(nacht, tag, hell));
+  }
+  if (hell < 0.4) for (let i = 0; i < 12; i++) { const sx = Math.floor(Z.hash(i * 7) * W), sy = Math.floor(Z.hash(i * 11) * 40); if (Math.sin(t * 2 + i) > -0.3) p(c, sx, sy, '#fff6d0'); }
+  // Boden: Schnee oder Reif, Tannen links und rechts
+  r(c, 0, 84, W, 8, o.schnee ? '#eef4fa' : '#7a8a6a'); r(c, 0, 84, W, 1, o.schnee ? '#cfd9e8' : '#5a6a4a');
+  for (const tx of [10, 24, 112, 124]) {
+    const hh = 22 + (tx % 7);
+    for (let i = 0; i < hh; i++) r(c, tx - 1 - Math.floor(i / 3), 84 - hh + i, 3 + Math.floor(i / 3) * 2, 1, i % 6 < 2 && o.schnee ? '#e8f0f8' : '#2a5a3a');
+  }
+  // Ast mit Zweigen, Schnee obendrauf
+  r(c, 0, 8, W, 4, '#5a4030'); r(c, 0, 8, W, 1, '#7a5a42'); r(c, 0, 11, W, 1, '#3a2a20');
+  for (const [bx, by] of [[14, 12], [38, 12], [96, 12], [118, 12]]) { r(c, bx, by, 2, 5, '#5a4030'); r(c, bx + 2, by + 3, 4, 1, '#5a4030'); }
+  if (o.schnee) for (let x = 0; x < W; x++) if (Z.hash(x * 5) < 0.8) p(c, x, 7, '#f6f9fc');
+  const stufe = o.stufe, v = o.variante || 0;
+  const wood = '#a8703a', woodD = '#8a5a2e', woodL = '#c08a50';
+  const korn = ['#d8b060', '#a87a40', '#e8c878', '#3a3028'];
+  const spots = FSZ_PLATZ.map((q) => q.slice());
+  if (v === 2) {
+    // Futterglocke: aus Körnern, schrumpft mit dem Futter; zwei Stangen als Sitzplätze
+    const ring = 62, hoehe = stufe === 0 ? 0 : 6 + stufe * 6;
+    r(c, cx, 12, 2, ring - hoehe - 14, '#8a7a5a');
+    r(c, cx - 3, ring - hoehe - 3, 7, 1, '#c82828'); p(c, cx - 4, ring - hoehe - 4, '#c82828'); p(c, cx + 4, ring - hoehe - 4, '#c82828');
+    for (let i = 0; i < hoehe; i++) {
+      const w = Math.min(4 + Math.floor(i * 0.9), 14); const y = ring - hoehe + i;
+      for (let x = -w; x <= w; x++) p(c, cx + x, y, korn[(x * 3 + y * 5 + 40) % 4 === 0 ? 3 : (x + y) % 3 === 0 ? 1 : (x + y) % 3 === 1 ? 0 : 2]);
+    }
+    r(c, cx - 18, ring, 37, 2, '#6a4a2a'); r(c, cx - 18, ring + 2, 37, 1, '#4a3018');
+    for (const sx of [cx - 21, cx + 21]) { r(c, sx, 12, 1, 22, '#8a7a5a'); r(c, sx - 8, 34, 17, 2, '#6a4a2a'); }
+    spots[0] = [cx - 21, 34]; spots[1] = [cx + 21, 34]; spots[2] = [cx - 14, 62]; spots[3] = [cx + 14, 62];
+  } else {
+    const dach = v === 1 ? ['#f4f8fc', '#d8e4f0', '#e8f0f8'] : ['#c82828', '#a82020', '#d84040'];
+    r(c, cx, 12, 2, 8, '#8a7a5a');   // Schnur
+    // Dach
+    for (let i = 0; i < 14; i++) { const hb = 6 + Math.round(i * 2.1); r(c, cx + 1 - hb, 20 + i, hb * 2, 1, i === 13 ? dach[1] : i % 4 === 3 ? dach[2] : dach[0]); }
+    r(c, cx - 36, 34, 74, 2, ton(wood, -0.4));
+    // Haus: Pfosten, Rückwand, Flugloch
+    r(c, cx - 25, 36, 52, 24, woodD);
+    for (let x = cx - 24; x < cx + 26; x += 6) r(c, x, 36, 1, 24, ton(woodD, -0.2));
+    r(c, cx - 25, 36, 3, 24, wood); r(c, cx + 24, 36, 3, 24, wood); r(c, cx - 25, 36, 1, 24, woodL);
+    r(c, cx - 5, 40, 11, 14, '#2a1a10'); r(c, cx - 4, 39, 9, 1, '#2a1a10'); r(c, cx - 3, 38, 7, 1, '#2a1a10');
+    r(c, cx - 2, 55, 5, 2, woodL);   // Sitzstange am Flugloch
+    // Futterbrett mit Rand
+    r(c, cx - 33, 60, 68, 3, '#6a4a2a'); r(c, cx - 33, 60, 68, 1, '#8a6a42'); r(c, cx - 33, 56, 2, 5, '#6a4a2a'); r(c, cx + 34, 56, 2, 5, '#6a4a2a');
+    // Futterberg: je Stufe breiter und höher
+    if (stufe > 0) {
+      const bw = [0, 14, 26, 38, 50, 62][stufe], bh = [0, 2, 4, 6, 8, 10][stufe];
+      for (let x = -bw / 2; x <= bw / 2; x++) {
+        const hx = Math.round(bh * (1 - Math.pow(Math.abs(x) / (bw / 2), 1.5)));
+        for (let k = 0; k < Math.max(1, hx); k++) p(c, cx + Math.round(x), 59 - k, korn[(Math.round(x) * 3 + k * 5 + 40) % 7 === 0 ? 3 : (Math.round(x) + k) % 3 === 0 ? 1 : (Math.round(x) + k) % 3 === 1 ? 0 : 2]);
+      }
+    }
+    if (v === 1) {   // Laterne unter dem Brett
+      r(c, cx, 63, 1, 3, '#3a2a1a'); r(c, cx - 3, 66, 7, 7, '#c83a2a'); r(c, cx - 2, 67, 5, 5, '#ffd070'); r(c, cx - 3, 65, 7, 1, '#3a2a1a');
+    }
+  }
+  // Meisenknödel am rechten Ast
+  if (o.knoedel) {
+    r(c, 112, 12, 1, 20, '#8a7a5a'); r(c, 109, 32, 7, 7, '#b8945a'); r(c, 109, 32, 7, 1, '#3a8a3a');
+    for (let i = 0; i < 6; i++) p(c, 110 + (i * 3) % 5, 33 + (i * 2) % 5, i % 2 ? '#8a6a3a' : '#d8b878');
+  }
+  // Vögel: Anflug, Sitzen, Abflug (wie draußen, nur größer)
+  zu.krumen = zu.krumen || []; zu.merk = zu.merk || {};
+  for (const b of o.voegel) {
+    const [zx, zy] = spots[b.platz] || spots[0], FLUG = 1.2;
+    const seed = (b.platz * 1.7 + b.art.length * 0.9);
+    let x = zx, y = zy, fliegt = false, schaut = b.platz % 2 === 0 ? 1 : -1;   // zur Mitte
+    if (b.t < FLUG) { const k = b.t / FLUG, e = k * k * (3 - 2 * k), sx = b.links ? -20 : W + 20; x = sx + (zx - sx) * e; y = zy - 40 * (1 - e) - Math.sin(k * Math.PI) * 8; fliegt = true; schaut = x < zx ? 1 : -1; }
+    else if (b.t > b.bleibt) { const k = Math.min(1, (b.t - b.bleibt) / FLUG), e = k * k, ex = b.links ? W + 24 : -24; x = zx + (ex - zx) * e; y = zy - 50 * e; fliegt = true; schaut = ex > zx ? 1 : -1; }
+    else {
+      const sit = b.t - FLUG;
+      if (Math.floor(sit / (3 + (seed % 2.5)) + seed) % 3 === 0) schaut = -schaut;   // schaut sich mal um
+      const unten = b.platz >= 2;
+      const pickt = unten && stufe > 0 && Math.sin(sit * 4.2 + seed * 7) > 0.45;
+      // Hüpfer: ein kurzer Satz alle paar Sekunden, am Brett auch ein Schritt zur Seite
+      const hk = ((sit * 0.32 + seed * 0.37) % 1);
+      if (hk < 0.1) { y -= Math.sin(hk / 0.1 * Math.PI) * (unten ? 4 : 6); if (unten) x += Math.round(Math.sin((sit * 0.32 + seed * 0.37 | 0) * 2.3 + seed) * 6 * hk / 0.1); }
+      if (pickt) { y += 3; x += schaut * 2; }
+      const m = zu.merk[b.art + b.platz];
+      if (pickt && !m) zu.krumen.push({ x: x + schaut * 11, y: 58, vx: (Math.random() - 0.5) * 14, vy: -18, t: 0 });
+      zu.merk[b.art + b.platz] = pickt;
+    }
+    const sp = albumSprite(b.art);
+    const fl = fliegt ? Math.sin(t * 26) * 2 : 0;
+    c.save();
+    c.translate(Math.round(x), Math.round(y + fl));
+    if (schaut < 0) c.scale(-1, 1);
+    c.drawImage(sp, -14, -25);
+    c.restore();
+  }
+  // Krümel fallen
+  zu.krumen = zu.krumen.filter((k) => k.t < 1);
+  for (const k of zu.krumen) { k.t += 1 / 60; k.vy += 90 * (1 / 60); k.x += k.vx / 60; k.y += k.vy / 60; if (k.y < 84) p(c, Math.round(k.x), Math.round(k.y), '#d8b060'); }
+  // Schneefall, nachts Abdunkelung
+  if (o.schnee) for (let i = 0; i < 16; i++) p(c, Math.floor((i * 37 + Math.sin(t + i) * 4 + t * 6) % W), Math.floor((i * 23 + t * (12 + (i % 4) * 4)) % H), '#ffffff');
+  if (hell < 0.9) { c.fillStyle = `rgba(14,20,50,${(0.9 - hell) * 0.45})`; c.fillRect(0, 0, W, H); }
+  if (v === 1 && hell < 0.9) { c.fillStyle = 'rgba(255,200,100,0.18)'; c.fillRect(cx - 9, 62, 19, 16); }
 }
 function voegel(c, GW, t, L) {
   const fx = FUTTER_X, fy = GW + FUTTER_DY;

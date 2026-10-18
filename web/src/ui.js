@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610181710';
-import * as S from './spiel.js?v=202610181710';
-import * as Z from './zeit.js?v=202610181710';
-import * as T from './ton.js?v=202610181710';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610181710';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum } from './szene.js?v=202610181710';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610181710';
-import * as A from './auftraege.js?v=202610181710';
-import * as E from './erfolge.js?v=202610181710';
-import * as ZL from './ziele.js?v=202610181710';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610181710';
-import * as KA from './karte.js?v=202610181710';
-import { zeigeRueckblick } from './ereignis.js?v=202610181710';
-import { barbaraZweig } from './szene.js?v=202610181710';
-import * as SW from './schneeball.js?v=202610181710';
-import * as LI from './lichtung.js?v=202610181710';
-import * as CB from './christbaum.js?v=202610181710';
-import * as SB from './schlitten.js?v=202610181710';
-import * as EB from './schlittschuh.js?v=202610181710';
-import * as BS from './backstube.js?v=202610181710';
-import { alleSymbole } from './symbole.js?v=202610181710';
+import * as C from './config.js?v=202610181800';
+import * as S from './spiel.js?v=202610181800';
+import * as Z from './zeit.js?v=202610181800';
+import * as T from './ton.js?v=202610181800';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610181800';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610181800';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610181800';
+import * as A from './auftraege.js?v=202610181800';
+import * as E from './erfolge.js?v=202610181800';
+import * as ZL from './ziele.js?v=202610181800';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610181800';
+import * as KA from './karte.js?v=202610181800';
+import { zeigeRueckblick } from './ereignis.js?v=202610181800';
+import { barbaraZweig } from './szene.js?v=202610181800';
+import * as SW from './schneeball.js?v=202610181800';
+import * as LI from './lichtung.js?v=202610181800';
+import * as CB from './christbaum.js?v=202610181800';
+import * as SB from './schlitten.js?v=202610181800';
+import * as EB from './schlittschuh.js?v=202610181800';
+import * as BS from './backstube.js?v=202610181800';
+import { alleSymbole } from './symbole.js?v=202610181800';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1543,6 +1543,55 @@ function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
 function maleVogel(ctx, id) {
   // 18.10.: eigene Album-Bilder in Spielpixeln (1:1 wie Gäste und Tiere)
   zeichneVogelAlbum(ctx, id);
+}
+/**
+ * Das Futterhaus groß (18.10.): Futterberg in fünf Stufen, Hinweis, wann es leer
+ * ist, Nachfüllen - und die Vögel, die gerade da sind. Das Spiel steht, solange
+ * das Fenster offen ist; die Vögel kommen und gehen trotzdem (S.vogelTakt).
+ */
+export function zeigeFutterhaus() {
+  const NAMEN = Object.fromEntries(C.VOEGEL.map((v) => [v.id, v.name]));
+  const box = fenster('Dein Futterhaus', `
+    <canvas class="futter-szene" width="${FSZ_W}" height="${FSZ_H}"></canvas>
+    <div class="futter-stand"><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="futter-text"></p>
+    <p class="klein futter-gast"></p>`,
+  [{ text: 'Futter nachfüllen', aktion: () => {
+      if (S.futterStand().stufe >= 5) return false;
+      T.spiele('koerner'); S.fuettere(); toast(`Futterhaus gefüllt - hält ${C.FUTTER_STUNDEN} Stunden.`, 'gut'); anzeige(); return false;
+    } }, { text: 'Schließen', neben: true }]);
+  const cv = box.querySelector('canvas'), c = cv.getContext('2d');
+  const knopf = box.querySelector('.k'), segs = box.querySelectorAll('.futter-stand i');
+  const text = box.querySelector('.futter-text'), gast = box.querySelector('.futter-gast');
+  const zu = {};
+  const uhr = (ms) => { const d = new Date(Z.jetzt().getTime() + ms); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  function anzeige() {
+    const f = S.futterStand();
+    segs.forEach((s, i) => { s.className = i < f.stufe ? (f.stufe <= 1 ? 'knapp' : 'voll') : ''; });
+    const h = Math.floor(f.rest / 3600000), m = Math.floor((f.rest % 3600000) / 60000);
+    if (f.stufe === 0) text.innerHTML = '<b>Leer!</b> Solange nichts drin ist, kommen keine Vögel. Füll es nach, dann kommen sie bald.';
+    else {
+      const rest = h > 0 ? `${h} Std. ${m} Min.` : `${m} Min.`;
+      text.innerHTML = `Futter für noch etwa <b>${rest}</b>. Gegen ${uhr(f.rest)} Uhr ist es leer.`
+        + (f.stufe <= 2 ? ' <span class="futter-knapp">Bald nachfüllen!</span>' : '');
+    }
+    knopf.disabled = f.stufe >= 5;
+    knopf.textContent = f.stufe >= 5 ? 'Futter ist voll' : f.stufe === 0 ? 'Futter einfüllen' : 'Futter nachfüllen';
+    const da = S.lauf.voegel.filter((b) => b.t > 1.2 && b.t < b.bleibt).map((b) => NAMEN[b.art]);
+    gast.textContent = da.length ? `Gerade da: ${[...new Set(da)].join(', ')}` : f.stufe > 0 ? 'Gerade ist kein Vogel da - sie kommen alle paar Sekunden vorbei.' : 'Keine Vögel ohne Futter.';
+  }
+  anzeige();
+  let letzt = performance.now(), akt = 0;
+  (function schleife(now) {
+    if (!cv.isConnected || document.querySelector('#modal').classList.contains('versteckt')) return;
+    const dt = Math.min(0.1, (now - letzt) / 1000); letzt = now;
+    S.vogelTakt(dt);
+    const f = S.futterStand();
+    zeichneFutterSzene(c, now / 1000, { stufe: f.stufe, variante: S.variante('futterhaus'), knoedel: S.hat('kal_knoedel'), voegel: S.lauf.voegel,
+      schnee: Z.schnee() > 0, hell: Z.licht().hell }, zu);
+    if ((akt += dt) > 1) { akt = 0; anzeige(); }
+    requestAnimationFrame(schleife);
+  })(performance.now());
 }
 /**
  * Steckbrief eines Vogels (14.10.): beim ersten Besuch am Futterhaus (`neu`,
