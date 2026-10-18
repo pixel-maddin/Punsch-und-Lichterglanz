@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610180330';
-import * as C from './config.js?v=202610180330';
-import * as S from './spiel.js?v=202610180330';
-import * as Z from './zeit.js?v=202610180330';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610181100';
+import * as C from './config.js?v=202610181100';
+import * as S from './spiel.js?v=202610181100';
+import * as Z from './zeit.js?v=202610181100';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -476,7 +476,7 @@ function brett(c, y, t) {
       if (h.vonWichtel && h.fuer != null) {
         wichtelKlein(c, x + 1, by, t);
         if (!(h.flammeT > 0) && h.extra !== 'beutel') {
-          const a = Math.max(0, 1 - (h.wartetT || 0) / C.WICHTEL_WARTEN);
+          const a = Math.max(0, 1 - (h.wartetT || 0) / S.wichtelWartezeit());
           r(c, x + 1, by - 23, 18, 2, '#2a3a64'); r(c, x + 1, by - 23, Math.max(1, Math.round(18 * a)), 2, '#7ab8ff');
         }
       }

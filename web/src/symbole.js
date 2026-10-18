@@ -116,6 +116,16 @@ const SYMBOLE = {
     '..GgG..',
     '.ggggg.',
   ],
+  // Sprechblase für den Nachrichtenverlauf (18.10.)
+  post: [
+    '.wwwwwww.',
+    'wwwwwwwww',
+    'wwKwKwKww',
+    'wwwwwwwww',
+    '.wwwwwww.',
+    '..ww.....',
+    '..w......',
+  ],
   herz: [
     '.pp.pp.',
     'pPppppp',

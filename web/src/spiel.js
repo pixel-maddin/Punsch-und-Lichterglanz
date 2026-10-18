@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610180330';
-import * as Z from './zeit.js?v=202610180330';
-import { neueFarben } from './pixel.js?v=202610180330';
+import * as C from './config.js?v=202610181100';
+import * as Z from './zeit.js?v=202610181100';
+import { neueFarben } from './pixel.js?v=202610181100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1006,6 +1006,9 @@ export function tippeGast(platz) {
   bediene(g, false, faktor);
 }
 
+/** Wie lange steht ein fertiges Wichtel-Glas bereit? Ohne dich nur kurz, aber lang genug zum Sehen. */
+export const wichtelWartezeit = () => chefAktiv() ? C.WICHTEL_WARTEN : C.WICHTEL_BEREIT;
+
 /**
  * Wen bedient der Servier-Wichtel als Nächstes? Den ungeduldigsten Gast am
  * Tresen - aber keine besonderen Gäste und Großbestellungen (Sache des
@@ -1375,7 +1378,7 @@ export function update(dt) {
         continue;
       }
       h.wartetT = (h.wartetT || 0) + dt;
-      if (h.wartetT >= C.WICHTEL_WARTEN || !chefAktiv()) {
+      if (h.wartetT >= wichtelWartezeit()) {
         lauf.hand.splice(i, 1);
         bediene(g, true, h.extraFertig ? 1 + (C.PRODUKT[h.id].bonus || C.EXTRA_BONUS) : 1);
       }
@@ -1386,7 +1389,10 @@ export function update(dt) {
       if (g) {
         // Ab der Aufsicht (17.10.) bedient er normale Gäste auch dann direkt,
         // wenn du da bist - davor schenkt er auf dein Tablett ein
-        if (!(chefAktiv() && !aufsicht() && wichtelGlas(g))) {
+        // Ohne dich (nichts getippt) füllt er trotzdem SICHTBAR ein (gemeldet 18.10.:
+        // "ich sehe nicht, was gerade gemacht wird"); direkt bedient wird nur, wenn
+        // das Tablett keinen Platz hat. Mit Aufsicht und Chef am Stand bleibt das Tablett frei.
+        if (!((!aufsicht() || !chefAktiv()) && wichtelGlas(g))) {
           const p = C.PRODUKT[g.wunsch];
           if (p.art === 'platte') lauf.crepe.fertig = false; else st.toepfe[p.id]--;
           bediene(g, true);

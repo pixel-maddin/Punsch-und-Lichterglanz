@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610180330';
-import * as S from './spiel.js?v=202610180330';
-import * as Z from './zeit.js?v=202610180330';
-import * as T from './ton.js?v=202610180330';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610180330';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610180330';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610180330';
-import * as A from './auftraege.js?v=202610180330';
-import * as E from './erfolge.js?v=202610180330';
-import * as ZL from './ziele.js?v=202610180330';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610180330';
-import * as KA from './karte.js?v=202610180330';
-import { zeigeRueckblick } from './ereignis.js?v=202610180330';
-import { barbaraZweig } from './szene.js?v=202610180330';
-import * as SW from './schneeball.js?v=202610180330';
-import * as LI from './lichtung.js?v=202610180330';
-import * as CB from './christbaum.js?v=202610180330';
-import * as SB from './schlitten.js?v=202610180330';
-import * as EB from './schlittschuh.js?v=202610180330';
-import * as BS from './backstube.js?v=202610180330';
-import { alleSymbole } from './symbole.js?v=202610180330';
+import * as C from './config.js?v=202610181100';
+import * as S from './spiel.js?v=202610181100';
+import * as Z from './zeit.js?v=202610181100';
+import * as T from './ton.js?v=202610181100';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610181100';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610181100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610181100';
+import * as A from './auftraege.js?v=202610181100';
+import * as E from './erfolge.js?v=202610181100';
+import * as ZL from './ziele.js?v=202610181100';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610181100';
+import * as KA from './karte.js?v=202610181100';
+import { zeigeRueckblick } from './ereignis.js?v=202610181100';
+import { barbaraZweig } from './szene.js?v=202610181100';
+import * as SW from './schneeball.js?v=202610181100';
+import * as LI from './lichtung.js?v=202610181100';
+import * as CB from './christbaum.js?v=202610181100';
+import * as SB from './schlitten.js?v=202610181100';
+import * as EB from './schlittschuh.js?v=202610181100';
+import * as BS from './backstube.js?v=202610181100';
+import { alleSymbole } from './symbole.js?v=202610181100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -150,14 +150,64 @@ export function zielLeiste() {
 // ---------------------------------------------------------------------------
 let toastT = null;
 const toastWarteschlange = [];
+
+// Nachrichtenverlauf (18.10.): Jede Einblendung (außer kurzen Rückmeldungen
+// wie "Dafür reichen deine Sterne noch nicht") landet nach ihrem Flug zum
+// Knopf oben links im Verlauf. Gemerkt werden die letzten 10, auch über das
+// Neuladen hinweg (eigener Schlüssel, nicht im Spielstand).
+const NACHR_MAX = 10;
+const NACHR_KEY = 'adventshaus.nachrichten';
+let nachrichten = [];
+try { nachrichten = (JSON.parse(localStorage.getItem(NACHR_KEY)) || []).slice(-NACHR_MAX); for (const m of nachrichten) m.gezeigt = true; } catch (e) { nachrichten = []; }
+function nachrSpeichern() { try { localStorage.setItem(NACHR_KEY, JSON.stringify(nachrichten)); } catch (e) { /* egal */ } }
+function nachrPunkt() {
+  const p = $('#nachrPunkt');
+  if (p) p.classList.toggle('versteckt', !nachrichten.some((m) => m.neu && m.gezeigt));
+}
+function uhrzeit() {
+  const d = Z.jetzt();
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
 export function toast(text, art = 'normal') {
-  toastWarteschlange.push([text, art]);
+  let eintrag = null;
+  if (art !== 'hinweis') {
+    eintrag = { text, art, zeit: uhrzeit(), neu: true, gezeigt: false };
+    nachrichten.push(eintrag);
+    if (nachrichten.length > NACHR_MAX) nachrichten.shift();
+    nachrSpeichern();
+  }
+  toastWarteschlange.push([text, art, eintrag]);
   if (!toastT) naechsterToast();
+}
+/** Fenster mit dem Verlauf. Öffnen heißt: alles gelesen. */
+function zeigeNachrichten() {
+  const liste = nachrichten.slice().reverse();
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const html = liste.length
+    ? liste.map((m) => `<div class="nachr-zeile${m.neu ? ' neu' : ''}"><small>${m.zeit}</small><b>${esc(m.text)}</b></div>`).join('')
+    : '<p>Noch keine Nachrichten.</p>';
+  for (const m of nachrichten) { m.neu = false; m.gezeigt = true; }
+  nachrSpeichern(); nachrPunkt();
+  fenster('Nachrichten', `<p class="klein">Die letzten ${NACHR_MAX} Hinweise, neueste oben.</p>` + html, [{ text: 'Schließen' }]);
+}
+/** Die Einblendung segelt zum Knopf oben links, schrumpft und ist weg. */
+function fliegeZumKnopf(e, eintrag) {
+  const knopf = $('#nachr');
+  const a = e.getBoundingClientRect(), b = knopf.getBoundingClientRect();
+  e.style.setProperty('--fx', (b.left + b.width / 2 - (a.left + a.width / 2)) + 'px');
+  e.style.setProperty('--fy', (b.top + b.height / 2 - (a.top + a.height / 2)) + 'px');
+  e.classList.remove('zeigen'); e.classList.add('fliegt');
+  setTimeout(() => {
+    if (eintrag) eintrag.gezeigt = true;
+    nachrPunkt();
+    knopf.classList.remove('huepft'); void knopf.offsetWidth; knopf.classList.add('huepft');
+  }, 560);
 }
 function naechsterToast() {
   const n = toastWarteschlange.shift();
   const e = $('#toast');
   if (!n) { e.classList.remove('zeigen'); toastT = null; return; }
+  e.classList.remove('fliegt'); e.style.removeProperty('--fx'); e.style.removeProperty('--fy');
   e.textContent = n[0];
   // Nicht über dem Kopf von Laden/Kalender/Menü und nicht über einer
   // Hinweisblase oben: dann weiter nach unten bzw. unter die Blase
@@ -167,7 +217,10 @@ function naechsterToast() {
   if (tippOben) e.style.top = (tipp.offsetTop + tipp.offsetHeight + 6) + 'px';
   e.className = 'zeigen ' + n[1];
   const dauer = n[1] === 'hinweis' ? 1800 : n[1] === 'neu' ? 3600 : 2600;
-  toastT = setTimeout(() => { e.classList.remove('zeigen'); toastT = setTimeout(naechsterToast, 250); }, dauer);
+  toastT = setTimeout(() => {
+    if (n[2]) { fliegeZumKnopf(e, n[2]); toastT = setTimeout(naechsterToast, 650); }
+    else { e.classList.remove('zeigen'); toastT = setTimeout(naechsterToast, 250); }
+  }, dauer);
 }
 
 // ---------------------------------------------------------------------------
@@ -2299,6 +2352,8 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
 // ---------------------------------------------------------------------------
 export function verdrahte() {
   alleSymbole();
+  $('#nachr').onclick = () => { T.spiele('klick'); zeigeNachrichten(); };
+  nachrPunkt();
   $('#ziel').onclick = () => {
     T.spiele('klick');
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen

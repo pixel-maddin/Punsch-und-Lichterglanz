@@ -91,7 +91,8 @@ export const CREPE_ZEIT = 3.5;                   // Backzeit (s)
 export const SPUEL_ZEIT = 1.5;                   // Spül-Wichtel: alle so viele s ein Glas aufs Tablett
 export const WICHTEL_EINSCHENKEN = 0.8;          // s, die der Wichtel länger braucht als du (Glas holen, eingießen)
 export const WICHTEL_WEGKIPPEN = 15;           // s: ein Wichtel-Glas, das keiner mehr will, kippt er weg (sonst staute das Tablett, 13.10.)
-export const WICHTEL_WARTEN = 4;               // s, die ein eingeschenktes Glas auf dich wartet, bevor der Wichtel selbst serviert
+export const WICHTEL_BEREIT = 0.9;              // s: fertiges Glas steht sichtbar bereit, wenn du nicht tippst (18.10.)
+export const WICHTEL_WARTEN = 4;              // s, die ein eingeschenktes Glas auf dich wartet, bevor der Wichtel selbst serviert
 export const JUBEL_ZEIT = 0.375;                 // s Freudensprung, wenn du selbst bedienst (20 % flotter als 0,45)
 
 // ---------------------------------------------------------------------------
