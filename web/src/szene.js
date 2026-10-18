@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181510';
-import * as Z from './zeit.js?v=202610181510';
-import * as S from './spiel.js?v=202610181510';
-import { FASSADEN } from './config.js?v=202610181510';
-import * as C from './config.js?v=202610181510';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181710';
+import * as Z from './zeit.js?v=202610181710';
+import * as S from './spiel.js?v=202610181710';
+import { FASSADEN } from './config.js?v=202610181710';
+import * as C from './config.js?v=202610181710';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2544,6 +2544,60 @@ export function zeichneVogel(c, x, y, art, opt = {}) {
     const hoch = opt.fluegel;   // Flügelschlag
     if (hoch) { P(-1, -4, dunkel); P(-2, -5, dunkel); } else { P(-1, 0, dunkel); P(-2, 0, dunkel); }
   } else { P(0, 0, '#b07a50'); P(1, 0, '#b07a50'); }                                                   // Füßchen
+}
+/**
+ * Vogel fürs Album und den Steckbrief (18.10.), gemalt in Spielpixeln auf 28 x 28:
+ * dieselbe Pixelgröße wie Gäste und Tiere im Album. Vorher waren es die kleinen
+ * 7 x 7-Vögel, 3-4-fach hochgezogen - dicke Pixel, die nicht zum Rest passten.
+ * Blick nach rechts, Füße auf y 25.
+ */
+export function zeichneVogelAlbum(c, art) {
+  const v = C.VOEGEL.find((q) => q.id === art) || C.VOEGEL[0];
+  const [oben, brust, bauch] = v.f;
+  const dunkel = ton(oben, -0.28), umriss = ton(oben, -0.55);
+  const flaeche = (cx, cy, rx, ry, farbe) => {
+    for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
+      const d = ((x + 0.5 - cx) / rx) ** 2 + ((y + 0.5 - cy) / ry) ** 2;
+      if (d <= 1) { const f = farbe(x, y, d); if (f) p(c, x, y, f); }
+    }
+  };
+  if (art === 'waldkauz') {
+    const hell = ton(brust, 0.25), streif = ton(bauch, -0.1);
+    // Standbein-Krallen, Körper (aufrecht), Flügel seitlich, Brust mit Strichen
+    r(c, 10, 25, 3, 1, '#3a2a1a'); r(c, 16, 25, 3, 1, '#3a2a1a');
+    flaeche(14, 17, 7.5, 8, (x, y, d) => d > 0.8 ? umriss : y > 17 ? ((x + y) % 3 === 0 ? streif : brust) : oben);
+    flaeche(14, 18.5, 3.6, 5.5, (x, y) => ((x + y * 2) % 4 === 0 ? streif : hell));
+    flaeche(8.5, 18, 2, 5.5, (x, y, d) => d > 0.7 ? umriss : dunkel); flaeche(19.5, 18, 2, 5.5, (x, y, d) => d > 0.7 ? umriss : dunkel);
+    // Kopf mit Gesichtsschleier: zwei helle Scheiben, große dunkle Augen
+    flaeche(14, 9, 7, 6, (x, y, d) => d > 0.8 ? umriss : oben);
+    flaeche(10.7, 9.5, 3.4, 3.4, (x, y, d) => d > 0.7 ? brust : hell); flaeche(17.3, 9.5, 3.4, 3.4, (x, y, d) => d > 0.7 ? brust : hell);
+    flaeche(10.7, 9.5, 1.7, 1.9, () => '#2a1a10'); flaeche(17.3, 9.5, 1.7, 1.9, () => '#2a1a10');
+    p(c, 10, 8, '#ffd040'); p(c, 17, 8, '#ffd040');
+    r(c, 13, 10, 2, 3, '#d8b060'); p(c, 13, 12, '#a88040'); p(c, 14, 12, '#a88040');   // Schnabel
+    r(c, 8, 4, 2, 1, dunkel); r(c, 18, 4, 2, 1, dunkel);                               // Brauen
+    return;
+  }
+  // Schwanz (hinten links, keck nach oben), Füßchen
+  for (let i = 0; i < 5; i++) { p(c, 5 + i, 20 - i, i < 2 ? dunkel : oben); p(c, 6 + i, 20 - i, dunkel); }
+  r(c, 12, 24, 1, 2, '#b07a50'); r(c, 16, 24, 1, 2, '#b07a50'); p(c, 11, 25, '#b07a50'); p(c, 15, 25, '#b07a50');
+  // Körper: Rücken oben, Brust vorn, Bauch unten, dunkler Umriss
+  flaeche(13.5, 18, 8, 6, (x, y, d) => d > 0.78 ? umriss : y >= 21 ? bauch : x >= 17 && y >= 16 ? brust : y >= 18 ? ton(brust, -0.05) : oben);
+  // Flügel mit Federkante
+  flaeche(11.5, 17.5, 4.5, 3, (x, y, d) => d > 0.65 ? umriss : y >= 19 && x % 2 === 0 ? ton(dunkel, 0.12) : dunkel);
+  // Kopf: Käppchen, Wange, Auge mit Glanzpunkt, Schnabel, rosa Bäckchen
+  flaeche(19, 11, 4.6, 4.4, (x, y, d) => d > 0.72 ? umriss : y <= 9 ? oben : ({ kohlmeise: '#f4f4f0', blaumeise: '#f4f4f0', spatz: '#d8c8b0' }[art] || brust));
+  p(c, 20, 9, '#0e0e14'); p(c, 21, 9, '#0e0e14'); p(c, 20, 8, '#ffffff');
+  p(c, 22, 12, mische(brust, '#ff7088', 0.5)); p(c, 21, 12, mische(brust, '#ff7088', 0.5));
+  r(c, 23, 10, 2, 2, '#e0a040'); p(c, 25, 11, '#b07830');   // Schnabel
+  if (art === 'kohlmeise') { r(c, 19, 15, 3, 7, '#2a2a30'); r(c, 17, 7, 6, 1, '#2a2a30'); }           // Bauchstreif, schwarzer Kopf
+  if (art === 'blaumeise') { r(c, 17, 9, 5, 1, '#2a3a6a'); p(c, 20, 9, '#0e0e14'); }                  // Augenstreif
+  if (art === 'spatz') { r(c, 19, 14, 3, 2, '#3a2a1c'); }                                            // Latz
+  if (art === 'gimpel') { r(c, 17, 6, 6, 3, '#1a1a20'); r(c, 17, 14, 7, 4, '#e04a5a'); }             // schwarzes Käppchen, rote Brust
+  if (art === 'rotkehlchen') { flaeche(21, 13, 3, 3, (x, y) => (y >= 11 ? '#e8702a' : null)); p(c, 20, 9, '#0e0e14'); p(c, 20, 8, '#ffffff'); }
+  if (art === 'seidenschwanz') {
+    r(c, 14, 6, 6, 1, oben); r(c, 12, 5, 5, 1, oben); r(c, 11, 4, 3, 1, dunkel);                    // Haube
+    r(c, 18, 9, 5, 2, '#2a1a1a'); p(c, 20, 9, '#e8e060'); r(c, 6, 15, 2, 1, '#e8c060');             // Maske, gelbe Schwanzspitze
+  }
 }
 function voegel(c, GW, t, L) {
   const fx = FUTTER_X, fy = GW + FUTTER_DY;

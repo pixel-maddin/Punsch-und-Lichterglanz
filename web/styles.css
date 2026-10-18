@@ -889,3 +889,61 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #modal .teilen-zeichen::before { content: ''; position: absolute; left: 50%; top: calc(var(--px) * -2.2); width: calc(var(--px) * 0.5); height: calc(var(--px) * 4); margin-left: calc(var(--px) * -0.25); background: #2a6ad8; }
 #modal .teilen-zeichen::after { content: ''; position: absolute; left: 50%; top: calc(var(--px) * -2.4); width: calc(var(--px) * 1.8); height: calc(var(--px) * 1.8); margin-left: calc(var(--px) * -0.9);
   border-left: calc(var(--px) * 0.5) solid #2a6ad8; border-top: calc(var(--px) * 0.5) solid #2a6ad8; transform: rotate(45deg); box-sizing: border-box; }
+
+/* ======================================================================
+   Einheitliche Menüs (18.10., Durchsicht als UI-Designer)
+   Gefunden: drei verschiedene Umschalter (Reiter, „Einkaufen | Mein Haus",
+   Sprungleiste), vier Überschriftsstile, Schriftgrößen von 3,4 bis 5,8 für
+   dasselbe, drei Größen für Schließknöpfe, Knopfbreiten von 34 bis 40 und
+   ein Menü, dessen Knöpfe je nach Beschriftung umbrachen.
+   Schriftleiter in Menüs: 4,4 klein · 5 Text · 5,6 betont · 8 Titel.
+   ====================================================================== */
+
+/* Umschalter: „Einkaufen | Mein Haus" und die Sprungleiste in Mein Haus sehen gleich aus */
+.modi, .haus-sprung {
+  gap: 0; padding: calc(var(--px) * 0.8);
+  background: #e8d4a8; border: calc(var(--px) * 0.6) solid #c89a5a; border-radius: calc(var(--px) * 3);
+}
+.haus-sprung { top: 0; margin: 0 0 calc(var(--px) * 1.5); }
+.modus-k, .hs-k {
+  min-height: calc(var(--px) * 15); padding: 0 calc(var(--px) * 1);
+  font: bold calc(var(--px) * 5) var(--schrift); color: var(--holz); line-height: 1.1;
+  background: none; border: 0; border-radius: calc(var(--px) * 2.4);
+}
+.hs-k + .hs-k { border-left: calc(var(--px) * 0.5) solid #c89a5a; border-radius: calc(var(--px) * 2.4); }
+.hs-k:active { transform: scale(0.95); background: #fff3c4; }
+.modus-k.aktiv { background: #fffaf0; color: var(--rot2); box-shadow: 0 calc(var(--px) * 0.6) 0 #c89a5a; }
+
+/* Überschriften in Listen: eine Art, auch bei „Tagesaufträge" */
+.gruppe, .aufgaben-titel {
+  font-weight: bold; font-size: calc(var(--px) * 4.6); letter-spacing: 0.08em; text-transform: uppercase;
+  color: #8a5a30; opacity: 1;
+  margin: calc(var(--px) * 4) 0 calc(var(--px) * 1.5); padding-bottom: calc(var(--px) * 1);
+  border-bottom: calc(var(--px) * 0.5) solid #e0c898;
+}
+.gruppe.haus-abschnitt { border-bottom: 0; padding-bottom: calc(var(--px) * 2); font-size: calc(var(--px) * 4.6); }
+
+/* Kleingedrucktes nicht unter 4,4 */
+.album-karte b { font-size: calc(var(--px) * 4.4); }
+.album-karte small { font-size: calc(var(--px) * 4.2); }
+.vw { font-size: calc(var(--px) * 4.4); }
+.vw small { font-size: calc(var(--px) * 4.2); }
+.pw { font-size: calc(var(--px) * 4.4); }
+.haus-zusatz, .haus-quelle { font-size: calc(var(--px) * 4.4); }
+
+/* Knöpfe in Zeilen: gleiche Breite und Schrift */
+.auftrag .k, .bitte-zettel .k, .knopfplatz .k { min-width: calc(var(--px) * 40); font-size: calc(var(--px) * 5); }
+
+/* Schließen- und Kartenknöpfe: eine Größe wie im Blatt (15) */
+#kartenZu, #kartenText, #miniZu {
+  width: calc(var(--px) * 15); height: calc(var(--px) * 15); border-radius: calc(var(--px) * 2);
+  background: var(--holz); box-shadow: none;
+}
+#kartenZu, #miniZu { font-size: calc(var(--px) * 7); }
+#kartenText { font-size: calc(var(--px) * 5.6); }
+
+/* Menü: Knöpfe in zwei gleich breiten Spalten, kein Umbruch je nach Wortlaut */
+#blatt[data-art="menue"] .schalter { display: grid; grid-template-columns: 1fr 1fr; }
+#blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 15); padding: calc(var(--px) * 2); font-size: calc(var(--px) * 5); line-height: 1.15; }
+#blatt[data-art="menue"] .schalter .k:last-child:nth-child(odd) { grid-column: 1 / -1; }
+#blatt[data-art="menue"] .neustart .k { width: 100%; }

@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610181510';
-import * as S from './spiel.js?v=202610181510';
-import * as Z from './zeit.js?v=202610181510';
-import * as T from './ton.js?v=202610181510';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610181510';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610181510';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610181510';
-import * as A from './auftraege.js?v=202610181510';
-import * as E from './erfolge.js?v=202610181510';
-import * as ZL from './ziele.js?v=202610181510';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610181510';
-import * as KA from './karte.js?v=202610181510';
-import { zeigeRueckblick } from './ereignis.js?v=202610181510';
-import { barbaraZweig } from './szene.js?v=202610181510';
-import * as SW from './schneeball.js?v=202610181510';
-import * as LI from './lichtung.js?v=202610181510';
-import * as CB from './christbaum.js?v=202610181510';
-import * as SB from './schlitten.js?v=202610181510';
-import * as EB from './schlittschuh.js?v=202610181510';
-import * as BS from './backstube.js?v=202610181510';
-import { alleSymbole } from './symbole.js?v=202610181510';
+import * as C from './config.js?v=202610181710';
+import * as S from './spiel.js?v=202610181710';
+import * as Z from './zeit.js?v=202610181710';
+import * as T from './ton.js?v=202610181710';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610181710';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum } from './szene.js?v=202610181710';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610181710';
+import * as A from './auftraege.js?v=202610181710';
+import * as E from './erfolge.js?v=202610181710';
+import * as ZL from './ziele.js?v=202610181710';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610181710';
+import * as KA from './karte.js?v=202610181710';
+import { zeigeRueckblick } from './ereignis.js?v=202610181710';
+import { barbaraZweig } from './szene.js?v=202610181710';
+import * as SW from './schneeball.js?v=202610181710';
+import * as LI from './lichtung.js?v=202610181710';
+import * as CB from './christbaum.js?v=202610181710';
+import * as SB from './schlitten.js?v=202610181710';
+import * as EB from './schlittschuh.js?v=202610181710';
+import * as BS from './backstube.js?v=202610181710';
+import { alleSymbole } from './symbole.js?v=202610181710';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1541,18 +1541,8 @@ function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
 }
 /** Vogel auf 28 x 28: klein malen, zweimal per Scale2x vergrößern - Pixel bleiben Spielpixel. */
 function maleVogel(ctx, id) {
-  // Der Waldkauz ist doppelt so groß wie die anderen: nur zweifach, mittig
-  if (id === 'waldkauz') {
-    const k = document.createElement('canvas'); k.width = 9; k.height = 10;
-    zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 4, 8, id);
-    ctx.drawImage(scale2x(k, 9, 10, document.createElement('canvas')), 5, 3);
-    return;
-  }
-  const k = document.createElement('canvas'); k.width = 7; k.height = 7;
-  zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 3, 6, id);   // 17.10.: runde Vögel, dx -3..3, dy -6..0
-  // 18.10.: war mit 28 px zu groß - jetzt dreifach (21 px), mittig in der 28er Fläche
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(k, 0, 0, 7, 7, 3, 4, 21, 21);
+  // 18.10.: eigene Album-Bilder in Spielpixeln (1:1 wie Gäste und Tiere)
+  zeichneVogelAlbum(ctx, id);
 }
 /**
  * Steckbrief eines Vogels (14.10.): beim ersten Besuch am Futterhaus (`neu`,

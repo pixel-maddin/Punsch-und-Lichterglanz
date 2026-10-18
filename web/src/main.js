@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610181510';
-import * as S from './spiel.js?v=202610181510';
-import * as Z from './zeit.js?v=202610181510';
-import * as T from './ton.js?v=202610181510';
-import * as LI from './lichtung.js?v=202610181510';
-import * as CB from './christbaum.js?v=202610181510';
-import * as KA from './karte.js?v=202610181510';
-import * as SB from './schlitten.js?v=202610181510';
-import * as EB from './schlittschuh.js?v=202610181510';
-import * as BS from './backstube.js?v=202610181510';
-import * as UI from './ui.js?v=202610181510';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610181510';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610181510';
-import * as Lernen from './lernen.js?v=202610181510';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610181510';
-import * as A from './auftraege.js?v=202610181510';
-import * as E from './erfolge.js?v=202610181510';
-import * as ZL from './ziele.js?v=202610181510';
+import * as C from './config.js?v=202610181710';
+import * as S from './spiel.js?v=202610181710';
+import * as Z from './zeit.js?v=202610181710';
+import * as T from './ton.js?v=202610181710';
+import * as LI from './lichtung.js?v=202610181710';
+import * as CB from './christbaum.js?v=202610181710';
+import * as KA from './karte.js?v=202610181710';
+import * as SB from './schlitten.js?v=202610181710';
+import * as EB from './schlittschuh.js?v=202610181710';
+import * as BS from './backstube.js?v=202610181710';
+import * as UI from './ui.js?v=202610181710';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610181710';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610181710';
+import * as Lernen from './lernen.js?v=202610181710';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610181710';
+import * as A from './auftraege.js?v=202610181710';
+import * as E from './erfolge.js?v=202610181710';
+import * as ZL from './ziele.js?v=202610181710';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
