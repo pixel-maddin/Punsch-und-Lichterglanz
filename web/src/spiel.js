@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610181300';
-import * as Z from './zeit.js?v=202610181300';
-import { neueFarben } from './pixel.js?v=202610181300';
+import * as C from './config.js?v=202610181510';
+import * as Z from './zeit.js?v=202610181510';
+import { neueFarben } from './pixel.js?v=202610181510';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -288,7 +288,7 @@ export function stimmung() {
   for (const d of C.MARKT_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of [...C.LICHTUNG_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO]) if (st.kalDeko[d.id]) s += d.stimmung;
   s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
-  s += schneemannHerzen();
+  s += schneemannHerzen() + schneekatzeHerzen();
   return s;
 }
 
@@ -1909,7 +1909,7 @@ export function rueckblick() {
     getraenke: C.PRODUKTE.filter((p) => hat(p.id)).length,
     rekorde: Object.keys(C.MINISPIELE).filter((n) => miniRekord(n) > 0).length,
     blueten: st.barbara ? barbaraBlueten(st.barbara) : 0,
-    voegel: Object.keys(st.voegel || {}).length, schneemann: schneemannStufe(),
+    voegel: Object.keys(st.voegel || {}).length, schneemann: schneemannStufe(), schneekatze: schneekatzeStufe(),
     wettbewerb: st.wettbewerb && st.wettbewerb.saison === Z.saison() ? st.wettbewerb.platz : null,
   };
 }
@@ -2109,7 +2109,7 @@ function schneemannHerzen() {
   return s * C.SCHNEEMANN_HERZ + (s >= C.SCHNEEMANN_STUFEN ? C.SCHNEEMANN_FERTIG : 0);
 }
 /** Kann man heute weiterbauen? (Funkeln am Schneehaufen) */
-export const schneemannBereit = () => Z.schnee() > 0 && st.lernen >= 99 && schneemannStufe() < C.SCHNEEMANN_STUFEN
+export const schneemannBereit = () => Z.schnee() > 0 && schneemannStufe() < C.SCHNEEMANN_STUFEN
   && (!st.schneemann || st.schneemann.tag !== Z.tagesSchluessel());
 /** 'gebaut' | 'fertig' (gerade fertig geworden) | 'morgen' | 'kein' (kein Schnee) | 'ist' (schon fertig) */
 export function baueSchneemann() {
@@ -2118,6 +2118,25 @@ export function baueSchneemann() {
   if (s >= C.SCHNEEMANN_STUFEN) return 'ist';
   if (st.schneemann && st.schneemann.tag === Z.tagesSchluessel()) return 'morgen';
   st.schneemann = { stufe: s + 1, tag: Z.tagesSchluessel() };
+  speichere();
+  return s + 1 >= C.SCHNEEMANN_STUFEN ? 'fertig' : 'gebaut';
+}
+
+// Die Schneekatze auf dem Dach (18.10.): gleiche Regeln wie der Schneemann, eigener Stand
+export function schneekatzeStufe() { return (st.schneekatze && st.schneekatze.stufe) || 0; }
+function schneekatzeHerzen() {
+  const s = schneekatzeStufe();
+  return s * C.SCHNEEMANN_HERZ + (s >= C.SCHNEEMANN_STUFEN ? C.SCHNEEMANN_FERTIG : 0);
+}
+export const schneekatzeBereit = () => Z.schnee() > 0 && schneekatzeStufe() < C.SCHNEEMANN_STUFEN
+  && (!st.schneekatze || st.schneekatze.tag !== Z.tagesSchluessel());
+/** Wie baueSchneemann: 'gebaut' | 'fertig' | 'morgen' | 'kein' | 'ist' */
+export function baueSchneekatze() {
+  if (Z.schnee() <= 0) return 'kein';
+  const s = schneekatzeStufe();
+  if (s >= C.SCHNEEMANN_STUFEN) return 'ist';
+  if (st.schneekatze && st.schneekatze.tag === Z.tagesSchluessel()) return 'morgen';
+  st.schneekatze = { stufe: s + 1, tag: Z.tagesSchluessel() };
   speichere();
   return s + 1 >= C.SCHNEEMANN_STUFEN ? 'fertig' : 'gebaut';
 }

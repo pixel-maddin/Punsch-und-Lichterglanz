@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181300';
-import * as Z from './zeit.js?v=202610181300';
-import * as S from './spiel.js?v=202610181300';
-import { FASSADEN } from './config.js?v=202610181300';
-import * as C from './config.js?v=202610181300';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610181510';
+import * as Z from './zeit.js?v=202610181510';
+import * as S from './spiel.js?v=202610181510';
+import { FASSADEN } from './config.js?v=202610181510';
+import * as C from './config.js?v=202610181510';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -558,6 +558,7 @@ function haus(c, G, w, t, L) {
   if (S.zeigt('auf_engel')) engel(c, L, 60, wandO - 28, t);
   if (S.zeigt('h_hahn')) wetterhahn(c, 52, wandO - 28, t);
   if (S.zeigt('l_eich')) dachEichhorn(c, 41, wandO - 10, t);
+  if (w.schnee > 0) schneekatze(c, KATZE_X, wandO + KATZE_DY, S.schneekatzeStufe(), S.schneekatzeBereit(), t);
   if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershow(c, L, wandO, wandU, t);
 }
 
@@ -1978,7 +1979,7 @@ function saenger(c, L, fuss, t) {
  */
 function vorDenLeuten(c, L, G, GW, t, w, opts) {
   if (S.zeigt('g_vorrat')) schneeballVorrat(c, 12, GW - 1);
-  if (Z.schnee() > 0 && S.st.lernen >= 99) eigenerSchneemann(c, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
+  if (Z.schnee() > 0) eigenerSchneemann(c, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
   if (S.zeigt('m_kutsche') && !opts.karte) kutsche(c, L, G, t, w);
   if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(c, GW, t, w);
 }
@@ -2575,7 +2576,7 @@ function kugel(c, x, y, rad, f = '#f6f9fc', s = '#cfd9e8') {
 }
 function eigenerSchneemann(c, x, fuss, stufe, bereit, t) {
   // Schneehaufen, aus dem er entsteht
-  if (stufe < 2) { r(c, x - 5, fuss - 1, 11, 1, '#dfe8f2'); r(c, x - 4, fuss - 2, 9, 1, '#eef4fa'); r(c, x - 2, fuss - 3, 5, 1, '#f6f9fc'); }
+  if (stufe < 2) haufen(c, x, fuss);
   if (stufe === 1) kugel(c, x + 3, fuss - 2, 2);
   const bauchY = fuss - 4, mitteY = fuss - 10, kopfY = fuss - 14;
   if (stufe >= 2) kugel(c, x, bauchY, 4);
@@ -2596,12 +2597,43 @@ function eigenerSchneemann(c, x, fuss, stufe, bereit, t) {
     r(c, x - 7, fuss - 13, 1, 12, '#8a5a2e'); for (let i = 0; i < 4; i++) r(c, x - 9 + i, fuss - 15 - (i % 2), 1, 3, '#c8a050');   // Besen
   }
   // Heute kann man weiterbauen: es funkelt über dem Haufen
-  if (bereit) {
-    const k = Math.floor(t * 3) % 4, sy = fuss - 6 - (stufe >= 2 ? stufe * 2 : 0);
-    const f = '#ffffff';
-    if (k < 3) { p(c, x + 4, sy, f); p(c, x + 3, sy, k === 1 ? f : '#cfe6ff'); p(c, x + 5, sy, k === 1 ? f : '#cfe6ff'); p(c, x + 4, sy - 1, '#cfe6ff'); p(c, x + 4, sy + 1, '#cfe6ff'); }
-    if (k === 2) p(c, x - 4, sy + 3, f);
+  if (bereit) funkelnBauen(c, x, fuss - 6 - (stufe >= 2 ? stufe * 2 : 0), t);
+}
+/** Schneehaufen mit blauem Rand - weiß auf weißem Schnee war er nicht zu sehen (gemeldet 18.10.). */
+function haufen(c, x, fuss) {
+  const rand = '#9fb3cf';
+  r(c, x - 7, fuss, 15, 1, rand);
+  r(c, x - 6, fuss - 1, 13, 1, '#cfd9e8'); r(c, x - 5, fuss - 2, 11, 1, '#eef4fa'); r(c, x - 4, fuss - 3, 9, 1, '#f6f9fc'); r(c, x - 2, fuss - 4, 5, 1, '#f6f9fc');
+  r(c, x - 2, fuss - 5, 5, 1, rand);
+  for (const [dx, dy] of [[3, 4], [5, 3], [6, 2], [7, 1]]) { p(c, x - dx, fuss - dy, rand); p(c, x + dx, fuss - dy, rand); }
+}
+/** Goldenes Funkeln: hier kann man heute weiterbauen. */
+function funkelnBauen(c, x, sy, t) {
+  const k = Math.floor(t * 3) % 4, g = '#ffe27a', w = '#fffbe0';
+  if (k < 3) { p(c, x + 4, sy, w); p(c, x + 3, sy, k === 1 ? w : g); p(c, x + 5, sy, k === 1 ? w : g); p(c, x + 4, sy - 1, g); p(c, x + 4, sy + 1, g); }
+  if (k === 2) p(c, x - 4, sy + 3, w);
+}
+
+// ---------------------------------------------------------------------------
+// Die eigene Schneekatze auf dem Dach (18.10.): wie der Schneemann, eine Stufe am Tag
+// ---------------------------------------------------------------------------
+// Sitzt links auf der Dachfläche zwischen Eichhörnchen (x 41) und Gaube (ab x 69).
+export const KATZE_X = 58, KATZE_DY = -3;   // Fuß = wandO + KATZE_DY
+function schneekatze(c, x, fuss, stufe, bereit, t) {
+  const rand = '#9fb3cf';
+  if (stufe < 2) haufen(c, x, fuss);
+  if (stufe === 1) kugel(c, x + 3, fuss - 2, 2);
+  if (stufe >= 2) kugel(c, x, fuss - 3, 3);        // Körper
+  if (stufe >= 3) kugel(c, x, fuss - 8, 2);        // Kopf
+  if (stufe >= 4) { for (const ex of [-2, 2]) { p(c, x + ex, fuss - 11, '#f6f9fc'); p(c, x + ex, fuss - 12, '#f6f9fc'); p(c, x + ex, fuss - 11, '#f0a0b0'); } }   // Ohren
+  if (stufe >= 5) {
+    p(c, x - 1, fuss - 9, '#1a1a22'); p(c, x + 1, fuss - 9, '#1a1a22'); p(c, x, fuss - 8, '#f08aa0');   // Augen, Nase
+    p(c, x - 3, fuss - 8, rand); p(c, x + 3, fuss - 8, rand);                                         // Schnurrhaare
   }
+  if (stufe >= 6) { p(c, x + 4, fuss - 1, '#f6f9fc'); p(c, x + 5, fuss - 1, '#f6f9fc'); p(c, x + 5, fuss - 2, '#f6f9fc'); p(c, x + 5, fuss - 3, '#f6f9fc'); p(c, x + 4, fuss - 4, '#f6f9fc'); }   // Schwanz
+  if (stufe >= 7) { r(c, x - 2, fuss - 6, 5, 1, '#c83a3a'); p(c, x + 2, fuss - 5, '#c83a3a'); p(c, x, fuss - 5, '#e8c030'); }   // Schal mit Glöckchen
+  if (stufe >= 2) { r(c, x - 3, fuss, 7, 1, rand); }   // Standlinie
+  if (bereit) funkelnBauen(c, x + 3, fuss - 8 - (stufe >= 2 ? stufe : 0), t);
 }
 
 // ---------------------------------------------------------------------------

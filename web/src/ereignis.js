@@ -4,14 +4,14 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610181300';
-import * as S from './spiel.js?v=202610181300';
-import * as T from './ton.js?v=202610181300';
-import * as Z from './zeit.js?v=202610181300';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610181300';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610181300';
-import { schriftBild } from './schrift.js?v=202610181300';
-import { fenster, karte } from './ui.js?v=202610181300';
+import * as C from './config.js?v=202610181510';
+import * as S from './spiel.js?v=202610181510';
+import * as T from './ton.js?v=202610181510';
+import * as Z from './zeit.js?v=202610181510';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610181510';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610181510';
+import { schriftBild } from './schrift.js?v=202610181510';
+import { fenster, karte } from './ui.js?v=202610181510';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -305,6 +305,7 @@ export function zeigeRueckblick(danach) {
   if (r0.wettbewerb != null) zeilen.push(['Schönstes Haus im Dorf', C.WETTBEWERB.plaetze[r0.wettbewerb] ? `${C.WETTBEWERB.plaetze[r0.wettbewerb].name} (${r0.wettbewerb + 1}. Platz)` : 'Urkunde']);
   if (r0.voegel) zeilen.push(['Vogelarten am Futterhaus', `${z(r0.voegel)} von ${C.VOEGEL.length}`]);
   if (r0.schneemann) zeilen.push(['Eigener Schneemann', r0.schneemann >= C.SCHNEEMANN_STUFEN ? 'fertig gebaut' : `${r0.schneemann} von ${C.SCHNEEMANN_STUFEN} Stufen`]);
+  if (r0.schneekatze) zeilen.push(['Schneekatze auf dem Dach', r0.schneekatze >= C.SCHNEEMANN_STUFEN ? 'fertig gebaut' : `${r0.schneekatze} von ${C.SCHNEEMANN_STUFEN} Stufen`]);
   fenster(`Der Advent von ${S.st.name || 'deinem Haus'}`, `
     <div class="statistik rueckblick">${zeilen.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join('')}</div>
     <p class="klein">Danke fürs Mitfeiern - frohe Weihnachten!</p>`,
@@ -368,7 +369,7 @@ export function zeigeErsterSchnee(danach) {
       <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
       <p class="zeile-gross">Über Nacht ist alles weiß geworden.</p>
       <p>Im Weihnachtsladen gibt es jetzt Schneemänner, und auf dem Weiher glänzt das Eis.</p>
-      <p class="bonus">Auf dem Gehweg vor deinem Haus liegt ein Schneehaufen: Tipp ihn jeden Tag einmal an, dann wächst dein eigener Schneemann.</p>`,
+      <p class="bonus">Auf dem Gehweg und auf dem Dach liegt jetzt je ein Schneehaufen. Tipp sie jeden Tag einmal an - mal sehen, was daraus wird!</p>`,
     [{ text: 'Wie schön!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
     BILDER.schnee(bildKontext(box));
   }, 3600);

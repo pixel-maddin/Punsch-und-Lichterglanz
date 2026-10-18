@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610181300';
-import * as S from './spiel.js?v=202610181300';
-import * as Z from './zeit.js?v=202610181300';
-import * as T from './ton.js?v=202610181300';
-import * as LI from './lichtung.js?v=202610181300';
-import * as CB from './christbaum.js?v=202610181300';
-import * as KA from './karte.js?v=202610181300';
-import * as SB from './schlitten.js?v=202610181300';
-import * as EB from './schlittschuh.js?v=202610181300';
-import * as BS from './backstube.js?v=202610181300';
-import * as UI from './ui.js?v=202610181300';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X } from './szene.js?v=202610181300';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610181300';
-import * as Lernen from './lernen.js?v=202610181300';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610181300';
-import * as A from './auftraege.js?v=202610181300';
-import * as E from './erfolge.js?v=202610181300';
-import * as ZL from './ziele.js?v=202610181300';
+import * as C from './config.js?v=202610181510';
+import * as S from './spiel.js?v=202610181510';
+import * as Z from './zeit.js?v=202610181510';
+import * as T from './ton.js?v=202610181510';
+import * as LI from './lichtung.js?v=202610181510';
+import * as CB from './christbaum.js?v=202610181510';
+import * as KA from './karte.js?v=202610181510';
+import * as SB from './schlitten.js?v=202610181510';
+import * as EB from './schlittschuh.js?v=202610181510';
+import * as BS from './backstube.js?v=202610181510';
+import * as UI from './ui.js?v=202610181510';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610181510';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610181510';
+import * as Lernen from './lernen.js?v=202610181510';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610181510';
+import * as A from './auftraege.js?v=202610181510';
+import * as E from './erfolge.js?v=202610181510';
+import * as ZL from './ziele.js?v=202610181510';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -128,7 +128,7 @@ cv.addEventListener('pointerdown', (e) => {
       return;
     }
     // Der eigene Schneemann auf dem Gehweg (11.10.)
-    if (Z.schnee() > 0 && S.st.lernen >= 99 && x >= SCHNEEMANN_X - 9 && x <= SCHNEEMANN_X + 9 && y >= GW - 24 && y <= GW + 2) {
+    if (Z.schnee() > 0 && x >= SCHNEEMANN_X - 9 && x <= SCHNEEMANN_X + 9 && y >= GW - 24 && y <= GW + 2) {
       const r0 = S.baueSchneemann();
       S.lauf.klicks.push({ x, y, t: 0 });
       if (r0 === 'gebaut' || r0 === 'fertig') T.spiele('schnee'); else T.spiele('klick');
@@ -137,6 +137,18 @@ cv.addEventListener('pointerdown', (e) => {
       else if (r0 === 'gebaut') UI.toast(`${STUFE[S.schneemannStufe()]} Morgen geht es weiter. (♥ +${C.SCHNEEMANN_HERZ})`, 'gut');
       else if (r0 === 'morgen') UI.toast('Für heute ist genug gebaut - morgen geht es weiter.', 'hinweis');
       else if (r0 === 'ist') UI.toast('Dein Schneemann ist fertig.', 'hinweis');
+      return;
+    }
+    // Die Schneekatze auf dem Dach (18.10.)
+    if (Z.schnee() > 0 && x >= KATZE_X - 9 && x <= KATZE_X + 9 && y >= GW - 78 && y <= GW - 56) {
+      const r0 = S.baueSchneekatze();
+      S.lauf.klicks.push({ x, y, t: 0 });
+      if (r0 === 'gebaut' || r0 === 'fertig') T.spiele('schnee'); else T.spiele('klick');
+      const STUFE = ['', 'Ein kleiner Schneeball.', 'Ein runder Körper!', 'Ein Köpfchen sitzt obendrauf.', 'Zwei spitze Ohren.', 'Augen, Näschen und Schnurrhaare.', 'Und ein Schwänzchen!', ''];
+      if (r0 === 'fertig') { T.spiele('spezial'); UI.toast('Deine Schneekatze ist fertig - mit Schal und Glöckchen! ♥ +' + (C.SCHNEEMANN_HERZ + C.SCHNEEMANN_FERTIG), 'neu'); }
+      else if (r0 === 'gebaut') UI.toast(`${STUFE[S.schneekatzeStufe()]} Morgen geht es weiter. (♥ +${C.SCHNEEMANN_HERZ})`, 'gut');
+      else if (r0 === 'morgen') UI.toast('Für heute ist genug gebaut - morgen geht es weiter.', 'hinweis');
+      else if (r0 === 'ist') UI.toast('Deine Schneekatze ist fertig.', 'hinweis');
       return;
     }
     // Der Briefkasten neben der Tür (Wunschzettel, 10.10.)
@@ -363,7 +375,7 @@ setInterval(() => {
   // Wer den ersten Schnee schon vor dem 11.10. gesehen hat, kennt den Schneehaufen nicht
   if (Z.schnee() > 0 && S.startzieleFertig() && !S.st.schneemannHinweis && S.lauf.t > 30 && !UI.fensterOffen()) {
     S.st.schneemannHinweis = true;
-    UI.toast('Neu: Auf dem Gehweg liegt ein Schneehaufen - tipp ihn jeden Tag an, dann wächst dein Schneemann!', 'spezial');
+    UI.toast('Neu: Auf dem Gehweg und auf dem Dach liegt je ein Schneehaufen - tipp sie jeden Tag an, mal sehen, was daraus wird!', 'spezial');
   }
   if (S.neujahrJetzt()) { T.spiele('feuerwerk'); UI.toast(`Frohes neues Jahr ${Z.jetzt().getFullYear()}!`, 'spezial'); }
   const ziel = ZL.pruefe();
