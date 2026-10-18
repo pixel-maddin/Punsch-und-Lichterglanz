@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610181100';
-import * as S from './spiel.js?v=202610181100';
-import * as Z from './zeit.js?v=202610181100';
-import * as T from './ton.js?v=202610181100';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610181100';
-import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610181100';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610181100';
-import * as A from './auftraege.js?v=202610181100';
-import * as E from './erfolge.js?v=202610181100';
-import * as ZL from './ziele.js?v=202610181100';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610181100';
-import * as KA from './karte.js?v=202610181100';
-import { zeigeRueckblick } from './ereignis.js?v=202610181100';
-import { barbaraZweig } from './szene.js?v=202610181100';
-import * as SW from './schneeball.js?v=202610181100';
-import * as LI from './lichtung.js?v=202610181100';
-import * as CB from './christbaum.js?v=202610181100';
-import * as SB from './schlitten.js?v=202610181100';
-import * as EB from './schlittschuh.js?v=202610181100';
-import * as BS from './backstube.js?v=202610181100';
-import { alleSymbole } from './symbole.js?v=202610181100';
+import * as C from './config.js?v=202610181300';
+import * as S from './spiel.js?v=202610181300';
+import * as Z from './zeit.js?v=202610181300';
+import * as T from './ton.js?v=202610181300';
+import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610181300';
+import { zeichneWelt, ortVon, funkeln, zeichneVogel } from './szene.js?v=202610181300';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610181300';
+import * as A from './auftraege.js?v=202610181300';
+import * as E from './erfolge.js?v=202610181300';
+import * as ZL from './ziele.js?v=202610181300';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610181300';
+import * as KA from './karte.js?v=202610181300';
+import { zeigeRueckblick } from './ereignis.js?v=202610181300';
+import { barbaraZweig } from './szene.js?v=202610181300';
+import * as SW from './schneeball.js?v=202610181300';
+import * as LI from './lichtung.js?v=202610181300';
+import * as CB from './christbaum.js?v=202610181300';
+import * as SB from './schlitten.js?v=202610181300';
+import * as EB from './schlittschuh.js?v=202610181300';
+import * as BS from './backstube.js?v=202610181300';
+import { alleSymbole } from './symbole.js?v=202610181300';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1550,8 +1550,9 @@ function maleVogel(ctx, id) {
   }
   const k = document.createElement('canvas'); k.width = 7; k.height = 7;
   zeichneVogel(k.getContext('2d', { willReadFrequently: true }), 3, 6, id);   // 17.10.: runde Vögel, dx -3..3, dy -6..0
-  const x2 = scale2x(k, 7, 7, document.createElement('canvas'));
-  ctx.drawImage(scale2x(x2, 14, 14, document.createElement('canvas')), 0, 0);
+  // 18.10.: war mit 28 px zu groß - jetzt dreifach (21 px), mittig in der 28er Fläche
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(k, 0, 0, 7, 7, 3, 4, 21, 21);
 }
 /**
  * Steckbrief eines Vogels (14.10.): beim ersten Besuch am Futterhaus (`neu`,

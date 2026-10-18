@@ -13,12 +13,12 @@
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
  */
-import * as C from './config.js?v=202610181100';
-import * as Z from './zeit.js?v=202610181100';
-import * as T from './ton.js?v=202610181100';
-import * as MH from './minihud.js?v=202610181100';
-import * as L from './licht.js?v=202610181100';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610181100';
+import * as C from './config.js?v=202610181300';
+import * as Z from './zeit.js?v=202610181300';
+import * as T from './ton.js?v=202610181300';
+import * as MH from './minihud.js?v=202610181300';
+import * as L from './licht.js?v=202610181300';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610181300';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -453,7 +453,10 @@ function zeichne(t) {
   for (let i = 0; i < 8; i++) r(c, m.x - 10 + i, m.y - 16 + i, 20 - i * 2, 1, i % 2 ? '#c83a32' : '#e84a3a');
   r(c, m.x - 6, m.y - 8, 12, 6, '#a82a24'); r(c, m.x - 3, m.y - 6, 6, 3, '#2a2a30');
   r(c, m.x - 5, m.y - 19, 10, 3, '#f4f0e8'); r(c, m.x - 5, m.y - 19, 10, 1, '#ffffff');
-  MH.label('netz', m.x, m.y + 9, 'NETZ', 'schild');
+  // Das Schild ist DOM und läge über dem Auto, das davor wegfährt (gemeldet 18.10.):
+  // solange ein Auto die Maschine überdeckt, bleibt es weg
+  const ca = g.auto;
+  MH.label('netz', m.x, m.y + 9, ca && Math.abs(ca.x - m.x) < 34 ? null : 'NETZ', 'schild');
   // Die Ware
   const w = g.ware;
   if (w) {

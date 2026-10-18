@@ -199,7 +199,7 @@ export const GAESTE = {
   sophia: { geduld: 18, tempo: 32, spezial: true, stamm: true, mult: 2, name: 'Postbotin Sophia', wunsch: ['gluehwein', 'schoko'],
     farben: { mantel: '#2a4a8a', schal: '#f0c020', haut: '#f0c4a0', haar: '#8a4a22', hut: '#f0c020' } },
   karl:  { geduld: 24, tempo: 22, spezial: true, stamm: true, mult: 2, name: 'Karl', wunsch: ['gluehwein', 'lebkuchen'],
-    farben: { mantel: '#3e6a3e', schal: '#b84a3a', haut: '#e8b090', haar: '#6a5a50', hut: '#6a5a4a' } },
+    farben: { mantel: '#26262e', schal: '#d02a2a', haut: '#e8b090', haar: '#6a5a50', hut: '#6a5a4a' } },   // 18.10.: schwarzes T-Shirt, roter Schal, blaue Hose (pixel.js) - vorher grüne Jacke, "wie ein Offizier"
   lena:  { geduld: 20, tempo: 36, spezial: true, stamm: true, mult: 2, name: 'Lena', wunsch: ['kinderpunsch', 'schoko'], ohneAlk: true,
     farben: { mantel: '#3a8ac8', schal: '#f4f4f4', haut: '#f6d2b0', haar: '#c8862a', hut: '#d82a2a' } },
   franz: { geduld: 26, tempo: 24, spezial: true, stamm: true, mult: 2, name: 'Förster Franz', wunsch: ['jaegertee', 'gluehwein'],

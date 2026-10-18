@@ -370,8 +370,10 @@ export function figurKlein(c, g, x, y, t) {
       r(c, x - 3, y - 13, 1, 4, g.farben.haar); p(c, x - 3, y - 9, '#f0c020');   // Zopf mit Gummi
     } else if (g.typ === 'karl') {
       r(c, x + 3, y - 9, 1, 6, g.farben.mantel);                            // etwas kräftiger
-      p(c, x - 1, y - 9, '#b84a3a'); p(c, x + 1, y - 8, '#e8d8c8'); p(c, x - 1, y - 7, '#e8d8c8');   // kariertes Hemd
-      p(c, x, y - 7, '#e8c030'); p(c, x, y - 5, '#e8c030');               // Knöpfe der Strickjacke
+      // Blaue Hose (Beine und unterer Rumpf), roter Schal hängt vorn herab
+      r(c, x - 3, y - 5, 6, 2, '#2a58b0');
+      for (const [bx, hoch] of [[x - 2, schritt], [x + 1, 1 - schritt]]) r(c, bx, y - 3 + hoch, 1, Math.max(0, 2 - hoch), '#2a58b0');
+      p(c, x - 3, y - 9, g.farben.schal); p(c, x - 3, y - 8, g.farben.schal);
       p(c, x - 2, y - 13, '#a8a8a8');                                        // graue Schläfe
       r(c, x - 3, y - 17, 6, 3, '#8a8478'); r(c, x + 1, y - 15, 3, 1, '#5e5a52'); p(c, x - 2, y - 16, '#a8a296');   // graue Schiebermütze
     } else if (g.typ === 'lena') {
@@ -529,9 +531,8 @@ export function figurGross(c, g, cx, basis, t, laune) {
       r(c, cx - 8, ko + 3, 2, 12, g.farben.haar); r(c, cx - 8, ko + 15, 2, 1, '#f0c020'); r(c, cx - 8, ko + 16, 2, 3, g.farben.haar);   // langer Zopf
     } else if (g.typ === 'karl') {
       const ko = b - 29;
-      // Strickjacke offen über kariertem Hemd, Knöpfe; graue Schläfen
-      for (let y = b - 16; y < b; y++) for (let x = cx - 3; x < cx + 3; x++) p(c, x, y, (x + y) % 3 === 0 ? '#e8d8c8' : (x + (y >> 1)) % 2 ? '#b84a3a' : '#8a2a22');
-      for (let i = 0; i < 3; i++) p(c, cx + 4, b - 13 + i * 4, '#e8c030');
+      // Schwarzes T-Shirt (Grundfigur), blaue Hose unten mit Naht, roter Schal; graue Schläfen
+      r(c, cx - 10, b - 6, 20, 6, '#2a58b0'); r(c, cx - 10, b - 6, 2, 6, '#1e4288'); r(c, cx, b - 6, 1, 6, '#1e4288'); r(c, cx - 10, b - 6, 20, 1, '#3a6cc8');
       r(c, cx - 7, ko + 3, 1, 3, '#b0aca8'); r(c, cx + 6, ko + 3, 1, 3, '#b0aca8');
       r(c, cx - 6, ko - 3, 12, 4, '#8a8478'); r(c, cx - 7, ko + 1, 10, 1, '#8a8478'); r(c, cx + 2, ko + 1, 7, 2, '#5e5a52'); r(c, cx - 4, ko - 2, 4, 1, '#a8a296');   // graue Schiebermütze
       r(c, cx - 11, b - 15, 1, 15, ton(g.farben.mantel, -0.2)); r(c, cx + 10, b - 15, 1, 15, ton(g.farben.mantel, -0.2));   // breiter
