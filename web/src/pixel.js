@@ -256,6 +256,8 @@ export function iconGross(c, id, x, y, t = 0, roh = false) {
   r(c, x + 2, y + 7, 1, 12, ton(f, -0.28)); r(c, x + 3, y + 7, 1, 12, ton(f, -0.1));
   r(c, x + 12, y + 8, 1, 9, ton(f, 0.18)); r(c, x + 10, y + 8, 1, 7, ton(f, 0.4)); p(c, x + 10, y + 16, ton(f, 0.25));
   r(c, x + 3, y + 18, 10, 1, ton(f, -0.22)); r(c, x + 3, y + 19, 10, 1, ton(f, -0.4));
+  // Boden unten abgerundet (19.10.): Die Ecken standen in heller Becherfarbe da - sah aus wie ein Fehler
+  c.clearRect(x + 2, y + 19, 1, 1); c.clearRect(x + 13, y + 19, 1, 1); p(c, x + 13, y + 18, ton(f, -0.3));
   r(c, x + 2, y + 6, 12, 1, ton(f, 0.45)); r(c, x + 3, y + 7, 10, 1, innen); r(c, x + 4, y + 7, 3, 1, ton(innen, 0.25));   // Rand, Oberfläche
   // Henkel
   r(c, x + 14, y + 9, 3, 2, f); r(c, x + 16, y + 11, 2, 4, f); r(c, x + 14, y + 15, 3, 2, f);

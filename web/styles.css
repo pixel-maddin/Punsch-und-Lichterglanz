@@ -1124,3 +1124,6 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .kachel.frei .k-name { color: #9aaad8; margin-top: calc(var(--px) * 6); }
 .kachel.frei .k-preis { color: #9aaad8; font-size: var(--t-titel); }
 .kachel.frei .k-balken { display: none; }
+/* Name und Preis etwas tiefer und mit mehr Luft dazwischen (19.10.) */
+.k-name { margin-top: calc(var(--px) * 3.2); }
+.k-preis { margin-top: calc(var(--px) * 2.6); }
