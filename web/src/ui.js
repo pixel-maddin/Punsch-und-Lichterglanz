@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610191400';
-import * as S from './spiel.js?v=202610191400';
-import * as Z from './zeit.js?v=202610191400';
-import * as T from './ton.js?v=202610191400';
-import { icon, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610191400';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610191400';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610191400';
-import * as A from './auftraege.js?v=202610191400';
-import * as E from './erfolge.js?v=202610191400';
-import * as ZL from './ziele.js?v=202610191400';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610191400';
-import * as KA from './karte.js?v=202610191400';
-import { zeigeRueckblick } from './ereignis.js?v=202610191400';
-import { barbaraZweig } from './szene.js?v=202610191400';
-import * as SW from './schneeball.js?v=202610191400';
-import * as LI from './lichtung.js?v=202610191400';
-import * as CB from './christbaum.js?v=202610191400';
-import * as SB from './schlitten.js?v=202610191400';
-import * as EB from './schlittschuh.js?v=202610191400';
-import * as BS from './backstube.js?v=202610191400';
-import { alleSymbole } from './symbole.js?v=202610191400';
+import * as C from './config.js?v=202610191510';
+import * as S from './spiel.js?v=202610191510';
+import * as Z from './zeit.js?v=202610191510';
+import * as T from './ton.js?v=202610191510';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610191510';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610191510';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610191510';
+import * as A from './auftraege.js?v=202610191510';
+import * as E from './erfolge.js?v=202610191510';
+import * as ZL from './ziele.js?v=202610191510';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610191510';
+import * as KA from './karte.js?v=202610191510';
+import { zeigeRueckblick } from './ereignis.js?v=202610191510';
+import { barbaraZweig } from './szene.js?v=202610191510';
+import * as SW from './schneeball.js?v=202610191510';
+import * as LI from './lichtung.js?v=202610191510';
+import * as CB from './christbaum.js?v=202610191510';
+import * as SB from './schlitten.js?v=202610191510';
+import * as EB from './schlittschuh.js?v=202610191510';
+import * as BS from './backstube.js?v=202610191510';
+import { alleSymbole } from './symbole.js?v=202610191510';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1542,6 +1542,47 @@ function maleVogel(ctx, id) {
   // 18.10.: eigene Album-Bilder in Spielpixeln (1:1 wie Gäste und Tiere)
   zeichneVogelAlbum(ctx, id);
 }
+/**
+ * Die Karte des Standes (19.10.): Von allem, was man hat, höchstens
+ * C.ANGEBOT_MAX anbieten. Jederzeit umstellbar; das Spiel steht, solange das
+ * Fenster offen ist. Je Zeile Preis je Glas, Zubereitungszeit und Handgriff -
+ * schnelle Sorten bringen weniger, langsame mehr.
+ */
+export function zeigeStandkarte() {
+  S.st.angebotNeu = false;
+  const box = fenster('Deine Karte', '<p class="klein karte-kopf"></p><div class="karte-liste"></div>', [{ text: 'Fertig' }]);
+  const kopf = box.querySelector('.karte-kopf'), liste = box.querySelector('.karte-liste');
+  const nb = ' ';
+  function bauen() {
+    const a = S.angebot();
+    kopf.textContent = `${a.length} von ${C.ANGEBOT_MAX} Plätzen belegt. Gäste wünschen sich nur, was auf der Karte steht.`;
+    liste.innerHTML = '';
+    for (const p0 of S.produkteBesessen()) {
+      const an = a.includes(p0.id);
+      const z = el('div', 'karte-zeile' + (an ? ' an' : ''));
+      const cv = el('canvas', 'karte-ico'); cv.width = 20; cv.height = 20;
+      iconGross(cv.getContext('2d'), p0.id, 0, 0, 0);
+      const preis = Math.round(S.produktPreis(p0) * S.preisFaktor());
+      const teile = [`★${nb}${preis.toLocaleString('de-DE')}${nb}je${nb}Stück`];
+      if (p0.zeit) teile.push(`${String(p0.zeit).replace('.', ',')}${nb}s`);
+      if (p0.griffe) teile.push(p0.griffe.map((g) => C.HANDGRIFF[g].name).join(' + '));
+      const txt = el('div', 'txt', `<b>${p0.name}</b><span>${teile.join(`${nb}· `)}</span>`);
+      const voll = !an && a.length >= C.ANGEBOT_MAX;
+      const k = el('button', 'k' + (an ? ' k--wahl gewaehlt' : voll ? ' k--neben' : ''), an ? '✓ Im Angebot' : voll ? 'Karte voll' : 'Anbieten');
+      if (voll || (an && a.length <= 1)) k.disabled = true;
+      k.onclick = () => {
+        if (!S.setzeAngebot(p0.id, !an)) { T.spiele('falsch'); return; }
+        T.spiele('klick'); bauen();
+      };
+      z.append(cv, txt, k);
+      liste.appendChild(z);
+    }
+    const rest = C.PRODUKTE.length - S.produkteBesessen().length;
+    if (rest > 0) liste.appendChild(el('p', 'klein', `Noch ${rest} weitere Sorten gibt es später im Supermarkt auf der Karte.`));
+  }
+  bauen();
+}
+
 /**
  * Das Futterhaus groß (18.10.): Futterberg in fünf Stufen, Hinweis, wann es leer
  * ist, Nachfüllen - und die Vögel, die gerade da sind. Das Spiel steht, solange

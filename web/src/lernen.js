@@ -23,12 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610191400';
-import * as S from './spiel.js?v=202610191400';
-import * as A from './auftraege.js?v=202610191400';
-import * as E from './erfolge.js?v=202610191400';
-import * as Z from './ziele.js?v=202610191400';
-import * as KA from './karte.js?v=202610191400';
+import * as C from './config.js?v=202610191510';
+import * as S from './spiel.js?v=202610191510';
+import * as A from './auftraege.js?v=202610191510';
+import * as E from './erfolge.js?v=202610191510';
+import * as Z from './ziele.js?v=202610191510';
+import * as KA from './karte.js?v=202610191510';
+import { zellePos } from './tresen.js?v=202610191510';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -76,7 +77,8 @@ tipp.addEventListener('pointerdown', (e) => {
 function gastZiel(platz = 0) { return { x: S.platzX(platz) - 4, y: G + 30 }; }
 const glaeserZiel = () => ({ x: 17, y: G + C.T_GAST + 11 });
 const ausgussZiel = () => ({ x: 165, y: G + C.T_GAST + 11 });
-function zellZiel(i) { return { x: (i % 5) * C.T_ZELLE_B + 18, y: G + C.T_GAST + C.T_BRETT + Math.floor(i / 5) * C.T_ZELLE_H + 13 }; }
+// 19.10.: Kacheln der Karte statt 2 × 5 Töpfe - Lage kommt aus tresen.js (null = nicht auf der Karte)
+function zellZiel(i) { const q = zellePos(i); return q ? { x: q.x, y: G + C.T_GAST + C.T_BRETT + q.y } : null; }
 const ladenZiel = () => ({ x: 18, y: H - 14 });
 const auftragZiel = () => ({ x: 54, y: H - 14 });
 const kalenderZiel = () => ({ x: 90, y: H - 14 });
@@ -110,7 +112,7 @@ function einfuehrung() {
       if (hand('voll', g.wunsch)) { st.lernen = 3; return einfuehrung(); }
       if (hand('voll')) return { text: 'Das ist das falsche Getränk. Tippe auf den AUSGUSS, um es wegzukippen.', ziel: ausgussZiel() };
       if (!hand('glas') && p.art === 'topf') return { text: 'Du brauchst ein Glas - tippe auf die GLÄSER.', ziel: glaeserZiel() };
-      return { text: `Jetzt auf den Topf mit demselben Bild tippen: ${p.name}.`, ziel: zellZiel(C.PRODUKTE.indexOf(p)) };
+      return { text: `Jetzt unten auf das Getränk mit demselben Bild tippen: ${p.name}.`, ziel: zellZiel(C.PRODUKTE.indexOf(p)) };
     }
     case 3:
       if (S.st.stats.bedient >= 1) { st.lernen = 4; hinweisT = 0; return einfuehrung(); }

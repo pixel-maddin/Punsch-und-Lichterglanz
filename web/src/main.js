@@ -4,24 +4,24 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610191400';
-import * as S from './spiel.js?v=202610191400';
-import * as Z from './zeit.js?v=202610191400';
-import * as T from './ton.js?v=202610191400';
-import * as LI from './lichtung.js?v=202610191400';
-import * as CB from './christbaum.js?v=202610191400';
-import * as KA from './karte.js?v=202610191400';
-import * as SB from './schlitten.js?v=202610191400';
-import * as EB from './schlittschuh.js?v=202610191400';
-import * as BS from './backstube.js?v=202610191400';
-import * as UI from './ui.js?v=202610191400';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610191400';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610191400';
-import * as Lernen from './lernen.js?v=202610191400';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610191400';
-import * as A from './auftraege.js?v=202610191400';
-import * as E from './erfolge.js?v=202610191400';
-import * as ZL from './ziele.js?v=202610191400';
+import * as C from './config.js?v=202610191510';
+import * as S from './spiel.js?v=202610191510';
+import * as Z from './zeit.js?v=202610191510';
+import * as T from './ton.js?v=202610191510';
+import * as LI from './lichtung.js?v=202610191510';
+import * as CB from './christbaum.js?v=202610191510';
+import * as KA from './karte.js?v=202610191510';
+import * as SB from './schlitten.js?v=202610191510';
+import * as EB from './schlittschuh.js?v=202610191510';
+import * as BS from './backstube.js?v=202610191510';
+import * as UI from './ui.js?v=202610191510';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610191510';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610191510';
+import * as Lernen from './lernen.js?v=202610191510';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610191510';
+import * as A from './auftraege.js?v=202610191510';
+import * as E from './erfolge.js?v=202610191510';
+import * as ZL from './ziele.js?v=202610191510';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -162,6 +162,7 @@ cv.addEventListener('pointerdown', (e) => {
   S.lauf.druck = { art: tr.art, i: tr.i ?? tr.platz, t: 0.14 };
   const vorher = S.lauf.hand.map((h) => h.art + (h.id || ''));
   if (tr.art === 'glaeser') S.tippeGlaeser();
+  else if (tr.art === 'karte') { T.spiele('klick'); UI.zeigeStandkarte(); }   // 19.10.: was auf der Karte steht
   else if (tr.art === 'zelle') {
     // Gesperrter Topf: nur ein Hinweis. Früher öffnete sich hier der Laden -
     // beim schnellen Tippen am Tresen landete man dann ungewollt im Einkauf.

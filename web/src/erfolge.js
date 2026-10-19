@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=202610191400';
-import * as S from './spiel.js?v=202610191400';
+import * as C from './config.js?v=202610191510';
+import * as S from './spiel.js?v=202610191510';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;
@@ -35,7 +35,7 @@ export const ERFOLGE = [
   { id: 'herz100',     name: 'Gemütlich',              text: 'Erreiche 100 ♥ Stimmung.',                    ziel: 100,  wert: () => S.stimmung() },
   { id: 'bedient1000', name: 'Dorfgespräch',           text: 'Bediene 1.000 Gäste.',                        ziel: 1000, wert: () => zahl('bedient') },
   { id: 'serie',       name: 'Keiner geht leer aus',   text: 'Bediene 50 Gäste hintereinander, ohne dass einer weitergeht.', ziel: 50, wert: () => Math.max(zahl('serie'), zahl('serieBest')) },
-  { id: 'getraenke',   name: 'Volle Karte',            text: 'Biete alle Getränke und Leckereien an.',      ziel: C.PRODUKTE.length, wert: () => S.produkteFrei().length },
+  { id: 'getraenke',   name: 'Volle Karte',            text: 'Hol dir alle Getränke und Leckereien.',        ziel: C.PRODUKTE.length, wert: () => S.produkteBesessen().length },
   { id: 'nikolaus5',   name: 'Nikolaus-Freund',        text: 'Tippe den Nikolaus 5-mal an.',                ziel: 5,    wert: () => zahl('nikolaus') },
   { id: 'sonderAlle',  name: 'Alle Jahre wieder',      text: 'Bediene jeden besonderen Gast mindestens einmal.', ziel: SONDER.length, wert: () => SONDER.filter((t) => typ(t) > 0).length },
   { id: 'gross10',     name: 'Gruppenreise',           text: 'Schaffe 10 Großbestellungen.',                ziel: 10,   wert: () => zahl('gross') },

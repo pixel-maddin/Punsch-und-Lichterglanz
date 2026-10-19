@@ -981,3 +981,64 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .futter-text { margin: calc(var(--px) * 1) 0 !important; font-size: var(--t-text); }
 .futter-knapp { color: var(--rot2); font-weight: bold; }
 .futter-gast { margin: calc(var(--px) * 1) 0 0 !important; }
+
+/* ======================================================================
+   Dunkelblau statt Holz (19.10., nach dem Mock-up): Einblendungen oben, die
+   Zielleiste, Hinweisblasen und Knöpfe. Grund dunkelblau, Rahmen hellblau,
+   helle Schrift. Art der Meldung zeigt die Rahmenfarbe (Gold = besonders,
+   Grün = gut, Rot = schlecht). „Kaufen"/„Abholen" bleiben grün.
+   ====================================================================== */
+:root {
+  --ui-blau: #1c2850; --ui-blau2: #2e4478; --ui-tief: #0e1630;
+  --ui-rand: #8ab8f0; --ui-rand2: #5a78b8; --ui-text: #eef4ff; --ui-text2: #b8ccf0;
+}
+#toast {
+  background: linear-gradient(#26366c, #18224a); color: var(--ui-text);
+  border: calc(var(--px) * 1) solid var(--ui-rand);
+  box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief), 0 0 calc(var(--px) * 5) rgba(8, 12, 32, 0.55);
+  padding: calc(var(--px) * 3.4) calc(var(--px) * 5);
+  font-size: var(--t-gross); line-height: 1.3; max-width: 92%;
+}
+#toast.spezial, #toast.neu { background: linear-gradient(#26366c, #18224a); border-color: #ffd860; box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief), 0 0 calc(var(--px) * 5) rgba(255, 216, 96, 0.35); }
+#toast.neu { font-size: var(--t-gross); }
+#toast.gut { background: linear-gradient(#26366c, #18224a); border-color: #7ad07a; box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief); }
+#toast.boese { background: linear-gradient(#26366c, #18224a); border-color: #f07a6a; box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief); }
+#toast.hinweis { font-size: var(--t-betont); }
+
+#ziel { background: rgba(28, 40, 80, 0.92); color: var(--ui-text); border-color: var(--ui-rand); box-shadow: 0 calc(var(--px) * 0.8) 0 var(--ui-tief); }
+#ziel .was i { color: #ffd860; }
+#ziel .lohn { color: #ffd860; }
+#ziel small { color: var(--ui-text2); }
+#ziel .fort { background: rgba(255, 255, 255, 0.15); }
+#ziel.bereit { background: rgba(32, 48, 96, 0.96); border-color: #ffd860; }
+#ziel.ansturm { background: rgba(60, 24, 40, 0.95); border-color: #f07a6a; }
+#ziel.zimt, #ziel.markt { background: rgba(32, 44, 88, 0.96); }
+#ziel.markt { border-color: #f07a6a; }
+
+#tipp { background: var(--ui-blau); color: var(--ui-text); border-color: var(--ui-rand); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief), 0 0 calc(var(--px) * 6) rgba(0, 0, 0, 0.4); }
+#tipp::before { color: var(--ui-text2); }
+#tipp[data-pfeil="unten"]::after { border-top-color: var(--ui-rand); }
+#tipp[data-pfeil="oben"]::after { border-bottom-color: var(--ui-rand); }
+
+/* Knöpfe: dunkelblau mit hellblauem Rahmen (Hauptknopf heller, Nebenknopf dunkler) */
+.k {
+  background: linear-gradient(#36528e, #22346a); border-color: var(--ui-rand); color: #fff;
+  box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.18);
+  text-shadow: 0 calc(var(--px) * 0.5) 0 rgba(0, 0, 0, 0.4);
+}
+.k:active:not(:disabled) { box-shadow: 0 calc(var(--px) * 0.2) 0 var(--ui-tief); }
+.k--neben, .k--wahl { background: linear-gradient(#26345e, #1a2448); border-color: var(--ui-rand2); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.12); }
+.k--wahl.gewaehlt { background: linear-gradient(#f0c848, #c8962a); color: var(--tinte); text-shadow: none; border-color: #8a6414; box-shadow: 0 calc(var(--px) * 1.2) 0 #8a6414; }
+#blattZu, #kartenZu, #kartenText, #miniZu { background: linear-gradient(#36528e, #22346a); color: #fff; border: calc(var(--px) * 0.8) solid var(--ui-rand); }
+
+/* Fenster „Deine Karte" */
+.karte-liste { display: flex; flex-direction: column; gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 2); text-align: left; }
+.karte-zeile { display: grid; grid-template-columns: auto 1fr auto; gap: calc(var(--px) * 2.5); align-items: center; padding: calc(var(--px) * 2); border-radius: calc(var(--px) * 2); background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; }
+.karte-zeile.an { background: #fff3c4; border-color: var(--gold); }
+.karte-ico { width: calc(var(--px) * 20); height: calc(var(--px) * 20); image-rendering: pixelated; }
+.karte-zeile .txt b { display: block; font-size: var(--t-betont); }
+.karte-zeile .txt span { display: block; font-size: var(--t-klein); color: var(--text2); line-height: 1.3; }
+.karte-zeile .k { min-width: calc(var(--px) * 40); font-size: var(--t-text); padding-left: calc(var(--px) * 2); padding-right: calc(var(--px) * 2); }
+.karte-zeile .txt { min-width: 0; }
+.karte-zeile .k { min-width: calc(var(--px) * 34); white-space: nowrap; }
+#modal .box { overflow-x: hidden; }

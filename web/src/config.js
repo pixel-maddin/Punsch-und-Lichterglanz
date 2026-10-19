@@ -81,6 +81,7 @@ export const EXTRA_BONUS = 0.30;   // Rückfall, wenn ein Getränk keinen eigene
 export const ZUCKER_ZEIT = 1.2;    // s, die der Zuckerhut brennt
 export const PRODUKT = Object.fromEntries(PRODUKTE.map((p) => [p.id, p]));
 
+export const ANGEBOT_MAX = 5;   // so viele Dinge stehen höchstens auf der Karte des Standes (19.10.)
 export const TOPF_PORTIONEN = [6, 10, 16, 25];   // je Stufe „Größere Töpfe"
 export const NACHFUELL_TIPPS = 4;                // so oft tippen, bis voll
 export const NACHFUELL_ZEIT = [0, 5, 3, 1.5];    // Nachfüll-Wichtel je Stufe (s)

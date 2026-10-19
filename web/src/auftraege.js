@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610191400';
-import * as S from './spiel.js?v=202610191400';
-import * as Z from './zeit.js?v=202610191400';
+import * as C from './config.js?v=202610191510';
+import * as S from './spiel.js?v=202610191510';
+import * as Z from './zeit.js?v=202610191510';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -51,7 +51,7 @@ function erzeuge(tag) {
     const typ = moeglich[Math.floor(z() * moeglich.length)] || 'bediene';
     benutzt.add(typ);
     let param = null;
-    if (typ === 'produkt') { const frei = S.produkteFrei().filter((p) => p.art !== 'platte'); param = frei[Math.floor(z() * frei.length)].id; }
+    if (typ === 'produkt') { const frei = S.produkteBesessen().filter((p) => p.art !== 'platte'); param = frei[Math.floor(z() * frei.length)].id; }
     liste.push({ typ, param, ziel: TYPEN[typ].stufen[stufe], stand: 0, stufe, lohn: Math.max(20, Math.round(proMinute() * lohnMinuten(stufe))), abgeholt: false });
   });
   return { tag, liste };

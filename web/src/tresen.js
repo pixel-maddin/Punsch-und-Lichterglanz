@@ -3,16 +3,16 @@
  *
  *   ┌──────────── Gäste (bis zu drei, mit Wunsch und Geduld) ─────┐
  *   │ Gläser │    Hand (1-3 Plätze)    │ Schwung │ Ausguss        │
- *   │ Regal: 2 × 5 Töpfe / Dose / Crêpe-Platte                    │
+ *   │ Karte: bis zu 5 Kacheln (Getränke, Dose, Crêpe) │ KARTE      │
  *   └─────────────────────────────────────────────────────────────┘
  *
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610191400';
-import * as C from './config.js?v=202610191400';
-import * as S from './spiel.js?v=202610191400';
-import * as Z from './zeit.js?v=202610191400';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610191510';
+import * as C from './config.js?v=202610191510';
+import * as S from './spiel.js?v=202610191510';
+import * as Z from './zeit.js?v=202610191510';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -62,9 +62,8 @@ function naechsterSchritt() {
 function naechsterSchrittZeigen(c, yb, yr, t) {
   const s = naechsterSchritt();
   if (!s) return;
-  const q = s.art === 'zelle'
-    ? [(s.i % 5) * C.T_ZELLE_B + 1, yr + Math.floor(s.i / 5) * C.T_ZELLE_H + 1, C.T_ZELLE_B - 2, C.T_ZELLE_H - 3]
-    : [1, yb + 1, 40, C.T_BRETT - 2];
+  const q = s.art === 'zelle' ? kachelRechteck(s.i, yr) : [1, yb + 1, 40, C.T_BRETT - 2];
+  if (!q) return;
   const a = 0.45 + 0.4 * Math.sin(t * 3.2);   // ruhiges Atmen, kein Blinken
   c.save();
   c.globalAlpha = Math.max(0.1, a);
@@ -80,7 +79,8 @@ function gedrueckt(c, y0, yb, yr) {
   const d = S.lauf.druck;
   if (!d) return;
   let q = null;
-  if (d.art === 'zelle') q = [(d.i % 5) * C.T_ZELLE_B + 1, yr + Math.floor(d.i / 5) * C.T_ZELLE_H + 1, C.T_ZELLE_B - 2, C.T_ZELLE_H - 3];
+  if (d.art === 'zelle') q = kachelRechteck(d.i, yr);
+  else if (d.art === 'karte') q = [KARTE_X + 1, yr + 1, 180 - KARTE_X - 2, REGAL_H - 3];
   else if (d.art === 'glaeser') q = [1, yb + 1, 40, C.T_BRETT - 2];
   else if (d.art === 'ausguss') q = [150, yb + 1, 29, C.T_BRETT - 2];
   if (!q) return;
@@ -607,23 +607,6 @@ function extraHinweis(c, x, y, extra, t, noch = 1) {
   if (noch > 1) { r(c, x + 7, y - 2, 5, 5, '#c83a2e'); text(c, String(noch), x + 8, y - 1, '#ffffff'); }
 }
 
-/** Produktsymbol als einfarbiger Schattenriss (11 x 11), einmal gerechnet. */
-const risse = {};
-function schattenriss(id) {
-  if (risse[id]) return risse[id];
-  const cv = document.createElement('canvas');
-  cv.width = 11; cv.height = 11;
-  const k = cv.getContext('2d');
-  icon(k, id, 1, 1, 0, true);   // „roh": ohne Sahne und Zimt, die sind Handarbeit
-  // Dampf über den Tassen gehört nicht zur Form - nur Apfel (Blatt) und Feuerzange (Zange) behalten ihren Kopf
-  if (C.PRODUKT[id].art === 'topf' && id !== 'apfel' && id !== 'feuerzange') k.clearRect(0, 0, 11, 4);
-  k.globalCompositeOperation = 'source-in';
-  k.fillStyle = '#23150b';
-  k.fillRect(0, 0, 11, 11);
-  // Doppelt groß über Scale2x, nicht als 2x2-Blöcke (11.10.) - eigene Leinwand je Riss
-  return (risse[id] = scale2x(cv, 11, 11, document.createElement('canvas')));
-}
-
 /**
  * Das leere Glas auf dem Servierbrett, doppelt so groß wie `glas()` - aber in
  * Spielpixeln gezeichnet, nicht hochgezogen (11.10.): Rand, Schatten und
@@ -650,140 +633,160 @@ function glas(c, x, y) {
 }
 
 // ---------------------------------------------------------------------------
-function regal(c, y, t) {
-  r(c, 0, y, 180, C.T_ZELLE_H * 2, '#4a2e18');
-  for (let i = 0; i < 10; i++) {
-    const sx = (i % 5) * C.T_ZELLE_B, sy = y + Math.floor(i / 5) * C.T_ZELLE_H;
-    zelle(c, i, sx, sy, t);
-  }
-  r(c, 0, y + C.T_ZELLE_H - 1, 180, 2, '#6a4222');
-  r(c, 0, y + C.T_ZELLE_H * 2 - 2, 180, 2, '#6a4222');
+// Die Karte des Standes unten (19.10.): eine Reihe mit höchstens fünf großen
+// Kacheln (nur was auf der Karte steht, S.produkteFrei) und rechts die Kachel
+// „KARTE" zum Umstellen. Vorher 2 × 5 kleine Töpfe mit allem, auch Gesperrtem.
+// Kacheln dunkelblau mit hellblauem Rahmen wie Leiste und Knöpfe.
+const KB = 32, KARTE_X = KB * C.ANGEBOT_MAX, REGAL_H = C.T_ZELLE_H * 2;
+const KACHEL = { grund: '#1c2850', grund2: '#24325e', rand: '#6a8ad8', hell: '#9ab8f0', dunkel: '#0e1630' };
+/** Platz (0..4) eines Produkts (Index in PRODUKTE) unten - oder -1, wenn es nicht auf der Karte steht. */
+export function kachelPlatz(i) {
+  const p = C.PRODUKTE[i];
+  return p ? S.produkteFrei().indexOf(p) : -1;
+}
+/** Mitte der Kachel relativ zur Oberkante der Reihe (für Zeiger in lernen.js). */
+export function zellePos(i) {
+  const k = kachelPlatz(i);
+  return k < 0 ? null : { x: k * KB + KB / 2, y: 18 };
+}
+/** Rechteck der Kachel (für Druck und Hinweisrahmen). */
+function kachelRechteck(i, yr) {
+  const k = kachelPlatz(i);
+  return k < 0 ? null : [k * KB + 1, yr + 1, KB - 2, REGAL_H - 3];
 }
 
-function zelle(c, i, x, y, t) {
-  const p0 = C.PRODUKTE[i];
-  const W = C.T_ZELLE_B, H = C.T_ZELLE_H;
-  r(c, x + 1, y + 1, W - 2, H - 3, '#5a3a22');
-  if (!S.hat(p0.id)) {
-    // Gesperrt: Schattenriss des Getränks bzw. Essens, doppelt groß
-    // (vorher ein Schloss - so sieht man, was hier einmal steht)
-    r(c, x + 1, y + 1, W - 2, H - 3, '#3a2616');
-    const wz = S.lauf.wackel['z' + p0.id];   // angetippt: der Schattenriss wackelt
-    const sx = x + W / 2 - 10 + (wz ? Math.round(Math.sin(wz * 60) * 2) : 0);
-    c.drawImage(schattenriss(p0.id), sx, y + 3);
-    if (S.freiErfuellt(p0.id) && S.st.geld >= p0.kosten) { // Man KÖNNTE es kaufen: kleines Funkeln
-      if (Math.floor(t * 2) % 2) p(c, x + W - 5, y + 4, '#ffe060');
-      p(c, x + W - 6, y + 5, '#ffe060');
-    }
-    return;
+function regal(c, y, t) {
+  r(c, 0, y, 180, REGAL_H, KACHEL.dunkel);
+  const frei = S.produkteFrei();
+  for (let k = 0; k < C.ANGEBOT_MAX; k++) {
+    const x = k * KB;
+    const p0 = frei[k];
+    if (p0) kachel(c, C.PRODUKTE.indexOf(p0), x, y, t);
+    else leereKachel(c, x, y, t);
   }
+  karteKachel(c, KARTE_X, y, t);
+}
+
+/** Rahmen einer Kachel: abgerundet, oben heller, unten dunkler (Pixelstil). */
+function kachelRahmen(c, x, y, w, h, rand, grund) {
+  r(c, x + 2, y + 1, w - 4, 1, rand); r(c, x + 2, y + h - 2, w - 4, 1, rand);
+  r(c, x + 1, y + 2, 1, h - 4, rand); r(c, x + w - 2, y + 2, 1, h - 4, rand);
+  r(c, x + 2, y + 2, w - 4, h - 4, grund);
+  r(c, x + 2, y + 2, w - 4, 1, ton(grund, 0.18));
+  r(c, x + 2, y + h - 3, w - 4, 1, ton(grund, -0.25));
+}
+
+/** Freier Platz: gestrichelter Rahmen mit Plus - antippen öffnet die Karte. */
+function leereKachel(c, x, y) {
+  r(c, x + 1, y + 1, KB - 2, REGAL_H - 3, '#141e40');
+  for (let i = 3; i < KB - 3; i += 3) { p(c, x + i, y + 2, '#3a4a80'); p(c, x + i, y + REGAL_H - 4, '#3a4a80'); }
+  for (let j = 3; j < REGAL_H - 4; j += 3) { p(c, x + 2, y + j, '#3a4a80'); p(c, x + KB - 3, y + j, '#3a4a80'); }
+  const cx = x + KB / 2, cy = y + 22;
+  r(c, cx - 3, cy, 7, 1, '#6a8ad8'); r(c, cx, cy - 3, 1, 7, '#6a8ad8');
+}
+
+/** Die Kachel „KARTE": Tafel mit Liste, darunter senkrecht das Wort. */
+function karteKachel(c, x, y, t) {
+  const w = 180 - x;
+  kachelRahmen(c, x, y, w, REGAL_H - 1, KACHEL.rand, '#2a2048');
+  // kleine Tafel mit drei Zeilen
+  r(c, x + 5, y + 6, 10, 9, '#6a4a2a'); r(c, x + 6, y + 7, 8, 7, '#1e3a2a');
+  for (let i = 0; i < 3; i++) r(c, x + 7, y + 8 + i * 2, 4 + (i % 2) * 2, 1, '#e8f0e0');
+  const wort = 'KARTE';
+  for (let i = 0; i < wort.length; i++) text(c, wort[i], x + 8, y + 19 + i * 6, '#e6dcff', '#0a0414');
+  // Neu gekauft, aber kein Platz mehr: goldener Punkt
+  if (S.st.angebotNeu && Math.floor(t * 2) % 2) { r(c, x + w - 6, y + 2, 4, 4, '#ffd040'); p(c, x + w - 5, y + 3, '#fff6c0'); }
+}
+
+function kachel(c, i, x, y, t) {
+  const p0 = C.PRODUKTE[i];
+  const W = KB, H = REGAL_H;
+  const max = S.topfMax();
+  const rest = S.st.toepfe[p0.id] || 0;
+  const leer = p0.art !== 'platte' && rest <= 0;
+  kachelRahmen(c, x, y, W, H - 1, KACHEL.rand, leer ? '#1a1e34' : KACHEL.grund);
   const wk = S.lauf.wackel['z' + p0.id];
   const dx = wk ? Math.round(Math.sin(wk * 60) * 2) : 0;
   const cx = x + W / 2 + dx;
-  const max = S.topfMax();
-  const rest = S.st.toepfe[p0.id] || 0;
 
-  if (p0.art === 'topf') {
-    // Topf mit Etikett
-    const tx = cx - 12, ty = y + 5;
-    r(c, tx, ty, 24, 16, '#5a5a64'); r(c, tx, ty, 2, 16, '#46464e'); r(c, tx + 22, ty, 2, 16, '#6e6e7a');
-    r(c, tx - 2, ty + 3, 2, 3, '#46464e'); r(c, tx + 24, ty + 3, 2, 3, '#46464e');
-    r(c, tx - 1, ty - 1, 26, 2, '#7a7a86');
-    if (rest > 0) r(c, tx + 1, ty, 22, 1, p0.farbe);
-    r(c, cx - 6, ty + 4, 12, 11, '#f0e6d0');
-    icon(c, p0.id, cx - 5, ty + 5, t);
-    if (rest > 0 && p0.id !== 'feuerzange') {
-      const s = Math.floor(t * 2 + i) % 2;
-      p(c, cx - 4 + s, ty - 3, '#eef2f6'); p(c, cx + 3 - s, ty - 4, '#eef2f6');
-    }
-    if (p0.id === 'feuerzange' && rest > 0) {
-      const fl = Math.floor(t * 9) % 2;
-      r(c, cx - 3, ty - 2, 6, 1, '#e8e8e8'); p(c, cx - 1 + fl, ty - 4, '#6ab0ff'); p(c, cx, ty - 3, '#ffd040'); p(c, cx + 1 - fl, ty - 4, '#ff8a20');
-    }
-  } else if (p0.art === 'dose') {
-    const tx = cx - 9, ty = y + 4;
-    r(c, tx, ty, 18, 17, '#c8d8e0'); r(c, tx, ty, 1, 17, '#a8bcc8'); r(c, tx - 1, ty - 1, 20, 2, '#d83a3a');
-    const zeigen = Math.min(4, Math.ceil(rest / max * 4));
-    for (let k = 0; k < zeigen; k++) icon(c, 'lebkuchen', tx + 1 + (k % 2) * 8, ty + 9 - Math.floor(k / 2) * 6, t);
-  } else {
-    // Crêpe-Platte
-    const tx = cx - 13, ty = y + 12;
+  // Preis je Glas (mit allen Aufschlägen), unten in der Kachel: ★ und Zahl
+  const preis = '★' + kurzZahl(S.produktPreis(p0) * S.preisFaktor());
+  const pw = textBreite(preis);
+  text(c, preis, Math.round(x + W / 2 - pw / 2), y + H - 16, '#ffe27a', '#0a0414');
+
+  if (p0.art === 'platte') {
+    // Crêpe-Platte (wie vorher, nur in der großen Kachel)
+    const tx = cx - 13, ty = y + 22;
     r(c, tx, ty, 26, 8, '#3a3a40'); r(c, tx + 2, ty - 3, 22, 4, '#1e1e22'); r(c, tx + 3, ty - 4, 20, 1, '#2a2a30');
     const cr = S.lauf.crepe;
     if (cr.backT >= 0) {
       const a = cr.backT / C.CREPE_ZEIT;
-      // Gewendet: die helle Seite liegt oben, sonst bräunt er gleichmäßig
       r(c, tx + 5, ty - 4, 16, 2, cr.gewendet ? mische('#f4e4b0', '#e8b868', a * 0.6) : mische('#f4e4b0', '#e0a850', a));
       if (cr.gewendet) { p(c, tx + 8, ty - 4, '#c8883a'); p(c, tx + 14, ty - 3, '#c8883a'); }
-      // Handgriff „Wenden": Balken mit grüner Zone, solange noch nicht gewendet
       if (!cr.gewendet && !cr.verpasst) zeitBalken(c, tx + 2, ty + 3, 22, a, C.HANDGRIFF.wenden.timing);
       else r(c, tx + 2, ty + 5, Math.round(22 * a), 1, cr.gewendet ? '#4ac05a' : '#ffd040');
       if (Math.floor(t * 8) % 2) p(c, tx + 8, ty - 7, '#eef2f6');
     } else if (cr.fertig) {
-      icon(c, 'crepe', cx - 5, ty - 12, t);
-      if (Math.floor(t * 3) % 2) p(c, cx + 6, ty - 12, '#ffe060');
+      icon(c, 'crepe', cx - 5, ty - 14, t);
+      if (Math.floor(t * 3) % 2) p(c, cx + 6, ty - 14, '#ffe060');
     } else {
-      p(c, cx, ty - 7, '#ffffff'); r(c, cx - 1, ty - 8, 3, 1, '#ffffff'); p(c, cx, ty - 9, '#ffffff'); // Plus: antippen zum Backen
+      // Antippen zum Backen: großes Plus über der Platte
+      r(c, cx - 4, ty - 10, 9, 1, '#ffffff'); r(c, cx, ty - 14, 1, 9, '#ffffff');
     }
     r(c, tx + 20, ty + 2, 3, 3, cr.backT >= 0 ? '#f04a3a' : '#5a5a60');
     return;
   }
 
-  // Füllstand
-  const bw = W - 8;
-  r(c, x + 4, y + H - 5, bw, 2, '#2a1a10');
-  if (rest > 0) r(c, x + 4, y + H - 5, Math.max(1, Math.round(bw * rest / max)), 2, rest / max > 0.25 ? '#6ad06a' : '#f0c040');
+  // Getränk bzw. Lebkuchen groß (20 x 20), mit Dampf
+  iconGross(c, p0.id, cx - 10, y + 7, t);
+  if (leer) { c.save(); c.globalAlpha = 0.55; r(c, x + 2, y + 2, W - 4, 28, '#1a1e34'); c.restore(); }
+
+  // Füllstand: Balken unten
+  const bw = W - 8, by = y + H - 7;
+  r(c, x + 4, by, bw, 2, '#0a1028');
+  if (!leer) r(c, x + 4, by, Math.max(1, Math.round(bw * rest / max)), 2, rest / max > 0.25 ? '#6ad06a' : '#f0c040');
   else {
-    // Leer: Nachfüllfortschritt, und ein blinkender Hinweis
     const f = S.lauf.fuellen[p0.id] || 0;
     const nf = S.stufe('nachfuell');
     const a = nf ? (S.lauf.nachfuellT[p0.id] || 0) / C.NACHFUELL_ZEIT[nf] : f;
-    r(c, x + 4, y + H - 5, Math.round(bw * Math.min(1, Math.max(a, f))), 2, '#5ab0f0');
+    r(c, x + 4, by, Math.round(bw * Math.min(1, Math.max(a, f))), 2, '#5ab0f0');
     if (!nf) {
-      // Leer: vier Punkte zeigen, wie oft man noch tippen muss
+      // Leer: Punkte zeigen, wie oft man noch tippen muss; „LEER" blinkt
       const getippt = Math.round(f * C.NACHFUELL_TIPPS);
-      for (let k = 0; k < C.NACHFUELL_TIPPS; k++) {
-        const px = cx - 7 + k * 4, py = y + 1;
-        r(c, px, py, 3, 3, k < getippt ? '#5ab0f0' : (Math.floor(t * 3) % 2 ? '#f4f4f4' : '#9aa0aa'));
-      }
-      // Groß „LEER" quer über das Etikett und ein blinkender Rahmen um das
-      // Fach - die vier Punkte allein übersah man, und das Glas blieb dann
-      // still leer stehen (Betatest 02.10.)
+      for (let k = 0; k < C.NACHFUELL_TIPPS; k++) r(c, cx - 7 + k * 4, y + 4, 3, 3, k < getippt ? '#5ab0f0' : (Math.floor(t * 3) % 2 ? '#f4f4f4' : '#9aa0aa'));
       const an = Math.floor(t * 2.5) % 2;
-      r(c, cx - 9, y + 10, 19, 7, '#2a1010');
-      text(c, 'LEER', cx - 7, y + 11, an ? '#ff6a5a' : '#ffd0c8', null);
-      if (an) {
-        r(c, x + 1, y + 1, W - 2, 1, '#ff6a5a'); r(c, x + 1, y + H - 2, W - 2, 1, '#ff6a5a');
-        r(c, x + 1, y + 1, 1, H - 2, '#ff6a5a'); r(c, x + W - 2, y + 1, 1, H - 2, '#ff6a5a');
-      }
-    }
-    if (nf) nachfuellWichtel(c, x, y, a, p0.farbe, t, i);
+      r(c, cx - 9, y + 13, 19, 7, '#2a1010');
+      text(c, 'LEER', cx - 7, y + 14, an ? '#ff6a5a' : '#ffd0c8', null);
+      if (an) { r(c, x + 1, y + 1, W - 2, 1, '#ff6a5a'); r(c, x + 1, y + H - 3, W - 2, 1, '#ff6a5a'); r(c, x + 1, y + 1, 1, H - 3, '#ff6a5a'); r(c, x + W - 2, y + 1, 1, H - 3, '#ff6a5a'); }
+    } else nachfuellWichtel(c, x, y, a, p0.farbe, t, i);
   }
   // Gerade voll geworden: der Wichtel hüpft mit leerer Kanne davon
   const weg = S.lauf.gefuellt[p0.id];
   if (weg > 0) {
     const k = 1 - weg / 0.6;
-    wichtelKlein(c, x + 5 - k * 6, y + 15 - Math.sin(k * Math.PI) * 8, t, i);
-    if (Math.floor(t * 10) % 2) { p(c, cx - 2, y + 2, '#ffe060'); p(c, cx + 5, y + 1, '#ffe060'); }
+    wichtelKlein(c, x + 5 - k * 6, y + 20 - Math.sin(k * Math.PI) * 8, t, i);
+    if (Math.floor(t * 10) % 2) { p(c, cx - 2, y + 3, '#ffe060'); p(c, cx + 5, y + 2, '#ffe060'); }
   }
 }
 
+/** 12 · 340 · 1,2k - kurz genug für die schmale Kachel. */
+function kurzZahl(n) {
+  n = Math.round(n);
+  if (n < 1000) return String(n);
+  return (n / 1000).toFixed(n < 1e4 ? 1 : 0).replace('.', ',') + 'k';
+}
+
 /**
- * Nachfüll-Wichtel bei der Arbeit: steht auf einem Schemel links am Topf
- * und gießt aus einer Kanne hinein. Vorher saß er nur klein in der Ecke -
- * man sah nicht, dass er etwas tut.
+ * Nachfüll-Wichtel bei der Arbeit: steht auf einem Schemel links am Becher
+ * und gießt aus einer Kanne hinein.
  */
 function nachfuellWichtel(c, x, y, anteil, farbe, t, i) {
-  r(c, x + 2, y + 17, 6, 1, '#8a5a2e'); r(c, x + 3, y + 18, 1, 4, '#6a4222'); r(c, x + 6, y + 18, 1, 4, '#6a4222');   // Schemel
-  wichtelKlein(c, x + 5, y + 16, t, i);
-  // Kanne, die sich beim Gießen neigt
+  r(c, x + 2, y + 22, 6, 1, '#8a5a2e'); r(c, x + 3, y + 23, 1, 4, '#6a4222'); r(c, x + 6, y + 23, 1, 4, '#6a4222');   // Schemel
+  wichtelKlein(c, x + 5, y + 21, t, i);
   const kipp = Math.floor(t * 4) % 2;
-  r(c, x + 7, y + 7 - kipp, 4, 4, '#a8b0bc'); r(c, x + 7, y + 7 - kipp, 4, 1, '#c8d0dc'); p(c, x + 11, y + 7 - kipp, '#a8b0bc');
-  // Strahl in den Topf, in der Farbe des Getränks
-  for (let k = 0; k < 3; k++) if ((Math.floor(t * 12) + k) % 3) p(c, x + 12, y + 7 + k - kipp, farbe);
-  // Was schon drin ist, steigt am Topfrand sichtbar hoch
-  const tx = x + C.T_ZELLE_B / 2 - 12;
-  if (anteil > 0) r(c, tx + 1, y + 5, Math.max(1, Math.round(22 * anteil)), 1, farbe);
+  r(c, x + 6, y + 10 - kipp, 4, 4, '#a8b0bc'); r(c, x + 6, y + 10 - kipp, 4, 1, '#c8d0dc'); p(c, x + 10, y + 10 - kipp, '#a8b0bc');
+  for (let k = 0; k < 3; k++) if ((Math.floor(t * 12) + k) % 3) p(c, x + 11, y + 10 + k - kipp, farbe);
+  if (anteil > 0) r(c, x + 9, y + 9, Math.max(1, Math.round(14 * anteil)), 1, farbe);
 }
 
 // ---------------------------------------------------------------------------
@@ -802,7 +805,8 @@ export function treffer(x, y, y0) {
     const i = Math.floor((x - handStart() + 3) / PLATZ);
     return { art: 'hand', i: Math.max(0, Math.min(S.handMax() - 1, i)) };
   }
-  const sp = Math.min(4, Math.floor(x / C.T_ZELLE_B));
-  const zeile = Math.min(1, Math.floor((y - yr) / C.T_ZELLE_H));
-  return { art: 'zelle', i: zeile * 5 + sp };
+  // Untere Reihe (19.10.): fünf Kacheln der Karte, rechts „KARTE"; ein freier Platz öffnet auch die Karte
+  if (x >= KARTE_X) return { art: 'karte' };
+  const p0 = S.produkteFrei()[Math.min(C.ANGEBOT_MAX - 1, Math.floor(x / KB))];
+  return p0 ? { art: 'zelle', i: C.PRODUKTE.indexOf(p0) } : { art: 'karte' };
 }

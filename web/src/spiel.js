@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610191400';
-import * as Z from './zeit.js?v=202610191400';
-import { neueFarben } from './pixel.js?v=202610191400';
+import * as C from './config.js?v=202610191510';
+import * as Z from './zeit.js?v=202610191510';
+import { neueFarben } from './pixel.js?v=202610191510';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -383,7 +383,65 @@ export const bunt = (kette) => !!(st.bunt && st.bunt[kette]);
 export const topfMax = () => C.TOPF_PORTIONEN[stufe('topf')];
 export const handMax = () => C.TABLETT[stufe('tablett')];
 export const tresenPlaetze = () => C.TRESEN[stufe('tresen')];
-export const produkteFrei = () => C.PRODUKTE.filter((p) => hat(p.id));
+/** Alles, was man besitzt (freigeschaltet und gekauft). */
+export const produkteBesessen = () => C.PRODUKTE.filter((p) => hat(p.id));
+
+// ---------------------------------------------------------------------------
+// Die Karte des Standes (19.10.): Von allem, was man hat, stehen höchstens
+// ANGEBOT_MAX Dinge auf der Karte - nur die wünschen sich die Gäste, nur sie
+// stehen unten am Tresen. Jederzeit umstellbar („Karte" rechts unten).
+// st.angebot = ids auf der Karte, st.angebotBekannt = ids, über die schon
+// entschieden wurde (Neues kommt von selbst dazu, solange Platz ist;
+// selbst Abgewähltes bleibt weg).
+// ---------------------------------------------------------------------------
+export function angebot() {
+  const besessen = produkteBesessen().map((p) => p.id);
+  if (!Array.isArray(st.angebot)) {
+    // Alte Spielstände: alles, wenn es passt, sonst die fünf teuersten
+    st.angebot = besessen.length <= C.ANGEBOT_MAX ? besessen.slice()
+      : besessen.slice().sort((a, b) => C.PRODUKT[b].preis - C.PRODUKT[a].preis).slice(0, C.ANGEBOT_MAX);
+    st.angebotBekannt = besessen.slice();
+  }
+  st.angebotBekannt = st.angebotBekannt || [];
+  for (const id of besessen) {
+    if (st.angebotBekannt.includes(id)) continue;
+    st.angebotBekannt.push(id);
+    if (st.angebot.length < C.ANGEBOT_MAX) st.angebot.push(id);
+    else st.angebotNeu = true;   // gekauft, aber kein Platz: Punkt an der Karte
+  }
+  st.angebot = st.angebot.filter((id) => besessen.includes(id));
+  if (!st.angebot.length && besessen.length) st.angebot = [besessen[0]];
+  return st.angebot;
+}
+/** Auf der Karte (= wünschen sich die Gäste). Reihenfolge wie PRODUKTE, damit die Plätze unten fest bleiben. */
+export const produkteFrei = () => { const a = angebot(); return C.PRODUKTE.filter((p) => a.includes(p.id) && hat(p.id)); };
+export const aufKarte = (id) => angebot().includes(id);
+/**
+ * Auf die Karte nehmen oder herunternehmen. false, wenn die Karte voll ist
+ * oder es das Letzte wäre. Wer sich etwas wünscht, das es nicht mehr gibt,
+ * sucht sich etwas Neues aus - Großbestellungen eingeschlossen.
+ */
+export function setzeAngebot(id, an) {
+  const a = angebot();
+  if (!hat(id)) return false;
+  if (an) {
+    if (a.includes(id)) return true;
+    if (a.length >= C.ANGEBOT_MAX) return false;
+    a.push(id);
+  } else {
+    if (!a.includes(id)) return true;
+    if (a.length <= 1) return false;
+    a.splice(a.indexOf(id), 1);
+    for (const g of lauf.gaeste) {
+      if (g.gehen || g.bedient || g.wunsch !== id) continue;
+      const neu = g.gross ? produkteFrei().filter((p) => p.art !== 'platte') : null;
+      if (g.gross) { if (neu.length) { g.gross.id = neu[Math.floor(Math.random() * neu.length)].id; g.wunsch = g.gross.id; } }
+      else { const w = wunschFuer(g.typ); if (w) g.wunsch = w; }
+    }
+  }
+  speichere();
+  return true;
+}
 export const preisFaktor = () => (1 + stimmung() * C.STIMMUNG_PREIS) * (1 + boni().preis) * rufFaktor();
 
 export function gastTakt() {
@@ -676,7 +734,7 @@ function spezialMoeglich() {
  */
 function sonderBereit() {
   if (!nachStartRuhe() || !einstieg('sonder')) return false;   // Einstieg in Wellen
-  if (produkteFrei().length < C.SONDER_AB_PRODUKTE) return false;
+  if (produkteBesessen().length < C.SONDER_AB_PRODUKTE) return false;
   if (lauf.sonderSeit == null) lauf.sonderSeit = lauf.t;
   return lauf.t >= lauf.sonderSeit + (st.ersterSonder ? 0 : C.SONDER_NACH);
 }
