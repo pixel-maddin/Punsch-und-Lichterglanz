@@ -144,7 +144,7 @@ export function icon(c, id, x, y, t = 0, roh = false) {
   }
   const P = {
     gluehwein: '#8a1830', kinderpunsch: '#ee6d9a', apfel: '#e8942e', schoko: '#6b3a22',
-    eierpunsch: '#f3e38a', jaegertee: '#3f7a3a', weisser: '#efe7c0', feuerzange: '#a01818',
+    eierpunsch: '#f3e38a', jaegertee: '#3f7a3a', weisser: '#efe7c0', feuerzange: '#24346e',   // 19.10.: dunkelblaue Tasse (sah sonst aus wie der Sternenpunsch)
   };
   const f = P[id] || '#888888';
   // Tasse in Produktfarbe (12.10. detailreicher, wie iconGross im Kleinen):
@@ -203,7 +203,7 @@ export function icon(c, id, x, y, t = 0, roh = false) {
 const FARBE_GROSS = {
   gluehwein: ['#8a1830', '#4e0c1c'], kinderpunsch: ['#ee6d9a', '#c43c6a'], apfel: ['#e8942e', '#b8661a'],
   schoko: ['#6b3a22', '#3e1e10'], eierpunsch: ['#f3e38a', '#e0b84a'], jaegertee: ['#3f7a3a', '#9a6a28'],
-  weisser: ['#efe7c0', '#d8c48a'], feuerzange: ['#a01818', '#5a0a0e'],
+  weisser: ['#efe7c0', '#d8c48a'], feuerzange: ['#24346e', '#a01818'],   // Tasse dunkelblau, Getränk rot
 };
 const MOTIV = {   // je 5 x 5, '#' = Motivfarbe, '+' = Glanzpunkt
   gluehwein: ['..#..', '#####', '.#+#.', '.#.#.', '#...#'],
