@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610191830';
-import * as Z from './zeit.js?v=202610191830';
-import { neueFarben } from './pixel.js?v=202610191830';
+import * as C from './config.js?v=202610191840';
+import * as Z from './zeit.js?v=202610191840';
+import { neueFarben } from './pixel.js?v=202610191840';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -389,7 +389,7 @@ export const produkteBesessen = () => C.PRODUKTE.filter((p) => hat(p.id));
 // ---------------------------------------------------------------------------
 // Die Karte des Standes (19.10.): Von allem, was man hat, stehen höchstens
 // ANGEBOT_MAX Dinge auf der Karte - nur die wünschen sich die Gäste, nur sie
-// stehen unten am Tresen. Jederzeit umstellbar („Karte" rechts unten).
+// stehen unten am Tresen. Jederzeit umstellbar (Knopf „Angebot" oben rechts).
 // st.angebot = ids auf der Karte, st.angebotBekannt = ids, über die schon
 // entschieden wurde (Neues kommt von selbst dazu, solange Platz ist;
 // selbst Abgewähltes bleibt weg).
@@ -412,7 +412,7 @@ export function angebot() {
     const billig = st.angebot.slice().sort((a, b) => C.PRODUKT[a].preis - C.PRODUKT[b].preis)[0];
     if (billig && C.PRODUKT[billig].preis < C.PRODUKT[id].preis) {
       st.angebot[st.angebot.indexOf(billig)] = id;
-      hooks.toast(`${C.PRODUKT[id].name} steht jetzt auf deiner Karte statt ${C.PRODUKT[billig].name}. Umstellen: „Karte" rechts unten.`, 'neu');
+      hooks.toast(`${C.PRODUKT[id].name} ist jetzt in deinem Angebot statt ${C.PRODUKT[billig].name}. Umstellen: „Angebot" oben rechts.`, 'neu');
     }
     st.angebotNeu = true;   // Punkt an der Karte, bis man sie ansieht
   }
