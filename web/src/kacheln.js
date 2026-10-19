@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202610192310';
-import * as S from './spiel.js?v=202610192310';
-import { iconGross, scale2x, r, p } from './pixel.js?v=202610192310';
-import { naechsterSchritt } from './tresen.js?v=202610192310';
+import * as C from './config.js?v=202610192320';
+import * as S from './spiel.js?v=202610192320';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202610192320';
+import { naechsterSchritt } from './tresen.js?v=202610192320';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;
@@ -89,12 +89,13 @@ function angebotBild(c) {
   p(c, 13, 9, '#ffffff'); p(c, 14, 8, '#e8eef4'); p(c, 16, 9, '#ffffff'); p(c, 15, 7, '#e8eef4');
 }
 /**
- * Symbole der Kopfzeile (19.10.: vorher 5 × 5 bzw. 7 × 7 Pixel - der Stern sah aus
- * wie ein Pfeil). Gemalt als Form auf 20 × 20 mit Umriss, Licht oben links und
- * Schatten unten rechts, dann wie die Knöpfe zweimal geglättet.
+ * Symbole der Kopfzeile als 16 × 16-Pixelraster (19.10.: erst 5 × 5 bzw. 7 × 7 -
+ * der Stern sah aus wie ein Pfeil -, dann kurz geglättet; Nutzerwunsch: 16 × 16,
+ * scharf und ohne Glättung). Form mit Umriss, Licht oben links, Schatten unten rechts.
  */
+const N = 16;
 function form(c, drin, farbe) {
-  for (let y = 0; y < 20; y++) for (let x = 0; x < 20; x++) {
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     if (!drin(x + 0.5, y + 0.5)) continue;
     const rand = !drin(x - 0.5, y + 0.5) || !drin(x + 1.5, y + 0.5) || !drin(x + 0.5, y - 0.5) || !drin(x + 0.5, y + 1.5);
     p(c, x, y, rand ? farbe.rand : farbe.innen(x, y));
@@ -102,27 +103,32 @@ function form(c, drin, farbe) {
 }
 function sternBild(c) {
   const ecken = [];
-  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 4.1 : 9.4; ecken.push([10 + Math.cos(a) * rr, 10.6 + Math.sin(a) * rr]); }
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? 3.4 : 7.8; ecken.push([8 + Math.cos(a) * rr, 8.7 + Math.sin(a) * rr]); }
   const drin = (x, y) => { let d = false; for (let i = 0, j = 9; i < 10; j = i++) { const [xi, yi] = ecken[i], [xj, yj] = ecken[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) d = !d; } return d; };
-  form(c, drin, { rand: '#9a5a0a', innen: (x, y) => (x + y < 16 ? '#fff2a0' : x + y < 22 ? '#ffd040' : '#e8a020') });
-  p(c, 8, 7, '#ffffff'); p(c, 9, 6, '#fffbe0');   // Glanz
+  form(c, drin, { rand: '#9a5a0a', innen: (x, y) => (x + y < 13 ? '#fff2a0' : x + y < 18 ? '#ffd040' : '#e8a020') });
+  p(c, 7, 5, '#ffffff');   // Glanz
 }
 function herzBild(c) {
-  const drin = (x, y) => { const u = (x - 10) / 7, v = -(y - 10.2) / 7; const q = u * u + v * v - 1; return q * q * q - u * u * v * v * v <= 0; };   // klassische Herzkurve mit Einkerbung oben
-  form(c, drin, { rand: '#8a1838', innen: (x, y) => (x + y < 15 ? '#ff9ab8' : x + y < 23 ? '#ff4a78' : '#d82a5a') });
-  r(c, 5, 6, 2, 2, '#ffe0ea'); p(c, 7, 5, '#ffffff');   // Glanz
+  const drin = (x, y) => { const u = (x - 8) / 5.8, v = -(y - 8.2) / 5.8; const q = u * u + v * v - 1; return q * q * q - u * u * v * v * v <= 0; };   // klassische Herzkurve mit Einkerbung oben
+  form(c, drin, { rand: '#8a1838', innen: (x, y) => (x + y < 12 ? '#ff9ab8' : x + y < 18 ? '#ff4a78' : '#d82a5a') });
+  p(c, 4, 5, '#ffe0ea'); p(c, 5, 4, '#ffffff');   // Glanz
 }
 function postBild(c) {
-  const drin = (x, y) => (x > 1.5 && x < 18.5 && y > 3 && y < 14.5 && !((x < 3 || x > 17) && (y < 4.5 || y > 13))) || (x > 4 && x < 8 && y >= 14 && y < 18 - (x - 4) * 0.9);
-  form(c, drin, { rand: '#4a5a88', innen: (x, y) => (y < 6 ? '#ffffff' : '#e8eef8') });
-  for (const dx of [6, 10, 14]) { r(c, dx - 1, 8, 2, 2, '#5a6a98'); }   // drei Punkte
+  const drin = (x, y) => (x > 1 && x < 15 && y > 2 && y < 11.5 && !((x < 2.2 || x > 13.8) && (y < 3.6 || y > 10.4))) || (x > 3 && x < 6.2 && y >= 11 && y < 14.2 - (x - 3));
+  form(c, drin, { rand: '#4a5a88', innen: (x, y) => (y < 5 ? '#ffffff' : '#e8eef8') });
+  for (const dx of [5, 8, 11]) r(c, dx - 1, 6, 2, 2, '#5a6a98');   // drei Punkte
 }
 export function knopfBilder() {
   const h = document.querySelector('#btnHaus canvas'), a = document.querySelector('#btnStandkarte canvas');
   if (h) maleBild(h, hausBild);
   if (a) maleBild(a, angebotBild);
   const bilder = { stern: sternBild, herz: herzBild, post: postBild };
-  for (const cv of document.querySelectorAll('canvas[data-bild]')) if (bilder[cv.dataset.bild]) maleBild(cv, bilder[cv.dataset.bild]);
+  for (const cv of document.querySelectorAll('canvas[data-bild]')) {
+    const malen = bilder[cv.dataset.bild];
+    if (!malen) continue;
+    cv.width = N; cv.height = N;   // 1:1, kein Scale2x
+    const c = cv.getContext('2d'); c.clearRect(0, 0, N, N); malen(c);
+  }
 }
 
 const nbsp = ' ';

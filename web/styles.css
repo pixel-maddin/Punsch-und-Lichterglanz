@@ -1176,5 +1176,5 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Knöpfe „Haus" und „Angebot": Grund etwas durchscheinend, damit die Welt dahinter durchkommt (19.10.) */
 .knopf-oben { background: linear-gradient(rgba(52, 80, 140, 0.62), rgba(30, 46, 96, 0.62)); -webkit-backdrop-filter: blur(calc(var(--px) * 0.6)); backdrop-filter: blur(calc(var(--px) * 0.6)); }
 /* Kopfzeilen-Symbole jetzt fein gezeichnet (kacheln.knopfBilder): alle gleich groß */
-#hud .hud-ico { width: calc(var(--px) * 8); height: calc(var(--px) * 8); top: 0; image-rendering: auto; }
+#hud .hud-ico { width: calc(var(--px) * 8); height: calc(var(--px) * 8); top: 0; image-rendering: pixelated; }   /* 16 × 16-Raster, scharf */
 #nachr .hud-ico { width: calc(var(--px) * 9); height: calc(var(--px) * 9); }
