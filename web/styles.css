@@ -970,7 +970,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 
 /* Futterhaus-Fenster (18.10.): Szene 1:1 in Spielpixeln, Futterstand in fünf Stufen */
 #modal .futter-szene {
-  display: block; margin: 0 auto calc(var(--px) * 2); width: calc(var(--px) * 132); height: calc(var(--px) * 92);
+  display: block; margin: 0 auto calc(var(--px) * 2); width: calc(var(--px) * 132); height: calc(var(--px) * 100);
   max-width: 100%; image-rendering: pixelated; box-sizing: border-box;
   border: calc(var(--px) * 1) solid var(--holz); border-radius: calc(var(--px) * 1.5);
 }

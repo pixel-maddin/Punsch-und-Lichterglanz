@@ -1037,22 +1037,23 @@ export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Groß
 // Der Meisenknödel (Türchen 18) verdoppelt die Gewichte der seltenen.
 // ---------------------------------------------------------------------------
 export const VOEGEL = [
-  { id: 'spatz',    name: 'Spatz',         w: 34, f: ['#8a6a4a', '#c8a880', '#5a4030'], text: 'Der Haussperling ist nie gern allein und tschilpt den ganzen Tag mit seinen Freunden. Im Winter plustert er sich zu einer kleinen Federkugel auf.' },
-  { id: 'kohlmeise', name: 'Kohlmeise',    w: 26, f: ['#2a2a30', '#f0d040', '#f4f4f0'], text: 'Die häufigste Meise im Garten. Ihr Ruf klingt wie „Zi-zi-bäh“ - und beim Fressen hängt sie gern kopfüber am Futterhaus.' },
-  { id: 'blaumeise', name: 'Blaumeise',    w: 18, f: ['#4a8ad8', '#f0d848', '#f4f4f0'], text: 'Ein kleiner Turner mit blauem Käppchen: Sie hangelt sich an die dünnsten Zweige und wiegt dabei nur etwa elf Gramm.' },
-  { id: 'rotkehlchen', name: 'Rotkehlchen', w: 12, f: ['#8a6a4a', '#e8702a', '#e8dcc8'], selten: true, nachtAuch: true, text: 'Singt sogar mitten im Winter - und manchmal nachts unter einer Laterne. Es ist neugierig und kommt Menschen erstaunlich nah.' },
-  { id: 'gimpel',   name: 'Gimpel',        w: 6,  f: ['#2a2a30', '#e04a5a', '#7a7a88'], selten: true, text: 'Auch Dompfaff genannt. Das Männchen trägt eine leuchtend rote Brust und ein schwarzes Käppchen, und meist ist das Pärchen zusammen unterwegs.' },
-  { id: 'seidenschwanz', name: 'Seidenschwanz', w: 2, f: ['#a88a78', '#e8c060', '#3a2a2a'], selten: true, schnee: true, text: 'Ein Wintergast aus dem hohen Norden. Er kommt nur in manchen Jahren, wenn es dort zu wenig Beeren gibt - dann aber gleich im Schwarm.' },
+  { id: 'spatz',    name: 'Spatz',         w: 34, sterne: 10, f: ['#8a6a4a', '#c8a880', '#5a4030'], text: 'Der Haussperling ist nie gern allein und tschilpt den ganzen Tag mit seinen Freunden. Im Winter plustert er sich zu einer kleinen Federkugel auf.' },
+  { id: 'kohlmeise', name: 'Kohlmeise',    w: 26, sterne: 12, f: ['#2a2a30', '#f0d040', '#f4f4f0'], text: 'Die häufigste Meise im Garten. Ihr Ruf klingt wie „Zi-zi-bäh“ - und beim Fressen hängt sie gern kopfüber am Futterhaus.' },
+  { id: 'blaumeise', name: 'Blaumeise',    w: 18, sterne: 16, f: ['#4a8ad8', '#f0d848', '#f4f4f0'], text: 'Ein kleiner Turner mit blauem Käppchen: Sie hangelt sich an die dünnsten Zweige und wiegt dabei nur etwa elf Gramm.' },
+  { id: 'rotkehlchen', name: 'Rotkehlchen', w: 12, sterne: 25, f: ['#8a6a4a', '#e8702a', '#e8dcc8'], selten: true, nachtAuch: true, text: 'Singt sogar mitten im Winter - und manchmal nachts unter einer Laterne. Es ist neugierig und kommt Menschen erstaunlich nah.' },
+  { id: 'gimpel',   name: 'Gimpel',        w: 6, sterne: 40, f: ['#2a2a30', '#e04a5a', '#7a7a88'], selten: true, text: 'Auch Dompfaff genannt. Das Männchen trägt eine leuchtend rote Brust und ein schwarzes Käppchen, und meist ist das Pärchen zusammen unterwegs.' },
+  { id: 'seidenschwanz', name: 'Seidenschwanz', w: 2, sterne: 80, f: ['#a88a78', '#e8c060', '#3a2a2a'], selten: true, schnee: true, text: 'Ein Wintergast aus dem hohen Norden. Er kommt nur in manchen Jahren, wenn es dort zu wenig Beeren gibt - dann aber gleich im Schwarm.' },
   // Nur nachts (11.10., Betatest: im Dezember ist es nur 8-17 Uhr hell - wer
   // morgens früh und abends spielt, sah sonst nie einen Vogel)
-  { id: 'waldkauz', name: 'Waldkauz',    w: 4,  f: ['#7a5a3e', '#b8946a', '#5a4030'], selten: true, nacht: true, text: 'Die Eule mit dem bekannten „Huhuu“. Tagsüber schläft sie gut versteckt, und ihren Kopf kann sie fast ganz nach hinten drehen.' },
+  { id: 'waldkauz', name: 'Waldkauz',    w: 4, sterne: 60, f: ['#7a5a3e', '#b8946a', '#5a4030'], selten: true, nacht: true, text: 'Die Eule mit dem bekannten „Huhuu“. Tagsüber schläft sie gut versteckt, und ihren Kopf kann sie fast ganz nach hinten drehen.' },
 ];
 export const VOGEL_NACHT_TAKT = 2.2;   // nachts so viel seltener (nur Rotkehlchen und Waldkauz)
 export const FUTTER_STUNDEN = 12;   // vom Morgen- bis zum Abendbesuch (11.10.: vorher 8)
 export const VOGEL_TAKT = [14, 32];   // s zwischen zwei Vögeln
 export const VOGEL_BLEIBT = [7, 14];  // s am Futterhaus
 export const VOGEL_MAX = 3;           // gleichzeitig
-export const VOGEL_STERNE = 10;       // Antippen im Futterhaus-Fenster, einmal je Besuch (18.10.)
+export const VOGEL_STERNE = 10;       // Antippen im Futterhaus-Fenster, einmal je Besuch (18.10.); seit 19.10. je Art `sterne` in VOEGEL (seltener = mehr)
+export const GUCK_STERNE = 100;       // Vogel, der selten aus dem Flugloch schaut: einmal antippen (19.10.)
 export const KNOEDEL_SELTEN = 2;
 
 // Der eigene Schneemann (11.10.): ab dem ersten Schnee auf dem Gehweg links.

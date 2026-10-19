@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610192330';
-import * as Z from './zeit.js?v=202610192330';
-import { neueFarben } from './pixel.js?v=202610192330';
+import * as C from './config.js?v=202610192345';
+import * as Z from './zeit.js?v=202610192345';
+import { neueFarben } from './pixel.js?v=202610192345';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2208,13 +2208,26 @@ function vogelWahl() {
   for (const v of liste) { r -= gew(v); if (r <= 0) return v; }
   return liste[0];
 }
-/** Vogel im Futterhaus-Fenster angetippt: VOGEL_STERNE, einmal je Besuch. true = gab Sterne. */
+/**
+ * Vogel im Futterhaus-Fenster angetippt: einmal je Besuch Sterne, je seltener die
+ * Art, desto mehr (`sterne` in C.VOEGEL, 19.10.). Rückgabe: Betrag, 0 = nichts.
+ */
 export function vogelAntippen(b) {
-  if (!b || b.belohnt || b.t < 1.2 || b.t > b.bleibt) return false;   // nur solange er sitzt
+  if (!b || b.belohnt || b.t < 1.2 || b.t > b.bleibt) return 0;   // nur solange er sitzt
   b.belohnt = true;
-  verdiene(C.VOGEL_STERNE);
+  const v = C.VOEGEL.find((q) => q.id === b.art);
+  const betrag = (v && v.sterne) || C.VOGEL_STERNE;
+  verdiene(betrag);
   speichere();
-  return true;
+  return betrag;
+}
+/** Der Vogel im Flugloch angetippt (19.10.): einmal C.GUCK_STERNE. */
+export function guckVogelAntippen(g) {
+  if (!g || g.belohnt || !g.sichtbar) return 0;
+  g.belohnt = true;
+  verdiene(C.GUCK_STERNE);
+  speichere();
+  return C.GUCK_STERNE;
 }
 /** Auch vom Futterhaus-Fenster aufgerufen: dort steht das Spiel, aber die Vögel kommen und gehen weiter. */
 export function vogelTakt(dt) {

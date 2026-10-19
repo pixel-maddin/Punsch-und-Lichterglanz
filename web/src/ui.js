@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610192330';
-import * as S from './spiel.js?v=202610192330';
-import * as Z from './zeit.js?v=202610192330';
-import * as T from './ton.js?v=202610192330';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610192330';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610192330';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610192330';
-import * as A from './auftraege.js?v=202610192330';
-import * as E from './erfolge.js?v=202610192330';
-import * as ZL from './ziele.js?v=202610192330';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610192330';
-import * as KA from './karte.js?v=202610192330';
-import { zeigeRueckblick } from './ereignis.js?v=202610192330';
-import { barbaraZweig } from './szene.js?v=202610192330';
-import * as SW from './schneeball.js?v=202610192330';
-import * as LI from './lichtung.js?v=202610192330';
-import * as CB from './christbaum.js?v=202610192330';
-import * as SB from './schlitten.js?v=202610192330';
-import * as EB from './schlittschuh.js?v=202610192330';
-import * as BS from './backstube.js?v=202610192330';
-import { alleSymbole } from './symbole.js?v=202610192330';
+import * as C from './config.js?v=202610192345';
+import * as S from './spiel.js?v=202610192345';
+import * as Z from './zeit.js?v=202610192345';
+import * as T from './ton.js?v=202610192345';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610192345';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610192345';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610192345';
+import * as A from './auftraege.js?v=202610192345';
+import * as E from './erfolge.js?v=202610192345';
+import * as ZL from './ziele.js?v=202610192345';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610192345';
+import * as KA from './karte.js?v=202610192345';
+import { zeigeRueckblick } from './ereignis.js?v=202610192345';
+import { barbaraZweig } from './szene.js?v=202610192345';
+import * as SW from './schneeball.js?v=202610192345';
+import * as LI from './lichtung.js?v=202610192345';
+import * as CB from './christbaum.js?v=202610192345';
+import * as SB from './schlitten.js?v=202610192345';
+import * as EB from './schlittschuh.js?v=202610192345';
+import * as BS from './backstube.js?v=202610192345';
+import { alleSymbole } from './symbole.js?v=202610192345';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1610,9 +1610,20 @@ export function zeigeFutterhaus() {
   // Vogel antippen: +VOGEL_STERNE, einmal je Besuch (S.vogelAntippen prüft das)
   cv.onclick = (e) => {
     const rc = cv.getBoundingClientRect(), x = (e.clientX - rc.left) / rc.width * FSZ_W, y = (e.clientY - rc.top) / rc.height * FSZ_H;
+    zu.texte = zu.texte || [];
+    // Der Vogel im Flugloch (19.10.): selten da, einmal +GUCK_STERNE
+    const gy = 46 + FSZ_DY;
+    if (zu.guck && zu.guck.sichtbar && Math.abs(x - FSZ_CX) <= 8 && Math.abs(y - gy) <= 10) {
+      const b = S.guckVogelAntippen(zu.guck);
+      if (b) { T.spiele('spezialKasse'); zu.texte.push({ x: FSZ_CX, y: 46 - 12, text: '+' + b, t: 0 }); zu.guck.t = Math.max(zu.guck.t, zu.guck.dauer - 0.5); }
+      else T.spiele('klick');
+      return;
+    }
     const hit = (zu.treffer || []).filter((q) => Math.abs(x - q.x) <= 12 && y >= q.y - 26 && y <= q.y + 2).sort((a, b) => Math.abs(x - a.x) - Math.abs(x - b.x))[0];
     if (!hit) return;
-    if (S.vogelAntippen(hit.b)) { T.spiele('kasse'); zu.texte = zu.texte || []; zu.texte.push({ x: hit.x, y: hit.y - 28, text: '+' + C.VOGEL_STERNE, t: 0 }); }
+    // Je seltener der Vogel, desto mehr Sterne (19.10.); Texte liegen in der tiefer gehängten Ebene
+    const b = S.vogelAntippen(hit.b);
+    if (b) { T.spiele('kasse'); zu.texte.push({ x: hit.x, y: hit.y - FSZ_DY - 28, text: '+' + b, t: 0 }); }
     else T.spiele('klick');
   };
   const uhr = (ms) => { const d = new Date(Z.jetzt().getTime() + ms); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
