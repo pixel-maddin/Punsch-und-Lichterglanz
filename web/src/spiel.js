@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610182100';
-import * as Z from './zeit.js?v=202610182100';
-import { neueFarben } from './pixel.js?v=202610182100';
+import * as C from './config.js?v=202610190900';
+import * as Z from './zeit.js?v=202610190900';
+import { neueFarben } from './pixel.js?v=202610190900';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2062,11 +2062,14 @@ export function feierabendAnsage() {
 export const futterVoll = () => hat('futterhaus') && (st.futterBis || 0) > Z.jetzt().getTime();
 export function fuettere() {
   if (!hat('futterhaus')) return false;
-  const voll = futterVoll();
+  const vorher = futterStand().stufe;
+  if (vorher >= 5) return false;   // ist schon ganz voll: nichts zu tun
   st.futterBis = Z.jetzt().getTime() + C.FUTTER_STUNDEN * 3600000;
-  if (!voll) { lauf.vogelAb = Math.min(lauf.vogelAb, 3); zaehleErfolg('futter'); }   // gleich kommt der erste
+  // Jedes echte Nachfüllen zählt (18.10.: vorher nur bei ganz leerem Haus - Karls Bitte blieb sonst offen)
+  zaehleErfolg('futter');
+  if (vorher === 0) lauf.vogelAb = Math.min(lauf.vogelAb, 3);   // gleich kommt der erste
   speichere();
-  return !voll;
+  return true;
 }
 /**
  * Wie voll ist das Futterhaus? (18.10.) Das Futter sinkt über FUTTER_STUNDEN

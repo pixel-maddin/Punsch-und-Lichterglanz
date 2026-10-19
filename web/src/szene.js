@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610182100';
-import * as Z from './zeit.js?v=202610182100';
-import * as S from './spiel.js?v=202610182100';
-import { FASSADEN } from './config.js?v=202610182100';
-import * as C from './config.js?v=202610182100';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610190900';
+import * as Z from './zeit.js?v=202610190900';
+import * as S from './spiel.js?v=202610190900';
+import { FASSADEN } from './config.js?v=202610190900';
+import * as C from './config.js?v=202610190900';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -558,6 +558,7 @@ function haus(c, G, w, t, L) {
   if (S.zeigt('auf_engel')) engel(c, L, 60, wandO - 28, t);
   if (S.zeigt('h_hahn')) wetterhahn(c, 52, wandO - 28, t);
   if (S.zeigt('l_eich')) dachEichhorn(c, 41, wandO - 10, t);
+  if (S.zeigt('g_fahne')) siegerfahne(c, 34, wandO + 2, t);   // linke Hausecke an der Traufe
   if (w.schnee > 0) schneekatze(c, KATZE_X, wandO + KATZE_DY, S.schneekatzeStufe(), S.schneekatzeBereit(), t);
   if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershow(c, L, wandO, wandU, t);
 }
@@ -967,12 +968,16 @@ function grummelLauscher(c, G, t) {
   r(c, x, y - 2, 5, 2, '#c82828'); p(c, x - 1, y - 1, '#c82828'); p(c, x - 2, y, '#ffffff');
   r(c, x + 3, y + 6, 2, 2, '#5a9a30');   // Hand an der Ecke
 }
-/** Grüne Siegerfahne mit Schneeball an einer Stange links am Stand. */
-function siegerfahne(c, x, markise, t) {
-  r(c, x, markise - 18, 1, 18, '#7a5230'); p(c, x, markise - 19, '#e8c030');
+/**
+ * Grüne Siegerfahne mit Schneeball (18.10.: an der linken Hausecke, Fahne weht nach
+ * links - vorher am Stand und dort vor dem Futterhaus). x = Stange, fuss = unten.
+ */
+function siegerfahne(c, x, fuss, t) {
+  const hoch = 22;
+  r(c, x, fuss - hoch, 1, hoch + 1, '#7a5230'); p(c, x, fuss - hoch - 1, '#e8c030');
   const wehen = Math.floor(t * 3) % 2;
-  for (let i = 0; i < 8; i++) r(c, x + 1 + i, markise - 18 + ((i + wehen) % 4 === 0 ? 1 : 0), 1, 5, i % 2 ? '#3a8a3a' : '#2f7a30');
-  r(c, x + 4, markise - 16, 2, 2, '#ffffff');
+  for (let i = 0; i < 8; i++) r(c, x - 1 - i, fuss - hoch + ((i + wehen) % 4 === 0 ? 1 : 0), 1, 5, i % 2 ? '#3a8a3a' : '#2f7a30');
+  r(c, x - 6, fuss - hoch + 2, 2, 2, '#ffffff');
 }
 
 function tanne(c, G, w, t, L) {
@@ -2264,7 +2269,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [124, -66], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [29, -79], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -2421,7 +2426,6 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Kopf auf halber Dachhöhe über dem Stand steht
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
-  if (S.zeigt('g_fahne')) siegerfahne(e, 125, GW - 44, t);
   if (S.zeigt('baenke')) baenke(e, L, GW, t, w, S.variante('baenke'));   // bis 11.10. gar nicht gezeichnet
   if (S.zeigt('m_herzen')) lebkuchenherzen(e, GW, t);
   // Aus der Waldlichtung: Hasen und Reh vor dem Zaun, mit den Füßen gerade
