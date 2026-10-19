@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610192210';
-import * as Z from './zeit.js?v=202610192210';
-import { neueFarben } from './pixel.js?v=202610192210';
+import * as C from './config.js?v=202610192230';
+import * as Z from './zeit.js?v=202610192230';
+import { neueFarben } from './pixel.js?v=202610192230';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1046,35 +1046,53 @@ const bereit = (h) => h.art === 'voll' && !(h.rest > 0) && !(h.brennT > 0);
  * Rückgabe: glas = Map(Index → Gast-id), gast = Map(Gast-id → { bereit, anteil }).
  */
 export function servierPlan() {
-  const G = lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen);
+  glaeserZuordnen();
   const glas = new Map(), gast = new Map();
-  const vergeben = new Set();
-  const merke = (i, h, id) => {
-    glas.set(i, id);
-    const fertig = bereit(h), a = fertig ? 1 : h.brennT > 0 ? 1 : Math.max(0, Math.min(1, 1 - (h.rest || 0) / (h.dauer || 1)));
-    const alt = gast.get(id);
-    if (!alt || (fertig && !alt.bereit) || (!alt.bereit && a > alt.anteil)) gast.set(id, { bereit: fertig, anteil: a });
-  };
   lauf.hand.forEach((h, i) => {
-    if (h.art !== 'voll' || !h.vonWichtel || h.fuer == null || !G.some((x) => x.id === h.fuer)) return;
-    merke(i, h, h.fuer); vergeben.add(h.fuer);
+    if (h.art !== 'voll' || h.ziel == null) return;
+    glas.set(i, h.ziel);
+    const fertig = bereit(h), a = fertig ? 1 : h.brennT > 0 ? 1 : Math.max(0, Math.min(1, 1 - (h.rest || 0) / (h.dauer || 1)));
+    const alt = gast.get(h.ziel);
+    if (!alt || (fertig && !alt.bereit) || (!alt.bereit && a > alt.anteil)) gast.set(h.ziel, { bereit: fertig, anteil: a });
   });
-  const reihe = lauf.hand.map((h, i) => i).filter((i) => lauf.hand[i].art === 'voll' && !glas.has(i))
-    .sort((a, b) => (bereit(lauf.hand[b]) ? 1 : 0) - (bereit(lauf.hand[a]) ? 1 : 0));
-  for (const i of reihe) {
-    const h = lauf.hand[i];
-    const g = G.filter((x) => x.wunsch === h.id && (x.gross || !vergeben.has(x.id))).sort((a, b) => a.geduld - b.geduld)[0];
+  return { glas, gast };
+}
+
+/**
+ * Jedes volle Glas auf dem Tablett gehört EINEM Gast (`h.ziel`) - und zwar fest,
+ * bis der geht, bedient ist oder sich etwas anderes wünscht (19.10.). Vorher
+ * wurde je Bild neu nach Geduld zugeordnet; bei zwei Gästen mit demselben
+ * Wunsch sprangen Haken und Reservierung hin und her (gemeldet). Neue
+ * Zuordnung: fertige Gläser zuerst, dann der ungeduldigste passende Gast.
+ * Wichtel-Gläser gehören dem, für den sie eingeschenkt wurden.
+ */
+function glaeserZuordnen() {
+  const G = lauf.gaeste;
+  const da = (x) => x.am && !x.bedient && !x.gehen;
+  const vergeben = new Set();
+  for (const h of lauf.hand) {
+    if (h.art !== 'voll') { if (h.ziel != null) h.ziel = null; continue; }
+    if (h.vonWichtel && h.fuer != null) h.ziel = h.fuer;
+    const g = h.ziel != null ? G.find((x) => x.id === h.ziel) : null;
+    if (g && da(g) && g.wunsch === h.id && (g.gross || !vergeben.has(g.id))) { if (!g.gross) vergeben.add(g.id); }
+    else h.ziel = null;
+  }
+  const offen = lauf.hand.filter((h) => h.art === 'voll' && h.ziel == null).sort((a, b) => (bereit(b) ? 1 : 0) - (bereit(a) ? 1 : 0));
+  for (const h of offen) {
+    const g = G.filter((x) => da(x) && x.wunsch === h.id && (x.gross || !vergeben.has(x.id))).sort((a, b) => a.geduld - b.geduld)[0];
     if (!g) continue;
-    merke(i, h, g.id);
+    h.ziel = g.id;
     if (!g.gross) vergeben.add(g.id);
   }
-  return { glas, gast };
 }
 
 export function tippeGast(platz) {
   const g = lauf.gaeste.find((x) => x.platz === platz && x.am && !x.gehen);
   if (!g || g.bedient) return;
-  const i = lauf.hand.findIndex((h) => bereit(h) && h.id === g.wunsch);
+  // Zuerst das Glas, das ihm gehört (grüner Haken), sonst jedes passende fertige
+  glaeserZuordnen();
+  let i = lauf.hand.findIndex((h) => bereit(h) && h.id === g.wunsch && h.ziel === g.id);
+  if (i < 0) i = lauf.hand.findIndex((h) => bereit(h) && h.id === g.wunsch);
   if (i < 0) {
     // Das Richtige ist noch in Arbeit? Dann nur warten - keine Strafe
     if (lauf.hand.some((h) => h.art === 'voll' && h.id === g.wunsch)) {
@@ -1372,12 +1390,14 @@ export function update(dt) {
   // nach dem Einschenken plötzlich jemand anderes da, und man lieferte
   // „falsch", ohne etwas falsch gemacht zu haben (Betatest 02.10.).
   // Großbestellungen nicht: deren Uhr ist die Aufgabe.
+  // 19.10.: über die feste Zuordnung (glaeserZuordnen) - vorher hier je Bild neu
+  // nach Geduld sortiert, und weil die Geduld des Reservierten festgehalten wird,
+  // sprang die Reservierung bei zwei Gästen mit demselben Wunsch hin und her.
+  glaeserZuordnen();
   const reserviert = new Set();
   for (const h of lauf.hand) {
-    if (h.art !== 'voll') continue;
-    const g = G.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && x.wunsch === h.id && !reserviert.has(x.id))
-      .sort((a, b) => a.geduld - b.geduld)[0];
-    if (g) reserviert.add(g.id);
+    const g = h.art === 'voll' && h.ziel != null && G.find((x) => x.id === h.ziel);
+    if (g && !g.gross) reserviert.add(g.id);
   }
   for (const g of G) {
     const def = C.GAESTE[g.typ];
