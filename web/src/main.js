@@ -4,24 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610191610';
-import * as S from './spiel.js?v=202610191610';
-import * as Z from './zeit.js?v=202610191610';
-import * as T from './ton.js?v=202610191610';
-import * as LI from './lichtung.js?v=202610191610';
-import * as CB from './christbaum.js?v=202610191610';
-import * as KA from './karte.js?v=202610191610';
-import * as SB from './schlitten.js?v=202610191610';
-import * as EB from './schlittschuh.js?v=202610191610';
-import * as BS from './backstube.js?v=202610191610';
-import * as UI from './ui.js?v=202610191610';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610191610';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610191610';
-import * as Lernen from './lernen.js?v=202610191610';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610191610';
-import * as A from './auftraege.js?v=202610191610';
-import * as E from './erfolge.js?v=202610191610';
-import * as ZL from './ziele.js?v=202610191610';
+import * as C from './config.js?v=202610191800';
+import * as S from './spiel.js?v=202610191800';
+import * as Z from './zeit.js?v=202610191800';
+import * as T from './ton.js?v=202610191800';
+import * as LI from './lichtung.js?v=202610191800';
+import * as CB from './christbaum.js?v=202610191800';
+import * as KA from './karte.js?v=202610191800';
+import * as SB from './schlitten.js?v=202610191800';
+import * as EB from './schlittschuh.js?v=202610191800';
+import * as BS from './backstube.js?v=202610191800';
+import * as UI from './ui.js?v=202610191800';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610191800';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610191800';
+import * as Kacheln from './kacheln.js?v=202610191800';
+import * as Lernen from './lernen.js?v=202610191800';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610191800';
+import * as A from './auftraege.js?v=202610191800';
+import * as E from './erfolge.js?v=202610191800';
+import * as ZL from './ziele.js?v=202610191800';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -313,6 +314,7 @@ function frame(jetzt) {
       c.clearRect(0, 0, C.B, H);
       const w = zeichneWelt(c, G, tSek, zeichenDt);
       zeichneTresen(c, G, tSek, w);
+      Kacheln.aktualisiere(tSek);   // die Karte unten als feine HTML-Ebene (19.10.)
     } catch (e) { console.warn('Zeichnen', e); }
     zeichenDt = 0; letzteZeichnung = jetzt;
     standGezeichnet = steht; bildVeraltet = leinwandLeer = false;
@@ -561,6 +563,6 @@ if (S.ENTWICKLUNG) window.__spiel = {
   bildschleife: (t) => frame(t),
   // Ein Bild von Hand zeichnen - im verborgenen Vorschaufenster steht
   // requestAnimationFrame still, der Screenshot zeigt sonst ein altes Bild.
-  bild() { c.clearRect(0, 0, C.B, H); const w = zeichneWelt(c, G, tSek, 0); zeichneTresen(c, G, tSek, w); },
+  bild() { c.clearRect(0, 0, C.B, H); const w = zeichneWelt(c, G, tSek, 0); zeichneTresen(c, G, tSek, w); Kacheln.aktualisiere(tSek); },
   groesse,
 };

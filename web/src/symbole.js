@@ -116,6 +116,18 @@ const SYMBOLE = {
     '..GgG..',
     '.ggggg.',
   ],
+  // Speisekarte des Standes (19.10.): Tafel mit Becher und zwei Zeilen
+  karteStand: [
+    '.bbbbbbbbb.',
+    'bKKKKKKKKKb',
+    'bKwwKKgggKb',
+    'bKrrwKKKKKb',
+    'bKrrKKgggKb',
+    'bKKKKKKKKKb',
+    'bKgggKgggKb',
+    'bKKKKKKKKKb',
+    '.bbbbbbbbb.',
+  ],
   // Sprechblase für den Nachrichtenverlauf (18.10.)
   post: [
     '.wwwwwww.',

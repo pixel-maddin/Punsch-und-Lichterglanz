@@ -1042,3 +1042,85 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .karte-zeile .txt { min-width: 0; }
 .karte-zeile .k { min-width: calc(var(--px) * 34); white-space: nowrap; }
 #modal .box { overflow-x: hidden; }
+
+/* ======================================================================
+   19.10. (zweite Runde nach dem Mock-up)
+   ====================================================================== */
+/* Kopfzeile: dunkelblaue Kästen mit hellblauem Rahmen, etwas größer */
+#hud { font-size: var(--t-gross); }
+#hud > div, #nachr {
+  height: calc(var(--px) * 13);
+  background: linear-gradient(rgba(38, 54, 108, 0.94), rgba(24, 34, 74, 0.94));
+  border: calc(var(--px) * 0.8) solid var(--ui-rand);
+  box-shadow: 0 calc(var(--px) * 0.8) 0 var(--ui-tief);
+  color: var(--ui-text);
+}
+#hud > div { padding: 0 calc(var(--px) * 3); }
+#geld { color: #ffe27a; }
+#nachr { width: calc(var(--px) * 14); }
+#geld .hud-ico { width: calc(var(--px) * 6); height: calc(var(--px) * 6); }
+.hud-ico { width: calc(var(--px) * 8); height: calc(var(--px) * 8); }
+
+/* Knopf „Karte" oben rechts unter der Uhr; die Zielleiste macht ihm Platz */
+#btnStandkarte {
+  position: absolute; right: calc(var(--px) * 3); top: calc(var(--px) * 19); z-index: 5;
+  width: calc(var(--px) * 26); min-height: calc(var(--px) * 17);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--px) * 0.8);
+  appearance: none; cursor: pointer; padding: calc(var(--px) * 1.2) 0;
+  background: linear-gradient(#36528e, #22346a); color: #fff;
+  border: calc(var(--px) * 0.8) solid var(--ui-rand); border-radius: calc(var(--px) * 2);
+  box-shadow: 0 calc(var(--px) * 1) 0 var(--ui-tief);
+  font: 800 var(--t-mini) var(--schrift);
+}
+#btnStandkarte .sym { width: calc(var(--px) * 11); height: calc(var(--px) * 9); image-rendering: pixelated; }
+#btnStandkarte:active { transform: scale(0.94); }
+#standkartePunkt { position: absolute; top: calc(var(--px) * -2); right: calc(var(--px) * -2); width: calc(var(--px) * 4.5); height: calc(var(--px) * 4.5); border-radius: 50%; background: var(--rot); border: calc(var(--px) * 0.7) solid #fff; }
+.mit-standkarte #ziel { right: calc(var(--px) * 31); }
+.blatt-offen #btnStandkarte { display: none; }
+
+/* Die Kacheln unten (kacheln.js): fein über dem Spielbild, Tipps gehen durch */
+#theke {
+  position: absolute; left: 0; right: 0; bottom: calc(var(--px) * 32); height: calc(var(--px) * 54);
+  z-index: 1; pointer-events: none;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--px) * 1.2);
+  padding: calc(var(--px) * 1.2); box-sizing: border-box;
+  background: linear-gradient(#141e40, #0c1430);
+}
+.kachel {
+  position: relative; min-width: 0; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center;
+  padding: calc(var(--px) * 1.6) calc(var(--px) * 0.8) calc(var(--px) * 4);
+  background: linear-gradient(#30467e, #1a2650);
+  border: calc(var(--px) * 0.8) solid var(--ui-rand); border-radius: calc(var(--px) * 2.5);
+  box-shadow: inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.14), 0 calc(var(--px) * 0.8) 0 #060c22;
+  color: #fff; transition: transform 0.08s, filter 0.08s;
+}
+.kachel canvas { width: calc(var(--px) * 22); height: calc(var(--px) * 22); image-rendering: pixelated; }
+.k-name { max-width: 100%; margin-top: calc(var(--px) * 0.6); font: 800 var(--t-mini) var(--schrift); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; letter-spacing: -0.01em; }
+.k-preis { margin-top: calc(var(--px) * 0.4); font: 900 var(--t-klein) var(--schrift); color: #ffe27a; text-shadow: 0 calc(var(--px) * 0.5) 0 rgba(0, 0, 0, 0.45); }
+.k-info { position: absolute; top: calc(var(--px) * 1.6); left: 50%; transform: translateX(-50%); white-space: nowrap;
+  font: 800 calc(var(--px) * 3.6) var(--schrift); font-style: normal; color: #fff; background: rgba(10, 16, 40, 0.85);
+  border-radius: calc(var(--px) * 1.5); padding: 0 calc(var(--px) * 1.4); }
+.k-info:empty { display: none; }
+.k-balken { position: absolute; left: calc(var(--px) * 3); right: calc(var(--px) * 3); bottom: calc(var(--px) * 1.8); height: calc(var(--px) * 1.6); border-radius: calc(var(--px) * 1); background: rgba(0, 0, 0, 0.5); }
+.k-fuell { position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit; background: #6ad06a; }
+.k-fuell[data-art="gelb"] { background: #f0c040; }
+.k-fuell[data-art="blau"] { background: #5ab0f0; }
+.k-zone { position: absolute; top: 0; bottom: 0; background: rgba(90, 210, 100, 0.75); }
+.k-marke { position: absolute; top: calc(var(--px) * -0.8); bottom: calc(var(--px) * -0.8); width: calc(var(--px) * 0.8); margin-left: calc(var(--px) * -0.4); background: #fff; }
+.kachel.leer { background: linear-gradient(#262c48, #161a30); border-color: #6a74a0; }
+.kachel.leer canvas { opacity: 0.4; }
+.kachel.leer .k-info { color: #ff8a7a; }
+.kachel.arbeit { border-color: #ffd860; }
+.kachel.fertig { border-color: #7ad07a; box-shadow: 0 0 calc(var(--px) * 3) rgba(122, 208, 122, 0.6), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.14); }
+.kachel.fertig .k-info { color: #9af09a; }
+.kachel.tipp { animation: kachelTipp 1.6s ease-in-out infinite; }
+@keyframes kachelTipp { 50% { box-shadow: 0 0 0 calc(var(--px) * 0.8) #ffd860, 0 0 calc(var(--px) * 4) rgba(255, 216, 96, 0.7); border-color: #ffd860; } }
+.kachel.gedrueckt { filter: brightness(1.3); transform: scale(0.95); }
+.kachel.wackelt { animation: kachelWackel 0.3s linear 1; }
+@keyframes kachelWackel { 25% { transform: translateX(calc(var(--px) * -1.5)); } 75% { transform: translateX(calc(var(--px) * 1.5)); } }
+.kachel.voll-neu { box-shadow: 0 0 calc(var(--px) * 4) rgba(255, 224, 96, 0.8); }
+.kachel.frei { background: rgba(20, 30, 64, 0.6); border-style: dashed; border-color: #4a5c98; }
+.kachel.frei .k-name { color: #9aaad8; margin-top: calc(var(--px) * 6); }
+.kachel.frei .k-preis { color: #9aaad8; font-size: var(--t-titel); }
+.kachel.frei .k-balken { display: none; }

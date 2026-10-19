@@ -1,0 +1,122 @@
+/*
+ * kacheln.js - die Karte des Standes unten als feine Ebene über dem Spielbild
+ * (19.10., nach dem Mock-up). Gemeldet: Die Kacheln im 180-Pixel-Bild waren
+ * „zu pixelig". Jetzt: Rahmen, Name und Preis als HTML (scharf, Nunito), das
+ * Getränk per Scale2x zweimal geglättet auf 80 x 80 (angezeigt 20 Spielpixel
+ * groß - auf dem Handy also mit vier- bis sechsmal so vielen Bildpunkten).
+ *
+ * Die Ebene nimmt KEINE Tipps an (pointer-events: none): Getippt wird wie
+ * immer aufs Spielbild, tresen.js/treffer() weiß, welche Kachel dort liegt.
+ * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
+ * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
+ */
+import * as C from './config.js?v=202610191800';
+import * as S from './spiel.js?v=202610191800';
+import { iconGross, scale2x, r } from './pixel.js?v=202610191800';
+import { naechsterSchritt } from './tresen.js?v=202610191800';
+
+const $ = (s) => document.querySelector(s);
+let wurzel = null;
+const kacheln = [];   // je Platz: { el, cv, name, preis, info, balken, zone, marke, sig, bildSig }
+
+function bauen() {
+  wurzel = $('#theke');
+  if (!wurzel) return false;
+  for (let k = 0; k < C.ANGEBOT_MAX; k++) {
+    const el = document.createElement('div');
+    el.className = 'kachel';
+    el.innerHTML = '<canvas width="80" height="80"></canvas><b class="k-name"></b><span class="k-preis"></span><i class="k-info"></i>'
+      + '<span class="k-balken"><span class="k-zone"></span><span class="k-fuell"></span><span class="k-marke"></span></span>';
+    wurzel.appendChild(el);
+    kacheln.push({ el, cv: el.querySelector('canvas'), name: el.querySelector('.k-name'), preis: el.querySelector('.k-preis'),
+      info: el.querySelector('.k-info'), zone: el.querySelector('.k-zone'), fuell: el.querySelector('.k-fuell'), marke: el.querySelector('.k-marke'), sig: '', bildSig: '' });
+  }
+  return true;
+}
+
+// Kleine Leinwand 20 x 20 in Spielpixeln, dann zweimal Scale2x
+const _klein = document.createElement('canvas'); _klein.width = 20; _klein.height = 20;
+const _kc = _klein.getContext('2d', { willReadFrequently: true });
+const _x2 = document.createElement('canvas');
+function maleBild(ziel, malen) {
+  _kc.clearRect(0, 0, 20, 20);
+  malen(_kc);
+  const x2 = scale2x(_klein, 20, 20, _x2);
+  const zc = ziel.getContext('2d');
+  zc.clearRect(0, 0, 80, 80);
+  zc.drawImage(scale2x(x2, 40, 40, ziel._x4 || (ziel._x4 = document.createElement('canvas'))), 0, 0);
+}
+/** Die Crêpe-Platte in 20 x 20: leer, mit Teig (bräunt) oder mit fertigem Crêpe. */
+function platte(c, cr) {
+  r(c, 1, 12, 18, 6, '#3a3a40'); r(c, 2, 10, 16, 3, '#1e1e22'); r(c, 3, 9, 14, 1, '#2a2a30'); r(c, 15, 14, 2, 2, cr.backT >= 0 ? '#f04a3a' : '#5a5a60');
+  if (cr.backT >= 0) {
+    const a = cr.backT / C.CREPE_ZEIT;
+    const f = cr.gewendet ? '#e8c070' : a < 0.5 ? '#f4e4b0' : a < 0.8 ? '#e8c070' : '#c88a3a';
+    r(c, 4, 8, 12, 2, f); r(c, 5, 7, 10, 1, f);
+  } else if (cr.fertig) iconGross(c, 'crepe', 0, -3, 0);
+}
+
+const nbsp = ' ';
+const kurz = (n) => { n = Math.round(n); return n < 1000 ? String(n) : (n / 1000).toFixed(n < 1e4 ? 1 : 0).replace('.', ',') + 'k'; };
+
+/** Einmal je Bild aus main.js (beim Zeichnen des Spielbilds). */
+export function aktualisiere(t) {
+  if (!wurzel && !bauen()) return;
+  const frei = S.produkteFrei();
+  const druck = S.lauf.druck;
+  const ns = naechsterSchritt();   // leiser Hinweis: dieses Getränk ist als Nächstes dran
+  // Steam/Flammen der Becher: Bilder höchstens 6-mal je Sekunde neu
+  const bildTakt = Math.floor(t * 6);
+  for (let k = 0; k < C.ANGEBOT_MAX; k++) {
+    const q = kacheln[k], p0 = frei[k];
+    if (!p0) {
+      if (q.sig !== 'frei') { q.sig = 'frei'; q.el.className = 'kachel frei'; q.name.textContent = 'Frei'; q.preis.textContent = '+'; q.info.textContent = ''; q.cv.getContext('2d').clearRect(0, 0, 80, 80); q.bildSig = ''; }
+      continue;
+    }
+    const i = C.PRODUKTE.indexOf(p0);
+    const rest = S.st.toepfe[p0.id] || 0, max = S.topfMax();
+    const platteArt = p0.art === 'platte', cr = S.lauf.crepe;
+    const leer = !platteArt && rest <= 0;
+    const nf = S.stufe('nachfuell');
+    let zustand = 'bereit', info = '', anteil = platteArt ? 0 : rest / max, zone = null, marke = null, balkenArt = anteil > 0.25 ? 'gruen' : 'gelb';
+    if (platteArt) {
+      if (cr.backT >= 0) {
+        const a = cr.backT / C.CREPE_ZEIT;
+        anteil = a; balkenArt = cr.gewendet ? 'gruen' : 'gelb';
+        if (!cr.gewendet && !cr.verpasst) { zone = C.HANDGRIFF.wenden.timing; marke = a; info = 'Wenden!'; zustand = 'arbeit'; }
+        else { info = 'backt'; zustand = 'arbeit'; }
+      } else if (cr.fertig) { info = 'Fertig!'; zustand = 'fertig'; anteil = 1; balkenArt = 'gruen'; }
+      else { info = 'Backen'; anteil = 0; }
+    } else if (leer) {
+      zustand = 'leer';
+      const f = S.lauf.fuellen[p0.id] || 0;
+      if (nf) { anteil = (S.lauf.nachfuellT[p0.id] || 0) / C.NACHFUELL_ZEIT[nf]; info = 'Wichtel füllt'; }
+      else { anteil = f; info = `LEER${nbsp}· ${C.NACHFUELL_TIPPS - Math.round(f * C.NACHFUELL_TIPPS)}×${nbsp}tippen`; }
+      balkenArt = 'blau';
+    }
+    const gedrueckt = druck && druck.art === 'zelle' && druck.i === i;
+    const wackelt = !!S.lauf.wackel['z' + p0.id];
+    const tipp = !!ns && ns.art === 'zelle' && ns.i === i;
+    const preis = `+${kurz(S.produktPreis(p0) * S.preisFaktor())}${nbsp}★`;
+    const sig = [p0.id, zustand, info, preis, gedrueckt, wackelt, tipp, Math.round(anteil * 40), zone ? 1 : 0, marke == null ? '' : Math.round(marke * 40)].join('|');
+    if (sig !== q.sig) {
+      q.sig = sig;
+      q.el.className = 'kachel ' + zustand + (gedrueckt ? ' gedrueckt' : '') + (wackelt ? ' wackelt' : '') + (tipp ? ' tipp' : '') + (S.lauf.gefuellt[p0.id] > 0 ? ' voll-neu' : '');
+      q.name.textContent = p0.name;
+      q.preis.textContent = preis;
+      q.info.textContent = info;
+      q.fuell.style.width = Math.round(Math.max(0, Math.min(1, anteil)) * 100) + '%';
+      q.fuell.dataset.art = balkenArt;
+      q.zone.style.display = zone ? '' : 'none';
+      if (zone) { q.zone.style.left = zone.von * 100 + '%'; q.zone.style.width = (zone.bis - zone.von) * 100 + '%'; }
+      q.marke.style.display = marke == null ? 'none' : '';
+      if (marke != null) q.marke.style.left = Math.min(98, marke * 100) + '%';
+    }
+    // Bild: Becher mit Dampf (bewegt sich) bzw. Platte
+    const bSig = p0.id + '|' + (platteArt ? [cr.backT >= 0, cr.fertig, cr.gewendet, Math.floor((cr.backT || 0) * 4)].join(',') : bildTakt % 2);
+    if (bSig !== q.bildSig) {
+      q.bildSig = bSig;
+      maleBild(q.cv, (c) => (platteArt ? platte(c, cr) : iconGross(c, p0.id, 0, 0, t)));
+    }
+  }
+}

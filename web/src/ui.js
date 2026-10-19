@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610191610';
-import * as S from './spiel.js?v=202610191610';
-import * as Z from './zeit.js?v=202610191610';
-import * as T from './ton.js?v=202610191610';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610191610';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610191610';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610191610';
-import * as A from './auftraege.js?v=202610191610';
-import * as E from './erfolge.js?v=202610191610';
-import * as ZL from './ziele.js?v=202610191610';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610191610';
-import * as KA from './karte.js?v=202610191610';
-import { zeigeRueckblick } from './ereignis.js?v=202610191610';
-import { barbaraZweig } from './szene.js?v=202610191610';
-import * as SW from './schneeball.js?v=202610191610';
-import * as LI from './lichtung.js?v=202610191610';
-import * as CB from './christbaum.js?v=202610191610';
-import * as SB from './schlitten.js?v=202610191610';
-import * as EB from './schlittschuh.js?v=202610191610';
-import * as BS from './backstube.js?v=202610191610';
-import { alleSymbole } from './symbole.js?v=202610191610';
+import * as C from './config.js?v=202610191800';
+import * as S from './spiel.js?v=202610191800';
+import * as Z from './zeit.js?v=202610191800';
+import * as T from './ton.js?v=202610191800';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610191800';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610191800';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610191800';
+import * as A from './auftraege.js?v=202610191800';
+import * as E from './erfolge.js?v=202610191800';
+import * as ZL from './ziele.js?v=202610191800';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610191800';
+import * as KA from './karte.js?v=202610191800';
+import { zeigeRueckblick } from './ereignis.js?v=202610191800';
+import { barbaraZweig } from './szene.js?v=202610191800';
+import * as SW from './schneeball.js?v=202610191800';
+import * as LI from './lichtung.js?v=202610191800';
+import * as CB from './christbaum.js?v=202610191800';
+import * as SB from './schlitten.js?v=202610191800';
+import * as EB from './schlittschuh.js?v=202610191800';
+import * as BS from './backstube.js?v=202610191800';
+import { alleSymbole } from './symbole.js?v=202610191800';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -44,14 +44,19 @@ export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() |
 // ---------------------------------------------------------------------------
 let letzteHud = '';
 export function hud() {
-  const g = S.formatGeld(S.st.geld);
+  // 19.10.: nur die Zahl (der Stern davor sagt, was es ist) - so passt die größere Kopfzeile
+  const g = S.st.geld >= 1e6 ? (S.st.geld / 1e6).toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' Mio.' : Math.floor(S.st.geld).toLocaleString('de-DE');
   const s = S.stimmung();
   const tw = Z.tagesWetter();
   const u = `${Z.uhrText()} ${tw.temp < 0 ? '−' : ''}${Math.abs(tw.temp)}°`;
   const k = S.offeneTueren();
-  const sig = g + s + u + k + '|' + A.abholbar() + '|' + E.neuZahl();
+  const karteDa = S.st.lernen >= 99;   // Knopf „Karte" erst nach der Einführung
+  const sig = g + s + u + k + '|' + A.abholbar() + '|' + E.neuZahl() + '|' + karteDa + !!S.st.angebotNeu;
   if (sig === letzteHud) return;
   letzteHud = sig;
+  $('#btnStandkarte').classList.toggle('versteckt', !karteDa);
+  $('#huelle').classList.toggle('mit-standkarte', karteDa);
+  $('#standkartePunkt').classList.toggle('versteckt', !S.st.angebotNeu);
   $('#geldZahl').textContent = g;
   $('#stimmungZahl').textContent = s;
   $('#uhr').textContent = u + ((Z.zeitVerstellt() || S.devAn()) && !S.DEMO ? ' ⚙' : '');
@@ -2436,6 +2441,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
 export function verdrahte() {
   alleSymbole();
   $('#nachr').onclick = () => { T.spiele('klick'); zeigeNachrichten(); };
+  $('#btnStandkarte').onclick = () => { T.spiele('klick'); zeigeStandkarte(); };
   nachrPunkt();
   $('#ziel').onclick = () => {
     T.spiele('klick');
