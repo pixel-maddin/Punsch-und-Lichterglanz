@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610191800';
-import * as C from './config.js?v=202610191800';
-import * as S from './spiel.js?v=202610191800';
-import * as Z from './zeit.js?v=202610191800';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610191830';
+import * as C from './config.js?v=202610191830';
+import * as S from './spiel.js?v=202610191830';
+import * as Z from './zeit.js?v=202610191830';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -25,8 +25,8 @@ export function zeichneTresen(c, y0, t, w) {
   // für den Topf darüber (treffer() ist nach unten offen) - zu tief getippt
   // landet also im Getränk, nicht im Menü
   const ys = y0 + C.STAND_H;
-  r(c, 0, ys, C.B, C.LEISTE_LUFT, '#3a2414'); r(c, 0, ys, C.B, 1, '#6a4222'); r(c, 0, ys + C.LEISTE_LUFT - 1, C.B, 1, '#24160c');
-  for (let x = 6; x < C.B; x += 30) r(c, x, ys + 2, 2, 2, '#8a5a32');   // Schraubenköpfe
+  // 19.10.: dunkelblau wie Kacheln und Leiste (vorher Holz mit Schraubenköpfen)
+  r(c, 0, ys, C.B, C.LEISTE_LUFT, '#0c1430'); r(c, 0, ys + C.LEISTE_LUFT - 1, C.B, 1, '#1a2650');
   gedrueckt(c, y0, yb, yr);
   naechsterSchrittZeigen(c, yb, yr, t);
   // Ringe an der Tippstelle

@@ -990,7 +990,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
    ====================================================================== */
 :root {
   --ui-blau: #1c2850; --ui-blau2: #2e4478; --ui-tief: #0e1630;
-  --ui-rand: #8ab8f0; --ui-rand2: #5a78b8; --ui-text: #eef4ff; --ui-text2: #b8ccf0;
+  --ui-rand: #6a8cc8; --ui-rand2: #4a64a0;   /* 19.10.: Rahmen etwas dunkler (vorher #8ab8f0) */ --ui-text: #eef4ff; --ui-text2: #b8ccf0;
 }
 #toast {
   background: linear-gradient(#26366c, #18224a); color: var(--ui-text);
