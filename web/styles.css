@@ -1076,7 +1076,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 
 /* Die Kacheln unten (kacheln.js): fein über dem Spielbild, Tipps gehen durch */
 #theke {
-  position: absolute; left: 0; right: 0; bottom: calc(var(--px) * 32); height: calc(var(--px) * 54);
+  position: absolute; left: 0; right: 0; bottom: calc(var(--px) * 28); height: calc(var(--px) * 44);
   z-index: 1; pointer-events: none;
   display: grid; grid-template-columns: repeat(5, 1fr); gap: calc(var(--px) * 1.2);
   padding: calc(var(--px) * 1.2); box-sizing: border-box;
@@ -1166,3 +1166,10 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Mehr Luft um Sterne und Herzen in der Kopfzeile (19.10.) */
 #geld, #stimmung { padding: 0 calc(var(--px) * 5) !important; }
 #geld .hud-ico, #stimmung .hud-ico { margin-right: calc(var(--px) * 2.2); }
+/* Niedrigere Kacheln (19.10.: Reihe 44 statt 54 Spielpixel - auf dem iPhone in 16:9 war es eng) */
+.kachel { padding-top: calc(var(--px) * 1); }
+.k-name { margin-top: calc(var(--px) * 1.4); }
+.k-preis { margin-top: calc(var(--px) * 1); }
+.k-balken { bottom: calc(var(--px) * 1.4); }
+.k-info { top: calc(var(--px) * 1); }
+.kachel.frei .k-name { margin-top: calc(var(--px) * 4); }

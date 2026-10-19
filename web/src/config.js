@@ -13,18 +13,18 @@ export const B = 180;          // Breite in Pixeln - fest
 export const H_MIN = 300;      // Mindesthöhe; darunter wird nach Höhe skaliert
 export const H_MAX = 440;      // Höher wird es nicht, der Rest ist Rand
 export const LEISTE = 26;      // DOM-Leiste unten (Laden, Kalender, …)
-export const STAND_H = 128;    // Tresenansicht über der Leiste
+export const STAND_H = 118;    // Tresenansicht über der Leiste (19.10.: 128 → 118, Kacheln niedriger - auf dem iPhone war es eng)
 // Abstand zwischen unterster Regalreihe und Leiste (12.10., gemeldet: beim
 // schnellen Ausschenken landete man auf Karte/Aufträge statt auf dem Topf).
 // Eine Holzleiste; ein Tipp darauf zählt noch für den Topf darüber.
-export const LEISTE_LUFT = 6;
+export const LEISTE_LUFT = 2;   // 19.10.: 6 → 2 (Nutzerwunsch: weniger Abstand zu den Menüknöpfen)
 export const HUD_H = 20;       // DOM-Kopfzeile oben
 
 // Tresenansicht, relativ zu ihrer Oberkante
 export const T_GAST = 52;      // Höhe der Gästezone
 export const T_BRETT = 22;     // Höhe des Tresenbretts (Gläser, Hand, Ausguss)
 export const T_ZELLE_B = 36;   // Regal: 5 Spalten
-export const T_ZELLE_H = 27;   // Regal: 2 Reihen
+export const T_ZELLE_H = 22;   // halbe Höhe der Kachelreihe (19.10.: 27 → 22, Reihe 44 statt 54)
 
 // ---------------------------------------------------------------------------
 // Getränke und Speisen

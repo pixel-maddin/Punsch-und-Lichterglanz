@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202610192120';
-import * as S from './spiel.js?v=202610192120';
-import { iconGross, scale2x, r, p } from './pixel.js?v=202610192120';
-import { naechsterSchritt } from './tresen.js?v=202610192120';
+import * as C from './config.js?v=202610192200';
+import * as S from './spiel.js?v=202610192200';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202610192200';
+import { naechsterSchritt } from './tresen.js?v=202610192200';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;
@@ -25,7 +25,7 @@ function bauen() {
   for (let k = 0; k < C.ANGEBOT_MAX; k++) {
     const el = document.createElement('div');
     el.className = 'kachel';
-    el.innerHTML = '<canvas width="80" height="80"></canvas><b class="k-name"></b><span class="k-preis"></span><i class="k-info"></i>'
+    el.innerHTML = '<canvas width="40" height="40"></canvas><b class="k-name"></b><span class="k-preis"></span><i class="k-info"></i>'
       + '<span class="k-balken"><span class="k-zone"></span><span class="k-fuell"></span><span class="k-marke"></span></span>';
     wurzel.appendChild(el);
     kacheln.push({ el, cv: el.querySelector('canvas'), name: el.querySelector('.k-name'), preis: el.querySelector('.k-preis'),
@@ -38,13 +38,15 @@ function bauen() {
 const _klein = document.createElement('canvas'); _klein.width = 20; _klein.height = 20;
 const _kc = _klein.getContext('2d', { willReadFrequently: true });
 const _x2 = document.createElement('canvas');
-function maleBild(ziel, malen) {
+// `glatt` = zweimal Scale2x (80 x 80, Knöpfe oben), sonst einmal (40 x 40): Die
+// Getränke-Kacheln sollen wieder etwas pixeliger aussehen (19.10. Nutzerwunsch)
+function maleBild(ziel, malen, glatt = true) {
   _kc.clearRect(0, 0, 20, 20);
   malen(_kc);
   const x2 = scale2x(_klein, 20, 20, _x2);
   const zc = ziel.getContext('2d');
-  zc.clearRect(0, 0, 80, 80);
-  zc.drawImage(scale2x(x2, 40, 40, ziel._x4 || (ziel._x4 = document.createElement('canvas'))), 0, 0);
+  zc.clearRect(0, 0, ziel.width, ziel.height);
+  zc.drawImage(glatt ? scale2x(x2, 40, 40, ziel._x4 || (ziel._x4 = document.createElement('canvas'))) : x2, 0, 0);
 }
 /** Die Crêpe-Platte in 20 x 20: leer, mit Teig (bräunt) oder mit fertigem Crêpe. */
 function platte(c, cr) {
@@ -103,7 +105,7 @@ export function aktualisiere(t) {
   for (let k = 0; k < C.ANGEBOT_MAX; k++) {
     const q = kacheln[k], p0 = frei[k];
     if (!p0) {
-      if (q.sig !== 'frei') { q.sig = 'frei'; q.el.className = 'kachel frei'; q.name.textContent = 'Frei'; q.preis.textContent = '+'; q.info.textContent = ''; q.cv.getContext('2d').clearRect(0, 0, 80, 80); q.bildSig = ''; }
+      if (q.sig !== 'frei') { q.sig = 'frei'; q.el.className = 'kachel frei'; q.name.textContent = 'Frei'; q.preis.textContent = '+'; q.info.textContent = ''; q.cv.getContext('2d').clearRect(0, 0, 40, 40); q.bildSig = ''; }
       continue;
     }
     const i = C.PRODUKTE.indexOf(p0);
@@ -150,7 +152,7 @@ export function aktualisiere(t) {
     const bSig = p0.id + '|' + (platteArt ? [cr.backT >= 0, cr.fertig, cr.gewendet, Math.floor((cr.backT || 0) * 4)].join(',') : bildTakt % 2);
     if (bSig !== q.bildSig) {
       q.bildSig = bSig;
-      maleBild(q.cv, (c) => (platteArt ? platte(c, cr) : iconGross(c, p0.id, 0, 0, t)));
+      maleBild(q.cv, (c) => (platteArt ? platte(c, cr) : iconGross(c, p0.id, 0, 0, t)), false);
     }
   }
 }
