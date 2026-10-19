@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202610191855';
-import * as S from './spiel.js?v=202610191855';
-import { iconGross, scale2x, r } from './pixel.js?v=202610191855';
-import { naechsterSchritt } from './tresen.js?v=202610191855';
+import * as C from './config.js?v=202610191930';
+import * as S from './spiel.js?v=202610191930';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202610191930';
+import { naechsterSchritt } from './tresen.js?v=202610191930';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;
@@ -54,6 +54,38 @@ function platte(c, cr) {
     const f = cr.gewendet ? '#e8c070' : a < 0.5 ? '#f4e4b0' : a < 0.8 ? '#e8c070' : '#c88a3a';
     r(c, 4, 8, 12, 2, f); r(c, 5, 7, 10, 1, f);
   } else if (cr.fertig) iconGross(c, 'crepe', 0, -3, 0);
+}
+
+/**
+ * Bilder der beiden Knöpfe oben (19.10.): Haus links, Angebot rechts - in 20 x 20
+ * gemalt und wie die Kacheln zweimal per Scale2x geglättet.
+ */
+function hausBild(c) {
+  r(c, 13, 3, 3, 4, '#8a4a3a'); r(c, 13, 2, 3, 1, '#f6f9fc');                                    // Schornstein mit Schnee
+  for (let i = 0; i < 7; i++) r(c, 9 - i, 3 + i, 3 + i * 2, 1, i < 2 ? '#f6f9fc' : i % 2 ? '#c83a2e' : '#a82a22');   // Dach, oben verschneit
+  r(c, 3, 10, 15, 1, '#5a2a1a');
+  r(c, 4, 11, 13, 7, '#efe0c0'); r(c, 4, 11, 1, 7, '#d0bc98'); r(c, 16, 11, 1, 7, '#d8c6a4');   // Wand
+  r(c, 5, 12, 3, 3, '#ffd870'); r(c, 13, 12, 3, 3, '#ffd870'); p(c, 6, 13, '#f0a840'); p(c, 14, 13, '#f0a840');   // warme Fenster
+  r(c, 9, 13, 3, 5, '#7a4a28'); p(c, 11, 15, '#ffd040');                                          // Tür
+  r(c, 9, 12, 3, 1, '#2f7a30'); p(c, 10, 12, '#d83a3a');                                           // Kranz über der Tür
+  const bunt = ['#ff5a5a', '#ffd040', '#5ad06a', '#5a9aff'];
+  for (let x = 4, k = 0; x < 17; x += 2, k++) p(c, x, 10, bunt[k % 4]);                           // Lichterkette an der Traufe
+  r(c, 2, 18, 17, 2, '#f6f9fc'); r(c, 2, 19, 17, 1, '#cfd9e8');                                   // Schnee
+}
+function angebotBild(c) {
+  r(c, 1, 2, 13, 15, '#8a5a2e'); r(c, 2, 3, 11, 13, '#244a34'); r(c, 1, 2, 13, 1, '#a8703a');     // Tafel mit Holzrahmen
+  for (let i = 0; i < 4; i++) { r(c, 3, 5 + i * 3, 2, 1, '#ffd870'); r(c, 6, 5 + i * 3, 3 + ((i * 2) % 3), 1, '#e8f0e0'); }   // Kreidezeilen mit Sternchen
+  r(c, 5, 17, 1, 2, '#6a4222'); r(c, 9, 17, 1, 2, '#6a4222');                                      // Füße
+  // Becher davor, mit Dampf
+  r(c, 11, 11, 7, 7, '#c8302a'); r(c, 11, 11, 7, 1, '#e86a5a'); r(c, 11, 11, 1, 7, '#a02020'); r(c, 12, 17, 5, 1, '#801818');
+  r(c, 18, 13, 1, 3, '#c8302a'); p(c, 18, 12, '#c8302a'); p(c, 18, 16, '#c8302a');
+  r(c, 13, 13, 3, 3, '#ffd040'); p(c, 14, 14, '#fff6c0');                                           // Stern auf dem Becher
+  p(c, 13, 9, '#ffffff'); p(c, 14, 8, '#e8eef4'); p(c, 16, 9, '#ffffff'); p(c, 15, 7, '#e8eef4');
+}
+export function knopfBilder() {
+  const h = document.querySelector('#btnHaus canvas'), a = document.querySelector('#btnStandkarte canvas');
+  if (h) maleBild(h, hausBild);
+  if (a) maleBild(a, angebotBild);
 }
 
 const nbsp = ' ';

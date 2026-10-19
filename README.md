@@ -69,7 +69,7 @@ Wichtel schauen nur zu.
 Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst höchstens 3 Stunden
 Arbeit - wer mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
 
-**Haus schmücken:** Tippe auf dein Haus. Jeder Deko-Platz hat drei
+**Haus schmücken:** Knopf „Haus" oben links. Jeder Deko-Platz hat drei
 Varianten - die Tanne kann eine Riesentanne oder eine Palme werden, auf dem
 Dach warten Rentiere oder ein steckengebliebener Nikolaus, am Stand spielt
 eine Blaskapelle oder der Elvis-Wichtel. Die dritte Variante zeigt sich erst,

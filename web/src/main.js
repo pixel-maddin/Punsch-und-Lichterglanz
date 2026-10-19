@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610191855';
-import * as S from './spiel.js?v=202610191855';
-import * as Z from './zeit.js?v=202610191855';
-import * as T from './ton.js?v=202610191855';
-import * as LI from './lichtung.js?v=202610191855';
-import * as CB from './christbaum.js?v=202610191855';
-import * as KA from './karte.js?v=202610191855';
-import * as SB from './schlitten.js?v=202610191855';
-import * as EB from './schlittschuh.js?v=202610191855';
-import * as BS from './backstube.js?v=202610191855';
-import * as UI from './ui.js?v=202610191855';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610191855';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610191855';
-import * as Kacheln from './kacheln.js?v=202610191855';
-import * as Lernen from './lernen.js?v=202610191855';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610191855';
-import * as A from './auftraege.js?v=202610191855';
-import * as E from './erfolge.js?v=202610191855';
-import * as ZL from './ziele.js?v=202610191855';
+import * as C from './config.js?v=202610191930';
+import * as S from './spiel.js?v=202610191930';
+import * as Z from './zeit.js?v=202610191930';
+import * as T from './ton.js?v=202610191930';
+import * as LI from './lichtung.js?v=202610191930';
+import * as CB from './christbaum.js?v=202610191930';
+import * as KA from './karte.js?v=202610191930';
+import * as SB from './schlitten.js?v=202610191930';
+import * as EB from './schlittschuh.js?v=202610191930';
+import * as BS from './backstube.js?v=202610191930';
+import * as UI from './ui.js?v=202610191930';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610191930';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610191930';
+import * as Kacheln from './kacheln.js?v=202610191930';
+import * as Lernen from './lernen.js?v=202610191930';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610191930';
+import * as A from './auftraege.js?v=202610191930';
+import * as E from './erfolge.js?v=202610191930';
+import * as ZL from './ziele.js?v=202610191930';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -154,7 +154,8 @@ cv.addEventListener('pointerdown', (e) => {
     }
     // Der Briefkasten neben der Tür (Wunschzettel, 10.10.)
     if (x >= 82 && x <= 98 && y >= GW - 47 && y <= GW - 32 && S.briefDa()) { T.spiele('klick'); UI.zeigeBrief(); return; }
-    if (x >= 32 && x <= 128 && y >= GW - 96 && y <= GW - 22 && S.st.lernen >= 99) { T.spiele('klick'); UI.oeffneMeinHaus(); }
+    // 19.10.: Ein Tipp aufs Haus öffnet nicht mehr „Haus schmücken" (dafür gibt es den
+    // Knopf „Haus" oben links) - das Haus ist frei für Überraschungen wie die Schneekatze
     return;
   }
   S.lauf.chefT = 0;   // du bist am Stand: Wichtel legen einen Zahn zu
@@ -425,6 +426,7 @@ else if (q.get('tempo')) Z.setzeZeit(null, Number(q.get('tempo')));
 
 ZL.nachholen();
 UI.verdrahte();
+Kacheln.knopfBilder();   // Bilder der Knöpfe „Haus" und „Angebot" (19.10.)
 if (S.DEMO) demo(S.DEMO);
 else if (!S.st.intro) {
   UI.frageName(false, () => UI.waehleModus((modus) => {

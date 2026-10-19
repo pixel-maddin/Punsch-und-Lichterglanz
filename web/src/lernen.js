@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610191855';
-import * as S from './spiel.js?v=202610191855';
-import * as A from './auftraege.js?v=202610191855';
-import * as E from './erfolge.js?v=202610191855';
-import * as Z from './ziele.js?v=202610191855';
-import * as KA from './karte.js?v=202610191855';
-import { zellePos } from './tresen.js?v=202610191855';
+import * as C from './config.js?v=202610191930';
+import * as S from './spiel.js?v=202610191930';
+import * as A from './auftraege.js?v=202610191930';
+import * as E from './erfolge.js?v=202610191930';
+import * as Z from './ziele.js?v=202610191930';
+import * as KA from './karte.js?v=202610191930';
+import { zellePos } from './tresen.js?v=202610191930';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -152,7 +152,7 @@ const HINWEISE = [
     text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
-    text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung - je mehr, desto mehr Gäste. Tipp: Tippe auf dein Haus, um es zu schmücken (Lichter, Farben, Varianten).',
+    text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung - je mehr, desto mehr Gäste. Tipp: Mit dem Knopf „Haus" oben links schmückst du es (Lichter, Farben, Varianten).',
     ziel: () => ({ x: 90, y: 10 }), dauer: 9 },
   { id: 'gegangen', ruhig: true, wann: () => S.st.stats.verpasst >= 1,
     text: () => 'Ein Gast ist weitergegangen - nicht schlimm, es kommen neue! Aber Achtung: Manchmal kommt jemand GANZ BESONDERES vorbei - den solltest du nicht warten lassen.',

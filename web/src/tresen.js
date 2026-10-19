@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610191855';
-import * as C from './config.js?v=202610191855';
-import * as S from './spiel.js?v=202610191855';
-import * as Z from './zeit.js?v=202610191855';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610191930';
+import * as C from './config.js?v=202610191930';
+import * as S from './spiel.js?v=202610191930';
+import * as Z from './zeit.js?v=202610191930';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -405,9 +405,11 @@ function zustandAbzeichen(c, x, y, z, t) {
     r(c, x - 2, y - 2, 6, 5, '#4ac05a'); r(c, x - 1, y - 3, 4, 7, '#4ac05a');
     p(c, x - 1, y + 1, '#ffffff'); p(c, x, y + 2, '#ffffff'); p(c, x + 1, y + 1, '#ffffff'); p(c, x + 2, y, '#ffffff'); p(c, x + 3, y - 1, '#ffffff');   // Haken
   } else {
-    // In Arbeit: kleiner Füllbalken, wie über dem Glas auf dem Tablett
-    r(c, x - 3, y - 2, 10, 4, '#3a2a20');
-    r(c, x - 2, y - 1, Math.max(1, Math.round(8 * z.anteil)), 2, '#ffd040');
+    // In Arbeit: drei Punkte, die nacheinander aufleuchten („wird gemacht") -
+    // 19.10. statt eines weiteren Füllbalkens
+    r(c, x - 3, y - 2, 11, 5, '#3a2a20');
+    const an = Math.floor(t * 4) % 3;
+    for (let k = 0; k < 3; k++) r(c, x - 2 + k * 3, y - 1, 2, 3, k === an ? '#ffd040' : '#8a6a3a');
   }
 }
 
@@ -484,11 +486,8 @@ function brett(c, y, t) {
   r(c, gx - 1, gy + 12, 28, 3, '#6a4222');
   for (let i = 0; i < 3; i++) glas(c, gx + i * 9, gy + 3);
   glas(c, gx + 4, gy - 3); glas(c, gx + 13, gy - 3);
-  if (S.hat('spuel')) {
-    wichtelKlein(c, gx + 30, y + 17, t);
-    // Wie lange, bis das nächste saubere Glas aufs Tablett kommt
-    if (S.lauf.spuelT > 0) { r(c, gx, y + 19, 26, 1, '#6a4222'); r(c, gx, y + 19, Math.round(26 * S.lauf.spuelT / C.SPUEL_ZEIT), 1, '#9ad8ff'); }
-  }
+  // Spül-Wichtel (19.10.: ohne Balken - das neue Glas erscheint einfach)
+  if (S.hat('spuel')) wichtelKlein(c, gx + 30, y + 17, t);
 
   // Hand
   const n = S.handMax();
@@ -509,14 +508,13 @@ function brett(c, y, t) {
     const hoch = S.lauf.neuInHand === i && S.lauf.neuInHandT > 0 ? 2 : 0;
     if (h.art === 'glas') glasGross(c, x, by - 17 - hoch);
     else if (h.rest > 0) {
-      // In Zubereitung: ein Glas, das sich von unten füllt, und ein Balken
+      // In Zubereitung: ein Glas, das sich von unten füllt (19.10.: der gelbe Balken darüber ist weg - das Glas zeigt es schon)
       const a = Math.max(0, Math.min(1, 1 - h.rest / (h.dauer || 1)));
       glasGross(c, x, by - 17);
       const f = C.PRODUKT[h.id].farbe, hFl = Math.round(12 * a);
       r(c, x + 3, by - 3 - hFl, 11, hFl, f);
       // Vom Servier-Wichtel bestellt: er steht daneben und gießt ein
       if (h.vonWichtel) { wichtelKlein(c, x + 1, by, t); p(c, x + 3, by - 13 + (Math.floor(t * 8) % 2), f); }
-      r(c, x + 1, by - 22, 18, 2, '#3a2a20'); r(c, x + 1, by - 22, Math.round(18 * a), 2, '#ffd040');
       if (h.id === 'feuerzange') { const fl = Math.floor(t * 9) % 2; p(c, x + 8 + fl, by - 20, '#6ab0ff'); p(c, x + 9, by - 19, '#ff8a20'); }
       else if (Math.floor(t * 4) % 2) p(c, x + 9, by - 19, '#eef2f6');
     }
@@ -536,15 +534,9 @@ function brett(c, y, t) {
         extraHinweis(c, x + 13, by - 30, h.extra, t, C.HANDGRIFF[h.extra].n - h.tipps);
         if (h.extra === 'beutel') { const tm = C.HANDGRIFF.beutel.timing; zeitBalken(c, x + 1, by - 23, 18, h.ziehT / tm.dauer, tm); }
       }
-      // Vom Wichtel eingeschenkt und fertig: er steht daneben und wartet; der
-      // hellblaue Balken zeigt, wann er selbst serviert
-      if (h.vonWichtel && h.fuer != null) {
-        wichtelKlein(c, x + 1, by, t);
-        if (!(h.flammeT > 0) && h.extra !== 'beutel') {
-          const a = Math.max(0, 1 - (h.wartetT || 0) / S.wichtelWartezeit());
-          r(c, x + 1, by - 23, 18, 2, '#2a3a64'); r(c, x + 1, by - 23, Math.max(1, Math.round(18 * a)), 2, '#7ab8ff');
-        }
-      }
+      // Vom Wichtel eingeschenkt und fertig: er steht daneben und wartet
+      // (19.10.: ohne den hellblauen Warte-Balken - der grüne Haken sagt „fertig")
+      if (h.vonWichtel && h.fuer != null) wichtelKlein(c, x + 1, by, t);
       // Feuerzauber brennt: Balken schrumpft - so lange gibt es den Bonus
       if (h.flammeT > 0) {
         const a = h.flammeT / C.FEUER_FENSTER;

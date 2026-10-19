@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610191855';
-import * as S from './spiel.js?v=202610191855';
-import * as Z from './zeit.js?v=202610191855';
-import * as T from './ton.js?v=202610191855';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610191855';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610191855';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610191855';
-import * as A from './auftraege.js?v=202610191855';
-import * as E from './erfolge.js?v=202610191855';
-import * as ZL from './ziele.js?v=202610191855';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610191855';
-import * as KA from './karte.js?v=202610191855';
-import { zeigeRueckblick } from './ereignis.js?v=202610191855';
-import { barbaraZweig } from './szene.js?v=202610191855';
-import * as SW from './schneeball.js?v=202610191855';
-import * as LI from './lichtung.js?v=202610191855';
-import * as CB from './christbaum.js?v=202610191855';
-import * as SB from './schlitten.js?v=202610191855';
-import * as EB from './schlittschuh.js?v=202610191855';
-import * as BS from './backstube.js?v=202610191855';
-import { alleSymbole } from './symbole.js?v=202610191855';
+import * as C from './config.js?v=202610191930';
+import * as S from './spiel.js?v=202610191930';
+import * as Z from './zeit.js?v=202610191930';
+import * as T from './ton.js?v=202610191930';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610191930';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610191930';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610191930';
+import * as A from './auftraege.js?v=202610191930';
+import * as E from './erfolge.js?v=202610191930';
+import * as ZL from './ziele.js?v=202610191930';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610191930';
+import * as KA from './karte.js?v=202610191930';
+import { zeigeRueckblick } from './ereignis.js?v=202610191930';
+import { barbaraZweig } from './szene.js?v=202610191930';
+import * as SW from './schneeball.js?v=202610191930';
+import * as LI from './lichtung.js?v=202610191930';
+import * as CB from './christbaum.js?v=202610191930';
+import * as SB from './schlitten.js?v=202610191930';
+import * as EB from './schlittschuh.js?v=202610191930';
+import * as BS from './backstube.js?v=202610191930';
+import { alleSymbole } from './symbole.js?v=202610191930';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -55,6 +55,7 @@ export function hud() {
   if (sig === letzteHud) return;
   letzteHud = sig;
   $('#btnStandkarte').classList.toggle('versteckt', !karteDa);
+  $('#btnHaus').classList.toggle('versteckt', !karteDa);
   $('#huelle').classList.toggle('mit-standkarte', karteDa);
   $('#standkartePunkt').classList.toggle('versteckt', !S.st.angebotNeu);
   $('#geldZahl').textContent = g;
@@ -693,7 +694,7 @@ function baueLaden() {
         z.classList.add('blitz'); setTimeout(() => z.classList.remove('blitz'), 500);
         const hinweis = (a.id in C.LICHTER || S.istDeko(a) || a.wahl) && !(S.st.tipps && S.st.tipps.meinHaus);
         // 17.10.: „Mein Haus" heißt seit 09.10. „Haus schmücken" und öffnet sich über das Haus
-        toast(hinweis ? `${a.name} gekauft! Ein- und ausschalten, Farbe und Varianten: Tippe auf dein Haus.` : `${a.name} gekauft!`, 'gut');
+        toast(hinweis ? `${a.name} gekauft! Ein- und ausschalten, Farbe und Varianten: Knopf „Haus" oben links.` : `${a.name} gekauft!`, 'gut');
         if (hinweis) { S.st.tipps = S.st.tipps || {}; S.st.tipps.meinHaus = true; }
         zeigeKauf(a.id);
       }
@@ -2442,6 +2443,7 @@ export function verdrahte() {
   alleSymbole();
   $('#nachr').onclick = () => { T.spiele('klick'); zeigeNachrichten(); };
   $('#btnStandkarte').onclick = () => { T.spiele('klick'); zeigeStandkarte(); };
+  $('#btnHaus').onclick = () => { T.spiele('klick'); offen === 'laden' ? schliesseBlatt() : oeffneMeinHaus(); };
   nachrPunkt();
   $('#ziel').onclick = () => {
     T.spiele('klick');
