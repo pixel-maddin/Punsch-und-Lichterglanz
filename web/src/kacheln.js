@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202610192230';
-import * as S from './spiel.js?v=202610192230';
-import { iconGross, scale2x, r, p } from './pixel.js?v=202610192230';
-import { naechsterSchritt } from './tresen.js?v=202610192230';
+import * as C from './config.js?v=202610192245';
+import * as S from './spiel.js?v=202610192245';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202610192245';
+import { naechsterSchritt } from './tresen.js?v=202610192245';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;
@@ -37,16 +37,19 @@ function bauen() {
 // Kleine Leinwand 20 x 20 in Spielpixeln, dann zweimal Scale2x
 const _klein = document.createElement('canvas'); _klein.width = 20; _klein.height = 20;
 const _kc = _klein.getContext('2d', { willReadFrequently: true });
-const _x2 = document.createElement('canvas');
 // `glatt` = zweimal Scale2x (80 x 80, Knöpfe oben), sonst einmal (40 x 40): Die
-// Getränke-Kacheln sollen wieder etwas pixeliger aussehen (19.10. Nutzerwunsch)
+// Getränke-Kacheln sollen wieder etwas pixeliger aussehen (19.10. Nutzerwunsch).
+// 19.10. nachts: KEIN drawImage aus einer gemeinsamen Zwischenleinwand mehr -
+// Safari auf dem iPhone kopiert Leinwände teils verzögert, dann zeigten zwei
+// Kacheln dieselbe Sorte und sprangen hin und her (gemeldet). Scale2x schreibt
+// jetzt per putImageData direkt in die Leinwand der Kachel bzw. in deren eigene
+// Zwischenleinwand; gelesen wird nur sofort (getImageData).
 function maleBild(ziel, malen, glatt = true) {
   _kc.clearRect(0, 0, 20, 20);
   malen(_kc);
-  const x2 = scale2x(_klein, 20, 20, _x2);
-  const zc = ziel.getContext('2d');
-  zc.clearRect(0, 0, ziel.width, ziel.height);
-  zc.drawImage(glatt ? scale2x(x2, 40, 40, ziel._x4 || (ziel._x4 = document.createElement('canvas'))) : x2, 0, 0);
+  if (!glatt) { scale2x(_klein, 20, 20, ziel); return; }
+  const x2 = scale2x(_klein, 20, 20, ziel._x2 || (ziel._x2 = document.createElement('canvas')));
+  scale2x(x2, 40, 40, ziel);
 }
 /** Die Crêpe-Platte in 20 x 20: leer, mit Teig (bräunt) oder mit fertigem Crêpe. */
 function platte(c, cr) {

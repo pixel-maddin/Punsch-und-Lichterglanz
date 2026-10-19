@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610192230';
-import * as S from './spiel.js?v=202610192230';
-import * as Z from './zeit.js?v=202610192230';
-import * as T from './ton.js?v=202610192230';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610192230';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610192230';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610192230';
-import * as A from './auftraege.js?v=202610192230';
-import * as E from './erfolge.js?v=202610192230';
-import * as ZL from './ziele.js?v=202610192230';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610192230';
-import * as KA from './karte.js?v=202610192230';
-import { zeigeRueckblick } from './ereignis.js?v=202610192230';
-import { barbaraZweig } from './szene.js?v=202610192230';
-import * as SW from './schneeball.js?v=202610192230';
-import * as LI from './lichtung.js?v=202610192230';
-import * as CB from './christbaum.js?v=202610192230';
-import * as SB from './schlitten.js?v=202610192230';
-import * as EB from './schlittschuh.js?v=202610192230';
-import * as BS from './backstube.js?v=202610192230';
-import { alleSymbole } from './symbole.js?v=202610192230';
+import * as C from './config.js?v=202610192245';
+import * as S from './spiel.js?v=202610192245';
+import * as Z from './zeit.js?v=202610192245';
+import * as T from './ton.js?v=202610192245';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610192245';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610192245';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610192245';
+import * as A from './auftraege.js?v=202610192245';
+import * as E from './erfolge.js?v=202610192245';
+import * as ZL from './ziele.js?v=202610192245';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610192245';
+import * as KA from './karte.js?v=202610192245';
+import { zeigeRueckblick } from './ereignis.js?v=202610192245';
+import { barbaraZweig } from './szene.js?v=202610192245';
+import * as SW from './schneeball.js?v=202610192245';
+import * as LI from './lichtung.js?v=202610192245';
+import * as CB from './christbaum.js?v=202610192245';
+import * as SB from './schlitten.js?v=202610192245';
+import * as EB from './schlittschuh.js?v=202610192245';
+import * as BS from './backstube.js?v=202610192245';
+import { alleSymbole } from './symbole.js?v=202610192245';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
