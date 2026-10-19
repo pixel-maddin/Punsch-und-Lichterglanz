@@ -157,7 +157,7 @@ export function icon(c, id, x, y, t = 0, roh = false) {
   // Motiv 3 x 3
   // (kein Pluszeichen: ein rotes Kreuz las sich schon einmal als Erste Hilfe)
   const M3 = { gluehwein: ['.#.', '###', '#.#'], kinderpunsch: ['#.#', '.#.', '#.#'], eierpunsch: ['#.#', '###', '.#.'],
-    jaegertee: ['.#.', '###', '###'], schoko: ['#.#', '.#.', '#.#'], feuerzange: ['.#.', '.#.', '###'] };
+    jaegertee: ['.#.', '###', '###'], schoko: ['#.#', '.#.', '#.#'], feuerzange: ['.#.', '###', '###'] };   // 19.10.: Seiten einen Pixel höher - wie eine Flamme
   if (id === 'apfel') { r(c, x + 2, y + 6, 3, 2, '#d83a2a'); p(c, x + 2, y + 6, '#f06a5a'); p(c, x + 3, y + 5, '#3a8a2a'); }   // Apfel mit Stiel
   const m3 = M3[id], mf = MOTIV_FARBE[id];
   if (m3) m3.forEach((z, j) => { for (let i = 0; i < 3; i++) if (z[i] === '#') p(c, x + 2 + i, y + 5 + j, mf); });
