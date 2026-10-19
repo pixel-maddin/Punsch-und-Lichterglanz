@@ -42,17 +42,19 @@ export const T_ZELLE_H = 27;   // Regal: 2 Reihen
 // Beträge in GANZEN Sternen: seit 29.09. alles ×10 (vorher 1,20 Sterne für
 // Kinderpunsch, jetzt 12) - ganze Zahlen fühlen sich großzügiger an, schwerer
 // wird dadurch nichts. Alte Spielstände werden in spiel.js umgerechnet.
+// Preise 19.10. nach der Karte (5 aus 10) gesenkt: Herzwärmer 20→19, Waldtee 24→22, Crêpe 28→24,
+// Zimtwolke 32→26, Feuerzauber 40→30 - sonst verdiente man mit den fünf teuersten ~40 % mehr als vorher.
 export const PRODUKTE = [
   { id: 'gluehwein',    name: 'Sternenpunsch',    preis: 10, zeit: 0.4,  kosten: 0,     art: 'topf',   farbe: '#8a1830', alk: false },
   { id: 'kinderpunsch', name: 'Kinderpunsch',     preis: 12, zeit: 0.5,  kosten: 200,    art: 'topf',   farbe: '#ee6d9a', alk: false, griffe: ['zuckerstange'], bonus: 0.20 },
   { id: 'apfel',        name: 'Heißer Apfel',     preis: 14, zeit: 0.7,  kosten: 600,    art: 'topf',   farbe: '#e8942e', alk: false, griffe: ['ruehren'], bonus: 0.25 },
   { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false, griffe: ['guss'], bonus: 0.25 },
   { id: 'schoko',       name: 'Heiße Schokolade', preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, griffe: ['sahne'], bonus: 0.30 },
-  { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 20, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, griffe: ['sahne', 'zimtpulver'], bonus: 0.40 },
-  { id: 'jaegertee',    name: 'Waldtee',          preis: 24, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false, griffe: ['beutel'], bonus: 0.40 },
-  { id: 'crepe',        name: 'Crêpe',            preis: 28, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false, griffe: ['wenden'], bonus: 0.40 },
-  { id: 'weisser',      name: 'Zimtwolke',        preis: 32, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: false, griffe: ['schaum', 'zimt'], bonus: 0.45 },
-  { id: 'feuerzange',   name: 'Feuerzauber',      preis: 40, zeit: 2.4, kosten: 165000, art: 'topf',   farbe: '#a01818', alk: false, griffe: ['zucker'], bonus: 0.50 },
+  { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 19, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, griffe: ['sahne', 'zimtpulver'], bonus: 0.40 },
+  { id: 'jaegertee',    name: 'Waldtee',          preis: 22, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false, griffe: ['beutel'], bonus: 0.40 },
+  { id: 'crepe',        name: 'Crêpe',            preis: 24, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false, griffe: ['wenden'], bonus: 0.40 },
+  { id: 'weisser',      name: 'Zimtwolke',        preis: 26, zeit: 1.7, kosten: 86000, art: 'topf',   farbe: '#efe7c0', alk: false, griffe: ['schaum', 'zimt'], bonus: 0.45 },
+  { id: 'feuerzange',   name: 'Feuerzauber',      preis: 30, zeit: 2.4, kosten: 165000, art: 'topf',   farbe: '#a01818', alk: false, griffe: ['zucker'], bonus: 0.50 },
 ];
 // griffe: die Handgriffe, die nur DU machst - nach dem Einschenken das Glas
 // auf dem Tablett antippen, in dieser Reihenfolge (je `n`-mal). Fertig zahlt

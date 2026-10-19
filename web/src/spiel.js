@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610191510';
-import * as Z from './zeit.js?v=202610191510';
-import { neueFarben } from './pixel.js?v=202610191510';
+import * as C from './config.js?v=202610191610';
+import * as Z from './zeit.js?v=202610191610';
+import { neueFarben } from './pixel.js?v=202610191610';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -406,8 +406,15 @@ export function angebot() {
   for (const id of besessen) {
     if (st.angebotBekannt.includes(id)) continue;
     st.angebotBekannt.push(id);
-    if (st.angebot.length < C.ANGEBOT_MAX) st.angebot.push(id);
-    else st.angebotNeu = true;   // gekauft, aber kein Platz: Punkt an der Karte
+    if (st.angebot.length < C.ANGEBOT_MAX) { st.angebot.push(id); continue; }
+    // Karte voll: Das Neue ersetzt das Günstigste (gemessen 19.10.: wer nie
+    // umstellt, verdiente sonst nur die Hälfte). Zurücktauschen geht jederzeit.
+    const billig = st.angebot.slice().sort((a, b) => C.PRODUKT[a].preis - C.PRODUKT[b].preis)[0];
+    if (billig && C.PRODUKT[billig].preis < C.PRODUKT[id].preis) {
+      st.angebot[st.angebot.indexOf(billig)] = id;
+      hooks.toast(`${C.PRODUKT[id].name} steht jetzt auf deiner Karte statt ${C.PRODUKT[billig].name}. Umstellen: „Karte" rechts unten.`, 'neu');
+    }
+    st.angebotNeu = true;   // Punkt an der Karte, bis man sie ansieht
   }
   st.angebot = st.angebot.filter((id) => besessen.includes(id));
   if (!st.angebot.length && besessen.length) st.angebot = [besessen[0]];
