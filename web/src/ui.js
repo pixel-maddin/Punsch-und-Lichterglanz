@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610191930';
-import * as S from './spiel.js?v=202610191930';
-import * as Z from './zeit.js?v=202610191930';
-import * as T from './ton.js?v=202610191930';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610191930';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610191930';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610191930';
-import * as A from './auftraege.js?v=202610191930';
-import * as E from './erfolge.js?v=202610191930';
-import * as ZL from './ziele.js?v=202610191930';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610191930';
-import * as KA from './karte.js?v=202610191930';
-import { zeigeRueckblick } from './ereignis.js?v=202610191930';
-import { barbaraZweig } from './szene.js?v=202610191930';
-import * as SW from './schneeball.js?v=202610191930';
-import * as LI from './lichtung.js?v=202610191930';
-import * as CB from './christbaum.js?v=202610191930';
-import * as SB from './schlitten.js?v=202610191930';
-import * as EB from './schlittschuh.js?v=202610191930';
-import * as BS from './backstube.js?v=202610191930';
-import { alleSymbole } from './symbole.js?v=202610191930';
+import * as C from './config.js?v=202610192000';
+import * as S from './spiel.js?v=202610192000';
+import * as Z from './zeit.js?v=202610192000';
+import * as T from './ton.js?v=202610192000';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610192000';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H } from './szene.js?v=202610192000';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610192000';
+import * as A from './auftraege.js?v=202610192000';
+import * as E from './erfolge.js?v=202610192000';
+import * as ZL from './ziele.js?v=202610192000';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610192000';
+import * as KA from './karte.js?v=202610192000';
+import { zeigeRueckblick } from './ereignis.js?v=202610192000';
+import { barbaraZweig } from './szene.js?v=202610192000';
+import * as SW from './schneeball.js?v=202610192000';
+import * as LI from './lichtung.js?v=202610192000';
+import * as CB from './christbaum.js?v=202610192000';
+import * as SB from './schlitten.js?v=202610192000';
+import * as EB from './schlittschuh.js?v=202610192000';
+import * as BS from './backstube.js?v=202610192000';
+import { alleSymbole } from './symbole.js?v=202610192000';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -2222,14 +2222,15 @@ export function zeigeHilfe() {
   fenster('So geht’s', `
     <ol class="hilfe">
       <li><b>Glas holen</b> - links auf dem Tresen.</li>
-      <li><b>Abfüllen</b> - auf den passenden Topf tippen. Das Symbol im Bläschen des Gastes ist dasselbe wie auf dem Topf.</li>
-      <li><b>Servieren</b> - auf den Gast tippen. Je schneller, desto mehr Trinkgeld.</li>
+      <li><b>Abfüllen</b> - unten auf das passende Getränk tippen. Das Bild im Bläschen des Gastes ist dasselbe wie unten.</li>
+      <li><b>Servieren</b> - ist das Glas fertig, tragen Glas und Bläschen einen grünen Haken. Dann auf den Gast tippen. Je schneller, desto mehr Trinkgeld.</li>
       <li><b>Handgriffe</b> - Zuckerstange, Umrühren, Zuckerguss, Sahne, Zimt, Milchschaum, Zuckerhut: das fertige Glas auf dem Tablett antippen (die goldene Blase zeigt, was fehlt). Dann zahlt der Gast mehr, je nach Getränk 20 bis 50 %. Wichtel lassen sie weg.</li>
-      <li><b>Leerer Topf?</b> Ein paarmal antippen, dann ist er wieder voll.</li>
+      <li><b>Leer?</b> Das Getränk unten ein paarmal antippen, dann ist es wieder voll.</li>
       <li><b>Zu langsam?</b> Nicht schlimm - dann geht der Gast eben weiter. Nur besondere Gäste solltest du nicht verpassen - wer das ist, merkst du schon.</li>
     </ol>
     <p>Wer zügig hintereinander bedient, baut <b>Schwung</b> auf (bis ×1,40). Wer länger bleibt, bekommt Besuch von ganzen Gruppen - und manchmal von jemand ganz Besonderem.</p>
     <p>Mit den Sternen kaufst du Deko, Farbe, Zutaten und Wichtel. Je gemütlicher das Haus, desto mehr Gäste kommen und desto mehr zahlen sie.</p>
+    <p>Oben links schmückst du mit <b>Haus</b> dein Haus (Lichter, Farben, Varianten). Oben rechts stellst du mit <b>Angebot</b> zusammen, welche Sorten dein Stand anbietet - höchstens ${C.ANGEBOT_MAX}. Schnelle Sorten bringen weniger je Glas, langsame mehr.</p>
     <p>Auf der <b>Karte</b> warten Läden, Minispiele (zuerst nur die Waldlichtung, alle paar Tage kommt ein neues dazu) und alle paar Tage der Weihnachtsmarkt.${S.miniOffen('back') ? ' Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr.' : ''} Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an. Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
     <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.${S.aufsicht() ? ' Deine Wichtel bedienen normale Gäste jetzt allein - du kümmerst dich um die <b>goldenen Gäste</b>: Sie drängeln vor und zahlen viel mehr.' : ''}</p>
     <p><b>Ruf:</b> Jeden Tag, an dem du ein bisschen mitarbeitest, steigt der Ruf deines Standes - und alle Preise mit. Wie weit du heute bist, steht unter Aufträge.</p>

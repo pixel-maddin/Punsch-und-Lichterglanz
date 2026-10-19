@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610191930';
-import * as S from './spiel.js?v=202610191930';
-import * as A from './auftraege.js?v=202610191930';
-import * as E from './erfolge.js?v=202610191930';
-import * as Z from './ziele.js?v=202610191930';
-import * as KA from './karte.js?v=202610191930';
-import { zellePos } from './tresen.js?v=202610191930';
+import * as C from './config.js?v=202610192000';
+import * as S from './spiel.js?v=202610192000';
+import * as A from './auftraege.js?v=202610192000';
+import * as E from './erfolge.js?v=202610192000';
+import * as Z from './ziele.js?v=202610192000';
+import * as KA from './karte.js?v=202610192000';
+import { zellePos } from './tresen.js?v=202610192000';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -118,7 +118,7 @@ function einfuehrung() {
       if (S.st.stats.bedient >= 1) { st.lernen = 4; hinweisT = 0; return einfuehrung(); }
       if (!g) return null;
       if (S.lauf.hand.some((h) => h.art === 'voll' && h.rest > 0)) return null;   // kurz einschenken lassen
-      return { text: 'Fertig! Jetzt auf den GAST tippen - servieren!', ziel: gastZiel(g.platz) };
+      return { text: 'Fertig - der grüne Haken zeigt es! Jetzt auf den GAST tippen - servieren!', ziel: gastZiel(g.platz) };
     case 4:
       return { text: 'Geschafft! Je schneller du servierst, desto mehr Trinkgeld. Jetzt kommen mehr Gäste - viel Spaß!', ziel: null,
         weiter: () => { st.lernen = 99; S.lauf.lernen = false; ruheT = HINWEIS_PAUSE - NACH_EINFUEHRUNG; S.speichere(); } };
@@ -131,7 +131,7 @@ function einfuehrung() {
 // ---------------------------------------------------------------------------
 const HINWEISE = [
   { id: 'leer', ruhig: true, sofort: true, wann: () => !S.stufe('nachfuell') && leererTopf() >= 0,
-    text: () => 'Der Topf ist leer! Tippe ihn 4-mal an, dann ist er wieder voll.',
+    text: () => `Leer! Tippe das Getränk unten ${C.NACHFUELL_TIPPS}-mal an, dann ist es wieder voll.`,
     ziel: () => zellZiel(leererTopf()), fertig: () => leererTopf() < 0 },
   { id: 'falsch', ruhig: true, sofort: true, wann: () => S.lauf.fehlGast > 0,
     text: () => 'Falsches Getränk - der Gast möchte, was in seinem Bläschen steht. Dein Glas bleibt stehen: vielleicht will es der Nächste, sonst ab in den Ausguss.',
@@ -141,12 +141,19 @@ const HINWEISE = [
     ziel: ausgussZiel, fertig: () => S.lauf.hand.length < S.handMax() },
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
   { id: 'laden', sofort: true, wann: () => zielDran('getraenk', 'kinderpunsch'),
-    info: () => (S.hat('kinderpunsch') ? 'Neues Getränk: Kinderpunsch! Gut gemacht.' : 'Neues Getränk! Du hast genug Sterne für Kinderpunsch.') + ' Je mehr Sorten du anbietest, desto mehr Sterne verdienst du: Jede neue Sorte ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
+    info: () => (S.hat('kinderpunsch') ? 'Neues Getränk: Kinderpunsch! Gut gemacht.' : 'Neues Getränk! Du hast genug Sterne für Kinderpunsch.') + ' Bis zu fünf Sorten passen in dein Angebot, und jede neue ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
     text: () => 'Tippe auf KARTE - im Supermarkt gibt es Kinderpunsch.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
   { id: 'laden_danach', ruhig: true, sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
-    text: () => 'Prima! Kinderpunsch steht jetzt im Regal. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn aus dem neuen Topf. Weitere Getränke findest du später im Supermarkt.',
+    text: () => 'Prima! Kinderpunsch steht jetzt unten in deinem Angebot. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn von dort. Weitere Getränke gibt es später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
+  // 19.10.: Angebot (höchstens fünf Sorten) und Knopf „Haus" oben links
+  { id: 'angebot', wann: () => S.produkteBesessen().length > C.ANGEBOT_MAX,
+    text: () => `Dein Angebot ist voll: Höchstens ${C.ANGEBOT_MAX} Sorten passen unten hin. Neues ersetzt von selbst das Günstigste. Mit „ANGEBOT" oben rechts stellst du es selbst zusammen - schnelle Sorten bringen weniger je Glas, langsame mehr.`,
+    ziel: () => ({ x: 164, y: 30 }), dauer: 14 },
+  { id: 'hausknopf', wann: () => S.hat('kranz') && S.st.stats.bedient >= 30,
+    text: () => 'Dein Haus schmückst du mit dem Knopf „HAUS" oben links: Lichter, Farben und Varianten.',
+    ziel: () => ({ x: 16, y: 30 }), dauer: 9 },
   { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
     info: () => (S.hat('kranz') ? 'Deine erste Deko hängt!' : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen.') + ' Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus im Dorf werden!',
     text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
@@ -166,7 +173,7 @@ const HINWEISE = [
     text: () => 'Tippe auf KARTE - im Wichtelwald wartet er schon.',
     ziel: ladenZiel, fertig: () => S.hat('spuel'), laden: { tab: 'wichtel', id: 'spuel' }, lang: true },
   { id: 'w_nachfuell', sofort: true, wann: () => zielDran('nachfuell', 'nachfuell'),
-    info: () => (S.hat('nachfuell') ? 'Den NACHFÜLL-WICHTEL hast du auch schon: Er füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.' : 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.'),
+    info: () => (S.hat('nachfuell') ? 'Den NACHFÜLL-WICHTEL hast du auch schon: Er füllt leere Getränke unten von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.' : 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.'),
     text: () => 'Tippe auf KARTE - im Wichtelwald findest du ihn.',
     ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, lang: true },
   { id: 'w_servier', sofort: true, wann: () => zielDran('servier', 'servier'),
@@ -180,7 +187,7 @@ const HINWEISE = [
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
   { id: 'bestellen2', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg && S.lauf.hand.some((h) => h.vonWichtel && !(h.rest > 0)),
-    text: () => 'Siehst du den kleinen Wichtel am Tablett? Solange du am Stand bist, schenkt er für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - dann gibt es den Bonus. Sonst serviert er es nach ein paar Sekunden selbst (blauer Balken). Du kannst auch selbst einen Gast antippen, dann schenkt er für ihn ein.',
+    text: () => 'Siehst du den kleinen Wichtel am Tablett? Solange du am Stand bist, schenkt er für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - dann gibt es den Bonus. Sonst serviert er es nach ein paar Sekunden selbst - fertige Gläser tragen einen grünen Haken. Du kannst auch selbst einen Gast antippen, dann schenkt er für ihn ein.',
     ziel: () => handZiel(Math.max(0, S.lauf.hand.findIndex((h) => h.vonWichtel))), fertig: () => (S.lauf.wichtelSelbst || 0) > 0 || !S.lauf.hand.some((h) => h.vonWichtel) },
   // Was es außer dem Stand gibt (09.10.): erst, wenn die Wichtel den Stand
   // tragen - dann ist Zeit dafür, und es hat Sterne für die Markt-Ware
@@ -231,7 +238,7 @@ const HINWEISE = [
     text: () => { const g = S.lauf.gaeste.find((x) => x.gross); return g ? `Großbestellung! ${g.gross.name} will ${g.gross.n} × ${C.PRODUKT[g.gross.id].name}. Bring alle, bevor die Zeit abläuft - das gibt richtig viele Sterne. Die Wichtel trauen sich da nicht ran.` : ''; },
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.gross && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 9 },
   { id: 'chef', ruhig: true, wann: () => S.hat('servier') && S.chefAktiv() && S.st.stats.bedient >= 60,
-    text: () => `Du bist der Chef! Solange du am Stand mit anpackst, arbeiten die Wichtel ${C.CHEF_TEMPO === 2 ? 'doppelt' : '×' + String(C.CHEF_TEMPO).replace('.', ',')} so schnell (Tafel links oben). Besondere Gäste bedienst nur du.`,
+    text: () => `Du bist der Chef! Solange du am Stand mit anpackst, arbeiten die Wichtel ${C.CHEF_TEMPO === 2 ? 'doppelt' : '×' + String(C.CHEF_TEMPO).replace('.', ',')} so schnell (grüne Tafel links neben dem Schild). Besondere Gäste bedienst nur du.`,
     ziel: () => ({ x: 40, y: G + 2 }), dauer: 8 },
   { id: 'schild', ruhig: true, wann: () => S.st.stats.bedient >= 40 && !S.st.standName,
     text: () => 'Tipp: Tippe auf das rote Schild über dem Stand - dann kannst du ihm einen eigenen Namen geben.',

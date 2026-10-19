@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610191930';
-import * as Z from './zeit.js?v=202610191930';
-import { neueFarben } from './pixel.js?v=202610191930';
+import * as C from './config.js?v=202610192000';
+import * as Z from './zeit.js?v=202610192000';
+import { neueFarben } from './pixel.js?v=202610192000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -974,7 +974,7 @@ export function tippeZelle(i) {
     else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS && (st.topfHinweise || 0) < 2) {
       st.topfHinweise = (st.topfHinweise || 0) + 1;
       const noch = C.NACHFUELL_TIPPS - Math.round(lauf.fuellen[p.id] * C.NACHFUELL_TIPPS);
-      hooks.toast(`Topf leer! Noch ${noch}× antippen, dann ist er wieder voll.`, 'hinweis');
+      hooks.toast(`${p.name} ist leer! Noch ${noch}× antippen, dann ist es wieder voll.`, 'hinweis');
     }
     return;
   }
