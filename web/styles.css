@@ -1173,3 +1173,5 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .k-balken { bottom: calc(var(--px) * 1.4); }
 .k-info { top: calc(var(--px) * 1); }
 .kachel.frei .k-name { margin-top: calc(var(--px) * 4); }
+/* Knöpfe „Haus" und „Angebot": Grund etwas durchscheinend, damit die Welt dahinter durchkommt (19.10.) */
+.knopf-oben { background: linear-gradient(rgba(52, 80, 140, 0.62), rgba(30, 46, 96, 0.62)); -webkit-backdrop-filter: blur(calc(var(--px) * 0.6)); backdrop-filter: blur(calc(var(--px) * 0.6)); }
