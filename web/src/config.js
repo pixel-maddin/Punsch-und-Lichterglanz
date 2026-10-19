@@ -496,7 +496,8 @@ for (const p of PRODUKTE) {
   if (p.kosten === 0) continue;
   ARTIKEL.push({
     id: p.id, tab: 'super', gruppe: 'Zutaten', name: p.name, kosten: p.kosten, stimmung: 0,
-    produkt: true, text: `Gäste zahlen ${String(p.preis).replace('.', ',')} Sterne${p.zeit ? ` · Zubereitung ${String(p.zeit).replace('.', ',')} s` : ''}${p.id === 'kinderpunsch' ? ' · lockt Kinder an' : ''}${p.griffe ? ` · mit ${p.griffe.map((g) => HANDGRIFF[g].name).join(' + ')} +${Math.round((p.bonus || EXTRA_BONUS) * 100)} %` : ''}.`,
+    produkt: true, // 19.10.: geschützte Leerzeichen (\u00A0) zwischen Zahl und Einheit und vor dem „·" - sonst brach „0,5 | s" oder „+20 | %" um
+    text: `Gäste zahlen ${String(p.preis).replace('.', ',')}\u00A0Sterne${p.zeit ? `\u00A0· Zubereitung ${String(p.zeit).replace('.', ',')}\u00A0s` : ''}${p.id === 'kinderpunsch' ? '\u00A0· lockt Kinder an' : ''}${p.griffe ? `\u00A0· mit ${p.griffe.map((g) => HANDGRIFF[g].name).join(' + ')} +${Math.round((p.bonus || EXTRA_BONUS) * 100)}\u00A0%` : ''}.`,
   });
 }
 

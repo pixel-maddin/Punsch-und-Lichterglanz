@@ -20,6 +20,19 @@
   --gruen2: #2a5626;
   --gold: #e8b030;
   --schrift: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  /* Schriftleiter (19.10., Durchsicht als UI/UX-Designer): sieben Stufen statt
+     vorher 25 verschiedener GrÃ¶ÃŸen. Ausnahmen nur fÃ¼r Zahlen-/SymbolgrÃ¶ÃŸen
+     (Summe, TÃ¼rchen-Ziffern, Emoji-Symbole) und die winzigen Kartenschilder. */
+  --t-mini:   calc(var(--px) * 4.2);   /* Kleingedrucktes, FuÃŸnoten, StÃ¤nde unter Karten */
+  --t-klein:  calc(var(--px) * 4.6);   /* Nebentext, Reiter, AbschnittskÃ¶pfe */
+  --t-text:   calc(var(--px) * 5);     /* FlieÃŸtext, Zeilentext, KnÃ¶pfe in Listen */
+  --t-betont: calc(var(--px) * 5.6);   /* Namen in Zeilen, Hinweise, HauptknÃ¶pfe */
+  --t-gross:  calc(var(--px) * 6.2);   /* FensterknÃ¶pfe, Eingaben, hervorgehobene Einblendung */
+  --t-titel:  calc(var(--px) * 7);     /* groÃŸe Zwischenzeilen, Symbole in KnÃ¶pfen */
+  --t-kopf:   calc(var(--px) * 8);     /* Titel von Blatt und Fenster */
+  /* Textfarben auf Papier: zwei Abstufungen statt fÃ¼nf (alle mind. 4,5:1 Kontrast) */
+  --text2: #6a4a34;
+  --text3: #7a5a44;
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -63,7 +76,7 @@ html, body {
   gap: calc(var(--px) * 2);
   pointer-events: none;
   font-weight: bold;
-  font-size: calc(var(--px) * 5.6);   /* eine Größe für alle drei Kästen */
+  font-size: var(--t-betont);   /* eine Größe für alle drei Kästen */
   color: #fff;
   /* Kein Umriss: Die Kästen haben ihren eigenen dunklen Grund */
 }
@@ -105,7 +118,7 @@ html, body {
 }
 .blatt-offen #toast.fliegt { transform: translate(calc(-50% + var(--fx, 0px)), var(--fy, 0px)) scale(0.08) !important; }
 .nachr-zeile { display: flex; gap: calc(var(--px) * 2); padding: calc(var(--px) * 1.6) 0; border-bottom: calc(var(--px) * 0.4) solid rgba(90, 60, 30, 0.2); text-align: left; }
-.nachr-zeile small { flex: none; color: #7a5a44; font-weight: normal; }
+.nachr-zeile small { flex: none; color: var(--text3); font-weight: normal; }
 .nachr-zeile.neu b { color: var(--rot2); }
 .nachr-zeile.neu::before { content: '●'; color: var(--rot); flex: none; }
 /* Pixelsymbole (symbole.js): 1:1 im Spielraster, pixelgenau hochgezogen */
@@ -133,7 +146,7 @@ html, body {
   position: relative;
   appearance: none; border: 0; background: none;
   color: var(--papier);
-  font: bold calc(var(--px) * 5.2) var(--schrift);
+  font: bold var(--t-text) var(--schrift);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   /* Schrift etwas tiefer, das Symbol bleibt, wo es war */
   gap: calc(var(--px) * 2.5); padding-top: calc(var(--px) * 2);
@@ -150,7 +163,7 @@ html, body {
   min-width: calc(var(--px) * 7); height: calc(var(--px) * 7);
   border-radius: calc(var(--px) * 4);
   background: var(--rot); color: #fff;
-  font-size: calc(var(--px) * 4.6);
+  font-size: var(--t-klein);
   display: flex; align-items: center; justify-content: center;
   border: calc(var(--px) * 0.6) solid #fff;
 }
@@ -160,7 +173,7 @@ html, body {
 .zeile.neu { background: linear-gradient(90deg, #fff3c4, transparent 70%); }
 .zeile.verdeckt b { color: #8a7a66; letter-spacing: 0.1em; }
 .zeile.verdeckt span { font-style: italic; }
-#toast.neu { background: #fff4c8; border-color: var(--gold); box-shadow: 0 calc(var(--px) * 1.2) 0 #a87a1a; font-size: calc(var(--px) * 6.2); }
+#toast.neu { background: #fff4c8; border-color: var(--gold); box-shadow: 0 calc(var(--px) * 1.2) 0 #a87a1a; font-size: var(--t-gross); }
 #btnKalender.lockt .sym, #btnAuftraege.lockt .sym, #btnLaden.lockt .sym { animation: wackeln 1.4s infinite; }
 @keyframes wackeln { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-12deg); } 90% { transform: rotate(10deg); } 95% { transform: rotate(-6deg); } }
 
@@ -174,7 +187,7 @@ html, body {
   border-radius: calc(var(--px) * 2);
   box-shadow: 0 calc(var(--px) * 1.2) 0 var(--holz2);
   padding: calc(var(--px) * 2.5) calc(var(--px) * 4);
-  font-weight: bold; font-size: calc(var(--px) * 5.6);
+  font-weight: bold; font-size: var(--t-betont);
   text-align: center;
   pointer-events: none;
   transition: opacity 0.2s, transform 0.2s;
@@ -184,7 +197,7 @@ html, body {
 #toast.spezial { background: #fff4c8; border-color: var(--gold); box-shadow: 0 calc(var(--px) * 1.2) 0 #a87a1a; }
 #toast.gut { background: #e4f4d8; border-color: var(--gruen); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--gruen2); }
 #toast.boese { background: #f8dcd4; border-color: var(--rot); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--rot2); }
-#toast.hinweis { font-size: calc(var(--px) * 5); }
+#toast.hinweis { font-size: var(--t-text); }
 
 #pause { color: #fff; }
 /* Solange Laden, Kalender oder Menü offen sind, erscheinen Einblendungen
@@ -195,7 +208,7 @@ html, body {
 /* ---------------------------------------------------------------- Knöpfe */
 .k {
   appearance: none;
-  font: bold calc(var(--px) * 5.4) var(--schrift);
+  font: bold var(--t-betont) var(--schrift);
   color: #fff;
   background: linear-gradient(#d24a3c, var(--rot));
   border: calc(var(--px) * 0.8) solid var(--rot2);
@@ -215,7 +228,7 @@ html, body {
 .k--wahl.gewaehlt { background: linear-gradient(#f0c848, #c8962a); color: var(--tinte); text-shadow: none; border-color: #8a6414; box-shadow: 0 calc(var(--px) * 1.2) 0 #8a6414; }
 .k--fertig, .k--zu { background: none; border-color: transparent; box-shadow: none; color: var(--gruen); }
 .k--fertig:disabled, .k--zu:disabled { opacity: 1; filter: none; }
-.haken { color: var(--gruen); font-size: calc(var(--px) * 8); }
+.haken { color: var(--gruen); font-size: var(--t-kopf); }
 
 /* ---------------------------------------------------------------- Blatt */
 /* Die Übersichtskarte (karte.js): über der Welt, unter Kopfzeile und Leiste */
@@ -225,12 +238,12 @@ html, body {
 #kartenOrte .ort {
   position: absolute; transform: translate(-50%, 0); z-index: 2;
   appearance: none; cursor: pointer; text-align: center; white-space: nowrap;
-  font: bold calc(var(--px) * 4.4) var(--schrift); color: var(--tinte); line-height: 1.15;
+  font: bold var(--t-klein) var(--schrift); color: var(--tinte); line-height: 1.15;
   background: rgba(255, 248, 232, 0.94); border: calc(var(--px) * 0.6) solid var(--holz);
   border-radius: calc(var(--px) * 1.5); padding: calc(var(--px) * 0.8) calc(var(--px) * 2);
   box-shadow: 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.3);
 }
-#kartenOrte .ort small { display: block; font-weight: normal; font-size: calc(var(--px) * 3.4); color: #8a6a4a; }
+#kartenOrte .ort small { display: block; font-weight: normal; font-size: calc(var(--px) * 3.4); color: var(--text3); }
 #kartenOrte .ort.bald { background: rgba(240, 232, 214, 0.88); }
 #kartenOrte .ort.zuhause { background: #fff3c4; border-color: var(--gold); }
 /* Markttag: das Schild LEUCHTET, statt zu hüpfen (11.10., Nutzerwunsch) */
@@ -248,7 +261,7 @@ html, body {
 #kartenZu {
   position: absolute; right: calc(var(--px) * 3); top: calc(var(--px) * 21); z-index: 3;
   appearance: none; border: 0; cursor: pointer; width: calc(var(--px) * 13); height: calc(var(--px) * 13);
-  border-radius: calc(var(--px) * 2.5); background: var(--holz); color: #fff; font: bold calc(var(--px) * 6) var(--schrift);
+  border-radius: calc(var(--px) * 2.5); background: var(--holz); color: #fff; font: bold var(--t-gross) var(--schrift);
   box-shadow: 0 calc(var(--px) * 1) 0 rgba(0, 0, 0, 0.35);
 }
 /* Schilder aus (12.10.): nur noch die Orte, die leicht leuchten. Ein
@@ -256,7 +269,7 @@ html, body {
 #kartenText {
   position: absolute; left: calc(var(--px) * 3); top: calc(var(--px) * 21); z-index: 3;
   appearance: none; border: 0; cursor: pointer; width: calc(var(--px) * 13); height: calc(var(--px) * 13);
-  border-radius: calc(var(--px) * 2.5); background: var(--holz); color: #fff; font: bold calc(var(--px) * 5) var(--schrift);
+  border-radius: calc(var(--px) * 2.5); background: var(--holz); color: #fff; font: bold var(--t-text) var(--schrift);
   box-shadow: 0 calc(var(--px) * 1) 0 rgba(0, 0, 0, 0.35);
 }
 #landkarte.ohne-text #kartenText { text-decoration: line-through; opacity: 0.85; }
@@ -268,7 +281,7 @@ html, body {
 #miniZu {
   position: absolute; right: calc(var(--px) * 3); top: calc(var(--px) * 15); z-index: 2;
   appearance: none; border: 0; cursor: pointer; width: calc(var(--px) * 12); height: calc(var(--px) * 12);
-  border-radius: calc(var(--px) * 2.5); background: rgba(90, 50, 30, 0.85); color: #fff; font: bold calc(var(--px) * 5.5) var(--schrift);
+  border-radius: calc(var(--px) * 2.5); background: rgba(90, 50, 30, 0.85); color: #fff; font: bold var(--t-betont) var(--schrift);
 }
 #blatt {
   position: absolute; left: calc(var(--px) * 3); right: calc(var(--px) * 3);
@@ -287,14 +300,14 @@ html, body {
   padding: calc(var(--px) * 3) calc(var(--px) * 3) calc(var(--px) * 2) calc(var(--px) * 5);
   border-bottom: calc(var(--px) * 0.8) solid #d8b880;
 }
-#blatt h1 { margin: 0; font-size: calc(var(--px) * 8); flex: 1; color: var(--rot2); }
-#blattGeld { font-weight: bold; font-size: calc(var(--px) * 6); color: var(--holz); }
+#blatt h1 { margin: 0; font-size: var(--t-kopf); flex: 1; color: var(--rot2); }
+#blattGeld { font-weight: bold; font-size: var(--t-gross); color: var(--holz); }
 #blattZu {
   appearance: none; border: 0; cursor: pointer;
   width: calc(var(--px) * 15); height: calc(var(--px) * 15);
   border-radius: calc(var(--px) * 2);
   background: var(--holz); color: var(--papier);
-  font-size: calc(var(--px) * 7);
+  font-size: var(--t-titel);
 }
 #blattTabs { display: flex; flex-direction: column; gap: calc(var(--px) * 2); padding: calc(var(--px) * 2) calc(var(--px) * 3) 0; }
 #blattTabs .reiter { display: flex; gap: calc(var(--px) * 1); }
@@ -309,7 +322,7 @@ html, body {
 }
 .modus-k {
   flex: 1; appearance: none; cursor: pointer; border: 0; background: none;
-  font: bold calc(var(--px) * 5.4) var(--schrift); color: var(--holz);
+  font: bold var(--t-betont) var(--schrift); color: var(--holz);
   padding: calc(var(--px) * 4.6) 0; border-radius: calc(var(--px) * 2.4);
   position: relative;
 }
@@ -318,16 +331,16 @@ html, body {
 #blatt[data-modus="haus"] #blattInhalt { margin-top: calc(var(--px) * 2); border-radius: calc(var(--px) * 2); }
 
 /* Mein Haus: Auswahl aus Punkten (Aus / Weiß / Bunt, Aus / An, Anstrich) */
-.zeile.haus .txt b { font-size: calc(var(--px) * 5.4); }
+.zeile.haus .txt b { font-size: var(--t-betont); }
 .punktwahl { flex: none; display: flex; gap: calc(var(--px) * 1); }
 .pw {
   appearance: none; cursor: pointer;
   min-width: calc(var(--px) * 16);
   display: flex; flex-direction: column; align-items: center; gap: calc(var(--px) * 1);
   padding: calc(var(--px) * 1.6) calc(var(--px) * 1) calc(var(--px) * 1.2);
-  background: var(--papier2); color: #7a5a44;
+  background: var(--papier2); color: var(--text3);
   border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2);
-  font: bold calc(var(--px) * 4) var(--schrift);
+  font: bold var(--t-mini) var(--schrift);
 }
 .pw.aktiv { background: #fff3c4; color: var(--tinte); border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 0.6) var(--gold); }
 .pw:active { transform: scale(0.94); }
@@ -348,12 +361,12 @@ html, body {
 .vw {
   appearance: none; cursor: pointer; text-align: center;
   padding: calc(var(--px) * 1.6) calc(var(--px) * 1);
-  background: var(--papier2); color: #7a5a44;
+  background: var(--papier2); color: var(--text3);
   border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2);
-  font: bold calc(var(--px) * 4.2) var(--schrift); line-height: 1.2;
+  font: bold var(--t-mini) var(--schrift); line-height: 1.2;
 }
-.vw b { display: block; font-size: calc(var(--px) * 4.4); }
-.vw small { display: block; font-weight: normal; font-size: calc(var(--px) * 3.8); }
+.vw b { display: block; font-size: var(--t-klein); }
+.vw small { display: block; font-weight: normal; font-size: var(--t-mini); }
 .vw.aktiv { background: #fff3c4; color: var(--tinte); border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 0.6) var(--gold); }
 .vw.kauf { background: #e4f4d8; border-color: var(--gruen); color: var(--gruen2); }
 .vw.teuer { opacity: 0.6; }
@@ -362,31 +375,31 @@ html, body {
 .var-erkl { margin: calc(var(--px) * 1) 0 calc(var(--px) * 1); }
 /* Haus schmücken (11.10.): Sprungleiste, eine Karte je Teil, Herkunft des Geschenkten */
 .haus-sprung { position: sticky; top: calc(var(--px) * -0.5); z-index: 2; display: flex; gap: calc(var(--px) * 1.5); padding: calc(var(--px) * 1.5) 0; background: var(--papier); border-bottom: calc(var(--px) * 0.5) solid #e0c898; }
-.hs-k { flex: 1; appearance: none; cursor: pointer; padding: calc(var(--px) * 3.4) 0; min-height: calc(var(--px) * 13); background: var(--papier2); color: var(--holz); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 3); font: bold calc(var(--px) * 4.4) var(--schrift); }
+.hs-k { flex: 1; appearance: none; cursor: pointer; padding: calc(var(--px) * 3.4) 0; min-height: calc(var(--px) * 13); background: var(--papier2); color: var(--holz); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 3); font: bold var(--t-klein) var(--schrift); }
 .hs-k:active { transform: scale(0.95); background: #fff3c4; }
 .zeile.haus.karte { flex-wrap: wrap; }
 .zeile.haus.karte .txt { flex: 1 1 40%; }
 .zeile.haus .txt span { display: block; }
 .zeile.haus.ist-aus .ico, .zeile.haus.ist-aus .txt b, .zeile.haus.ist-aus .varwahl, .zeile.haus.ist-aus .haus-zusatz { opacity: 0.45; }
-.haus-zusatz { flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; margin-top: calc(var(--px) * 1.5); font: bold calc(var(--px) * 4.2) var(--schrift); color: #7a5a44; }
+.haus-zusatz { flex: 1 1 100%; display: flex; align-items: center; justify-content: space-between; margin-top: calc(var(--px) * 1.5); font: bold var(--t-mini) var(--schrift); color: var(--text3); }
 /* Abschnitte in „Haus schmücken" deutlich abgrenzen (11.10.): Balken statt blasser Zeile */
 .gruppe.haus-abschnitt { opacity: 1; margin: calc(var(--px) * 5) 0 calc(var(--px) * 1); padding: calc(var(--px) * 2) calc(var(--px) * 3); background: var(--holz); color: #fff8ec; border-radius: calc(var(--px) * 2); letter-spacing: 0.08em; box-shadow: 0 calc(var(--px) * 0.8) 0 rgba(0, 0, 0, 0.18); }
 .haus-sprung + .gruppe.haus-abschnitt, .var-erkl + .gruppe.haus-abschnitt { margin-top: calc(var(--px) * 2); }
 .zeile.haus.anstrich { flex-wrap: wrap; }
 .anstrich-wahl { flex: 1 1 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 1.5); margin-top: calc(var(--px) * 1.5); }
 .anstrich-wahl .pw { min-width: 0; }
-.haus-quelle { margin: calc(var(--px) * 2.5) 0 0; font: bold calc(var(--px) * 4) var(--schrift); color: #a07a52; }
+.haus-quelle { margin: calc(var(--px) * 2.5) 0 0; font: bold var(--t-mini) var(--schrift); color: var(--text3); }
 /* Anstrich: eine eigene Reihe unter dem Titel, darf umbrechen */
 .gruppe + .punktwahl { flex-wrap: wrap; margin: calc(var(--px) * 1) 0 calc(var(--px) * 2); }
 .tab {
   flex: 1; appearance: none; cursor: pointer;
-  font: bold calc(var(--px) * 4.6) var(--schrift);
+  font: bold var(--t-klein) var(--schrift);
   color: var(--holz);
   background: var(--papier2);
   border: calc(var(--px) * 0.8) solid #c89a5a; border-bottom: 0;
   border-radius: calc(var(--px) * 2) calc(var(--px) * 2) 0 0;
   padding: calc(var(--px) * 6.2) calc(var(--px) * 0.5);   /* höher: gut mit dem Finger zu treffen (~40 px) */
-  font-size: calc(var(--px) * 4.9);
+  font-size: var(--t-text);
   line-height: 1.1;
 }
 .tab.aktiv { background: #fffaf0; color: var(--rot2); }
@@ -401,7 +414,7 @@ html, body {
 }
 #blatt[data-art="kalender"] #blattInhalt, #blatt[data-art="auftraege"] #blattInhalt, #blatt[data-art="menue"] #blattInhalt { margin-top: calc(var(--px) * 3); border-radius: calc(var(--px) * 2); }
 .gruppe {
-  font-weight: bold; font-size: calc(var(--px) * 5); text-transform: uppercase; letter-spacing: 0.06em;
+  font-weight: bold; font-size: var(--t-text); text-transform: uppercase; letter-spacing: 0.06em;
   color: var(--holz); opacity: 0.7;
   margin: calc(var(--px) * 3) 0 calc(var(--px) * 1);
 }
@@ -420,33 +433,33 @@ html, body {
   border: calc(var(--px) * 0.6) solid #d8b880;
 }
 .zeile .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: calc(var(--px) * 0.5); }
-.zeile b { font-size: calc(var(--px) * 5.8); }
-.zeile span { font-size: calc(var(--px) * 4.8); color: #6a4a34; line-height: 1.25; }
-.zeile .bonus, p.bonus { font-style: normal; font-size: calc(var(--px) * 4.4); color: #b0304a; font-weight: bold; }
-.zeile .grund { font-size: calc(var(--px) * 4.4); color: #8a6a4a; }
+.zeile b { font-size: var(--t-betont); }
+.zeile span { font-size: var(--t-text); color: var(--text2); line-height: 1.25; }
+.zeile .bonus, p.bonus { font-style: normal; font-size: var(--t-klein); color: #b0304a; font-weight: bold; }
+.zeile .grund { font-size: var(--t-klein); color: var(--text3); }
 .zeile.besessen .txt b::after { content: ''; }
 .zeile.gesperrt .ico { filter: grayscale(0.7); opacity: 0.7; }
 .knopfplatz { flex: none; min-width: calc(var(--px) * 40); display: flex; justify-content: flex-end; }
-.knopfplatz .k { min-width: calc(var(--px) * 40); padding-left: calc(var(--px) * 2); padding-right: calc(var(--px) * 2); font-size: calc(var(--px) * 5); }
+.knopfplatz .k { min-width: calc(var(--px) * 40); padding-left: calc(var(--px) * 2); padding-right: calc(var(--px) * 2); font-size: var(--t-text); }
 
 #blatt.kurz-weg { opacity: 0; pointer-events: none; transition: opacity 0.15s; }
-.klein-schalter { min-width: calc(var(--px) * 22) !important; margin-left: calc(var(--px) * 2); font-size: calc(var(--px) * 4.4) !important; }
+.klein-schalter { min-width: calc(var(--px) * 22) !important; margin-left: calc(var(--px) * 2); font-size: var(--t-klein) !important; }
 .knopfplatz { gap: 0; }
 
 /* ---------------------------------------------------------------- Aufträge */
 .auftrag { display: flex; align-items: center; gap: calc(var(--px) * 3); padding: calc(var(--px) * 3) 0; border-bottom: calc(var(--px) * 0.5) dashed #e0c898; }
-.auftrag .stufe { flex: none; width: calc(var(--px) * 12); height: calc(var(--px) * 12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; font-size: calc(var(--px) * 5); }
+.auftrag .stufe { flex: none; width: calc(var(--px) * 12); height: calc(var(--px) * 12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #fff; font-size: var(--t-text); }
 .auftrag .stufe.s0 { background: #6a9a4a; } .auftrag .stufe.s1 { background: #d8942a; } .auftrag .stufe.s2 { background: #b83a2e; }
 .auftrag .mitte { flex: 1; min-width: 0; }
-.auftrag b { font-size: calc(var(--px) * 5.6); display: block; }
+.auftrag b { font-size: var(--t-betont); display: block; }
 .auftrag .balken, #modal .balken, .balken-zeile .balken { height: calc(var(--px) * 3); background: #e8d8b8; border-radius: calc(var(--px) * 2); margin: calc(var(--px) * 1.5) 0; overflow: hidden; }
 .auftrag .balken i, #modal .balken i, .balken-zeile .balken i { display: block; height: 100%; background: linear-gradient(90deg, #e8b030, #f0d060); }
-.auftrag small { font-size: calc(var(--px) * 4.4); color: #7a5a44; }
+.auftrag small { font-size: var(--t-klein); color: var(--text3); }
 /* Balken mit dem Stand rechts daneben (17.10.: vorher im Fließtext, brach um) */
 .balken-zeile { display: flex; align-items: center; gap: calc(var(--px) * 2); }
 .balken-zeile .balken { flex: 1; }
-.balken-zeile .zahl { flex: none; white-space: nowrap; font-size: calc(var(--px) * 4.4); font-weight: bold; color: #7a5a44; }
-.aufgaben-titel { margin: calc(var(--px) * 4) 0 calc(var(--px) * 1); font-size: calc(var(--px) * 4.6); font-weight: bold; letter-spacing: 0.06em; text-transform: uppercase; color: #9a6a3a; }
+.balken-zeile .zahl { flex: none; white-space: nowrap; font-size: var(--t-klein); font-weight: bold; color: var(--text3); }
+.aufgaben-titel { margin: calc(var(--px) * 4) 0 calc(var(--px) * 1); font-size: var(--t-klein); font-weight: bold; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
 
 /* Ruf des Standes (17.10.): eigener Kopf, dunkel mit Gold - kein Auftrag */
 .ruf-kopf { display: flex; align-items: center; gap: calc(var(--px) * 3); padding: calc(var(--px) * 3); border-radius: calc(var(--px) * 3);
@@ -454,14 +467,14 @@ html, body {
 .ruf-kopf .ruf-stern { flex: none; width: calc(var(--px) * 18); height: calc(var(--px) * 18); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: radial-gradient(#ffe27a, #e8a020); color: #4a2a08; font-weight: bold; line-height: 1; }
 .ruf-kopf .ruf-stern small { font-size: calc(var(--px) * 3.4); }
-.ruf-kopf .ruf-stern b { font-size: calc(var(--px) * 7.5); }
+.ruf-kopf .ruf-stern b { font-size: var(--t-titel); }
 .ruf-kopf .mitte { flex: 1; min-width: 0; }
 .ruf-kopf .ruf-titel { display: flex; justify-content: space-between; align-items: baseline; gap: calc(var(--px) * 2); }
-.ruf-kopf .ruf-titel b { font-size: calc(var(--px) * 5.4); color: #ffe27a; }
-.ruf-kopf .ruf-titel span { white-space: nowrap; font-size: calc(var(--px) * 4.6); font-weight: bold; }
+.ruf-kopf .ruf-titel b { font-size: var(--t-betont); color: #ffe27a; }
+.ruf-kopf .ruf-titel span { white-space: nowrap; font-size: var(--t-klein); font-weight: bold; }
 .ruf-kopf .balken { background: rgba(255, 255, 255, 0.18); }
 .ruf-kopf .zahl, .ruf-kopf small { color: #d8d0f0; }
-.ruf-kopf small { font-size: calc(var(--px) * 4.2); }
+.ruf-kopf small { font-size: var(--t-mini); }
 .ruf-kopf .ruf-stern small { color: #6a3a08; font-size: calc(var(--px) * 3.4); }
 .ruf-kopf.fertig .balken i { background: linear-gradient(90deg, #5ac85a, #9ae07a); }
 
@@ -470,17 +483,17 @@ html, body {
 .bitte-zettel .bitte-kopf { display: flex; gap: calc(var(--px) * 3); align-items: flex-start; }
 .bitte-zettel canvas { flex: none; width: calc(var(--px) * 32); height: calc(var(--px) * 48); image-rendering: pixelated; border-radius: calc(var(--px) * 1.5); background: #3a2440; }
 .bitte-zettel .mitte { flex: 1; min-width: 0; }
-.bitte-zettel b { font-size: calc(var(--px) * 5.6); display: block; }
-.bitte-zettel .bitte-text { display: block; font-size: calc(var(--px) * 4.6); font-style: italic; color: #5a3a24; margin: calc(var(--px) * 1) 0 0; }
+.bitte-zettel b { font-size: var(--t-betont); display: block; }
+.bitte-zettel .bitte-text { display: block; font-size: var(--t-klein); font-style: italic; color: #5a3a24; margin: calc(var(--px) * 1) 0 0; }
 .bitte-zettel .bitte-fuss { margin-top: calc(var(--px) * 2); }
-.bitte-zettel small { font-size: calc(var(--px) * 4.4); color: #7a5a44; }
+.bitte-zettel small { font-size: var(--t-klein); color: var(--text3); }
 .bitte-zettel .bitte-knopf { display: flex; justify-content: space-between; align-items: center; gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 1); }
-.bitte-zettel .k { min-width: calc(var(--px) * 34); font-size: calc(var(--px) * 5); }
+.bitte-zettel .k { min-width: calc(var(--px) * 34); font-size: var(--t-text); }
 .bitte-zettel.erledigt .bitte-text, .bitte-zettel.erledigt canvas { opacity: 0.6; }
-.auftrag .k { min-width: calc(var(--px) * 34); font-size: calc(var(--px) * 5); }
+.auftrag .k { min-width: calc(var(--px) * 34); font-size: var(--t-text); }
 .auftrag.erledigt { opacity: 0.55; }
 .sammlung { display: flex; gap: calc(var(--px) * 2); flex-wrap: wrap; margin-top: calc(var(--px) * 2); }
-.sammlung span { background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2); padding: calc(var(--px) * 1.5) calc(var(--px) * 3); font-size: calc(var(--px) * 4.6); }
+.sammlung span { background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2); padding: calc(var(--px) * 1.5) calc(var(--px) * 3); font-size: var(--t-klein); }
 .sammlung span.hat { background: #fff3c4; border-color: var(--gold); font-weight: bold; }
 
 /* ---------------------------------------------------------------- Kalender */
@@ -497,41 +510,41 @@ html, body {
   background: linear-gradient(#c84a3c, #9a2c22);
   border: calc(var(--px) * 0.8) dashed #f0d090;
   border-radius: calc(var(--px) * 1.5);
-  color: #fff4d8; font: bold calc(var(--px) * 8) Georgia, serif;
+  color: #fff4d8; font: bold var(--t-kopf) Georgia, serif;
   text-shadow: 0 calc(var(--px) * 0.6) 0 #5a1810;
 }
 .tuer.gross { background: linear-gradient(#e8b030, #b8841a); color: #5a3a08; text-shadow: none; }
 .tuer.bereit { animation: pulsieren 1.2s infinite; border-style: solid; border-color: #fff; }
 @keyframes pulsieren { 50% { transform: scale(1.06); box-shadow: 0 0 calc(var(--px) * 4) #ffe8a0; } }
-.tuer.auf { background: #173016; border: calc(var(--px) * 0.8) solid #2a5626; color: #8ad07a; font-size: calc(var(--px) * 7); animation: none; }
+.tuer.auf { background: #173016; border: calc(var(--px) * 0.8) solid #2a5626; color: #8ad07a; font-size: var(--t-titel); animation: none; }
 /* Vorfreude-Päckchen (vor dem 1.12., eins je Tag) */
 .vorfreude {
   appearance: none; display: grid; grid-template-columns: auto 1fr; column-gap: calc(var(--px) * 3); align-items: center;
   width: 100%; margin: calc(var(--px) * 2) 0 calc(var(--px) * 3); padding: calc(var(--px) * 3);
   text-align: left; cursor: pointer; color: var(--hinweis);
   background: var(--papier2); border: calc(var(--px) * 0.8) dashed #d8b880; border-radius: calc(var(--px) * 2);
-  font: bold calc(var(--px) * 5.6) var(--schrift);
+  font: bold var(--t-betont) var(--schrift);
 }
 .vorfreude .vf-ico { grid-row: span 2; font-size: calc(var(--px) * 12); filter: grayscale(0.7); opacity: 0.6; }
-.vorfreude small { font-weight: normal; font-size: calc(var(--px) * 4.6); }
+.vorfreude small { font-weight: normal; font-size: var(--t-klein); }
 .vorfreude.bereit { background: #fff3c4; border: calc(var(--px) * 0.8) solid var(--gold); animation: pulsieren 1.2s infinite; }
 .vorfreude.bereit .vf-ico { filter: none; opacity: 1; }
 /* Barbarazweig im Kalender: kleines Fensterbild, pixelgenau vergrößert */
 .vorfreude .vf-ico.zweig { width: calc(var(--px) * 14); height: calc(var(--px) * 18); image-rendering: pixelated; filter: none; opacity: 1;
   background: #dfe8f0; border: calc(var(--px) * 0.8) solid #b89a70; border-radius: calc(var(--px) * 1); }
 .statistik.rueckblick { margin-bottom: calc(var(--px) * 4); }
-p.hinweis, p.klein { font-size: calc(var(--px) * 5); line-height: 1.35; }
-p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
+p.hinweis, p.klein { font-size: var(--t-text); line-height: 1.35; }
+p.klein { color: var(--text3); font-size: var(--t-klein); }
 
 /* ---------------------------------------------------------------- Menü */
 .statistik { display: grid; gap: calc(var(--px) * 3); margin: calc(var(--px) * 3) 0 calc(var(--px) * 7); }
-.statistik div { display: flex; justify-content: space-between; gap: calc(var(--px) * 4); font-size: calc(var(--px) * 5.2); border-bottom: calc(var(--px) * 0.5) dashed #e0c898; padding-bottom: calc(var(--px) * 2.5); }
-.statistik span { color: #7a5a44; }
+.statistik div { display: flex; justify-content: space-between; gap: calc(var(--px) * 4); font-size: var(--t-text); border-bottom: calc(var(--px) * 0.5) dashed #e0c898; padding-bottom: calc(var(--px) * 2.5); }
+.statistik span { color: var(--text3); }
 .regler { display: flex; align-items: center; gap: calc(var(--px) * 2.5); margin: calc(var(--px) * 5) 0; }
-.regler .rname { font-weight: bold; font-size: calc(var(--px) * 5.6); min-width: calc(var(--px) * 26); }
-.regler .rk { min-height: calc(var(--px) * 13); min-width: calc(var(--px) * 13); padding: 0; font-size: calc(var(--px) * 7); }
+.regler .rname { font-weight: bold; font-size: var(--t-betont); min-width: calc(var(--px) * 26); }
+.regler .rk { min-height: calc(var(--px) * 13); min-width: calc(var(--px) * 13); padding: 0; font-size: var(--t-titel); }
 .regler input { flex: 1; accent-color: var(--rot); height: calc(var(--px) * 8); }
-.regler .rwert { min-width: calc(var(--px) * 12); text-align: center; font-size: calc(var(--px) * 6); }
+.regler .rwert { min-width: calc(var(--px) * 12); text-align: center; font-size: var(--t-gross); }
 .schalter { display: flex; gap: calc(var(--px) * 3); flex-wrap: wrap; margin: calc(var(--px) * 3) 0; }
 .schalter .k { flex: 1; }
 
@@ -553,17 +566,17 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   animation: aufploppen 0.22s ease-out;
 }
 @keyframes aufploppen { from { transform: scale(0.85); opacity: 0; } }
-#modal h2 { margin: 0 0 calc(var(--px) * 3); color: var(--rot2); font-size: calc(var(--px) * 8.5); }
-#modal .inhalt { font-size: calc(var(--px) * 5.6); line-height: 1.4; }
+#modal h2 { margin: 0 0 calc(var(--px) * 3); color: var(--rot2); font-size: var(--t-kopf); }
+#modal .inhalt { font-size: var(--t-betont); line-height: 1.4; }
 #modal .inhalt p { margin: calc(var(--px) * 2) 0; }
 #modal .summe { font-size: calc(var(--px) * 11); font-weight: bold; color: var(--gruen); margin: calc(var(--px) * 1) 0; }
 #modal .gross-ico { font-size: calc(var(--px) * 20); line-height: 1.1; }
 #modal .knoepfe { display: flex; flex-wrap: wrap; gap: calc(var(--px) * 3); margin-top: calc(var(--px) * 5); }
-#modal .knoepfe .k { flex: 1 1 40%; font-size: calc(var(--px) * 6); }
+#modal .knoepfe .k { flex: 1 1 40%; font-size: var(--t-gross); }
 #modal label { display: block; text-align: left; font-weight: bold; margin: calc(var(--px) * 3) 0; }
 #modal input, #modal select {
   width: 100%; margin-top: calc(var(--px) * 1.5);
-  font: calc(var(--px) * 6) var(--schrift);
+  font: var(--t-gross) var(--schrift);
   padding: calc(var(--px) * 2.5);
   border: calc(var(--px) * 0.8) solid var(--holz); border-radius: calc(var(--px) * 1.5);
   background: #fffaf0; color: var(--tinte);
@@ -579,14 +592,14 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   font-family: var(--schrift);
 }
 .modus:active { transform: translateY(calc(var(--px) * 1)); box-shadow: none; }
-.modus b { display: block; font-size: calc(var(--px) * 7); color: var(--rot2); margin-bottom: calc(var(--px) * 1.5); }
-.modus span { font-size: calc(var(--px) * 5.2); line-height: 1.35; }
+.modus b { display: block; font-size: var(--t-titel); color: var(--rot2); margin-bottom: calc(var(--px) * 1.5); }
+.modus span { font-size: var(--t-text); line-height: 1.35; }
 .ziel { text-align: left; list-style: none; padding: 0; margin: calc(var(--px) * 3) 0; }
 .ziel li { margin: calc(var(--px) * 2) 0; }
 .hilfe { text-align: left; padding-left: calc(var(--px) * 8); }
 .hilfe li { margin: calc(var(--px) * 1.5) 0; }
 .ereignisbild { display: block; margin: 0 auto; box-sizing: content-box; image-rendering: pixelated; border-radius: calc(var(--px) * 1.5); border: calc(var(--px) * 1) solid var(--holz); }
-#modal .zeile-gross { font-size: calc(var(--px) * 7.5); font-weight: bold; color: var(--gruen2); margin-top: calc(var(--px) * 3); }
+#modal .zeile-gross { font-size: var(--t-titel); font-weight: bold; color: var(--gruen2); margin-top: calc(var(--px) * 3); }
 .kartenbild { width: 100%; image-rendering: pixelated; border-radius: calc(var(--px) * 1.5); box-shadow: 0 calc(var(--px) * 1) 0 rgba(0, 0, 0, 0.3); }
 
 /* ---------------------------------------------------------------- Einführung */
@@ -598,20 +611,20 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   border-radius: calc(var(--px) * 2.5);
   box-shadow: 0 calc(var(--px) * 1.2) 0 #a87a1a, 0 0 calc(var(--px) * 6) rgba(0, 0, 0, 0.35);
   padding: calc(var(--px) * 3) calc(var(--px) * 4);
-  font-weight: bold; font-size: calc(var(--px) * 5.8); line-height: 1.35;
+  font-weight: bold; font-size: var(--t-betont); line-height: 1.35;
   text-align: center;
   animation: aufploppen 0.2s ease-out;
 }
 #tipp::before {
   content: '✕'; position: absolute; top: calc(var(--px) * 1); right: calc(var(--px) * 2.5);
-  font-size: calc(var(--px) * 4.5); color: #a88a6a;
+  font-size: var(--t-klein); color: #a88a6a;
 }
 #tipp .weiter {
   display: block; width: fit-content; margin: calc(var(--px) * 2.5) auto 0;
   background: linear-gradient(#5a9a4a, var(--gruen)); color: #fff;
   border: calc(var(--px) * 0.8) solid var(--gruen2); border-radius: calc(var(--px) * 2);
   box-shadow: 0 calc(var(--px) * 1) 0 var(--gruen2);
-  padding: calc(var(--px) * 1.5) calc(var(--px) * 6); font-size: calc(var(--px) * 5.4); font-weight: bold;
+  padding: calc(var(--px) * 1.5) calc(var(--px) * 6); font-size: var(--t-betont); font-weight: bold;
   animation: pulsieren 1.4s infinite;
 }
 #tipp.mit-weiter::before { display: none; }
@@ -667,7 +680,7 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   image-rendering: pixelated; border-radius: calc(var(--px) * 1.5);
   border: calc(var(--px) * 0.8) solid #4a2c16; cursor: pointer;
 }
-.wand-zeile { text-align: center; margin: calc(var(--px) * 2) 0 0; font-size: calc(var(--px) * 4.6); }
+.wand-zeile { text-align: center; margin: calc(var(--px) * 2) 0 0; font-size: var(--t-klein); }
 .wand-zeile + .klein { text-align: center; }
 /* Geschichte eines Stammgastes (17.10.): Porträt 64 x 52, per Scale2x 128 x 104, 1:1 */
 #modal .stamm-portraet {
@@ -676,7 +689,7 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   border: calc(var(--px) * 0.6) solid #c89a5a; border-radius: calc(var(--px) * 2);
 }
 #modal .story-text { font-style: italic; }
-#modal .story-stand { margin: calc(var(--px) * 2) auto 0; max-width: calc(var(--px) * 110); font-size: calc(var(--px) * 4.4); color: #7a5a44; text-align: center; }
+#modal .story-stand { margin: calc(var(--px) * 2) auto 0; max-width: calc(var(--px) * 110); font-size: var(--t-klein); color: var(--text3); text-align: center; }
 #modal .story-stand .balken { margin-top: calc(var(--px) * 1); }
 #modal .vogel-gross {   /* 14.10.: Steckbrief, 28 x 28 doppelt */
   display: block; margin: 0 auto calc(var(--px) * 2);
@@ -691,7 +704,7 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 /* Einführung im Laden: die Zeile, zu der geführt wird */
 .zeile.fuehrung { outline: calc(var(--px) * 0.8) solid var(--gold); outline-offset: calc(var(--px) * -0.4); background: #fff3c4; animation: fuehrung 1.2s ease-in-out infinite; }
 @keyframes fuehrung { 50% { outline-color: #ffcf40; background: #ffe89a; } }
-.zeile .txt .fuehr-pfeil { display: block; margin-top: calc(var(--px) * 1); font: bold calc(var(--px) * 4.4) var(--schrift); color: var(--rot2); }
+.zeile .txt .fuehr-pfeil { display: block; margin-top: calc(var(--px) * 1); font: bold var(--t-klein) var(--schrift); color: var(--rot2); }
 
 /* Startziele (ziele.js): eine Leiste unter der Kopfzeile, antippbar */
 #ziel {
@@ -702,15 +715,15 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
   background: rgba(247, 233, 200, 0.82); color: var(--hinweis);   /* leicht durchsichtig */
   border: calc(var(--px) * 0.8) solid var(--holz); border-radius: calc(var(--px) * 2);
   box-shadow: 0 calc(var(--px) * 0.8) 0 var(--holz2);
-  font: bold calc(var(--px) * 5.8) var(--schrift); line-height: 1.2;
+  font: bold var(--t-betont) var(--schrift); line-height: 1.2;
   z-index: 3;
 }
-#ziel .nr { flex: none; background: var(--rot); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.8) calc(var(--px) * 1.8); font-size: calc(var(--px) * 4.8); }
+#ziel .nr { flex: none; background: var(--rot); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.8) calc(var(--px) * 1.8); font-size: var(--t-text); }
 #ziel .was { flex: 1; min-width: 0; }
 #ziel .was i { font-style: normal; color: var(--rot2); white-space: nowrap; }
-#ziel .lohn, #ziel small, #ziel .los { flex: none; white-space: nowrap; font-size: calc(var(--px) * 5); }
+#ziel .lohn, #ziel small, #ziel .los { flex: none; white-space: nowrap; font-size: var(--t-text); }
 #ziel .lohn { color: #9a6a10; }
-#ziel small { color: #7a5a44; font-weight: normal; }
+#ziel small { color: var(--text3); font-weight: normal; }
 #ziel .los { background: var(--gruen); color: #fff; border-radius: calc(var(--px) * 1.4); padding: calc(var(--px) * 0.8) calc(var(--px) * 2); }
 /* Laufendes nächstes Ziel nach den Startzielen (13.10.) */
 #ziel.weiter .nr { background: var(--gruen); }
@@ -727,9 +740,9 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 .haendler-liste { display: flex; flex-direction: column; gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 2); text-align: left; }
 .zeile.haendler { display: grid; grid-template-columns: auto 1fr auto; gap: calc(var(--px) * 2.5); align-items: center; background: var(--papier2); border-radius: calc(var(--px) * 1.5); padding: calc(var(--px) * 2); }
 /* Händler: Symbol wie in den Läden (18 mit Rahmen = 16 Spielpixel); vorher 13, also gestaucht */
-.zeile.haendler .txt b { display: block; font-size: calc(var(--px) * 5.4); }
-.zeile.haendler .txt span { display: block; font-size: calc(var(--px) * 4.4); line-height: 1.3; }
-.zeile.haendler .txt em { font-style: normal; font-size: calc(var(--px) * 4.4); color: var(--rot2); }
+.zeile.haendler .txt b { display: block; font-size: var(--t-betont); }
+.zeile.haendler .txt span { display: block; font-size: var(--t-klein); line-height: 1.3; }
+.zeile.haendler .txt em { font-style: normal; font-size: var(--t-klein); color: var(--rot2); }
 .zeile.haendler .k.gesperrt { opacity: 0.55; }
 #ziel.bereit { background: rgba(255, 243, 196, 0.9); border-color: var(--gold); animation: zielPuls 1.4s ease-in-out infinite; }
 @keyframes zielPuls { 50% { box-shadow: 0 0 0 calc(var(--px) * 1.2) rgba(232, 176, 48, 0.55), 0 calc(var(--px) * 0.8) 0 var(--holz2); } }
@@ -766,7 +779,7 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #miniHud .mh-kopf {
   position: absolute; left: 0; right: calc(var(--px) * 16); top: 0; height: calc(var(--px) * 16);
   display: flex; align-items: center; justify-content: space-between; gap: calc(var(--px) * 2);
-  padding: 0 calc(var(--px) * 3); font-size: calc(var(--px) * 5.6);
+  padding: 0 calc(var(--px) * 3); font-size: var(--t-betont);
 }
 #miniHud .mh-kopf > div {
   /* 14 hoch (11.10.): Die Schrift steht 1:1 in Spielpixeln und ist mit Kontur
@@ -780,16 +793,16 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #miniHud .mh-kette { color: #8ae88a; gap: calc(var(--px) * 2); }
 #miniHud .mh-kette i { display: block; width: calc(var(--px) * 16); height: calc(var(--px) * 2.4); background: rgba(0, 0, 0, 0.45); border-radius: calc(var(--px) * 1.2); overflow: hidden; }
 #miniHud .mh-kette b { display: block; height: 100%; background: #8ae88a; }
-#miniHud .mh-kette.fort { color: #fff; font-size: calc(var(--px) * 4.2); }
+#miniHud .mh-kette.fort { color: #fff; font-size: var(--t-mini); }
 #miniHud .mh-kette.fort i { width: calc(var(--px) * 26); }
 #miniHud .mh-kette.versteckt { visibility: hidden; }
 #miniHud .mh-hinweis {
   position: absolute; left: 50%; top: calc(var(--px) * 18); transform: translateX(-50%);
-  background: rgba(40, 20, 10, 0.62); color: #ffe27a; font-size: calc(var(--px) * 4.6);
+  background: rgba(40, 20, 10, 0.62); color: #ffe27a; font-size: var(--t-klein);
   padding: calc(var(--px) * 1) calc(var(--px) * 3); border-radius: calc(var(--px) * 3); white-space: nowrap;
 }
 /* Hinweis an einer Stelle im Bild (Backstube): größer und kräftiger */
-#miniHud .mh-hinweis.gross { font-size: calc(var(--px) * 5.2); background: rgba(40, 20, 10, 0.82); padding: calc(var(--px) * 1.4) calc(var(--px) * 3.5); border: calc(var(--px) * 0.6) solid #c89a5a; }
+#miniHud .mh-hinweis.gross { font-size: var(--t-text); background: rgba(40, 20, 10, 0.82); padding: calc(var(--px) * 1.4) calc(var(--px) * 3.5); border: calc(var(--px) * 0.6) solid #c89a5a; }
 #miniHud .mh-gross {
   position: absolute; left: 0; right: 0; top: 40%; transform: translateY(-50%); text-align: center;
   font-size: calc(var(--px) * 22); letter-spacing: calc(var(--px) * 0.5);
@@ -811,9 +824,9 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 }
 @keyframes mhSteigen { to { transform: translate(-50%, calc(-100% - var(--px) * 14)); opacity: 0; } }
 #miniHud .mh-label { position: absolute; transform: translate(-50%, 0); text-align: left; color: #2a1810; line-height: 1.15; white-space: nowrap; }
-#miniHud .mh-label.wunsch { font-size: calc(var(--px) * 6); transform: none; }
-#miniHud .mh-label.wunsch small { display: block; font-size: calc(var(--px) * 4.8); }
-#miniHud .mh-label.schild { font-size: calc(var(--px) * 4.2); color: #fff; background: rgba(40, 20, 10, 0.62); padding: 0 calc(var(--px) * 1.6); border-radius: calc(var(--px) * 1.5); }
+#miniHud .mh-label.wunsch { font-size: var(--t-gross); transform: none; }
+#miniHud .mh-label.wunsch small { display: block; font-size: var(--t-text); }
+#miniHud .mh-label.schild { font-size: var(--t-mini); color: #fff; background: rgba(40, 20, 10, 0.62); padding: 0 calc(var(--px) * 1.6); border-radius: calc(var(--px) * 1.5); }
 #miniZu { top: calc(var(--px) * 1) !important; height: calc(var(--px) * 14) !important; width: calc(var(--px) * 14) !important; }   /* so hoch wie die Kästen der Kopfzeile */
 
 /* Karte nachts (10.10.): Schilder glühen warm */
@@ -822,10 +835,10 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 #kartenOrte .ort-flaeche.santa { width: calc(var(--px) * 20); height: calc(var(--px) * 22); z-index: 3; }
 
 /* Startfenster der Minispiele: drei Knöpfe für die Schwierigkeit */
-.stufen-titel { margin: calc(var(--px) * 3) 0 0; font-size: calc(var(--px) * 4); font-weight: bold; color: #8a6a4a; text-transform: uppercase; letter-spacing: calc(var(--px) * 0.3); }
+.stufen-titel { margin: calc(var(--px) * 3) 0 0; font-size: var(--t-mini); font-weight: bold; color: var(--text3); text-transform: uppercase; letter-spacing: calc(var(--px) * 0.3); }
 .stufen { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 1.5); }
-.stufen .k.stufe { display: flex; flex-direction: column; align-items: center; padding: calc(var(--px) * 2) 0; font-weight: bold; font-size: calc(var(--px) * 5); background: #fff6e0; color: var(--tinte); border: calc(var(--px) * 0.6) solid #c89a5a; }
-.stufen .k.stufe small { font-weight: normal; font-size: calc(var(--px) * 3.6); color: #8a6a4a; }
+.stufen .k.stufe { display: flex; flex-direction: column; align-items: center; padding: calc(var(--px) * 2) 0; font-weight: bold; font-size: var(--t-text); background: #fff6e0; color: var(--tinte); border: calc(var(--px) * 0.6) solid #c89a5a; }
+.stufen .k.stufe small { font-weight: normal; font-size: var(--t-mini); color: var(--text3); }
 .stufen .k.stufe.gewaehlt { background: var(--rot); color: #fff; border-color: var(--rot2); }
 .stufen .k.stufe.gewaehlt small { color: #ffe0d0; }
 
@@ -834,14 +847,14 @@ p.klein { color: #7a5a44; font-size: calc(var(--px) * 4.6); }
 .rezeptbuch .rezept { display: flex; flex-direction: column; align-items: center; text-align: center; padding: calc(var(--px) * 2);
   background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 1.5); }
 .rezeptbuch canvas { width: calc(var(--px) * 20); height: calc(var(--px) * 18); image-rendering: pixelated; }
-.rezeptbuch b { font-size: calc(var(--px) * 4.4); line-height: 1.15; margin-top: calc(var(--px) * 1); }
-.rezeptbuch small { font-size: calc(var(--px) * 3.8); color: #7a5a44; line-height: 1.2; }
+.rezeptbuch b { font-size: var(--t-klein); line-height: 1.15; margin-top: calc(var(--px) * 1); }
+.rezeptbuch small { font-size: var(--t-mini); color: var(--text3); line-height: 1.2; }
 .rezeptbuch .zu { opacity: 0.6; border-style: dashed; }
 /* Wunschzettel (10.10.): Kinderbrief auf liniertem Papier, Dankesbild */
 .brief { background: repeating-linear-gradient(#fffdf6 0, #fffdf6 calc(var(--px) * 6.4), #c8d8f0 calc(var(--px) * 6.4), #c8d8f0 calc(var(--px) * 6.8));
   border-left: calc(var(--px) * 1) solid #e8a0a0; padding: calc(var(--px) * 3) calc(var(--px) * 4); text-align: left;
   font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive; color: #2a3a8a; transform: rotate(-0.6deg); }
-.brief p { font-size: calc(var(--px) * 5.4); line-height: calc(var(--px) * 6.8); margin: 0 0 calc(var(--px) * 1.5); }
+.brief p { font-size: var(--t-betont); line-height: calc(var(--px) * 6.8); margin: 0 0 calc(var(--px) * 1.5); }
 .brief .brief-gruss { text-align: right; }
 .brief-text { font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive; color: #2a3a8a; }
 canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); image-rendering: pixelated; display: block; margin: calc(var(--px) * 2) auto;
@@ -851,15 +864,15 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .album-karte { display: flex; flex-direction: column; align-items: center; text-align: center; padding: calc(var(--px) * 1.6);
   background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 1.5); }
 .album-karte canvas { image-rendering: pixelated; }   /* Größe 1:1 aus der Leinwand, setzt albumKarte() */
-.album-karte b { font-size: calc(var(--px) * 4); line-height: 1.15; }
-.album-karte small { font-size: calc(var(--px) * 3.6); color: #7a5a44; line-height: 1.2; }
+.album-karte b { font-size: var(--t-mini); line-height: 1.15; }
+.album-karte small { font-size: var(--t-mini); color: var(--text3); line-height: 1.2; }
 .album-karte.zu { opacity: 0.65; border-style: dashed; }
 .album-bilder { display: grid; grid-template-columns: repeat(auto-fill, minmax(calc(var(--px) * 98), 1fr)); justify-items: center; gap: calc(var(--px) * 4); margin: calc(var(--px) * 2) 0 calc(var(--px) * 4); }
 .album-bild { text-align: center; }
 .album-bild canvas { display: block; width: calc(var(--px) * 96); height: calc(var(--px) * 72); image-rendering: pixelated; box-shadow: 0 calc(var(--px) * 1) calc(var(--px) * 2) rgba(0,0,0,0.25); }
 .album-bild:nth-child(odd) canvas { transform: rotate(-1.5deg); }
 .album-bild:nth-child(even) canvas { transform: rotate(1.5deg); }
-.album-bild small { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive; color: #2a3a8a; font-size: calc(var(--px) * 4.2); }
+.album-bild small { font-family: 'Comic Sans MS', 'Chalkboard SE', cursive; color: #2a3a8a; font-size: var(--t-mini); }
 /* Der erste Schnee (10.10.): Rand beschlägt, eine große Flocke schwebt herab */
 .erster-schnee { position: absolute; inset: 0; z-index: 60; pointer-events: none; overflow: hidden; transition: opacity 0.9s; }
 .erster-schnee.weg { opacity: 0; }
@@ -907,7 +920,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .haus-sprung { top: 0; margin: 0 0 calc(var(--px) * 1.5); }
 .modus-k, .hs-k {
   min-height: calc(var(--px) * 15); padding: 0 calc(var(--px) * 1);
-  font: bold calc(var(--px) * 5) var(--schrift); color: var(--holz); line-height: 1.1;
+  font: bold var(--t-text) var(--schrift); color: var(--holz); line-height: 1.1;
   background: none; border: 0; border-radius: calc(var(--px) * 2.4);
 }
 .hs-k + .hs-k { border-left: calc(var(--px) * 0.5) solid #c89a5a; border-radius: calc(var(--px) * 2.4); }
@@ -916,35 +929,35 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 
 /* Überschriften in Listen: eine Art, auch bei „Tagesaufträge" */
 .gruppe, .aufgaben-titel {
-  font-weight: bold; font-size: calc(var(--px) * 4.6); letter-spacing: 0.08em; text-transform: uppercase;
+  font-weight: bold; font-size: var(--t-klein); letter-spacing: 0.08em; text-transform: uppercase;
   color: #8a5a30; opacity: 1;
   margin: calc(var(--px) * 4) 0 calc(var(--px) * 1.5); padding-bottom: calc(var(--px) * 1);
   border-bottom: calc(var(--px) * 0.5) solid #e0c898;
 }
-.gruppe.haus-abschnitt { border-bottom: 0; padding-bottom: calc(var(--px) * 2); font-size: calc(var(--px) * 4.6); }
+.gruppe.haus-abschnitt { border-bottom: 0; padding-bottom: calc(var(--px) * 2); font-size: var(--t-klein); }
 
 /* Kleingedrucktes nicht unter 4,4 */
-.album-karte b { font-size: calc(var(--px) * 4.4); }
-.album-karte small { font-size: calc(var(--px) * 4.2); }
-.vw { font-size: calc(var(--px) * 4.4); }
-.vw small { font-size: calc(var(--px) * 4.2); }
-.pw { font-size: calc(var(--px) * 4.4); }
-.haus-zusatz, .haus-quelle { font-size: calc(var(--px) * 4.4); }
+.album-karte b { font-size: var(--t-klein); }
+.album-karte small { font-size: var(--t-mini); }
+.vw { font-size: var(--t-klein); }
+.vw small { font-size: var(--t-mini); }
+.pw { font-size: var(--t-klein); }
+.haus-zusatz, .haus-quelle { font-size: var(--t-klein); }
 
 /* Knöpfe in Zeilen: gleiche Breite und Schrift */
-.auftrag .k, .bitte-zettel .k, .knopfplatz .k { min-width: calc(var(--px) * 40); font-size: calc(var(--px) * 5); }
+.auftrag .k, .bitte-zettel .k, .knopfplatz .k { min-width: calc(var(--px) * 40); font-size: var(--t-text); }
 
 /* Schließen- und Kartenknöpfe: eine Größe wie im Blatt (15) */
 #kartenZu, #kartenText, #miniZu {
   width: calc(var(--px) * 15); height: calc(var(--px) * 15); border-radius: calc(var(--px) * 2);
   background: var(--holz); box-shadow: none;
 }
-#kartenZu, #miniZu { font-size: calc(var(--px) * 7); }
-#kartenText { font-size: calc(var(--px) * 5.6); }
+#kartenZu, #miniZu { font-size: var(--t-titel); }
+#kartenText { font-size: var(--t-betont); }
 
 /* Menü: Knöpfe in zwei gleich breiten Spalten, kein Umbruch je nach Wortlaut */
 #blatt[data-art="menue"] .schalter { display: grid; grid-template-columns: 1fr 1fr; }
-#blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 15); padding: calc(var(--px) * 2); font-size: calc(var(--px) * 5); line-height: 1.15; }
+#blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 15); padding: calc(var(--px) * 2); font-size: var(--t-text); line-height: 1.15; }
 #blatt[data-art="menue"] .schalter .k:last-child:nth-child(odd) { grid-column: 1 / -1; }
 #blatt[data-art="menue"] .neustart .k { width: 100%; }
 
@@ -958,6 +971,6 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .futter-stand i { flex: 1; height: calc(var(--px) * 5); border-radius: calc(var(--px) * 1.2); background: #e8d8b8; border: calc(var(--px) * 0.6) solid #c89a5a; box-sizing: border-box; }
 .futter-stand i.voll { background: linear-gradient(#f0d060, #d8a830); }
 .futter-stand i.knapp { background: linear-gradient(#e86a4a, #c8402a); }
-.futter-text { margin: calc(var(--px) * 1) 0 !important; font-size: calc(var(--px) * 5); }
+.futter-text { margin: calc(var(--px) * 1) 0 !important; font-size: var(--t-text); }
 .futter-knapp { color: var(--rot2); font-weight: bold; }
 .futter-gast { margin: calc(var(--px) * 1) 0 0 !important; }
