@@ -1178,3 +1178,6 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Kopfzeilen-Symbole jetzt fein gezeichnet (kacheln.knopfBilder): alle gleich groß */
 #hud .hud-ico { width: calc(var(--px) * 8); height: calc(var(--px) * 8); top: 0; image-rendering: pixelated; }   /* 16 × 16-Raster, scharf */
 #nachr .hud-ico { width: calc(var(--px) * 9); height: calc(var(--px) * 9); }
+/* Auf der Landkarte und in Minispielen keine Knöpfe „Haus"/„Angebot" (19.10., gemeldet) */
+#huelle:has(#landkarte:not(.versteckt)) .knopf-oben,
+#huelle:has(#minispiel:not(.versteckt)) .knopf-oben { display: none; }
