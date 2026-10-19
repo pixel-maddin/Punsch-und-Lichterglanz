@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202610192000';
-import * as S from './spiel.js?v=202610192000';
-import { iconGross, scale2x, r, p } from './pixel.js?v=202610192000';
-import { naechsterSchritt } from './tresen.js?v=202610192000';
+import * as C from './config.js?v=202610192100';
+import * as S from './spiel.js?v=202610192100';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202610192100';
+import { naechsterSchritt } from './tresen.js?v=202610192100';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;
@@ -77,8 +77,9 @@ function angebotBild(c) {
   for (let i = 0; i < 4; i++) { r(c, 3, 5 + i * 3, 2, 1, '#ffd870'); r(c, 6, 5 + i * 3, 3 + ((i * 2) % 3), 1, '#e8f0e0'); }   // Kreidezeilen mit Sternchen
   r(c, 5, 17, 1, 2, '#6a4222'); r(c, 9, 17, 1, 2, '#6a4222');                                      // Füße
   // Becher davor, mit Dampf
-  r(c, 11, 11, 7, 7, '#c8302a'); r(c, 11, 11, 7, 1, '#e86a5a'); r(c, 11, 11, 1, 7, '#a02020'); r(c, 12, 17, 5, 1, '#801818');
-  r(c, 18, 13, 1, 3, '#c8302a'); p(c, 18, 12, '#c8302a'); p(c, 18, 16, '#c8302a');
+  // weiße Tasse (19.10. Nutzerwunsch), mit grauer Schattenkante
+  r(c, 11, 11, 7, 7, '#f4eee4'); r(c, 11, 11, 7, 1, '#ffffff'); r(c, 11, 11, 1, 7, '#c8c0b4'); r(c, 12, 17, 5, 1, '#a8a094');
+  r(c, 18, 13, 1, 3, '#e8e0d4'); p(c, 18, 12, '#e8e0d4'); p(c, 18, 16, '#e8e0d4');
   r(c, 13, 13, 3, 3, '#ffd040'); p(c, 14, 14, '#fff6c0');                                           // Stern auf dem Becher
   p(c, 13, 9, '#ffffff'); p(c, 14, 8, '#e8eef4'); p(c, 16, 9, '#ffffff'); p(c, 15, 7, '#e8eef4');
 }
@@ -115,7 +116,8 @@ export function aktualisiere(t) {
       if (cr.backT >= 0) {
         const a = cr.backT / C.CREPE_ZEIT;
         anteil = a; balkenArt = cr.gewendet ? 'gruen' : 'gelb';
-        if (!cr.gewendet && !cr.verpasst) { zone = C.HANDGRIFF.wenden.timing; marke = a; info = 'Wenden!'; zustand = 'arbeit'; }
+        // „Wenden!" erst, wenn der Strich im grünen Bereich ist (19.10.) - vorher „backt"
+        if (!cr.gewendet && !cr.verpasst) { zone = C.HANDGRIFF.wenden.timing; marke = a; info = a >= zone.von && a <= zone.bis ? 'Wenden!' : 'backt'; zustand = 'arbeit'; }
         else { info = 'backt'; zustand = 'arbeit'; }
       } else if (cr.fertig) { info = 'Fertig!'; zustand = 'fertig'; anteil = 1; balkenArt = 'gruen'; }
       else { info = 'Backen'; anteil = 0; }

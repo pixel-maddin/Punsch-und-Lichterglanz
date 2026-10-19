@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610192000';
-import * as C from './config.js?v=202610192000';
-import * as S from './spiel.js?v=202610192000';
-import * as Z from './zeit.js?v=202610192000';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610192100';
+import * as C from './config.js?v=202610192100';
+import * as S from './spiel.js?v=202610192100';
+import * as Z from './zeit.js?v=202610192100';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -92,14 +92,57 @@ function gedrueckt(c, y0, yb, yr) {
   c.strokeRect(q[0] + 0.5, q[1] + 0.5, q[2] - 1, q[3] - 1);
 }
 
+/**
+ * Der Blick aus dem Stand nach draußen (19.10., mehr Detail): Himmel in Bändern,
+ * hinten ein Waldrand und drei kleine Marktbuden mit warmen Fenstern, eine
+ * Lichterkette zwischen ihnen, vorne Schnee mit Spuren. Alles blass gehalten,
+ * damit die Gäste davor klar bleiben. Fest aus Z.hash - nichts springt.
+ */
+function aussenBlick(c, y0, w, t, oben, unten, hell) {
+  const nacht = 1 - hell, schnee = w.schnee > 0;
+  for (let i = 0; i < 6; i++) r(c, 0, y0 + i * 5, 180, 5, mische(ton(oben, -0.12), ton(oben, 0.1), i / 5));
+  if (nacht > 0.5) for (let i = 0; i < 10; i++) p(c, Math.floor(Z.hash(i * 31) * 180), y0 + 16 + Math.floor(Z.hash(i * 17) * 8), '#e8eef8');
+  // Waldrand hinten, blass (Luftperspektive)
+  const wald = mische(mische('#5a7894', '#8aa4bc', hell), oben, 0.35);
+  for (let x = 0; x < 180; x += 5) {
+    const h = 6 + Math.floor(Z.hash(x * 3.1) * 6);
+    for (let k = 0; k < h; k++) { const b = Math.floor(k / 2.2); r(c, x + 2 - b, y0 + 30 - h + k, 1 + b * 2, 1, k < 2 && schnee ? mische(wald, '#ffffff', 0.6) : wald); }
+  }
+  // Drei kleine Buden mit Fenstern (nachts hell), dazwischen eine Lichterkette
+  const bude = mische(mische('#5a4a5a', '#9a8070', hell), oben, 0.3), dach = mische(mische('#6a3040', '#b85a50', hell), oben, 0.3);
+  const fenster = mische('#c8a060', '#ffd98a', nacht);
+  const buden = [22, 92, 150];
+  for (const bx of buden) {
+    r(c, bx - 6, y0 + 25, 13, 5, bude);
+    for (let k = 0; k < 4; k++) r(c, bx - 7 + k, y0 + 24 - k, 15 - k * 2, 1, k === 3 && schnee ? '#f0f4fa' : dach);
+    r(c, bx - 4, y0 + 26, 3, 2, fenster); r(c, bx + 2, y0 + 26, 3, 2, fenster);
+  }
+  const BUNT2 = ['#ff6a6a', '#ffd860', '#7ad07a', '#7ab0ff'];
+  for (let i = 0; i < buden.length - 1; i++) {
+    const a = buden[i] + 7, b = buden[i + 1] - 7;
+    for (let x = a; x <= b; x += 4) {
+      const k = (x - a) / (b - a), y = y0 + 21 + Math.round(Math.sin(k * Math.PI) * 2);
+      const an = nacht < 0.3 || Math.sin(t * 2 + x) > -0.6;
+      p(c, x, y, an ? BUNT2[(x >> 2) % 4] : '#5a5a6a');
+    }
+  }
+  // Boden: Schnee bzw. Wiese in Bändern, Spuren und ein Weg
+  for (let i = 0; i < 4; i++) r(c, 0, y0 + 30 + i * 6, 180, 6, mische(ton(unten, -0.06), ton(unten, 0.05), i / 3));
+  r(c, 0, y0 + 30, 180, 1, ton(unten, -0.15));
+  const spur = ton(unten, schnee ? -0.1 : -0.12);
+  for (let i = 0; i < 26; i++) {
+    const x = Math.floor(Z.hash(i * 13.7) * 178), y = y0 + 33 + Math.floor(Z.hash(i * 7.3) * 17);
+    p(c, x, y, spur); p(c, x + 2, y + 1, spur);
+  }
+}
+
 // ---------------------------------------------------------------------------
 function gaestezone(c, y0, t, w) {
   const hell = w.li.hell;
   // Blick nach draußen
   const oben = mische('#26305e', w.schnee > 0 ? '#9cc0dc' : '#a4b0ba', hell);
   const unten = mische('#3e4a7c', w.schnee > 0 ? '#e0e8f0' : '#8c8a70', hell);
-  r(c, 0, y0, 180, 30, oben);
-  r(c, 0, y0 + 30, 180, 22, unten);
+  aussenBlick(c, y0, w, t, oben, unten, hell);
   // Lichter am Horizont / Schneefall
   if (w.wetter.art === 'schnee') for (let i = 0; i < 24; i++) {
     const x = (i * 37 + t * (6 + (i % 3) * 3)) % 180, y = y0 + ((i * 13 + t * (10 + (i % 4) * 4)) % 50);
@@ -476,10 +519,25 @@ const PLATZ = 26;   // Abstand der Dinge auf dem Servierbrett
 function handStart() { const n = S.handMax(); return Math.round(90 - (n * PLATZ) / 2); }
 
 function brett(c, y, t) {
-  r(c, 0, y, 180, C.T_BRETT, '#a8703a');
-  r(c, 0, y, 180, 2, '#c8905a');
-  for (let x = 0; x < 180; x += 30) r(c, x, y + 2, 1, C.T_BRETT - 2, '#8a5a2e');
-  r(c, 0, y + C.T_BRETT - 1, 180, 1, '#6a4222');
+  // Tresen aus Holz (19.10., mehr Detail): Platte mit heller Kante und Schattenlippe,
+  // darunter Bretter mit Maserung, Astlöchern, Fugen und Nägeln, unten eine dunkle Leiste
+  const H = C.T_BRETT;
+  r(c, 0, y, 180, H, '#a8703a');
+  r(c, 0, y, 180, 3, '#c8905a'); r(c, 0, y, 180, 1, '#e0b07a'); r(c, 0, y + 3, 180, 1, '#7a4a24');
+  for (let x = 0; x < 180; x += 3) if (Z.hash(x * 1.7) < 0.35) r(c, x, y + 1, 2 + Math.floor(Z.hash(x * 2.9) * 4), 1, '#d49e64');   // Maserung der Platte
+  for (let row = y + 5; row < y + H - 2; row++) {
+    for (let x = 0; x < 180; x++) {
+      const z0 = Z.hash(x * 7.13 + row * 131.7);
+      if (z0 < 0.045) r(c, x, row, 3 + Math.floor(z0 * 90), 1, '#946030');          // dunkle Fasern
+      else if (z0 > 0.975) r(c, x, row, 2, 1, '#b8804a');                            // helle Fasern
+    }
+  }
+  for (const [kx, ky] of [[22, 11], [71, 16], [117, 9], [163, 14]]) { r(c, kx, y + ky, 3, 2, '#6a3e1e'); p(c, kx + 1, y + ky, '#4a2a12'); r(c, kx - 1, y + ky - 1, 5, 1, '#946030'); }   // Astlöcher
+  for (let x = 30; x < 180; x += 30) {
+    r(c, x, y + 4, 1, H - 6, '#7a4a24'); r(c, x + 1, y + 4, 1, H - 6, '#b8804a');   // Fuge mit Lichtkante
+    p(c, x - 2, y + 6, '#4a4a52'); p(c, x + 3, y + 6, '#4a4a52'); p(c, x - 2, y + H - 4, '#4a4a52'); p(c, x + 3, y + H - 4, '#4a4a52');   // Nägel
+  }
+  r(c, 0, y + H - 2, 180, 1, '#7a4a24'); r(c, 0, y + H - 1, 180, 1, '#5a3418');
 
   // Gläserstapel
   const gx = 4, gy = y + 4;

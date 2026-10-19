@@ -1147,3 +1147,23 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #btnStandkarte .sym { display: none; }
 .mit-standkarte #ziel { left: calc(var(--px) * 31); right: calc(var(--px) * 31); }
 .blatt-offen .knopf-oben { display: none; }
+
+/* Kopfzeile als EINE Leiste (19.10.): Nachrichten, Sterne, Herzen und Uhr in einem
+   dunkelblauen Band mit hellblauem Rahmen, getrennt durch feine Linien - vorher vier Kästen */
+#hud {
+  left: calc(var(--px) * 3); right: calc(var(--px) * 3); top: calc(var(--px) * 3.5);
+  height: calc(var(--px) * 13); padding: 0; gap: 0;
+  background: linear-gradient(rgba(40, 58, 112, 0.95), rgba(22, 32, 70, 0.95));
+  border: calc(var(--px) * 0.8) solid var(--ui-rand); border-radius: calc(var(--px) * 2.5);
+  box-shadow: 0 calc(var(--px) * 0.8) 0 var(--ui-tief), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.1);
+  justify-content: flex-start;
+}
+#hud > div, #nachr {
+  height: 100%; background: none; border: 0; border-radius: 0; box-shadow: none;
+  border-left: calc(var(--px) * 0.5) solid rgba(138, 176, 230, 0.35);
+}
+#nachr { border-left: 0; width: calc(var(--px) * 14); flex: none; }
+#hud > div { padding: 0 calc(var(--px) * 3); }
+#geld, #stimmung { flex: none; }
+#uhr { flex: 1; justify-content: flex-end; }
+#pause { flex: none; }

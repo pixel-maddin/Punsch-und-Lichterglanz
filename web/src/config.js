@@ -49,7 +49,7 @@ export const PRODUKTE = [
   { id: 'kinderpunsch', name: 'Kinderpunsch',     preis: 12, zeit: 0.5,  kosten: 200,    art: 'topf',   farbe: '#ee6d9a', alk: false, griffe: ['zuckerstange'], bonus: 0.20 },
   { id: 'apfel',        name: 'Heißer Apfel',     preis: 14, zeit: 0.7,  kosten: 600,    art: 'topf',   farbe: '#e8942e', alk: false, griffe: ['ruehren'], bonus: 0.25 },
   { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false, griffe: ['guss'], bonus: 0.25 },
-  { id: 'schoko',       name: 'Heiße Schokolade', preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, griffe: ['sahne'], bonus: 0.30 },
+  { id: 'schoko',       name: 'Heiße Schoki',      preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, griffe: ['sahne'], bonus: 0.30 },
   { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 19, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, griffe: ['sahne', 'zimtpulver'], bonus: 0.40 },
   { id: 'jaegertee',    name: 'Waldtee',          preis: 22, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false, griffe: ['beutel'], bonus: 0.40 },
   { id: 'crepe',        name: 'Crêpe',            preis: 24, zeit: 0,  kosten: 18000,  art: 'platte', farbe: '#f0c070', alk: false, griffe: ['wenden'], bonus: 0.40 },
