@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610191225';
-import * as Z from './zeit.js?v=202610191225';
-import { neueFarben } from './pixel.js?v=202610191225';
+import * as C from './config.js?v=202610191400';
+import * as Z from './zeit.js?v=202610191400';
+import { neueFarben } from './pixel.js?v=202610191400';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -971,6 +971,40 @@ export function tippeHand(i) {
 }
 
 const bereit = (h) => h.art === 'voll' && !(h.rest > 0) && !(h.brennT > 0);
+
+/**
+ * Wem gehört welches Glas auf dem Tablett? Nur für die Anzeige (tresen.js,
+ * 19.10.): fertige Gläser bekommen einen Haken, „ihr" Gast eine grüne Blase.
+ * Gleiche Regel wie das Festhalten der Geduld in update(): je Glas der
+ * ungeduldigste Gast am Tresen mit genau diesem Wunsch; Wichtel-Gläser
+ * gehören dem, für den sie eingeschenkt wurden. Fertige Gläser zuerst.
+ * Rückgabe: glas = Map(Index → Gast-id), gast = Map(Gast-id → { bereit, anteil }).
+ */
+export function servierPlan() {
+  const G = lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen);
+  const glas = new Map(), gast = new Map();
+  const vergeben = new Set();
+  const merke = (i, h, id) => {
+    glas.set(i, id);
+    const fertig = bereit(h), a = fertig ? 1 : h.brennT > 0 ? 1 : Math.max(0, Math.min(1, 1 - (h.rest || 0) / (h.dauer || 1)));
+    const alt = gast.get(id);
+    if (!alt || (fertig && !alt.bereit) || (!alt.bereit && a > alt.anteil)) gast.set(id, { bereit: fertig, anteil: a });
+  };
+  lauf.hand.forEach((h, i) => {
+    if (h.art !== 'voll' || !h.vonWichtel || h.fuer == null || !G.some((x) => x.id === h.fuer)) return;
+    merke(i, h, h.fuer); vergeben.add(h.fuer);
+  });
+  const reihe = lauf.hand.map((h, i) => i).filter((i) => lauf.hand[i].art === 'voll' && !glas.has(i))
+    .sort((a, b) => (bereit(lauf.hand[b]) ? 1 : 0) - (bereit(lauf.hand[a]) ? 1 : 0));
+  for (const i of reihe) {
+    const h = lauf.hand[i];
+    const g = G.filter((x) => x.wunsch === h.id && (x.gross || !vergeben.has(x.id))).sort((a, b) => a.geduld - b.geduld)[0];
+    if (!g) continue;
+    merke(i, h, g.id);
+    if (!g.gross) vergeben.add(g.id);
+  }
+  return { glas, gast };
+}
 
 export function tippeGast(platz) {
   const g = lauf.gaeste.find((x) => x.platz === platz && x.am && !x.gehen);

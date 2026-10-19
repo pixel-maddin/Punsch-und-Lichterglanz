@@ -11,8 +11,8 @@
  * Fläche umgerechnet, damit sie bei jeder Bildschirmgröße sitzen.
  * Solange kein Minispiel offen ist (z. B. im Messweg), tut alles nichts.
  */
-import { zeichneSymbol } from './symbole.js?v=202610191225';
-import { schriftBild, stilFuer } from './schrift.js?v=202610191225';
+import { zeichneSymbol } from './symbole.js?v=202610191400';
+import { schriftBild, stilFuer } from './schrift.js?v=202610191400';
 
 /**
  * Text in der Weihnachtsschrift (schrift.js) in ein Element setzen. Ein

@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610191225';
-import * as C from './config.js?v=202610191225';
-import * as S from './spiel.js?v=202610191225';
-import * as Z from './zeit.js?v=202610191225';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, scale2x, iconGross } from './pixel.js?v=202610191400';
+import * as C from './config.js?v=202610191400';
+import * as S from './spiel.js?v=202610191400';
+import * as Z from './zeit.js?v=202610191400';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -28,6 +28,7 @@ export function zeichneTresen(c, y0, t, w) {
   r(c, 0, ys, C.B, C.LEISTE_LUFT, '#3a2414'); r(c, 0, ys, C.B, 1, '#6a4222'); r(c, 0, ys + C.LEISTE_LUFT - 1, C.B, 1, '#24160c');
   for (let x = 6; x < C.B; x += 30) r(c, x, ys + 2, 2, 2, '#8a5a32');   // Schraubenköpfe
   gedrueckt(c, y0, yb, yr);
+  naechsterSchrittZeigen(c, yb, yr, t);
   // Ringe an der Tippstelle
   for (const k of S.lauf.klicks) {
     const a = 1 - k.t / 0.35;
@@ -35,6 +36,43 @@ export function zeichneTresen(c, y0, t, w) {
     c.lineWidth = 1;
     c.beginPath(); c.arc(Math.round(k.x) + 0.5, Math.round(k.y) + 0.5, 2 + k.t * 26, 0, Math.PI * 2); c.stroke();
   }
+}
+
+/**
+ * Was ist als Nächstes zu tun? (19.10.) Wer ein paar Sekunden nichts tippt und
+ * noch keinen Servier-Wichtel hat, bekommt einen leisen goldenen Rahmen um das
+ * passende Feld: erst die Gläser, dann der Topf für den ungeduldigsten Gast.
+ * Ist ein Glas fertig, zeigt das schon die grüne Blase - dann kein Rahmen.
+ */
+const SCHRITT_NACH = 4;   // s ohne Tippen
+function naechsterSchritt() {
+  if (S.st.lernen < 99 || S.lauf.lernen || S.hat('servier') || S.lauf.chefT < SCHRITT_NACH) return null;
+  const plan = S.servierPlan();
+  if ([...plan.gast.values()].some((z) => z.bereit)) return null;
+  const g = S.lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !plan.gast.has(x.id)).sort((a, b) => a.geduld - b.geduld)[0];
+  if (!g) return null;
+  const p = C.PRODUKT[g.wunsch], i = C.PRODUKTE.indexOf(p);
+  if (!p || i < 0 || !S.hat(p.id)) return null;
+  // Topf mit Inhalt, aber kein leeres Glas auf dem Tablett: erst ein Glas holen
+  if (p.art === 'topf' && (S.st.toepfe[p.id] || 0) > 0 && !S.lauf.hand.some((h) => h.art === 'glas')) {
+    return S.lauf.hand.length < S.handMax() && !S.hat('spuel') ? { art: 'glaeser' } : null;
+  }
+  return { art: 'zelle', i };
+}
+function naechsterSchrittZeigen(c, yb, yr, t) {
+  const s = naechsterSchritt();
+  if (!s) return;
+  const q = s.art === 'zelle'
+    ? [(s.i % 5) * C.T_ZELLE_B + 1, yr + Math.floor(s.i / 5) * C.T_ZELLE_H + 1, C.T_ZELLE_B - 2, C.T_ZELLE_H - 3]
+    : [1, yb + 1, 40, C.T_BRETT - 2];
+  const a = 0.45 + 0.4 * Math.sin(t * 3.2);   // ruhiges Atmen, kein Blinken
+  c.save();
+  c.globalAlpha = Math.max(0.1, a);
+  c.strokeStyle = '#ffd040'; c.lineWidth = 1;
+  c.strokeRect(q[0] + 0.5, q[1] + 0.5, q[2] - 1, q[3] - 1);
+  c.strokeStyle = '#fff2b0';
+  c.strokeRect(q[0] + 1.5, q[1] + 1.5, q[2] - 3, q[3] - 3);
+  c.restore();
 }
 
 /** Das angetippte Feld leuchtet kurz auf. */
@@ -222,7 +260,9 @@ function gaestezone(c, y0, t, w) {
   }
   balken(c, y0);
   // Wunschbläschen zuletzt: Sie dürfen von nichts verdeckt werden
-  for (const [g, x, y, anteil] of blasen) blase(c, g, x, y, t, anteil);
+  // Zustand je Bestellung (19.10.): in Arbeit (gelber Balken) oder bereit (grüner Haken)
+  const plan = S.servierPlan();
+  for (const [g, x, y, anteil] of blasen) blase(c, g, x, y, t, anteil, plan.gast.get(g.id));
   // Servier-Wichtel: über dem Gast, der als Nächstes dran ist, ein kleiner
   // Wichtel mit grünem Balken - so lange braucht er noch (gemeldet 01.10.)
   const sv = S.servierVorschau();
@@ -354,10 +394,30 @@ function figurSkaliert(c, g, cx, basis, s, t, laune, alpha, w) {
   c.restore();
 }
 
-function blase(c, g, x, y, t, anteil) {
-  if (g.gross) return grossBlase(c, g, x, y, t, anteil);
+/**
+ * Zustand einer Bestellung an der Blase (19.10.). Nicht nur Farbe: „bereit" hat
+ * einen Haken und hüpft, „in Arbeit" einen Füllbalken. Nur EIN Glas pro Gast
+ * zählt (S.servierPlan), so hebt sich nie mehr als die passende Bestellung hervor.
+ */
+function zustandAbzeichen(c, x, y, z, t) {
+  if (!z) return;
+  if (z.bereit) {
+    r(c, x - 3, y - 3, 8, 7, '#1e5a2a'); r(c, x - 2, y - 4, 6, 9, '#1e5a2a');   // runder grüner Knopf mit dunklem Rand
+    r(c, x - 2, y - 2, 6, 5, '#4ac05a'); r(c, x - 1, y - 3, 4, 7, '#4ac05a');
+    p(c, x - 1, y + 1, '#ffffff'); p(c, x, y + 2, '#ffffff'); p(c, x + 1, y + 1, '#ffffff'); p(c, x + 2, y, '#ffffff'); p(c, x + 3, y - 1, '#ffffff');   // Haken
+  } else {
+    // In Arbeit: kleiner Füllbalken, wie über dem Glas auf dem Tablett
+    r(c, x - 3, y - 2, 10, 4, '#3a2a20');
+    r(c, x - 2, y - 1, Math.max(1, Math.round(8 * z.anteil)), 2, '#ffd040');
+  }
+}
+
+function blase(c, g, x, y, t, anteil, z) {
+  if (g.gross) return grossBlase(c, g, x, y, t, anteil, z);
+  // Bereit zum Servieren: Blase hüpft sanft und ist grün umrandet - hier antippen
+  if (z && z.bereit) y -= Math.floor(t * 2.5) % 2;
   const spez = C.GAESTE[g.typ].spezial;
-  const rand = spez || g.gold ? '#e8b030' : g.eilig ? '#e8742a' : '#6a4a3a';
+  const rand = z && z.bereit ? '#3aa04a' : spez || g.gold ? '#e8b030' : g.eilig ? '#e8742a' : '#6a4a3a';
   // Goldener Gast (17.10.): goldener Grund und ein Funkeln - nur du bedienst ihn
   const grund = g.gold ? '#fff0b8' : '#fffaf0';
   r(c, x + 1, y, 14, 16, rand); r(c, x, y + 1, 16, 14, rand);
@@ -376,6 +436,7 @@ function blase(c, g, x, y, t, anteil) {
     r(c, x + 11, y - 3, 7, 7, '#e8742a'); r(c, x + 12, y - 2, 5, 5, '#fff4e0');
     p(c, x + 14, y - 1, '#3a2410'); p(c, x + 14, y, '#3a2410'); p(c, x + 15, y, '#3a2410');
   }
+  zustandAbzeichen(c, x + 1, y + 1, z, t);   // oben links: Haken oder Füllbalken
   // Geduld
   const bw = 16;
   r(c, x, y + 17, bw, 3, '#3a2a20');
@@ -385,18 +446,20 @@ function blase(c, g, x, y, t, anteil) {
 }
 
 /** Großbestellung: breite goldene Blase mit Sorte und Zähler „3/8". */
-function grossBlase(c, g, x, y, t, anteil) {
+function grossBlase(c, g, x, y, t, anteil, z) {
   const gr = g.gross;
   const s = gr.stand + '/' + gr.n;
   const bw = 18 + textBreite(s);
   x = Math.min(x, 178 - bw);
-  const rand = '#e8b030';
+  if (z && z.bereit) y -= Math.floor(t * 2.5) % 2;
+  const rand = z && z.bereit ? '#3aa04a' : '#e8b030';
   r(c, x + 1, y, bw - 2, 16, rand); r(c, x, y + 1, bw, 14, rand);
   r(c, x + 1, y + 1, bw - 2, 14, '#fff6d8');
   r(c, x + 2, y + 13, 3, 2, rand); p(c, x + 3, y + 15, rand);
   if (g.bedient) { smiley(c, x + bw / 2, y + 8, true); return; }
   icon(c, gr.id, x + 3, y + 3, t);
   text(c, s, x + 14, y + 6, '#7a4a10', null);
+  zustandAbzeichen(c, x + 1, y + 1, z, t);
   r(c, x, y + 17, bw, 3, '#3a2a20');
   const f = anteil > 0.55 ? '#5ac85a' : anteil > 0.28 ? '#f0c040' : '#f04a3a';
   if (anteil < 0.28 && Math.floor(t * 6) % 2) return;
@@ -430,6 +493,7 @@ function brett(c, y, t) {
 
   // Hand
   const n = S.handMax();
+  const plan = S.servierPlan();
   let hx = handStart();
   const wk = S.lauf.wackel.hand;
   if (wk) hx += Math.round(Math.sin(wk * 60) * 2);
@@ -462,6 +526,8 @@ function brett(c, y, t) {
       // Verpasst (Timing): wie „roh" zeichnen - Zuckerhut aus, Beutel noch drin
       const roh = h.verpasst ? true : h.griffe && !h.extraFertig ? h.griffe.slice(0, h.schritt) : false;
       iconGross(c, h.id, x, by - 19 - hoch, t, roh);   // in Spielpixeln groß gezeichnet (12.10.)
+      // Fertig und ein Gast wartet darauf: grüner Haken wie an seiner Blase (19.10.)
+      if (plan.glas.has(i) && !(h.brennT > 0)) zustandAbzeichen(c, x + 1, by - 14 - hoch, { bereit: true }, t);
       if (h.brennT > 0) {
         // Der Zuckerhut brennt: große, flackernde Flamme
         const fl = Math.floor(t * 12) % 2;
