@@ -312,7 +312,10 @@ Reines Canvas 2D (180 Pixel breit, per CSS hochskaliert), ES-Module,
 kein Node, kein npm, keine Bilddatei - Grafik und Geräusche entstehen im
 Code. Einzige Fremddateien sind die zwei Musikstücke (`web/audio/musik-haus.m4a`
 am Haus, `web/audio/musik-karte.m4a` auf der Karte und in den Minispielen,
-weich übergeblendet), im Menü lauter, leiser oder ganz aus. Spielstand in `localStorage` (`adventshaus.v1`).
+weich übergeblendet), im Menü lauter, leiser oder ganz aus. Dazu zwei
+Schriften in `web/fonts/`: **Nunito** für Texte und **Pixelify Sans** für Titel,
+beide unter der SIL Open Font License (Lizenztexte daneben), damit das Spiel auf
+jedem Gerät gleich aussieht und ohne fremde Server auskommt. Spielstand in `localStorage` (`adventshaus.v1`).
 
 `web/` ist rein statisch und läuft auf jedem Webserver. Beim Hochladen auf
 GitHub veröffentlicht `.github/workflows/pages.yml` den Ordner `web/` über

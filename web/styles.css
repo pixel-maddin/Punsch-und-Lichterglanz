@@ -6,6 +6,10 @@
  * Optik: Pergament, dunkles Holz, Weihnachtsrot — wie ein Menü in einem
  * Bauernhof-Pixelspiel.
  */
+/* Schriften (19.10.) - liegen im Spiel, nicht bei Google: offline spielbar, keine fremden Server */
+@font-face { font-family: "Nunito"; src: url("fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; font-display: swap; }
+@font-face { font-family: "Pixelify Sans"; src: url("fonts/PixelifySans.ttf") format("truetype"); font-weight: 400 700; font-display: swap; }
+
 :root {
   --px: 2px;
   --papier: #f7e9c8;
@@ -19,7 +23,10 @@
   --gruen: #3f7a3a;
   --gruen2: #2a5626;
   --gold: #e8b030;
-  --schrift: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  /* 19.10.: eigene Schriften im Spiel (fonts/, SIL OFL), damit iPhone und Android gleich aussehen.
+     Nunito für alle Texte, Pixelify Sans nur für Titel - Pixelschrift wird klein unscharf. */
+  --schrift: "Nunito", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  --titelschrift: "Pixelify Sans", "Nunito", system-ui, sans-serif;
   /* Schriftleiter (19.10., Durchsicht als UI/UX-Designer): sieben Stufen statt
      vorher 25 verschiedener GrÃ¶ÃŸen. Ausnahmen nur fÃ¼r Zahlen-/SymbolgrÃ¶ÃŸen
      (Summe, TÃ¼rchen-Ziffern, Emoji-Symbole) und die winzigen Kartenschilder. */
@@ -300,7 +307,7 @@ html, body {
   padding: calc(var(--px) * 3) calc(var(--px) * 3) calc(var(--px) * 2) calc(var(--px) * 5);
   border-bottom: calc(var(--px) * 0.8) solid #d8b880;
 }
-#blatt h1 { margin: 0; font-size: var(--t-kopf); flex: 1; color: var(--rot2); }
+#blatt h1 { margin: 0; font: 600 var(--t-kopf) var(--titelschrift); flex: 1; color: var(--rot2); letter-spacing: 0.02em; }
 #blattGeld { font-weight: bold; font-size: var(--t-gross); color: var(--holz); }
 #blattZu {
   appearance: none; border: 0; cursor: pointer;
@@ -566,7 +573,7 @@ p.klein { color: var(--text3); font-size: var(--t-klein); }
   animation: aufploppen 0.22s ease-out;
 }
 @keyframes aufploppen { from { transform: scale(0.85); opacity: 0; } }
-#modal h2 { margin: 0 0 calc(var(--px) * 3); color: var(--rot2); font-size: var(--t-kopf); }
+#modal h2 { margin: 0 0 calc(var(--px) * 3); color: var(--rot2); font: 600 var(--t-kopf) var(--titelschrift); letter-spacing: 0.02em; }
 #modal .inhalt { font-size: var(--t-betont); line-height: 1.4; }
 #modal .inhalt p { margin: calc(var(--px) * 2) 0; }
 #modal .summe { font-size: calc(var(--px) * 11); font-weight: bold; color: var(--gruen); margin: calc(var(--px) * 1) 0; }
