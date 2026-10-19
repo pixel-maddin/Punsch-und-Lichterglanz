@@ -1167,3 +1167,6 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #geld, #stimmung { flex: none; }
 #uhr { flex: 1; justify-content: flex-end; }
 #pause { flex: none; }
+/* Mehr Luft um Sterne und Herzen in der Kopfzeile (19.10.) */
+#geld, #stimmung { padding: 0 calc(var(--px) * 5) !important; }
+#geld .hud-ico, #stimmung .hud-ico { margin-right: calc(var(--px) * 2.2); }
