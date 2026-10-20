@@ -1181,3 +1181,17 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Auf der Landkarte und in Minispielen keine Knöpfe „Haus"/„Angebot" (19.10., gemeldet) */
 #huelle:has(#landkarte:not(.versteckt)) .knopf-oben,
 #huelle:has(#minispiel:not(.versteckt)) .knopf-oben { display: none; }
+
+/* Im Menü die Knöpfe wieder in den ursprünglichen Farben (20.10., Nutzerwunsch):
+   rot (Haupt), Holz (Neben/Wahl), gold (gewählt) - nicht dunkelblau */
+#blatt[data-art="menue"] .k {
+  background: linear-gradient(#d24a3c, var(--rot)); border-color: var(--rot2);
+  box-shadow: 0 calc(var(--px) * 1.2) 0 var(--rot2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.25);
+}
+#blatt[data-art="menue"] .k:active:not(:disabled) { box-shadow: 0 calc(var(--px) * 0.2) 0 var(--rot2); }
+#blatt[data-art="menue"] .k--neben, #blatt[data-art="menue"] .k--wahl {
+  background: linear-gradient(#8a6a4a, #6b4a2c); border-color: var(--holz2);
+  box-shadow: 0 calc(var(--px) * 1.2) 0 var(--holz2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.2);
+}
+#blatt[data-art="menue"] .k--wahl.gewaehlt { background: linear-gradient(#f0c848, #c8962a); color: var(--tinte); text-shadow: none; border-color: #8a6414; box-shadow: 0 calc(var(--px) * 1.2) 0 #8a6414; }
+#blatt[data-art="menue"] .k--leise { background: linear-gradient(#b8b0a4, #948a7c); border-color: #6e665a; box-shadow: 0 calc(var(--px) * 1.2) 0 #6e665a, inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.25); }
