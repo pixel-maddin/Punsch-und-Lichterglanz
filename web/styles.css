@@ -1216,3 +1216,14 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #blatt[data-art="menue"] .schalter { margin: calc(var(--px) * 2.5) 0; gap: calc(var(--px) * 2); }
 #blatt[data-art="menue"] .neustart { margin-top: calc(var(--px) * 4); padding-top: calc(var(--px) * 3.5); }
 #blatt[data-art="menue"] .version { margin-top: calc(var(--px) * 2); }
+/* Statistik-Aufklappfeld präsenter (20.10.): goldener Rahmen, größere Schrift, runder Pfeilknopf */
+.menue-statistik { background: linear-gradient(#fff6d4, #f4e2b0); border: calc(var(--px) * 0.8) solid var(--gold); box-shadow: 0 calc(var(--px) * 1) 0 #c8962a; }
+.menue-statistik summary { padding: calc(var(--px) * 3) calc(var(--px) * 3.4); font-size: var(--t-betont); color: var(--rot2); }
+.menue-statistik summary::before { content: '★'; color: var(--gold); font-size: var(--t-gross); text-shadow: 0 calc(var(--px) * 0.4) 0 #a87a1a; }
+.menue-statistik summary small { font-size: var(--t-klein); color: var(--text2); }
+.menue-statistik summary::after {
+  content: '▾'; flex: none; width: calc(var(--px) * 9); height: calc(var(--px) * 9); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+  background: var(--rot); color: #fff; font-size: var(--t-klein);
+}
+.menue-statistik[open] { box-shadow: 0 calc(var(--px) * 1) 0 #c8962a, inset 0 0 0 calc(var(--px) * 0.4) rgba(232, 176, 48, 0.4); }
