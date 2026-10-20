@@ -1195,3 +1195,10 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 }
 #blatt[data-art="menue"] .k--wahl.gewaehlt { background: linear-gradient(#f0c848, #c8962a); color: var(--tinte); text-shadow: none; border-color: #8a6414; box-shadow: 0 calc(var(--px) * 1.2) 0 #8a6414; }
 #blatt[data-art="menue"] .k--leise { background: linear-gradient(#b8b0a4, #948a7c); border-color: #6e665a; box-shadow: 0 calc(var(--px) * 1.2) 0 #6e665a, inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.25); }
+
+/* Kaufknöpfe wieder wie früher (20.10.): grün zum Kaufen, und gekauft bzw. gesperrt
+   ohne Grund - die blaue Knopffarbe hatte beides überdeckt, der grüne Haken ging unter */
+.k--kauf { background: linear-gradient(#5a9a4a, var(--gruen)); border-color: var(--gruen2); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--gruen2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.25); }
+.k--kauf:active:not(:disabled) { box-shadow: 0 calc(var(--px) * 0.2) 0 var(--gruen2); }
+.k--fertig, .k--zu { background: none !important; border-color: transparent !important; box-shadow: none !important; color: var(--gruen); text-shadow: none; }
+.k--fertig .haken { color: var(--gruen); }
