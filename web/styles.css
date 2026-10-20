@@ -1202,3 +1202,17 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .k--kauf:active:not(:disabled) { box-shadow: 0 calc(var(--px) * 0.2) 0 var(--gruen2); }
 .k--fertig, .k--zu { background: none !important; border-color: transparent !important; box-shadow: none !important; color: var(--gruen); text-shadow: none; }
 .k--fertig .haken { color: var(--gruen); }
+
+/* Menü entschlackt (20.10.): Statistik zum Aufklappen, engere Abstände - alles ohne Scrollen */
+.menue-statistik { margin: 0 0 calc(var(--px) * 3); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2); background: var(--papier2); }
+.menue-statistik summary { list-style: none; cursor: pointer; padding: calc(var(--px) * 2.4) calc(var(--px) * 3); font: 800 var(--t-text) var(--schrift); color: var(--tinte); display: flex; align-items: baseline; gap: calc(var(--px) * 1.5); }
+.menue-statistik summary::-webkit-details-marker { display: none; }
+.menue-statistik summary::after { content: '▾'; margin-left: auto; color: var(--text3); transition: transform 0.15s; }
+.menue-statistik[open] summary::after { transform: rotate(180deg); }
+.menue-statistik summary small { font-weight: 600; font-size: var(--t-mini); color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menue-statistik .statistik { margin: 0; padding: 0 calc(var(--px) * 3) calc(var(--px) * 2.4); gap: calc(var(--px) * 1.6); }
+.menue-statistik .statistik div { font-size: var(--t-klein); padding-bottom: calc(var(--px) * 1.4); }
+#blatt[data-art="menue"] .regler { margin: calc(var(--px) * 2.5) 0; }
+#blatt[data-art="menue"] .schalter { margin: calc(var(--px) * 2.5) 0; gap: calc(var(--px) * 2); }
+#blatt[data-art="menue"] .neustart { margin-top: calc(var(--px) * 4); padding-top: calc(var(--px) * 3.5); }
+#blatt[data-art="menue"] .version { margin-top: calc(var(--px) * 2); }
