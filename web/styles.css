@@ -1016,13 +1016,15 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #ziel.markt { border-color: #f07a6a; }
 
 
-/* Knöpfe: dunkelblau mit hellblauem Rahmen (Hauptknopf heller, Nebenknopf dunkler) */
+/* Knöpfe: Bestätigen (Hauptknopf) seit 21.10. tannengrün mit hellgrünem Rahmen
+   (Nutzerwunsch: passt besser zur Weihnachtszeit), Nebenknopf bleibt dunkelblau.
+   Kaufen (.k--kauf) bleibt das hellere Grün, damit man beides unterscheidet. */
 .k {
-  background: linear-gradient(#36528e, #22346a); border-color: var(--ui-rand); color: #fff;
-  box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.18);
+  background: linear-gradient(#2e6a3c, #1a4626); border-color: #6aa878; color: #fff;
+  box-shadow: 0 calc(var(--px) * 1.2) 0 #0c2414, inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.16);
   text-shadow: 0 calc(var(--px) * 0.5) 0 rgba(0, 0, 0, 0.4);
 }
-.k:active:not(:disabled) { box-shadow: 0 calc(var(--px) * 0.2) 0 var(--ui-tief); }
+.k:active:not(:disabled) { box-shadow: 0 calc(var(--px) * 0.2) 0 #0c2414; }
 .k--neben, .k--wahl { background: linear-gradient(#26345e, #1a2448); border-color: var(--ui-rand2); box-shadow: 0 calc(var(--px) * 1.2) 0 var(--ui-tief), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.12); }
 .k--wahl.gewaehlt { background: linear-gradient(#f0c848, #c8962a); color: var(--tinte); text-shadow: none; border-color: #8a6414; box-shadow: 0 calc(var(--px) * 1.2) 0 #8a6414; }
 #blattZu, #kartenZu, #kartenText, #miniZu { background: linear-gradient(#36528e, #22346a); color: #fff; border: calc(var(--px) * 0.8) solid var(--ui-rand); }
