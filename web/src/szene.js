@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610200940';
-import * as Z from './zeit.js?v=202610200940';
-import * as S from './spiel.js?v=202610200940';
-import { FASSADEN } from './config.js?v=202610200940';
-import * as C from './config.js?v=202610200940';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610210900';
+import * as Z from './zeit.js?v=202610210900';
+import * as S from './spiel.js?v=202610210900';
+import { FASSADEN } from './config.js?v=202610210900';
+import * as C from './config.js?v=202610210900';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2634,7 +2634,9 @@ function guckVogel(c, cx, t, zu) {
   if (!zu.guck) {
     zu.guckAb -= dt;
     if (zu.guckAb > 0) return;
-    const arten = C.VOEGEL.filter((v) => v.id !== 'waldkauz');
+    // nur Arten, die schon kommen (21.10.), und ohne Waldkauz (zu groß fürs Loch)
+    const arten = S.vogelArtenFrei().filter((v) => v.id !== 'waldkauz');
+    if (!arten.length) { zu.guckAb = 30; return; }
     zu.guck = { art: arten[Math.floor(Math.random() * arten.length)].id, t: 0, dauer: 4.5, belohnt: false, links: Math.random() < 0.5 };
     zu.guckAb = 25 + Math.random() * 35;
   }

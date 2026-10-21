@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610200940';
-import * as Z from './zeit.js?v=202610200940';
-import { neueFarben } from './pixel.js?v=202610200940';
+import * as C from './config.js?v=202610210900';
+import * as Z from './zeit.js?v=202610210900';
+import { neueFarben } from './pixel.js?v=202610210900';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1927,6 +1927,9 @@ export function tuerBereit(n) {
   const ph = Z.phase();
   return (ph === 'advent' || ph === 'weihnacht' || ph === 'winter') && Z.dezemberTag() >= n && !tuerOffen(n);
 }
+/** Runde Beträge für den Kalender (21.10.): unter 1.000 in 100er-, darüber in 1.000er-Schritten. */
+const glatt = (n) => (n < 950 ? Math.max(100, Math.round(n / 100) * 100) : Math.round(n / 1000) * 1000);
+
 export function oeffneTuer(n) {
   if (!tuerBereit(n)) return null;
   st.kalender[n] = true;
@@ -1934,7 +1937,7 @@ export function oeffneTuer(n) {
   let ergebnis;
   if (deko) { st.kalDeko[deko.id] = true; st.neu = st.neu || {}; st.neu[deko.id] = true; ergebnis = { deko }; }
   else {
-    const betrag = Math.max(C.KALENDER_GELD_MIN, Math.round(st.gesamt * C.KALENDER_GELD_ANTEIL));
+    const betrag = glatt(Math.max(C.KALENDER_GELD_MIN, st.gesamt * C.KALENDER_GELD_ANTEIL));
     st.geld += betrag; hooks.geld();
     ergebnis = { betrag };
   }
@@ -1954,7 +1957,7 @@ export function oeffneVorfreude() {
   if (!vorfreudeBereit()) return 0;
   st.vorfreude = heuteMitternacht();
   st.vorfreudeZahl = (st.vorfreudeZahl || 0) + 1;
-  const betrag = Math.max(C.VORFREUDE_MIN, Math.round(st.gesamt * C.VORFREUDE_ANTEIL / 10) * 10);
+  const betrag = glatt(Math.max(C.VORFREUDE_MIN, st.gesamt * C.VORFREUDE_ANTEIL));
   st.geld += betrag; hooks.geld();
   speichere();
   return betrag;
@@ -2184,6 +2187,7 @@ export function fuettere() {
   const vorher = futterStand().stufe;
   if (vorher >= 5) return false;   // ist schon ganz voll: nichts zu tun
   st.futterBis = Z.jetzt().getTime() + C.FUTTER_STUNDEN * 3600000;
+  if (!st.futterStart) st.futterStart = Z.jetzt().getTime();   // ab heute kommen die Vogelarten nach und nach (21.10.)
   // Jedes echte Nachfüllen zählt (18.10.: vorher nur bei ganz leerem Haus - Karls Bitte blieb sonst offen)
   zaehleErfolg('futter');
   if (vorher === 0) lauf.vogelAb = Math.min(lauf.vogelAb, 3);   // gleich kommt der erste
@@ -2200,9 +2204,17 @@ export function futterStand() {
   return { rest, anteil, stufe: rest <= 0 ? 0 : Math.min(5, Math.ceil(anteil * 5)) };
 }
 const istNacht = () => Z.licht().hell <= 0.12;   // nachts nur Rotkehlchen und Waldkauz
+/** Tage seit dem ersten Füllen des Futterhauses (21.10.; ohne Füllen 0). */
+const futterTage = () => (st.futterStart ? Math.max(0, Math.floor((Z.jetzt().getTime() - st.futterStart) / 86400000)) : 0);
+/** Welche Arten kommen schon? Nach und nach (`abTag`), schon gesehene immer (21.10.). */
+export function vogelArtenFrei() {
+  const tage = futterTage(), vg = st.voegel || {};
+  return C.VOEGEL.filter((v) => vg[v.id] || tage >= (v.abTag || 0));
+}
 function vogelWahl() {
   const schnee = Z.schnee() > 0, knoedel = !!st.kalDeko.kal_knoedel, nacht = istNacht();
-  const liste = C.VOEGEL.filter((v) => (!v.schnee || schnee) && (nacht ? v.nacht || v.nachtAuch : !v.nacht));
+  const liste = vogelArtenFrei().filter((v) => (!v.schnee || schnee) && (nacht ? v.nacht || v.nachtAuch : !v.nacht));
+  if (!liste.length) return null;   // z. B. nachts, bevor Rotkehlchen und Waldkauz dran sind
   const gew = (v) => v.w * (v.selten && knoedel ? C.KNOEDEL_SELTEN : 1);
   let r = Math.random() * liste.reduce((s, v) => s + gew(v), 0);
   for (const v of liste) { r -= gew(v); if (r <= 0) return v; }
@@ -2242,6 +2254,7 @@ export function vogelTakt(dt) {
   const frei = [0, 1, 2, 3].filter((p) => !V.some((v) => v.platz === p));
   if (!frei.length) return;
   const art = vogelWahl();
+  if (!art) return;
   V.push({ art: art.id, platz: frei[Math.floor(Math.random() * frei.length)], t: 0,
     bleibt: C.VOGEL_BLEIBT[0] + Math.random() * (C.VOGEL_BLEIBT[1] - C.VOGEL_BLEIBT[0]), links: Math.random() < 0.5 });
   st.voegel = st.voegel || {};
