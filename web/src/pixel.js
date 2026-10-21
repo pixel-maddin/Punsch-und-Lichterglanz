@@ -707,17 +707,36 @@ export function figurGross(c, g, cx, basis, t, laune) {
 export function wichtelKlein(c, x, y, t, phase = 0) {
   x = Math.round(x); y = Math.round(y - Math.abs(Math.sin(t * 4 + phase)) * 1.2);
   r(c, x - 2, y - 4, 4, 4, '#2f8a3a'); r(c, x - 2, y - 1, 4, 1, '#1f5a26');
+  // Schattierung (21.10., wie die Gäste): Schattenseite links, Lichtkante rechts, Gürtel
+  r(c, x - 2, y - 4, 1, 3, '#246e2e'); r(c, x + 1, y - 4, 1, 3, '#43a64e'); p(c, x, y - 2, '#e8c030');
   r(c, x - 1, y - 7, 3, 3, '#f2c9a0'); p(c, x + 1, y - 6, '#2a1a1a');
+  p(c, x - 1, y - 5, '#d8a882'); p(c, x - 2, y - 6, '#f2c9a0');   // Kinnschatten, Ohr
   r(c, x - 2, y - 8, 4, 1, '#d83a3a'); r(c, x - 1, y - 9, 2, 1, '#d83a3a'); p(c, x - 2, y - 10, '#d83a3a'); p(c, x - 3, y - 10, '#ffffff');
+  p(c, x - 2, y - 8, '#a82828'); p(c, x + 1, y - 8, '#f06a5a');
 }
 export function wichtelGross(c, cx, basis, t) {
   cx = Math.round(cx);
   const b = basis;
-  r(c, cx - 6, b - 9, 12, 9, '#2f8a3a'); r(c, cx - 6, b - 9, 12, 1, '#e8c030');
+  // Kittel mit Schattenseite links, Lichtkante rechts, goldenem Kragen, Knöpfen, Gürtel (21.10.)
+  r(c, cx - 6, b - 9, 12, 9, '#2f8a3a');
+  r(c, cx - 6, b - 8, 2, 8, '#246e2e'); r(c, cx + 4, b - 8, 2, 8, '#43a64e');
+  r(c, cx - 3, b - 8, 1, 8, '#246e2e'); r(c, cx + 3, b - 7, 1, 6, '#3a9a46');   // Ärmelnähte
+  r(c, cx - 6, b - 9, 12, 1, '#e8c030'); r(c, cx - 5, b - 8, 10, 1, '#c89a20');
+  p(c, cx, b - 6, '#f4d870'); p(c, cx, b - 3, '#f4d870');
+  r(c, cx - 6, b - 2, 12, 1, '#3a2418'); p(c, cx, b - 2, '#e8c030');
   const ko = b - 19;
   kopf(c, cx, ko, 9, 10, '#f2c9a0');
   r(c, cx - 6, ko + 3, 2, 3, '#f2c9a0'); r(c, cx + 4, ko + 3, 2, 3, '#f2c9a0'); // Ohren
+  p(c, cx - 6, ko + 4, '#d8a882'); p(c, cx + 5, ko + 4, '#e8b890');           // Ohrinneres
+  // Gesicht: Schattenseite links, Kinn, Nase, rote Wangen, Glanz
+  r(c, cx - 5, ko + 2, 1, 6, '#dcae88'); r(c, cx - 3, ko + 9, 6, 1, '#dcae88');
+  p(c, cx + 3, ko + 2, '#fbe0c4'); p(c, cx, ko + 6, '#e0a888');
+  p(c, cx - 3, ko + 6, '#f09a8a'); p(c, cx + 3, ko + 6, '#f09a8a');
   augen(c, cx, ko + 4, 1, false); mund(c, cx, ko + 7, 'froh');
   r(c, cx - 5, ko - 1, 10, 3, '#d83a3a'); r(c, cx - 3, ko - 4, 7, 3, '#d83a3a'); r(c, cx + 2, ko - 6, 4, 2, '#d83a3a');
-  r(c, cx + 5, ko - 7, 2, 2, '#ffffff'); r(c, cx - 5, ko + 1, 10, 1, '#ffffff');
+  // Mütze: Schatten links und in den Falten, Licht oben rechts
+  r(c, cx - 5, ko - 1, 2, 2, '#a82828'); r(c, cx - 3, ko - 4, 1, 3, '#a82828'); p(c, cx + 2, ko - 6, '#a82828');
+  r(c, cx + 1, ko - 4, 3, 1, '#f06a5a'); p(c, cx + 4, ko - 6, '#f06a5a'); p(c, cx - 1, ko - 2, '#b83030');
+  r(c, cx + 5, ko - 7, 2, 2, '#ffffff'); p(c, cx + 5, ko - 6, '#d4dae4');
+  r(c, cx - 5, ko + 1, 10, 1, '#ffffff'); r(c, cx - 5, ko + 2, 10, 1, '#dfe4ec');
 }

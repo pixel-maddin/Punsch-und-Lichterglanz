@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610211200';
-import * as Z from './zeit.js?v=202610211200';
-import * as S from './spiel.js?v=202610211200';
-import { FASSADEN } from './config.js?v=202610211200';
-import * as C from './config.js?v=202610211200';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610211230';
+import * as Z from './zeit.js?v=202610211230';
+import * as S from './spiel.js?v=202610211230';
+import { FASSADEN } from './config.js?v=202610211230';
+import * as C from './config.js?v=202610211230';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -462,8 +462,14 @@ function haus(c, G, w, t, L) {
     for (let i = 0; i < rows; i++) {
       const y = wandO - dachH + i;
       const l = Math.round(52 - i * 20 / dachH), rr = Math.round(108 + i * 20 / dachH);
-      r(c, l, y, rr - l, 1, i === rows - 1 ? '#dfe8f2' : '#f6f9fc');
+      // Nicht über den Schornstein malen (21.10., gemeldet: unten ragte er unter
+      // dem Schneeband heraus) - der Schnee liegt links und rechts an ihm an
+      const f = i === rows - 1 ? '#dfe8f2' : '#f6f9fc';
+      r(c, l, y, 98 - l, 1, f); r(c, 107, y, rr - 107, 1, f);
     }
+    // kleine Schneewehe an der Bergseite des Schornsteins
+    const su = wandO - dachH + rows;
+    p(c, 97, su - 1, '#f6f9fc'); p(c, 107, su - 1, '#dfe8f2');
     for (let x = 32; x < 128; x += 1) if (Z.hash(x * 3) < 0.5 * w.schnee) p(c, x, wandO - 1, '#f6f9fc');
     r(c, 97, ko - 2, 11, 1, '#f6f9fc');
   }
