@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202610210900';
-import * as S from './spiel.js?v=202610210900';
-import { iconGross, scale2x, r, p } from './pixel.js?v=202610210900';
-import { naechsterSchritt } from './tresen.js?v=202610210900';
+import * as C from './config.js?v=202610211030';
+import * as S from './spiel.js?v=202610211030';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202610211030';
+import { naechsterSchritt } from './tresen.js?v=202610211030';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;
@@ -25,7 +25,7 @@ function bauen() {
   for (let k = 0; k < C.ANGEBOT_MAX; k++) {
     const el = document.createElement('div');
     el.className = 'kachel';
-    el.innerHTML = '<canvas width="40" height="40"></canvas><b class="k-name"></b><span class="k-preis"></span><i class="k-info"></i>'
+    el.innerHTML = '<canvas width="20" height="20"></canvas><b class="k-name"></b><span class="k-preis"></span><i class="k-info"></i>'
       + '<span class="k-balken"><span class="k-zone"></span><span class="k-fuell"></span><span class="k-marke"></span></span>';
     wurzel.appendChild(el);
     kacheln.push({ el, cv: el.querySelector('canvas'), name: el.querySelector('.k-name'), preis: el.querySelector('.k-preis'),
@@ -44,12 +44,26 @@ const _kc = _klein.getContext('2d', { willReadFrequently: true });
 // Kacheln dieselbe Sorte und sprangen hin und her (gemeldet). Scale2x schreibt
 // jetzt per putImageData direkt in die Leinwand der Kachel bzw. in deren eigene
 // Zwischenleinwand; gelesen wird nur sofort (getImageData).
+// 21.10.: Die Getränke-Kacheln zeichnen ganz ohne Scale2x 1:1 in ihre eigene
+// 20 x 20-Leinwand (Nutzerwunsch: „mehr nach 16-Bit") - ein Bildpixel = ein Spielpixel.
 function maleBild(ziel, malen, glatt = true) {
+  if (!glatt) { const c = ziel.getContext('2d', { willReadFrequently: true }); c.clearRect(0, 0, 20, 20); malen(c); umriss(c); return; }
   _kc.clearRect(0, 0, 20, 20);
   malen(_kc);
-  if (!glatt) { scale2x(_klein, 20, 20, ziel); return; }
   const x2 = scale2x(_klein, 20, 20, ziel._x2 || (ziel._x2 = document.createElement('canvas')));
   scale2x(x2, 40, 40, ziel);
+}
+/** Dunkler 1-px-Umriss um alles Gemalte (16-Bit-Look, hebt das Getränk vom Blau ab). */
+function umriss(c) {
+  const bild = c.getImageData(0, 0, 20, 20), d = bild.data;
+  const voll = (x, y) => x >= 0 && y >= 0 && x < 20 && y < 20 && d[(y * 20 + x) * 4 + 3] > 120;
+  const rand = [];
+  for (let y = 0; y < 20; y++) for (let x = 0; x < 20; x++) {
+    if (voll(x, y)) continue;
+    if (voll(x - 1, y) || voll(x + 1, y) || voll(x, y - 1) || voll(x, y + 1)) rand.push((y * 20 + x) * 4);
+  }
+  for (const i of rand) { d[i] = 18; d[i + 1] = 16; d[i + 2] = 32; d[i + 3] = 255; }
+  c.putImageData(bild, 0, 0);
 }
 /** Die Crêpe-Platte in 20 x 20: leer, mit Teig (bräunt) oder mit fertigem Crêpe. */
 function platte(c, cr) {
@@ -145,7 +159,7 @@ export function aktualisiere(t) {
   for (let k = 0; k < C.ANGEBOT_MAX; k++) {
     const q = kacheln[k], p0 = frei[k];
     if (!p0) {
-      if (q.sig !== 'frei') { q.sig = 'frei'; q.el.className = 'kachel frei'; q.name.textContent = 'Frei'; q.preis.textContent = '+'; q.info.textContent = ''; q.cv.getContext('2d').clearRect(0, 0, 40, 40); q.bildSig = ''; }
+      if (q.sig !== 'frei') { q.sig = 'frei'; q.el.className = 'kachel frei'; q.name.textContent = 'Frei'; q.preis.textContent = '+'; q.info.textContent = ''; q.cv.getContext('2d').clearRect(0, 0, 20, 20); q.bildSig = ''; }
       continue;
     }
     const i = C.PRODUKTE.indexOf(p0);

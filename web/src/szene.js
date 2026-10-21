@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610210900';
-import * as Z from './zeit.js?v=202610210900';
-import * as S from './spiel.js?v=202610210900';
-import { FASSADEN } from './config.js?v=202610210900';
-import * as C from './config.js?v=202610210900';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610211030';
+import * as Z from './zeit.js?v=202610211030';
+import * as S from './spiel.js?v=202610211030';
+import { FASSADEN } from './config.js?v=202610211030';
+import * as C from './config.js?v=202610211030';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -104,6 +104,9 @@ function himmel(c, G, w, t) {
     for (let i = 0; i < 4; i++) {
       const x = ((i * 61 + t * (2 + i)) % 240) - 40, y = 8 + i * 13;
       r(c, x, y, 26, 4, wf); r(c, x + 5, y - 3, 14, 3, wf); r(c, x + 16, y - 1, 12, 3, wf);
+      // Wolke mit hellem Rand oben und Schatten unten (21.10.)
+      r(c, x + 6, y - 3, 12, 1, ton(wf, 0.12)); r(c, x + 1, y, 4, 1, ton(wf, 0.08)); r(c, x + 19, y - 1, 8, 1, ton(wf, 0.08));
+      r(c, x + 2, y + 3, 24, 1, ton(wf, -0.07));
     }
   }
   return horizont;
@@ -145,6 +148,12 @@ function tannenRiss(c, x, fuss, h, f, schneeF) {
     // leicht gestufte Kanten, damit es nach Tanne und nicht nach Dreieck aussieht
     const stufe = (i % 4 === 3) ? 1 : 0;
     r(c, x - bw - stufe, fuss - h + i, bw * 2 + 1 + stufe * 2, 1, f);
+    // Licht von links, Schatten rechts und unter jeder Stufe (21.10.)
+    if (bw >= 1) {
+      p(c, x - bw - stufe, fuss - h + i, ton(f, 0.12));
+      r(c, x + 1, fuss - h + i, bw + stufe, 1, ton(f, -0.08));
+      if (i % 4 === 0 && i > 0) r(c, x - bw + 1, fuss - h + i, bw * 2 - 1, 1, ton(f, -0.12));
+    }
     if (schneeF && i % 4 === 3) { p(c, x - bw - stufe, fuss - h + i, schneeF); p(c, x + bw + stufe, fuss - h + i, schneeF); }
   }
   if (schneeF) p(c, x, fuss - h, schneeF);
@@ -178,6 +187,16 @@ function hintergrund(c, G, w, L, t = 0) {
   const schnee = w.schnee > 0;
   // Feld bis zum Vorgarten
   r(c, 0, hz, 180, G - hz, schnee ? '#e4ebf2' : '#9aa068');
+  // Feld mit Furchen und Büscheln (21.10.), nach hinten feiner
+  for (let y = hz; y < G - 26; y++) {
+    const tief = (y - hz) / Math.max(1, G - 26 - hz);
+    if (!schnee && (y - hz) % 3 === 1) for (let x = (y * 5) % 4; x < 180; x += 4) p(c, x, y, '#8e955e');
+    for (let x = 0; x < 180; x++) {
+      const h = Z.hash(x * 23 + y * 307);
+      if (h < 0.03 + tief * 0.05) p(c, x, y, schnee ? '#d2dce8' : '#848b54');
+      else if (h > 0.975 - tief * 0.02) p(c, x, y, schnee ? '#f6f9fc' : '#b0b47a');
+    }
+  }
   // Zwei Reihen Tannen, die hintere blasser (Luftperspektive)
   const reihe = (fuss, hMin, hMax, f, sf, seed, abstand) => {
     for (let i = -1; i < 180 / abstand + 2; i++) {
@@ -381,27 +400,52 @@ function haus(c, G, w, t, L) {
     for (let y = wandU - 10; y < wandU; y += 3) for (let x = HX0 + ((y / 3) % 2 ? 2 : 0); x < HX1; x += 6) r(c, x, y, 1, 3, ton(F.sockel, -0.25));
     r(c, HX0, wandU - 10, HX1 - HX0, 1, ton(F.sockel, -0.3));
   }
-  // Eckbretter
+  wandStruktur(c, F, wandO, wandU);
+  // Eckbretter, mit Lichtkante links und Schattenkante rechts
   r(c, HX0, wandO, 2, wandU - wandO, F.rahmen); r(c, HX1 - 2, wandO, 2, wandU - wandO, F.rahmen);
+  r(c, HX0, wandO, 1, wandU - wandO, ton(F.rahmen, 0.12)); r(c, HX1 - 1, wandO, 1, wandU - wandO, ton(F.rahmen, -0.18));
   r(c, HX0 - 1, wandU - 1, HX1 - HX0 + 2, 2, ton(F.wand, -0.35));
 
-  // Dach (Trapez)
+  // Dach (Trapez) mit einzelnen Schindeln (21.10.): jede Reihe unten mit
+  // Schattenfuge, oben mit Lichtkante, versetzte Stoßfugen, und jede Schindel
+  // weicht im Ton ein wenig ab - vorher war es eine Fläche mit Punkten.
   const dachH = 28;
+  const dachHell = ton(F.dach, 0.07), dachDunkel = ton(F.dach, -0.08);
   for (let i = 0; i <= dachH; i++) {
     const y = wandO - i;
     const l = Math.round(32 + i * 20 / dachH), rr = Math.round(128 - i * 20 / dachH);
-    r(c, l, y, rr - l, 1, i % 4 === 0 ? F.dach2 : F.dach);
-    if (i % 4 === 2) for (let x = l + ((i / 4) % 2 ? 2 : 0); x < rr; x += 5) p(c, x, y, F.dach2);
+    const reihe = Math.floor(i / 4), j = i % 4;
+    if (j === 0) { r(c, l, y, rr - l, 1, F.dach2); continue; }
+    const vers = reihe % 2 ? 3 : 0;
+    for (let x0 = 30 - vers; x0 < rr; x0 += 6) {
+      const a = Math.max(l, x0 + 1), b = Math.min(rr, x0 + 6);
+      if (b <= a) continue;
+      const h = Z.hash(reihe * 131 + x0 * 7);
+      const f = h < 0.22 ? dachDunkel : h > 0.84 ? dachHell : F.dach;
+      r(c, a, y, b - a, 1, j === 3 ? ton(f, 0.08) : f);
+      if (x0 >= l && x0 < rr) p(c, x0, y, F.dach2);   // Stoßfuge
+    }
+    // Ortgang: dunkle Kante an den Schrägen
+    p(c, l, y, ton(F.dach, -0.3)); p(c, rr - 1, y, ton(F.dach, -0.3));
   }
+  // Moos und fehlende Ziegel am alten Dach
+  if (S.st.fassade === 'trist') for (const [mx, my] of [[44, 3], [47, 2], [66, 15], [112, 6], [115, 5], [86, 22]]) p(c, mx, wandO - my, '#6e7448');
   r(c, 31, wandO, 98, 2, ton(F.dach, -0.3)); // Traufe
+  r(c, 31, wandO + 1, 98, 1, ton(F.dach, -0.45));
   if (F.muster === 'lebkuchen') for (let x = 32; x < 128; x += 3) { p(c, x, wandO + 2, '#fff8f0'); p(c, x + 1, wandO + 3, '#fff8f0'); }
   if (S.st.fassade === 'trist') { r(c, 58, wandO - 12, 4, 2, ton(F.dach, -0.4)); r(c, 96, wandO - 6, 3, 2, ton(F.dach, -0.4)); }
 
   // Schornstein
   const ku = wandO - 18, ko = wandO - 38;
   r(c, 98, ko, 9, ku - ko, '#8a4a3a');
-  for (let y = ko + 2; y < ku; y += 3) r(c, 98, y, 9, 1, '#6a3428');
-  r(c, 97, ko - 1, 11, 2, '#5a3a32');
+  // Ziegel im Verband, links Licht, rechts Schatten (21.10.)
+  for (let y = ko + 2, z = 0; y < ku; y += 3, z++) {
+    r(c, 98, y, 9, 1, '#6a3428');
+    for (let x = 98 + (z % 2 ? 1 : 3); x < 107; x += 4) r(c, x, y - 2, 1, 2, '#6a3428');
+    if (Z.hash(z * 17) > 0.6) r(c, 99 + (z % 3) * 2, y - 2, 2, 2, '#9a5a44');
+  }
+  r(c, 98, ko, 1, ku - ko, '#a0604a'); r(c, 106, ko, 1, ku - ko, '#6a3428');
+  r(c, 97, ko - 1, 11, 2, '#5a3a32'); r(c, 97, ko - 1, 11, 1, '#7a5a50');
   // Rauch nur mit Kamin
   if (kamin) {
     for (let i = 0; i < 6; i++) {
@@ -427,7 +471,12 @@ function haus(c, G, w, t, L) {
   // Gaube mit Fenster
   const gx0 = 71, gx1 = 89, go = wandO - 20, gu = wandO - 4;
   r(c, gx0, go, gx1 - gx0, gu - go, F.wand);
-  for (let i = 0; i < 6; i++) r(c, gx0 - 2 + i, go - i, gx1 - gx0 + 4 - i * 2, 1, F.dach2);
+  for (let i = 0; i < 6; i++) {
+    r(c, gx0 - 2 + i, go - i, gx1 - gx0 + 4 - i * 2, 1, i % 2 ? F.dach : F.dach2);
+    if (i % 2) for (let x = gx0 + i + (i % 4 === 1 ? 1 : 3); x < gx1 + 2 - i; x += 4) p(c, x, go - i, F.dach2);
+    p(c, gx0 - 2 + i, go - i, ton(F.dach, -0.3)); p(c, gx1 + 1 - i, go - i, ton(F.dach, -0.3));
+  }
+  r(c, gx0, go + 1, gx1 - gx0, 1, ton(F.wand, -0.2));   // Schatten unter dem Gaubendach
   if (w.schnee > 0) r(c, gx0 + 2, go - 5, gx1 - gx0 - 4, 1, '#f6f9fc');
   fenster(c, 75, go + 4, 10, 10, F, false, w, L, t, 'gaube');
 
@@ -563,6 +612,52 @@ function haus(c, G, w, t, L) {
   if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershow(c, L, wandO, wandU, t);
 }
 
+/**
+ * Oberfläche der Hauswand (21.10., gemeldet: „flach, wenig Textur"):
+ * Körnung je nach Muster, Schatten unter dem Dachüberstand, zur Ecke hin
+ * etwas dunkler, beim Putz ein Steinsockel. Alles fest aus dem Hash, nichts flimmert.
+ */
+function wandStruktur(c, F, wandO, wandU) {
+  const m = F.muster;
+  const hell = ton(F.wand, 0.07), dunkel = ton(F.wand, -0.08);
+  if (m === 'putz' || m === 'bretter' || m === 'chalet') {
+    for (let y = wandO + 3; y < wandU - 1; y++) for (let x = HX0 + 2; x < HX1 - 2; x++) {
+      const h = Z.hash(x * 31 + y * 173);
+      if (h < 0.05) p(c, x, y, dunkel); else if (h > 0.96) p(c, x, y, hell);
+    }
+  }
+  if (m === 'putz') {
+    // ausgebesserte Putzflecken und abgeplatzte Stellen
+    for (const [fx, fy, fw, fh] of [[54, 9, 5, 3], [101, 28, 4, 2], [66, 30, 3, 2]]) r(c, fx, wandO + fy, fw, fh, ton(F.wand, 0.05));
+    for (const [fx, fy] of [[57, 34], [108, 12], [42, 25]]) { r(c, fx, wandO + fy, 2, 1, ton(F.wand, -0.18)); p(c, fx, wandO + fy + 1, ton(F.wand, -0.1)); }
+    // Steinsockel
+    const so = wandU - 5;
+    r(c, HX0, so, HX1 - HX0, 4, ton(F.wand, -0.22));
+    r(c, HX0, so, HX1 - HX0, 1, ton(F.wand, -0.08));
+    for (let x = HX0 + 1, k = 0; x < HX1; x += 7, k++) {
+      r(c, x + (k % 2 ? 3 : 0), so + 1, 1, 3, ton(F.wand, -0.34));
+      if (Z.hash(k * 7) > 0.5) p(c, x + 2, so + 2, ton(F.wand, -0.14));
+    }
+    r(c, HX0, so + 2, HX1 - HX0, 1, ton(F.wand, -0.28));
+  }
+  if (m === 'bretter' || m === 'chalet') {
+    // Holz: helle Kante neben jeder Fuge, ein paar Astlöcher
+    if (m === 'bretter') for (let x = HX0 + 4; x < HX1 - 2; x += 4) r(c, x, wandO, 1, wandU - wandO, hell);
+    for (let i = 0; i < 7; i++) {
+      const ax = HX0 + 5 + Math.floor(Z.hash(i * 41) * 74), ay = wandO + 6 + Math.floor(Z.hash(i * 59) * 30);
+      p(c, ax, ay, ton(F.wand, -0.25)); p(c, ax, ay + 1, ton(F.wand, -0.12));
+    }
+  }
+  // Schatten des Dachüberstands: zwei volle Zeilen, eine gerasterte
+  r(c, HX0, wandO + 2, HX1 - HX0, 2, ton(F.wand, -0.2));
+  for (let x = HX0; x < HX1; x += 2) p(c, x + ((x >> 1) % 2), wandO + 4, ton(F.wand, -0.12));
+  // zu den Ecken hin gerastert dunkler (Rundung, Tiefe)
+  for (let y = wandO + 4; y < wandU - 1; y++) {
+    if (y % 2) { p(c, HX0 + 2, y, dunkel); p(c, HX1 - 3, y, dunkel); }
+    p(c, HX1 - 4 + (y % 2), y, ton(F.wand, -0.05));
+  }
+}
+
 function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
   r(c, x - 1, y - 1, fw + 2, fh + 2, F.rahmen);
   if (F.laden && wo !== 'gaube') {
@@ -631,12 +726,26 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
     }
     r(c, x, y, 2, fh, '#9a3028'); r(c, x + fw - 2, y, 2, fh, '#9a3028');   // Vorhänge
   } else {
+    // Glas (21.10.): oben etwas Himmelsspiegelung, schräger Lichtstreif,
+    // innen Gardinen oben und an den Seiten - vorher eine dunkle Fläche
     r(c, x, y, fw, fh, '#39404e');
-    p(c, x + 2, y + 2, '#5a6478'); p(c, x + 3, y + 3, '#5a6478');
+    r(c, x, y, fw, 2, '#4a5468'); r(c, x, y + fh - 2, fw, 2, '#30364a');
+    for (let k = 0; k < Math.min(fw, fh) - 2; k++) { p(c, x + 2 + k, y + fh - 3 - k, '#4e5a70'); if (k % 3 === 0) p(c, x + 3 + k, y + fh - 3 - k, '#5e6a82'); }
+    if (wo !== 'gaube') {
+      const g = '#d8d0c0', g2 = '#b8b0a2';
+      r(c, x, y, fw, 1, g);
+      for (let xx = x; xx < x + fw; xx++) if (xx % 2) p(c, xx, y + 1, g2);
+      r(c, x, y + 1, 2, fh - 3, g2); p(c, x, y + 1, g); r(c, x + fw - 2, y + 1, 2, fh - 3, g2); p(c, x + fw - 1, y + 1, g);
+      p(c, x + 1, y + fh - 3, g2); p(c, x + fw - 2, y + fh - 3, g2);
+    }
   }
   // Sprossen
   r(c, x + Math.floor(fw / 2), y, 1, fh, F.rahmen); r(c, x, y + Math.floor(fh / 2), fw, 1, F.rahmen);
+  // Rahmen mit Licht oben/links und Schatten unten/rechts
+  r(c, x - 1, y - 1, fw + 2, 1, ton(F.rahmen, 0.15)); r(c, x - 1, y - 1, 1, fh + 2, ton(F.rahmen, 0.08));
+  r(c, x + fw, y - 1, 1, fh + 2, ton(F.rahmen, -0.2));
   r(c, x - 2, y + fh + 1, fw + 4, 1, ton(F.rahmen, -0.2)); // Fensterbank
+  r(c, x - 2, y + fh + 2, fw + 4, 1, ton(F.wand, -0.18));  // ihr Schatten an der Wand
   if (w.schnee > 0 && wo !== 'gaube') r(c, x - 2, y + fh, fw + 4, 1, '#f6f9fc');
 
   if (wo === 'gaube' && S.zeigt('fensterstern')) {
@@ -925,16 +1034,47 @@ function boden(c, G, w) {
   const schnee = w.schnee > 0;
   // Vorgarten
   r(c, 0, G - 26, 180, 14, schnee ? '#eef3f8' : '#6f6a3e');
+  // Struktur (21.10.): Grasbüschel in drei Tönen, Erde und Laub - bzw. im
+  // Schnee sanfte Mulden und Glitzer. Fest aus dem Hash, nichts flimmert.
+  for (let y = G - 26; y < G - 12; y++) for (let x = 0; x < 180; x++) {
+    const h = Z.hash(x * 13 + y * 101);
+    if (schnee) {
+      if (h < 0.06) p(c, x, y, '#dde6f0'); else if (h > 0.985) p(c, x, y, '#ffffff');
+    } else if (h < 0.1) { p(c, x, y, '#86804a'); if (h < 0.04) p(c, x, y - 1, '#99924f'); }
+    else if (h > 0.91) p(c, x, y, '#5a5630');
+  }
   if (schnee) for (let i = 0; i < 30; i++) p(c, Math.floor(Z.hash(i * 17) * 180), G - 26 + Math.floor(Z.hash(i * 23) * 14), '#d4deea');
   else for (let i = 0; i < 40; i++) p(c, Math.floor(Z.hash(i * 17) * 180), G - 26 + Math.floor(Z.hash(i * 23) * 14), ['#8a5a2a', '#a8703a', '#5a5a32', '#7a7040'][i % 4]);
-  // Weg zur Tür
-  for (let y = G - 22; y < G - 12; y += 3) { r(c, 76, y, 4, 2, schnee ? '#c4ccd6' : '#9a948a'); r(c, 81, y + 1, 3, 2, schnee ? '#c4ccd6' : '#9a948a'); }
-  // Gehweg
-  r(c, 0, G - 12, 180, 12, schnee ? '#d6dde6' : '#8c8a88');
+  // Schatten vom Haus auf den Vorgarten
+  r(c, HX0, G - 24, HX1 - HX0, 1, schnee ? '#cdd8e4' : '#5a5632');
+  for (let x = HX0; x < HX1; x += 2) p(c, x, G - 23, schnee ? '#dce4ee' : '#635e36');
+  // Weg zur Tür: Trittsteine mit Licht- und Schattenkante
+  const st = schnee ? '#c4ccd6' : '#9a948a', stH = schnee ? '#dfe5ec' : '#b0aa9e', stD = schnee ? '#a8b2c0' : '#7a756c';
+  for (let y = G - 22; y < G - 12; y += 3) {
+    r(c, 76, y, 4, 2, st); r(c, 76, y, 4, 1, stH); r(c, 76, y + 2, 4, 1, stD);
+    r(c, 81, y + 1, 3, 2, st); r(c, 81, y + 1, 3, 1, stH); r(c, 81, y + 3, 3, 1, stD);
+  }
+  // Gehweg: Platten mit leicht verschiedenem Ton, Kanten, ein paar Risse
+  const plat = schnee ? '#d6dde6' : '#8c8a88';
+  r(c, 0, G - 12, 180, 12, plat);
+  for (let x = 0, k = 0; x < 180; x += 10, k++) for (let z = 0; z < 2; z++) {
+    const h = Z.hash(k * 29 + z * 7);
+    const y0 = G - 11 + z * 6, f = h < 0.3 ? ton(plat, -0.05) : h > 0.75 ? ton(plat, 0.06) : plat;
+    r(c, x + 1, y0, 9, 5, f);
+    r(c, x + 1, y0, 9, 1, ton(f, 0.08));
+    if (!schnee && h > 0.88) { p(c, x + 3, y0 + 2, ton(plat, -0.2)); p(c, x + 4, y0 + 3, ton(plat, -0.2)); p(c, x + 5, y0 + 3, ton(plat, -0.15)); }
+    for (let i = 0; i < 4; i++) { const hh = Z.hash(k * 53 + z * 11 + i * 3); p(c, x + 1 + Math.floor(hh * 9), y0 + 1 + Math.floor(Z.hash(hh * 97) * 4), ton(f, hh > 0.5 ? -0.07 : 0.07)); }
+  }
   for (let x = 0; x < 180; x += 10) r(c, x, G - 12, 1, 12, schnee ? '#c4ccd6' : '#7a7876');
+  r(c, 0, G - 6, 180, 1, schnee ? '#c4ccd6' : '#7a7876');
   r(c, 0, G - 12, 180, 1, schnee ? '#f0f4f8' : '#a4a2a0');
+  // Bordstein
+  r(c, 0, G - 2, 180, 1, schnee ? '#e4eaf0' : '#a8a6a2');
   r(c, 0, G - 1, 180, 1, schnee ? '#b8c2ce' : '#6a6866');
-  if (schnee) r(c, 0, G - 7, 180, 3, '#c8d0da'); // Trampelpfad
+  if (schnee) {
+    r(c, 0, G - 7, 180, 3, '#c8d0da'); // Trampelpfad
+    for (let x = 0; x < 180; x++) if (Z.hash(x * 7.3) < 0.18) p(c, x, G - 7 + Math.floor(Z.hash(x * 3.1) * 3), '#b8c2ce');
+  }
 }
 
 /** Kufen und Hufe quer über den verschneiten Gehweg (12.10.; im Vorgarten
@@ -1781,9 +1921,14 @@ function stand(c, G, w, t, L) {
   const markise = G - 44;
   // Rückwand und Töpfe
   r(c, x0 + 2, G - 34, x1 - x0 - 4, 12, '#5a3a22');
+  // Rückwand aus Brettern, oben im Schatten der Markise (21.10.)
+  for (let x = x0 + 5; x < x1 - 2; x += 5) { r(c, x, G - 34, 1, 12, '#4a2e1a'); r(c, x + 1, G - 34, 1, 12, '#664428'); }
+  r(c, x0 + 2, G - 34, x1 - x0 - 4, 2, '#3e2614');
   for (let i = 0; i < 4; i++) {
     const tx = x0 + 6 + i * 10;
     r(c, tx, G - 27, 7, 5, '#4a4a52'); r(c, tx, G - 27, 7, 1, '#8a1830');
+    r(c, tx, G - 26, 1, 4, '#6a6a74'); r(c, tx + 6, G - 26, 1, 4, '#38383e'); p(c, tx + 1, G - 25, '#8a8a96');
+    r(c, tx - 1, G - 25, 1, 1, '#38383e'); r(c, tx + 7, G - 25, 1, 1, '#38383e');   // Griffe
     if (Math.sin(t * 3 + i) > 0) p(c, tx + 3, G - 29 - (Math.floor(t * 2 + i) % 2), '#e8eef4');
   }
   // Wichtel, die schon mitarbeiten, schauen über den Tresen
@@ -1795,7 +1940,7 @@ function stand(c, G, w, t, L) {
     if (a < 0.85) { r(c, zx, zy, 3, 1, '#e8eef8'); p(c, zx + 1, zy + 1, '#e8eef8'); r(c, zx, zy + 2, 3, 1, '#e8eef8'); }
   }
   // Pfosten (die Zuckerstangen stehen seit dem 29.09. im Vorgarten)
-  for (const px of [x0, x1 - 2]) r(c, px, markise, 2, G - 10 - markise, '#7a5230');
+  for (const px of [x0, x1 - 2]) { r(c, px, markise, 2, G - 10 - markise, '#7a5230'); r(c, px, markise, 1, G - 10 - markise, '#94683e'); }
   // Ausbaustufen des Stands: Holzdach, dann Laternen und Grün, dann Stern und Lichter
   const ausbau = S.zeigt('stand') ? S.stufe('stand') : 0;
   if (ausbau >= 1) {
@@ -1826,6 +1971,8 @@ function stand(c, G, w, t, L) {
     const f = Math.floor((x - x0) / 4) % 2 ? '#f4f0e8' : '#c83030';
     r(c, x, markise, 1, 6, f);
     if ((x - x0) % 4 < 2) p(c, x, markise + 6, f);
+    // Stoff: oben Licht, unten Falte im Schatten
+    p(c, x, markise, ton(f, 0.15)); r(c, x, markise + 4, 1, 2, ton(f, -0.12));
   }
   r(c, x0 - 2, markise - 1, x1 - x0 + 4, 1, '#8a2020');
   if (w.schnee > 0) r(c, x0 - 2, markise - 2, x1 - x0 + 4, 1, '#f6f9fc');
@@ -1857,8 +2004,17 @@ function stand(c, G, w, t, L) {
   if (S.zeigt('standlicht')) L.push({ rect: [x0 + 2, G - 34, x1 - x0 - 4, 12], f: '#ffb860', halo: 10, an: 0.35 });
   // Tresen
   r(c, x0, G - 22, x1 - x0, 12, '#8a5a32');
+  // Bretter mit Maserung, Nägeln und Lichtkante (21.10.)
+  for (let y = G - 22, z = 0; y < G - 10; y += 3, z++) {
+    r(c, x0, y, x1 - x0, 1, '#9a6a3c');
+    for (let x = x0; x < x1; x++) { const h = Z.hash(x * 19 + z * 331); if (h < 0.16) p(c, x, y + 1, '#7a4c2a'); }
+    p(c, x0 + 2, y + 1, '#4a2e1a'); p(c, x1 - 3, y + 1, '#4a2e1a');
+    if (z % 2) p(c, x0 + 20 + z * 3, y + 1, '#5a3618');   // Astloch
+  }
   for (let y = G - 19; y < G - 10; y += 3) r(c, x0, y, x1 - x0, 1, '#6a4222');
-  r(c, x0 - 1, G - 23, x1 - x0 + 2, 2, '#a8703a');
+  r(c, x1 - 1, G - 22, 1, 12, '#6a4222');
+  r(c, x0 - 1, G - 23, x1 - x0 + 2, 2, '#a8703a'); r(c, x0 - 1, G - 23, x1 - x0 + 2, 1, '#c08a50');
+  r(c, x0, G - 21, x1 - x0, 1, '#5a3618');   // Schatten unter der Tresenplatte
   if (w.schnee > 0) r(c, x0, G - 24, x1 - x0, 1, '#f6f9fc');
   // Plätzchendose aus der Backstube (10.10.): eine Auslage vorn an der
   // Tresenkante - auf der Theke selbst lag der Teller über den Wichtelköpfen
@@ -2252,6 +2408,12 @@ const STRASSE = 6;   // so viel liegt die Welt über der Tresenkante
 function fahrbahn(c, GW, G, w) {
   const schnee = w.schnee > 0;
   r(c, 0, GW, 180, G - GW, schnee ? '#b8c2ce' : '#5e5e66');
+  // Körnung im Asphalt bzw. Spurrillen im Schnee (21.10.)
+  for (let y = GW + 1; y < G; y++) for (let x = 0; x < 180; x++) {
+    const h = Z.hash(x * 17 + y * 211);
+    if (h < 0.07) p(c, x, y, schnee ? '#a8b2c0' : '#535359'); else if (h > 0.95) p(c, x, y, schnee ? '#ccd4de' : '#6c6c74');
+  }
+  if (schnee) { r(c, 0, GW + 1, 180, 1, '#a4aebc'); r(c, 0, G - 1, 180, 1, '#a4aebc'); }
   r(c, 0, GW, 180, 1, schnee ? '#9aa6b4' : '#48484e');
   for (let x = 4; x < 180; x += 14) r(c, x, GW + 3, 6, 1, schnee ? '#dfe6ee' : '#c8c4b0');
 }
