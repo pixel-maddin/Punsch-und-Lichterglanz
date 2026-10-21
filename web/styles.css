@@ -1229,3 +1229,29 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   background: var(--rot); color: #fff; font-size: var(--t-klein);
 }
 .menue-statistik[open] { box-shadow: 0 calc(var(--px) * 1) 0 #c8962a, inset 0 0 0 calc(var(--px) * 0.4) rgba(232, 176, 48, 0.4); }
+
+/* Menü neu (21.10.): Statistik offen als kompakte Karte in zwei Spalten, mehr Luft
+   zwischen den Knöpfen, Einstellungen als eigene Unterseite. Passt auch bei 9:16. */
+.menue-statistik { padding: calc(var(--px) * 2.6) calc(var(--px) * 3.2) calc(var(--px) * 3); }
+.menue-statistik h3 { margin: 0 0 calc(var(--px) * 2); font: 800 var(--t-betont) var(--schrift); color: var(--rot2); display: flex; align-items: center; gap: calc(var(--px) * 1.5); }
+.menue-statistik h3::before { content: '★'; color: var(--gold); font-size: var(--t-gross); text-shadow: 0 calc(var(--px) * 0.4) 0 #a87a1a; }
+.menue-statistik .statistik.kompakt { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--px) * 1.8) calc(var(--px) * 3); margin: 0; padding: 0; }
+.menue-statistik .statistik.kompakt div { display: flex; flex-direction: column; justify-content: flex-start; gap: calc(var(--px) * 0.3); min-width: 0; font-size: var(--t-klein); padding-bottom: calc(var(--px) * 1.2); border-bottom: calc(var(--px) * 0.5) dashed #e0c898; }
+.menue-statistik .statistik.kompakt div.breit { grid-column: 1 / -1; }
+.menue-statistik .statistik.kompakt span { font-size: var(--t-mini); color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.menue-statistik .statistik.kompakt b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#blatt[data-art="menue"] .regler { margin: calc(var(--px) * 4) 0 calc(var(--px) * 3); }
+#blatt[data-art="menue"] .schalter { margin: calc(var(--px) * 3.5) 0; gap: calc(var(--px) * 3.5) calc(var(--px) * 3); }
+#blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 15); }
+#blatt[data-art="menue"] .schalter.einzeln { grid-template-columns: 1fr; gap: calc(var(--px) * 4); margin-top: calc(var(--px) * 2); }
+#blatt[data-art="menue"] .schalter.einzeln .k { min-height: calc(var(--px) * 17); font-size: var(--t-betont); }
+#blatt[data-art="menue"] .neustart { margin-top: calc(var(--px) * 5); padding-top: calc(var(--px) * 4.5); }
+/* Niedrige Schirme (9:16 und flacher): etwas dichter, damit nichts scrollt */
+@media (max-aspect-ratio: 10/16) and (max-height: 700px), (min-aspect-ratio: 9/16) {
+  .menue-statistik .statistik.kompakt { gap: calc(var(--px) * 1.2) calc(var(--px) * 3); }
+  .menue-statistik .statistik.kompakt div { padding-bottom: calc(var(--px) * 0.8); }
+  #blatt[data-art="menue"] .regler { margin: calc(var(--px) * 3) 0 calc(var(--px) * 2); }
+  #blatt[data-art="menue"] .schalter { margin: calc(var(--px) * 3.2) 0; gap: calc(var(--px) * 3.6) calc(var(--px) * 3); }
+  #blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 14.5); }
+  #blatt[data-art="menue"] .neustart { margin-top: calc(var(--px) * 3.5); padding-top: calc(var(--px) * 3); }
+}

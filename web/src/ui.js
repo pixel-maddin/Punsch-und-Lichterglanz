@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610211130';
-import * as S from './spiel.js?v=202610211130';
-import * as Z from './zeit.js?v=202610211130';
-import * as T from './ton.js?v=202610211130';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610211130';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610211130';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610211130';
-import * as A from './auftraege.js?v=202610211130';
-import * as E from './erfolge.js?v=202610211130';
-import * as ZL from './ziele.js?v=202610211130';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610211130';
-import * as KA from './karte.js?v=202610211130';
-import { zeigeRueckblick } from './ereignis.js?v=202610211130';
-import { barbaraZweig } from './szene.js?v=202610211130';
-import * as SW from './schneeball.js?v=202610211130';
-import * as LI from './lichtung.js?v=202610211130';
-import * as CB from './christbaum.js?v=202610211130';
-import * as SB from './schlitten.js?v=202610211130';
-import * as EB from './schlittschuh.js?v=202610211130';
-import * as BS from './backstube.js?v=202610211130';
-import { alleSymbole } from './symbole.js?v=202610211130';
+import * as C from './config.js?v=202610211200';
+import * as S from './spiel.js?v=202610211200';
+import * as Z from './zeit.js?v=202610211200';
+import * as T from './ton.js?v=202610211200';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610211200';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610211200';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610211200';
+import * as A from './auftraege.js?v=202610211200';
+import * as E from './erfolge.js?v=202610211200';
+import * as ZL from './ziele.js?v=202610211200';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610211200';
+import * as KA from './karte.js?v=202610211200';
+import { zeigeRueckblick } from './ereignis.js?v=202610211200';
+import { barbaraZweig } from './szene.js?v=202610211200';
+import * as SW from './schneeball.js?v=202610211200';
+import * as LI from './lichtung.js?v=202610211200';
+import * as CB from './christbaum.js?v=202610211200';
+import * as SB from './schlitten.js?v=202610211200';
+import * as EB from './schlittschuh.js?v=202610211200';
+import * as BS from './backstube.js?v=202610211200';
+import { alleSymbole } from './symbole.js?v=202610211200';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1891,9 +1891,11 @@ export function oeffneMenue() {
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
   const b = S.boni();
-  const stat = el('div', 'statistik');
+  // 21.10.: Statistik wieder offen, aber kompakt in zwei Spalten (Name oben klein,
+  // Wert darunter) - so passt das Menü auch bei 9:16 ohne Aufklappfeld
+  const stat = el('div', 'statistik kompakt');
   stat.innerHTML = `
-    <div><span>Haus</span><b>${esc(S.st.name || '-')}</b></div>
+    <div class="breit"><span>Haus</span><b>${esc(S.st.name || '-')}</b></div>
     <div><span>Spielmodus</span><b>${S.st.modus === 'eigen' ? 'Individuell' : 'Klassisch'}</b></div>
     <div><span>Wetter heute</span><b>${(C.WETTER_LAGEN[Z.tagesWetter().art] || { name: 'Ruhig' }).name}, ${Z.tagesWetter().temp}°</b></div>
     <div><span>Stimmung</span><b>♥ ${S.stimmung()}</b></div>
@@ -1902,12 +1904,11 @@ export function oeffneMenue() {
     <div><span>Wichtel verdienen</span><b>${S.formatGeld(S.wichtelProSekunde() * 60)}/min</b></div>
     <div><span>Bedient</span><b>${S.st.stats.bedient.toLocaleString('de-DE')}</b></div>
     <div><span>Verdient insgesamt</span><b>${S.formatGeld(S.st.gesamt)}</b></div>
-    ${S.st.andenken ? `<div><span>Andenken aus früheren Jahren</span><b>★ ${S.st.andenken}</b></div>` : ''}`;
-  // 20.10.: Die Zahlen liegen hinter einem Aufklappfeld - so passt das Menü ohne Scrollen
-  const auf = el('details', 'menue-statistik');
-  auf.appendChild(el('summary', null, `Statistik <small>· ${esc(S.st.name || 'dein Haus')} · ♥ ${S.stimmung()}</small>`));
-  auf.appendChild(stat);
-  liste.appendChild(auf);
+    ${S.st.andenken ? `<div class="breit"><span>Andenken aus früheren Jahren</span><b>★ ${S.st.andenken}</b></div>` : ''}`;
+  const karte = el('div', 'menue-statistik');
+  karte.appendChild(el('h3', null, 'Statistik'));
+  karte.appendChild(stat);
+  liste.appendChild(karte);
 
   const ton = el('div', 'schalter');
   const mk = (label, an, f) => { const k = el('button', 'k k--wahl' + (an ? ' gewaehlt' : ''), `${label}: ${an ? 'an' : 'aus'}`); k.onclick = () => { f(); oeffneMenue(); }; return k; };
@@ -1929,18 +1930,15 @@ export function oeffneMenue() {
   for (const b of regler.querySelectorAll('.rk')) b.onclick = () => setze(stufe() + Number(b.dataset.d));
   wert.textContent = stufe() === 0 ? 'aus' : stufe();
   liste.appendChild(regler);
-  ton.appendChild(mk('Geräusche', S.st.ton.fx, () => { S.st.ton.fx = !S.st.ton.fx; T.setzeFx(S.st.ton.fx); S.speichere(); }));
+  // Geräusche, Vorschau, Haus umbenennen, So geht's liegen seit 21.10. unter „Einstellungen"
+  const einst = el('button', 'k k--neben', 'Einstellungen');
+  einst.onclick = () => oeffneEinstellungen();
+  ton.appendChild(einst);
   // Nach den Startzielen: nächstes Ziel vorschlagen lassen oder selbst erkunden (13.10.)
-  // Vorschau „Morgen wartet …“ abschaltbar (13.10.)
-  ton.appendChild(mk('Vorschau auf morgen', S.st.vorschauAus !== true, () => { S.st.vorschauAus = S.st.vorschauAus !== true; S.speichere(); }));
   if (ZL.fertig()) ton.appendChild(mk('Nächstes Ziel zeigen', S.st.zieleWeiter === true, () => { S.st.zieleWeiter = S.st.zieleWeiter !== true; S.speichere(); zielLeiste(); }));
   liste.appendChild(ton);
 
   const zeile = el('div', 'schalter');
-  const nm = el('button', 'k k--neben', 'Haus umbenennen');
-  nm.onclick = () => frageName(true);
-  const hilfe = el('button', 'k k--neben', 'So geht’s');
-  hilfe.onclick = () => zeigeHilfe();
   // Solange die Einführung (samt Startzielen) läuft: überspringen, sonst nochmal
   const neu = el('button', 'k k--neben', lernenLaeuft() ? 'Einführung überspringen' : 'Einführung nochmal');
   neu.onclick = () => {
@@ -1950,7 +1948,7 @@ export function oeffneMenue() {
       { text: 'Abbrechen', neben: true },
     ]);
   };
-  zeile.appendChild(nm); zeile.appendChild(hilfe); zeile.appendChild(neu);
+  zeile.appendChild(neu);
   // iPhone im Browser: die Anleitung zum Home-Bildschirm jederzeit wieder (12.10.)
   if (iosImBrowser()) {
     const ins = el('button', 'k k--neben', 'Als App speichern');
@@ -1969,16 +1967,14 @@ export function oeffneMenue() {
     rb.onclick = () => { schliesseBlatt(); zeigeRueckblick(); };
     zeile.appendChild(rb);
   }
-  liste.appendChild(zeile);
-
   // Spielstand als Datei (14.10.): sichern und auf einem anderen Gerät laden
-  const datei = el('div', 'schalter');
+  const datei = zeile;
   const sich = el('button', 'k k--neben', 'Spielstand sichern');
   sich.onclick = () => standSichern();
   const lade = el('button', 'k k--neben', 'Spielstand laden');
   lade.onclick = () => standLaden();
   datei.appendChild(sich); datei.appendChild(lade);
-  liste.appendChild(datei);
+  liste.appendChild(zeile);
 
   // Neustart: ganz unten und abgesetzt, mit Rückfrage
   const neustart = el('div', 'schalter neustart');
@@ -1994,6 +1990,32 @@ export function oeffneMenue() {
   const kopf = $('#blattTitel');
   // Die Werkstatt gibt es nur lokal - Spieler sollen sie nicht finden
   kopf.onclick = S.ENTWICKLUNG ? () => { if (++titelTipps >= 5) { titelTipps = 0; werkstatt(); } } : null;
+  $('#blattGeld').textContent = S.formatGeld(S.st.geld);
+}
+
+/** Unterseite „Einstellungen" im Menü (21.10.): Geräusche, Vorschau, Haus umbenennen, So geht's. */
+function oeffneEinstellungen() {
+  oeffneBlatt('menue', 'Einstellungen');
+  $('#blattTabs').classList.add('versteckt');
+  $('#blattTitel').onclick = null;
+  const liste = $('#blattInhalt');
+  liste.innerHTML = '';
+  const mk = (label, an, f) => { const k = el('button', 'k k--wahl' + (an ? ' gewaehlt' : ''), `${label}: ${an ? 'an' : 'aus'}`); k.onclick = () => { f(); oeffneEinstellungen(); }; return k; };
+  const schalter = el('div', 'schalter einzeln');
+  schalter.appendChild(mk('Geräusche', S.st.ton.fx, () => { S.st.ton.fx = !S.st.ton.fx; T.setzeFx(S.st.ton.fx); S.speichere(); }));
+  // Vorschau „Morgen wartet …" abschaltbar (13.10.)
+  schalter.appendChild(mk('Vorschau auf morgen', S.st.vorschauAus !== true, () => { S.st.vorschauAus = S.st.vorschauAus !== true; S.speichere(); }));
+  const nm = el('button', 'k k--neben', 'Haus umbenennen');
+  nm.onclick = () => frageName(true);
+  const hilfe = el('button', 'k k--neben', 'So geht’s');
+  hilfe.onclick = () => zeigeHilfe();
+  schalter.appendChild(nm); schalter.appendChild(hilfe);
+  liste.appendChild(schalter);
+  const zurueck = el('div', 'schalter neustart');
+  const zk = el('button', 'k', '‹ Zurück zum Menü');
+  zk.onclick = () => oeffneMenue();
+  zurueck.appendChild(zk);
+  liste.appendChild(zurueck);
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
 }
 
@@ -2140,7 +2162,7 @@ export function frageName(umbenennen = false, danach) {
     const v = box.querySelector('#hausName').value.trim();
     S.st.name = v || 'Unser Haus';
     S.speichere();
-    if (umbenennen) oeffneMenue();
+    if (umbenennen) oeffneEinstellungen();
     if (danach) setTimeout(danach, 50);
   } }]);
   setTimeout(() => { const i = $('#hausName'); if (i && !umbenennen) i.focus(); }, 100);
