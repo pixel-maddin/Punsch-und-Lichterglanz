@@ -393,7 +393,9 @@ export function figurKlein(c, g, x, y, t) {
     case 'kind': {
       bein(x - 1, schritt); bein(x + 1, 1 - schritt);
       r(c, x - 2, y - 7, 5, 4, F.mantel); r(c, x - 2, y - 7, 5, 1, F.schal);
+      r(c, x - 2, y - 6, 1, 3, ton(F.mantel, -0.2)); r(c, x + 2, y - 6, 1, 3, ton(F.mantel, 0.14));
       r(c, x - 2, y - 11, 4, 4, F.haut); p(c, x + 1, y - 9, '#2a1a1a');
+      p(c, x - 2, y - 8, ton(F.haut, -0.15));
       if (F.ohneMuetze) r(c, x - 2, y - 12, 4, 2, F.haar);
       else { r(c, x - 2, y - 12, 4, 2, F.hut); p(c, x - 1, y - 13, '#ffffff'); }
       break;
@@ -403,7 +405,12 @@ export function figurKlein(c, g, x, y, t) {
       const lang = g.typ === 'oma' || F.frau || F.lang;
       r(c, x - 3, y - 10, 6, lang ? 8 : 7, F.mantel); r(c, x - 3, y - 10, 1, lang ? 8 : 7, ton(F.mantel, -0.25));
       r(c, x - 3, y - 10, 6, 1, F.schal);
+      // Schattierung klein (21.10.): Lichtkante vorn, Gürtellinie, Hand
+      r(c, x + 2, y - 9, 1, lang ? 6 : 5, ton(F.mantel, 0.14)); p(c, x - 2, y - 9, ton(F.mantel, -0.12));
+      p(c, x + 1, y - 6, ton(F.mantel, -0.2)); p(c, x - 1, y - 6, ton(F.mantel, -0.2));
+      p(c, x + 2, y - 5, F.haut);
       r(c, x - 2, y - 14, 4, 4, F.haut); p(c, x + 1, y - 12, '#2a1a1a');
+      p(c, x - 2, y - 11, ton(F.haut, -0.15)); p(c, x + 1, y - 11, wange(F.haut));
       if (g.typ === 'oma') { r(c, x - 2, y - 15, 4, 2, F.haar); p(c, x - 3, y - 14, F.haar); p(c, x - 3, y - 13, F.haar); }
       else if (F.ohneMuetze) { r(c, x - 2, y - 15, 4, 2, F.haar); p(c, x - 3, y - 14, F.haar); if (g.typ === 'opa') r(c, x, y - 11, 2, 1, F.haar); }
       else if (g.typ === 'opa') { r(c, x - 3, y - 15, 6, 1, '#5a4030'); r(c, x - 2, y - 17, 4, 2, '#6a4a36'); r(c, x, y - 11, 2, 1, F.haar); }
@@ -495,6 +502,33 @@ function augen(c, cx, y, abst, zu) {
   else { r(c, cx - abst - 1, y - 1, 1, 2, '#2a1a1a'); r(c, cx + abst, y - 1, 1, 2, '#2a1a1a'); }
 }
 
+/**
+ * Mantel am Tresen (21.10., „mehr Details, Schattierung"): Knopfleiste oder
+ * Reißverschluss (je Gast fest über die Phase), Ärmelnähte, Falten, Taschen.
+ * Licht kommt wie bei den Rändern von rechts.
+ */
+function manteldetails(c, f, cx, y0, bw, h, phase) {
+  const dunkel = ton(f, -0.22), hell = ton(f, 0.14);
+  const art = Math.floor((phase || 0) * 7) % 3;   // 0 Knöpfe, 1 Reißverschluss, 2 Dufflecoat
+  // Ärmel: Naht und Schatten unter der Achsel
+  r(c, cx - bw / 2 + 3, y0 + 3, 1, h - 3, dunkel); r(c, cx + bw / 2 - 4, y0 + 3, 1, h - 3, ton(f, -0.1));
+  r(c, cx - bw / 2 + 2, y0 + 1, 2, 1, hell);
+  // Leiste in der Mitte
+  r(c, cx, y0 + 2, 1, h - 2, dunkel);
+  if (art === 0) for (let y = y0 + 4; y < y0 + h; y += 4) { p(c, cx + 1, y, ton(f, 0.35)); p(c, cx + 1, y + 1, dunkel); }
+  else if (art === 1) { for (let y = y0 + 3; y < y0 + h; y += 2) p(c, cx + 1, y, '#c8c8d0'); p(c, cx + 1, y0 + 3, '#e8e8f0'); }
+  else for (let y = y0 + 4; y < y0 + h; y += 4) { r(c, cx - 1, y, 3, 1, '#d8c8a0'); p(c, cx + 2, y, '#6a5a3a'); }
+  // Taschen und eine Falte
+  r(c, cx - 6, y0 + h - 5, 4, 1, dunkel); r(c, cx + 3, y0 + h - 5, 4, 1, dunkel);
+  p(c, cx + 3, y0 + h - 6, hell);
+  p(c, cx - 3, y0 + 6, dunkel); p(c, cx - 3, y0 + 7, dunkel); p(c, cx + 4, y0 + 8, hell);
+}
+/** Strickschal: abwechselnd dunklere Maschen, oben eine Lichtkante. */
+function schalStrick(c, f, x, y, w, h) {
+  for (let yy = y + 1; yy < y + h; yy++) for (let xx = x + (yy % 2); xx < x + w; xx += 2) p(c, xx, yy, ton(f, -0.12));
+  r(c, x + 1, y, w - 2, 1, ton(f, 0.15));
+}
+
 /** Erkennungszeichen der Gruppen (17.10.) - groß, am Tresen. ko = Oberkante Kopf, o = Kinder tiefer. */
 function gruppeGross(c, extra, cx, b, ko, o, bw) {
   switch (extra) {
@@ -560,13 +594,27 @@ export function figurGross(c, g, cx, basis, t, laune) {
       r(c, cx - bw / 2, b - 16 + o, bw, 16 - o, F.mantel);
       r(c, cx - bw / 2, b - 16 + o, 2, 16 - o, ton(F.mantel, -0.25));
       r(c, cx + bw / 2 - 2, b - 16 + o, 2, 16 - o, ton(F.mantel, 0.12));
-      if (g.typ === 'oma') { r(c, cx - 8, b - 17, 16, 4, F.schal); r(c, cx - 2, b - 13, 4, 3, ton(F.schal, -0.2)); }
-      else { r(c, cx - 7, b - 17 + o, 14, 3, F.schal); r(c, cx + 3, b - 14 + o, 3, 6, F.schal); r(c, cx + 3, b - 9 + o, 3, 1, ton(F.schal, -0.3)); }
+      manteldetails(c, F.mantel, cx, b - 16 + o, bw, 16 - o, g.phase);
+      if (g.typ === 'oma') { r(c, cx - 8, b - 17, 16, 4, F.schal); r(c, cx - 2, b - 13, 4, 3, ton(F.schal, -0.2)); schalStrick(c, F.schal, cx - 8, b - 17, 16, 4); }
+      else {
+        r(c, cx - 7, b - 17 + o, 14, 3, F.schal); r(c, cx + 3, b - 14 + o, 3, 6, F.schal); r(c, cx + 3, b - 9 + o, 3, 1, ton(F.schal, -0.3));
+        schalStrick(c, F.schal, cx - 7, b - 17 + o, 14, 3);
+        r(c, cx + 3, b - 14 + o, 1, 5, ton(F.schal, -0.15)); for (let i = 0; i < 3; i++) p(c, cx + 3 + i, b - 8 + o + (i % 2), ton(F.schal, -0.3));   // Fransen
+        r(c, cx - 7, b - 14 + o, 10, 1, ton(F.mantel, -0.2));   // Schatten unter dem Schal
+      }
       const kh = k ? 11 : 12;
       const ko = b - 17 + o - kh;
-      kopf(c, cx, ko, k ? 11 : 12, kh, F.haut);
+      const kw = k ? 11 : 12;
+      kopf(c, cx, ko, kw, kh, F.haut);
+      // Gesicht mit Licht von rechts: Schattenseite links, Kinn, Nase, Glanz (21.10.)
+      const hs = ton(F.haut, -0.14);
+      r(c, cx - kw / 2, ko + 2, 1, kh - 4, hs); r(c, cx - kw / 2 + 1, ko + kh - 1, kw - 3, 1, hs);
+      p(c, cx - kw / 2 + 1, ko + kh - 2, hs);
+      p(c, cx + kw / 2 - 2, ko + 3, ton(F.haut, 0.18));
+      p(c, cx + 1, ko + 7, ton(F.haut, -0.2));   // Nase
       p(c, cx - 4, ko + 8, wange(F.haut)); p(c, cx + 4, ko + 8, wange(F.haut));
       augen(c, cx, ko + 5, 2, blinzeln);
+      r(c, cx - 4, ko + 3, 2, 1, ton(F.haar, -0.1)); r(c, cx + 2, ko + 3, 2, 1, ton(F.haar, -0.1));   // Augenbrauen
       mund(c, cx, ko + 9, laune);
       if (g.typ === 'oma') {
         r(c, cx - 6, ko - 1, 12, 4, F.haar); r(c, cx - 7, ko + 1, 2, 5, F.haar); r(c, cx + 5, ko + 1, 2, 5, F.haar);
@@ -581,7 +629,15 @@ export function figurGross(c, g, cx, basis, t, laune) {
         if (F.frau && !k) { r(c, cx - 7, ko + 2, 2, 12, F.haar); r(c, cx + 5, ko + 2, 2, 12, F.haar); r(c, cx - 7, ko + 13, 2, 1, ton(F.haar, 0.2)); }
         else { r(c, cx - 6, ko + 2, 1, 5, F.haar); r(c, cx + 5, ko + 2, 1, 5, F.haar); }
         if (F.ohneMuetze) { r(c, cx - 5, ko - 1, 10, 3, F.haar); r(c, cx - 6, ko + 1, 12, 1, F.haar); }   // Chor (17.10.): Haare statt Mütze
-        else { r(c, cx - 6, ko - 3, 12, 5, F.hut); r(c, cx - 6, ko + 1, 12, 1, ton(F.hut, 0.3)); r(c, cx - 1, ko - 5, 3, 2, '#ffffff'); }
+        else {
+          r(c, cx - 6, ko - 3, 12, 5, F.hut);
+          // Strickmütze: Rippen, Schatten links, Umschlag, Bommel mit Schatten
+          for (let x = cx - 5; x < cx + 6; x += 2) r(c, x, ko - 2, 1, 3, ton(F.hut, -0.15));
+          r(c, cx - 6, ko - 3, 1, 5, ton(F.hut, -0.25)); r(c, cx - 5, ko - 3, 10, 1, ton(F.hut, 0.12));
+          r(c, cx - 6, ko + 1, 12, 1, ton(F.hut, 0.3)); r(c, cx - 6, ko + 2, 12, 1, ton(F.hut, -0.1));
+          r(c, cx - 1, ko - 5, 3, 2, '#ffffff'); p(c, cx - 1, ko - 4, '#d4dae4'); p(c, cx + 1, ko - 5, '#ffffff');
+        }
+        for (const hx of [cx - 6, cx + 5]) p(c, hx, ko + 4, ton(F.haar, -0.2));   // Strähne
       }
       if (F.extra) gruppeGross(c, F.extra, cx, b, ko, o, bw);
       break;
