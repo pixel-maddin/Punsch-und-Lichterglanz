@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610221200';
-import * as S from './spiel.js?v=202610221200';
-import * as Z from './zeit.js?v=202610221200';
-import * as FEIN from './fein.js?v=202610221200';
-import * as T from './ton.js?v=202610221200';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610221200';
+import * as C from './config.js?v=202610221400';
+import * as S from './spiel.js?v=202610221400';
+import * as Z from './zeit.js?v=202610221400';
+import * as FEIN from './fein.js?v=202610221400';
+import * as T from './ton.js?v=202610221400';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610221400';
 
 const $ = (s) => document.querySelector(s);
 
@@ -159,7 +159,7 @@ function baueSchilder(hervor) {
     const [sdx, sdy] = o.schild || [0, 0];
     b.style.left = `calc(var(--px) * ${o.x + sdx})`;
     b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy + vers()})`;
-    const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : 0;
+    const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : o.spiel === 'baum' && S.baumschuleTun() ? 1 : 0;   // Baumschule: gießen oder ernten (22.10.)
     let unter = o.bald ? 'bald' : o.spiel ? 'Minispiel' : '';
     // Noch nie gespielt: kleines NEU am Schild
     const nieGespielt = o.spiel && !S.miniRekord(o.spiel);

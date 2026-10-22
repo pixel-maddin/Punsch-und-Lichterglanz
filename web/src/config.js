@@ -863,6 +863,17 @@ export const LICHTUNG_DEKO = [
 // Minispiel Christbaumverkauf (09.10.): 60 s, Kunden wollen einen bestimmten
 // Baum (Sorte und Größe). Fällen (3x tippen), einnetzen (3x), aufs Autodach.
 export const BAUM_DAUER = 60;
+// Baumschule (22.10.): 4 Beete, ohne Pflege 4 Tage, mit täglich Gießen + Düngen etwa 2 Tage
+export const BAUMSCHULE_BEETE = 4;
+export const BAUMSCHULE_JE_TAG = 0.25;        // Wachstum je Kalendertag von selbst
+export const BAUMSCHULE_GIESSEN = 0.25;       // einmal am Tag, für alle Beete
+export const BAUMSCHULE_DUENGER = 0.25;       // einmal am Tag, kostet Sterne
+export const BAUMSCHULE_DUENGER_MIN_MINUTEN = 2;   // Düngerpreis: so viele Minuten Einnahmen …
+export const BAUMSCHULE_DUENGER_MIN = 150;    // … mindestens
+export const BAUMSCHULE_WARE_MAX = 6;         // so viele geerntete Bäume warten höchstens aufs Minispiel
+export const BAUMSCHULE_EICH_CHANCE = 0.4;    // Eichhörnchen im Baum: Chance je Tag
+export const BAUMSCHULE_EICH_MINUTEN = 1;     // Lohn: 1 Minute Einnahmen …
+export const BAUMSCHULE_EICH_MIN = 100;       // … mindestens 100 Sterne
 export const BAUM_DEKO = [
   { id: 'c_kugeln',   name: 'Riesenkugeln im Baum',   ab: 900,  stimmung: 5, text: 'Drei große Kugeln hängen im kahlen Baum.' },
   { id: 'c_dachbaum', name: 'Bäumchen auf dem First', ab: 1700, stimmung: 5, text: 'Ein kleiner Christbaum mit Lichtern ganz oben auf dem Dach.' },

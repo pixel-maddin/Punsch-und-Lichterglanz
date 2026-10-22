@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610221200';
-import * as Z from './zeit.js?v=202610221200';
-import { neueFarben } from './pixel.js?v=202610221200';
+import * as C from './config.js?v=202610221400';
+import * as Z from './zeit.js?v=202610221400';
+import { neueFarben } from './pixel.js?v=202610221400';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2136,6 +2136,95 @@ export function briefDank() {
   B.erfuellt.push({ art: b.art, ziel: b.ziel, kind: b.kind, alter: b.alter, maedchen: b.maedchen, tag: tagNr() });
   B.aktiv = null;
   B.ab = tagNr() + 1;
+  speichere();
+  return betrag;
+}
+
+// ---------------------------------------------------------------------------
+// Baumschule (22.10.) beim Christbaumverkauf: eigene Tannen ziehen. Sie wachsen
+// von selbst (BAUMSCHULE_JE_TAG je Kalendertag), Gießen und Düngen (je einmal am
+// Tag, für alle Beete) machen sie schneller. Nichts verdorrt, keine Strafe.
+// Fertig geerntete Bäume stehen im Minispiel golden im Feld und bringen ×3.
+// st.baumschule = { beete: [{ art, tag0, bonus } | null], ware: [art], gegossen, geduengt, eich }
+// ---------------------------------------------------------------------------
+export function baumschule() {
+  const b = st.baumschule = st.baumschule || { beete: [], ware: [], gegossen: 0, geduengt: 0, eich: null };
+  while (b.beete.length < C.BAUMSCHULE_BEETE) b.beete.push(null);
+  return b;
+}
+export const baumschuleOffen = () => miniOffen('baum');
+export const heuteNr = () => tagNr();
+/** Wachstum eines Beets 0..1. */
+export function beetWachs(beet) { return beet ? Math.min(1, Math.max(0, (tagNr() - beet.tag0) * C.BAUMSCHULE_JE_TAG + beet.bonus)) : 0; }
+/** Stufe zum Zeichnen: 0 Setzling, 1 klein, 2 mittel, 3 groß (fertig). */
+export const beetStufe = (beet) => { const w = beetWachs(beet); return w >= 1 ? 3 : w >= 0.6 ? 2 : w >= 0.3 ? 1 : 0; };
+export function pflanze(i, art) {
+  const B = baumschule();
+  if (B.beete[i]) return false;
+  B.beete[i] = { art, tag0: tagNr(), bonus: 0 };
+  st.stats.baumschule = (st.stats.baumschule || 0) + 1;
+  // Gepflanzt an einem Tag, an dem schon gegossen/gedüngt war: zählt für den neuen mit
+  if (B.gegossen === tagNr()) B.beete[i].bonus += C.BAUMSCHULE_GIESSEN;
+  hooks.ton('schnee'); speichere();
+  return true;
+}
+const wachsende = () => baumschule().beete.filter((b) => b && beetWachs(b) < 1);
+export const kannGiessen = () => baumschule().gegossen !== tagNr() && wachsende().length > 0;
+export const kannDuengen = () => baumschule().geduengt !== tagNr() && wachsende().length > 0;
+export const duengerPreis = () => Math.max(C.BAUMSCHULE_DUENGER_MIN, Math.round(einnahmenProMinute() * C.BAUMSCHULE_DUENGER_MIN_MINUTEN / 10) * 10);
+export function giesse() {
+  if (!kannGiessen()) return false;
+  const B = baumschule();
+  for (const b of wachsende()) b.bonus += C.BAUMSCHULE_GIESSEN;
+  B.gegossen = tagNr();
+  hooks.ton('giessen'); speichere();
+  return true;
+}
+export function duenge() {
+  if (!kannDuengen() || st.geld < duengerPreis()) return false;
+  const B = baumschule();
+  st.geld -= duengerPreis(); hooks.geld();
+  for (const b of wachsende()) b.bonus += C.BAUMSCHULE_DUENGER;
+  B.geduengt = tagNr();
+  hooks.ton('koerner'); speichere();
+  return true;
+}
+/** Fertigen Baum ernten: kommt in den Verkauf (golden im Minispiel). */
+export function ernte(i) {
+  const B = baumschule(), b = B.beete[i];
+  if (!b || beetWachs(b) < 1 || B.ware.length >= C.BAUMSCHULE_WARE_MAX) return false;
+  B.ware.push(b.art); B.beete[i] = null;
+  hooks.ton('kasse'); speichere();
+  return true;
+}
+/** Im Minispiel verkaufte eigene Bäume abbuchen. */
+export function eigeneVerkauft(arten) {
+  const B = baumschule();
+  for (const a of arten) { const k = B.ware.indexOf(a); if (k >= 0) B.ware.splice(k, 1); }
+  if (arten.length) { st.stats.eigeneBaeume = (st.stats.eigeneBaeume || 0) + arten.length; speichere(); }
+}
+/** Gibt es in der Baumschule etwas zu tun? (Punkt auf der Karte) */
+export const baumschuleTun = () => baumschuleOffen() && (kannGiessen() || baumschule().beete.some((b) => b && beetWachs(b) >= 1) || (baumschule().beete.some((b) => !b) && st.stats.baumschule == null));
+/**
+ * Eichhörnchen (einmal am Tag gewürfelt): versteckt sich in einem halbwegs
+ * großen Baum und lugt ab und zu hervor. Rückgabe Beet-Index oder -1.
+ */
+export function eichhoernchen() {
+  const B = baumschule(), heute = tagNr();
+  if (!B.eich || B.eich.tag !== heute) {
+    const kandidaten = B.beete.map((b, i) => (b && beetWachs(b) >= 0.3 ? i : -1)).filter((i) => i >= 0);
+    B.eich = { tag: heute, beet: kandidaten.length && Math.random() < C.BAUMSCHULE_EICH_CHANCE ? kandidaten[Math.floor(Math.random() * kandidaten.length)] : -1, gefangen: false };
+    speichere();
+  }
+  const beet = B.beete[B.eich.beet];
+  return B.eich.gefangen || !beet || beetWachs(beet) < 0.3 ? -1 : B.eich.beet;   // geerntet: weg ist es
+}
+export function fangeEichhoernchen() {
+  const B = baumschule();
+  if (eichhoernchen() < 0) return 0;
+  B.eich.gefangen = true;
+  const betrag = Math.max(C.BAUMSCHULE_EICH_MIN, Math.round(einnahmenProMinute() * C.BAUMSCHULE_EICH_MINUTEN / 10) * 10);
+  verdiene(betrag);
   speichere();
   return betrag;
 }

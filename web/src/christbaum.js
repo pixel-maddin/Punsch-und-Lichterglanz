@@ -12,13 +12,24 @@
  *
  * Gleiches Gerüst wie lichtung.js: eigenes Vollbild-Canvas (#minispiel),
  * 180 Pixel breit, Kulisse als Zwischenbild, gezeichnet nur solange offen.
+ *
+ * 22.10. (gemeldet: „hakelig, Grafik zu simpel beim Bewegen, Sägen, Netz"):
+ * Bäume sind vorberechnete Bilder (`baumBild`) mit Etagen, Nadeln, Schnee-
+ * klumpen; Kippen, Liegen und Fliegen drehen dieses Bild pixelgenau
+ * (`gedreht`, je 5° zwischengespeichert). Eine Bügelsäge fährt bei jedem Tipp,
+ * die Kerbe wächst, beim 2. Schnitt neigt sich der Baum. Er kippt, schlägt auf
+ * (Wolke, Bildwackeln) und rutscht zur Maschine; Tipps aufs Netz werden schon
+ * dabei gemerkt (keine Totzeit mehr). Die Maschine zieht ihn Stück für Stück
+ * durch: Was durch ist, ist schmal und eingenetzt. Aufs Dach fliegt er mit
+ * Drehung, das Auto federt ein, ein Gurt schnappt zu.
+ * Dazu eigene Bäume aus der Baumschule (`eigen`): golden markiert, ×3 Punkte.
  */
-import * as C from './config.js?v=202610221200';
-import * as Z from './zeit.js?v=202610221200';
-import * as T from './ton.js?v=202610221200';
-import * as MH from './minihud.js?v=202610221200';
-import * as L from './licht.js?v=202610221200';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610221200';
+import * as C from './config.js?v=202610221400';
+import * as Z from './zeit.js?v=202610221400';
+import * as T from './ton.js?v=202610221400';
+import * as MH from './minihud.js?v=202610221400';
+import * as L from './licht.js?v=202610221400';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610221400';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -31,6 +42,7 @@ const ARTEN = Object.keys(SORTEN);
 const GROESSE = ['KLEIN', 'MITTEL', 'GROSS'];
 const HOEHE = [15, 21, 28];
 const SAEGEN = 3, NETZ = 3;
+const EIGEN_MULT = 3;   // eigener Baum aus der Baumschule: so viel mehr Punkte
 const AUTO_FARBEN = ['#c83a32', '#3a6ab8', '#e8c030', '#2f8a3a', '#8a4ab8', '#e8e8e4', '#3a3a44'];
 
 let cv = null, c = null, H = 320;
@@ -42,18 +54,21 @@ export const zustand = () => spiel;
 // Wo was steht (abhängig von H)
 const REIHEN = () => [0.35, 0.48, 0.61].map((f) => Math.round(H * f));
 const SPALTEN = [24, 66, 108, 150];
-const MASCHINE = () => ({ x: 36, y: Math.round(H * 0.84) });
+const MASCHINE = () => ({ x: 46, y: Math.round(H * 0.84) });
 const PARKPLATZ = () => ({ x: 130, y: Math.round(H * 0.9) });
 
-/** Runde starten. `beiEnde(punkte, kunden)` kommt nach Ablauf. */
-export function starte(hoehe, beiEnde, stufeNr = 1) {
+/**
+ * Runde starten. `beiEnde(punkte, kunden, eigeneVerkauft)` kommt nach Ablauf.
+ * `eigen` = Sorten fertiger Bäume aus der Baumschule (höchstens einer steht im Feld).
+ */
+export function starte(hoehe, beiEnde, stufeNr = 1, eigen = []) {
   stufe = C.miniStufe('baum', stufeNr);
   H = Math.round(hoehe); fertig = beiEnde;
   cv = $('#miniCv');
   cv.width = W; cv.height = H;
   c = cv.getContext('2d');
   c.imageSmoothingEnabled = false;
-  spiel = neuesSpiel(-3);
+  spiel = neuesSpiel(-3, eigen);
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
   T.musikMinispiel(true);   // Im Minispiel läuft das Kartenstück (11.10.; vom 09.10. bis dahin ruhte die Musik)
@@ -76,25 +91,37 @@ export function schliesse() {
 function zufall(a, b) { return a + Math.random() * (b - a); }
 const wahl = (l) => l[Math.floor(Math.random() * l.length)];
 
-function neuesSpiel(t0) {
+function neuesSpiel(t0, eigen = []) {
   const g = { t: t0, punkte: 0, kette: 1, kunden: 0, baeume: [], auto: null, ware: null, schritt: 'suchen',
-    texte: [], fehl: [], spaene: [], aus: false, autoAb: 0.3 };
+    texte: [], fehl: [], spaene: [], wolken: [], aus: false, autoAb: 0.3, bildWackel: 0, eigen: eigen.slice(), eigenVerkauft: [] };
   REIHEN().forEach((y, ri) => SPALTEN.forEach((x, si) => g.baeume.push(neuerBaum(x + (ri % 2 ? 8 : 0) - 4, y, ri * 4 + si))));
+  eigenPflanzen(g);
   return g;
 }
 function neuerBaum(x, y, i) {
-  return { x, y, i, art: wahl(ARTEN), gr: Math.floor(Math.random() * 3), weg: false, nachT: 0, schnitte: 0, wackel: 0, wachs: 1 };
+  return { x, y, i, art: wahl(ARTEN), gr: Math.floor(Math.random() * 3), weg: false, nachT: 0, schnitte: 0, wackel: 0, wachs: 1, saegeT: 0, eigen: false };
+}
+/** Ein eigener Baum aus der Baumschule steht groß und golden im Feld (vorne, damit man ihn sieht). */
+function eigenPflanzen(g) {
+  if (!g.eigen.length || g.baeume.some((b) => b.eigen && !b.weg)) return;
+  const frei = g.baeume.filter((b) => !b.weg && b !== g.aktiv && b.i >= 4);
+  if (!frei.length) return;
+  const b = wahl(frei);
+  b.art = g.eigen.shift(); b.gr = 2; b.eigen = true; b.wachs = 1;
 }
 /** Neuer Kunde: wünscht sich einen Baum, den es auf dem Platz gerade gibt. */
 function neuesAuto(g) {
   const stehen = g.baeume.filter((b) => !b.weg);
-  const ziel = wahl(stehen);
+  // Der zweite Kunde (und danach jeder dritte) will den eigenen Baum, wenn einer steht
+  const eigen = stehen.find((b) => b.eigen);
+  const ziel = eigen && (g.kunden === 1 || g.kunden % 3 === 2) ? eigen : wahl(stehen);
   const max = Math.max(8, 14 - g.kunden * 0.35) / stufe.tempo;
-  g.auto = { x: W + 30, phase: 'kommt', farbe: wahl(AUTO_FARBEN), wunsch: { art: ziel.art, gr: ziel.gr },
-    geduld: max, max, fehler: false, dach: false, t: 0,
+  g.auto = { x: W + 30, phase: 'kommt', farbe: wahl(AUTO_FARBEN), wunsch: { art: ziel.art, gr: ziel.gr, eigen: ziel.eigen },
+    geduld: max, max, fehler: false, dach: null, t: 0, feder: 0,
     kunde: { typ: wahl(['erwachsen', 'erwachsen', 'oma', 'opa']), farben: neueFarben('erwachsen'), phase: Math.random() * 6, laeuft: false } };
   g.schritt = 'suchen';
 }
+const passt = (b, w) => b.art === w.art && b.gr === w.gr && (!w.eigen || b.eigen);
 
 // ---------------------------------------------------------------------------
 // Tippen
@@ -108,7 +135,7 @@ export function tippeAuf(x, y) {
     if (!b) { if (g.schritt === 'suchen' && y < H * 0.68) fehl(x, y); else if (y >= H * 0.68) tippeUnten(x, y); return; }
     if (g.schritt === 'saegen' && b !== g.aktiv) return;
     if (g.schritt === 'suchen') {
-      if (b.art !== a.wunsch.art || b.gr !== a.wunsch.gr) {
+      if (!passt(b, a.wunsch)) {
         // Falscher Baum: Kopfschütteln, Geduld weg, Kette reißt
         a.fehler = true; a.geduld -= 2; g.kette = 1; b.wackel = 0.4;
         const minus = Math.round(C.MINI_MINUS.baum.falsch * stufe.punkte);
@@ -119,34 +146,40 @@ export function tippeAuf(x, y) {
       }
       g.aktiv = b; g.schritt = 'saegen';
     }
-    b.schnitte++; b.wackel = 0.15;
-    for (let i = 0; i < 4; i++) g.spaene.push({ x: b.x + 2, y: b.y - 2, vx: zufall(-20, 30), vy: zufall(-40, -15), t: 0 });
-    T.spiele('greifen');
+    b.schnitte++; b.wackel = 0.12; b.saegeT = 0.28;
+    for (let i = 0; i < 6; i++) g.spaene.push({ x: b.x + 3, y: b.y - 2, vx: zufall(-10, 40), vy: zufall(-45, -10), t: 0 });
+    T.spiele('saege');
     if (b.schnitte >= SAEGEN) {
-      // Gefällt: liegt kurz, dann rutscht er zur Netzmaschine
+      // Gefällt: kippt nach rechts, schlägt auf, rutscht zur Netzmaschine
       b.weg = true; b.nachT = 2.2; b.wachs = 0;
-      g.ware = { art: b.art, gr: b.gr, x: b.x, y: b.y - 2, vonX: b.x, vonY: b.y - 2, phase: 'faellt', t: 0, netz: 0 };
+      g.ware = { art: b.art, gr: b.gr, eigen: b.eigen, x: b.x + 1, y: b.y, vonX: b.x + 1, vonY: b.y, phase: 'kippt', t: 0, netz: 0, netzAnim: 0, vor: 0, vorT: 0, winkel: 0 };
       g.aktiv = null; g.schritt = 'netz';
-      T.spiele('glas');
+      T.spiele('knack');
+      g.texte.push({ x: b.x, y: b.y - HOEHE[b.gr] - 4, text: 'KNACK!', farbe: '#ffe27a', t: 0 });
     }
     return;
   }
   tippeUnten(x, y);
 }
 function tippeUnten(x, y) {
-  const g = spiel, a = g.auto, m = MASCHINE();
-  if (g.schritt === 'netz' && g.ware && g.ware.phase === 'wartet' && Math.abs(x - m.x) < 26 && Math.abs(y - (m.y - 8)) < 22) {
-    g.ware.netz++;
-    T.spiele('greifen');
-    if (g.ware.netz >= NETZ) { g.ware.phase = 'fertig'; g.schritt = 'laden'; T.spiele('kasse'); }
+  const g = spiel, a = g.auto, m = MASCHINE(), w = g.ware;
+  // Netz: Tipps zählen schon, während der Baum noch fällt oder rutscht (gemerkt in `vor`)
+  const amNetz = Math.abs(x - m.x) < 30 && Math.abs(y - (m.y - 8)) < 24;
+  const amBaum = w && Math.abs(x - (w.x + HOEHE[w.gr] / 2)) < HOEHE[w.gr] / 2 + 8 && Math.abs(y - w.y) < 14;
+  if (g.schritt === 'netz' && w && (amNetz || amBaum) && w.netz + w.vor < NETZ) {
+    if (w.phase === 'wartet') netzZug(w); else w.vor++;
     return;
   }
   if (g.schritt === 'laden' && Math.abs(x - a.x) < 30 && Math.abs(y - (PARKPLATZ().y - 10)) < 26 && a.phase === 'wartet') {
-    g.ware.phase = 'fliegt'; g.ware.t = 0; g.ware.vonX = g.ware.x; g.ware.vonY = g.ware.y;
+    w.phase = 'fliegt'; w.t = 0; w.vonX = w.x; w.vonY = w.y;
     g.schritt = 'warten';
     return;
   }
   fehl(x, y);
+}
+function netzZug(w) {
+  w.netz++; spiel.maschineRuck = 0.16;
+  T.spiele('rascheln');
 }
 function baumBei(x, y) {
   let best = null, bd = Infinity;
@@ -173,6 +206,9 @@ function takt(jetzt) {
   zeichne(jetzt / 1000);
   rafId = requestAnimationFrame(takt);
 }
+/** Start der liegenden Ware vor der Maschine: die Spitze an der Öffnung. */
+const netzStart = (w) => MASCHINE().x - 14 - HOEHE[w.gr];   // Spitze vor dem Trichter, der ganze Baum noch sichtbar
+const netzEnde = () => MASCHINE().x + 9;
 
 function schritt(dt) {
   const g = spiel;
@@ -180,12 +216,15 @@ function schritt(dt) {
   if (g.t >= 0 && !g.aus && g.t >= C.BAUM_DAUER) {
     g.aus = true;
     if (fertig) T.spiele('fertig');
-    setTimeout(() => { if (spiel === g && fertig) fertig(g.punkte, g.kunden); }, 900);
+    setTimeout(() => { if (spiel === g && fertig) fertig(g.punkte, g.kunden, g.eigenVerkauft); }, 900);
   }
+  if (g.bildWackel > 0) g.bildWackel -= dt;
+  if (g.maschineRuck > 0) g.maschineRuck -= dt;
   // Nachwachsen
   for (const b of g.baeume) {
     if (b.wackel > 0) b.wackel -= dt;
-    if (b.weg) { b.nachT -= dt; if (b.nachT <= 0) Object.assign(b, neuerBaum(b.x, b.y, b.i), { wachs: 0 }); }
+    if (b.saegeT > 0) b.saegeT -= dt;
+    if (b.weg) { b.nachT -= dt; if (b.nachT <= 0) { Object.assign(b, neuerBaum(b.x, b.y, b.i), { wachs: 0 }); eigenPflanzen(g); } }
     else if (b.wachs < 1) b.wachs = Math.min(1, b.wachs + dt * 2.5);
   }
   // Das Auto
@@ -193,6 +232,7 @@ function schritt(dt) {
   const a = g.auto;
   if (a) {
     a.t += dt;
+    if (a.feder > 0) a.feder -= dt;
     const ziel = PARKPLATZ().x;
     if (a.phase === 'kommt') { a.x = Math.max(ziel, a.x - 160 * dt); if (a.x <= ziel) a.phase = 'wartet'; }
     else if (a.phase === 'wartet' && !g.aus) {
@@ -203,6 +243,8 @@ function schritt(dt) {
         g.punkte = Math.max(0, g.punkte - minus);
         g.texte.push({ x: a.x - 26, y: PARKPLATZ().y - 40, text: 'ZU LANGSAM! -' + minus, farbe: '#ff7a6a', t: 0 });
         T.spiele('falsch');
+        // Ein eigener Baum, der schon gefällt war, ist nicht verloren: zurück in die Liste
+        if (g.ware && g.ware.eigen) g.eigen.unshift(g.ware.art);
         g.kette = 1; g.ware = null; g.aktiv = null; g.schritt = 'suchen';
         for (const b of g.baeume) b.schnitte = b.weg ? b.schnitte : 0;
         a.phase = 'faehrt';
@@ -212,36 +254,53 @@ function schritt(dt) {
       if (a.x < -50) { g.auto = null; g.autoAb = 0.3; }
     }
   }
-  // Die Ware: fällt, rutscht zur Maschine, wartet aufs Netz, fliegt aufs Dach
+  // Die Ware: kippt, schlägt auf, rutscht vor die Maschine, wird durchgezogen, fliegt aufs Dach
   const w = g.ware;
   if (w) {
     w.t += dt;
     const m = MASCHINE();
-    if (w.phase === 'faellt' && w.t > 0.3) { w.phase = 'rutscht'; w.t = 0; w.vonX = w.x; w.vonY = w.y; }
-    else if (w.phase === 'rutscht') {
-      const k = Math.min(1, w.t / 0.45), e = k * k * (3 - 2 * k);
-      w.x = w.vonX + (m.x - 18 - w.vonX) * e; w.y = w.vonY + (m.y - 6 - w.vonY) * e;
-      if (k >= 1) { w.phase = 'wartet'; w.t = 0; }
-    } else if (w.phase === 'wartet') {
-      w.x = m.x - 18 + w.netz * 8; w.y = m.y - 6;
-    } else if (w.phase === 'fertig') {
-      w.x = m.x + 14; w.y = m.y - 6;
-    } else if (w.phase === 'fliegt') {
-      const k = Math.min(1, w.t / 0.35), pp = PARKPLATZ();
-      w.x = w.vonX + (a.x - 6 - w.vonX) * k; w.y = w.vonY + (pp.y - 21 - w.vonY) * k - Math.sin(k * Math.PI) * 18;
+    if (w.phase === 'kippt') {
+      const k = Math.min(1, w.t / 0.42);
+      w.winkel = 90 * k * k;   // wie fallen: erst langsam, dann schnell
       if (k >= 1) {
-        // Auf dem Dach: kassieren, Kette, losfahren
-        const pkt = Math.round((50 + 70 * Math.max(0, a.geduld) / a.max) * g.kette * stufe.punkte);
+        w.phase = 'liegt'; w.t = 0; w.winkel = 90; g.bildWackel = 0.18;
+        T.spiele('plumps');
+        const l = HOEHE[w.gr], winter = Z.schnee() > 0;
+        for (let i = 0; i < 10; i++) g.wolken.push({ x: w.x + zufall(4, l), y: w.y - 1, vx: zufall(-12, 12), vy: zufall(-22, -6), t: 0, f: winter ? '#ffffff' : '#d8c8a8' });
+      }
+    } else if (w.phase === 'liegt' && w.t > 0.22) { w.phase = 'rutscht'; w.t = 0; w.vonX = w.x; w.vonY = w.y; }
+    else if (w.phase === 'rutscht') {
+      const k = Math.min(1, w.t / 0.32), e = k * k * (3 - 2 * k);
+      w.x = w.vonX + (netzStart(w) - w.vonX) * e; w.y = w.vonY + (m.y - 6 - w.vonY) * e - Math.sin(k * Math.PI) * 4;
+      if (k >= 1) { w.phase = 'wartet'; w.t = 0; w.vorT = 0; }
+    } else if (w.phase === 'wartet') {
+      // Gemerkte Tipps nacheinander abarbeiten
+      if (w.vor > 0 && (w.vorT -= dt) <= 0) { w.vor--; netzZug(w); w.vorT = 0.14; }
+      w.netzAnim = Math.min(w.netz, w.netzAnim + dt * 7);
+      w.x = netzStart(w) + (netzEnde() - netzStart(w)) * (w.netzAnim / NETZ); w.y = m.y - 6;
+      if (w.netz >= NETZ && w.netzAnim >= NETZ) { w.phase = 'fertig'; w.t = 0; g.schritt = 'laden'; T.spiele('kasse'); }
+    } else if (w.phase === 'fliegt') {
+      const k = Math.min(1, w.t / 0.5), pp = PARKPLATZ(), e = k * k * (3 - 2 * k);
+      const zx = a.x - 12, zy = pp.y - 22;
+      w.x = w.vonX + (zx - w.vonX) * e; w.y = w.vonY + (zy - w.vonY) * e - Math.sin(k * Math.PI) * 22;
+      w.winkel = 90 - Math.sin(k * Math.PI) * 30;   // dreht sich im Flug ein Stück auf
+      if (k >= 1) {
+        // Auf dem Dach: festzurren, kassieren, Kette, losfahren
+        let pkt = Math.round((50 + 70 * Math.max(0, a.geduld) / a.max) * g.kette * stufe.punkte);
+        if (w.eigen) { pkt *= EIGEN_MULT; g.eigenVerkauft.push(w.art); }
         g.punkte += pkt; g.kunden++;
-        g.texte.push({ x: a.x, y: pp.y - 44, text: '+' + pkt, farbe: g.kette > 1 ? '#ffb040' : '#ffe060', t: 0 });
+        g.texte.push({ x: a.x, y: pp.y - 44, text: (w.eigen ? 'DEIN BAUM! ' : '') + '+' + pkt, farbe: w.eigen ? '#ffd040' : g.kette > 1 ? '#ffb040' : '#ffe060', t: 0 });
         g.kette = a.fehler ? 1 : Math.min(3, g.kette + 1);
-        T.spiele(g.kette >= 3 ? 'spezialKasse' : 'kasse');
-        a.dach = { art: w.art, gr: w.gr }; a.phase = 'faehrt'; g.ware = null; g.schritt = 'suchen';
+        T.spiele('gurt');
+        setTimeout(() => T.spiele(g.kette >= 3 || w.eigen ? 'spezialKasse' : 'kasse'), 90);
+        a.dach = { art: w.art, gr: w.gr, eigen: w.eigen }; a.feder = 0.3; a.phase = 'faehrt'; g.ware = null; g.schritt = 'suchen';
       }
     }
   }
   for (const s of g.spaene) { s.t += dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 140 * dt; }
   g.spaene = g.spaene.filter((s) => s.t < 0.6);
+  for (const s of g.wolken) { s.t += dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 40 * dt; }
+  g.wolken = g.wolken.filter((s) => s.t < 0.55);
   for (const x of g.texte) x.t += dt;
   g.texte = g.texte.filter((x) => x.t < 1);
   for (const x of g.fehl) x.t += dt;
@@ -272,16 +331,16 @@ export function messe(takt = 0.3, treffer = 1, hoehe = 320, stufeNr = 1) {
     const g = spiel, a = g.auto;
     if (!a || a.phase !== 'wartet') continue;
     if (g.schritt === 'suchen') {
-      const richtig = g.baeume.find((b) => !b.weg && b.art === a.wunsch.art && b.gr === a.wunsch.gr);
+      const richtig = g.baeume.find((b) => !b.weg && passt(b, a.wunsch));
       if (!richtig) continue;
       if (falschVersucht !== a && Math.random() > treffer) {
         falschVersucht = a;
-        const falsch = g.baeume.find((b) => !b.weg && b !== richtig && (b.art !== a.wunsch.art || b.gr !== a.wunsch.gr));
+        const falsch = g.baeume.find((b) => !b.weg && b !== richtig && !passt(b, a.wunsch));
         if (falsch) { tippeAuf(falsch.x, falsch.y - 5); continue; }
       }
       tippeAuf(richtig.x, richtig.y - 5);
     } else if (g.schritt === 'saegen' && g.aktiv) tippeAuf(g.aktiv.x, g.aktiv.y - 5);
-    else if (g.schritt === 'netz' && g.ware && g.ware.phase === 'wartet') { const m = MASCHINE(); tippeAuf(m.x, m.y - 8); }
+    else if (g.schritt === 'netz' && g.ware) { const m = MASCHINE(); tippeAuf(m.x, m.y - 8); }
     else if (g.schritt === 'laden') tippeAuf(a.x, PARKPLATZ().y - 10);
   }
   const erg = { punkte: spiel.punkte, kunden: spiel.kunden };
@@ -290,9 +349,96 @@ export function messe(takt = 0.3, treffer = 1, hoehe = 320, stufeNr = 1) {
 }
 
 // ---------------------------------------------------------------------------
-// Zeichnen
+// Baumbilder (22.10.): einmal gemalt, gedreht wird das fertige Bild
 // ---------------------------------------------------------------------------
 function hash(n) { const s = Math.sin(n * 91.7) * 43758.5453; return s - Math.floor(s); }
+const bilder = new Map();
+/**
+ * Stehender Baum als Bild. Rückgabe { cv, px, py }: (px, py) = Mitte des
+ * Stammfußes im Bild. Etagen mit hängenden Astspitzen, Licht links, Schatten
+ * rechts und unter jeder Etage, Nadeln, Schneeklumpen, Zapfen bzw. Reif.
+ * `netz`: eingenetzt (schmal zusammengedrückt, weißes Netz darüber).
+ */
+export function baumBild(art, gr, winter, netz = false, eigen = false) {
+  const schl = `${art}|${gr}|${winter}|${netz}|${eigen}`;
+  let b = bilder.get(schl);
+  if (b) return b;
+  const f = SORTEN[art].f, h = HOEHE[gr], breit = Math.round(h * 0.42);
+  const bw = breit * 2 + 7, bh = h + 4;
+  const k = document.createElement('canvas'); k.width = bw; k.height = bh;
+  const x = k.getContext('2d');
+  const px = Math.floor(bw / 2), py = bh - 1;
+  const P = (xx, yy, col) => { x.fillStyle = col; x.fillRect(xx, yy, 1, 1); };
+  // Stamm
+  x.fillStyle = '#5a3a22'; x.fillRect(px - 1, py - 3, 3, 4); P(px - 1, py - 3, '#7a5232'); P(px + 1, py, '#3a2414');
+  const stufen = gr + 2, kh = (h - 2) / stufen;
+  const quetsch = netz ? 0.5 : 1;
+  for (let i = 0; i < h - 2; i++) {
+    const s = Math.floor(i / kh), innen = (i % kh) / kh;
+    let w = Math.max(0, Math.round((s + 1) / stufen * breit * (0.5 + innen * 0.5) * quetsch));
+    const yy = py - h + 1 + i;
+    for (let dx = -w; dx <= w; dx++) {
+      const hh = hash(dx * 13 + i * 7 + gr * 3 + art.length);
+      let col = dx < 0 ? f[1] : f[0];
+      if (dx === w) col = f[2];
+      else if (dx === -w) col = ton(f[1], 0.12);
+      else if (dx < 0 && hh < 0.14) col = ton(f[1], 0.16);   // Nadeln im Licht
+      else if (dx > 0 && hh < 0.16) col = ton(f[0], -0.18);  // Nadeln im Schatten
+      // Schatten unter der Etage darüber
+      if (s > 0 && innen < 0.2 && Math.abs(dx) < w - 1) col = ton(col, -0.2);
+      P(px + dx, yy, col);
+    }
+    // hängende Astspitzen an der Unterkante jeder Etage
+    if (!netz && innen > 0.8 && w > 2) { P(px - w - 1, yy, f[1]); P(px + w + 1, yy, f[2]); if (s % 2 === 0) { P(px - w, yy + 1, f[1]); P(px + w, yy + 1, f[2]); } }
+    if (winter && innen < 0.22 && w > 0) for (let dx = -w; dx <= w; dx++) if (hash(dx * 5 + i * 3) < (dx < 0 ? 0.7 : 0.45)) P(px + dx, yy, dx < 0 ? '#ffffff' : '#dfe8f2');
+    if (art === 'fichte' && s > 0 && innen > 0.65 && i % 2 === 0 && w > 2) { P(px - w + 1, yy, '#8a4a1a'); P(px + w - 2, yy, '#6a3a14'); }   // Zapfen
+    if (art === 'blau' && innen > 0.55 && i % 2 && w > 1) { P(px + w - 1, yy, '#a8c8d4'); P(px - w + 1, yy, '#c4dce4'); }   // bläulicher Reif
+    if (netz && i % 3 === 0) for (let dx = -w; dx <= w; dx += 2) P(px + dx, yy, '#f4f0e8');
+    if (netz && i % 3 === 1) { P(px - w, yy, '#e0dcd0'); P(px + w, yy, '#e0dcd0'); }
+  }
+  P(px, py - h, winter ? '#ffffff' : f[1]); P(px, py - h + 1, f[1]);
+  if (eigen) { P(px, py - h - 1, '#ffe060'); P(px - 1, py - h, '#ffe060'); P(px + 1, py - h, '#ffe060'); P(px, py - h - 2, '#fff6c0'); x.fillStyle = '#c82828'; x.fillRect(px - 1, py - 5, 3, 1); }
+  b = { cv: k, px, py };
+  bilder.set(schl, b);
+  return b;
+}
+/**
+ * Das Bild um den Stammfuß gedreht (Grad, im Uhrzeigersinn), pixelgenau mit
+ * nächstem Nachbarn. Rückgabe { cv, ox, oy } = Lage des Drehpunkts im Ergebnis.
+ */
+function gedreht(bild, grad) {
+  grad = Math.round(grad / 5) * 5;
+  if (grad === 0) return { cv: bild.cv, ox: bild.px, oy: bild.py };
+  const schl = grad;
+  bild.dreh = bild.dreh || new Map();
+  let d = bild.dreh.get(schl);
+  if (d) return d;
+  const a = grad * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
+  const sw = bild.cv.width, sh = bild.cv.height;
+  const quelle = bild.cv.getContext('2d').getImageData(0, 0, sw, sh).data;
+  // Grenzen der gedrehten Ecken
+  const ecken = [[0, 0], [sw, 0], [0, sh], [sw, sh]].map(([x, y]) => { const dx = x - bild.px, dy = y - bild.py; return [dx * ca - dy * sa, dx * sa + dy * ca]; });
+  const x0 = Math.floor(Math.min(...ecken.map((e) => e[0]))) - 1, x1 = Math.ceil(Math.max(...ecken.map((e) => e[0]))) + 1;
+  const y0 = Math.floor(Math.min(...ecken.map((e) => e[1]))) - 1, y1 = Math.ceil(Math.max(...ecken.map((e) => e[1]))) + 1;
+  const k = document.createElement('canvas'); k.width = x1 - x0; k.height = y1 - y0;
+  const kc = k.getContext('2d'), img = kc.createImageData(k.width, k.height), z = img.data;
+  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+    const sx = Math.round(x * ca + y * sa + bild.px - 0.5 * 0), sy = Math.round(-x * sa + y * ca + bild.py);
+    if (sx < 0 || sy < 0 || sx >= sw || sy >= sh) continue;
+    const qi = (sy * sw + sx) * 4, zi = ((y - y0) * k.width + (x - x0)) * 4;
+    if (quelle[qi + 3] < 128) continue;
+    z[zi] = quelle[qi]; z[zi + 1] = quelle[qi + 1]; z[zi + 2] = quelle[qi + 2]; z[zi + 3] = 255;
+  }
+  kc.putImageData(img, 0, 0);
+  d = { cv: k, ox: -x0, oy: -y0 };
+  bild.dreh.set(schl, d);
+  return d;
+}
+/** Bild mit seinem Drehpunkt auf (x, y) setzen. */
+function setze(ctx, d, x, y) { ctx.drawImage(d.cv, Math.round(x - d.ox), Math.round(y - d.oy)); }
+/** Für die Baumschule (ui.js): einen stehenden Baum in ein fremdes Canvas malen. */
+export function maleBaum(ctx, x, fuss, art, gr, winter, eigen = false) { const b = baumBild(art, gr, winter, false, eigen); ctx.drawImage(b.cv, Math.round(x - b.px), Math.round(fuss - b.py)); }
+
 function kreis(cx, cy, rad, f) {
   c.fillStyle = f;
   for (let y = -rad; y <= rad; y++) { const w = Math.round(Math.sqrt(rad * rad - y * y)); c.fillRect(Math.round(cx - w), Math.round(cy + y), w * 2 + 1, 1); }
@@ -366,60 +512,100 @@ function baueKulisse(winter) {
   const lx = W - 6, ly = pp + 4;
   r(c, lx, ly - 22, 1, 22, '#2a2a34'); r(c, lx - 2, ly - 27, 5, 5, '#2a2a34'); r(c, lx - 1, ly - 26, 3, 3, '#ffe090'); p(c, lx, ly - 29, '#3a3a44');
   c.fillStyle = 'rgba(255,220,140,0.12)'; c.fillRect(lx - 8, ly - 30, 17, 12);
-  for (let i = 0; i < 3; i++) baumLiegend(6 + i * 2, pp + 8 + i * 4, ['nordmann', 'blau', 'fichte'][i % 3], 0, true);
+  for (let i = 0; i < 3; i++) setze(c, gedreht(baumBild(['nordmann', 'blau', 'fichte'][i % 3], 0, winter, true), 90), 4 + i * 2, pp + 8 + i * 4);
   c = ziel;
 }
 
-/** Stehender Baum: drei bis vier Stufen mit Licht und Schatten, Schnee oben. */
-function baumStehend(x, fuss, art, gr, wachs, winter, wackel) {
-  const f = SORTEN[art].f, h = Math.max(3, Math.round(HOEHE[gr] * wachs)), b = Math.round(h * 0.42);
-  const dx = wackel > 0 ? Math.round(Math.sin(wackel * 60) * 1.5) : 0;
-  c.fillStyle = 'rgba(20,30,20,0.2)'; c.fillRect(Math.round(x - b - 1), fuss, b * 2 + 3, 2);
-  r(c, x, fuss - 3, 2, 3, '#5a3a22');
-  const stufen = gr + 2;
-  for (let i = 0; i < h - 2; i++) {
-    const s = Math.floor(i / ((h - 2) / stufen)), innen = (i % ((h - 2) / stufen)) / ((h - 2) / stufen);
-    const w = Math.max(0, Math.round((s + 1) / stufen * b * (0.5 + innen * 0.5)));
-    const yy = fuss - h + i, xx = x + dx;
-    r(c, xx - w, yy, w, 1, f[1]); r(c, xx, yy, w + 1, 1, f[0]); p(c, xx + w, yy, f[2]);
-    if (winter && innen < 0.15) r(c, xx - w, yy, w + 1, 1, '#ffffff');
-    if (art === 'fichte' && s > 0 && innen > 0.7 && (i % 2 === 0)) { p(c, xx - w + 1, yy, '#8a4a1a'); p(c, xx + w - 2, yy, '#8a4a1a'); }   // Zapfen
-    if (art === 'blau' && innen > 0.6 && i % 2) p(c, xx + w - 1, yy, '#a8c8d4');                      // bläulicher Schimmer
+/** Stehender Baum im Feld: Bild, beim Wackeln leicht versetzt, beim 2. Schnitt geneigt. */
+function baumStehend(b, winter) {
+  const bild = baumBild(b.art, b.gr, winter, false, b.eigen);
+  const dx = b.wackel > 0 ? Math.round(Math.sin(b.wackel * 60) * 1.5) : 0;
+  if (b.wachs < 1) {
+    // Nachwachsen: von unten hochschieben (abgeschnitten am Boden)
+    const hh = Math.max(2, Math.round(bild.cv.height * b.wachs));
+    c.drawImage(bild.cv, 0, 0, bild.cv.width, hh, Math.round(b.x - bild.px), Math.round(b.y - bild.py + bild.cv.height - hh), bild.cv.width, hh);
+    return;
   }
-  p(c, x + dx, fuss - h - 1, winter ? '#ffffff' : f[1]);
+  const neig = b.schnitte >= 2 ? 6 : b.schnitte === 1 ? 0 : 0;
+  setze(c, gedreht(bild, neig), b.x + dx, b.y);
 }
-/** Liegender Baum (Spitze nach rechts), auf Wunsch mit Netz. */
-function baumLiegend(x, y, art, gr, netz) {
-  const f = SORTEN[art].f, l = HOEHE[gr], b = Math.round(l * 0.3);
-  r(c, x - 3, y - 1, 4, 2, '#5a3a22');
-  for (let i = 0; i < l; i++) {
-    const w = Math.max(0, Math.round((1 - i / l) * b));
-    r(c, x + i, y - w, 1, w, f[1]); r(c, x + i, y, 1, w + 1, f[0]); p(c, x + i, y + w, f[2]);
-    if (netz && i % 3 === 0) for (let k = -w; k <= w; k += 2) p(c, x + i + (k % 4 === 0 ? 0 : 1), y + k, '#f4f0e8');
+/** Die Bügelsäge am Stamm: fährt nach jedem Tipp hin und her; Kerbe wächst. */
+function saege(b, t) {
+  const hub = b.saegeT > 0 ? Math.round(Math.sin(b.saegeT * 40) * 3) : Math.round(Math.sin(t * 3) * 0.5);
+  const sx = b.x + 3 + hub, sy = b.y - 2;
+  // Kerbe im Stamm (von rechts nach links)
+  for (let i = 0; i < Math.min(3, b.schnitte); i++) p(c, b.x + 1 - i, b.y - 2, '#2a1a10');
+  // Blatt mit Zähnen
+  r(c, sx, sy, 12, 1, '#d8dce4'); for (let i = 0; i < 12; i += 2) p(c, sx + i, sy + 1, '#8a8e96');
+  // Bügel und Griff
+  r(c, sx + 1, sy - 6, 1, 6, '#c83a32'); r(c, sx + 1, sy - 6, 11, 1, '#c83a32'); r(c, sx + 11, sy - 6, 1, 6, '#c83a32');
+  p(c, sx + 2, sy - 5, '#e85a4a');
+  r(c, sx + 12, sy - 2, 3, 3, '#3a2a1e'); p(c, sx + 12, sy - 2, '#5a4030');
+  // Fortschritt als drei Kerben-Punkte unter dem Baum
+  for (let i = 0; i < SAEGEN; i++) r(c, b.x - 5 + i * 4, b.y + 3, 3, 2, i < b.schnitte ? '#e8b030' : '#5a4a3a');
+}
+/** Die Netzmaschine von der Seite: Trichter links offen, Tunnel, Netzrolle oben. */
+function maschine(m, ruck, anim) {
+  const dx = ruck > 0 ? (Math.floor(ruck * 60) % 2 ? 1 : -1) : 0, x = m.x + dx, y = m.y;
+  // Beine
+  r(c, x - 7, y - 2, 2, 10, '#5a5a62'); r(c, x + 6, y - 2, 2, 10, '#5a5a62'); r(c, x - 8, y + 7, 4, 1, '#3a3a42'); r(c, x + 5, y + 7, 4, 1, '#3a3a42');
+  // Trichter: links weit, nach rechts eng
+  for (let i = 0; i < 6; i++) { const hh = 14 - i; r(c, x - 13 + i, y - 6 - hh / 2, 1, hh, i === 0 ? '#e84a3a' : i % 2 ? '#c83a32' : '#d8443a'); }
+  // Tunnel
+  r(c, x - 7, y - 10, 15, 9, '#a82a24'); r(c, x - 7, y - 10, 15, 1, '#e85a4a'); r(c, x - 7, y - 2, 15, 1, '#6a1814');
+  for (let i = 0; i < 3; i++) p(c, x - 4 + i * 5, y - 7, '#f0c040');   // Nieten
+  // Netzrolle oben, dreht sich beim Ziehen
+  r(c, x - 5, y - 16, 11, 5, '#f4f0e8'); r(c, x - 5, y - 16, 11, 1, '#ffffff'); r(c, x - 5, y - 12, 11, 1, '#c8c4b8');
+  const o = Math.floor(anim * 6) % 3;
+  for (let i = o; i < 11; i += 3) p(c, x - 5 + i, y - 14, '#c8c4b8');
+  r(c, x - 6, y - 15, 1, 3, '#5a5a62'); r(c, x + 6, y - 15, 1, 3, '#5a5a62');
+}
+/** Liegende Ware: links von der Maschine normal, rechts davon eingenetzt (schmal). */
+function wareZeichnen(w, winter, t) {
+  const m = MASCHINE();
+  const normal = gedreht(baumBild(w.art, w.gr, winter, false, w.eigen), w.winkel);
+  if (w.phase === 'kippt' || w.phase === 'liegt' || w.phase === 'rutscht') {
+    setze(c, normal, w.x, w.y + (w.phase === 'liegt' && w.t < 0.08 ? -1 : 0));
+    return;
   }
+  const netz = gedreht(baumBild(w.art, w.gr, winter, true, w.eigen), w.winkel);
+  if (w.phase === 'fliegt' || w.phase === 'fertig') { setze(c, netz, w.x, w.y); return; }
+  // wartet: durch die Maschine ziehen - hinter der Öffnung (rechts) ist er eingenetzt
+  const aus = m.x + 8;
+  c.save(); c.beginPath(); c.rect(0, 0, m.x - 7, H); c.clip(); setze(c, normal, w.x, w.y); c.restore();
+  c.save(); c.beginPath(); c.rect(aus, 0, W - aus, H); c.clip(); setze(c, netz, w.x, w.y); c.restore();
+  // Fortschritt über der Maschine
+  for (let i = 0; i < NETZ; i++) r(c, m.x - 5 + i * 4, m.y - 22, 3, 2, i < w.netz ? '#e8b030' : '#5a4a3a');
 }
 
 function auto(a, pp, winter) {
-  const x = Math.round(a.x), y = pp.y;
-  c.fillStyle = 'rgba(0,0,0,0.2)'; c.fillRect(x - 21, y + 1, 42, 2);
+  const x = Math.round(a.x), y = pp.y + (a.feder > 0.15 ? 1 : 0);
+  c.fillStyle = 'rgba(0,0,0,0.2)'; c.fillRect(x - 21, pp.y + 1, 42, 2);
   r(c, x - 20, y - 11, 40, 8, a.farbe); r(c, x - 20, y - 11, 40, 1, ton(a.farbe, 0.25)); r(c, x - 20, y - 4, 40, 1, ton(a.farbe, -0.3));
   r(c, x - 12, y - 18, 24, 7, a.farbe); r(c, x - 11, y - 17, 10, 5, '#a8d0ec'); r(c, x + 1, y - 17, 10, 5, '#a8d0ec');
+  p(c, x - 10, y - 16, '#e0f0fc'); p(c, x + 2, y - 16, '#e0f0fc');
   r(c, x - 13, y - 19, 26, 1, '#3a3a40');                 // Dachträger
   r(c, x + 17, y - 9, 3, 2, '#fff4b0'); r(c, x - 20, y - 9, 2, 2, '#e84a4a');
-  for (const rx of [x - 12, x + 11]) { kreis(rx, y - 2, 3, '#2a2a30'); p(c, rx, y - 2, '#b8bcc4'); }
+  for (const rx of [x - 12, x + 11]) { kreis(rx, pp.y - 2, 3, '#2a2a30'); p(c, rx, pp.y - 2, '#b8bcc4'); }
   if (winter) r(c, x - 12, y - 20, 24, 1, '#ffffff');
-  if (a.dach) baumLiegend(x - 12, y - 22, a.dach.art, a.dach.gr, true);
+  if (a.dach) {
+    setze(c, gedreht(baumBild(a.dach.art, a.dach.gr, winter, true, a.dach.eigen), 90), x - 12, y - 22);
+    // Spanngurte
+    for (const gx of [x - 6, x + 6]) { r(c, gx, y - 25, 1, 6, '#e8a020'); p(c, gx, y - 19, '#8a5a10'); }
+  }
 }
 
 function blase(a, pp, t) {
   const kx = Math.round(a.x - 28), ky = pp.y - 2;
   const bw = 66, bh = 36, bx = Math.max(2, Math.min(W - bw - 2, kx - bw / 2)), by = ky - 32 - bh;
-  r(c, bx, by, bw, bh, '#fffaf0'); r(c, bx, by, bw, 1, '#ffffff'); r(c, bx, by + bh - 1, bw, 1, '#c8b898');
-  r(c, bx - 1, by + 1, 1, bh - 2, '#c8b898'); r(c, bx + bw, by + 1, 1, bh - 2, '#c8b898');
+  const rand = a.wunsch.eigen ? '#e8b030' : '#c8b898';
+  r(c, bx, by, bw, bh, a.wunsch.eigen ? '#fff6d8' : '#fffaf0'); r(c, bx, by, bw, 1, '#ffffff'); r(c, bx, by + bh - 1, bw, 1, rand);
+  r(c, bx - 1, by + 1, 1, bh - 2, rand); r(c, bx + bw, by + 1, 1, bh - 2, rand);
   r(c, kx - 1, by + bh, 3, 2, '#fffaf0'); p(c, kx, by + bh + 2, '#fffaf0');
   // Der Wunschbaum in echter Größe, dazu Sorte und Größe in Schrift
-  baumStehend(bx + 12, by + bh - 4, a.wunsch.art, a.wunsch.gr, 1, false, 0);
-  const s1 = GROESSE[a.wunsch.gr], s2 = SORTEN[a.wunsch.art].name;
+  const bild = baumBild(a.wunsch.art, a.wunsch.gr, false, false, a.wunsch.eigen);
+  c.drawImage(bild.cv, Math.round(bx + 12 - bild.px), Math.round(by + bh - 4 - bild.py));
+  const s1 = a.wunsch.eigen ? 'DEIN BAUM' : GROESSE[a.wunsch.gr], s2 = SORTEN[a.wunsch.art].name;
   MH.label('wunsch', bx + 23, by + 5, `${s1}<small style="color:${SORTEN[a.wunsch.art].f[2]}">${s2}</small>`, 'wunsch');
   // Geduld
   const anteil = Math.max(0, a.geduld / a.max);
@@ -431,39 +617,30 @@ function zeichne(t) {
   const g = spiel;
   const winter = Z.schnee() > 0;
   baueKulisse(winter);
+  c.save();
+  if (g.bildWackel > 0) c.translate(Math.floor(g.bildWackel * 50) % 2 ? 1 : -1, Math.floor(g.bildWackel * 40) % 2 ? 1 : 0);
   c.drawImage(kulisse, 0, 0);
   const a = g.auto;
   // Bäume, von hinten nach vorn; der gewählte bekommt eine Säge
   for (const b of [...g.baeume].sort((x, y) => x.y - y.y)) {
-    if (b.weg) { r(c, b.x - 1, b.y - 2, 4, 2, '#c8a070'); p(c, b.x, b.y - 2, '#a8805a'); continue; }
+    if (b.weg) { r(c, b.x - 1, b.y - 2, 4, 2, '#c8a070'); p(c, b.x, b.y - 2, '#a8805a'); p(c, b.x + 1, b.y - 2, '#8a6040'); continue; }
     L.schatten(c, b.x + 1 + L.schattenRichtung() * 5, b.y, 9 + b.gr * 2, 3, 0.32);   // weicher Bodenschatten, weg von der Sonne
-    baumStehend(b.x, b.y, b.art, b.gr, b.wachs, winter, b.wackel);
-    if (b === g.aktiv) {
-      const sx = b.x + 4, sy = b.y - 3, hin = Math.floor(t * 10) % 2;
-      r(c, sx + hin, sy, 9, 2, '#c8ccd4'); for (let i = 0; i < 9; i += 2) p(c, sx + hin + i, sy + 2, '#8a8e96');
-      r(c, sx + 9 + hin, sy - 1, 3, 4, '#c83a32');
-      for (let i = 0; i < SAEGEN; i++) r(c, b.x - 5 + i * 4, b.y + 3, 3, 2, i < b.schnitte ? '#e8b030' : '#5a4a3a');
-    }
+    if (b.eigen && b.wachs >= 1) L.schatten(c, b.x, b.y - 2, 12, 4, 0.12);
+    baumStehend(b, winter);
+    if (b.eigen && b.wachs >= 1 && Math.sin(t * 4 + b.i) > 0.3) p(c, b.x + 4, b.y - HOEHE[b.gr] + 3, '#fff6c0');   // Funkeln
+    if (b === g.aktiv) saege(b, t);
   }
-  // Späne
+  // Späne und Aufschlagwolke
   for (const s of g.spaene) p(c, s.x, s.y, '#e8c890');
-  // Netzmaschine: Trichter auf Beinen, Netzrolle
-  const m = MASCHINE();
-  r(c, m.x - 10, m.y - 2, 2, 10, '#5a5a62'); r(c, m.x + 8, m.y - 2, 2, 10, '#5a5a62');
-  for (let i = 0; i < 8; i++) r(c, m.x - 10 + i, m.y - 16 + i, 20 - i * 2, 1, i % 2 ? '#c83a32' : '#e84a3a');
-  r(c, m.x - 6, m.y - 8, 12, 6, '#a82a24'); r(c, m.x - 3, m.y - 6, 6, 3, '#2a2a30');
-  r(c, m.x - 5, m.y - 19, 10, 3, '#f4f0e8'); r(c, m.x - 5, m.y - 19, 10, 1, '#ffffff');
+  for (const s of g.wolken) { const gr = s.t < 0.25 ? 2 : 1; r(c, Math.round(s.x), Math.round(s.y), gr, gr, s.f); }
+  // Die Ware, dann die Maschine davor (der Baum verschwindet im Tunnel)
+  const m = MASCHINE(), w = g.ware;
+  if (w && w.phase !== 'fliegt') wareZeichnen(w, winter, t);
+  maschine(m, g.maschineRuck || 0, w ? w.netzAnim : 0);
   // Das Schild ist DOM und läge über dem Auto, das davor wegfährt (gemeldet 18.10.):
   // solange ein Auto die Maschine überdeckt, bleibt es weg
   const ca = g.auto;
   MH.label('netz', m.x, m.y + 9, ca && Math.abs(ca.x - m.x) < 34 ? null : 'NETZ', 'schild');
-  // Die Ware
-  const w = g.ware;
-  if (w) {
-    if (w.phase === 'faellt') { baumLiegend(w.x - 6, w.y, w.art, w.gr, false); for (let i = 0; i < 5; i++) p(c, w.x - 4 + i * 4, w.y + 3 - Math.floor(w.t * 20) % 3, winter ? '#ffffff' : '#c8b898'); }
-    else baumLiegend(Math.round(w.x), Math.round(w.y), w.art, w.gr, w.phase === 'fertig' || w.phase === 'fliegt');
-    if (w.phase === 'wartet') for (let i = 0; i < NETZ; i++) r(c, m.x - 5 + i * 4, m.y - 23, 3, 2, i < w.netz ? '#e8b030' : '#5a4a3a');
-  }
   // Auto mit Kunde und Wunsch
   const pp = PARKPLATZ();
   if (a) {
@@ -472,11 +649,13 @@ function zeichne(t) {
       figurKlein(c, a.kunde, a.x - 28, pp.y, t);
     } else MH.label('wunsch', 0, 0, null);
   } else MH.label('wunsch', 0, 0, null);
+  if (w && w.phase === 'fliegt') wareZeichnen(w, winter, t);   // im Flug vor allem anderen
   // Hinweis, was als Nächstes dran ist
-  const was = !a || a.phase === 'faehrt' ? '' : g.schritt === 'suchen' ? 'BAUM SUCHEN' : g.schritt === 'saegen' ? 'SÄGEN!' : g.schritt === 'netz' ? (w && w.phase === 'wartet' ? 'INS NETZ!' : '') : g.schritt === 'laden' ? 'AUFS AUTO!' : '';
+  const was = !a || a.phase === 'faehrt' ? '' : g.schritt === 'suchen' ? (a.wunsch.eigen ? 'DEIN GOLDENER BAUM!' : 'BAUM SUCHEN') : g.schritt === 'saegen' ? 'SÄGEN!' : g.schritt === 'netz' ? 'INS NETZ!' : g.schritt === 'laden' ? 'AUFS AUTO!' : '';
   MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null);
   // Fehlgriffe und Texte
   for (const f of g.fehl) { const k = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - k})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
+  c.restore();
   // Schwebende Texte als DOM (minihud.js) - einmal anstoßen, sie steigen selbst
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || (x.text.length > 3 ? '#ffb040' : '#ffe27a'), x.text.length > 5 ? 0.8 : 1.1); }
 
@@ -498,6 +677,8 @@ function zeichne(t) {
     p(c, x, y, an ? FARB[i % 4] : ton(FARB[i % 4], -0.4));
     if (an) L.schein(c, x, y, 4, RGB[i % 4], 0.06 + 0.16 * nachts);
   }
+  // Eigener Baum: goldener Schein, damit man ihn auch im Arbeitslicht findet
+  for (const b of g.baeume) if (b.eigen && !b.weg && b.wachs >= 1) L.schein(c, b.x, b.y - HOEHE[b.gr] / 2, 16, '255,214,90', 0.22 + 0.08 * Math.sin(t * 3));
 
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)
   const rest = Math.max(0, Math.ceil(C.BAUM_DAUER - Math.max(0, g.t)));

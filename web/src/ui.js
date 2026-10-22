@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610221200';
-import * as S from './spiel.js?v=202610221200';
-import * as Z from './zeit.js?v=202610221200';
-import * as T from './ton.js?v=202610221200';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610221200';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221200';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221200';
-import * as A from './auftraege.js?v=202610221200';
-import * as E from './erfolge.js?v=202610221200';
-import * as ZL from './ziele.js?v=202610221200';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221200';
-import * as KA from './karte.js?v=202610221200';
-import { zeigeRueckblick } from './ereignis.js?v=202610221200';
-import { barbaraZweig } from './szene.js?v=202610221200';
-import * as SW from './schneeball.js?v=202610221200';
-import * as LI from './lichtung.js?v=202610221200';
-import * as CB from './christbaum.js?v=202610221200';
-import * as SB from './schlitten.js?v=202610221200';
-import * as EB from './schlittschuh.js?v=202610221200';
-import * as BS from './backstube.js?v=202610221200';
-import { alleSymbole } from './symbole.js?v=202610221200';
+import * as C from './config.js?v=202610221400';
+import * as S from './spiel.js?v=202610221400';
+import * as Z from './zeit.js?v=202610221400';
+import * as T from './ton.js?v=202610221400';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610221400';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221400';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221400';
+import * as A from './auftraege.js?v=202610221400';
+import * as E from './erfolge.js?v=202610221400';
+import * as ZL from './ziele.js?v=202610221400';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221400';
+import * as KA from './karte.js?v=202610221400';
+import { zeigeRueckblick } from './ereignis.js?v=202610221400';
+import { barbaraZweig } from './szene.js?v=202610221400';
+import * as SW from './schneeball.js?v=202610221400';
+import * as LI from './lichtung.js?v=202610221400';
+import * as CB from './christbaum.js?v=202610221400';
+import * as SB from './schlitten.js?v=202610221400';
+import * as EB from './schlittschuh.js?v=202610221400';
+import * as BS from './backstube.js?v=202610221400';
+import { alleSymbole } from './symbole.js?v=202610221400';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -441,11 +441,134 @@ function zeigeBaumspiel() {
     <p>Kunden fahren vor und wollen einen bestimmten Baum - <b>Größe und Sorte stehen in der Sprechblase.</b></p>
     <p>Tippe den richtigen Baum an und <b>säge ihn mit drei Tipps</b>. Dann <b>dreimal aufs Netz</b> und zum Schluss <b>aufs Auto</b>. Je schneller, desto mehr Punkte - fehlerfreie Kunden hintereinander geben eine Kette bis ×3.</p>
     <p class="klein">${C.BAUM_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
-    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
-  [{ text: 'Später', neben: true }], 'baum', starteBaumspiel);
+    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>
+    ${S.baumschule().ware.length ? `<p class="bonus">${S.baumschule().ware.length} eigene ${S.baumschule().ware.length === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft bringt ${S.baumschule().ware.length === 1 ? 'er' : 'jeder'} ×3!</p>` : ''}`,
+  [{ text: 'Baumschule', neben: true, aktion: () => { setTimeout(zeigeBaumschule, 60); } }], 'baum', starteBaumspiel);
 }
 export function starteBaumspiel(stufeNr = 1) {
-  CB.starte(spielHoehe(), (punkte, n) => { CB.schliesse(); miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft`, 'Gut verkauft!', () => starteBaumspiel(stufeNr)); }, stufeNr);
+  CB.starte(spielHoehe(), (punkte, n, eigene = []) => {
+    CB.schliesse(); S.eigeneVerkauft(eigene);
+    miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft${eigene.length ? `, davon ${eigene.length} aus deiner Baumschule` : ''}`, 'Gut verkauft!', () => starteBaumspiel(stufeNr));
+  }, stufeNr, S.baumschule().ware);
+}
+
+/**
+ * Baumschule (22.10.): vier Beete hinter dem Verkaufsplatz. Gießen und Düngen
+ * gelten für alle Beete und gehen je einmal am Tag; ohne beides wachsen die
+ * Bäume trotzdem, nur langsamer. Fertige Bäume erntet man - sie stehen dann im
+ * Minispiel golden im Feld. Manchmal sitzt ein Eichhörnchen in einem Baum.
+ */
+const BS_W = 132, BS_H = 64, BEET_X = [18, 50, 82, 114], BEET_Y = 54;
+const SORTE_KURZ = { nordmann: 'Nordmann', blau: 'Blaufichte', fichte: 'Fichte' };
+export function zeigeBaumschule() {
+  const box = fenster('Baumschule', `
+    <canvas class="futter-szene baumschule-szene" width="${BS_W}" height="${BS_H}"></canvas>
+    <div class="beete"></div>
+    <p class="klein bs-text"></p>`,
+  [{ text: 'Gießen', aktion: () => { if (S.giesse()) { toast('Gegossen - die Bäume wachsen heute schneller.', 'gut'); } neu(); return false; } },
+    { text: 'Düngen', neben: true, aktion: () => {
+      if (!S.kannDuengen()) return false;
+      if (!S.duenge()) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return false; }
+      toast('Gedüngt - heute ein ordentlicher Schub!', 'gut'); neu(); return false;
+    } },
+    { text: 'Zurück', neben: true, aktion: () => { setTimeout(zeigeBaumspiel, 60); } }]);
+  const cv = box.querySelector('canvas'), c = cv.getContext('2d');
+  const [kGiessen, kDuengen] = box.querySelectorAll('.k');
+  const beete = box.querySelector('.beete'), text = box.querySelector('.bs-text');
+  const zu = { eichBis: 0 };
+  function neu() {
+    const B = S.baumschule();
+    beete.innerHTML = '';
+    B.beete.forEach((b, i) => {
+      const karte = el('div', 'beet');
+      if (!b) {
+        karte.innerHTML = `<b>Beet ${i + 1}</b><span>leer - was pflanzen?</span>`;
+        const reihe = el('div', 'beet-wahl');
+        for (const art of Object.keys(SORTE_KURZ)) {
+          const k = el('button', 'k k--neben', SORTE_KURZ[art]);
+          k.onclick = () => { S.pflanze(i, art); neu(); };
+          reihe.appendChild(k);
+        }
+        karte.appendChild(reihe);
+      } else {
+        const w = S.beetWachs(b), st = ['Setzling', 'klein', 'mittel', 'fertig'][S.beetStufe(b)];
+        karte.innerHTML = `<b>${SORTE_KURZ[b.art]}</b><span>${st} · ${Math.round(w * 100)} %</span><div class="beet-balken"><i style="width:${Math.round(w * 100)}%"></i></div>`;
+        if (w >= 1) {
+          const k = el('button', 'k k--kauf', 'Ernten');
+          k.disabled = B.ware.length >= C.BAUMSCHULE_WARE_MAX;
+          k.onclick = () => { if (S.ernte(i)) toast(`${SORTE_KURZ[b.art]} geerntet - steht jetzt golden im Christbaumverkauf (×3)!`, 'gut'); neu(); };
+          karte.appendChild(k);
+        }
+      }
+      beete.appendChild(karte);
+    });
+    kGiessen.disabled = !S.kannGiessen();
+    kGiessen.textContent = B.gegossen === S.heuteNr() ? 'Heute gegossen' : 'Gießen';
+    kDuengen.disabled = !S.kannDuengen();
+    kDuengen.textContent = S.kannDuengen() ? `Düngen · ★ ${S.formatGeld(S.duengerPreis()).replace(' Sterne', '')}` : 'Düngen';
+    const ware = B.ware.length;
+    text.innerHTML = `Ohne Pflege brauchen die Bäume ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, mit Gießen und Düngen jeden Tag etwa 2. Nichts verdorrt.`
+      + (ware ? ` <b>${ware} geerntete${ware === 1 ? 'r Baum wartet' : ' Bäume warten'} im Verkauf.</b>` : '');
+  }
+  neu();
+  cv.onclick = (e) => {
+    const rc = cv.getBoundingClientRect(), x = (e.clientX - rc.left) / rc.width * BS_W, y = (e.clientY - rc.top) / rc.height * BS_H;
+    const i = S.eichhoernchen();
+    if (i >= 0 && zu.sichtbar && Math.abs(x - zu.ex) < 10 && Math.abs(y - zu.ey) < 10) {
+      const b = S.fangeEichhoernchen();
+      if (b) { T.spiele('spezialKasse'); toast(`Ein Eichhörnchen! +${S.formatGeld(b)}`, 'gut'); zu.fang = { x: zu.ex, y: zu.ey, t: 0, text: '+' + b }; }
+    }
+  };
+  let letzt = performance.now();
+  (function schleife(now) {
+    if (!cv.isConnected || document.querySelector('#modal').classList.contains('versteckt')) return;
+    const dt = Math.min(0.1, (now - letzt) / 1000); letzt = now;
+    zeichneBaumschule(c, now / 1000, zu, dt);
+    requestAnimationFrame(schleife);
+  })(letzt);
+}
+function zeichneBaumschule(c, t, zu, dt) {
+  const B = S.baumschule(), winter = Z.schnee() > 0, hell = Z.licht().hell;
+  for (let y = 0; y < BS_H; y++) r(c, 0, y, BS_W, 1, mische(mische('#141c3c', '#2c3a6a', y / BS_H), mische('#9cc0e4', '#e2eef8', y / BS_H), hell));
+  // Waldsaum hinten, Boden, Zaun
+  for (let x = -2; x < BS_W + 4; x += 7) { const h = 8 + ((x * 7) % 5); for (let i = 0; i < h; i++) { const w = Math.round((i + 1) / h * 3); r(c, x - w, 26 - h + i, w * 2 + 1, 1, winter ? '#5a7a72' : '#3e6a48'); } }
+  r(c, 0, 26, BS_W, BS_H - 26, winter ? '#e4ecf3' : '#7aa458');
+  for (let y = 27; y < BS_H; y++) for (let x = 0; x < BS_W; x++) if (Z.hash(x * 17 + y * 131) < 0.06) p(c, x, y, winter ? '#d2dce8' : '#6a9448');
+  for (let x = 2; x < BS_W; x += 6) { r(c, x, 22, 1, 7, '#a8784a'); p(c, x, 21, '#a8784a'); }
+  r(c, 0, 24, BS_W, 1, '#8a5a32');
+  const nass = B.gegossen === S.heuteNr();
+  zu.sichtbar = false;
+  const eich = S.eichhoernchen();
+  B.beete.forEach((b, i) => {
+    const x = BEET_X[i];
+    // Beet: Erdhügel mit Furchen (nass dunkler), Holzrand
+    r(c, x - 12, BEET_Y - 2, 25, 5, nass ? '#4a3020' : '#6a4a30'); r(c, x - 11, BEET_Y - 3, 23, 1, nass ? '#5a3a26' : '#7a5838');
+    for (let k = -10; k <= 10; k += 4) p(c, x + k, BEET_Y, nass ? '#3a2418' : '#5a3a24');
+    r(c, x - 13, BEET_Y + 3, 27, 2, '#8a5a32'); r(c, x - 13, BEET_Y + 3, 27, 1, '#a8784a');
+    if (winter) for (let k = -11; k <= 11; k++) if (Z.hash(k * 3 + i) < 0.4) p(c, x + k, BEET_Y - 3, '#f6f9fc');
+    if (!b) { r(c, x - 1, BEET_Y - 6, 3, 3, '#c8a070'); p(c, x, BEET_Y - 7, '#a8784a'); return; }   // Schildchen
+    const st = S.beetStufe(b);
+    if (st === 0) {
+      // Setzling: zwei kleine Nadelbüschel
+      r(c, x, BEET_Y - 5, 1, 3, '#5a3a22'); p(c, x - 1, BEET_Y - 5, '#3a7a3a'); p(c, x + 1, BEET_Y - 5, '#3a7a3a'); p(c, x, BEET_Y - 6, '#4a9a48'); p(c, x - 1, BEET_Y - 4, '#2e6a30'); p(c, x + 1, BEET_Y - 4, '#2e6a30');
+    } else CB.maleBaum(c, x, BEET_Y - 2, b.art, st - 1, winter, st === 3);
+    if (st === 3 && Math.sin(t * 4 + i) > 0.4) p(c, x + 4, BEET_Y - 22, '#fff6c0');
+    // Eichhörnchen: lugt alle paar Sekunden seitlich aus dem Baum
+    if (i === eich && st >= 1) {
+      const zyklus = (t + i * 1.3) % 4.2, raus = zyklus < 1.6;
+      if (raus) {
+        const h = [0, 15, 21, 28][st], ex = x + 4 + (zyklus < 0.2 ? -2 : 0), ey = BEET_Y - 2 - Math.round(h * 0.45);
+        r(c, ex, ey - 2, 3, 3, '#c86a2a'); p(c, ex + 2, ey - 1, '#1a1a1a'); p(c, ex, ey - 3, '#a8521e'); p(c, ex + 2, ey - 3, '#a8521e');   // Kopf mit Ohren
+        r(c, ex + 1, ey + 1, 2, 3, '#c86a2a'); p(c, ex + 2, ey + 2, '#f0d8b0');                                                          // Körper
+        const sw = Math.round(Math.sin(t * 6) * 1);
+        r(c, ex - 2 + sw, ey - 4, 2, 6, '#d87a32'); p(c, ex - 3 + sw, ey - 4, '#d87a32');                                               // buschiger Schwanz
+        zu.sichtbar = true; zu.ex = ex + 1; zu.ey = ey;
+      }
+    }
+  });
+  if (zu.fang) { zu.fang.t += dt; pixText(c, zu.fang.text + ' ★', Math.round(zu.fang.x - 8), Math.round(zu.fang.y - 8 - zu.fang.t * 14), '#ffe060'); if (zu.fang.t > 1.1) zu.fang = null; }
+  if (winter) for (let i = 0; i < 10; i++) p(c, Math.floor((i * 37 + Math.sin(t + i) * 4 + t * 6) % BS_W), Math.floor((i * 23 + t * (12 + (i % 4) * 4)) % BS_H), '#ffffff');
+  if (hell < 0.9) { c.fillStyle = `rgba(14,20,50,${(0.9 - hell) * 0.4})`; c.fillRect(0, 0, BS_W, BS_H); }
 }
 
 // ---------------------------------------------------------------------------
