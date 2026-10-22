@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610221100';
-import * as Z from './zeit.js?v=202610221100';
-import * as S from './spiel.js?v=202610221100';
-import { FASSADEN } from './config.js?v=202610221100';
-import * as C from './config.js?v=202610221100';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610221200';
+import * as Z from './zeit.js?v=202610221200';
+import * as S from './spiel.js?v=202610221200';
+import { FASSADEN } from './config.js?v=202610221200';
+import * as C from './config.js?v=202610221200';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2846,43 +2846,94 @@ export function zeichneFutterSzene(c, t, o, zu) {
       }
     }
   }
-  // Ast mit Zweigen, Schnee obendrauf
-  r(c, 0, 8, W, 4, '#5a4030'); r(c, 0, 8, W, 1, '#7a5a42'); r(c, 0, 11, W, 1, '#3a2a20');
-  for (const [bx, by] of [[14, 12], [38, 12], [96, 12], [118, 12]]) { r(c, bx, by, 2, 5, '#5a4030'); r(c, bx + 2, by + 3, 4, 1, '#5a4030'); }
-  if (o.schnee) for (let x = 0; x < W; x++) if (Z.hash(x * 5) < 0.8) p(c, x, 7, '#f6f9fc');
+  // Ast (22.10., gemeldet: „nicht so gerade"): kommt links dick aus dem Baum,
+  // biegt sich leicht durch, wird nach rechts dünner; Rinde, Knoten, Zweige
+  const astTop = (x) => Math.round(6 + x * 0.03 + Math.sin(x * 0.045 + 0.6) * 2.2);
+  const astDick = (x) => Math.max(2, Math.round(6.5 - x * 0.034));
+  const astUnten = (x) => astTop(x) + astDick(x);
+  const ASTENDE = W - 3;
+  for (let x = 0; x < ASTENDE; x++) {
+    const y0 = astTop(x), d = astDick(x) - (x > ASTENDE - 8 ? 1 : 0);
+    for (let k = 0; k < d; k++) {
+      const h = Z.hash(x * 13 + k * 71);
+      let f = k === 0 ? '#80604a' : k === d - 1 ? '#352418' : '#5a4030';
+      if (k > 0 && k < d - 1 && h < 0.22) f = '#4a3426';           // Rindenfurchen
+      else if (k === 1 && h > 0.8) f = '#6e5040';
+      p(c, x, y0 + k, f);
+    }
+  }
+  // Knoten in der Rinde
+  for (const kx of [22, 71]) { const ky = astTop(kx) + 1; p(c, kx, ky, '#3a2a1e'); p(c, kx + 1, ky, '#2e2016'); p(c, kx, ky + 1, '#6e5040'); }
+  // Zweige: schräg nach oben und unten, mit kleiner Gabel und Knospen
+  const zweig = (x0, nach, len, oben) => {
+    let x = x0, y = oben ? astTop(x0) - 1 : astUnten(x0);
+    for (let i = 0; i < len; i++) {
+      p(c, x, y, i < len / 2 ? '#5a4030' : '#6e5040');
+      x += nach; if (i % 2 === 0) y += oben ? -1 : 1;
+    }
+    p(c, x, y + (oben ? -1 : 1), '#6e5040'); p(c, x + nach, y, '#7a5a42');
+    p(c, x - nach, y + (oben ? -1 : 1), '#a8704a');                 // Knospe
+    if (o.schnee && oben) p(c, x - nach, y - 2, '#f6f9fc');
+  };
+  zweig(10, 1, 6, true); zweig(30, -1, 5, false); zweig(46, 1, 7, true); zweig(88, 1, 6, false); zweig(100, -1, 5, true); zweig(122, 1, 4, true);
+  if (o.schnee) for (let x = 0; x < ASTENDE; x++) if (Z.hash(x * 5) < 0.8) p(c, x, astTop(x) - 1, Z.hash(x * 9) < 0.3 ? '#dfe8f2' : '#f6f9fc');
   const stufe = o.stufe, v = o.variante || 0;
   const wood = '#a8703a', woodD = '#8a5a2e', woodL = '#c08a50';
   const korn = ['#d8b060', '#a87a40', '#e8c878', '#3a3028'];
   const spots = FSZ_PLATZ.map((q) => q.slice());
   // Futterhaus, Knödel, Vögel, Krümel und Texte hängen FSZ_DY tiefer; die Schnüre reichen bis zum Ast
   c.save(); c.translate(0, FSZ_DY);
+  // Schnur von der Unterkante des Asts bis `ende` (in der tiefer gehängten Ebene), mit Knoten oben
+  const schnur = (x, w, ende) => {
+    const oben = astUnten(x) - FSZ_DY;
+    r(c, x, oben, w, ende - oben, '#8a7a5a'); r(c, x, oben, 1, ende - oben, '#a8987a');
+    r(c, x - 1, oben, w + 2, 1, '#6a5a40');
+  };
   if (v === 2) {
     // Futterglocke: aus Körnern, schrumpft mit dem Futter; zwei Stangen als Sitzplätze
     const ring = 62, hoehe = stufe === 0 ? 0 : 6 + stufe * 6;
-    r(c, cx, 12 - FSZ_DY, 2, ring - hoehe - 14 + FSZ_DY, '#8a7a5a');
+    schnur(cx, 2, ring - hoehe - 2);
     r(c, cx - 3, ring - hoehe - 3, 7, 1, '#c82828'); p(c, cx - 4, ring - hoehe - 4, '#c82828'); p(c, cx + 4, ring - hoehe - 4, '#c82828');
     for (let i = 0; i < hoehe; i++) {
       const w = Math.min(4 + Math.floor(i * 0.9), 14); const y = ring - hoehe + i;
       for (let x = -w; x <= w; x++) p(c, cx + x, y, korn[(x * 3 + y * 5 + 40) % 4 === 0 ? 3 : (x + y) % 3 === 0 ? 1 : (x + y) % 3 === 1 ? 0 : 2]);
     }
     r(c, cx - 18, ring, 37, 2, '#6a4a2a'); r(c, cx - 18, ring + 2, 37, 1, '#4a3018');
-    for (const sx of [cx - 21, cx + 21]) { r(c, sx, 12 - FSZ_DY, 1, 22 + FSZ_DY, '#8a7a5a'); r(c, sx - 8, 34, 17, 2, '#6a4a2a'); }
+    for (const sx of [cx - 21, cx + 21]) { schnur(sx, 1, 34); r(c, sx - 8, 34, 17, 2, '#6a4a2a'); }
     spots[0] = [cx - 21, 34]; spots[1] = [cx + 21, 34]; spots[2] = [cx - 14, 62]; spots[3] = [cx + 14, 62];
   } else {
     const dach = v === 1 ? ['#f4f8fc', '#d8e4f0', '#e8f0f8'] : ['#c82828', '#a82020', '#d84040'];
-    r(c, cx, 12 - FSZ_DY, 2, 8 + FSZ_DY, '#8a7a5a');   // Schnur
-    // Dach
-    for (let i = 0; i < 14; i++) { const hb = 6 + Math.round(i * 2.1); r(c, cx + 1 - hb, 20 + i, hb * 2, 1, i === 13 ? dach[1] : i % 4 === 3 ? dach[2] : dach[0]); }
-    r(c, cx - 36, 34, 74, 2, ton(wood, -0.4));
-    // Haus: Pfosten, Rückwand, Flugloch
+    schnur(cx, 2, 20);
+    // Dach (22.10. mit Schindeln): Reihen versetzt, Fugen, Licht links oben, Schatten rechts
+    for (let i = 0; i < 14; i++) {
+      const hb = 6 + Math.round(i * 2.1), y = 20 + i, x0 = cx + 1 - hb, br = hb * 2;
+      r(c, x0, y, br, 1, i === 13 ? dach[1] : i % 4 === 3 ? dach[2] : dach[0]);
+      if (i % 4 === 1 || i % 4 === 2) for (let x = x0 + ((i >> 2) % 2 ? 2 : 0); x < x0 + br; x += 5) p(c, x, y, dach[1]);   // Stoßfugen
+      if (i % 4 === 0 && i < 13) r(c, x0 + 1, y, Math.round(br * 0.4), 1, ton(dach[0], 0.14));                            // Lichtkante
+      r(c, x0 + br - 2, y, 2, 1, ton(dach[0], -0.18));                                                                     // Schattenseite
+    }
+    r(c, cx - 1, 19, 4, 1, ton(dach[1], -0.2)); p(c, cx, 18, ton(dach[1], -0.3));                                          // Firstkappe
+    if (o.schnee && v !== 1) for (let i = 0; i < 3; i++) { const hb = 6 + Math.round(i * 2.1); for (let x = cx + 1 - hb; x < cx + 1 + hb; x++) if (Z.hash(x * 7 + i) < 0.75 - i * 0.2) p(c, x, 20 + i, i === 2 ? '#dfe8f2' : '#f6f9fc'); }
+    r(c, cx - 36, 34, 74, 2, ton(wood, -0.4)); r(c, cx - 36, 34, 74, 1, ton(wood, -0.25));
+    // Haus: Bretter mit Maserung, Astlöchern und Nägeln, Eckpfosten, Schatten unterm Dach
     r(c, cx - 25, 36, 52, 24, woodD);
-    for (let x = cx - 24; x < cx + 26; x += 6) r(c, x, 36, 1, 24, ton(woodD, -0.2));
-    r(c, cx - 25, 36, 3, 24, wood); r(c, cx + 24, 36, 3, 24, wood); r(c, cx - 25, 36, 1, 24, woodL);
+    for (let x = cx - 24; x < cx + 26; x += 6) { r(c, x, 36, 1, 24, ton(woodD, -0.2)); r(c, x + 1, 36, 1, 24, ton(woodD, 0.06)); }
+    for (let y = 37; y < 60; y++) for (let x = cx - 22; x < cx + 24; x++) { const h = Z.hash(x * 17 + y * 131); if (h < 0.07) p(c, x, y, ton(woodD, -0.12)); else if (h > 0.97) p(c, x, y, ton(woodD, 0.1)); }
+    for (const [ax, ay] of [[cx - 15, 46], [cx + 14, 52]]) { r(c, ax, ay, 2, 1, ton(woodD, -0.35)); p(c, ax, ay + 1, ton(woodD, -0.2)); }
+    r(c, cx - 25, 36, 52, 2, ton(woodD, -0.3));                                                                                  // Schatten des Dachs
+    r(c, cx - 25, 36, 3, 24, wood); r(c, cx + 24, 36, 3, 24, wood); r(c, cx - 25, 36, 1, 24, woodL); r(c, cx + 26, 36, 1, 24, ton(wood, -0.25));
+    for (const nx of [cx - 24, cx + 25]) { p(c, nx, 39, '#3a3028'); p(c, nx, 56, '#3a3028'); }                                  // Nägel
+    // Flugloch mit Rand
     r(c, cx - 5, 40, 11, 14, '#2a1a10'); r(c, cx - 4, 39, 9, 1, '#2a1a10'); r(c, cx - 3, 38, 7, 1, '#2a1a10');
+    r(c, cx - 6, 41, 1, 13, woodL); r(c, cx - 5, 39, 1, 2, woodL); r(c, cx - 4, 38, 1, 1, woodL); r(c, cx - 3, 37, 7, 1, woodL);
+    r(c, cx + 6, 41, 1, 13, ton(wood, -0.3)); r(c, cx + 5, 39, 1, 2, ton(wood, -0.3));
     guckVogel(c, cx, t, zu);
-    r(c, cx - 2, 55, 5, 2, woodL);   // Sitzstange am Flugloch
-    // Futterbrett mit Rand
+    r(c, cx - 2, 55, 5, 2, woodL); p(c, cx - 2, 56, ton(woodL, -0.25)); r(c, cx + 2, 56, 1, 1, ton(woodL, -0.3));   // Sitzstange am Flugloch
+    // Futterbrett mit Rand, Maserung und Kante
     r(c, cx - 43, 60, 87, 3, '#6a4a2a'); r(c, cx - 43, 60, 87, 1, '#8a6a42'); r(c, cx - 43, 63, 87, 1, '#4a3018');
+    for (let x = cx - 42; x < cx + 43; x++) if (Z.hash(x * 23) < 0.18) p(c, x, 61, '#5a3e22');
+    r(c, cx - 44, 59, 2, 4, '#7a5832'); r(c, cx + 43, 59, 2, 4, '#5a3e22');                                                    // Leisten an den Enden
+    if (o.schnee) { r(c, cx - 44, 58, 4, 1, '#f6f9fc'); r(c, cx + 41, 58, 4, 1, '#f6f9fc'); }
     // Futterberg (18.10. kleiner): je Stufe breiter und höher
     if (stufe > 0) {
       const bw = [0, 10, 18, 26, 34, 42][stufe], bh = [0, 1, 3, 4, 6, 7][stufe];
@@ -2897,7 +2948,7 @@ export function zeichneFutterSzene(c, t, o, zu) {
   }
   // Meisenknödel am rechten Ast
   if (o.knoedel) {
-    r(c, 112, 12 - FSZ_DY, 1, 20 + FSZ_DY, '#8a7a5a'); r(c, 109, 32, 7, 7, '#b8945a'); r(c, 109, 32, 7, 1, '#3a8a3a');
+    schnur(112, 1, 32); r(c, 109, 32, 7, 7, '#b8945a'); r(c, 109, 32, 7, 1, '#3a8a3a');
     for (let i = 0; i < 6; i++) p(c, 110 + (i * 3) % 5, 33 + (i * 2) % 5, i % 2 ? '#8a6a3a' : '#d8b878');
   }
   // Vögel: Anflug, Sitzen, Abflug (wie draußen, nur größer)

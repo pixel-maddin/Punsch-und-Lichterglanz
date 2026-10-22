@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610221100';
-import * as S from './spiel.js?v=202610221100';
-import * as Z from './zeit.js?v=202610221100';
-import * as T from './ton.js?v=202610221100';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610221100';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221100';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221100';
-import * as A from './auftraege.js?v=202610221100';
-import * as E from './erfolge.js?v=202610221100';
-import * as ZL from './ziele.js?v=202610221100';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221100';
-import * as KA from './karte.js?v=202610221100';
-import { zeigeRueckblick } from './ereignis.js?v=202610221100';
-import { barbaraZweig } from './szene.js?v=202610221100';
-import * as SW from './schneeball.js?v=202610221100';
-import * as LI from './lichtung.js?v=202610221100';
-import * as CB from './christbaum.js?v=202610221100';
-import * as SB from './schlitten.js?v=202610221100';
-import * as EB from './schlittschuh.js?v=202610221100';
-import * as BS from './backstube.js?v=202610221100';
-import { alleSymbole } from './symbole.js?v=202610221100';
+import * as C from './config.js?v=202610221200';
+import * as S from './spiel.js?v=202610221200';
+import * as Z from './zeit.js?v=202610221200';
+import * as T from './ton.js?v=202610221200';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610221200';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221200';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221200';
+import * as A from './auftraege.js?v=202610221200';
+import * as E from './erfolge.js?v=202610221200';
+import * as ZL from './ziele.js?v=202610221200';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221200';
+import * as KA from './karte.js?v=202610221200';
+import { zeigeRueckblick } from './ereignis.js?v=202610221200';
+import { barbaraZweig } from './szene.js?v=202610221200';
+import * as SW from './schneeball.js?v=202610221200';
+import * as LI from './lichtung.js?v=202610221200';
+import * as CB from './christbaum.js?v=202610221200';
+import * as SB from './schlitten.js?v=202610221200';
+import * as EB from './schlittschuh.js?v=202610221200';
+import * as BS from './backstube.js?v=202610221200';
+import { alleSymbole } from './symbole.js?v=202610221200';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -802,7 +802,7 @@ function hausReiterListe() {
   const lichter = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => NUR_LICHT.has(a.id) && hatTeil(a)));
   if (lichter.length) reiter.push({ id: 'lichter', kurz: 'Lichter', teile: lichter, anstriche: [] });
   const gesch = geschenke();
-  if (gesch.length) reiter.push({ id: 'geschenkt', kurz: 'Geschenkt', gesch });
+  if (gesch.length) reiter.push({ id: 'geschenkt', kurz: 'Geschenke', gesch });
   return reiter;
 }
 function baueHaus(behalteScroll) {
@@ -1693,14 +1693,14 @@ export function zeigeStandkarte() {
 export function zeigeFutterhaus() {
   const box = fenster('Dein Futterhaus', `
     <canvas class="futter-szene" width="${FSZ_W}" height="${FSZ_H}"></canvas>
-    <div class="futter-stand"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="futter-stand einer"><i></i></div>
     <p class="futter-text"></p>`,
   [{ text: 'Futter nachfüllen', aktion: () => {
       if (S.futterStand().stufe >= 5) return false;
       T.spiele('koerner'); S.fuettere(); toast(`Futterhaus gefüllt - hält ${C.FUTTER_STUNDEN} Stunden.`, 'gut'); anzeige(); return false;
     } }, { text: 'Schließen', neben: true }]);
   const cv = box.querySelector('canvas'), c = cv.getContext('2d');
-  const knopf = box.querySelector('.k'), segs = box.querySelectorAll('.futter-stand i');
+  const knopf = box.querySelector('.k'), balken = box.querySelector('.futter-stand i');
   const text = box.querySelector('.futter-text');
   const zu = cv.__zu = {};   // (zum Testen von außen erreichbar)
   // Vogel antippen: +VOGEL_STERNE, einmal je Besuch (S.vogelAntippen prüft das)
@@ -1722,16 +1722,17 @@ export function zeigeFutterhaus() {
     if (b) { T.spiele('kasse'); zu.texte.push({ x: hit.x, y: hit.y - FSZ_DY - 28, text: '+' + b, t: 0 }); }
     else T.spiele('klick');
   };
-  const uhr = (ms) => { const d = new Date(Z.jetzt().getTime() + ms); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  // 22.10.: EIN Balken statt fünf Teilen, und nur noch grobe Stunden (keine Uhrzeit)
   function anzeige() {
     const f = S.futterStand();
-    segs.forEach((s, i) => { s.className = i < f.stufe ? (f.stufe <= 1 ? 'knapp' : 'voll') : ''; });
-    const h = Math.floor(f.rest / 3600000), m = Math.floor((f.rest % 3600000) / 60000);
+    const anteil = Math.max(0, Math.min(1, f.rest / (C.FUTTER_STUNDEN * 3600000)));
+    balken.style.width = Math.round(anteil * 100) + '%';
+    balken.className = f.stufe <= 1 ? 'knapp' : 'voll';
+    const h = Math.round(f.rest / 3600000);
     if (f.stufe === 0) text.innerHTML = '<b>Leer!</b> Solange nichts drin ist, kommen keine Vögel. Füll es nach, dann kommen sie bald.';
     else {
-      const rest = h > 0 ? `${h} Std. ${m} Min.` : `${m} Min.`;
-      text.innerHTML = `Futter für noch etwa <b>${rest}</b>. Gegen ${uhr(f.rest)} Uhr ist es leer.`
-        + (f.stufe <= 2 ? ' <span class="futter-knapp">Bald nachfüllen!</span>' : '');
+      const rest = h >= 2 ? `rund ${h} Stunden` : h === 1 ? 'rund eine Stunde' : 'weniger als eine Stunde';
+      text.innerHTML = `Futter noch für <b>${rest}</b>.` + (f.stufe <= 2 ? ' <span class="futter-knapp">Bald nachfüllen!</span>' : '');
     }
     knopf.disabled = f.stufe >= 5;
     knopf.textContent = f.stufe >= 5 ? 'Futter ist voll' : f.stufe === 0 ? 'Futter einfüllen' : 'Futter nachfüllen';

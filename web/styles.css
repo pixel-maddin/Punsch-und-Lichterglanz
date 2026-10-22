@@ -1297,3 +1297,15 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Alle Lichter */
 .zeile.haus.alle-lichter { margin: calc(var(--px) * 1.5) 0 calc(var(--px) * 1); padding: calc(var(--px) * 2.4) calc(var(--px) * 2.6); border: calc(var(--px) * 0.8) solid var(--gold); border-radius: calc(var(--px) * 2.4); background: linear-gradient(#fff6d4, #f4e2b0); }
 .zeile.haus.alle-lichter .txt span { font-size: var(--t-mini); color: var(--text3); }
+
+/* Haus schmücken, Feinschliff (22.10.): „An" weiß, Pfeil als runder Knopf, höhere Knöpfe */
+.kipp.an, .kipp.an span { color: #fff !important; text-shadow: 0 calc(var(--px) * 0.4) 0 rgba(0, 0, 0, 0.3); }
+.hz-pfeil { width: calc(var(--px) * 11); height: calc(var(--px) * 11); display: flex; align-items: center; justify-content: center; padding: 0;
+  border-radius: 50%; background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; color: var(--rot2); font-size: var(--t-titel); line-height: 1; }
+.zeile.haus.offen .hz-pfeil { background: #fff3c4; border-color: var(--gold); }
+.varbox .vw { min-height: calc(var(--px) * 16); }
+.hz-inhalt .pw { min-height: calc(var(--px) * 15); }
+.var-kauf { min-height: calc(var(--px) * 17); padding: calc(var(--px) * 3.2) calc(var(--px) * 3); }
+/* Futterstand als EIN Balken (22.10.) */
+.futter-stand.einer { display: block; height: calc(var(--px) * 6); border-radius: calc(var(--px) * 3); background: #e8d8b8; border: calc(var(--px) * 0.6) solid #c89a5a; box-sizing: border-box; overflow: hidden; }
+.futter-stand.einer i { display: block; height: 100%; border: 0; border-radius: 0; transition: width 0.4s; }
