@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610211230';
-import * as Z from './zeit.js?v=202610211230';
-import { neueFarben } from './pixel.js?v=202610211230';
+import * as C from './config.js?v=202610220900';
+import * as Z from './zeit.js?v=202610220900';
+import { neueFarben } from './pixel.js?v=202610220900';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -316,7 +316,13 @@ export const chefAktiv = () => lauf.chefT < C.CHEF_ZEIT;
 export function spieltag() {
   if (st.startTag == null) return 99;   // alter Spielstand: volle Leistung
   if (!st.startTag) return 0;
-  return Math.max(0, Math.floor((Z.jetzt() - st.startTag) / 86400000));
+  // Kalendertage, nicht 24-h-Blöcke (22.10., gemeldet: Markt-Countdown sprang
+  // von 5 auf 6). Vorher wechselte der Spieltag erst zur Uhrzeit des ersten
+  // Starts - morgens hing er einen Tag hinterher, und der Markt-Countdown
+  // übersprang den nächsten Termin. Gerundet wegen der Sommerzeit-Umstellung.
+  const a = new Date(st.startTag); a.setHours(0, 0, 0, 0);
+  const b = new Date(Z.jetzt()); b.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.round((b - a) / 86400000));
 }
 const nachTag = (liste) => liste[Math.min(liste.length - 1, spieltag())];
 
@@ -1633,6 +1639,9 @@ function marktStand() {
   // konnte auch Tag 2 sein. Alte Spielstände (spieltag 99): heute.
   const sp = spieltag();
   if (!st.markt) st.markt = { anker: tagNr() - (sp < 99 ? sp : 0), seed: Math.floor(Math.random() * 1e6), besucht: 0, angesagt: 0 };
+  // Anker immer aus dem ersten Spieltag (22.10.): Wer den Markt früher morgens
+  // vor der Startuhrzeit zum ersten Mal abfragte, hatte ihn einen Tag zu spät
+  else if (sp < 99) st.markt.anker = tagNr() - sp;
   return st.markt;
 }
 /** Ist an Tag `d` Markt? Erster Markt MARKT_ERST Tage nach dem Anker, dann alle 3-4 Tage. */
