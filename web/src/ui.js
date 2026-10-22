@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610220900';
-import * as S from './spiel.js?v=202610220900';
-import * as Z from './zeit.js?v=202610220900';
-import * as T from './ton.js?v=202610220900';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610220900';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610220900';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610220900';
-import * as A from './auftraege.js?v=202610220900';
-import * as E from './erfolge.js?v=202610220900';
-import * as ZL from './ziele.js?v=202610220900';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610220900';
-import * as KA from './karte.js?v=202610220900';
-import { zeigeRueckblick } from './ereignis.js?v=202610220900';
-import { barbaraZweig } from './szene.js?v=202610220900';
-import * as SW from './schneeball.js?v=202610220900';
-import * as LI from './lichtung.js?v=202610220900';
-import * as CB from './christbaum.js?v=202610220900';
-import * as SB from './schlitten.js?v=202610220900';
-import * as EB from './schlittschuh.js?v=202610220900';
-import * as BS from './backstube.js?v=202610220900';
-import { alleSymbole } from './symbole.js?v=202610220900';
+import * as C from './config.js?v=202610221000';
+import * as S from './spiel.js?v=202610221000';
+import * as Z from './zeit.js?v=202610221000';
+import * as T from './ton.js?v=202610221000';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610221000';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221000';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221000';
+import * as A from './auftraege.js?v=202610221000';
+import * as E from './erfolge.js?v=202610221000';
+import * as ZL from './ziele.js?v=202610221000';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221000';
+import * as KA from './karte.js?v=202610221000';
+import { zeigeRueckblick } from './ereignis.js?v=202610221000';
+import { barbaraZweig } from './szene.js?v=202610221000';
+import * as SW from './schneeball.js?v=202610221000';
+import * as LI from './lichtung.js?v=202610221000';
+import * as CB from './christbaum.js?v=202610221000';
+import * as SB from './schlitten.js?v=202610221000';
+import * as EB from './schlittschuh.js?v=202610221000';
+import * as BS from './backstube.js?v=202610221000';
+import { alleSymbole } from './symbole.js?v=202610221000';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -773,140 +773,215 @@ function geschenke() {
  * zuletzt das Geschenkte nach Herkunft. Reihenfolge innerhalb eines Ortes
  * wie im Laden.
  */
-const HAUS_ORTE = [['haus', 'Am Haus'], ['garten', 'Im Garten'], ['stand', 'Am Stand']];
+/*
+ * Umbau 22.10. (UI/UX-Durchsicht, gemeldet: „recht unübersichtlich"). Voll
+ * gekauft waren es 49 Karten, ~230 Knöpfe und 6-7 Bildschirme auf EINER Seite,
+ * Einstellen und Einkaufen gemischt, zwei goldene Markierungen je Karte.
+ * Jetzt:
+ *  - echte Reiter (Haus · Garten · Stand · Lichter · Geschenkt), immer nur einer sichtbar
+ *  - je Teil EINE kompakte Zeile: Bild, fester Name, gewählte Variante klein,
+ *    rechts ein Kippschalter An/Aus; Antippen klappt Farbe/Varianten auf (nur eine offen)
+ *  - Varianten: Gekauftes nur als Auswahl (Gold = gewählt), Ungekauftes als EIN
+ *    ruhiger Knopf „+ Variante …“ mit Preis; kein „???“ mehr
+ *  - die reinen Lichterketten im eigenen Reiter, oben „Alle Lichter: Aus/Weiß/Bunt“
+ */
+const HAUS_ORTE = [['haus', 'Am Haus', 'Haus'], ['garten', 'Im Garten', 'Garten'], ['stand', 'Am Stand', 'Stand']];
+// Reine Lichter (eigener Reiter). Schornstein-Schmuck, Winterkranz und Lichter-Rentier
+// sind Dinge MIT Lichtern und bleiben an ihrem Ort.
+const NUR_LICHT = new Set(['lichter_dach', 'lichter_fenster', 'lichter_zaun', 'eiszapfen', 'festbeleuchtung', 'lichtershow', 'tanne_lichter', 'baum_girlande', 'lichterbogen', 'standlicht']);
+let hausReiter = 'haus';
+let hausOffen = null;   // id der aufgeklappten Zeile
+const hatTeil = (a) => S.stufe(a.id) > 0;
+function hausReiterListe() {
+  const anstriche = C.ARTIKEL.filter((a) => a.wahl === 'fassade' && hatTeil(a));
+  const reiter = [];
+  for (const [id, ort, kurz] of HAUS_ORTE) {
+    const teile = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => S.istDeko(a) && a.gruppe === ort && hatTeil(a) && !NUR_LICHT.has(a.id)));
+    if (teile.length || (id === 'haus' && anstriche.length)) reiter.push({ id, kurz, teile, anstriche: id === 'haus' ? anstriche : [] });
+  }
+  const lichter = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => NUR_LICHT.has(a.id) && hatTeil(a)));
+  if (lichter.length) reiter.push({ id: 'lichter', kurz: 'Lichter', teile: lichter, anstriche: [] });
+  const gesch = geschenke();
+  if (gesch.length) reiter.push({ id: 'geschenkt', kurz: 'Geschenkt', gesch });
+  return reiter;
+}
 function baueHaus(behalteScroll) {
   const liste = $('#blattInhalt');
   const pos = liste.scrollTop;
   liste.innerHTML = '';
-  const neu = S.st.neu || {};
-  const hat = (a) => S.stufe(a.id) > 0;
-  const sprung = el('div', 'haus-sprung');
-  liste.appendChild(sprung);
-  const ziele = [];
-  const abschnitt = (id, titel, kurz) => {
-    const g = el('div', 'gruppe haus-abschnitt', titel);
-    g.id = 'hs-' + id;
-    liste.appendChild(g);
-    ziele.push([id, kurz || titel]);
-  };
-
-  // Je Ort: jedes Teil einmal. Der Anstrich gehört zum Haus (11.10.) und
-  // steht als erste Karte unter „Am Haus" statt in einem eigenen Abschnitt.
-  const anstriche = C.ARTIKEL.filter((a) => a.wahl === 'fassade' && hat(a));
-  let mitVarianten = false;
-  for (const [id, ort] of HAUS_ORTE) {
-    const teile = sortiereNachFreischaltung(C.ARTIKEL.filter((a) => S.istDeko(a) && a.gruppe === ort && hat(a)));
-    if (!teile.length && !(id === 'haus' && anstriche.length)) continue;
-    abschnitt(id, ort, ort.replace(/^(Am|Im) /, ''));
-    if (id === 'haus' && anstriche.length) {
-      const z = el('div', 'zeile haus karte anstrich');
-      const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
-      zeichneIcon(cv, anstriche.find((a) => a.fassade === S.st.fassade) || anstriche[0]);
-      z.appendChild(cv);
-      const name = (anstriche.find((a) => a.fassade === S.st.fassade) || { name: 'Alter Anstrich' }).name;
-      z.appendChild(el('div', 'txt', `<b>Anstrich</b><span>${name}</span>`));
-      const werte = [{ wert: 'trist', text: 'Alt' }, ...anstriche.map((a) => ({ wert: a.fassade, text: a.name.replace(/haus$/i, '').split(' ')[0] }))];
-      const stil = Object.fromEntries(werte.map((v) => [v.wert, C.FASSADEN[v.wert].wand]));
-      const wahl = punktWahl(werte, S.st.fassade, (v) => S.setzeFassade(v), stil);
-      wahl.classList.add('anstrich-wahl');
-      z.appendChild(wahl);
-      liste.appendChild(z);
-    }
-    for (const a of teile) { liste.appendChild(hausKarte(a)); if (C.VARIANTEN[a.id]) mitVarianten = true; }
+  const reiter = hausReiterListe();
+  if (!reiter.length) {
+    liste.appendChild(el('p', 'hinweis', 'Hier stellst du später alles ein, was du gekauft hast: Lichter an, aus, weiß oder bunt, Deko ein- und ausblenden, den Anstrich wählen. Noch gibt es nichts - schau auf der KARTE in die Läden.'));
+    $('#blattGeld').textContent = S.formatGeld(S.st.geld);
+    return;
   }
-  // Geschenkt, nach Herkunft
-  const gesch = geschenke();
-  if (gesch.length) {
-    abschnitt('geschenkt', 'Geschenkt');
-    const QUELLEN = [['Aus dem Adventskalender', (d) => d.id.startsWith('kal_')], ['Aus den Minispielen', (d) => /^(l|c|s|e|g)_/.test(d.id)],
-      ['Vom Händler und vom Markt', (d) => /^(h|m)_/.test(d.id)], ['Für schwere Aufträge', () => true]];
-    const vergeben = new Set();
-    for (const [titel, passt] of QUELLEN) {
-      const teil = gesch.filter((d) => !vergeben.has(d.id) && passt(d));
-      if (!teil.length) continue;
-      liste.appendChild(el('p', 'haus-quelle', titel));
-      for (const d of teil) {
-        vergeben.add(d.id);
-        // Minispiel-Deko: aus welchem Spiel, ab welchem Rekord (wer ein neues Präfix einführt, trägt es hier ein)
-        const spiel = { l: 'Waldlichtung', c: 'Christbaumverkauf', s: 'Schlittenberg', e: 'Eisbahn', g: 'Schneeballwiese' }[d.id.split('_')[0]];
-        const ab = d.ab ? `${spiel ? spiel + ' · ' : ''}Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten` : '';
-        const z = hausZeile(liste, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab,
-          punktWahl(['aus', 'an'], S.zeigt(d.id) ? 'an' : 'aus', (v) => S.setzeDeko(d.id, v === 'an')));
-        if (!S.zeigt(d.id)) z.classList.add('ist-aus');
-        delete neu[d.id];
-      }
-    }
+  if (!reiter.some((r) => r.id === hausReiter)) hausReiter = reiter[0].id;
+  // Reiterleiste (echte Reiter, nicht mehr Sprungmarken)
+  const leiste = el('div', 'haus-sprung haus-reiter');
+  for (const r of reiter) {
+    const b = el('button', 'hs-k' + (r.id === hausReiter ? ' aktiv' : ''), r.kurz);
+    b.onclick = () => { if (hausReiter === r.id) return; T.spiele('klick'); hausReiter = r.id; hausOffen = null; baueHaus(); liste.scrollTop = 0; };
+    leiste.appendChild(b);
   }
-  // Sprungleiste (erst ab zwei Abschnitten) und der eine Satz zu den Varianten
-  if (ziele.length >= 2) for (const [id, kurz] of ziele) {
-    const b = el('button', 'hs-k', kurz);
-    b.onclick = () => { T.spiele('klick'); const z = $('#hs-' + id); if (z) liste.scrollTo({ top: z.offsetTop - sprung.offsetHeight - liste.offsetTop - 8, behavior: 'smooth' }); };
-    sprung.appendChild(b);
-  } else sprung.remove();
-  if (mitVarianten) sprung.after(el('p', 'klein var-erkl', `Manche Teile gibt es in drei Varianten - tippe eine an, um sie zu wählen oder zu kaufen (je ♥ +${C.VARIANTE_HERZEN}). Die dritte zeigt sich, wenn du die zweite hast.`));
-  if (!ziele.length) liste.appendChild(el('p', 'hinweis', 'Hier stellst du später alles ein, was du gekauft hast: Lichter an, aus, weiß oder bunt, Deko ein- und ausblenden, den Anstrich wählen. Noch gibt es nichts - schau auf der KARTE in die Läden.'));
+  liste.appendChild(leiste);
+  const r = reiter.find((x) => x.id === hausReiter);
+  if (r.id === 'geschenkt') baueGeschenkt(liste, r.gesch);
+  else {
+    if (r.id === 'lichter') liste.appendChild(alleLichter());
+    if (r.anstriche.length) liste.appendChild(anstrichZeile(r.anstriche));
+    for (const a of r.teile) liste.appendChild(hausKarte(a));
+  }
   if (behalteScroll) liste.scrollTop = pos;
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
 }
-
-/** Eine Karte in „Haus schmücken": Name, Schalter, ggf. Zaunfarbe und Varianten. */
+/** Kippschalter An/Aus (ein Knopf, sieht aus wie ein Schalter). */
+function kipp(an, setze) {
+  const b = el('button', 'kipp' + (an ? ' an' : ''), `<i></i><span>${an ? 'An' : 'Aus'}</span>`);
+  b.setAttribute('role', 'switch'); b.setAttribute('aria-checked', an ? 'true' : 'false');
+  b.onclick = (e) => { e.stopPropagation(); setze(!an); baueHaus(true); };
+  return b;
+}
+/** Grundgerüst einer Zeile: Bild, Name, Unterzeile, rechts der Schalter; antippen klappt auf. */
+function hausZeileKompakt(id, iconArtikel, name, unter, schalter, aufklapp) {
+  const offen = aufklapp && hausOffen === id;
+  const z = el('div', 'zeile haus kompakt' + (aufklapp ? ' klappbar' : '') + (offen ? ' offen' : ''));
+  const kopf = el('div', 'hz-kopf');
+  const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
+  zeichneIcon(cv, iconArtikel);
+  kopf.appendChild(cv);
+  kopf.appendChild(el('div', 'txt', `<b>${name}</b>${unter ? `<span>${unter}</span>` : ''}`));
+  if (aufklapp) kopf.appendChild(el('i', 'hz-pfeil', '▾'));
+  if (schalter) kopf.appendChild(schalter);
+  z.appendChild(kopf);
+  if (aufklapp) {
+    kopf.onclick = () => { T.spiele('klick'); hausOffen = offen ? null : id; baueHaus(true); };
+    if (offen) { const inhalt = el('div', 'hz-inhalt'); aufklapp(inhalt); z.appendChild(inhalt); }
+  }
+  return z;
+}
+function anstrichZeile(anstriche) {
+  const akt = anstriche.find((a) => a.fassade === S.st.fassade);
+  return hausZeileKompakt('anstrich', akt || anstriche[0], 'Anstrich', akt ? akt.name : 'Alter Anstrich', null, (inhalt) => {
+    const werte = [{ wert: 'trist', text: 'Alt' }, ...anstriche.map((a) => ({ wert: a.fassade, text: a.name.replace(/haus$/i, '').split(' ')[0] }))];
+    const stil = Object.fromEntries(werte.map((v) => [v.wert, C.FASSADEN[v.wert].wand]));
+    const wahl = punktWahl(werte, S.st.fassade, (v) => S.setzeFassade(v), stil);
+    wahl.classList.add('anstrich-wahl');
+    inhalt.appendChild(wahl);
+  });
+}
+/** Eine Zeile in „Haus schmücken": Name, Kippschalter, aufgeklappt Farbe, Zaunfarbe, Varianten. */
 function hausKarte(a) {
   const vs = C.VARIANTEN[a.id], aktiv = vs ? S.variante(a.id) : 0;
   const istLicht = a.id in C.LICHTER;
-  let text = vs && aktiv ? vs[aktiv].text : '', wahl, aus;
-  if (istLicht) {
-    const farbe = S.lichtKette(a.id);
-    const werte = farbe ? ['aus', 'weiss', 'bunt'] : ['aus', 'an'];
-    const noch = a.id in C.LICHT_AB_STUFE && !farbe ? 'Lichter kommen mit Stufe 2.' : a.id === 'festbeleuchtung' ? 'Immer warmweiß.' : '';
-    text = text || noch;
-    wahl = punktWahl(werte, S.lichtModus(a.id), (v) => S.setzeLicht(a.id, v));
-    aus = S.lichtModus(a.id) === 'aus';
-  } else {
-    wahl = punktWahl(['aus', 'an'], S.zeigt(a.id) ? 'an' : 'aus', (v) => S.setzeDeko(a.id, v === 'an'));
-    aus = !S.zeigt(a.id);
-  }
-  const z = el('div', 'zeile haus karte' + (aus ? ' ist-aus' : ''));
-  const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
-  zeichneIcon(cv, a);
-  z.appendChild(cv);
-  z.appendChild(el('div', 'txt', `<b>${vs && aktiv ? vs[aktiv].name : a.name}</b>${text ? `<span>${text}</span>` : ''}`));
-  z.appendChild(wahl);
-  // Die Zaunfarbe gehört zum Zaun (vorher ein eigener Abschnitt)
-  if (a.id === 'zaun' && S.stufe('zaun_braun') > 0) {
-    const zus = el('div', 'haus-zusatz', '<span>Farbe</span>');
-    zus.appendChild(punktWahl([{ wert: 'hell', text: 'Hell' }, { wert: 'braun', text: 'Braun' }],
-      S.st.zaunfarbe === 'braun' ? 'braun' : 'hell', (v) => S.setzeZaunfarbe(v), { hell: '#e2d5bb', braun: '#7a5234' }));
-    z.appendChild(zus);
-  }
-  if (vs) z.appendChild(variantenReihe(a.id));
+  const farbe = istLicht ? S.lichtKette(a.id) : null;
+  const an = istLicht ? S.lichtModus(a.id) !== 'aus' : S.zeigt(a.id);
+  const teile = [];
+  if (vs && vs[aktiv].kurz !== a.name) teile.push(vs[aktiv].kurz);   // „Holzstapel · Holzstapel“ vermeiden
+  if (farbe && an) teile.push(S.lichtModus(a.id) === 'bunt' ? 'Bunt' : 'Warmweiß');
+  else if (istLicht && a.id in C.LICHT_AB_STUFE && !farbe) teile.push('Lichter ab Stufe 2');
+  const zaunFarbe = a.id === 'zaun' && S.stufe('zaun_braun') > 0;
+  if (zaunFarbe) teile.push(S.st.zaunfarbe === 'braun' ? 'Braun' : 'Hell');
+  const schalter = kipp(an, (neu) => {
+    if (istLicht) S.setzeLicht(a.id, neu ? (farbe && S.bunt(farbe) ? 'bunt' : farbe ? 'weiss' : 'an') : 'aus');
+    else S.setzeDeko(a.id, neu);
+  });
+  const klappt = vs || farbe || zaunFarbe;
+  const z = hausZeileKompakt(a.id, a, a.name, teile.join(' · '), schalter, klappt ? (inhalt) => {
+    if (farbe) {
+      const zus = el('div', 'haus-zusatz', '<span>Farbe</span>');
+      zus.appendChild(punktWahl([{ wert: 'weiss', text: 'Weiß' }, { wert: 'bunt', text: 'Bunt' }], S.bunt(farbe) ? 'bunt' : 'weiss',
+        (v) => S.setzeLicht(a.id, v), { weiss: '#fff2cc', bunt: 'conic-gradient(#ff4a4a, #ffd040, #5aff6a, #4a8aff, #ff6adf, #ff4a4a)' }));
+      inhalt.appendChild(zus);
+    }
+    if (zaunFarbe) {
+      const zus = el('div', 'haus-zusatz', '<span>Farbe</span>');
+      zus.appendChild(punktWahl([{ wert: 'hell', text: 'Hell' }, { wert: 'braun', text: 'Braun' }],
+        S.st.zaunfarbe === 'braun' ? 'braun' : 'hell', (v) => S.setzeZaunfarbe(v), { hell: '#e2d5bb', braun: '#7a5234' }));
+      inhalt.appendChild(zus);
+    }
+    if (vs) inhalt.appendChild(variantenReihe(a.id));
+  } : null);
+  if (!an) z.classList.add('ist-aus');
   return z;
 }
-/** Die drei Varianten eines Platzes: gewählt, wählbar, kaufbar, ???. */
+/** Varianten eines Platzes: gekaufte zur Auswahl, die nächste als EIN Kaufknopf. */
 function variantenReihe(pl) {
   const vs = C.VARIANTEN[pl], aktiv = S.variante(pl);
+  const box = el('div', 'varbox');
   const reihe = el('div', 'varwahl');
+  let kaufen = null, spaeter = false;
   vs.forEach((v, i) => {
     const st = S.varianteStatus(pl, i);
-    let cls = 'vw', inhalt;
-    if (st.hat) { cls += i === aktiv ? ' aktiv' : ''; inhalt = `<b>${v.kurz}</b><small>${i === aktiv ? 'gewählt' : 'wählen'}</small>`; }
-    else if (st.versteckt) { cls += ' zu'; inhalt = '<b>???</b><small>erst Nr. 2</small>'; }
-    else { cls += st.leisten ? ' kauf' : ' teuer'; inhalt = `<b>${v.kurz}</b><small>★ ${S.formatGeld(st.kosten).replace(' Sterne', '')}</small>`; }
-    const b = el('button', cls, inhalt);
-    b.onclick = () => {
-      if (st.hat) {
+    if (st.hat) {
+      const b = el('button', 'vw' + (i === aktiv ? ' aktiv' : ''), `<b>${v.kurz}</b>`);
+      b.onclick = () => {
+        if (i === aktiv) return;
         S.waehleVariante(pl, i);
         if (!S.zeigt(pl)) S.setzeDeko(pl, true);   // eine Variante wählen heißt: zeigen
-        baueHaus(true); zeigeVariante(pl); return;
-      }
-      if (st.versteckt) { T.spiele('falsch'); toast('Die dritte Variante zeigt sich, wenn du die zweite hast.', 'hinweis'); return; }
+        baueHaus(true); zeigeVariante(pl);
+      };
+      reihe.appendChild(b);
+    } else if (st.versteckt) spaeter = true;
+    else if (!kaufen) kaufen = { v, i, st };
+  });
+  box.appendChild(reihe);
+  if (kaufen) {
+    const { v, i, st } = kaufen;
+    const b = el('button', 'var-kauf' + (st.leisten ? '' : ' teuer'), `<span>+ Variante: <b>${v.kurz}</b></span><small>★ ${S.formatGeld(st.kosten).replace(' Sterne', '')} · ♥ +${C.VARIANTE_HERZEN}</small>`);
+    b.onclick = () => {
       if (!S.kaufeVariante(pl, i)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
       if (!S.zeigt(pl)) S.setzeDeko(pl, true);
       toast(`${v.name} gekauft! ♥ +${C.VARIANTE_HERZEN}`, 'gut');
       baueHaus(true); zeigeVariante(pl, `+${C.VARIANTE_HERZEN} ♥`);
     };
-    reihe.appendChild(b);
-  });
-  return reihe;
+    box.appendChild(b);
+  }
+  if (spaeter) box.appendChild(el('p', 'var-spaeter', 'Die 3. Variante gibt es, sobald du die 2. hast.'));
+  return box;
+}
+/** Oben im Reiter „Lichter": alle auf einmal aus, warmweiß oder bunt. */
+function alleLichter() {
+  const ids = Object.keys(C.LICHTER).filter((id) => S.stufe(id) > 0);
+  const modi = ids.map((id) => S.lichtModus(id));
+  const alle = modi.every((m) => m === 'aus') ? 'aus'
+    : ids.every((id, k) => modi[k] !== 'aus' && (!S.lichtKette(id) || modi[k] === 'bunt')) ? 'bunt'
+    : ids.every((id, k) => modi[k] !== 'aus' && (!S.lichtKette(id) || modi[k] === 'weiss')) ? 'weiss' : null;
+  const z = el('div', 'zeile haus alle-lichter');
+  z.appendChild(el('div', 'txt', '<b>Alle Lichter</b><span>gilt für jede Kette am Haus, im Garten und am Stand</span>'));
+  z.appendChild(punktWahl(['aus', 'weiss', 'bunt'], alle, (v) => {
+    // direkt in den Stand statt über setzeLicht - sonst klickt es zehnmal gleichzeitig
+    S.st.aus = S.st.aus || {}; S.st.bunt = S.st.bunt || {};
+    for (const id of ids) {
+      S.st.aus[id] = v === 'aus';
+      const k = S.lichtKette(id);
+      if (k && v !== 'aus') S.st.bunt[k] = v === 'bunt';
+    }
+    T.spiele('klick'); S.speichere();
+  }));
+  return z;
+}
+/** Reiter „Geschenkt": nach Herkunft, je Teil eine Zeile mit Kippschalter. */
+function baueGeschenkt(liste, gesch) {
+  const neu = S.st.neu || {};
+  const QUELLEN = [['Aus dem Adventskalender', (d) => d.id.startsWith('kal_')], ['Aus den Minispielen', (d) => /^(l|c|s|e|g)_/.test(d.id)],
+    ['Vom Händler und vom Markt', (d) => /^(h|m)_/.test(d.id)], ['Für schwere Aufträge', () => true]];
+  const vergeben = new Set();
+  for (const [titel, passt] of QUELLEN) {
+    const teil = gesch.filter((d) => !vergeben.has(d.id) && passt(d));
+    if (!teil.length) continue;
+    liste.appendChild(el('p', 'haus-quelle', titel));
+    for (const d of teil) {
+      vergeben.add(d.id);
+      // Minispiel-Deko: aus welchem Spiel, ab welchem Rekord (wer ein neues Präfix einführt, trägt es hier ein)
+      const spiel = { l: 'Waldlichtung', c: 'Christbaumverkauf', s: 'Schlittenberg', e: 'Eisbahn', g: 'Schneeballwiese' }[d.id.split('_')[0]];
+      const ab = d.ab ? `${spiel ? spiel + ' · ' : ''}Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten` : '';
+      const an = S.zeigt(d.id);
+      const z = hausZeileKompakt(d.id, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab, kipp(an, (v) => S.setzeDeko(d.id, v)), null);
+      if (!an) z.classList.add('ist-aus');
+      liste.appendChild(z);
+      delete neu[d.id];
+    }
+  }
 }
 
 function freiSchluessel(a) {

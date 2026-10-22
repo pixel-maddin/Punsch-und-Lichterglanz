@@ -1255,3 +1255,45 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   #blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 14.5); }
   #blatt[data-art="menue"] .neustart { margin-top: calc(var(--px) * 3.5); padding-top: calc(var(--px) * 3); }
 }
+
+/* „Haus schmücken" neu (22.10.): echte Reiter, kompakte Zeilen mit Kippschalter,
+   Varianten aufklappbar, Kaufen als eigener ruhiger Knopf */
+.haus-reiter .hs-k { padding: calc(var(--px) * 2.6) 0; font-size: var(--t-mini); }
+.haus-reiter .hs-k.aktiv { background: linear-gradient(#fff6d4, #f4e2b0); color: var(--rot2); box-shadow: inset 0 calc(var(--px) * -1) 0 var(--gold); }
+.zeile.haus.kompakt { display: block; padding: 0; }
+.hz-kopf { display: flex; align-items: center; gap: calc(var(--px) * 2.6); padding: calc(var(--px) * 2.2) calc(var(--px) * 0.5); min-height: calc(var(--px) * 18); }
+.zeile.haus.klappbar .hz-kopf { cursor: pointer; }
+.zeile.haus.klappbar .hz-kopf:active { background: rgba(232, 176, 48, 0.12); }
+.zeile.haus.kompakt .txt b { font-size: var(--t-text); }
+.zeile.haus.kompakt .txt span { font-size: var(--t-mini); color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hz-pfeil { flex: none; font-style: normal; color: var(--text3); font-size: var(--t-gross); padding: 0 calc(var(--px) * 1); transition: transform 0.15s; }
+.zeile.haus.offen .hz-pfeil { transform: rotate(180deg); color: var(--rot2); }
+.zeile.haus.offen { background: rgba(255, 246, 212, 0.65); border-radius: calc(var(--px) * 2); }
+.hz-inhalt { padding: 0 calc(var(--px) * 1.5) calc(var(--px) * 3); display: flex; flex-direction: column; gap: calc(var(--px) * 2.4); }
+.hz-inhalt .haus-zusatz { margin: 0; }
+.hz-inhalt .anstrich-wahl { margin: 0; }
+/* Kippschalter */
+.kipp { flex: none; appearance: none; cursor: pointer; display: flex; align-items: center; gap: calc(var(--px) * 1.4);
+  padding: calc(var(--px) * 1) calc(var(--px) * 2) calc(var(--px) * 1) calc(var(--px) * 1);
+  min-height: calc(var(--px) * 13); border-radius: calc(var(--px) * 7); border: calc(var(--px) * 0.6) solid #b89a70;
+  background: #d8ccb8; color: #5a4a3a; font: 800 var(--t-mini) var(--schrift); }
+.kipp i { width: calc(var(--px) * 9); height: calc(var(--px) * 9); border-radius: 50%; background: #fff; box-shadow: 0 calc(var(--px) * 0.6) 0 rgba(0, 0, 0, 0.25); }
+.kipp span { min-width: calc(var(--px) * 9); text-align: center; }
+.kipp.an { flex-direction: row-reverse; padding: calc(var(--px) * 1) calc(var(--px) * 1) calc(var(--px) * 1) calc(var(--px) * 2); background: #4e9a48; border-color: var(--gruen2); color: #fff; }
+.kipp:active { transform: scale(0.94); }
+.zeile.haus.ist-aus .hz-kopf .ico, .zeile.haus.ist-aus .hz-kopf .txt { opacity: 0.45; }
+.zeile.haus.ist-aus .varwahl { opacity: 1; }
+/* Varianten */
+.varbox { display: flex; flex-direction: column; gap: calc(var(--px) * 1.8); }
+.varbox .varwahl { margin: 0; }
+.varbox .vw { min-height: calc(var(--px) * 12); }
+.var-kauf { appearance: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: calc(var(--px) * 2);
+  padding: calc(var(--px) * 2.2) calc(var(--px) * 3); border-radius: calc(var(--px) * 2.4);
+  border: calc(var(--px) * 0.6) dashed var(--gruen); background: #eef6e4; color: var(--gruen2); font: 600 var(--t-klein) var(--schrift); }
+.var-kauf small { font: 800 var(--t-mini) var(--schrift); white-space: nowrap; }
+.var-kauf.teuer { border-color: #b8a88a; background: #efe6d4; color: #8a7a62; }
+.var-kauf:active { transform: scale(0.97); }
+.var-spaeter { margin: 0; font-size: var(--t-mini); color: var(--text3); }
+/* Alle Lichter */
+.zeile.haus.alle-lichter { margin: calc(var(--px) * 1.5) 0 calc(var(--px) * 1); padding: calc(var(--px) * 2.4) calc(var(--px) * 2.6); border: calc(var(--px) * 0.8) solid var(--gold); border-radius: calc(var(--px) * 2.4); background: linear-gradient(#fff6d4, #f4e2b0); }
+.zeile.haus.alle-lichter .txt span { font-size: var(--t-mini); color: var(--text3); }
