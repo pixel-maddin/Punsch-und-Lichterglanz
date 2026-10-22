@@ -931,6 +931,7 @@ export const WETTER_LAGEN = {
 // Tag nach dem Dank. Ab dem zweiten Spieltag, höchstens BRIEF_MAX je Saison.
 export const BRIEF_AB_TAG = 3;   // 11.10.: Einstieg in Wellen (vorher 1)
 export const BRIEF_MAX = 10;
+export const BRIEF_WECHSEL = 3;          // gelesen und so viele Tage nicht erfüllt: neuer Brief (22.10.)
 export const BRIEF_BACKEN = 5;            // so viele Plätzchen wünscht sich das Back-Kind
 export const BRIEF_LOHN_MINUTEN = 4;      // Dank: so viele Minuten Einnahmen …
 export const BRIEF_LOHN_MIN = 200;        // … mindestens so viele Sterne

@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610221000';
-import * as S from './spiel.js?v=202610221000';
-import * as Z from './zeit.js?v=202610221000';
+import * as C from './config.js?v=202610221100';
+import * as S from './spiel.js?v=202610221100';
+import * as Z from './zeit.js?v=202610221100';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -68,7 +68,8 @@ export function fertig(a) { return a.stand >= a.ziel; }
 export function abholbar() {
   if (S.st.lernen < 99) return 0;
   const b = bitte();
-  return heute().filter((a) => fertig(a) && !a.abgeholt).length + (b && bitteFertig(b) && !b.abgeholt ? 1 : 0);
+  const brief = S.st.briefe && S.st.briefe.aktiv;   // Dankeschön im Briefkasten zählt mit (22.10.)
+  return heute().filter((a) => fertig(a) && !a.abgeholt).length + (b && bitteFertig(b) && !b.abgeholt ? 1 : 0) + (brief && brief.dank ? 1 : 0);
 }
 
 // ---------------------------------------------------------------------------

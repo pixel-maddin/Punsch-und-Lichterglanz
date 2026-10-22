@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610221000';
-import * as S from './spiel.js?v=202610221000';
-import * as Z from './zeit.js?v=202610221000';
-import * as T from './ton.js?v=202610221000';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610221000';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221000';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221000';
-import * as A from './auftraege.js?v=202610221000';
-import * as E from './erfolge.js?v=202610221000';
-import * as ZL from './ziele.js?v=202610221000';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221000';
-import * as KA from './karte.js?v=202610221000';
-import { zeigeRueckblick } from './ereignis.js?v=202610221000';
-import { barbaraZweig } from './szene.js?v=202610221000';
-import * as SW from './schneeball.js?v=202610221000';
-import * as LI from './lichtung.js?v=202610221000';
-import * as CB from './christbaum.js?v=202610221000';
-import * as SB from './schlitten.js?v=202610221000';
-import * as EB from './schlittschuh.js?v=202610221000';
-import * as BS from './backstube.js?v=202610221000';
-import { alleSymbole } from './symbole.js?v=202610221000';
+import * as C from './config.js?v=202610221100';
+import * as S from './spiel.js?v=202610221100';
+import * as Z from './zeit.js?v=202610221100';
+import * as T from './ton.js?v=202610221100';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x } from './pixel.js?v=202610221100';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221100';
+import * as A from './auftraege.js?v=202610221100';
+import * as E from './erfolge.js?v=202610221100';
+import * as ZL from './ziele.js?v=202610221100';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221100';
+import * as KA from './karte.js?v=202610221100';
+import { zeigeRueckblick } from './ereignis.js?v=202610221100';
+import { barbaraZweig } from './szene.js?v=202610221100';
+import * as SW from './schneeball.js?v=202610221100';
+import * as LI from './lichtung.js?v=202610221100';
+import * as CB from './christbaum.js?v=202610221100';
+import * as SB from './schlitten.js?v=202610221100';
+import * as EB from './schlittschuh.js?v=202610221100';
+import * as BS from './backstube.js?v=202610221100';
+import { alleSymbole } from './symbole.js?v=202610221100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1523,6 +1523,25 @@ function bitteKarte() {
   z.querySelector('.bitte-knopf').appendChild(k);
   return z;
 }
+/**
+ * Der offene Wunschzettel unter Aufträge (22.10., gemeldet: „bis zum 16.12. kein
+ * Brief"). Der Brief steckte nur im Briefkasten am Haus - einmal gelesen, war der
+ * Wunsch nirgends mehr zu sehen, und solange er offen war, kam kein neuer.
+ */
+function wunschKarte() {
+  const b = S.briefe().aktiv;
+  if (!b) return null;
+  const z = el('div', 'bitte-zettel wunsch-zettel' + (b.dank ? ' fertig' : ''));
+  const status = b.dank ? `Erfüllt! ${b.kind} hat dir ein Dankeschön in den Briefkasten gelegt.`
+    : b.offen ? 'Ungelesen - der Brief steckt im Briefkasten am Haus.' : 'Noch offen. Kein Zeitdruck.';
+  z.innerHTML = `<div class="bitte-kopf"><div class="mitte"><b>Brief von ${esc(b.kind)} (${b.alter})</b>
+      <span class="bitte-text">${b.offen && !b.dank ? 'Ein Brief für dich!' : `„${wunschText(b).replace(/<\/?b>/g, '')}“`}</span></div></div>
+    <div class="bitte-fuss"><div class="bitte-knopf"><small>${status}</small></div></div>`;
+  const k = el('button', 'k' + (b.dank ? ' k--kauf' : ' k--neben'), b.dank ? 'Abholen' : b.offen ? 'Lesen' : 'Nochmal lesen');
+  k.onclick = () => { T.spiele('klick'); schliesseBlatt(); zeigeBrief(); };
+  z.querySelector('.bitte-knopf').appendChild(k);
+  return z;
+}
 /** Kleines Porträt für den Zettel: die Straßenfigur (16 x 24), per Scale2x 32 x 48. */
 function maleStammKlein(cv, id) {
   const k = document.createElement('canvas'); k.width = 16; k.height = 24;
@@ -1567,6 +1586,8 @@ export function oeffneAuftraege(reiter) {
   liste.appendChild(rufKarte());
   const bk = bitteKarte();
   if (bk) { liste.appendChild(el('p', 'aufgaben-titel', 'Bitte eines Stammgasts')); liste.appendChild(bk); }
+  const wk = wunschKarte();
+  if (wk) { liste.appendChild(el('p', 'aufgaben-titel', 'Wunschzettel')); liste.appendChild(wk); }
   liste.appendChild(el('p', 'aufgaben-titel', 'Tagesaufträge'));
   const stufenName = ['leicht', 'mittel', 'schwer'];
   A.heute().forEach((a, i) => {

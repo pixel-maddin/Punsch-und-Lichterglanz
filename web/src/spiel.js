@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610221000';
-import * as Z from './zeit.js?v=202610221000';
-import { neueFarben } from './pixel.js?v=202610221000';
+import * as C from './config.js?v=202610221100';
+import * as Z from './zeit.js?v=202610221100';
+import { neueFarben } from './pixel.js?v=202610221100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2106,7 +2106,11 @@ export function briefPruefen() {
   const B = briefe();
   if (B.aktiv) {
     if (!B.aktiv.dank && briefErfuellt(B.aktiv)) { B.aktiv.dank = true; B.aktiv.offen = true; speichere(); return 'dank'; }
-    return null;
+    // Gelesen und seit BRIEF_WECHSEL Tagen nicht erfüllt (22.10.): Das Kind hat
+    // sich etwas anderes überlegt, es kommt ein neuer Brief. Vorher blockierte ein
+    // offener Wunsch für immer, und es kam bis Heiligabend kein Brief mehr.
+    if (B.aktiv.dank || B.aktiv.offen || tagNr() - B.aktiv.tag < C.BRIEF_WECHSEL) return null;
+    B.aktiv = null; B.n = Math.max(0, B.n - 1);
   }
   if (B.n >= C.BRIEF_MAX || tagNr() < B.ab) return null;
   const k = wunschKandidaten();
