@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610221400';
-import * as S from './spiel.js?v=202610221400';
-import * as Z from './zeit.js?v=202610221400';
-import * as T from './ton.js?v=202610221400';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610221400';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221400';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221400';
-import * as A from './auftraege.js?v=202610221400';
-import * as E from './erfolge.js?v=202610221400';
-import * as ZL from './ziele.js?v=202610221400';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221400';
-import * as KA from './karte.js?v=202610221400';
-import { zeigeRueckblick } from './ereignis.js?v=202610221400';
-import { barbaraZweig } from './szene.js?v=202610221400';
-import * as SW from './schneeball.js?v=202610221400';
-import * as LI from './lichtung.js?v=202610221400';
-import * as CB from './christbaum.js?v=202610221400';
-import * as SB from './schlitten.js?v=202610221400';
-import * as EB from './schlittschuh.js?v=202610221400';
-import * as BS from './backstube.js?v=202610221400';
-import { alleSymbole } from './symbole.js?v=202610221400';
+import * as C from './config.js?v=202610221500';
+import * as S from './spiel.js?v=202610221500';
+import * as Z from './zeit.js?v=202610221500';
+import * as T from './ton.js?v=202610221500';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610221500';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221500';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221500';
+import * as A from './auftraege.js?v=202610221500';
+import * as E from './erfolge.js?v=202610221500';
+import * as ZL from './ziele.js?v=202610221500';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221500';
+import * as KA from './karte.js?v=202610221500';
+import { zeigeRueckblick } from './ereignis.js?v=202610221500';
+import { barbaraZweig } from './szene.js?v=202610221500';
+import * as SW from './schneeball.js?v=202610221500';
+import * as LI from './lichtung.js?v=202610221500';
+import * as CB from './christbaum.js?v=202610221500';
+import * as SB from './schlitten.js?v=202610221500';
+import * as EB from './schlittschuh.js?v=202610221500';
+import * as BS from './backstube.js?v=202610221500';
+import { alleSymbole } from './symbole.js?v=202610221500';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -334,6 +334,7 @@ function amOrt(o) {
   if (o.tab) { oeffneLaden(o.tab); return; }
   if (o.spiel === 'lichtung') { zeigeLichtung(); return; }
   if (o.spiel === 'baum') { zeigeBaumspiel(); return; }
+  if (o.id === 'baumschule') { zeigeBaumschule(); return; }
   if (o.spiel === 'berg') { zeigeBergspiel(); return; }
   if (o.spiel === 'eis') { zeigeEisbahn(); return; }
   if (o.spiel === 'back') { zeigeBackstube(); return; }
@@ -443,7 +444,7 @@ function zeigeBaumspiel() {
     <p class="klein">${C.BAUM_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
     <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>
     ${S.baumschule().ware.length ? `<p class="bonus">${S.baumschule().ware.length} eigene ${S.baumschule().ware.length === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft bringt ${S.baumschule().ware.length === 1 ? 'er' : 'jeder'} ×3!</p>` : ''}`,
-  [{ text: 'Baumschule', neben: true, aktion: () => { setTimeout(zeigeBaumschule, 60); } }], 'baum', starteBaumspiel);
+  [{ text: 'Später', neben: true }], 'baum', starteBaumspiel);
 }
 export function starteBaumspiel(stufeNr = 1) {
   CB.starte(spielHoehe(), (punkte, n, eigene = []) => {
@@ -471,7 +472,7 @@ export function zeigeBaumschule() {
       if (!S.duenge()) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return false; }
       toast('Gedüngt - heute ein ordentlicher Schub!', 'gut'); neu(); return false;
     } },
-    { text: 'Zurück', neben: true, aktion: () => { setTimeout(zeigeBaumspiel, 60); } }]);
+    { text: 'Schließen', neben: true }]);
   const cv = box.querySelector('canvas'), c = cv.getContext('2d');
   const [kGiessen, kDuengen] = box.querySelectorAll('.k');
   const beete = box.querySelector('.beete'), text = box.querySelector('.bs-text');

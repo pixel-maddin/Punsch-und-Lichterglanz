@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610221400';
-import * as Z from './zeit.js?v=202610221400';
-import { neueFarben } from './pixel.js?v=202610221400';
+import * as C from './config.js?v=202610221500';
+import * as Z from './zeit.js?v=202610221500';
+import { neueFarben } from './pixel.js?v=202610221500';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -355,7 +355,7 @@ export function ortOffen(o) {
   const z = st.lernen >= 99 ? st.ziel || 0 : -1;
   const karte = !!(st.tipps && st.tipps.karte_mehr);
   if (o.spiel) return karte && miniOffen(o.spiel);
-  return { haus: true, super: true, dorf: z >= 1, wichtel: z >= 2, bau: z >= 5, festplatz: karte }[o.id] ?? true;
+  return { haus: true, super: true, dorf: z >= 1, wichtel: z >= 2, bau: z >= 5, festplatz: karte, baumschule: karte && miniOffen('baum') }[o.id] ?? true;
 }
 export const offlineAnteil = () => nachTag(C.OFFLINE_JE_TAG.anteil);
 export const offlineStunden = () => nachTag(C.OFFLINE_JE_TAG.stunden);

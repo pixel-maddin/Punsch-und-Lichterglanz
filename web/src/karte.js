@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610221400';
-import * as S from './spiel.js?v=202610221400';
-import * as Z from './zeit.js?v=202610221400';
-import * as FEIN from './fein.js?v=202610221400';
-import * as T from './ton.js?v=202610221400';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610221400';
+import * as C from './config.js?v=202610221500';
+import * as S from './spiel.js?v=202610221500';
+import * as Z from './zeit.js?v=202610221500';
+import * as FEIN from './fein.js?v=202610221500';
+import * as T from './ton.js?v=202610221500';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610221500';
 
 const $ = (s) => document.querySelector(s);
 
@@ -32,7 +32,8 @@ export const ORTE = [
   { id: 'dorf',      name: 'Weihnachtsladen', x: 90,  y: 0.17, tab: 'markt' },
   { id: 'festplatz', name: 'Festplatz',       x: 30,  y: 0.19, markt: true },
   { id: 'baeume',    name: 'Christbaumverkauf', x: 150, y: 0.21, spiel: 'baum' },
-  { id: 'super',     name: 'Supermarkt',      x: 34,  y: 0.445, tab: 'super' },   // 13.10. tiefer (0,40): stand zu dicht an der Backstube
+  { id: 'super',     name: 'Supermarkt',      x: 34,  y: 0.415, tab: 'super' },   // 22.10. wieder etwas höher (0,445): darunter liegt jetzt die Baumschule
+  { id: 'baumschule', name: 'Baumschule',     x: 22,  y: 0.545 },   // 22.10.: eigener Ort, vorher ein Knopf im Christbaumverkauf
   { id: 'bau',       name: 'Baumarkt',        x: 148, y: 0.41, tab: 'baumarkt' },
   { id: 'haus',      name: 'Zuhause',         x: 88,  y: 0.55 },
   { id: 'lichtung',  name: 'Waldlichtung',    x: 30,  y: 0.75, spiel: 'lichtung' },
@@ -159,7 +160,7 @@ function baueSchilder(hervor) {
     const [sdx, sdy] = o.schild || [0, 0];
     b.style.left = `calc(var(--px) * ${o.x + sdx})`;
     b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy + vers()})`;
-    const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : o.spiel === 'baum' && S.baumschuleTun() ? 1 : 0;   // Baumschule: gießen oder ernten (22.10.)
+    const n = o.tab ? C.ARTIKEL.filter((a) => a.tab === o.tab && neu[a.id]).length : o.id === 'baumschule' && S.baumschuleTun() ? 1 : 0;   // Baumschule: gießen oder ernten (22.10.)
     let unter = o.bald ? 'bald' : o.spiel ? 'Minispiel' : '';
     // Noch nie gespielt: kleines NEU am Schild
     const nieGespielt = o.spiel && !S.miniRekord(o.spiel);
@@ -289,6 +290,7 @@ function wege() {
     [P('dorf'), P('baeume'), [122, 0.15 * H]],
     [P('haus'), P('super'), [58, 0.53 * H]],
     [P('super'), P('festplatz'), [22, 0.3 * H]],
+    [P('super'), P('baumschule'), [20, 0.48 * H]],
     [P('haus'), P('bau'), [128, 0.55 * H]],
     [P('haus'), P('wichtel'), [104, 0.7 * H]],
     [P('wichtel'), P('lichtung'), [56, 0.86 * H]],
@@ -748,6 +750,31 @@ function marktPlatz(x, y, P, winter) {
   r(c, x - 17, y - 16, 1, 5, '#5a3a22'); r(c, x + 17, y - 16, 1, 5, '#5a3a22');
 }
 
+/** Baumschule (22.10.): kleines umzäuntes Feld mit Beeten und jungen Tannen, Gießkanne. */
+function baumschuleOrt(x, y, P, winter) {
+  schattenOval(x, y + 3, 28);
+  const erde = winter ? '#dce6ee' : '#8a6440', furche = winter ? '#c4d0dc' : '#6a4a2c';
+  r(c, x - 13, y - 9, 26, 12, erde);
+  // zwei Beetreihen mit Furchen
+  for (const fy of [y - 5, y + 1]) { r(c, x - 12, fy + 1, 24, 1, furche); r(c, x - 12, fy - 3, 24, 1, ton(erde, 0.08)); }
+  // junge Tannen klein und ordentlich in Reihen (verschieden groß = verschieden alt)
+  const setzling = (bx, by, h) => {
+    p(c, bx, by, '#4a2e1a');
+    for (let i = 0; i < h; i++) { const w = Math.floor((i + 1) / 2); r(c, bx - w, by - h + i, w, 1, P.nadel[2]); r(c, bx, by - h + i, w + 1, 1, P.nadel[1]); }
+    if (P.schnee) p(c, bx, by - h, P.schnee);
+  };
+  [[-9, 3], [-4, 4], [1, 2], [6, 5], [11, 3]].forEach(([dx, h]) => setzling(x + dx, y - 5, h));
+  [[-7, 5], [-2, 3], [3, 6], [8, 4]].forEach(([dx, h]) => setzling(x + dx, y + 1, h));
+  // kleines Schild
+  r(c, x - 16, y - 7, 1, 5, '#6a4a2a'); r(c, x - 18, y - 9, 5, 3, '#c8a070'); p(c, x - 16, y - 8, '#3a8a3a');
+  // Gießkanne vorn rechts
+  r(c, x + 12, y + 3, 4, 3, '#3a8ad8'); p(c, x + 16, y + 3, '#3a8ad8'); p(c, x + 17, y + 2, '#3a8ad8'); r(c, x + 12, y + 2, 1, 1, '#2a6ab0');
+  // Lattenzaun ringsum (vorne und an den Seiten)
+  for (let i = -14; i <= 14; i += 3) r(c, x + i, y + 2, 1, 3, '#8a6a42');
+  r(c, x - 14, y + 3, 29, 1, '#a8845a');
+  r(c, x - 14, y - 10, 1, 14, '#8a6a42'); r(c, x + 14, y - 10, 1, 14, '#8a6a42');
+  if (winter) { r(c, x - 14, y + 2, 29, 1, '#ffffff'); }
+}
 function christbaeume(x, y, P, winter) {
   schattenOval(x, y + 3, 38);
   r(c, x - 18, y - 13, 36, 16, winter ? '#e4ecf2' : '#a8946a');
@@ -936,7 +963,7 @@ function backstube(x, y, P, winter) {
   for (const [dx, dy] of [[0, 0], [1, -1], [2, 0], [2, 1], [1, 1], [0, 1]]) p(c, x + 10 + dx, y - 6 + dy, '#c8902c');
   if (winter) r(c, x - 9, y - 1, 18, 1, '#ffffff');
 }
-const ZEICHNER = { backstube, schnee: schneewiese, eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
+const ZEICHNER = { baumschule: baumschuleOrt, backstube, schnee: schneewiese, eis: eisbahn, dorf, festplatz, baeume: christbaeume, super: supermarkt, bau: baumarkt, haus: zuhause, lichtung, wichtel: wichtelwald, berg };
 
 // ---------------------------------------------------------------------------
 // Je Bild: was sich bewegt
