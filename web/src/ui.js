@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610221500';
-import * as S from './spiel.js?v=202610221500';
-import * as Z from './zeit.js?v=202610221500';
-import * as T from './ton.js?v=202610221500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610221500';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221500';
-import * as A from './auftraege.js?v=202610221500';
-import * as E from './erfolge.js?v=202610221500';
-import * as ZL from './ziele.js?v=202610221500';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221500';
-import * as KA from './karte.js?v=202610221500';
-import { zeigeRueckblick } from './ereignis.js?v=202610221500';
-import { barbaraZweig } from './szene.js?v=202610221500';
-import * as SW from './schneeball.js?v=202610221500';
-import * as LI from './lichtung.js?v=202610221500';
-import * as CB from './christbaum.js?v=202610221500';
-import * as SB from './schlitten.js?v=202610221500';
-import * as EB from './schlittschuh.js?v=202610221500';
-import * as BS from './backstube.js?v=202610221500';
-import { alleSymbole } from './symbole.js?v=202610221500';
+import * as C from './config.js?v=202610221530';
+import * as S from './spiel.js?v=202610221530';
+import * as Z from './zeit.js?v=202610221530';
+import * as T from './ton.js?v=202610221530';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610221530';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221530';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221530';
+import * as A from './auftraege.js?v=202610221530';
+import * as E from './erfolge.js?v=202610221530';
+import * as ZL from './ziele.js?v=202610221530';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221530';
+import * as KA from './karte.js?v=202610221530';
+import { zeigeRueckblick } from './ereignis.js?v=202610221530';
+import { barbaraZweig } from './szene.js?v=202610221530';
+import * as SW from './schneeball.js?v=202610221530';
+import * as LI from './lichtung.js?v=202610221530';
+import * as CB from './christbaum.js?v=202610221530';
+import * as SB from './schlitten.js?v=202610221530';
+import * as EB from './schlittschuh.js?v=202610221530';
+import * as BS from './backstube.js?v=202610221530';
+import { alleSymbole } from './symbole.js?v=202610221530';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -347,7 +347,7 @@ function amOrt(o) {
  * nach). Einmal je Spiel, aus main.js, wenn gerade nichts offen ist.
  */
 const MINI_NEU_TEXT = {
-  baum: 'Am <b>Christbaumverkauf</b> wollen Kunden ihren Baum: richtig aussuchen, sägen, ins Netz und aufs Autodach.',
+  baum: 'Am <b>Christbaumverkauf</b> wollen Kunden ihren Baum: richtig aussuchen, sägen, ins Netz und aufs Autodach. Gleich daneben aufgemacht: die <b>Baumschule</b> - dort ziehst du eigene Tannen für den Verkauf.',
   back: 'In der <b>Backstube</b> stichst du Plätzchen aus, backst sie goldbraun und verzierst sie. Was du bäckst, kommt in die Plätzchendose auf deinem Stand.',
   eis: 'Auf der <b>Eisbahn</b> drehst du deine Runden - mit Sprüngen und Tricks.',
   berg: 'Am <b>Schlittenberg</b> saust du im Wok den Hang hinunter, sammelst Sterne und weichst Tannen und Steinen aus.',
@@ -463,6 +463,7 @@ const BS_W = 132, BS_H = 64, BEET_X = [18, 50, 82, 114], BEET_Y = 54;
 const SORTE_KURZ = { nordmann: 'Nordmann', blau: 'Blaufichte', fichte: 'Fichte' };
 export function zeigeBaumschule() {
   const box = fenster('Baumschule', `
+    <p class="bs-intro">Hier ziehst du <b>Tannen für deinen Christbaumverkauf</b>. Fertige Bäume erntest du - im Verkauf stehen sie dann golden und bringen <b>×3 Punkte</b>.</p>
     <canvas class="futter-szene baumschule-szene" width="${BS_W}" height="${BS_H}"></canvas>
     <div class="beete"></div>
     <p class="klein bs-text"></p>`,

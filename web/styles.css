@@ -1320,3 +1320,4 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .beet-wahl { display: grid; grid-template-columns: 1fr; gap: calc(var(--px) * 1); }
 .beet-balken { height: calc(var(--px) * 3); border-radius: calc(var(--px) * 1.5); background: #e8d8b8; overflow: hidden; }
 .beet-balken i { display: block; height: 100%; background: linear-gradient(#7ac25a, #4e9a48); }
+.bs-intro { margin: 0 0 calc(var(--px) * 2); font-size: var(--t-klein); text-align: center; }
