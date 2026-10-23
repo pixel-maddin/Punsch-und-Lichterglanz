@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610231330';
-import * as S from './spiel.js?v=202610231330';
-import * as Z from './zeit.js?v=202610231330';
-import * as T from './ton.js?v=202610231330';
-import * as LI from './lichtung.js?v=202610231330';
-import * as CB from './christbaum.js?v=202610231330';
-import * as KA from './karte.js?v=202610231330';
-import * as SB from './schlitten.js?v=202610231330';
-import * as EB from './schlittschuh.js?v=202610231330';
-import * as BS from './backstube.js?v=202610231330';
-import * as UI from './ui.js?v=202610231330';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610231330';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610231330';
-import * as Kacheln from './kacheln.js?v=202610231330';
-import * as Lernen from './lernen.js?v=202610231330';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610231330';
-import * as A from './auftraege.js?v=202610231330';
-import * as E from './erfolge.js?v=202610231330';
-import * as ZL from './ziele.js?v=202610231330';
+import * as C from './config.js?v=202610231400';
+import * as S from './spiel.js?v=202610231400';
+import * as Z from './zeit.js?v=202610231400';
+import * as T from './ton.js?v=202610231400';
+import * as LI from './lichtung.js?v=202610231400';
+import * as CB from './christbaum.js?v=202610231400';
+import * as KA from './karte.js?v=202610231400';
+import * as SB from './schlitten.js?v=202610231400';
+import * as EB from './schlittschuh.js?v=202610231400';
+import * as BS from './backstube.js?v=202610231400';
+import * as UI from './ui.js?v=202610231400';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610231400';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610231400';
+import * as Kacheln from './kacheln.js?v=202610231400';
+import * as Lernen from './lernen.js?v=202610231400';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610231400';
+import * as A from './auftraege.js?v=202610231400';
+import * as E from './erfolge.js?v=202610231400';
+import * as ZL from './ziele.js?v=202610231400';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -153,7 +153,13 @@ cv.addEventListener('pointerdown', (e) => {
       return;
     }
     // Der Briefkasten neben der Tür (Wunschzettel, 10.10.)
-    if (x >= 82 && x <= 98 && y >= GW - 47 && y <= GW - 32 && S.briefDa()) { T.spiele('klick'); UI.zeigeBrief(); return; }
+    // 23.10.: Auch ohne Brief antippbar - dann ein kurzer Hinweis statt nichts
+    if (x >= 82 && x <= 98 && y >= GW - 47 && y <= GW - 32) {
+      T.spiele('klick');
+      if (S.briefDa()) UI.zeigeBrief();
+      else UI.toast(S.briefe().aktiv ? 'Gerade kein neuer Brief - den offenen Wunschzettel findest du unter Aufträge.' : 'Der Briefkasten ist gerade leer. Ab und zu steckt ein Brief von den Kindern aus dem Dorf drin!', 'hinweis');
+      return;
+    }
     // 19.10.: Ein Tipp aufs Haus öffnet nicht mehr „Haus schmücken" (dafür gibt es den
     // Knopf „Haus" oben links) - das Haus ist frei für Überraschungen wie die Schneekatze
     return;
