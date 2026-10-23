@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610231200';
-import * as S from './spiel.js?v=202610231200';
-import * as Z from './zeit.js?v=202610231200';
-import * as T from './ton.js?v=202610231200';
-import * as LI from './lichtung.js?v=202610231200';
-import * as CB from './christbaum.js?v=202610231200';
-import * as KA from './karte.js?v=202610231200';
-import * as SB from './schlitten.js?v=202610231200';
-import * as EB from './schlittschuh.js?v=202610231200';
-import * as BS from './backstube.js?v=202610231200';
-import * as UI from './ui.js?v=202610231200';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610231200';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610231200';
-import * as Kacheln from './kacheln.js?v=202610231200';
-import * as Lernen from './lernen.js?v=202610231200';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610231200';
-import * as A from './auftraege.js?v=202610231200';
-import * as E from './erfolge.js?v=202610231200';
-import * as ZL from './ziele.js?v=202610231200';
+import * as C from './config.js?v=202610231330';
+import * as S from './spiel.js?v=202610231330';
+import * as Z from './zeit.js?v=202610231330';
+import * as T from './ton.js?v=202610231330';
+import * as LI from './lichtung.js?v=202610231330';
+import * as CB from './christbaum.js?v=202610231330';
+import * as KA from './karte.js?v=202610231330';
+import * as SB from './schlitten.js?v=202610231330';
+import * as EB from './schlittschuh.js?v=202610231330';
+import * as BS from './backstube.js?v=202610231330';
+import * as UI from './ui.js?v=202610231330';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610231330';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610231330';
+import * as Kacheln from './kacheln.js?v=202610231330';
+import * as Lernen from './lernen.js?v=202610231330';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610231330';
+import * as A from './auftraege.js?v=202610231330';
+import * as E from './erfolge.js?v=202610231330';
+import * as ZL from './ziele.js?v=202610231330';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -255,19 +255,49 @@ function ankommen(erstesMal) {
   const tueren = S.offeneTueren();
   if (tueren > 0 && !erstesMal) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
   S.speichere();
-  const zeige = () => {
-    const m = meldungen.shift();
-    if (!m) return;
-    if (m[0] === 'advent') zeigeAdvent(m[1], zeige);
-    else if (m[0] === 'heiligabend') zeigeHeiligabend(zeige);
-    else if (m[0] === 'wettbewerb') { if (S.wettbewerbFaellig()) zeigeWettbewerb(zeige); else zeige(); }
-    else if (m[0] === 'silvester') { if (S.silvesterFaellig()) zeigeSilvester(zeige); else zeige(); }
-    else if (m[0] === 'schnee') zeigeErsterSchnee(zeige);
-    else if (m[0] === 'kiste') UI.zeigeKiste(m[1], () => setTimeout(zeige, 60));
-    else UI.fenster(m[0], m[1], [{ text: 'Weiter', aktion: () => { setTimeout(zeige, 60); } }]);
-  };
-  zeige();
+  // Schon Wartendes nicht doppelt (Kiste, Ereignisse)
+  for (const m of meldungen) if (!warteschlange.some((w) => w[0] === m[0] && w[1] === m[1])) warteschlange.push(m);
+  zeigeNaechste(true);
   return meldungen;
+}
+
+// ---------------------------------------------------------------------------
+// Fenster in Wellen (23.10., Betatest: am 1.12. morgens kamen acht Fenster
+// hintereinander - Kiste, Futterhaus, zwei neue Minispiele, erster Schnee,
+// Vogel, zwei Stammgäste). Höchstens WELLE_MAX Fenster nacheinander, dann
+// WELLE_PAUSE Ruhe; was noch wartet (Ankommen-Fenster, Vogel-Steckbrief,
+// Stammgast-Geschichte, neues Minispiel, Fragen), kommt in der nächsten Welle.
+// Gezählt wird jedes Fenster, das aufgeht - auch eines, das man selbst öffnet.
+// ---------------------------------------------------------------------------
+const WELLE_MAX = 3, WELLE_PAUSE = 45000;
+let welleZahl = 0, zuletztOffen = 0, warOffen = false;
+const warteschlange = [];
+function fensterTakt() {
+  const offen = UI.fensterOffen();
+  if (offen && !warOffen) { if (Date.now() - zuletztOffen > WELLE_PAUSE) welleZahl = 0; welleZahl++; }
+  if (offen) zuletztOffen = Date.now();
+  warOffen = offen;
+}
+/** Darf jetzt ein nicht angefordertes Fenster aufgehen? */
+const fensterFrei = () => !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()
+  && (welleZahl < WELLE_MAX || Date.now() - zuletztOffen > WELLE_PAUSE);
+/** Das nächste Ankommen-Fenster. `kette` = direkt nach dem vorigen (dann nur, solange die Welle nicht voll ist). */
+function zeigeNaechste(kette) {
+  if (!warteschlange.length) return;
+  fensterTakt();
+  if (kette && welleZahl >= WELLE_MAX) return;   // Rest später (Sekundentakt)
+  const m = warteschlange.shift();
+  const weiter = () => setTimeout(() => zeigeNaechste(true), 60);
+  if (m[0] === 'advent') zeigeAdvent(m[1], weiter);
+  else if (m[0] === 'heiligabend') { if (S.heiligabendFaellig()) zeigeHeiligabend(weiter); else zeigeNaechste(kette); }
+  else if (m[0] === 'wettbewerb') { if (S.wettbewerbFaellig()) zeigeWettbewerb(weiter); else zeigeNaechste(kette); }
+  else if (m[0] === 'silvester') { if (S.silvesterFaellig()) zeigeSilvester(weiter); else zeigeNaechste(kette); }
+  else if (m[0] === 'schnee') zeigeErsterSchnee(weiter);
+  // Kiste nur, wenn noch etwas drin ist: Ankommen läuft beim Laden und beim
+  // Sichtbarwerden der Seite, die ungeöffnete Kiste stand dann zweimal in der Schlange
+  else if (m[0] === 'kiste') { if (S.st.kiste > 0) UI.zeigeKiste(m[1], weiter); else zeigeNaechste(kette); }
+  else UI.fenster(m[0], m[1], [{ text: 'Weiter', aktion: weiter }]);
+  fensterTakt();   // gleich mitzählen, nicht erst im nächsten Bild
 }
 
 // ---------------------------------------------------------------------------
@@ -281,6 +311,7 @@ function frame(jetzt) {
   letzte = jetzt;
   // Während Laden, Kalender, ein Fenster oder eine Hinweisblase offen ist, steht
   // der Stand still - sonst liefen einem beim Stöbern die Gäste davon.
+  fensterTakt();
   const steht = UI.fensterOffen() || !!UI.panelOffen() || querFormat.matches || Lernen.pausiert();
   // Pause heißt ALLES steht, auch Schnee, Funken und Gehbewegungen: Die hängen
   // an der Zeichen-Uhr tSek, die lief vorher weiter (gemeldet 30.09.)
@@ -347,12 +378,17 @@ setInterval(() => {
   else { const brief = S.briefPruefen(); if (brief) UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'); }
   // Ein neues Minispiel ist auf der Karte: eigenes Fenster, sobald nichts offen ist
   const miniNeu = S.pruefeMiniFrei();
-  // Neue Vogelart am Futterhaus (14.10.): Steckbrief, sobald nichts offen ist
-  if (S.st.vogelNeu && S.st.vogelNeu.length && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { UI.zeigeVogel(S.st.vogelNeu.shift()); S.speichere(); }
+  // Ab hier je Sekunde höchstens EIN Fenster, und nur, wenn die Welle es zulässt (23.10.)
+  fensterTakt();
+  // Was beim Ankommen wegen der Welle liegen blieb, zuerst
+  if (warteschlange.length && fensterFrei()) zeigeNaechste(false);
+  // Neue Vogelart am Futterhaus (14.10.): Steckbrief
+  else if (S.st.vogelNeu && S.st.vogelNeu.length && fensterFrei()) { UI.zeigeVogel(S.st.vogelNeu.shift()); S.speichere(); }
   // Geschichte eines Stammgastes (17.10.): großes Fenster, hält das Spiel an
-  else if (S.st.stammNeu && S.st.stammNeu.length && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { const f = S.naechstesStammFenster(); if (f) UI.zeigeStamm(f); S.speichere(); }
+  else if (S.st.stammNeu && S.st.stammNeu.length && fensterFrei()) { const f = S.naechstesStammFenster(); if (f) UI.zeigeStamm(f); S.speichere(); }
   // erst nach einer Minute im Spiel - beim Ankommen kommen Kiste, Wetter und Briefe zuerst
-  if (miniNeu.length && S.lauf.t > 60 && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { UI.zeigeMiniNeu(miniNeu.shift()); S.speichere(); }
+  else if (miniNeu.length && S.lauf.t > 60 && fensterFrei()) { UI.zeigeMiniNeu(miniNeu.shift()); S.speichere(); }
+  fensterTakt();
   // Neu Freigeschaltetes: während der Startziele nur die NEU-Marken (sonst
   // kamen in den ersten Minuten ~15 Einblendungen), danach höchstens eine
   // Einblendung je Minute, mehrere zusammengefasst
@@ -365,7 +401,7 @@ setInterval(() => {
   } else if (!S.startzieleFertig()) neuGesammelt = [];
   // iPhone im Browser: einmal der Tipp zum Home-Bildschirm (12.10.) - nach
   // den Startzielen und eineinhalb ruhigen Minuten, nie über etwas anderem
-  if (!S.st.installTipp && UI.iosImBrowser() && S.startzieleFertig() && S.lauf.t > 90 && S.nachStartRuhe()
+  if (!S.st.installTipp && UI.iosImBrowser() && S.startzieleFertig() && S.lauf.t > 90 && S.nachStartRuhe() && fensterFrei()
       && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) UI.zeigeInstallTipp();
   // Kirchenglocken zur vollen Stunde (nicht im Minispiel - dort läuft dessen Welt)
   const gl = S.glockenFaellig();
@@ -393,7 +429,7 @@ setInterval(() => {
   }
   UI.zielLeiste();
   // Nach den Startzielen einmal fragen: weiter Ziele vorgeschlagen bekommen oder selbst erkunden?
-  if (ZL.fertig() && S.st.zieleWeiter == null && S.st.lernen >= 99 && S.lauf.t > 20 && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) UI.zeigeZieleFrage();
+  if (ZL.fertig() && S.st.zieleWeiter == null && S.st.lernen >= 99 && S.lauf.t > 20 && fensterFrei()) UI.zeigeZieleFrage();
   const erfolge = E.pruefe();
   // Socken aus der Einführung kamen still dazu - nach den Startzielen einmal sagen (13.10.)
   if (erfolge.length && !S.startzieleFertig()) S.st.sockenStill = (S.st.sockenStill || 0) + erfolge.length;
