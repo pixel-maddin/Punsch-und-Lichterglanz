@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610230930';
-import * as S from './spiel.js?v=202610230930';
-import * as Z from './zeit.js?v=202610230930';
-import * as T from './ton.js?v=202610230930';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610230930';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610230930';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610230930';
-import * as A from './auftraege.js?v=202610230930';
-import * as E from './erfolge.js?v=202610230930';
-import * as ZL from './ziele.js?v=202610230930';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610230930';
-import * as KA from './karte.js?v=202610230930';
-import { zeigeRueckblick } from './ereignis.js?v=202610230930';
-import { barbaraZweig } from './szene.js?v=202610230930';
-import * as SW from './schneeball.js?v=202610230930';
-import * as LI from './lichtung.js?v=202610230930';
-import * as CB from './christbaum.js?v=202610230930';
-import * as SB from './schlitten.js?v=202610230930';
-import * as EB from './schlittschuh.js?v=202610230930';
-import * as BS from './backstube.js?v=202610230930';
-import { alleSymbole } from './symbole.js?v=202610230930';
+import * as C from './config.js?v=202610231200';
+import * as S from './spiel.js?v=202610231200';
+import * as Z from './zeit.js?v=202610231200';
+import * as T from './ton.js?v=202610231200';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610231200';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610231200';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610231200';
+import * as A from './auftraege.js?v=202610231200';
+import * as E from './erfolge.js?v=202610231200';
+import * as ZL from './ziele.js?v=202610231200';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610231200';
+import * as KA from './karte.js?v=202610231200';
+import { zeigeRueckblick } from './ereignis.js?v=202610231200';
+import { barbaraZweig } from './szene.js?v=202610231200';
+import * as SW from './schneeball.js?v=202610231200';
+import * as LI from './lichtung.js?v=202610231200';
+import * as CB from './christbaum.js?v=202610231200';
+import * as SB from './schlitten.js?v=202610231200';
+import * as EB from './schlittschuh.js?v=202610231200';
+import * as BS from './backstube.js?v=202610231200';
+import { alleSymbole } from './symbole.js?v=202610231200';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -496,8 +496,10 @@ export function zeigeBaumschule() {
         const w = S.beetWachs(b), st = ['Setzling', 'klein', 'mittel', 'fertig'][S.beetStufe(b)];
         karte.innerHTML = `<b>${SORTE_KURZ[b.art]}</b><span>${st} · ${Math.round(w * 100)} %</span><div class="beet-balken"><i style="width:${Math.round(w * 100)}%"></i></div>`;
         if (w >= 1) {
-          const k = el('button', 'k k--kauf', 'Ernten');
-          k.disabled = B.ware.length >= C.BAUMSCHULE_WARE_MAX;
+          // Lager voll (23.10., Betatest): sagen, warum es nicht geht
+          const voll = B.ware.length >= C.BAUMSCHULE_WARE_MAX;
+          const k = el('button', 'k k--kauf', voll ? 'Erst verkaufen' : 'Ernten');
+          k.disabled = voll;
           k.onclick = () => { if (S.ernte(i)) toast(`${SORTE_KURZ[b.art]} geerntet - steht jetzt golden im Christbaumverkauf (×3)!`, 'gut'); neu(); };
           karte.appendChild(k);
         }
@@ -512,7 +514,8 @@ export function zeigeBaumschule() {
     kDuengen.textContent = S.kannDuengen() ? `Düngen · ★ ${S.formatGeld(S.duengerPreis()).replace(' Sterne', '')}` : B.geduengt !== S.heuteNr() && erstMorgen ? 'Düngen ab morgen' : 'Düngen';
     const ware = B.ware.length;
     text.innerHTML = `Ohne Pflege brauchen die Bäume ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, wenn du jeden Tag gießt 3, mit Gießen und Düngen 2. Gießen und Düngen gehen ab dem Tag nach dem Pflanzen. Nichts verdorrt.`
-      + (ware ? ` <b>${ware} geerntete${ware === 1 ? 'r Baum wartet' : ' Bäume warten'} im Verkauf.</b>` : '');
+      + (ware ? ` <b>${ware} geerntete${ware === 1 ? 'r Baum wartet' : ' Bäume warten'} im Verkauf.</b>` : '')
+      + (ware >= C.BAUMSCHULE_WARE_MAX ? ` Mehr als ${C.BAUMSCHULE_WARE_MAX} passen nicht ins Lager - verkauf sie erst im Christbaumverkauf (ein goldener Baum je Kunde).` : '');
   }
   neu();
   cv.onclick = (e) => {
@@ -2503,7 +2506,7 @@ export function zeigeHilfe() {
     <p>Wer zügig hintereinander bedient, baut <b>Schwung</b> auf (bis ×1,40). Wer länger bleibt, bekommt Besuch von ganzen Gruppen - und manchmal von jemand ganz Besonderem.</p>
     <p>Mit den Sternen kaufst du Deko, Farbe, Zutaten und Wichtel. Je gemütlicher das Haus, desto mehr Gäste kommen und desto mehr zahlen sie.</p>
     <p>Oben links schmückst du mit <b>Haus</b> dein Haus (Lichter, Farben, Varianten). Oben rechts stellst du mit <b>Angebot</b> zusammen, welche Sorten dein Stand anbietet - höchstens ${C.ANGEBOT_MAX}. Schnelle Sorten bringen weniger je Glas, langsame mehr.</p>
-    <p>Auf der <b>Karte</b> warten Läden, Minispiele (zuerst nur die Waldlichtung, alle paar Tage kommt ein neues dazu) und alle paar Tage der Weihnachtsmarkt.${S.miniOffen('back') ? ' Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr.' : ''} Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an. Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
+    <p>Auf der <b>Karte</b> warten Läden, Minispiele (zuerst nur die Waldlichtung, alle paar Tage kommt ein neues dazu) und alle paar Tage der Weihnachtsmarkt.${S.miniOffen('back') ? ' Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr.' : ''} Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an - offene Wunschzettel stehen auch unter Aufträge.${S.baumschuleOffen() ? ' In der <b>Baumschule</b> ziehst du eigene Tannen für den Christbaumverkauf.' : ''}${S.hat('futterhaus') ? ' Das <b>Futterhaus</b> im Baum antippen: nachfüllen und Vögel beobachten.' : ''} Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
     <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.${S.aufsicht() ? ' Deine Wichtel bedienen normale Gäste jetzt allein - du kümmerst dich um die <b>goldenen Gäste</b>: Sie drängeln vor und zahlen viel mehr.' : ''}</p>
     <p><b>Ruf:</b> Jeden Tag, an dem du ein bisschen mitarbeitest, steigt der Ruf deines Standes - und alle Preise mit. Wie weit du heute bist, steht unter Aufträge.</p>
     <p class="klein">Das Spiel läuft mit deiner echten Uhr: Nachts ist es dunkel, ab dem 1. Dezember liegt Schnee und jeden Tag geht ein Türchen auf.</p>`);

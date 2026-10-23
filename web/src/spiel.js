@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610230930';
-import * as Z from './zeit.js?v=202610230930';
-import { neueFarben } from './pixel.js?v=202610230930';
+import * as C from './config.js?v=202610231200';
+import * as Z from './zeit.js?v=202610231200';
+import { neueFarben } from './pixel.js?v=202610231200';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2204,7 +2204,8 @@ export function eigeneVerkauft(arten) {
   if (arten.length) { st.stats.eigeneBaeume = (st.stats.eigeneBaeume || 0) + arten.length; speichere(); }
 }
 /** Gibt es in der Baumschule etwas zu tun? (Punkt auf der Karte) */
-export const baumschuleTun = () => baumschuleOffen() && (kannGiessen() || baumschule().beete.some((b) => b && beetWachs(b) >= 1) || (baumschule().beete.some((b) => !b) && st.stats.baumschule == null));
+// Ernten zählt nur, wenn im Lager Platz ist (23.10., Betatest: bei vollem Lager leuchtete der Punkt für immer)
+export const baumschuleTun = () => baumschuleOffen() && (kannGiessen() || (baumschule().ware.length < C.BAUMSCHULE_WARE_MAX && baumschule().beete.some((b) => b && beetWachs(b) >= 1)) || (baumschule().beete.some((b) => !b) && st.stats.baumschule == null));
 /**
  * Eichhörnchen (einmal am Tag gewürfelt): versteckt sich in einem halbwegs
  * großen Baum und lugt ab und zu hervor. Rückgabe Beet-Index oder -1.

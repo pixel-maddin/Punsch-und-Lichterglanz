@@ -69,7 +69,10 @@ Wichtel schauen nur zu.
 Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst höchstens 3 Stunden
 Arbeit - wer mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
 
-**Haus schmücken:** Knopf „Haus" oben links. Jeder Deko-Platz hat drei
+**Haus schmücken:** Knopf „Haus" oben links, mit den Reitern Haus, Garten,
+Stand, Lichter und Geschenke. Jedes Teil hat einen Schalter An/Aus; antippen
+klappt Farbe und Varianten auf. Unter „Lichter" stellt man alle Ketten auf
+einmal aus, warmweiß oder bunt. Jeder Deko-Platz hat drei
 Varianten - die Tanne kann eine Riesentanne oder eine Palme werden, auf dem
 Dach warten Rentiere oder ein steckengebliebener Nikolaus, am Stand spielt
 eine Blaskapelle oder der Elvis-Wichtel. Die dritte Variante zeigt sich erst,
@@ -153,10 +156,17 @@ schneller - spätestens am 14.12. ist alles offen.
 **Christbaumverkauf (Minispiel):** Kunden fahren vor und wollen einen
 bestimmten Baum - Größe und Sorte (Nordmanntanne, Blaufichte, Fichte) stehen
 in der Sprechblase. Den richtigen Baum dreimal antippen zum Sägen, dreimal ins
-Netz, dann aufs Autodach. 60 Sekunden; je schneller, desto mehr Punkte, und
+Netz, dann aufs Autodach. 70 Sekunden; je schneller, desto mehr Punkte, und
 fehlerfreie Kunden hintereinander geben eine Kette bis ×3. Sterne für die
-ersten drei Runden am Tag, Rekord, und ab 900, 1.700 und 2.700 Punkten:
+ersten drei Runden am Tag, Rekord, und ab bestimmten Rekorden Deko:
 Riesenkugeln im Baum, ein Bäumchen auf dem Dachfirst und ein Lichterwald.
+
+**Baumschule:** eigener Ort auf der Karte, unter dem Supermarkt, offen ab dem
+Christbaumverkauf. Vier Beete für eigene Tannen (Nordmann, Blaufichte, Fichte).
+Sie wachsen von selbst in 6 Tagen, wer jeden Tag gießt, braucht 3, mit Gießen und
+Düngen 2. Gießen und Düngen gehen ab dem Tag nach dem Pflanzen, nichts verdorrt.
+Fertige Bäume erntet man - im Christbaumverkauf stehen sie dann golden im Feld
+und bringen ×3 Punkte. Manchmal versteckt sich ein Eichhörnchen in einem Baum.
 
 **Schlittenberg (Minispiel):** Im Wok den Berg hinunter! Daumen aufs Bild
 legen und seitlich ziehen - der Wok folgt. Tannen, Steinen, Schneemännern und
