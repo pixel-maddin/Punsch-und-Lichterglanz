@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610221530';
-import * as S from './spiel.js?v=202610221530';
-import * as Z from './zeit.js?v=202610221530';
-import * as T from './ton.js?v=202610221530';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610221530';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610221530';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610221530';
-import * as A from './auftraege.js?v=202610221530';
-import * as E from './erfolge.js?v=202610221530';
-import * as ZL from './ziele.js?v=202610221530';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610221530';
-import * as KA from './karte.js?v=202610221530';
-import { zeigeRueckblick } from './ereignis.js?v=202610221530';
-import { barbaraZweig } from './szene.js?v=202610221530';
-import * as SW from './schneeball.js?v=202610221530';
-import * as LI from './lichtung.js?v=202610221530';
-import * as CB from './christbaum.js?v=202610221530';
-import * as SB from './schlitten.js?v=202610221530';
-import * as EB from './schlittschuh.js?v=202610221530';
-import * as BS from './backstube.js?v=202610221530';
-import { alleSymbole } from './symbole.js?v=202610221530';
+import * as C from './config.js?v=202610230900';
+import * as S from './spiel.js?v=202610230900';
+import * as Z from './zeit.js?v=202610230900';
+import * as T from './ton.js?v=202610230900';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610230900';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610230900';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610230900';
+import * as A from './auftraege.js?v=202610230900';
+import * as E from './erfolge.js?v=202610230900';
+import * as ZL from './ziele.js?v=202610230900';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610230900';
+import * as KA from './karte.js?v=202610230900';
+import { zeigeRueckblick } from './ereignis.js?v=202610230900';
+import { barbaraZweig } from './szene.js?v=202610230900';
+import * as SW from './schneeball.js?v=202610230900';
+import * as LI from './lichtung.js?v=202610230900';
+import * as CB from './christbaum.js?v=202610230900';
+import * as SB from './schlitten.js?v=202610230900';
+import * as EB from './schlittschuh.js?v=202610230900';
+import * as BS from './backstube.js?v=202610230900';
+import { alleSymbole } from './symbole.js?v=202610230900';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -505,11 +505,13 @@ export function zeigeBaumschule() {
       beete.appendChild(karte);
     });
     kGiessen.disabled = !S.kannGiessen();
-    kGiessen.textContent = B.gegossen === S.heuteNr() ? 'Heute gegossen' : 'Gießen';
+    // Nur frisch Gepflanztes da (23.10.): gießen und düngen erst morgen
+    const erstMorgen = S.heuteGepflanzt();
+    kGiessen.textContent = B.gegossen === S.heuteNr() ? 'Heute gegossen' : !S.kannGiessen() && erstMorgen ? 'Gießen ab morgen' : 'Gießen';
     kDuengen.disabled = !S.kannDuengen();
-    kDuengen.textContent = S.kannDuengen() ? `Düngen · ★ ${S.formatGeld(S.duengerPreis()).replace(' Sterne', '')}` : 'Düngen';
+    kDuengen.textContent = S.kannDuengen() ? `Düngen · ★ ${S.formatGeld(S.duengerPreis()).replace(' Sterne', '')}` : B.geduengt !== S.heuteNr() && erstMorgen ? 'Düngen ab morgen' : 'Düngen';
     const ware = B.ware.length;
-    text.innerHTML = `Ohne Pflege brauchen die Bäume ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, mit Gießen und Düngen jeden Tag etwa 2. Nichts verdorrt.`
+    text.innerHTML = `Ohne Pflege brauchen die Bäume ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, wenn du jeden Tag gießt 3, mit Gießen und Düngen 2. Gießen und Düngen gehen ab dem Tag nach dem Pflanzen. Nichts verdorrt.`
       + (ware ? ` <b>${ware} geerntete${ware === 1 ? 'r Baum wartet' : ' Bäume warten'} im Verkauf.</b>` : '');
   }
   neu();

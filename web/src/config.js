@@ -862,12 +862,13 @@ export const LICHTUNG_DEKO = [
 ];
 // Minispiel Christbaumverkauf (09.10.): 60 s, Kunden wollen einen bestimmten
 // Baum (Sorte und Größe). Fällen (3x tippen), einnetzen (3x), aufs Autodach.
-export const BAUM_DAUER = 60;
-// Baumschule (22.10.): 4 Beete, ohne Pflege 4 Tage, mit täglich Gießen + Düngen etwa 2 Tage
+export const BAUM_DAUER = 70;   // 23.10.: 60 → 70 s (Nutzerwunsch)
+// Baumschule (22.10., 23.10. neu eingestellt): 4 Beete. Ohne Pflege 6 Tage, mit täglich Gießen 3,
+// mit Gießen und Düngen 2. Gießen und Düngen erst ab dem Tag nach dem Pflanzen.
 export const BAUMSCHULE_BEETE = 4;
-export const BAUMSCHULE_JE_TAG = 0.25;        // Wachstum je Kalendertag von selbst
-export const BAUMSCHULE_GIESSEN = 0.25;       // einmal am Tag, für alle Beete
-export const BAUMSCHULE_DUENGER = 0.25;       // einmal am Tag, kostet Sterne
+export const BAUMSCHULE_JE_TAG = 1 / 6;       // Wachstum je Kalendertag von selbst
+export const BAUMSCHULE_GIESSEN = 1 / 6;      // einmal am Tag, für alle Beete
+export const BAUMSCHULE_DUENGER = 1 / 6;      // einmal am Tag, kostet Sterne
 export const BAUMSCHULE_DUENGER_MIN_MINUTEN = 2;   // Düngerpreis: so viele Minuten Einnahmen …
 export const BAUMSCHULE_DUENGER_MIN = 150;    // … mindestens
 export const BAUMSCHULE_WARE_MAX = 6;         // so viele geerntete Bäume warten höchstens aufs Minispiel

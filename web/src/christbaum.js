@@ -24,12 +24,12 @@
  * Drehung, das Auto federt ein, ein Gurt schnappt zu.
  * Dazu eigene Bäume aus der Baumschule (`eigen`): golden markiert, ×3 Punkte.
  */
-import * as C from './config.js?v=202610221530';
-import * as Z from './zeit.js?v=202610221530';
-import * as T from './ton.js?v=202610221530';
-import * as MH from './minihud.js?v=202610221530';
-import * as L from './licht.js?v=202610221530';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610221530';
+import * as C from './config.js?v=202610230900';
+import * as Z from './zeit.js?v=202610230900';
+import * as T from './ton.js?v=202610230900';
+import * as MH from './minihud.js?v=202610230900';
+import * as L from './licht.js?v=202610230900';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610230900';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -397,7 +397,15 @@ export function baumBild(art, gr, winter, netz = false, eigen = false) {
     if (netz && i % 3 === 1) { P(px - w, yy, '#e0dcd0'); P(px + w, yy, '#e0dcd0'); }
   }
   P(px, py - h, winter ? '#ffffff' : f[1]); P(px, py - h + 1, f[1]);
-  if (eigen) { P(px, py - h - 1, '#ffe060'); P(px - 1, py - h, '#ffe060'); P(px + 1, py - h, '#ffe060'); P(px, py - h - 2, '#fff6c0'); x.fillStyle = '#c82828'; x.fillRect(px - 1, py - 5, 3, 1); }
+  if (eigen) {
+    P(px, py - h - 1, '#ffe060'); P(px - 1, py - h, '#ffe060'); P(px + 1, py - h, '#ffe060'); P(px, py - h - 2, '#fff6c0'); x.fillStyle = '#c82828'; x.fillRect(px - 1, py - 5, 3, 1);
+    // Goldene Kontur rundum (23.10., gemeldet: „leuchten zu wenig, erkennt man kaum")
+    const bild = x.getImageData(0, 0, bw, bh), d = bild.data;
+    const voll = (xx, yy) => xx >= 0 && yy >= 0 && xx < bw && yy < bh && d[(yy * bw + xx) * 4 + 3] > 0;
+    const rand = [];
+    for (let yy = 0; yy < bh; yy++) for (let xx = 0; xx < bw; xx++) if (!voll(xx, yy) && (voll(xx - 1, yy) || voll(xx + 1, yy) || voll(xx, yy - 1) || voll(xx, yy + 1))) rand.push([xx, yy]);
+    for (const [xx, yy] of rand) P(xx, yy, (xx + yy) % 3 ? '#ffd040' : '#fff2a0');
+  }
   b = { cv: k, px, py };
   bilder.set(schl, b);
   return b;
@@ -678,7 +686,19 @@ function zeichne(t) {
     if (an) L.schein(c, x, y, 4, RGB[i % 4], 0.06 + 0.16 * nachts);
   }
   // Eigener Baum: goldener Schein, damit man ihn auch im Arbeitslicht findet
-  for (const b of g.baeume) if (b.eigen && !b.weg && b.wachs >= 1) L.schein(c, b.x, b.y - HOEHE[b.gr] / 2, 16, '255,214,90', 0.22 + 0.08 * Math.sin(t * 3));
+  for (const b of g.baeume) if (b.eigen && !b.weg && b.wachs >= 1) {
+    const hh = HOEHE[b.gr], br = Math.round(hh * 0.42);
+    L.schein(c, b.x, b.y - hh / 2, 18, '255,214,90', 0.32 + 0.12 * Math.sin(t * 3));
+    // Glitzern (23.10.): sechs Funkelsterne um den Baum, jeder blitzt zu seiner Zeit auf
+    for (let k = 0; k < 6; k++) {
+      const ph = (t * 1.3 + k * 0.37) % 1;
+      if (ph > 0.45) continue;
+      const gx = Math.round(b.x + Math.sin(k * 2.4) * (br + 2)), gy = Math.round(b.y - 3 - ((k * 0.61) % 1) * (hh - 2));
+      const gross = ph > 0.12 && ph < 0.32, f = '#fff6c0';
+      p(c, gx, gy, '#ffffff');
+      if (gross) { p(c, gx - 1, gy, f); p(c, gx + 1, gy, f); p(c, gx, gy - 1, f); p(c, gx, gy + 1, f); if (ph > 0.18 && ph < 0.26) { p(c, gx - 2, gy, '#ffe060'); p(c, gx + 2, gy, '#ffe060'); p(c, gx, gy - 2, '#ffe060'); p(c, gx, gy + 2, '#ffe060'); } }
+    }
+  }
 
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)
   const rest = Math.max(0, Math.ceil(C.BAUM_DAUER - Math.max(0, g.t)));

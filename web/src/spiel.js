@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610221530';
-import * as Z from './zeit.js?v=202610221530';
-import { neueFarben } from './pixel.js?v=202610221530';
+import * as C from './config.js?v=202610230900';
+import * as Z from './zeit.js?v=202610230900';
+import { neueFarben } from './pixel.js?v=202610230900';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2155,7 +2155,7 @@ export function baumschule() {
 export const baumschuleOffen = () => miniOffen('baum');
 export const heuteNr = () => tagNr();
 /** Wachstum eines Beets 0..1. */
-export function beetWachs(beet) { return beet ? Math.min(1, Math.max(0, (tagNr() - beet.tag0) * C.BAUMSCHULE_JE_TAG + beet.bonus)) : 0; }
+export function beetWachs(beet) { return beet ? Math.min(1, Math.max(0, (tagNr() - beet.tag0) * C.BAUMSCHULE_JE_TAG + beet.bonus + 1e-9)) : 0; }   // 1e-9: 6 × 1/6 soll genau 1 ergeben
 /** Stufe zum Zeichnen: 0 Setzling, 1 klein, 2 mittel, 3 groß (fertig). */
 export const beetStufe = (beet) => { const w = beetWachs(beet); return w >= 1 ? 3 : w >= 0.6 ? 2 : w >= 0.3 ? 1 : 0; };
 export function pflanze(i, art) {
@@ -2163,12 +2163,12 @@ export function pflanze(i, art) {
   if (B.beete[i]) return false;
   B.beete[i] = { art, tag0: tagNr(), bonus: 0 };
   st.stats.baumschule = (st.stats.baumschule || 0) + 1;
-  // Gepflanzt an einem Tag, an dem schon gegossen/gedüngt war: zählt für den neuen mit
-  if (B.gegossen === tagNr()) B.beete[i].bonus += C.BAUMSCHULE_GIESSEN;
   hooks.ton('schnee'); speichere();
   return true;
 }
-const wachsende = () => baumschule().beete.filter((b) => b && beetWachs(b) < 1);
+// 23.10.: Frisch Gepflanztes kann man erst am nächsten Tag gießen und düngen
+const wachsende = () => baumschule().beete.filter((b) => b && beetWachs(b) < 1 && b.tag0 < tagNr());
+export const heuteGepflanzt = () => baumschule().beete.some((b) => b && b.tag0 === tagNr());
 export const kannGiessen = () => baumschule().gegossen !== tagNr() && wachsende().length > 0;
 export const kannDuengen = () => baumschule().geduengt !== tagNr() && wachsende().length > 0;
 export const duengerPreis = () => Math.max(C.BAUMSCHULE_DUENGER_MIN, Math.round(einnahmenProMinute() * C.BAUMSCHULE_DUENGER_MIN_MINUTEN / 10) * 10);
