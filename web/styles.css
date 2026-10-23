@@ -1321,3 +1321,5 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .beet-balken { height: calc(var(--px) * 3); border-radius: calc(var(--px) * 1.5); background: #e8d8b8; overflow: hidden; }
 .beet-balken i { display: block; height: 100%; background: linear-gradient(#7ac25a, #4e9a48); }
 .bs-intro { margin: 0 0 calc(var(--px) * 2); font-size: var(--t-klein); text-align: center; }
+/* Hinweis im Fenster, z. B. Meisenknödel ohne Futterhaus (23.10.) */
+.hinweis-kasten { margin: calc(var(--px) * 2) 0; padding: calc(var(--px) * 2.4) calc(var(--px) * 3); border: calc(var(--px) * 0.6) solid var(--gold); border-radius: calc(var(--px) * 2); background: #fff6d4; font-size: var(--t-klein); text-align: left; }

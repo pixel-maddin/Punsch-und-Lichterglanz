@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610230900';
-import * as S from './spiel.js?v=202610230900';
-import * as Z from './zeit.js?v=202610230900';
-import * as T from './ton.js?v=202610230900';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610230900';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610230900';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610230900';
-import * as A from './auftraege.js?v=202610230900';
-import * as E from './erfolge.js?v=202610230900';
-import * as ZL from './ziele.js?v=202610230900';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610230900';
-import * as KA from './karte.js?v=202610230900';
-import { zeigeRueckblick } from './ereignis.js?v=202610230900';
-import { barbaraZweig } from './szene.js?v=202610230900';
-import * as SW from './schneeball.js?v=202610230900';
-import * as LI from './lichtung.js?v=202610230900';
-import * as CB from './christbaum.js?v=202610230900';
-import * as SB from './schlitten.js?v=202610230900';
-import * as EB from './schlittschuh.js?v=202610230900';
-import * as BS from './backstube.js?v=202610230900';
-import { alleSymbole } from './symbole.js?v=202610230900';
+import * as C from './config.js?v=202610230930';
+import * as S from './spiel.js?v=202610230930';
+import * as Z from './zeit.js?v=202610230930';
+import * as T from './ton.js?v=202610230930';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610230930';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610230930';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610230930';
+import * as A from './auftraege.js?v=202610230930';
+import * as E from './erfolge.js?v=202610230930';
+import * as ZL from './ziele.js?v=202610230930';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610230930';
+import * as KA from './karte.js?v=202610230930';
+import { zeigeRueckblick } from './ereignis.js?v=202610230930';
+import { barbaraZweig } from './szene.js?v=202610230930';
+import * as SW from './schneeball.js?v=202610230930';
+import * as LI from './lichtung.js?v=202610230930';
+import * as CB from './christbaum.js?v=202610230930';
+import * as SB from './schlitten.js?v=202610230930';
+import * as EB from './schlittschuh.js?v=202610230930';
+import * as BS from './backstube.js?v=202610230930';
+import { alleSymbole } from './symbole.js?v=202610230930';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1101,7 +1101,8 @@ function baueGeschenkt(liste, gesch) {
       vergeben.add(d.id);
       // Minispiel-Deko: aus welchem Spiel, ab welchem Rekord (wer ein neues Präfix einführt, trägt es hier ein)
       const spiel = { l: 'Waldlichtung', c: 'Christbaumverkauf', s: 'Schlittenberg', e: 'Eisbahn', g: 'Schneeballwiese' }[d.id.split('_')[0]];
-      const ab = d.ab ? `${spiel ? spiel + ' · ' : ''}Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten` : '';
+      const ab = d.ab ? `${spiel ? spiel + ' · ' : ''}Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten`
+        : d.id === 'kal_knoedel' && !S.hat('futterhaus') ? 'Hängt erst, wenn du ein Futterhaus hast' : '';
       const an = S.zeigt(d.id);
       const z = hausZeileKompakt(d.id, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab, kipp(an, (v) => S.setzeDeko(d.id, v)), null);
       if (!an) z.classList.add('ist-aus');
@@ -1669,6 +1670,16 @@ function wunschKarte() {
   z.querySelector('.bitte-knopf').appendChild(k);
   return z;
 }
+/**
+ * Meisenknödel ohne Futterhaus (23.10.): Er hängt am Futterhaus, also sieht man
+ * ihn vorher nicht. Sagen, wo es das Futterhaus gibt - er wartet so lange.
+ */
+function knoedelHinweis(id) {
+  if (id !== 'kal_knoedel' || S.hat('futterhaus')) return '';
+  const fh = C.ARTIKEL.find((a) => a.id === 'futterhaus');
+  const preis = fh ? (Array.isArray(fh.kosten) ? fh.kosten[0] : fh.kosten) : 0;
+  return `<p class="hinweis-kasten">Du hast noch <b>kein Futterhaus</b>. Es steht im <b>Weihnachtsladen</b> auf der Karte (unter „Im Garten“${preis ? `, ${S.formatGeld(preis)}` : ''}). Der Knödel wartet so lange - sobald das Futterhaus hängt, hängt er daneben.</p>`;
+}
 /** Kleines Porträt für den Zettel: die Straßenfigur (16 x 24), per Scale2x 32 x 48. */
 function maleStammKlein(cv, id) {
   const k = document.createElement('canvas'); k.width = 16; k.height = 24;
@@ -2044,7 +2055,7 @@ export function oeffneKalender() {
       const e = S.oeffneTuer(n);
       T.spiele('tuer');
       oeffneKalender();
-      if (e.deko) fenster(`Türchen ${n}`, `<div class="gross-ico">🎁</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p><p class="klein">Gibt es nur hier im Kalender.</p>`);
+      if (e.deko) fenster(`Türchen ${n}`, `<div class="gross-ico">🎁</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p>${knoedelHinweis(e.deko.id)}<p class="klein">Gibt es nur hier im Kalender.</p>`);
       else fenster(`Türchen ${n}`, `<div class="gross-ico">⭐</div><p>Ein Umschlag mit</p><p class="summe">${S.formatGeld(e.betrag)}</p>`);
     };
     raster.appendChild(b);
