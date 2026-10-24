@@ -1,0 +1,308 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>App-Symbole</title>
+<!--
+  werkzeug/icons.html - malt die App-Symbole (24.10., löst werkzeug-icons.py ab: auf dem
+  Windows-Rechner gibt es kein Python, und 64 x 64 war „zu simpel").
+
+  Ein 96 x 96-Pixelraster mit ein paar Zeichenhilfen (px, rect, schein = weiches additives
+  Licht), ganzzahlig hochgezogen:
+    icon-192.png           96 x 2
+    icon-180.png           90 x 2 (je 3 Rasterpunkte Rand weg - dort ist nur Himmel/Schnee)
+    icon-512.png           96 x 5 = 480, dazu 16 px Rand in den Grundfarben
+    icon-maskable-512.png  96 x 4 = 384, dazu 64 px Rand (Android schneidet einen Kreis aus)
+  Einfach per Doppelklick im Browser öffnen (kein Server nötig): Die vier Bilder erscheinen mit
+  Download-Link, dann nach web/icons/ legen (512 auch nach store/). `window.__icons` hält sie
+  als data:-URL.
+-->
+<style>
+  body { background: #222; color: #ddd; font: 14px sans-serif; margin: 20px; }
+  .reihe { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; }
+  figure { margin: 0; text-align: center; }
+  img { image-rendering: pixelated; border-radius: 22%; display: block; }
+  img.gross { width: 512px; height: 512px; }
+  a { color: #9cf; }
+</style>
+<div class="reihe" id="vorschau"></div>
+<script>
+const N = 96;
+const bild = Array.from({ length: N }, () => Array(N).fill([0, 0, 0]));
+let grund = null;   // Kopie nach Himmel, Hügel und Schnee - Farben für den Rand
+const hexf = (h) => { h = h.replace('#', ''); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
+function px(x, y, f) { x = Math.round(x); y = Math.round(y); if (x >= 0 && x < N && y >= 0 && y < N) bild[y][x] = typeof f === 'string' ? hexf(f) : f; }
+function rect(x, y, w, h, f) { for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) px(xx, yy, f); }
+function mische(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
+function schein(cx, cy, r, farbe, staerke) {
+  const [fr, fg, fb] = hexf(farbe);
+  for (let y = Math.floor(cy - r) - 1; y <= cy + r + 1; y++) for (let x = Math.floor(cx - r) - 1; x <= cx + r + 1; x++) {
+    if (x < 0 || y < 0 || x >= N || y >= N) continue;
+    const d = Math.hypot(x - cx, y - cy) / r; if (d >= 1) continue;
+    const a = staerke * (1 - d) ** 2, [R, G, B] = bild[y][x];
+    bild[y][x] = [Math.min(255, R + fr * a), Math.min(255, G + fg * a), Math.min(255, B + fb * a)].map(Math.round);
+  }
+}
+function dunkel(cx, cy, r, staerke) {   // weicher Schatten (multipliziert)
+  for (let y = Math.floor(cy - r); y <= cy + r; y++) for (let x = Math.floor(cx - r); x <= cx + r; x++) {
+    if (x < 0 || y < 0 || x >= N || y >= N) continue;
+    const d = Math.hypot((x - cx) / 1, (y - cy) / 0.45) / r; if (d >= 1) continue;
+    const a = 1 - staerke * (1 - d); bild[y][x] = bild[y][x].map((v) => Math.round(v * a));
+  }
+}
+// fest „zufällig" (gleiches Bild bei jedem Lauf)
+let saat = 7; const zufall = () => ((saat = (saat * 16807) % 2147483647) / 2147483647);
+
+// ---------------------------------------------------------------------------
+// Himmel: Verlauf in Bändern, Polarlicht, Sterne, Mond
+// ---------------------------------------------------------------------------
+const OBEN = hexf('#0b0824'), UNTEN = hexf('#40327c');
+const himmel = (y) => mische(OBEN, UNTEN, Math.round(Math.min(1, y / 64) * 10) / 10);
+for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) bild[y][x] = himmel(y);
+// Polarlicht: zwei weiche, schwingende Bänder (Lichterglanz)
+for (let x = 0; x < N; x++) {
+  const m = 17 + Math.sin(x * 0.07 + 0.6) * 5 + Math.sin(x * 0.19) * 1.5;
+  for (let y = 4; y < 36; y++) {
+    const d = (y - m) / 6; if (Math.abs(d) > 1.6) continue;
+    const a = Math.exp(-d * d) * (0.22 + 0.1 * Math.sin(x * 0.31)) * (y < m ? 0.65 : 1);
+    const f = y < m ? hexf('#7a6aff') : hexf('#3affb4');
+    bild[y][x] = bild[y][x].map((v, i) => Math.min(255, Math.round(v + f[i] * a)));
+  }
+}
+grund = bild.map((r) => r.map((f) => f.slice()));   // Rand: Himmel und Polarlicht ohne Sterne
+for (let i = 0; i < 46; i++) { const x = Math.floor(zufall() * N), y = Math.floor(zufall() * 44); px(x, y, zufall() < 0.3 ? '#ffffff' : '#b8bcf0'); }
+function funkelstern(sx, sy, n, kern = '#ffffff') {
+  schein(sx, sy, n * 2.4, '#fff2b0', 0.32);
+  for (let d = -n; d <= n; d++) { px(sx + d, sy, '#fff2c0'); px(sx, sy + d, '#fff2c0'); }
+  px(sx - 1, sy - 1, '#ffe07a'); px(sx + 1, sy - 1, '#ffe07a'); px(sx - 1, sy + 1, '#ffe07a'); px(sx + 1, sy + 1, '#ffe07a');
+  px(sx, sy, kern);
+}
+funkelstern(80, 11, 4); funkelstern(56, 6, 2); funkelstern(91, 30, 2);
+// Mond (Sichel) mit Kratern und Hof
+const MX = 16, MY = 14;
+schein(MX, MY, 15, '#c8d0ff', 0.2);
+for (let y = -8; y <= 8; y++) for (let x = -8; x <= 8; x++) {
+  if (Math.hypot(x, y) <= 7.2 && Math.hypot(x - 3.4, y - 2) > 6) px(MX + x, MY + y, x < -4 ? '#fff8de' : y > 3 ? '#e2d4a2' : '#f2e6b8');
+}
+px(MX - 4, MY - 2, '#d8c896'); px(MX - 5, MY + 2, '#d8c896'); px(MX - 2, MY + 5, '#d8c896');
+
+// ---------------------------------------------------------------------------
+// Hinten: Hügel, Dorf mit Zwiebelturm, Tannen als Schattenriss
+// ---------------------------------------------------------------------------
+const huegel = (x) => 60 + Math.round(3 * Math.sin(x * 0.12) + 2 * Math.sin(x * 0.05 + 1));
+for (let x = 0; x < N; x++) for (let y = huegel(x); y < N; y++) { px(x, y, y === huegel(x) ? '#4a4a86' : '#2c2c5e'); grund[y][x] = bild[y][x].slice(); }
+function haeuschen(x, fuss, w, h, licht) {
+  rect(x, fuss - h, w, h, '#232552');
+  for (let k = 0; k <= w / 2 + 1; k++) rect(x - 1 + k, fuss - h - k, w + 2 - 2 * k, 1, '#1c1e46');
+  for (let k = 0; k <= w / 2 + 1; k++) px(x - 1 + k, fuss - h - k, '#8a90c8');   // Schnee auf dem Dach
+  for (const [lx, ly] of licht) { px(x + lx, fuss - h + ly, '#ffcf5a'); schein(x + lx, fuss - h + ly, 2.5, '#ffb040', 0.3); }
+}
+haeuschen(70, 62, 7, 5, [[2, 2]]);
+haeuschen(80, 61, 6, 4, [[3, 2]]);
+// Kirche mit Zwiebelturm rechts
+rect(87, 46, 4, 16, '#1e2048'); rect(86, 44, 6, 2, '#1e2048');
+for (let y = 0; y < 6; y++) { const w = [1, 2, 3, 3, 2, 1][y]; rect(89 - w, 38 + y, 2 * w, 1, '#1e2048'); }
+px(88, 36, '#ffd84a'); px(88, 37, '#1e2048'); px(89, 50, '#ffcf5a'); px(88, 50, '#ffcf5a'); schein(88.5, 50, 3, '#ffb040', 0.3);function tanneHinten(cx, fuss, hoehe, farbe) {
+  for (let k = 0; k < hoehe; k++) { const w = 1 + Math.floor(k * 6 / hoehe) + (k % 4 === 3 ? 1 : 0); rect(cx - w, fuss - hoehe + k, 2 * w + 1, 1, farbe); }
+}
+for (const [cx, fuss, h] of [[3, 64, 16], [60, 63, 10], [66, 64, 13], [94, 64, 12]]) tanneHinten(cx, fuss, h, '#1a2246');
+
+// ---------------------------------------------------------------------------
+// Schnee vorne (Grund), Trampelpfad zur Tür
+// ---------------------------------------------------------------------------
+const schneeKante = (x) => 76 + Math.round(1.5 * Math.sin(x * 0.17)) + (x > 30 && x < 58 ? 1 : 0);
+for (let x = 0; x < N; x++) for (let y = schneeKante(x); y < N; y++) px(x, y, y < schneeKante(x) + 2 ? '#eef3fa' : '#dbe4f2');
+for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (y >= schneeKante(x)) grund[y][x] = bild[y][x].slice();
+
+// ---------------------------------------------------------------------------
+// Das Haus
+// ---------------------------------------------------------------------------
+const HX0 = 22, HX1 = 66, DACH_Y = 22, WAND_Y = 45, BODEN = 77, APEX = 44;
+// Wand: rote Bretter mit Fugen, Maserung, Licht von links
+for (let y = WAND_Y; y < BODEN; y++) for (let x = HX0; x <= HX1; x++) {
+  let f = (y - WAND_Y) % 5 === 4 ? '#8e2a24' : '#b8392f';
+  if (x <= HX0 + 1) f = '#8a2822'; else if (x >= HX1 - 1) f = '#7e241e';
+  else if ((y - WAND_Y) % 5 !== 4 && (x * 7 + y * 3) % 17 === 0) f = '#a8342b';
+  px(x, y, f);
+}
+rect(HX0, WAND_Y, HX1 - HX0 + 1, 2, '#6a1c18');   // Schatten unter der Traufe
+// Steinsockel
+for (let x = HX0; x <= HX1; x++) for (let y = BODEN - 4; y < BODEN; y++) {
+  const fuge = (y - (BODEN - 4)) % 2 === 1 && (x + (y % 4 === 1 ? 2 : 0)) % 5 === 0;
+  px(x, y, fuge ? '#4a4a5a' : (x + y) % 3 === 0 ? '#7a7a8e' : '#8a8a9e');
+}
+rect(HX0, BODEN - 4, HX1 - HX0 + 1, 1, '#5a5a6e');
+// Giebel mit Brettern, Holzkante und dickem Schnee auf beiden Dachkanten
+for (let y = DACH_Y; y < WAND_Y; y++) {
+  const halb = Math.floor((y - DACH_Y) * 27 / (WAND_Y - DACH_Y)) + 1;
+  for (let x = APEX - halb + 4; x < APEX + halb - 3; x++) px(x, y, (y - DACH_Y) % 4 === 3 ? '#9c2f28' : x > APEX + 6 ? '#a6332b' : '#b0362d');
+  px(APEX - halb + 3, y, '#5a3a2c'); px(APEX + halb - 3, y, '#5a3a2c'); px(APEX + halb - 4, y, '#7a2620');
+  px(APEX - halb, y, '#ffffff'); px(APEX - halb + 1, y, '#f2f6fc'); px(APEX - halb + 2, y, '#dce6f4');
+  px(APEX + halb, y, '#c4d0e8'); px(APEX + halb - 1, y, '#d6e0f0'); px(APEX + halb - 2, y, '#bccae2');
+  px(APEX - halb - 1, y, '#e6eef8'); px(APEX + halb + 1, y, '#aebcd8');
+}
+rect(APEX - 3, DACH_Y - 2, 7, 3, '#ffffff'); rect(APEX - 2, DACH_Y - 3, 5, 1, '#f2f6fc');   // Schnee auf dem First
+// Traufe mit Schneewulst und Eiszapfen
+rect(APEX - 29, WAND_Y - 1, 59, 2, '#ffffff'); rect(APEX - 28, WAND_Y + 1, 57, 1, '#c8d4ea');
+for (let x = APEX - 27; x <= APEX + 27; x += 2) { const l = 1 + ((x * 7) % 5 === 0 ? 3 : (x * 3) % 4 === 0 ? 2 : 1); rect(x, WAND_Y + 2, 1, l, '#cfe6f6'); px(x, WAND_Y + 1 + l, '#eaf6ff'); }
+// Giebelfenster rund mit Kreuz und Schein
+for (let y = -3; y <= 3; y++) for (let x = -3; x <= 3; x++) if (x * x + y * y <= 10) px(APEX + x, 33 + y, x * x + y * y > 6 ? '#e8e0d0' : '#ffcf5a');
+px(APEX - 1, 32, '#fff0b0'); rect(APEX - 2, 33, 5, 1, '#6e3a20'); rect(APEX, 31, 1, 5, '#6e3a20');
+schein(APEX, 33, 8, '#ffb040', 0.28);
+// Schornstein mit Ziegeln, Schneekappe und Rauch
+for (let y = 16; y < 30; y++) for (let x = 54; x < 60; x++) px(x, y, (y % 3 === 2) || ((x + (y % 6 < 3 ? 0 : 2)) % 4 === 0) ? '#5a463e' : '#7a6258');
+rect(53, 15, 8, 2, '#ffffff'); rect(54, 14, 6, 1, '#eef3fa');
+for (const [x, y, r, a] of [[57, 11, 2.8, 0.9], [59.5, 7.5, 3.4, 0.7], [58, 3, 4, 0.5]]) schein(x, y, r, '#b8bce0', a);
+px(57, 11, '#c8cce8'); px(59, 8, '#b8bcdc');
+// Fenster: warm, mit Gardinen, Sprossen, Schnee auf dem Sims und Kasten mit Tannengrün
+function fenster(x0, y0) {
+  schein(x0 + 4.5, y0 + 4.5, 13, '#ffa030', 0.34);
+  rect(x0 - 1, y0 - 1, 11, 11, '#f2ece0');
+  rect(x0, y0, 9, 9, '#ffc850'); rect(x0, y0, 9, 3, '#ffe490');
+  rect(x0, y0, 2, 9, '#e86a4a'); rect(x0 + 7, y0, 2, 9, '#e86a4a');            // Gardinen
+  px(x0 + 1, y0 + 8, '#c84a32'); px(x0 + 7, y0 + 8, '#c84a32');
+  rect(x0 + 4, y0, 1, 9, '#8a4a22'); rect(x0 + 2, y0 + 4, 5, 1, '#8a4a22');
+  rect(x0 - 2, y0 + 10, 13, 1, '#ffffff');                                     // Sims mit Schnee
+  rect(x0 - 1, y0 + 11, 11, 3, '#6a4428'); rect(x0 - 1, y0 + 11, 11, 1, '#2e6a3c');   // Kasten mit Tannengrün
+  for (let k = 0; k < 11; k += 2) px(x0 - 1 + k, y0 + 10, k % 4 ? '#3e8a44' : '#2e6a3c');
+  px(x0 + 2, y0 + 10, '#d8322e'); px(x0 + 7, y0 + 10, '#d8322e');
+}
+fenster(27, 52); fenster(53, 52);
+// Tür mit Kranz, Klinke, Stufe und Laterne
+rect(39, 56, 11, BODEN - 56, '#2f5a42'); rect(39, 56, 11, 1, '#244634');
+rect(39, 56, 1, BODEN - 56, '#244634'); rect(44, 57, 1, BODEN - 57, '#28503a');
+rect(40, 66, 3, 1, '#28503a'); rect(46, 66, 3, 1, '#28503a');
+px(47, 67, '#e8c030');
+for (let y = -3; y <= 3; y++) for (let x = -3; x <= 3; x++) { const d = Math.hypot(x, y); if (d <= 3.2 && d >= 1.6) px(44.5 + x, 61 + y, (x + y) % 3 === 0 ? '#3e8a44' : '#2e6a3c'); }
+px(44, 64, '#d8322e'); px(45, 64, '#d8322e'); px(44, 65, '#b82424');
+rect(37, BODEN, 15, 1, '#9a9aae'); rect(36, BODEN + 1, 17, 1, '#ffffff');
+// Laterne rechts neben der Tür
+rect(52, 60, 3, 4, '#2a2a30'); rect(53, 61, 1, 2, '#ffe490'); rect(52, 59, 3, 1, '#ffffff');
+schein(53, 62, 7, '#ffb040', 0.42);
+// Lichterkette entlang der Dachkanten und der Traufe
+const BUNT = ['#ff4a4a', '#ffd040', '#5aff6a', '#4aa0ff', '#ff6adf'];
+const lichter = [];
+for (let y = DACH_Y + 3; y < WAND_Y; y += 3) { const halb = Math.floor((y - DACH_Y) * 27 / (WAND_Y - DACH_Y)) + 1; lichter.push([APEX - halb - 2, y], [APEX + halb + 2, y]); }
+for (let x = APEX - 26; x <= APEX + 26; x += 4) lichter.push([x, WAND_Y + 1 + (x % 8 === 0 ? 1 : 0)]);
+lichter.forEach(([x, y], i) => schein(x, y, 3.6, BUNT[i % 5], 0.5));
+lichter.forEach(([x, y], i) => { px(x, y, BUNT[i % 5]); px(x, y - 1, '#2a2a30'); });
+
+// ---------------------------------------------------------------------------
+// Christbaum links: vier Etagen, Schnee auf den Ästen, Kugeln, Lichter, Stern
+// ---------------------------------------------------------------------------
+const BX = 11;
+dunkel(BX + 2, 77, 9, 0.3);
+for (const [y0, y1, w] of [[30, 41, 5], [37, 50, 8], [45, 61, 10], [54, 72, 12]]) {
+  for (let y = y0; y < y1; y++) {
+    const ww = 1 + Math.floor((y - y0) * w / (y1 - y0));
+    rect(BX - ww, y, 2 * ww + 1, 1, '#1f5a2e');
+    rect(BX - ww, y, Math.max(1, ww - 1), 1, '#2e7a3e');
+    px(BX + ww, y, '#174424'); px(BX + ww - 1, y, '#1a4c28');
+    if ((y * 5 + BX) % 7 === 0) px(BX - Math.floor(ww / 2), y, '#3e9a4e');
+  }
+  // Schnee auf der Etage (unten am Rand)
+  const ww = w;
+  for (let x = BX - ww; x <= BX + ww; x++) if ((x + y1) % 3 !== 0) px(x, y1 - 1, x < BX ? '#ffffff' : '#d6e0f0');
+}
+rect(BX - 1, 72, 3, 4, '#5a3a22'); px(BX - 1, 72, '#7a5232');
+for (const [x, y, f] of [[BX - 2, 36, '#ff4a4a'], [BX + 3, 43, '#ffd040'], [BX - 5, 47, '#4aa0ff'], [BX + 2, 51, '#ff6adf'],
+  [BX - 3, 56, '#ffd040'], [BX + 6, 59, '#ff4a4a'], [BX - 8, 63, '#ff6adf'], [BX + 1, 64, '#4aa0ff'], [BX + 8, 68, '#ffd040'], [BX - 5, 69, '#ff4a4a']]) {
+  schein(x, y, 3, f, 0.45);
+  rect(x, y, 2, 2, f); px(x, y, '#ffffff');
+}
+// Lichtgirlande schräg über den Baum
+for (let k = 0; k < 7; k++) { const x = BX - 7 + k * 2, y = 49 + k + Math.round(Math.sin(k) * 0.5); px(x, y, '#fff2b0'); schein(x, y, 2, '#fff2b0', 0.4); }
+schein(BX, 27, 7, '#fff0a0', 0.5);
+for (let d = -3; d <= 3; d++) { px(BX + d, 27, '#ffd84a'); px(BX, 27 + d, '#ffd84a'); }
+px(BX - 1, 26, '#ffe890'); px(BX + 1, 28, '#e8b030'); px(BX, 27, '#fffbe0');
+
+// ---------------------------------------------------------------------------
+// Zaun mit Lichterkette zwischen Baum und Becher
+// ---------------------------------------------------------------------------
+for (let x = 22; x <= 66; x++) {
+  if (x >= 36 && x <= 53) continue;   // Pfad zur Tür
+  if (x % 4 === 2) { rect(x, 76, 2, 6, '#e2d5bb'); px(x, 75, '#ffffff'); px(x + 1, 75, '#ffffff'); rect(x + 1, 76, 1, 6, '#c8b898'); }
+}
+for (const yy of [78, 80]) for (let x = 22; x <= 66; x++) if (!(x >= 36 && x <= 53)) px(x, yy, '#d4c6a8');
+for (let x = 23; x <= 66; x += 3) { if (x >= 36 && x <= 53) continue; const f = BUNT[(x / 3 | 0) % 5]; schein(x, 77, 2.4, f, 0.45); px(x, 77, f); }
+
+// ---------------------------------------------------------------------------
+// Vorne: Schneehaufen, Trampelpfad, Funkeln
+// ---------------------------------------------------------------------------
+for (let y = 82; y < N; y++) for (let x = 0; x < N; x++) {
+  const hoch = 82 + Math.round(1.2 * Math.sin(x * 0.21) + Math.sin(x * 0.07));
+  if (y >= hoch) px(x, y, y === hoch ? '#ffffff' : y < hoch + 3 ? '#eef3fa' : (x * 7 + y * 13) % 29 === 0 ? '#c8d4ea' : '#dbe4f2');
+}
+for (let y = BODEN + 2; y < N; y++) { const w = 5 + (y - BODEN) * 0.35; for (let x = Math.round(44.5 - w); x <= 44.5 + w; x++) px(x, y, Math.abs(x - 44.5) > w - 1 ? '#d4ddee' : '#c9d3e8'); }
+for (let k = 0; k < 6; k++) { const y = BODEN + 4 + k * 3, x = 42 + (k % 2) * 5; px(x, y, '#aab6d0'); px(x + 1, y, '#b4c0d8'); }
+for (const [x, y] of [[6, 88], [20, 92], [28, 85], [60, 93], [17, 84], [90, 90], [35, 94]]) { px(x, y, '#ffffff'); px(x, y - 1, '#c8e0ff'); px(x - 1, y, '#e0ecff'); }
+
+// ---------------------------------------------------------------------------
+// Punschbecher vorne rechts: Orangenscheibe, Zimtstange, Dampf
+// ---------------------------------------------------------------------------
+const KX = 64, KY = 67, KW = 18, KH = 20;
+schein(KX + 9, KY + 9, 19, '#ff8a40', 0.24);
+dunkel(KX + 10, KY + KH + 1, 11, 0.35);
+for (let y = 0; y < KH; y++) {
+  const ein = y >= KH - 2 ? 1 : 0;
+  for (let x = ein; x < KW - ein; x++) {
+    let f = '#c8322e';
+    if (x <= 2 + ein) f = x === ein ? '#e85a4a' : '#e04a3e';
+    if (x >= KW - 3 - ein) f = x === KW - 1 - ein ? '#82201c' : '#9c2420';
+    if (y === KH - 1) f = '#82201c';
+    px(KX + x, KY + y, f);
+  }
+}
+// Muster: weiße Bordüre und Stern
+for (let x = 1; x < KW - 1; x++) { px(KX + x, KY + 4, x % 2 ? '#fff4e0' : '#f2d8c8'); px(KX + x, KY + KH - 4, x % 2 ? '#fff4e0' : '#f2d8c8'); }
+const SX = KX + 9, SY = KY + 10;
+for (let d = -3; d <= 3; d++) { px(SX + d, SY, '#fff4e0'); px(SX, SY + d, '#fff4e0'); }
+for (const [x, y] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [-2, -2], [2, -2], [-2, 2], [2, 2]]) px(SX + x, SY + y, '#fff4e0');
+px(SX, SY, '#ffd040');
+// Rand mit Punsch, Orangenscheibe, Zimtstange
+rect(KX, KY, KW, 1, '#f2ece0'); rect(KX, KY + 1, KW, 1, '#d8cfc0');
+rect(KX + 1, KY + 1, KW - 2, 2, '#7a1a2a'); px(KX + 4, KY + 1, '#b83a4a'); px(KX + 5, KY + 2, '#9a2a3a');
+for (let y = -4; y <= 0; y++) for (let x = -4; x <= 4; x++) { const d = Math.hypot(x, y); if (d <= 4.3) px(KX + 12 + x, KY + 1 + y, d > 3.3 ? '#e8701e' : (x === 0 || Math.abs(x) === Math.abs(y)) ? '#fff0c8' : '#ffb040'); }
+for (let k = 0; k < 9; k++) { px(KX + 4 + Math.floor(k / 2), KY - 7 + k, '#8a4a22'); px(KX + 5 + Math.floor(k / 2), KY - 7 + k, '#6a3418'); }
+// Henkel
+for (const [x, y] of [[0, 4], [1, 4], [2, 4], [3, 5], [3, 6], [3, 7], [3, 8], [3, 9], [3, 10], [2, 11], [1, 11], [0, 11]]) px(KX + KW + x, KY + y, '#b02c28');
+for (const [x, y] of [[1, 5], [2, 6], [2, 7], [2, 8], [2, 9], [1, 10]]) px(KX + KW + x, KY + y, '#82201c');
+// Dampf in Schwüngen
+[[68, 64], [69, 63], [69, 62], [68, 61], [68, 60], [69, 59], [70, 58], [76, 64], [75, 63], [75, 62], [76, 61], [76, 60], [75, 59], [75, 58], [76, 57]]
+  .forEach(([x, y], i) => px(x, y - 2, i % 3 ? '#f0f0ff' : '#c8c8e8'));
+
+// Fallende Flocken
+for (let i = 0; i < 22; i++) { const x = Math.floor(zufall() * N), y = 30 + Math.floor(zufall() * 46); if (bild[y][x][2] < 140) { px(x, y, '#ffffff'); if (zufall() < 0.4) px(x + 1, y, '#c8d4f0'); } }
+
+// Leichte Vignette (Ecken dunkler - das Motiv bleibt in der Mitte)
+for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const d = Math.hypot(x - 48, y - 46) / 68; if (d > 0.6) { const k = 1 - (d - 0.6) * 0.5; bild[y][x] = bild[y][x].map((v) => Math.round(v * k)); grund[y][x] = grund[y][x].map((v) => Math.round(v * k)); } }   // auch der Rand, sonst sieht man einen hellen Rahmen
+
+// ---------------------------------------------------------------------------
+// Ausgeben
+// ---------------------------------------------------------------------------
+function png(groesse, k, rand = 0, schnitt = 0) {
+  const n = N - 2 * schnitt;
+  if (n * k + 2 * rand !== groesse) throw new Error('Größe passt nicht: ' + groesse);
+  const cv = document.createElement('canvas'); cv.width = cv.height = groesse;
+  const c = cv.getContext('2d'), d = c.createImageData(groesse, groesse);
+  for (let y = 0; y < groesse; y++) for (let x = 0; x < groesse; x++) {
+    const ry = Math.floor((y - rand) / k), rx = Math.floor((x - rand) / k);
+    const innen = y >= rand && x >= rand && ry < n && rx < n;
+    const gy = Math.min(n - 1, Math.max(0, ry)) + schnitt, gx = Math.min(n - 1, Math.max(0, rx)) + schnitt;
+    const f = innen ? bild[gy][gx] : grund[gy][gx];   // Rand: Grundfarben (ohne Sterne und Figuren)
+    const o = (y * groesse + x) * 4; d.data[o] = f[0]; d.data[o + 1] = f[1]; d.data[o + 2] = f[2]; d.data[o + 3] = 255;
+  }
+  c.putImageData(d, 0, 0);
+  return cv.toDataURL('image/png');
+}
+window.__icons = {
+  'icon-192.png': png(192, 2),
+  'icon-180.png': png(180, 2, 0, 3),
+  'icon-512.png': png(512, 5, 16),
+  'icon-maskable-512.png': png(512, 4, 64),
+};
+const v = document.getElementById('vorschau');
+for (const [name, url] of Object.entries(window.__icons)) {
+  const f = document.createElement('figure');
+  f.innerHTML = `<img src="${url}" class="${name === 'icon-512.png' ? 'gross' : ''}"><figcaption><a download="${name}" href="${url}">${name}</a></figcaption>`;
+  v.appendChild(f);
+}
+</script>
