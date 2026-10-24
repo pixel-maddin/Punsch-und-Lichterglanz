@@ -11,12 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import * as MH from './minihud.js?v=202610241000';
-import * as L from './licht.js?v=202610241000';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import * as MH from './minihud.js?v=202610241200';
+import * as L from './licht.js?v=202610241200';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -79,7 +79,7 @@ function zufall(a, b) { return a + Math.random() * (b - a); }
 function neuesTier(festeArt) {
   const g = spiel;
   const roll = Math.random();
-  const art = festeArt || (roll < 0.04 ? 'gold' : roll < 0.22 ? 'reh' : roll < 0.52 ? 'eich' : 'hase');
+  const art = festeArt || (roll < 0.04 ? 'gold' : roll < (stufe.special ? 0.34 : 0.22) ? 'reh' : roll < (stufe.special ? 0.68 : 0.52) ? 'eich' : 'hase');   // Special: mehr schnelle Tiere
   const dir = Math.random() < 0.5 ? 1 : -1;
   const a = ARTEN[art];
   g.tiere.push({
@@ -540,7 +540,7 @@ function zeichne(t) {
   // Kopfzeile, Countdown und Ende als DOM (minihud.js)
   const rest = Math.max(0, Math.ceil(C.LICHTUNG_DAUER - Math.max(0, g.t)));
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: Math.max(0, g.ketteT) / 1.6, punkte: g.punkte });
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : null);
+  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.lichtung : 'Schwierigkeit: ' + stufe.name}` : null);
   MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }
 

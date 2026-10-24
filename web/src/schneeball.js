@@ -13,12 +13,12 @@
  * Aufbau wie lichtung.js: eigenes Canvas #miniCv, 180 Pixel breit, Kopfzeile
  * und Texte über minihud.js, Licht über licht.js.
  */
-import * as C from './config.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import * as MH from './minihud.js?v=202610241000';
-import * as L from './licht.js?v=202610241000';
-import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import * as MH from './minihud.js?v=202610241200';
+import * as L from './licht.js?v=202610241200';
+import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -88,7 +88,7 @@ function auftauchen() {
   const pl = frei[Math.floor(Math.random() * frei.length)];
   // Wichtel ab und zu, in der zweiten Hälfte öfter; Helm-Grummel ab 8 s; der Boss selten
   const z = Math.random(), z2 = Math.random();
-  const art = z < (g.t > C.SCHNEE_DAUER / 2 ? 0.28 : 0.22) ? 'wichtel'
+  const art = z < (g.t > C.SCHNEE_DAUER / 2 ? 0.28 : 0.22) + (stufe.special ? 0.1 : 0) ? 'wichtel'
     : z2 < 0.06 ? 'boss' : z2 < 0.26 && g.t > 8 ? 'helm' : 'grummel';
   // Je länger die Runde, desto kürzer bleiben sie oben
   const kuerzer = 1 - Math.min(0.35, g.t / C.SCHNEE_DAUER * 0.35);
@@ -452,7 +452,7 @@ function zeichne(t) {
   }
   const rest = Math.max(0, Math.ceil(C.SCHNEE_DAUER - Math.max(0, g.t)));
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.kette, ketteAnteil: Math.max(0, g.ketteT) / 1.5, punkte: g.punkte });
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name} · Wichtel nicht treffen!` : null);
+  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.schnee : 'Schwierigkeit: ' + stufe.name} · Wichtel nicht treffen!` : null);
   MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }
 

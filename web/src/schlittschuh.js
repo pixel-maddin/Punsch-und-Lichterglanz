@@ -10,12 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import * as MH from './minihud.js?v=202610241000';
-import * as L from './licht.js?v=202610241000';
-import { r, p, ton, mische } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import * as MH from './minihud.js?v=202610241200';
+import * as L from './licht.js?v=202610241200';
+import { r, p, ton, mische } from './pixel.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -136,7 +136,7 @@ function neuesDing(g) {
   // kleinere Fangzone (unten) - man muss den Sprung timen, statt jeden Stern
   // im Vorbeihüpfen mitzunehmen. Der Sprung hat seinen Scheitel bei 36,6.
   if (Math.random() < 0.7) g.dinge.push({ art: 'stern', x: g.naechstes + zufall(-6, 6), hoehe: zufall(26, 36), gross: Math.random() < 0.25, weg: false });
-  g.naechstes += zufall(150, 240) * (0.85 + g.v / TEMPO[1] * 0.35);
+  g.naechstes += zufall(150, 240) * (0.85 + g.v / TEMPO[1] * 0.35) * (stufe.special ? 0.86 : 1);   // Special: dichter
 }
 
 function schritt(dt) {
@@ -510,6 +510,6 @@ function zeichne(t) {
   const rest = Math.max(0, Math.ceil(C.EIS_DAUER - Math.max(0, g.t)));
   const kombo = g.tricks.length + (g.trick ? 1 : 0);
   MH.setzeKopf({ zeit: rest, knapp: rest <= 5 && g.t >= 0, kette: g.inLuft ? Math.max(1, kombo) : 1, ketteAnteil: g.trick ? g.trick.t / TRICKS[g.trick.art].dauer : 1, punkte: g.punkte });
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : g.t < 4 ? 'Tippen = springen · in der Luft wischen = Trick' : null);
+  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.eis : 'Schwierigkeit: ' + stufe.name}` : g.t < 4 ? 'Tippen = springen · in der Luft wischen = Trick' : null);
   MH.mitte(g.aus ? 'ZEIT UM!' : g.t < 0 ? String(Math.ceil(-g.t)) : g.t < 0.6 ? 'LOS!' : null, g.t < 0 && !g.aus ? '#ffffff' : '#ffe27a');
 }

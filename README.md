@@ -179,6 +179,12 @@ In allen Minispielen pausiert die Musik und läuft danach an derselben Stelle
 weiter. Jedes Minispiel hat drei Schwierigkeiten: Leicht (Punkte ×0,7),
 Normal und Schwer (Punkte ×1,4) - der Rekord gilt für alle.
 
+**Special des Tages:** Alle zwei bis drei Tage glitzert ein Minispiel golden
+auf der Karte. Dort gibt es an diesem Tag **doppelte Sterne**, dafür ist es
+schwerer: etwas schneller und mit einem eigenen Dreh (mehr Rehe, ungeduldige
+Kunden, schmaler goldener Bereich, mehr Hindernisse oder mehr Wichtel). Nach
+fünf geschafften Specials hängt ein goldener Pokal am Haus.
+
 **Eisbahn (Minispiel, am Weiher):** Schlittschuhlaufen! Tippen lässt den
 Wichtel springen - über Schneemänner, Steine, Holzstapel und Eislöcher. In der
 Luft wischen macht Tricks: nach oben ein Salto, nach links eine Pirouette,

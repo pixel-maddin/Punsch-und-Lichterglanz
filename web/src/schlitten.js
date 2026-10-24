@@ -10,12 +10,12 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import * as MH from './minihud.js?v=202610241000';
-import * as L from './licht.js?v=202610241000';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import * as MH from './minihud.js?v=202610241200';
+import * as L from './licht.js?v=202610241200';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -82,7 +82,7 @@ function neuesSpiel(t0) {
   // Strecke: alle 55 Pixel eine Reihe mit ein bis zwei Hindernissen, dazwischen Sterne
   const arten = Object.keys(ARTEN);
   for (let y = 260; y < LAENGE - 160; y += 68) {
-    const n = Math.random() < 0.45 ? 2 : 1;
+    const n = Math.random() < (stufe.special ? 0.75 : 0.45) ? 2 : 1;   // Special: öfter zwei
     const xs = [];
     for (let i = 0; i < n; i++) {
       let x, tries = 0;
@@ -371,7 +371,7 @@ function zeichne(t) {
   // Schwebende Texte als DOM (minihud.js) - einmal anstoßen, sie steigen selbst
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe || (x.text.length > 3 ? '#ffb040' : '#ffe27a'), x.text.length > 5 ? 0.8 : 1.1); }
   // Daumen-Hinweis am Anfang
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : g.t < 2.5 ? 'Daumen ziehen zum Lenken' : null);
+  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.berg : 'Schwierigkeit: ' + stufe.name}` : g.t < 2.5 ? 'Daumen ziehen zum Lenken' : null);
   // Licht und Schatten (12.10., licht.js): Wintersonne über dem Hang, und
   // abends ein warmer Lichtkegel um den Wok (Stirnlampe) - der Hang davor
   // liegt im Blau, Hindernisse tauchen aus dem Dunkel auf

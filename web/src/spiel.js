@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import { neueFarben } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import { neueFarben } from './pixel.js?v=202610241200';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -286,7 +286,7 @@ export function stimmung() {
   for (const d of C.AUFTRAG_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.HAENDLER_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
   for (const d of C.MARKT_DEKO) if (st.kalDeko[d.id]) s += d.stimmung;
-  for (const d of [...C.LICHTUNG_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO]) if (st.kalDeko[d.id]) s += d.stimmung;
+  for (const d of [...C.LICHTUNG_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO, ...C.SPECIAL_DEKO]) if (st.kalDeko[d.id]) s += d.stimmung;
   s += Object.keys(st.var || {}).length * C.VARIANTE_HERZEN;
   s += schneemannHerzen() + schneekatzeHerzen();
   return s;
@@ -1733,15 +1733,54 @@ export function miniErgebnis(name, punkte) {
   const mitSternen = l.runden < C.MINI_RUNDEN_STERNE;
   // Eine Runde ohne Punkte (abgebrochen, nichts getroffen) verbraucht keine der Sternerunden
   if (punkte > 0) { l.runden++; rufPunkt('mini'); }
-  const sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(def.maxMin, punkte / def.jeMin))) : 0;
+  const special = specialHeute() === name;
+  let sterne = mitSternen && punkte > 0 ? Math.max(20, Math.round(einnahmenProMinute() * Math.min(def.maxMin, punkte / def.jeMin))) : 0;
+  if (special) sterne *= C.SPECIAL_STERNE;   // doppelte Sterne, Punkte und Rekord bleiben echt
+  // Geschaffte Specials zählen (eins je Tag) - ab SPECIAL_DEKO_AB der Pokal
+  const neuSp = [];
+  if (special && punkte > 0) {
+    const sp = st.special = st.special || { n: 0, tag: -1 };
+    if (sp.tag !== tagNr()) { sp.tag = tagNr(); sp.n++; }
+    if (sp.n >= C.SPECIAL_DEKO_AB) for (const d of C.SPECIAL_DEKO) if (!st.kalDeko[d.id]) neuSp.push(d);
+  }
   if (sterne) verdiene(sterne);
   const vorher = l.best;
   if (punkte > l.best) l.best = punkte;
-  const neu = def.deko.filter((d) => !st.kalDeko[d.id] && l.best >= d.ab);
+  const neu = [...def.deko.filter((d) => !st.kalDeko[d.id] && l.best >= d.ab), ...neuSp];
   st.neu = st.neu || {};
   for (const d of neu) { st.kalDeko[d.id] = true; st.neu[d.id] = true; }
   speichere();
-  return { sterne, rekord: punkte > vorher && vorher > 0, best: l.best, neu, rest: miniRest(name) };
+  return { sterne, special, rekord: punkte > vorher && vorher > 0, best: l.best, neu, rest: miniRest(name) };
+}
+/*
+ * Minispiel-Special (24.10.): ab SPECIAL_AB_TAG nach dem ersten Spieltag alle
+ * 2-3 Tage, gewürfelt aus dem Markt-Seed (gleich nach jedem Neuladen), nie an
+ * einem Markttag (dann einen Tag später) und nie zweimal dasselbe Spiel
+ * hintereinander. Nur offene Spiele, erst wenn mindestens zwei offen sind und
+ * die Karte vorgestellt ist. Je Tag einmal gerechnet.
+ */
+let specialMerk = { schluessel: '', name: null };
+export function specialHeute() {
+  if (st.lernen < 99 || !(st.tipps && st.tipps.karte_mehr)) return null;
+  const offen = Object.keys(C.MINISPIELE).filter(miniOffen);
+  const heute = tagNr(), schluessel = heute + ':' + offen.join(',');
+  if (specialMerk.schluessel === schluessel) return specialMerk.name;
+  let name = null;
+  if (offen.length >= 2) {
+    const m = marktStand(), [a, b] = C.SPECIAL_ABSTAND;
+    let k = m.anker + C.SPECIAL_AB_TAG, vorher = null;
+    for (let i = 0; i < 80 && k <= heute; i++) {
+      const tag = istMarkt(k) ? k + 1 : k;   // Markttag: einen Tag später, der Takt bleibt
+      let wahl = offen[Math.floor(Z.hash(m.seed * 0.37 + k * 5.1) * offen.length) % offen.length];
+      if (wahl === vorher) wahl = offen[(offen.indexOf(wahl) + 1) % offen.length];
+      if (tag === heute) { name = wahl; break; }
+      if (tag > heute) break;
+      vorher = wahl;
+      k = tag === k ? k + a + (Z.hash(m.seed + k * 2.3 + 7) < 0.5 ? 0 : b - a) : tag + a;   // nach einer Verschiebung nie zwei Tage hintereinander
+    }
+  }
+  specialMerk = { schluessel, name };
+  return name;
 }
 /**
  * Steht das Minispiel schon auf der Karte? (10.10.) Nach Spieltag

@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610241000';
-import * as S from './spiel.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610241000';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610241000';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610241000';
-import * as A from './auftraege.js?v=202610241000';
-import * as E from './erfolge.js?v=202610241000';
-import * as ZL from './ziele.js?v=202610241000';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610241000';
-import * as KA from './karte.js?v=202610241000';
-import { zeigeRueckblick } from './ereignis.js?v=202610241000';
-import { barbaraZweig } from './szene.js?v=202610241000';
-import * as SW from './schneeball.js?v=202610241000';
-import * as LI from './lichtung.js?v=202610241000';
-import * as CB from './christbaum.js?v=202610241000';
-import * as SB from './schlitten.js?v=202610241000';
-import * as EB from './schlittschuh.js?v=202610241000';
-import * as BS from './backstube.js?v=202610241000';
-import { alleSymbole } from './symbole.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as S from './spiel.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610241200';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610241200';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610241200';
+import * as A from './auftraege.js?v=202610241200';
+import * as E from './erfolge.js?v=202610241200';
+import * as ZL from './ziele.js?v=202610241200';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610241200';
+import * as KA from './karte.js?v=202610241200';
+import { zeigeRueckblick } from './ereignis.js?v=202610241200';
+import { barbaraZweig } from './szene.js?v=202610241200';
+import * as SW from './schneeball.js?v=202610241200';
+import * as LI from './lichtung.js?v=202610241200';
+import * as CB from './christbaum.js?v=202610241200';
+import * as SB from './schlitten.js?v=202610241200';
+import * as EB from './schlittschuh.js?v=202610241200';
+import * as BS from './backstube.js?v=202610241200';
+import { alleSymbole } from './symbole.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -381,6 +381,7 @@ function zeigeLichtung() {
   [{ text: 'Später', neben: true }], 'lichtung', starteLichtung);
 }
 export function starteLichtung(stufeNr = 1) {
+  C.MINI_SPECIAL.laeuft = S.specialHeute();   // Special des Tages: schwerer (nur in dieser Runde)
   LI.starte(spielHoehe(), (punkte, n, arten) => {
     LI.schliesse(); S.zaehleTiere(arten); S.lichtungRundeVorbei();
     const selten = Object.keys(arten || {}).find((a) => LI.SELTENE[a]);
@@ -397,7 +398,10 @@ function miniFenster(titel, html, knoepfe, name, starte) {
   let gewaehlt = (S.st.miniStufe || {})[name] ?? 1;
   const start = { text: 'Start', aktion: () => { setTimeout(() => starte(gewaehlt), 60); } };
   // Oben das Ortsbild wie bei den Läden (11.10.)
-  const box = fenster(titel, '<canvas class="fenster-bild"></canvas>' + html + '<p class="stufen-titel">Schwierigkeit</p><div class="stufen"></div>', [...knoepfe, start]);
+  // Special des Tages (24.10.): goldener Streifen oben
+  const sp = S.specialHeute() === name
+    ? `<p class="special-streifen">✦ Special heute: <b>doppelte Sterne</b> - dafür schwerer: ${C.SPECIAL_TEXT[name]}</p>` : '';
+  const box = fenster(titel, '<canvas class="fenster-bild"></canvas>' + sp + html + '<p class="stufen-titel">Schwierigkeit</p><div class="stufen"></div>', [...knoepfe, start]);
   KA.vignette(box.querySelector('canvas.fenster-bild'), name);
   const reihe = box.querySelector('.stufen');
   C.MINI_STUFEN.forEach((stufe, i) => {
@@ -415,6 +419,7 @@ function miniFenster(titel, html, knoepfe, name, starte) {
 }
 /** Ergebnisfenster für jedes Minispiel: Punkte, Rekord, Sterne, neue Deko. */
 function miniErgebnis(name, punkte, zeile, titel, nochmal, danach) {
+  C.MINI_SPECIAL.laeuft = null;
   const e = S.miniErgebnis(name, punkte);
   const extra = danach ? danach() : '';
   const deko = e.neu.map((d) => `<p class="bonus">Neu für dein Haus: <b>${d.name}</b> (♥ +${d.stimmung})</p>`).join('');
@@ -422,7 +427,7 @@ function miniErgebnis(name, punkte, zeile, titel, nochmal, danach) {
     <p>${zeile}</p>
     <p class="summe">${punkte} Punkte</p>
     <p class="klein">Rekord: ${e.best}</p>
-    ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}</p>` : punkte > 0 ? '<p class="klein">Heute keine Sterne mehr - morgen wieder.</p>' : '<p class="klein">Ohne Punkte keine Sterne - die Runde zählt aber auch nicht mit.</p>'}
+    ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}${e.special ? ' (Special: doppelt!)' : ''}</p>` : punkte > 0 ? '<p class="klein">Heute keine Sterne mehr - morgen wieder.</p>' : '<p class="klein">Ohne Punkte keine Sterne - die Runde zählt aber auch nicht mit.</p>'}
     ${e.sterne && e.rest ? `<p class="klein">Heute noch ${e.rest} ${e.rest === 1 ? 'Runde' : 'Runden'} mit Sternen.</p>` : ''}
     ${deko}${extra}`,
   // Neue Deko: gleich ansehen - auf der Karte sähe man das Funkeln am Haus nicht
@@ -447,6 +452,7 @@ function zeigeBaumspiel() {
   [{ text: 'Später', neben: true }], 'baum', starteBaumspiel);
 }
 export function starteBaumspiel(stufeNr = 1) {
+  C.MINI_SPECIAL.laeuft = S.specialHeute();   // Special des Tages: schwerer (nur in dieser Runde)
   CB.starte(spielHoehe(), (punkte, n, eigene = []) => {
     CB.schliesse(); S.eigeneVerkauft(eigene);
     miniErgebnis('baum', punkte, `${n} ${n === 1 ? 'Baum' : 'Bäume'} verkauft${eigene.length ? `, davon ${eigene.length} aus deiner Baumschule` : ''}`, 'Gut verkauft!', () => starteBaumspiel(stufeNr));
@@ -592,6 +598,7 @@ function zeigeSchneeball() {
   [{ text: 'Später', neben: true }], 'schnee', starteSchneeball);
 }
 export function starteSchneeball(stufeNr = 1) {
+  C.MINI_SPECIAL.laeuft = S.specialHeute();   // Special des Tages: schwerer (nur in dieser Runde)
   SW.starte(spielHoehe(), (punkte, treffer, wichtel) => {
     SW.schliesse();
     miniErgebnis('schnee', punkte, `${treffer} Grummel getroffen${wichtel ? ` · ${wichtel} Wichtel erwischt - Aua!` : ' · kein Wichtel getroffen!'}`, 'Volltreffer!', () => starteSchneeball(stufeNr));
@@ -612,6 +619,7 @@ function zeigeEisbahn() {
   [{ text: 'Später', neben: true }], 'eis', starteEisbahn);
 }
 export function starteEisbahn(stufeNr = 1) {
+  C.MINI_SPECIAL.laeuft = S.specialHeute();   // Special des Tages: schwerer (nur in dieser Runde)
   EB.starte(spielHoehe(), (punkte, kombi) => {
     EB.schliesse();
     miniErgebnis('eis', punkte, kombi > 1 ? `Beste Kombo: ${kombi} Tricks in einem Sprung` : 'Schön gefahren!', 'Gut gelaufen!', () => starteEisbahn(stufeNr));
@@ -648,6 +656,7 @@ function zeigeBackstube() {
   box.querySelector('.rb-platz').appendChild(rezeptbuch());
 }
 export function starteBackstube(stufeNr = 1) {
+  C.MINI_SPECIAL.laeuft = S.specialHeute();   // Special des Tages: schwerer (nur in dieser Runde)
   BS.starte(spielHoehe(), (punkte, n, gebacken) => {
     BS.schliesse();
     const vorher = S.backRezepte().length;
@@ -753,6 +762,7 @@ function zeigeBergspiel() {
   [{ text: 'Später', neben: true }], 'berg', starteBergspiel);
 }
 export function starteBergspiel(stufeNr = 1) {
+  C.MINI_SPECIAL.laeuft = S.specialHeute();   // Special des Tages: schwerer (nur in dieser Runde)
   SB.starte(spielHoehe(), (punkte, zeit, sterne) => {
     SB.schliesse();
     const zeile = zeit != null ? `Im Ziel nach ${zeit.toFixed(1).replace('.', ',')} s · ${sterne} Sterne` : `Nicht ins Ziel geschafft · ${sterne} Sterne`;
@@ -889,7 +899,7 @@ function zeigeVariante(platz, text = '') {
 export function oeffneMeinHaus() { oeffneLaden(null, null, 'haus'); }
 /** Was man geschenkt bekommen hat: Türchen im Kalender und schwere Aufträge. */
 function geschenke() {
-  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO].filter((d) => S.st.kalDeko[d.id]);
+  return [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO, ...C.SPECIAL_DEKO].filter((d) => S.st.kalDeko[d.id]);
 }
 /*
  * „Haus schmücken" (umgebaut 11.10., gemeldet: „die Tanne kann ich nicht mehr
@@ -1093,7 +1103,7 @@ function alleLichter() {
 /** Reiter „Geschenkt": nach Herkunft, je Teil eine Zeile mit Kippschalter. */
 function baueGeschenkt(liste, gesch) {
   const neu = S.st.neu || {};
-  const QUELLEN = [['Aus dem Adventskalender', (d) => d.id.startsWith('kal_')], ['Aus den Minispielen', (d) => /^(l|c|s|e|g)_/.test(d.id)],
+  const QUELLEN = [['Aus dem Adventskalender', (d) => d.id.startsWith('kal_')], ['Aus den Minispielen', (d) => /^(l|c|s|e|g|sp)_/.test(d.id)],
     ['Vom Händler und vom Markt', (d) => /^(h|m)_/.test(d.id)], ['Für schwere Aufträge', () => true]];
   const vergeben = new Set();
   for (const [titel, passt] of QUELLEN) {
@@ -1105,6 +1115,7 @@ function baueGeschenkt(liste, gesch) {
       // Minispiel-Deko: aus welchem Spiel, ab welchem Rekord (wer ein neues Präfix einführt, trägt es hier ein)
       const spiel = { l: 'Waldlichtung', c: 'Christbaumverkauf', s: 'Schlittenberg', e: 'Eisbahn', g: 'Schneeballwiese' }[d.id.split('_')[0]];
       const ab = d.ab ? `${spiel ? spiel + ' · ' : ''}Rekord ab ${d.ab.toLocaleString('de-DE')} Punkten`
+        : d.id.startsWith('sp_') ? `Für ${C.SPECIAL_DEKO_AB} geschaffte Specials`
         : d.id === 'kal_knoedel' && !S.hat('futterhaus') ? 'Hängt erst, wenn du ein Futterhaus hast' : '';
       const an = S.zeigt(d.id);
       const z = hausZeileKompakt(d.id, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab, kipp(an, (v) => S.setzeDeko(d.id, v)), null);
@@ -1366,6 +1377,7 @@ function zeichneIcon(cv, a) {
     // Von der Schneeballwiese (12.10.)
     case 'g_vorrat': for (const [x, y] of [[3, 11], [7, 11], [11, 11], [5, 8], [9, 8], [7, 5]]) { r(c, x - 1, y - 1, 4, 3, '#ffffff'); p(c, x + 1, y + 1, '#c8d4e2'); } return;
     case 'g_lauscher': r(c, 9, 0, 7, 16, '#c9bca6'); r(c, 3, 6, 7, 7, '#7cbc44'); p(c, 5, 8, '#f0e040'); p(c, 7, 8, '#1a1a1a'); r(c, 5, 11, 4, 1, '#2a4a14'); r(c, 3, 4, 6, 2, '#c82828'); p(c, 2, 5, '#ffffff'); r(c, 9, 9, 2, 2, '#5a9a30'); return;
+    case 'sp_pokal': r(c, 4, 3, 9, 4, '#ffd84a'); r(c, 4, 2, 9, 1, '#e8a820'); r(c, 5, 7, 7, 1, '#e8a820'); p(c, 3, 4, '#e8a820'); p(c, 13, 4, '#a86a10'); r(c, 8, 8, 1, 3, '#e8a820'); r(c, 6, 11, 5, 1, '#ffd84a'); r(c, 6, 12, 5, 1, '#a86a10'); p(c, 5, 3, '#ffffff'); p(c, 8, 4, '#c83030'); return;
     case 'g_fahne': r(c, 3, 1, 1, 15, '#7a5230'); r(c, 4, 2, 10, 6, '#3a8a3a'); r(c, 4, 7, 10, 1, '#2a6a2a'); r(c, 7, 3, 3, 3, '#ffffff'); p(c, 3, 0, '#e8c030'); return;
     // Vom Schlittenberg
     case 's_kinder': r(c, 1, 11, 9, 2, '#a8703a'); r(c, 1, 13, 10, 1, '#6a4428'); for (const [x, f] of [[6, '#c83a32'], [12, '#3a6ab8']]) { r(c, x, 5, 3, 5, f); r(c, x, 2, 3, 3, '#f2c9a0'); r(c, x, 1, 3, 1, '#e8c030'); r(c, x, 10, 1, 4, '#2a2a30'); r(c, x + 2, 10, 1, 4, '#2a2a30'); } return;
@@ -2730,7 +2742,7 @@ export function verdrahte() {
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
   $('#kartenZu').onclick = () => { T.spiele('klick'); schliesseKarte(); };
   $('#kartenText').onclick = () => { T.spiele('klick'); KA.schilderUmschalten(); };
-  $('#miniZu').onclick = () => { T.spiele('klick'); LI.schliesse(); CB.schliesse(); SB.schliesse(); SW.schliesse(); EB.schliesse(); BS.schliesse(); };
+  $('#miniZu').onclick = () => { T.spiele('klick'); C.MINI_SPECIAL.laeuft = null; LI.schliesse(); CB.schliesse(); SB.schliesse(); SW.schliesse(); EB.schliesse(); BS.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
   $('#btnKarte').onclick = () => karte();

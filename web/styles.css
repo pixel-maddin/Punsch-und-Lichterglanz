@@ -1323,3 +1323,16 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .bs-intro { margin: 0 0 calc(var(--px) * 2); font-size: var(--t-klein); text-align: center; }
 /* Hinweis im Fenster, z. B. Meisenknödel ohne Futterhaus (23.10.) */
 .hinweis-kasten { margin: calc(var(--px) * 2) 0; padding: calc(var(--px) * 2.4) calc(var(--px) * 3); border: calc(var(--px) * 0.6) solid var(--gold); border-radius: calc(var(--px) * 2); background: #fff6d4; font-size: var(--t-klein); text-align: left; }
+
+/* Minispiel-Special (24.10.): goldener Streifen im Startfenster */
+.special-streifen {
+  margin: 0 0 calc(var(--px) * 2); padding: calc(var(--px) * 1.4) calc(var(--px) * 2);
+  border-radius: calc(var(--px) * 1.5); border: calc(var(--px) * 0.6) solid #e8b030;
+  background: linear-gradient(180deg, #fff3c4, #f6d77a); color: #5a3a10;
+  font-size: var(--t-klein); text-align: center;
+  animation: specialGlanz 2.4s ease-in-out infinite;
+}
+@keyframes specialGlanz { 0%, 100% { box-shadow: 0 0 0 rgba(255, 200, 60, 0); } 50% { box-shadow: 0 0 calc(var(--px) * 3) rgba(255, 200, 60, 0.8); } }
+/* Schild des Special-Orts auf der Karte: golden, glänzt (ohne transform - das Schild ist per translate zentriert) */
+#kartenOrte .ort.special { background: linear-gradient(180deg, #fff3c4, #f6d77a); border-color: #d89a20; animation: specialGlanz 2.4s ease-in-out infinite; }
+#kartenOrte .ort.special small { color: #8a5a10; font-weight: bold; }

@@ -1012,8 +1012,35 @@ for (const rz of BACK_REZEPTE) rz.ab = auf50(rz.ab * MINISPIELE.back.skala);
 /** Schwierigkeit samt Punktfaktor des Spiels - jede Punktzahl im Spiel läuft hierüber. */
 export function miniStufe(name, nr) {
   const s = MINI_STUFEN[nr] || MINI_STUFEN[1];
-  return { ...s, punkte: s.punkte * MINISPIELE[name].skala };
+  const sp = MINI_SPECIAL.laeuft === name;
+  return { ...s, punkte: s.punkte * MINISPIELE[name].skala, tempo: s.tempo * (sp ? SPECIAL_TEMPO : 1), special: sp };
 }
+
+// Minispiel-Special (24.10., Nutzeridee): Alle 2-3 Tage ist EIN offenes Spiel
+// „Special des Tages" - es glitzert auf der Karte, zahlt doppelte Sterne
+// (nicht Punkte - der Rekord bleibt fair) und ist schwerer: 20 % schneller
+// plus ein eigener Dreh je Spiel (`special` in der Stufe, Text unten).
+// `laeuft` setzt ui.js nur, solange eine Special-Runde läuft - der Messweg
+// `messe()` bleibt dadurch unberührt.
+export const MINI_SPECIAL = { laeuft: null };
+export const SPECIAL_TEMPO = 1.2;
+export const SPECIAL_STERNE = 2;
+export const SPECIAL_AB_TAG = 4;          // vorher wäre es zu viel auf einmal
+export const SPECIAL_ABSTAND = [2, 3];    // Tage zwischen zwei Specials
+export const SPECIAL_TEXT = {
+  lichtung: 'mehr Rehe und Eichhörnchen!',
+  baum:     'ungeduldige Kunden!',
+  back:     'schmaler goldener Bereich!',
+  berg:     'mehr Hindernisse!',
+  eis:      'mehr Hindernisse!',
+  schnee:   'mehr Wichtel dazwischen!',
+};
+// Nach SPECIAL_DEKO_AB geschafften Specials (je Tag eins, Runde mit Punkten)
+// gibt es ein Stück fürs Haus
+export const SPECIAL_DEKO_AB = 5;
+export const SPECIAL_DEKO = [
+  { id: 'sp_pokal', name: 'Goldener Pokal', stimmung: 7, text: 'Für fünf geschaffte Minispiel-Specials: ein goldener Pokal am Haus.' },
+];
 
 
 // Minispiele kommen nach und nach (10.10., Nutzerwunsch: „sonst zu überladen

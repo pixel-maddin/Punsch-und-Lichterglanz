@@ -24,12 +24,12 @@
  * Drehung, das Auto federt ein, ein Gurt schnappt zu.
  * Dazu eigene Bäume aus der Baumschule (`eigen`): golden markiert, ×3 Punkte.
  */
-import * as C from './config.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import * as MH from './minihud.js?v=202610241000';
-import * as L from './licht.js?v=202610241000';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import * as MH from './minihud.js?v=202610241200';
+import * as L from './licht.js?v=202610241200';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -115,7 +115,7 @@ function neuesAuto(g) {
   // Der zweite Kunde (und danach jeder dritte) will den eigenen Baum, wenn einer steht
   const eigen = stehen.find((b) => b.eigen);
   const ziel = eigen && (g.kunden === 1 || g.kunden % 3 === 2) ? eigen : wahl(stehen);
-  const max = Math.max(8, 14 - g.kunden * 0.35) / stufe.tempo;
+  const max = Math.max(8, 14 - g.kunden * 0.35) / stufe.tempo * (stufe.special ? 0.85 : 1);   // Special: ungeduldiger
   g.auto = { x: W + 30, phase: 'kommt', farbe: wahl(AUTO_FARBEN), wunsch: { art: ziel.art, gr: ziel.gr, eigen: ziel.eigen },
     geduld: max, max, fehler: false, dach: null, t: 0, feder: 0,
     kunde: { typ: wahl(['erwachsen', 'erwachsen', 'oma', 'opa']), farben: neueFarben('erwachsen'), phase: Math.random() * 6, laeuft: false } };
@@ -660,7 +660,7 @@ function zeichne(t) {
   if (w && w.phase === 'fliegt') wareZeichnen(w, winter, t);   // im Flug vor allem anderen
   // Hinweis, was als Nächstes dran ist
   const was = !a || a.phase === 'faehrt' ? '' : g.schritt === 'suchen' ? (a.wunsch.eigen ? 'DEIN GOLDENER BAUM!' : 'BAUM SUCHEN') : g.schritt === 'saegen' ? 'SÄGEN!' : g.schritt === 'netz' ? 'INS NETZ!' : g.schritt === 'laden' ? 'AUFS AUTO!' : '';
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null);
+  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.baum : 'Schwierigkeit: ' + stufe.name}` : was && !g.aus ? was : null);
   // Fehlgriffe und Texte
   for (const f of g.fehl) { const k = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - k})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
   c.restore();

@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610241000';
-import * as S from './spiel.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as FEIN from './fein.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as S from './spiel.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as FEIN from './fein.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 
@@ -164,6 +164,8 @@ function baueSchilder(hervor) {
     let unter = o.bald ? 'bald' : o.spiel ? 'Minispiel' : '';
     // Noch nie gespielt: kleines NEU am Schild
     const nieGespielt = o.spiel && !S.miniRekord(o.spiel);
+    // Special des Tages (24.10.): Schild glänzt golden
+    if (o.spiel && S.specialHeute() === o.spiel) { unter = 'Special heute!'; b.classList.add('special'); }
     if (o.markt) {
       const m = S.marktInfo();
       unter = m.heute ? 'heute Weihnachtsmarkt!' : m.inTagen === 1 ? 'Markt morgen' : `Markt in ${m.inTagen} Tagen`;
@@ -1115,7 +1117,33 @@ function zeichne(t, dt) {
       p(c, px2 - 1, py2 - 1, '#ffffff'); p(c, px2, py2 - 1, '#fff6d0');
     }
   }
+  specialGlitzer(t, zu);
   c.restore();
+}
+
+/**
+ * Das Minispiel-Special des Tages glitzert (24.10.): goldener, atmender Schein
+ * und sechs Funkelsterne, die reihum um den Ort aufblitzen.
+ */
+function specialGlitzer(t, zu) {
+  const name = S.specialHeute();
+  const o = name && ORTE.find((q) => q.spiel === name);
+  if (!o || zu.includes(o)) return;
+  const ox = o.x, oy = yPx(o) - 8, atem = 0.75 + Math.sin(t * 2.4) * 0.25;
+  const g = c.createRadialGradient(ox, oy, 2, ox, oy, 22);
+  g.addColorStop(0, `rgba(255,214,90,${(0.42 * atem).toFixed(3)})`); g.addColorStop(1, 'rgba(255,200,60,0)');
+  c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(ox - 22, oy - 22, 44, 44); c.restore();
+  for (let i = 0; i < 6; i++) {
+    const k = (t * 0.9 + i / 6) % 1;              // jeder Stern blitzt einmal je Umlauf
+    const hell = Math.max(0, Math.sin(k * Math.PI * 2));
+    if (hell < 0.15) continue;
+    const w = i / 6 * Math.PI * 2 + t * 0.35;
+    const sx = Math.round(ox + Math.cos(w) * 16), sy = Math.round(oy + Math.sin(w) * 11);
+    const f = hell > 0.7 ? '#ffffff' : '#ffe27a';
+    p(c, sx, sy, f);
+    if (hell > 0.45) { p(c, sx - 1, sy, '#ffd040'); p(c, sx + 1, sy, '#ffd040'); p(c, sx, sy - 1, '#ffd040'); p(c, sx, sy + 1, '#ffd040'); }
+    if (hell > 0.8) { p(c, sx - 2, sy, '#e8a820'); p(c, sx + 2, sy, '#e8a820'); p(c, sx, sy - 2, '#e8a820'); p(c, sx, sy + 2, '#e8a820'); }
+  }
 }
 
 /**

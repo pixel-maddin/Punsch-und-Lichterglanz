@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610241000';
-import * as Z from './zeit.js?v=202610241000';
-import * as T from './ton.js?v=202610241000';
-import * as MH from './minihud.js?v=202610241000';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610241000';
+import * as C from './config.js?v=202610241200';
+import * as Z from './zeit.js?v=202610241200';
+import * as T from './ton.js?v=202610241200';
+import * as MH from './minihud.js?v=202610241200';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610241200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -251,7 +251,8 @@ const ofenDauer = () => C.BACK_OFEN / stufe.tempo;
  * C.BACK_GOLDEN (0,52-0,80, also 0,28 breit). Man muss also jedes Mal hinsehen.
  */
 function neuesGold() {
-  const breite = 0.22 + Math.random() * 0.1, von = 0.36 + Math.random() * (0.88 - breite - 0.36);
+  // Special: schmaler goldener Bereich
+  const breite = (0.22 + Math.random() * 0.1) * (stufe.special ? 0.7 : 1), von = 0.36 + Math.random() * (0.88 - breite - 0.36);
   return [von, von + breite];
 }
 const gold = (w) => (w && w.gold) || C.BACK_GOLDEN;
@@ -717,7 +718,7 @@ function zeichne(t) {
   // Beim Backen links neben dem Ofen - darüber verdeckte er Ofen und Anzeige
   const woY = g.schritt === 'stechen' ? FORM_Y() - 24 : g.schritt === 'verzieren' ? SCHALE_Y() - 26 : OFEN().y + 6;
   const woX = g.schritt === 'backen' ? Math.round(OFEN().x / 2) : null;
-  MH.hinweis(g.t < 0 ? `Schwierigkeit: ${stufe.name}` : was && !g.aus ? was : null, g.t < 0 || !was ? null : woY, woX);
+  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.back : 'Schwierigkeit: ' + stufe.name}` : was && !g.aus ? was : null, g.t < 0 || !was ? null : woY, woX);
   MH.label('ofen', OFEN().x + 21, OFEN().y + OFEN().h + 4, 'OFEN', 'schild');
   for (const f of g.fehl) { const a = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - a})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe, x.text.length > 6 ? 0.8 : 1.1); }
