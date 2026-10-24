@@ -14,8 +14,8 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=202610241700';
-import * as A from './auftraege.js?v=202610241700';
+import * as S from './spiel.js?v=202610241800';
+import * as A from './auftraege.js?v=202610241800';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -61,14 +61,22 @@ export const fertig = () => idx() >= ZIELE.length;
 
 /**
  * Das laufende nächste Ziel NACH den Startzielen (13.10., Betatest: „nach
- * Minute 12 steht man ohne Ziel da, bei 6.000 Sternen"): das günstigste
- * Teil, das man gerade kaufen könnte - sichtbar, ohne Hindernis, kein Luxus.
- * Neue Getränke gehen vor (sie bringen mehr Sterne), sonst das billigste.
+ * Minute 12 steht man ohne Ziel da, bei 6.000 Sternen"). Sichtbar, ohne
+ * Hindernis, kein Luxus. Seit 24.10.: zuerst ein Meilenstein in Reichweite
+ * (Getränk, Helfer, Stand), sonst das billigste Teil - und es bleibt stehen,
+ * bis es gekauft ist.
  */
 export function naechstes() {
   // Nur wer es will (13.10., Nutzerwunsch: nur das Tutorial soll Ziele haben -
   // oder man entscheidet, ob man selbst erkundet): st.zieleWeiter
   if (S.st.lernen < 99 || !fertig() || S.st.zieleWeiter !== true) return null;
+  // Einmal gezeigt, bleibt es stehen, bis es gekauft ist (24.10., gemessen: das Futterhaus wurde
+  // beim Sparen zweimal von einem Ausbau verdrängt, sobald die Kasse ihn in Reichweite brachte)
+  if (gemerkt) {
+    const a = S.ARTIKEL_MAP[gemerkt.id], s = a && S.status(a);
+    if (s && S.stufe(a.id) === gemerkt.stufe && !s.versteckt && !s.fertig && !s.grund && s.kosten != null) return a;
+    gemerkt = null;
+  }
   let best = null, preis = Infinity, meilen = null, mPreis = Infinity;
   for (const a of S.ARTIKEL_LISTE) {
     if (a.luxus || (a.luxusAb && S.stufe(a.id) >= a.luxusAb - 1)) continue;
@@ -81,11 +89,14 @@ export function naechstes() {
   // Helfer oder Ausbau am Stand -, solange der nächste in Reichweite ist (Kasse + REICHWEITE_MIN
   // Minuten Einnahmen). Sonst das billigste Teil, meist Deko, bis man sich ihm nähert.
   const reichweite = Math.max(0, S.st.geld) + S.einnahmenProMinute() * REICHWEITE_MIN;
-  return meilen && mPreis <= reichweite ? meilen : best;
+  const wahl = meilen && mPreis <= reichweite ? meilen : best;
+  if (wahl) gemerkt = { id: wahl.id, stufe: S.stufe(wahl.id) };
+  return wahl;
 }
+let gemerkt = null;   // { id, stufe } des gezeigten Ziels - nur für diese Sitzung
 
 /** Bringt das Teil den Stand voran (statt nur das Haus)? Getränke, Wichtel, Ausbauten am Stand. */
-const REICHWEITE_MIN = 20;
+const REICHWEITE_MIN = 8;   // 24.10.: erst 20 - dann kam kaum Deko (♥ 19 nach 22 min)
 export const istMeilenstein = (a) => a.tab === 'super' || a.tab === 'wichtel' || (a.tab === 'baumarkt' && a.gruppe === 'Am Stand' && !S.istDeko(a));
 
 /** Was soll gerade gekauft werden, und wo? { tab, id } oder null. */
