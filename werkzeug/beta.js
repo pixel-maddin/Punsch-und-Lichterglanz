@@ -37,6 +37,8 @@ function mensch() {
     const inp = m.querySelector('input'); if (inp && !inp.value) inp.value = 'Tannenhof';
     if (m.querySelector('.kartenbild')) { [...m.querySelectorAll('button')].find((b) => /Schließen/.test(b.textContent))?.click(); return 'karte zu'; }
     const mod = m.querySelector('.modus[data-m="eigen"]') || m.querySelector('.modus'); if (mod) { mod.click(); return 'modus'; }
+    // „Dein Angebot": Fertig drücken - sonst tippt der Bot Schalter um, und das Fenster bleibt für immer offen (24.10.)
+    if (m.querySelector('h2')?.textContent === 'Dein Angebot') { [...m.querySelectorAll('button')].find((b) => b.textContent === 'Fertig')?.click(); return 'angebot'; }
     const kn = [...m.querySelectorAll('.knoepfe button, button.k')].filter((b) => !b.disabled);
     const b = kn.find((x) => !x.classList.contains('neben')) || kn[0];
     if (b) { b.click(); return 'fenster'; }
@@ -65,6 +67,11 @@ function mensch() {
   // Zielleiste oben: pulsiert, wenn das Ziel bezahlbar ist - antippen
   const zl = $('#ziel');
   if (zl && !zl.classList.contains('versteckt') && zl.classList.contains('bereit') && $('#blatt').classList.contains('versteckt') && $('#landkarte').classList.contains('versteckt')) { zl.click(); return 'ziel'; }
+  // Aufträge-Fenster: abholen, was geht (24.10.: sonst hing der Bot an Startziel 7)
+  if (!$('#blatt').classList.contains('versteckt')) {
+    const ab = [...$('#blattInhalt').querySelectorAll('button')].find((b) => b.textContent === 'Abholen' && !b.disabled);
+    if (ab) { ab.click(); log('mensch', 'abgeholt'); return 'abholen'; }
+  }
   // Laden offen ohne Zeiger: zu
   if (!$('#blatt').classList.contains('versteckt')) { $('#blattZu').click(); return 'blatt zu'; }
   if (!$('#landkarte').classList.contains('versteckt')) { $('#kartenZu').click(); return 'karte zu'; }

@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610242000';
-import * as S from './spiel.js?v=202610242000';
-import * as Z from './zeit.js?v=202610242000';
-import * as T from './ton.js?v=202610242000';
-import * as LI from './lichtung.js?v=202610242000';
-import * as CB from './christbaum.js?v=202610242000';
-import * as KA from './karte.js?v=202610242000';
-import * as SB from './schlitten.js?v=202610242000';
-import * as EB from './schlittschuh.js?v=202610242000';
-import * as BS from './backstube.js?v=202610242000';
-import * as UI from './ui.js?v=202610242000';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610242000';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610242000';
-import * as Kacheln from './kacheln.js?v=202610242000';
-import * as Lernen from './lernen.js?v=202610242000';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610242000';
-import * as A from './auftraege.js?v=202610242000';
-import * as E from './erfolge.js?v=202610242000';
-import * as ZL from './ziele.js?v=202610242000';
+import * as C from './config.js?v=202610242200';
+import * as S from './spiel.js?v=202610242200';
+import * as Z from './zeit.js?v=202610242200';
+import * as T from './ton.js?v=202610242200';
+import * as LI from './lichtung.js?v=202610242200';
+import * as CB from './christbaum.js?v=202610242200';
+import * as KA from './karte.js?v=202610242200';
+import * as SB from './schlitten.js?v=202610242200';
+import * as EB from './schlittschuh.js?v=202610242200';
+import * as BS from './backstube.js?v=202610242200';
+import * as UI from './ui.js?v=202610242200';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610242200';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610242200';
+import * as Kacheln from './kacheln.js?v=202610242200';
+import * as Lernen from './lernen.js?v=202610242200';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610242200';
+import * as A from './auftraege.js?v=202610242200';
+import * as E from './erfolge.js?v=202610242200';
+import * as ZL from './ziele.js?v=202610242200';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');

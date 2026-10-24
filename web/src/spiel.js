@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610242000';
-import * as Z from './zeit.js?v=202610242000';
-import { neueFarben } from './pixel.js?v=202610242000';
+import * as C from './config.js?v=202610242200';
+import * as Z from './zeit.js?v=202610242200';
+import { neueFarben } from './pixel.js?v=202610242200';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1766,7 +1766,7 @@ export function miniErgebnis(name, punkte) {
 }
 /*
  * Minispiel-Special (24.10.): ab SPECIAL_AB_TAG nach dem ersten Spieltag alle
- * 2-3 Tage, gewürfelt aus dem Markt-Seed (gleich nach jedem Neuladen), nie an
+ * 2-3 Tage, Takt aus dem Markt-Seed (gleich nach jedem Neuladen), Spiele reihum, nie an
  * einem Markttag (dann einen Tag später) und nie zweimal dasselbe Spiel
  * hintereinander. Nur offene Spiele, erst wenn mindestens zwei offen sind und
  * die Karte vorgestellt ist. Je Tag einmal gerechnet.
@@ -1780,16 +1780,28 @@ export function specialHeute() {
   let name = null;
   if (offen.length >= 2) {
     const m = marktStand(), [a, b] = C.SPECIAL_ABSTAND;
-    let k = m.anker + C.SPECIAL_AB_TAG, vorher = null;
+    // Feste, je Spielstand gemischte Reihenfolge ALLER Spiele, der Reihe nach (Betatest 24.10.:
+    // mit einem Zufallsgriff in die heute offenen war die Backstube 6 von 13 Mal dran, und weil
+    // sich die Liste mit jedem neuen Spiel änderte, griff die Sperre gegen Wiederholung nicht).
+    // Noch geschlossene Spiele werden übersprungen.
+    const reihe = Object.keys(C.MINISPIELE).map((n, j) => [n, Z.hash(m.seed * 0.37 + j * 7.13)]).sort((x, y) => x[1] - y[1]).map((x) => x[0]);
+    const nimm = (i) => { for (let s = 0; s < reihe.length; s++) { const n = reihe[(i + s) % reihe.length]; if (offen.includes(n)) return n; } return null; };
+    // Nie zweimal dasselbe hintereinander: verglichen mit dem Special, das WIRKLICH zuletzt dran war
+    // (st.specialLetzt) - nachgerechnet kam rückwirkend etwas anderes heraus, sobald ein Spiel aufging
+    const letzt = st.specialLetzt;
+    let k = m.anker + C.SPECIAL_AB_TAG;
     for (let i = 0; i < 80 && k <= heute; i++) {
       const tag = istMarkt(k) ? k + 1 : k;   // Markttag: einen Tag später, der Takt bleibt
-      let wahl = offen[Math.floor(Z.hash(m.seed * 0.37 + k * 5.1) * offen.length) % offen.length];
-      if (wahl === vorher) wahl = offen[(offen.indexOf(wahl) + 1) % offen.length];
-      if (tag === heute) { name = wahl; break; }
+      if (tag === heute) {
+        if (letzt && letzt.tag === heute && offen.includes(letzt.name)) { name = letzt.name; break; }   // heute schon festgelegt
+        name = nimm(i);
+        if (letzt && letzt.tag < heute && letzt.name === name) name = nimm(reihe.indexOf(name) + 1);
+        break;
+      }
       if (tag > heute) break;
-      vorher = wahl;
       k = tag === k ? k + a + (Z.hash(m.seed + k * 2.3 + 7) < 0.5 ? 0 : b - a) : tag + a;   // nach einer Verschiebung nie zwei Tage hintereinander
     }
+    if (name && (!letzt || letzt.tag !== heute)) st.specialLetzt = { tag: heute, name };
   }
   specialMerk = { schluessel, name };
   return name;

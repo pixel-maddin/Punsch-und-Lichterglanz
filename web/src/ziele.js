@@ -14,8 +14,8 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=202610242000';
-import * as A from './auftraege.js?v=202610242000';
+import * as S from './spiel.js?v=202610242200';
+import * as A from './auftraege.js?v=202610242200';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -43,7 +43,14 @@ export const ZIELE = [
   // Ablauf (Aufträge, Ruf, Erfolgswand). Kein Kauf: Antippen öffnet AUFTRÄGE (`oeffne`),
   // „Los" leuchtet, sobald einer abholbar ist, der Balken zeigt den leichtesten Auftrag.
   { id: 'auftrag', text: 'Hol deinen ersten Tagesauftrag unter AUFTRÄGE ab', lohn: 300,
-    stand: () => ((S.st.stats.auftraege || 0) > 0 ? 1 : 0), ziel: 1, kauf: () => null, oeffne: 'auftraege',
+    // Spätestens am nächsten Spieltag erledigt (Betatest 24.10.): Wer es übersieht, bliebe sonst für
+    // immer „in den Startzielen" - Bitten, Socken- und Ruf-Meldungen warten darauf
+    stand: () => {
+      if ((S.st.stats.auftraege || 0) > 0) return 1;
+      if (S.st.ziel7Tag == null) S.st.ziel7Tag = S.spieltag();
+      return S.spieltag() > S.st.ziel7Tag ? 1 : 0;
+    },
+    ziel: 1, kauf: () => null, oeffne: 'auftraege',
     bereit: () => A.heute().some((a) => A.fertig(a) && !a.abgeholt),
     anteil: () => Math.max(0, ...A.heute().filter((a) => !a.abgeholt).map((a) => Math.min(1, a.stand / a.ziel))) },
 ];
