@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610241300';
-import * as Z from './zeit.js?v=202610241300';
-import { neueFarben } from './pixel.js?v=202610241300';
+import * as C from './config.js?v=202610241500';
+import * as Z from './zeit.js?v=202610241500';
+import { neueFarben } from './pixel.js?v=202610241500';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -979,7 +979,7 @@ export function tippeZelle(i) {
     // Wer mit leerem Glas kam, wollte einschenken - sagen, warum nichts passiert
     // (sonst blieb das Glas still leer stehen, Betatest 02.10.). Nur die
     // ersten zwei Male als Text, danach reicht das blinkende LEER am Topf.
-    else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS && (st.topfHinweise || 0) < 2) {
+    else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS && (st.topfHinweise || 0) < 2 && st.tipps && st.tipps.leer) {   // 24.10.: nicht neben der Blase „4-mal antippen" (widersprach sich mit „Noch 3×")
       st.topfHinweise = (st.topfHinweise || 0) + 1;
       const noch = C.NACHFUELL_TIPPS - Math.round(lauf.fuellen[p.id] * C.NACHFUELL_TIPPS);
       hooks.toast(`${p.name} ist leer! Noch ${noch}× antippen, dann ist es wieder voll.`, 'hinweis');
@@ -1094,6 +1094,18 @@ function glaeserZuordnen() {
   }
 }
 
+/**
+ * Dieselbe Hinweis-Einblendung höchstens alle SELTEN_S Sekunden (24.10., Erstspieler-Messung:
+ * „gleich fertig“ und „schon unterwegs“ bei jedem ungeduldigen Tipp; selbst mit 30-s-Sperre noch 16-mal in 8 Minuten). Das Wackeln am Gast bzw.
+ * Topf bleibt bei jedem Tipp - das reicht als Antwort.
+ */
+const SELTEN_S = 30, SELTEN_MAX = 3;   // je Sitzung höchstens drei Mal
+function selten(art, text) {
+  const z = lauf.seltenT = lauf.seltenT || {}, n = lauf.seltenN = lauf.seltenN || {};
+  if ((n[art] || 0) >= SELTEN_MAX || (z[art] != null && lauf.t - z[art] < SELTEN_S)) return;
+  z[art] = lauf.t; n[art] = (n[art] || 0) + 1;
+  hooks.toast(text, 'hinweis');
+}
 export function tippeGast(platz) {
   const g = lauf.gaeste.find((x) => x.platz === platz && x.am && !x.gehen);
   if (!g || g.bedient) return;
@@ -1104,7 +1116,7 @@ export function tippeGast(platz) {
   if (i < 0) {
     // Das Richtige ist noch in Arbeit? Dann nur warten - keine Strafe
     if (lauf.hand.some((h) => h.art === 'voll' && h.id === g.wunsch)) {
-      lauf.wackel['g' + g.id] = 0.2; hooks.toast('Noch einen Moment - es ist gleich fertig!', 'hinweis');
+      lauf.wackel['g' + g.id] = 0.2; selten('fertig', 'Noch einen Moment - es ist gleich fertig!');
       return;
     }
     // Mit Servier-Wichtel: Tipp auf den Gast = der Wichtel schenkt ihm ein
@@ -1171,7 +1183,7 @@ function wichtelEinschenken(g) {
   if ((st.toepfe[p.id] || 0) <= 0) {
     lauf.wackel['z' + p.id] = 0.3; hooks.ton('falsch');
     // 17.10.: mit Nachfüll-Wichtel nicht zum Topf schicken - der füllt gleich selbst nach
-    hooks.toast(stufe('nachfuell') ? `${p.name} ist leer - der Nachfüll-Wichtel ist schon unterwegs!` : `${p.name} ist leer - erst nachfüllen!`, 'hinweis');
+    selten('leer' + p.id, stufe('nachfuell') ? `${p.name} ist leer - der Nachfüll-Wichtel ist schon unterwegs!` : `${p.name} ist leer - erst nachfüllen!`);
     return true;
   }
   if (!wichtelGlas(g)) {

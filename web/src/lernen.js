@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610241300';
-import * as S from './spiel.js?v=202610241300';
-import * as A from './auftraege.js?v=202610241300';
-import * as E from './erfolge.js?v=202610241300';
-import * as Z from './ziele.js?v=202610241300';
-import * as KA from './karte.js?v=202610241300';
-import { zellePos } from './tresen.js?v=202610241300';
+import * as C from './config.js?v=202610241500';
+import * as S from './spiel.js?v=202610241500';
+import * as A from './auftraege.js?v=202610241500';
+import * as E from './erfolge.js?v=202610241500';
+import * as Z from './ziele.js?v=202610241500';
+import * as KA from './karte.js?v=202610241500';
+import { zellePos } from './tresen.js?v=202610241500';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -192,12 +192,16 @@ const HINWEISE = [
   // Was es außer dem Stand gibt (09.10.): erst, wenn die Wichtel den Stand
   // tragen - dann ist Zeit dafür, und es hat Sterne für die Markt-Ware
   // Der Baumarkt geht nach dem Servier-Wichtel auf (Orte nach und nach, 11.10.)
-  { id: 'baumarkt', sofort: true, wann: () => !!S.st.tipps.wichtel_weg && (S.st.ziel || 0) >= 5,
+  // 24.10. (Erstspieler-Messung): erst NACH den Startzielen und mit normaler Pause. Vorher kamen
+  // nach dem dritten Wichtel acht Blasen in einer Minute (Servier-Wichtel, Karte, Wichtel weg,
+  // Baumarkt, Minispiele, Wichtel am Tablett) - mitten im Ziel „Heißer Apfel". Der Baumarkt ist
+  // trotzdem schon offen (ortOffen), nur die Vorstellung wartet.
+  { id: 'baumarkt', wann: () => !!S.st.tipps.wichtel_weg && Z.fertig() && !!S.st.tipps.ziele_fertig,   // nach „Alle sieben Ziele geschafft“
     info: () => 'Neu auf der Karte: der BAUMARKT! Dort gibt es größere Töpfe, einen längeren Tresen für mehr Gäste, ein Tablett für mehr Gläser - und neue Farbe für dein Haus.',
     text: () => 'Tippe auf KARTE - der Baumarkt ist jetzt offen.',
     // 13.10.: ohne `lang` - wer nicht hingeht, hatte den Zeiger sonst für immer über dem Stand
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, laden: { tab: 'baumarkt' } },
-  { id: 'karte_mehr', sofort: true, wann: () => !!S.st.tipps.wichtel_weg && !!S.st.tipps.baumarkt,
+  { id: 'karte_mehr', wann: () => !!S.st.tipps.wichtel_weg && !!S.st.tipps.baumarkt,
     // Nennt nur, was schon offen ist (10.10.: Minispiele kommen nach und nach)
     info: () => {
       const offen = KA.ORTE.filter((o) => o.spiel && S.miniOffen(o.spiel)).map((o) => o.name);
