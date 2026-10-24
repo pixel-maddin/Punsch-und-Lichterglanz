@@ -10,12 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610231400';
-import * as Z from './zeit.js?v=202610231400';
-import * as T from './ton.js?v=202610231400';
-import * as MH from './minihud.js?v=202610231400';
-import * as L from './licht.js?v=202610231400';
-import { r, p, ton, mische } from './pixel.js?v=202610231400';
+import * as C from './config.js?v=202610241000';
+import * as Z from './zeit.js?v=202610241000';
+import * as T from './ton.js?v=202610241000';
+import * as MH from './minihud.js?v=202610241000';
+import * as L from './licht.js?v=202610241000';
+import { r, p, ton, mische } from './pixel.js?v=202610241000';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -430,14 +430,15 @@ function figur(pose, t) {
 
 function skater(g, t, nacht) {
   const boden = BODEN();
-  const fx = SKATER_X, fy = boden - Math.round(g.y);
+  // Kufen 1 px IM Eis: die Zeile boden ist nur die helle Kante, sonst schwebt er (24.10.)
+  const fx = SKATER_X, fy = boden + 1 - Math.round(g.y);
   // Schatten auf dem Eis, kleiner je höher
   const sw = Math.max(4, 12 - Math.round(g.y / 5));
   L.schatten(c, fx + L.schattenRichtung() * 4, boden + 2, sw * 0.8, 2.5, 0.4);   // weicher Schatten auf dem Eis
   if (g.sturz > 0) {
     // Gestürzt: liegt quer und rutscht
     figur('stand', t);
-    c.save(); c.translate(fx, boden - 4); c.rotate(-Math.PI / 2 + Math.sin(t * 20) * 0.1); c.drawImage(fig, -12, -12); c.restore();
+    c.save(); c.translate(fx, boden - 3); c.rotate(-Math.PI / 2 + Math.sin(t * 20) * 0.1); c.drawImage(fig, -12, -12); c.restore();
     return;
   }
   let pose = g.inLuft ? 'hocke' : 'lauf', winkel = 0, breite = 1;
@@ -455,7 +456,7 @@ function skater(g, t, nacht) {
   c.drawImage(fig, -12, -10);
   c.restore();
   // Eisspäne hinter den Kufen beim Laufen
-  if (!g.inLuft && Math.floor(t * 12) % 2) p(c, fx - 6, boden - 1, '#ffffff');
+  if (!g.inLuft && Math.floor(t * 12) % 2) p(c, fx - 6, boden + 1, '#ffffff');
 }
 
 function ding(d, g, t) {

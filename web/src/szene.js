@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610231400';
-import * as Z from './zeit.js?v=202610231400';
-import * as S from './spiel.js?v=202610231400';
-import { FASSADEN } from './config.js?v=202610231400';
-import * as C from './config.js?v=202610231400';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610241000';
+import * as Z from './zeit.js?v=202610241000';
+import * as S from './spiel.js?v=202610241000';
+import { FASSADEN } from './config.js?v=202610241000';
+import * as C from './config.js?v=202610241000';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -573,14 +573,14 @@ function haus(c, G, w, t, L) {
   }
   if (S.zeigt('nussknacker')) [nussknacker, holzrentier, gartenzwerg][S.variante('nussknacker')](c, 96, G - 24, t);
 
-  // Lichter am Dach
-  if (S.zeigt('lichter_dach')) kette(c, L, 33, 127, wandO + 1, 16, 2, t, 0, S.stufe('lichter_dach'), 'dach');
   if (S.zeigt('eiszapfen')) {
     const ev = S.variante('eiszapfen');
+    // Hängt die Dachkette, rücken die Zapfen unter sie (die Kette hängt bis wandO + 4 durch)
+    const wo = wandO + (S.zeigt('lichter_dach') ? 4 : 0);
     if (ev === 1) {
       // Schneeflocken-Lichter: große Flocken in einer Reihe unter der Traufe
       for (let x = 38, i = 0; x < 126; x += 13, i++) {
-        const y = wandO + 5 + (i % 2) * 2, f = '#e6f4ff';
+        const y = wo + 5 + (i % 2) * 2, f = '#e6f4ff';
         for (let k = 1; k <= 2; k++) { p(c, x - k, y, f); p(c, x + k, y, f); p(c, x, y - k, f); p(c, x, y + k, f); }
         p(c, x - 1, y - 1, '#b8d8f0'); p(c, x + 1, y + 1, '#b8d8f0'); p(c, x + 1, y - 1, '#b8d8f0'); p(c, x - 1, y + 1, '#b8d8f0');
         p(c, x, y, '#ffffff'); r(c, x, wandO + 2, 1, y - wandO - 4, '#8a8a7a');
@@ -590,15 +590,17 @@ function haus(c, G, w, t, L) {
       // Lichtervorhang: lange Schnüre, auf jeder ein paar warme Lichter
       for (let x = 35, i = 0; x < 126; x += 4, i++) {
         const len = 5 + Math.floor(Z.hash(x * 1.3) * 7);
-        r(c, x, wandO + 2, 1, len, '#7a7a6a');
-        for (let k = 2; k <= len; k += 3) { p(c, x, wandO + 2 + k, '#fff2c8'); L.push({ x, y: wandO + 2 + k, f: '#fff2c8', halo: 2, an: 0.8 }); }
+        r(c, x, wandO + 2, 1, len + wo - wandO, '#7a7a6a');
+        for (let k = 2; k <= len; k += 3) { p(c, x, wo + 2 + k, '#fff2c8'); L.push({ x, y: wo + 2 + k, f: '#fff2c8', halo: 2, an: 0.8 }); }
       }
     } else for (let x = 34, i = 0; x < 127; x += 3, i++) {
       const len = 1 + Math.floor(Z.hash(x) * 3);
-      r(c, x, wandO + 2, 1, len, '#cfe6f6');
-      L.push({ x, y: wandO + 1 + len, f: '#e6f4ff', halo: 2, an: 0.85 });
+      r(c, x, wandO + 2, 1, len + wo - wandO, '#cfe6f6');
+      L.push({ x, y: wo + 1 + len, f: '#e6f4ff', halo: 2, an: 0.85 });
     }
   }
+  // Lichter am Dach (nach den Eiszapfen, damit die Kette davor hängt)
+  if (S.zeigt('lichter_dach')) kette(c, L, 33, 127, wandO + 1, 16, 2, t, 0, S.stufe('lichter_dach'), 'dach');
   if (S.zeigt('lichter_fenster')) {
     for (const fx of [48, 96]) rahmenLichter(c, L, fx - 2, G - 60, 20, 20, t, S.stufe('lichter_fenster'), 'fenster');
   }

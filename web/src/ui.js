@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610231400';
-import * as S from './spiel.js?v=202610231400';
-import * as Z from './zeit.js?v=202610231400';
-import * as T from './ton.js?v=202610231400';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610231400';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610231400';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610231400';
-import * as A from './auftraege.js?v=202610231400';
-import * as E from './erfolge.js?v=202610231400';
-import * as ZL from './ziele.js?v=202610231400';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610231400';
-import * as KA from './karte.js?v=202610231400';
-import { zeigeRueckblick } from './ereignis.js?v=202610231400';
-import { barbaraZweig } from './szene.js?v=202610231400';
-import * as SW from './schneeball.js?v=202610231400';
-import * as LI from './lichtung.js?v=202610231400';
-import * as CB from './christbaum.js?v=202610231400';
-import * as SB from './schlitten.js?v=202610231400';
-import * as EB from './schlittschuh.js?v=202610231400';
-import * as BS from './backstube.js?v=202610231400';
-import { alleSymbole } from './symbole.js?v=202610231400';
+import * as C from './config.js?v=202610241000';
+import * as S from './spiel.js?v=202610241000';
+import * as Z from './zeit.js?v=202610241000';
+import * as T from './ton.js?v=202610241000';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610241000';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610241000';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610241000';
+import * as A from './auftraege.js?v=202610241000';
+import * as E from './erfolge.js?v=202610241000';
+import * as ZL from './ziele.js?v=202610241000';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610241000';
+import * as KA from './karte.js?v=202610241000';
+import { zeigeRueckblick } from './ereignis.js?v=202610241000';
+import { barbaraZweig } from './szene.js?v=202610241000';
+import * as SW from './schneeball.js?v=202610241000';
+import * as LI from './lichtung.js?v=202610241000';
+import * as CB from './christbaum.js?v=202610241000';
+import * as SB from './schlitten.js?v=202610241000';
+import * as EB from './schlittschuh.js?v=202610241000';
+import * as BS from './backstube.js?v=202610241000';
+import { alleSymbole } from './symbole.js?v=202610241000';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -788,7 +788,7 @@ function baueLaden() {
   }
   let gruppe = null;
   if (ladenTab === 'super') {
-    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.${rezeptHinweis('gluehwein')}</span></div><div class="knopfplatz"><span class="haken">✓</span></div>`));
+    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.${rezeptHinweis('gluehwein')}</span></div><div class="knopfplatz"><button class="k k--fertig" disabled><span class="haken">✓</span></button></div>`));
     zeichneIcon(liste.lastChild.querySelector('canvas'), { id: 'gluehwein', produkt: true });
   }
   const neu = S.st.neu || {};

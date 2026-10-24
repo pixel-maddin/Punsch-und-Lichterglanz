@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610231400';
-import * as S from './spiel.js?v=202610231400';
-import * as Z from './zeit.js?v=202610231400';
+import * as C from './config.js?v=202610241000';
+import * as S from './spiel.js?v=202610241000';
+import * as Z from './zeit.js?v=202610241000';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -52,7 +52,7 @@ function erzeuge(tag) {
     benutzt.add(typ);
     let param = null;
     if (typ === 'produkt') { const frei = S.produkteBesessen().filter((p) => p.art !== 'platte'); param = frei[Math.floor(z() * frei.length)].id; }
-    liste.push({ typ, param, ziel: TYPEN[typ].stufen[stufe], stand: 0, stufe, lohn: Math.max(20, Math.round(proMinute() * lohnMinuten(stufe))), abgeholt: false });
+    liste.push({ typ, param, ziel: TYPEN[typ].stufen[stufe], stand: 0, stufe, lohn: Math.max(20, S.zehner(proMinute() * lohnMinuten(stufe))), abgeholt: false });
   });
   return { tag, liste };
 }
@@ -151,7 +151,7 @@ export function bitteAbholen() {
   b.abgeholt = true; b.tag = Z.tagesSchluessel();
   S.st.bittenStand[b.gast] = b.i + 1;
   S.st.stats.bitten = (S.st.stats.bitten || 0) + 1;
-  const lohn = Math.max(100, Math.round(S.einnahmenProMinute() * C.BITTE_MINUTEN * S.dev.geld));
+  const lohn = Math.max(100, S.zehner(S.einnahmenProMinute() * C.BITTE_MINUTEN * S.dev.geld));
   S.verdiene(lohn);
   S.speichere();
   return { lohn, name: bitteName(b), dank: bitteDef(b).dank };
@@ -165,6 +165,7 @@ export function abholen(i, melde) {
   if (!a || !fertig(a) || a.abgeholt) return null;
   a.abgeholt = true;
   S.st.stats.auftraege = (S.st.stats.auftraege || 0) + 1;
+  a.lohn = S.zehner(a.lohn);   // Aufträge von vor dem Update noch krumm
   S.verdiene(a.lohn);
   let deko = null;
   if (a.stufe === 2) { deko = naechstesSammelstueck(); if (deko) { S.st.kalDeko[deko.id] = true; S.st.neu = S.st.neu || {}; S.st.neu[deko.id] = true; } }

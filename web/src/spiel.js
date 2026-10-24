@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610231400';
-import * as Z from './zeit.js?v=202610231400';
-import { neueFarben } from './pixel.js?v=202610231400';
+import * as C from './config.js?v=202610241000';
+import * as Z from './zeit.js?v=202610241000';
+import { neueFarben } from './pixel.js?v=202610241000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -682,6 +682,8 @@ export function setzeDev(neu) {
 }
 export const devAn = () => dev.geld !== 1 || dev.tempo !== 1 || dev.tage !== 0;
 
+/** Belohnungen (Kiste, Aufträge, Funde) auf volle Zehner aufrunden - nur Minispiele zahlen genau. */
+export const zehner = (n) => Math.ceil(Math.round(n) / 10) * 10;
 export function verdiene(betrag) {
   betrag = Math.round(betrag);   // ganze Sterne
   st.geld += betrag;
@@ -837,7 +839,7 @@ export function stammBedient(g) {   // exportiert nur für Tests
   const dt = Z.dezemberTag();
   if (dt >= 24 && dt <= 26 && e.n >= 3 && e.geschenk !== Z.saison()) {   // nur wer sich schon kennt
     e.geschenk = Z.saison();
-    const betrag = Math.round(einnahmenProMinute() * C.STAMM_GESCHENK_MIN * dev.geld);
+    const betrag = zehner(einnahmenProMinute() * C.STAMM_GESCHENK_MIN * dev.geld);
     if (betrag > 0) verdiene(betrag);
     stammFenster({ id: g.typ, geschenk: true, text: s.geschenk, betrag });
     return;
@@ -1787,7 +1789,7 @@ export function santaWuerfeln() {
 }
 /** Den versteckten Weihnachtsmann gefunden: Sterne. */
 export function fangeSanta() {
-  const betrag = Math.round(Math.max(C.SANTA_MIN, einnahmenProMinute() * C.SANTA_MINUTEN) * dev.geld);
+  const betrag = zehner(Math.max(C.SANTA_MIN, einnahmenProMinute() * C.SANTA_MINUTEN) * dev.geld);
   verdiene(betrag);
   st.stats.santa = (st.stats.santa || 0) + 1;
   hooks.ton('spezialKasse');
@@ -1842,7 +1844,7 @@ export function fangeSchlitten() {
   sl.gefangen = sl.t;
   st.nikolausTag = Z.tagesSchluessel();   // am Morgen danach: Rentierspuren im Schnee
   zaehleErfolg('nikolaus');
-  const betrag = Math.round(Math.max(C.SCHLITTEN_MIN, einnahmenProMinute() * C.SCHLITTEN_MINUTEN) * dev.geld);
+  const betrag = zehner(Math.max(C.SCHLITTEN_MIN, einnahmenProMinute() * C.SCHLITTEN_MINUTEN) * dev.geld);
   verdiene(betrag);
   hooks.ton('spezialKasse');
   hooks.toast(`Ho ho ho! Der Nikolaus schenkt dir ${formatGeld(betrag)}!`, 'spezial');
@@ -1861,7 +1863,7 @@ export function durchschnittsPreis() {
 
 /** Die Kiste öffnen: alles, was die Wichtel verdient haben. Gibt den Betrag zurück. */
 export function oeffneKiste() {
-  const b = st.kiste || 0;
+  const b = zehner(st.kiste || 0);
   st.kiste = 0; st.kisteGaeste = 0;
   if (b > 0) verdiene(b);
   speichere();
@@ -1902,7 +1904,7 @@ export function offlineAbrechnen() {
     if (n >= vorrat) { n = vorrat; for (const p of produkteFrei()) if (p.art !== 'platte') st.toepfe[p.id] = 0; }
   }
   n = Math.floor(n);
-  const betrag = Math.round(n * durchschnittsPreis() * preisFaktor() * dev.geld);
+  const betrag = zehner(n * durchschnittsPreis() * preisFaktor() * dev.geld);
   // Kurz weg: gleich gutschreiben. Länger weg: in die Kiste - die öffnet man
   // selbst (der Moment „ich komme zurück, und es ist viel passiert"). Sie
   // bleibt gespeichert, falls man die App vorher wieder zumacht.
@@ -2131,7 +2133,7 @@ export function briefGelesen() { if (st.briefe && st.briefe.aktiv) { st.briefe.a
 export function briefDank() {
   const B = briefe(), b = B.aktiv;
   if (!b || !b.dank) return 0;
-  const betrag = Math.max(C.BRIEF_LOHN_MIN, Math.round(einnahmenProMinute() * C.BRIEF_LOHN_MINUTEN / 10) * 10);
+  const betrag = Math.max(C.BRIEF_LOHN_MIN, zehner(einnahmenProMinute() * C.BRIEF_LOHN_MINUTEN));
   verdiene(betrag);
   B.erfuellt.push({ art: b.art, ziel: b.ziel, kind: b.kind, alter: b.alter, maedchen: b.maedchen, tag: tagNr() });
   B.aktiv = null;
@@ -2224,7 +2226,7 @@ export function fangeEichhoernchen() {
   const B = baumschule();
   if (eichhoernchen() < 0) return 0;
   B.eich.gefangen = true;
-  const betrag = Math.max(C.BAUMSCHULE_EICH_MIN, Math.round(einnahmenProMinute() * C.BAUMSCHULE_EICH_MINUTEN / 10) * 10);
+  const betrag = Math.max(C.BAUMSCHULE_EICH_MIN, zehner(einnahmenProMinute() * C.BAUMSCHULE_EICH_MINUTEN));
   verdiene(betrag);
   speichere();
   return betrag;
@@ -2431,7 +2433,7 @@ export function wettbewerbPlatz(s = stimmung()) {
 }
 export function wettbewerbAuswerten() {
   const s = stimmung(), platz = wettbewerbPlatz(s);
-  const betrag = Math.round(Math.max(C.WETTBEWERB.lohnMin, einnahmenProMinute() * C.WETTBEWERB.lohn[platz]) / 10) * 10;
+  const betrag = zehner(Math.max(C.WETTBEWERB.lohnMin, einnahmenProMinute() * C.WETTBEWERB.lohn[platz]));
   verdiene(betrag);
   st.wettbewerb = { saison: Z.saison(), platz, stimmung: s, betrag };
   speichere();
