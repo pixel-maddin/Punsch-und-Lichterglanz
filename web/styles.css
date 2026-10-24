@@ -1320,7 +1320,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .beet-wahl { display: grid; grid-template-columns: 1fr; gap: calc(var(--px) * 1); }
 .beet-balken { height: calc(var(--px) * 3); border-radius: calc(var(--px) * 1.5); background: #e8d8b8; overflow: hidden; }
 .beet-balken i { display: block; height: 100%; background: linear-gradient(#7ac25a, #4e9a48); }
-.bs-intro { margin: 0 0 calc(var(--px) * 2); font-size: var(--t-klein); text-align: center; }
+/* .bs-intro entfällt (24.10.): Erklärung der Baumschule über erklaerung() */
 /* Hinweis im Fenster, z. B. Meisenknödel ohne Futterhaus (23.10.) */
 .hinweis-kasten { margin: calc(var(--px) * 2) 0; padding: calc(var(--px) * 2.4) calc(var(--px) * 3); border: calc(var(--px) * 0.6) solid var(--gold); border-radius: calc(var(--px) * 2); background: #fff6d4; font-size: var(--t-klein); text-align: left; }
 
@@ -1336,3 +1336,26 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Schild des Special-Orts auf der Karte: golden, glänzt (ohne transform - das Schild ist per translate zentriert) */
 #kartenOrte .ort.special { background: linear-gradient(180deg, #fff3c4, #f6d77a); border-color: #d89a20; animation: specialGlanz 2.4s ease-in-out infinite; }
 #kartenOrte .ort.special small { color: #8a5a10; font-weight: bold; }
+
+/* Startfenster der Minispiele (24.10.): Kärtchen statt Kleingedrucktem, Anleitung als Schritte */
+.mini-chips { display: flex; gap: calc(var(--px) * 1.5); justify-content: center; margin: 0 0 calc(var(--px) * 2); }
+.mini-chips span {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: calc(var(--px) * 1.2);
+  padding: calc(var(--px) * 1.4) calc(var(--px) * 1); white-space: nowrap;
+  background: var(--papier2); border-radius: calc(var(--px) * 1.5); border: calc(var(--px) * 0.5) solid #dcc08a;
+  font-size: var(--t-text); color: var(--text2);
+}
+.mini-chips b { color: var(--hinweis); }
+.mini-chips canvas { width: calc(var(--px) * 7); height: calc(var(--px) * 7); image-rendering: pixelated; flex: none; }
+.mini-ziel { text-align: center; font-size: var(--t-text); color: var(--text2); margin: 0 0 calc(var(--px) * 1.5); }
+.mini-anleitung { margin: 0 0 calc(var(--px) * 1.5); padding: 0 0 0 calc(var(--px) * 7); text-align: left; font-size: var(--t-text); line-height: 1.4; }
+.mini-anleitung li { margin: 0 0 calc(var(--px) * 1.2); padding-left: calc(var(--px) * 0.5); }
+.mini-anleitung li::marker { color: #b8862a; font-weight: bold; }
+.mini-anl { background: #fff6dc; border-radius: calc(var(--px) * 2); padding: calc(var(--px) * 2) calc(var(--px) * 2) calc(var(--px) * 0.5); margin: 0 0 calc(var(--px) * 1.5); }
+.mini-anl.versteckt { display: none; }
+.anl-knopf {
+  display: block; margin: 0 auto calc(var(--px) * 1.5); padding: calc(var(--px) * 1) calc(var(--px) * 4);
+  background: none; border: calc(var(--px) * 0.5) dashed #c8a060; border-radius: calc(var(--px) * 1.5);
+  font: inherit; font-size: var(--t-text); color: var(--text2); cursor: pointer;
+}
+.anl-mehr .rezeptbuch { margin-top: calc(var(--px) * 1); }

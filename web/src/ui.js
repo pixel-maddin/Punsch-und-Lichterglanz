@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610241800';
-import * as S from './spiel.js?v=202610241800';
-import * as Z from './zeit.js?v=202610241800';
-import * as T from './ton.js?v=202610241800';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610241800';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610241800';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610241800';
-import * as A from './auftraege.js?v=202610241800';
-import * as E from './erfolge.js?v=202610241800';
-import * as ZL from './ziele.js?v=202610241800';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610241800';
-import * as KA from './karte.js?v=202610241800';
-import { zeigeRueckblick } from './ereignis.js?v=202610241800';
-import { barbaraZweig } from './szene.js?v=202610241800';
-import * as SW from './schneeball.js?v=202610241800';
-import * as LI from './lichtung.js?v=202610241800';
-import * as CB from './christbaum.js?v=202610241800';
-import * as SB from './schlitten.js?v=202610241800';
-import * as EB from './schlittschuh.js?v=202610241800';
-import * as BS from './backstube.js?v=202610241800';
-import { alleSymbole } from './symbole.js?v=202610241800';
+import * as C from './config.js?v=202610242000';
+import * as S from './spiel.js?v=202610242000';
+import * as Z from './zeit.js?v=202610242000';
+import * as T from './ton.js?v=202610242000';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610242000';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610242000';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610242000';
+import * as A from './auftraege.js?v=202610242000';
+import * as E from './erfolge.js?v=202610242000';
+import * as ZL from './ziele.js?v=202610242000';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610242000';
+import * as KA from './karte.js?v=202610242000';
+import { zeigeRueckblick } from './ereignis.js?v=202610242000';
+import { barbaraZweig } from './szene.js?v=202610242000';
+import * as SW from './schneeball.js?v=202610242000';
+import * as LI from './lichtung.js?v=202610242000';
+import * as CB from './christbaum.js?v=202610242000';
+import * as SB from './schlitten.js?v=202610242000';
+import * as EB from './schlittschuh.js?v=202610242000';
+import * as BS from './backstube.js?v=202610242000';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610242000';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -372,12 +372,13 @@ function spielHoehe() {
   return Math.round($('#minispiel').parentElement.clientHeight / px);
 }
 function zeigeLichtung() {
-  const rest = S.lichtungRest(), best = S.lichtungRekord();
-  const naechste = C.LICHTUNG_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  miniFenster('Waldlichtung', `
-    <p>Hasen, Eichhörnchen und Rehe hüpfen durch die Lichtung. <b>Tippe sie an, um sie zu füttern.</b> Schnell hintereinander gibt eine Kette bis ×5. Und ganz selten schaut ein besonderer Gast vorbei.</p>
-    <p class="klein">${C.LICHTUNG_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
-    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  miniFenster('Waldlichtung', {
+    dauer: C.LICHTUNG_DAUER, deko: C.LICHTUNG_DEKO.find((d) => !S.st.kalDeko[d.id]),
+    schritte: [
+      'Hasen, Eichhörnchen und Rehe ziehen vorbei: <b>Tippe sie an</b>, um sie zu füttern.',
+      'Schnell hintereinander gibt eine <b>Kette bis ×5</b>.',
+      'Ganz selten schaut ein <b>besonderer Gast</b> vorbei.',
+    ] },
   [{ text: 'Später', neben: true }], 'lichtung', starteLichtung);
 }
 export function starteLichtung(stufeNr = 1) {
@@ -392,17 +393,65 @@ export function starteLichtung(stufeNr = 1) {
  * Startfenster eines Minispiels mit drei Knöpfen für die Schwierigkeit
  * (10.10.). Die zuletzt gewählte ist hervorgehoben (`st.miniStufe[name]`).
  */
-function miniFenster(titel, html, knoepfe, name, starte) {
+/*
+ * Aufbau seit 24.10. (Nutzerwunsch: „manche Fenster sehr überladen, viel Kleingedrucktes"):
+ * Bild · Special · drei Kärtchen (Dauer, Rekord, Sternerunden) · eine Zeile Extra · Anleitung
+ * als kurze Schritte. Die Anleitung steht nur beim ERSTEN Mal offen da (`st.anleitung[name]`,
+ * gesetzt beim Start; wer schon einen Rekord hat, gilt als kennend) - danach klappt sie der
+ * Knopf „Anleitung" auf. `o`: { schritte: [html], dauer, deko (nächstes Deko-Stück), zusatz
+ * (html, immer sichtbar), mehr (Element in der Anleitung, z. B. das Rezeptbuch) }.
+ */
+/**
+ * Erklärung, die nur beim ersten Öffnen offen dasteht (24.10.), danach hinter „Wie geht das? ▾".
+ * Gibt HTML zurück; `erklaerungKnopf(box)` macht den Knopf im fertigen Fenster lebendig.
+ * Gemerkt in st.anleitung[key] - gleicher Speicher wie die Minispiel-Anleitungen.
+ */
+function erklaerung(key, html, titel = 'Wie geht das?') {
+  const gesehen = !!(S.st.anleitung && S.st.anleitung[key]);
+  if (!gesehen) { S.st.anleitung = { ...(S.st.anleitung || {}), [key]: true }; S.speichere(); }
+  return gesehen
+    ? `<button class="anl-knopf" data-titel="${titel}">${titel} ▾</button><div class="mini-anl versteckt">${html}</div>`
+    : `<div class="mini-anl">${html}</div>`;
+}
+function erklaerungKnopf(box) {
+  for (const knopf of box.querySelectorAll('.anl-knopf[data-titel]')) knopf.onclick = () => {
+    T.spiele('klick');
+    const zu = knopf.nextElementSibling.classList.toggle('versteckt');
+    knopf.textContent = `${knopf.dataset.titel} ${zu ? '▾' : '▴'}`;
+  };
+}
+function miniFenster(titel, o, knoepfe, name, starte) {
   // Erst wählen, dann starten (11.10., Nutzerwunsch): Die Stufenknöpfe
   // markieren nur, gestartet wird über den eigenen Start-Knopf
   let gewaehlt = (S.st.miniStufe || {})[name] ?? 1;
-  const start = { text: 'Start', aktion: () => { setTimeout(() => starte(gewaehlt), 60); } };
+  const merke = () => { S.st.anleitung = { ...(S.st.anleitung || {}), [name]: true }; S.speichere(); };
+  const start = { text: 'Start', aktion: () => { merke(); setTimeout(() => starte(gewaehlt), 60); } };
   // Oben das Ortsbild wie bei den Läden (11.10.)
   // Special des Tages (24.10.): goldener Streifen oben
   const sp = S.specialHeute() === name
     ? `<p class="special-streifen">✦ Special heute: <b>doppelte Sterne</b> - dafür schwerer: ${C.SPECIAL_TEXT[name]}</p>` : '';
+  const rest = S.miniRest(name), best = S.miniRekord(name);
+  const erstes = !(S.st.anleitung && S.st.anleitung[name]) && !best;
+  const zahl = (n) => n.toLocaleString('de-DE');
+  const chips = `<div class="mini-chips">
+      <span><canvas data-ico="uhr"></canvas><b>${o.dauer} s</b></span>
+      <span><canvas data-ico="pokal"></canvas>Rekord <b>${zahl(best)}</b></span>
+      <span><canvas data-ico="stern"></canvas>${rest ? `<b>${rest}×</b>&nbsp;Sterne` : 'Sterne&nbsp;morgen'}</span>
+    </div>`;
+  const ziel = o.deko ? `<p class="mini-ziel">Neues Deko-Stück ab <b>${zahl(o.deko.ab)}</b> Punkten Rekord</p>` : '';
+  const anl = `<ol class="mini-anleitung">${o.schritte.map((s) => `<li>${s}</li>`).join('')}</ol>${o.mehr ? '<div class="anl-mehr"></div>' : ''}`;
+  const html = chips + (o.zusatz || '') + ziel
+    + (erstes ? `<div class="mini-anl">${anl}</div>` : `<button class="anl-knopf">Anleitung ▾</button><div class="mini-anl versteckt">${anl}</div>`);
   const box = fenster(titel, '<canvas class="fenster-bild"></canvas>' + sp + html + '<p class="stufen-titel">Schwierigkeit</p><div class="stufen"></div>', [...knoepfe, start]);
   KA.vignette(box.querySelector('canvas.fenster-bild'), name);
+  for (const cv of box.querySelectorAll('.mini-chips canvas[data-ico]')) zeichneSymbol(cv, cv.dataset.ico);
+  if (o.mehr) box.querySelector('.anl-mehr').appendChild(o.mehr());
+  const knopf = box.querySelector('.anl-knopf');
+  if (knopf) knopf.onclick = () => {
+    T.spiele('klick');
+    const zu = box.querySelector('.mini-anl').classList.toggle('versteckt');
+    knopf.textContent = zu ? 'Anleitung ▾' : 'Anleitung ▴';
+  };
   const reihe = box.querySelector('.stufen');
   C.MINI_STUFEN.forEach((stufe, i) => {
     const b = el('button', 'k stufe' + (i === gewaehlt ? ' gewaehlt' : ''), `${stufe.name}<small>Punkte ×${String(stufe.punkte).replace('.', ',')}</small>`);
@@ -425,10 +474,9 @@ function miniErgebnis(name, punkte, zeile, titel, nochmal, danach) {
   const deko = e.neu.map((d) => `<p class="bonus">Neu für dein Haus: <b>${d.name}</b> (♥ +${d.stimmung})</p>`).join('');
   fenster(e.rekord ? 'Neuer Rekord!' : punkte > 0 ? titel : 'Nächstes Mal!', `
     <p>${zeile}</p>
-    <p class="summe">${punkte} Punkte</p>
-    <p class="klein">Rekord: ${e.best}</p>
-    ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}${e.special ? ' (Special: doppelt!)' : ''}</p>` : punkte > 0 ? '<p class="klein">Heute keine Sterne mehr - morgen wieder.</p>' : '<p class="klein">Ohne Punkte keine Sterne - die Runde zählt aber auch nicht mit.</p>'}
-    ${e.sterne && e.rest ? `<p class="klein">Heute noch ${e.rest} ${e.rest === 1 ? 'Runde' : 'Runden'} mit Sternen.</p>` : ''}
+    <p class="summe">${punkte.toLocaleString('de-DE')} Punkte</p>
+    ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}${e.special ? ' (Special: doppelt!)' : ''}</p>` : ''}
+    <p class="mini-ziel">Rekord <b>${e.best.toLocaleString('de-DE')}</b>${e.sterne ? (e.rest ? ` · noch <b>${e.rest}×</b> Sterne heute` : ' · das war die letzte Sternerunde für heute') : punkte > 0 ? ' · heute keine Sterne mehr' : ' · ohne Punkte zählt die Runde nicht'}</p>
     ${deko}${extra}`,
   // Neue Deko: gleich ansehen - auf der Karte sähe man das Funkeln am Haus nicht
   e.neu.length
@@ -441,14 +489,15 @@ function miniErgebnis(name, punkte, zeile, titel, nochmal, danach) {
 // Minispiel Christbaumverkauf (christbaum.js)
 // ---------------------------------------------------------------------------
 function zeigeBaumspiel() {
-  const rest = S.miniRest('baum'), best = S.miniRekord('baum');
-  const naechste = C.BAUM_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  miniFenster('Christbaumverkauf', `
-    <p>Kunden fahren vor und wollen einen bestimmten Baum - <b>Größe und Sorte stehen in der Sprechblase.</b></p>
-    <p>Tippe den richtigen Baum an und <b>säge ihn mit drei Tipps</b>. Dann <b>dreimal aufs Netz</b> und zum Schluss <b>aufs Auto</b>. Je schneller, desto mehr Punkte - fehlerfreie Kunden hintereinander geben eine Kette bis ×3.</p>
-    <p class="klein">${C.BAUM_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
-    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>
-    ${S.baumschule().ware.length ? `<p class="bonus">${S.baumschule().ware.length} eigene ${S.baumschule().ware.length === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft bringt ${S.baumschule().ware.length === 1 ? 'er' : 'jeder'} ×3!</p>` : ''}`,
+  const ware = S.baumschule().ware.length;
+  miniFenster('Christbaumverkauf', {
+    dauer: C.BAUM_DAUER, deko: C.BAUM_DEKO.find((d) => !S.st.kalDeko[d.id]),
+    zusatz: ware ? `<p class="bonus">${ware} eigene ${ware === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft ×3!</p>` : '',
+    schritte: [
+      'Die <b>Sprechblase</b> zeigt, welche Größe und Sorte der Kunde will.',
+      'Baum antippen, <b>3× sägen</b>, <b>3× aufs Netz</b>, dann <b>aufs Auto</b>.',
+      'Schnell und ohne Fehler gibt eine <b>Kette bis ×3</b>.',
+    ] },
   [{ text: 'Später', neben: true }], 'baum', starteBaumspiel);
 }
 export function starteBaumspiel(stufeNr = 1) {
@@ -469,10 +518,13 @@ const BS_W = 132, BS_H = 64, BEET_X = [18, 50, 82, 114], BEET_Y = 54;
 const SORTE_KURZ = { nordmann: 'Nordmann', blau: 'Blaufichte', fichte: 'Fichte' };
 export function zeigeBaumschule() {
   const box = fenster('Baumschule', `
-    <p class="bs-intro">Hier ziehst du <b>Tannen für deinen Christbaumverkauf</b>. Fertige Bäume erntest du - im Verkauf stehen sie dann golden und bringen <b>×3 Punkte</b>.</p>
     <canvas class="futter-szene baumschule-szene" width="${BS_W}" height="${BS_H}"></canvas>
+    ${erklaerung('baumschule', `<ol class="mini-anleitung">
+      <li><b>Pflanze</b> eine Tanne in ein freies Beet.</li>
+      <li>Ab dem nächsten Tag einmal täglich <b>gießen</b> und <b>düngen</b>: Ohne Pflege dauert es ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, mit Gießen 3, mit beidem 2. Nichts verdorrt.</li>
+      <li>Fertige Bäume <b>erntest</b> du: Im Christbaumverkauf stehen sie golden und bringen <b>×3 Punkte</b>.</li></ol>`)}
     <div class="beete"></div>
-    <p class="klein bs-text"></p>`,
+    <p class="mini-ziel bs-text"></p>`,
   [{ text: 'Gießen', aktion: () => { if (S.giesse()) { toast('Gegossen - die Bäume wachsen heute schneller.', 'gut'); } neu(); return false; } },
     { text: 'Düngen', neben: true, aktion: () => {
       if (!S.kannDuengen()) return false;
@@ -481,6 +533,7 @@ export function zeigeBaumschule() {
     } },
     { text: 'Schließen', neben: true }]);
   const cv = box.querySelector('canvas'), c = cv.getContext('2d');
+  erklaerungKnopf(box);
   const [kGiessen, kDuengen] = box.querySelectorAll('.k');
   const beete = box.querySelector('.beete'), text = box.querySelector('.bs-text');
   const zu = { eichBis: 0 };
@@ -519,9 +572,9 @@ export function zeigeBaumschule() {
     kDuengen.disabled = !S.kannDuengen();
     kDuengen.textContent = S.kannDuengen() ? `Düngen · ★ ${S.formatGeld(S.duengerPreis()).replace(' Sterne', '')}` : B.geduengt !== S.heuteNr() && erstMorgen ? 'Düngen ab morgen' : 'Düngen';
     const ware = B.ware.length;
-    text.innerHTML = `Ohne Pflege brauchen die Bäume ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, wenn du jeden Tag gießt 3, mit Gießen und Düngen 2. Gießen und Düngen gehen ab dem Tag nach dem Pflanzen. Nichts verdorrt.`
-      + (ware ? ` <b>${ware} geerntete${ware === 1 ? 'r Baum wartet' : ' Bäume warten'} im Verkauf.</b>` : '')
-      + (ware >= C.BAUMSCHULE_WARE_MAX ? ` Mehr als ${C.BAUMSCHULE_WARE_MAX} passen nicht ins Lager - verkauf sie erst im Christbaumverkauf (ein goldener Baum je Kunde).` : '');
+    // 24.10.: die Dauer steht in der Erklärung oben - hier nur noch der Lagerstand
+    text.innerHTML = (ware ? `<b>${ware} geerntete${ware === 1 ? 'r Baum wartet' : ' Bäume warten'} im Verkauf.</b>` : '')
+      + (ware >= C.BAUMSCHULE_WARE_MAX ? `<br>Mehr als ${C.BAUMSCHULE_WARE_MAX} passen nicht ins Lager - verkauf sie erst im Christbaumverkauf (ein goldener Baum je Kunde).` : '');
   }
   neu();
   cv.onclick = (e) => {
@@ -588,13 +641,13 @@ function zeichneBaumschule(c, t, zu, dt) {
 // Minispiel Schneeballschlacht (schneeball.js, 12.10.)
 // ---------------------------------------------------------------------------
 function zeigeSchneeball() {
-  const rest = S.miniRest('schnee'), best = S.miniRekord('schnee');
-  const naechste = C.SCHNEE_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  miniFenster('Schneeballwiese', `
-    <p>Hinter den Schneewällen tauchen kleine <b>Grummel</b> auf. <b>Tippe sie an, um sie mit Schneebällen abzuwerfen.</b> Schnell hintereinander gibt eine Kette bis ×5. Grummel mit Kochtopf brauchen zwei Treffer, der mit dem Sack bringt am meisten.</p>
-    <p><b>Die Wichtel nicht treffen!</b> Und lass keinen Grummel zu lange stehen - sonst wirft er zurück.</p>
-    <p class="klein">${C.SCHNEE_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
-    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  miniFenster('Schneeballwiese', {
+    dauer: C.SCHNEE_DAUER, deko: C.SCHNEE_DEKO.find((d) => !S.st.kalDeko[d.id]),
+    schritte: [
+      '<b>Tippe die Grummel an</b>, die hinter den Wällen auftauchen. Mit Kochtopf brauchen sie zwei Treffer, der mit dem Sack bringt am meisten.',
+      '<b>Die Wichtel nicht treffen!</b>',
+      'Fliegt ein Schneeball auf dich zu: <b>schnell antippen</b>, dann zerplatzt er.',
+    ] },
   [{ text: 'Später', neben: true }], 'schnee', starteSchneeball);
 }
 export function starteSchneeball(stufeNr = 1) {
@@ -609,13 +662,13 @@ export function starteSchneeball(stufeNr = 1) {
 // Minispiel Eisbahn (schlittschuh.js)
 // ---------------------------------------------------------------------------
 function zeigeEisbahn() {
-  const rest = S.miniRest('eis'), best = S.miniRekord('eis');
-  const naechste = C.EIS_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  miniFenster('Eisbahn', `
-    <p>Schlittschuhlaufen auf dem Weiher! <b>Tippen = springen</b> - über Schneemänner, Steine, Holzstapel und Eislöcher.</p>
-    <p><b>In der Luft wischen</b> macht Tricks: nach oben ein Salto, nach links eine Pirouette, nach rechts eine Grätsche. Mehrere Tricks in einem Sprung sind eine Kombo - aber erst fertig drehen, dann landen!</p>
-    <p class="klein">${C.EIS_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
-    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  miniFenster('Eisbahn', {
+    dauer: C.EIS_DAUER, deko: C.EIS_DEKO.find((d) => !S.st.kalDeko[d.id]),
+    schritte: [
+      '<b>Tippen = springen</b> - über Schneemänner, Steine, Holz und Eislöcher.',
+      '<b>In der Luft wischen</b> = Trick: hoch Salto, links Pirouette, rechts Grätsche.',
+      'Mehrere Tricks in einem Sprung sind eine <b>Kombo</b> - aber vor dem Landen fertig drehen!',
+    ] },
   [{ text: 'Später', neben: true }], 'eis', starteEisbahn);
 }
 export function starteEisbahn(stufeNr = 1) {
@@ -645,15 +698,18 @@ function rezeptbuch() {
   return buch;
 }
 function zeigeBackstube() {
-  const rest = S.miniRest('back'), best = S.miniRekord('back'), n = S.dose().length;
-  const box = miniFenster('Backstube', `
-    <p>Kunden wollen Plätzchen - <b>das Bild steht in der Sprechblase.</b> Tippe die richtige <b>Ausstechform</b>, hol das Plätzchen <b>goldbraun aus dem Ofen</b> (wenn der Balken im gelben Bereich steht) und tippe die richtige <b>Verzierung</b>.</p>
-    <div class="rb-platz"></div>
-    <p class="klein">Was du bäckst, kommt in die <b>Plätzchendose</b> auf deinem Stand: Jeder Gast, den du selbst bedienst, nimmt eins und zahlt ${Math.round(C.DOSE_BONUS * 100)} % mehr. ${n ? `Gerade in der Dose: <b>${n}</b>.` : 'Die Dose ist leer.'}</p>
-    <p class="klein">${C.BACK_DAUER} Sekunden · Rekord: <b>${best}</b></p>
-    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord und die Plätzchen zählen!'}</p>`,
+  const n = S.dose().length, best = S.miniRekord('back');
+  const neuesRezept = C.BACK_REZEPTE.find((rz) => best < rz.ab);
+  miniFenster('Backstube', {
+    dauer: C.BACK_DAUER,
+    zusatz: `<p class="mini-ziel">Plätzchendose: <b>${n ? `${n} drin` : 'leer'}</b>${neuesRezept ? ` · neues Rezept ab <b>${neuesRezept.ab.toLocaleString('de-DE')}</b> Punkten` : ''}</p>`,
+    schritte: [
+      'Die <b>Sprechblase</b> zeigt, welches Plätzchen der Kunde will.',
+      'Richtige <b>Form</b> tippen, im <b>gelben Bereich</b> aus dem Ofen holen, richtige <b>Verzierung</b> tippen.',
+      `Gebackenes kommt in die <b>Plätzchendose</b>: Jeder Gast, den du selbst bedienst, nimmt eins und zahlt ${Math.round(C.DOSE_BONUS * 100)} % mehr.`,
+    ],
+    mehr: rezeptbuch },
   [{ text: 'Später', neben: true }], 'back', starteBackstube);
-  box.querySelector('.rb-platz').appendChild(rezeptbuch());
 }
 export function starteBackstube(stufeNr = 1) {
   C.MINI_SPECIAL.laeuft = S.specialHeute();   // Special des Tages: schwerer (nur in dieser Runde)
@@ -752,13 +808,13 @@ export function zeigeBrief() {
 // Minispiel Schlittenberg (schlitten.js)
 // ---------------------------------------------------------------------------
 function zeigeBergspiel() {
-  const rest = S.miniRest('berg'), best = S.miniRekord('berg');
-  const naechste = C.BERG_DEKO.find((d) => !S.st.kalDeko[d.id]);
-  miniFenster('Schlittenberg', `
-    <p>Im Wok den Berg hinunter! <b>Leg den Daumen aufs Bild und zieh ihn nach links oder rechts</b> - der Wok folgt ihm.</p>
-    <p>Weich Tannen, Steinen, Schneemännern und Holzstapeln aus und sammle die Sterne. Je schneller du im Ziel bist, desto mehr Punkte.</p>
-    <p class="klein">${C.BERG_DAUER} Sekunden · Rekord: <b>${best}</b>${naechste ? ` · ab ${naechste.ab} Punkten Rekord gibt es ein Deko-Stück` : ''}</p>
-    <p class="klein">${rest ? `Heute noch ${rest} ${rest === 1 ? 'Runde' : 'Runden'} mit Sternen.` : 'Sterne gibt es heute keine mehr - aber der Rekord zählt!'}</p>`,
+  miniFenster('Schlittenberg', {
+    dauer: C.BERG_DAUER, deko: C.BERG_DEKO.find((d) => !S.st.kalDeko[d.id]),
+    schritte: [
+      'Im Wok den Berg hinunter: <b>Daumen aufs Bild und seitlich ziehen</b> - der Wok folgt.',
+      'Weich <b>Tannen, Steinen, Schneemännern</b> und Holzstapeln aus.',
+      'Sammle Sterne - <b>je schneller im Ziel</b>, desto mehr Punkte.',
+    ] },
   [{ text: 'Später', neben: true }], 'berg', starteBergspiel);
 }
 export function starteBergspiel(stufeNr = 1) {
@@ -1529,15 +1585,20 @@ export function zeigeMarkt() {
   const m = S.marktInfo();
   const deko = C.MARKT_DEKO.filter((d) => S.st.kalDeko[d.id]).length;
   const rez = C.MARKT_REZEPTE.filter((x) => (S.st.rezepte || {})[x.id]).length;
-  const stand = `<p class="klein">Gesammelt: ${deko}/${C.MARKT_DEKO.length} Markt-Deko · ${rez}/${C.MARKT_REZEPTE.length} Rezepte</p>`;
+  // 24.10.: Sammelstand als Kärtchen, die Erklärung nur beim ersten Mal offen
+  const stand = `<div class="mini-chips"><span>Markt-Deko <b>${deko}/${C.MARKT_DEKO.length}</b></span><span>Rezepte <b>${rez}/${C.MARKT_REZEPTE.length}</b></span></div>`;
+  const wasGibts = erklaerung('markt', `<ol class="mini-anleitung">
+      <li><b>Deko</b>, die es nur auf dem Markt gibt.</li>
+      <li><b>Rezepte</b>: Deine Getränke bringen dauerhaft mehr Sterne.</li>
+      <li>Am Markttag kommen <b>${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste</b> an deinen Stand.</li></ol>`, 'Was gibt es dort?');
   if (!m.heute) {
     const wann = m.inTagen === 1 ? 'morgen' : `am ${WOCHENTAG[m.datum.getDay()]}, ${m.datum.getDate()}.${m.datum.getMonth() + 1}. (in ${m.inTagen} Tagen)`;
     const zu = fenster('Festplatz', `
       <canvas class="fenster-bild"></canvas>
       <p>Noch ist der Platz leer. Der nächste <b>Weihnachtsmarkt</b> ist ${wann}.</p>
-      <p class="klein">Dort gibt es Deko, die du nur auf dem Markt bekommst, und Rezepte, mit denen deine Getränke dauerhaft mehr Sterne bringen. Am Markttag kommen außerdem ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste an deinen Stand.</p>
-      ${stand}`, [{ text: 'Bis dann!' }]);
+      ${stand}${wasGibts}`, [{ text: 'Bis dann!' }]);
     KA.vignette(zu.querySelector('canvas.fenster-bild'), 'festplatz', { offen: false });
+    erklaerungKnopf(zu);
     return;
   }
   S.marktBesuchen();
@@ -1546,9 +1607,10 @@ export function zeigeMarkt() {
   const waren = [...a.deko, ...(a.rezept ? [a.rezept] : [])];
   const box = fenster('Weihnachtsmarkt', `
     <canvas class="fenster-bild"></canvas>
-    <p class="klein">${waren.length ? `Heute ist Markt! Am Stand ist viel los: ${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste. Was es hier gibt, gibt es nur auf dem Markt.` : 'Du hast schon alles, was der Markt heute hat - aber am Stand ist trotzdem mehr los!'}</p>
-    <div class="haendler-liste"></div>${stand}`, [{ text: 'Später', neben: true }]);
+    <p>${waren.length ? `<b>Heute ist Markt!</b> Was es hier gibt, gibt es nur auf dem Markt.` : 'Du hast schon alles, was der Markt heute hat - aber am Stand ist trotzdem mehr los!'}</p>
+    <div class="haendler-liste"></div>${stand}${wasGibts}`, [{ text: 'Später', neben: true }]);
   KA.vignette(box.querySelector('canvas.fenster-bild'), 'festplatz', { offen: true });   // Ortsbild wie bei den Läden (11.10.)
+  erklaerungKnopf(box);
   const liste = box.querySelector('.haendler-liste');
   for (const w of waren) {
     const preis = S.haendlerPreis(w);
