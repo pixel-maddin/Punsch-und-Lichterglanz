@@ -117,8 +117,10 @@ bedienst nur du.
 
 Nach der Einführung zeigt eine Leiste oben immer das nächste Ziel: ein
 neues Getränk, drei Deko-Teile, die drei ersten Wichtel, ein drittes
-Getränk und 15 ♥ Stimmung. Antippen führt direkt zur richtigen Stelle im
-Laden, jedes Ziel bringt ein paar Sterne.
+Getränk und zum Schluss der erste Tagesauftrag. Antippen führt direkt zur
+richtigen Stelle, jedes Ziel bringt ein paar Sterne. Danach kann die Leiste auf
+Wunsch weiter Ziele vorschlagen: zuerst neue Getränke, Helfer und Ausbauten für
+den Stand, dazwischen Deko.
 
 ## Aufträge und Erfolgswand
 

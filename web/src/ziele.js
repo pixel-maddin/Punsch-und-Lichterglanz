@@ -14,7 +14,8 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=202610241500';
+import * as S from './spiel.js?v=202610241700';
+import * as A from './auftraege.js?v=202610241700';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -34,25 +35,18 @@ export const ZIELE = [
     stand: () => (S.hat('nachfuell') ? 1 : 0), ziel: 1, kauf: () => 'nachfuell' },
   { id: 'servier', text: 'Hol dir den Servier-Wichtel', lohn: 250,
     stand: () => (S.hat('servier') ? 1 : 0), ziel: 1, kauf: () => 'servier' },
-  // Danach nicht wieder ins Leere: ein drittes Getränk und die erste Stimmungsmarke
+  // Danach nicht wieder ins Leere: ein drittes Getränk und der erste Tagesauftrag
   { id: 'apfel', text: 'Biete ein drittes Getränk an: Heißer Apfel', lohn: 200,
     stand: () => (S.hat('apfel') ? 1 : 0), ziel: 1, kauf: () => 'apfel' },
-  { id: 'herz', text: 'Erreiche 15 ♥ Stimmung mit mehr Deko', lohn: 300,
-    stand: () => Math.min(15, S.stimmung()), ziel: 15, kauf: billigsteDeko },
+  // 24.10.: statt „15 ♥ Stimmung" (war meist schon erfüllt, wenn es drankam - zwei „Ziel
+  // geschafft" hintereinander, nichts Neues). Der erste Tagesauftrag führt in den täglichen
+  // Ablauf (Aufträge, Ruf, Erfolgswand). Kein Kauf: Antippen öffnet AUFTRÄGE (`oeffne`),
+  // „Los" leuchtet, sobald einer abholbar ist, der Balken zeigt den leichtesten Auftrag.
+  { id: 'auftrag', text: 'Hol deinen ersten Tagesauftrag unter AUFTRÄGE ab', lohn: 300,
+    stand: () => ((S.st.stats.auftraege || 0) > 0 ? 1 : 0), ziel: 1, kauf: () => null, oeffne: 'auftraege',
+    bereit: () => A.heute().some((a) => A.fertig(a) && !a.abgeholt),
+    anteil: () => Math.max(0, ...A.heute().filter((a) => !a.abgeholt).map((a) => Math.min(1, a.stand / a.ziel))) },
 ];
-
-/** Die günstigste Deko, die man gerade kaufen könnte (sichtbar, ohne Hindernis). */
-function billigsteDeko() {
-  let best = null, preis = Infinity;
-  for (const id in S.ARTIKEL_MAP) {
-    const a = S.ARTIKEL_MAP[id];
-    if (!S.istDeko(a) || !a.stimmung) continue;
-    const st = S.status(a);
-    if (st.versteckt || st.fertig || st.grund || st.kosten == null) continue;
-    if (st.kosten < preis) { preis = st.kosten; best = id; }
-  }
-  return best;
-}
 
 S.setzeZieleAnzahl(ZIELE.length);   // spiel.js braucht die Zahl für startzieleFertig()
 const idx = () => S.st.ziel || 0;
@@ -75,17 +69,24 @@ export function naechstes() {
   // Nur wer es will (13.10., Nutzerwunsch: nur das Tutorial soll Ziele haben -
   // oder man entscheidet, ob man selbst erkundet): st.zieleWeiter
   if (S.st.lernen < 99 || !fertig() || S.st.zieleWeiter !== true) return null;
-  let best = null, preis = Infinity, getraenk = null, gPreis = Infinity;
+  let best = null, preis = Infinity, meilen = null, mPreis = Infinity;
   for (const a of S.ARTIKEL_LISTE) {
     if (a.luxus || (a.luxusAb && S.stufe(a.id) >= a.luxusAb - 1)) continue;
     const s = S.status(a);
     if (s.versteckt || s.fertig || s.grund || s.kosten == null) continue;
-    if (a.tab === 'super' && s.kosten < gPreis) { gPreis = s.kosten; getraenk = a; }
+    if (istMeilenstein(a) && s.kosten < mPreis) { mPreis = s.kosten; meilen = a; }
     if (s.kosten < preis) { preis = s.kosten; best = a; }
   }
-  // Ein neues Getränk, das höchstens doppelt so teuer ist wie das billigste Teil, kommt zuerst
-  return getraenk && gPreis <= preis * 2 ? getraenk : best;
+  // 24.10. (Nutzerwunsch, „keine endlose Einkaufsliste"): Meilensteine zuerst - neues Getränk,
+  // Helfer oder Ausbau am Stand -, solange der nächste in Reichweite ist (Kasse + REICHWEITE_MIN
+  // Minuten Einnahmen). Sonst das billigste Teil, meist Deko, bis man sich ihm nähert.
+  const reichweite = Math.max(0, S.st.geld) + S.einnahmenProMinute() * REICHWEITE_MIN;
+  return meilen && mPreis <= reichweite ? meilen : best;
 }
+
+/** Bringt das Teil den Stand voran (statt nur das Haus)? Getränke, Wichtel, Ausbauten am Stand. */
+const REICHWEITE_MIN = 20;
+export const istMeilenstein = (a) => a.tab === 'super' || a.tab === 'wichtel' || (a.tab === 'baumarkt' && a.gruppe === 'Am Stand' && !S.istDeko(a));
 
 /** Was soll gerade gekauft werden, und wo? { tab, id } oder null. */
 export function kaufziel() {

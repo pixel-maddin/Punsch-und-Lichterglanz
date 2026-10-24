@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610241500';
-import * as S from './spiel.js?v=202610241500';
-import * as A from './auftraege.js?v=202610241500';
-import * as E from './erfolge.js?v=202610241500';
-import * as Z from './ziele.js?v=202610241500';
-import * as KA from './karte.js?v=202610241500';
-import { zellePos } from './tresen.js?v=202610241500';
+import * as C from './config.js?v=202610241700';
+import * as S from './spiel.js?v=202610241700';
+import * as A from './auftraege.js?v=202610241700';
+import * as E from './erfolge.js?v=202610241700';
+import * as Z from './ziele.js?v=202610241700';
+import * as KA from './karte.js?v=202610241700';
+import { zellePos } from './tresen.js?v=202610241700';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -211,7 +211,7 @@ const HINWEISE = [
     },
     text: () => 'Tippe auf KARTE und schau dich um.',
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen },
-  { id: 'herz_ziel', wann: () => istZiel('herz'),
+  { id: 'herz_ziel', ruhig: true, wann: () => istZiel('auftrag'),   // 24.10.: Ziel „15 ♥" gibt es nicht mehr; hält das Spiel nicht mehr an
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter.',
     ziel: () => ({ x: 90, y: 10 }), dauer: 10 },
   { id: 'ziele_fertig', sofort: true, wann: () => Z.fertig() && S.st.tipps.wichtel_weg,

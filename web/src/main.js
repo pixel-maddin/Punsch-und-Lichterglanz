@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610241500';
-import * as S from './spiel.js?v=202610241500';
-import * as Z from './zeit.js?v=202610241500';
-import * as T from './ton.js?v=202610241500';
-import * as LI from './lichtung.js?v=202610241500';
-import * as CB from './christbaum.js?v=202610241500';
-import * as KA from './karte.js?v=202610241500';
-import * as SB from './schlitten.js?v=202610241500';
-import * as EB from './schlittschuh.js?v=202610241500';
-import * as BS from './backstube.js?v=202610241500';
-import * as UI from './ui.js?v=202610241500';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610241500';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610241500';
-import * as Kacheln from './kacheln.js?v=202610241500';
-import * as Lernen from './lernen.js?v=202610241500';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610241500';
-import * as A from './auftraege.js?v=202610241500';
-import * as E from './erfolge.js?v=202610241500';
-import * as ZL from './ziele.js?v=202610241500';
+import * as C from './config.js?v=202610241700';
+import * as S from './spiel.js?v=202610241700';
+import * as Z from './zeit.js?v=202610241700';
+import * as T from './ton.js?v=202610241700';
+import * as LI from './lichtung.js?v=202610241700';
+import * as CB from './christbaum.js?v=202610241700';
+import * as KA from './karte.js?v=202610241700';
+import * as SB from './schlitten.js?v=202610241700';
+import * as EB from './schlittschuh.js?v=202610241700';
+import * as BS from './backstube.js?v=202610241700';
+import * as UI from './ui.js?v=202610241700';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610241700';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610241700';
+import * as Kacheln from './kacheln.js?v=202610241700';
+import * as Lernen from './lernen.js?v=202610241700';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610241700';
+import * as A from './auftraege.js?v=202610241700';
+import * as E from './erfolge.js?v=202610241700';
+import * as ZL from './ziele.js?v=202610241700';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -212,7 +212,8 @@ S.hooks.ruf = (n) => {
   UI.toast(`Dein Stand spricht sich herum! Ruf ${n}: alle Preise +${Math.round(n * C.RUF_JE_STUFE * 100)} %`, 'spezial');
 };
 // Während der Startziele still - die Aufträge stellt ein eigener Hinweis danach vor
-A.beiErfuellt((a) => { if (!S.startzieleFertig()) return; T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
+A.beiErfuellt((a) => { if (!S.startzieleFertig() && !(ZL.aktuell() && ZL.aktuell().id === 'auftrag')) return;   // beim Startziel „erster Auftrag" schon melden (24.10.)
+  T.spiele('fertig'); UI.toast(`Auftrag erfüllt: ${A.text(a)}!`, 'neu'); });
 
 T.setzeFx(S.st.ton.fx);
 T.setzeMusik(S.st.ton.musik);

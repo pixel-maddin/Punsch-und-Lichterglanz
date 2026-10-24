@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610241500';
-import * as S from './spiel.js?v=202610241500';
-import * as Z from './zeit.js?v=202610241500';
-import * as T from './ton.js?v=202610241500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610241500';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610241500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610241500';
-import * as A from './auftraege.js?v=202610241500';
-import * as E from './erfolge.js?v=202610241500';
-import * as ZL from './ziele.js?v=202610241500';
-import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610241500';
-import * as KA from './karte.js?v=202610241500';
-import { zeigeRueckblick } from './ereignis.js?v=202610241500';
-import { barbaraZweig } from './szene.js?v=202610241500';
-import * as SW from './schneeball.js?v=202610241500';
-import * as LI from './lichtung.js?v=202610241500';
-import * as CB from './christbaum.js?v=202610241500';
-import * as SB from './schlitten.js?v=202610241500';
-import * as EB from './schlittschuh.js?v=202610241500';
-import * as BS from './backstube.js?v=202610241500';
-import { alleSymbole } from './symbole.js?v=202610241500';
+import * as C from './config.js?v=202610241700';
+import * as S from './spiel.js?v=202610241700';
+import * as Z from './zeit.js?v=202610241700';
+import * as T from './ton.js?v=202610241700';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610241700';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610241700';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610241700';
+import * as A from './auftraege.js?v=202610241700';
+import * as E from './erfolge.js?v=202610241700';
+import * as ZL from './ziele.js?v=202610241700';
+import { zeichneWand, sockeBei, socke, W as WAND_W, H as WAND_H } from './wand.js?v=202610241700';
+import * as KA from './karte.js?v=202610241700';
+import { zeigeRueckblick } from './ereignis.js?v=202610241700';
+import { barbaraZweig } from './szene.js?v=202610241700';
+import * as SW from './schneeball.js?v=202610241700';
+import * as LI from './lichtung.js?v=202610241700';
+import * as CB from './christbaum.js?v=202610241700';
+import * as SB from './schlitten.js?v=202610241700';
+import * as EB from './schlittschuh.js?v=202610241700';
+import * as BS from './backstube.js?v=202610241700';
+import { alleSymbole } from './symbole.js?v=202610241700';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -81,7 +81,7 @@ let leistenModus = '';   // 'ziel' | 'ansturm' | ''
 export function zielLeiste() {
   const z = ZL.aktuell();
   const k = ZL.kaufziel();   // nach den Startzielen das laufende nächste Ziel (13.10.)
-  const bereit = !!(k && k.leisten);
+  const bereit = !!(k && k.leisten) || !!(z && z.bereit && z.bereit());   // Ziel ohne Kauf (24.10.: erster Auftrag)
   // Der Kontostand gehört in die Signatur: „noch 186 Sterne" blieb sonst
   // stehen, während man längst 179 hatte (Betatest 02.10.)
   // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist kurz)
@@ -93,7 +93,7 @@ export function zielLeiste() {
   leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : weiter ? 'weiter' : '';
   const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}` : markt ? 'markt'
     : weiter ? `w|${weiter.id}|${weiter.kosten}|${bereit}|${bereit ? '' : Math.floor(S.st.geld)}`
-    : z ? `${z.id}|${z.stand()}|${bereit}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
+    : z ? `${z.id}|${z.stand()}|${bereit}|${z.anteil ? Math.round(z.anteil() * 20) : ''}|${k ? k.kosten : ''}|${k && !bereit ? S.st.geld : ''}` : '';
   if (sig === letztesZiel) return;
   letztesZiel = sig;
   const b = $('#ziel');
@@ -127,7 +127,7 @@ export function zielLeiste() {
     const a = S.ARTIKEL_MAP[weiter.id];
     const stufe = Array.isArray(a.kosten) ? ` <i>Stufe ${S.stufe(a.id) + 1}</i>` : '';
     const herz = Array.isArray(a.stimmung) ? a.stimmung[S.stufe(a.id)] : a.stimmung;
-    const was = `${a.name}${stufe}${herz ? ` <i>♥+${herz}</i>` : a.tab === 'super' ? ' <i>neues Getränk</i>' : ''}`;
+    const was = `${a.name}${stufe}${herz ? ` <i>♥+${herz}</i>` : a.tab === 'super' ? ' <i>neues Getränk</i>' : a.tab === 'wichtel' ? ' <i>Helfer</i>' : ZL.istMeilenstein(a) ? ' <i>für den Stand</i>' : ''}`;
     b.innerHTML = `<span class="nr">Nächstes</span><span class="was">${was}</span>`
       + (bereit ? '<span class="los">Los ▸</span>' : `<small>noch ${S.formatGeld(weiter.kosten - S.st.geld)}</small>`)
       + `<span class="fort"><span style="width:${Math.round(Math.max(0, Math.min(1, S.st.geld / weiter.kosten)) * 100)}%"></span></span>`;
@@ -141,7 +141,7 @@ export function zielLeiste() {
   const nochNicht = k && !bereit ? `<small>noch ${S.formatGeld(k.kosten - S.st.geld)}</small>` : '';
   // Fortschrittsbalken an der Unterkante: Sterne bis zum nächsten Kauf,
   // sonst wie weit das Ziel selbst ist
-  const anteil = bereit ? 1 : k ? S.st.geld / k.kosten : z.stand() / z.ziel;
+  const anteil = bereit ? 1 : k ? S.st.geld / k.kosten : z.anteil ? z.anteil() : z.stand() / z.ziel;
   b.innerHTML = `<span class="nr">Ziel ${ZL.nummer()}/${ZL.ZIELE.length}</span><span class="was">${z.text}${zahl}</span>`
     + (bereit ? '<span class="los">Los ▸</span>' : nochNicht || `<span class="lohn">+${z.lohn} ★</span>`)
     + `<span class="fort"><span style="width:${Math.round(Math.max(0, Math.min(1, anteil)) * 100)}%"></span></span>`;
@@ -2482,7 +2482,7 @@ export function zeigeZieleFrage() {
   T.spiele('spezial');
   fenster('Wie geht es weiter?', `
     <p><b>Die ersten Schritte hast du geschafft!</b> Ab jetzt entscheidest du.</p>
-    <p>Soll dir das Spiel oben in der Leiste immer ein <b>nächstes Ziel</b> vorschlagen - das günstigste Teil, das du gerade kaufen kannst? Oder möchtest du lieber <b>selbst erkunden</b>, was es in den Läden gibt?</p>
+    <p>Soll dir das Spiel oben in der Leiste immer ein <b>nächstes Ziel</b> vorschlagen - ein neues Getränk, einen Helfer oder einen Ausbau für den Stand, dazwischen Deko? Oder möchtest du lieber <b>selbst erkunden</b>, was es in den Läden gibt?</p>
     <p class="klein">Du kannst das jederzeit im Menü umstellen.</p>`,
   [{ text: 'Selbst erkunden', neben: true, aktion: () => { S.st.zieleWeiter = false; S.speichere(); zielLeiste(); } },
     { text: 'Ziele vorschlagen', aktion: () => { S.st.zieleWeiter = true; S.speichere(); zielLeiste(); } }]);
@@ -2738,6 +2738,8 @@ export function verdrahte() {
     T.spiele('klick');
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
     if (leistenModus === 'markt') { oeffneKarte('festplatz'); return; }
+    const zl = leistenModus === 'ziel' && ZL.aktuell();
+    if (zl && zl.oeffne === 'auftraege') { offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege('heute'); return; }
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();
   };
   $('#btnLaden').onclick = () => { T.spiele('klick'); KA.istOffen() ? schliesseKarte() : oeffneKarte(); };
