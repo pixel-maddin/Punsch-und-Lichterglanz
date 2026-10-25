@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610251500';
-import * as Z from './zeit.js?v=202610251500';
-import { neueFarben } from './pixel.js?v=202610251500';
+import * as C from './config.js?v=202610251700';
+import * as Z from './zeit.js?v=202610251700';
+import { neueFarben } from './pixel.js?v=202610251700';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2523,6 +2523,12 @@ export function wettbewerbInTagen() {
   const d = Z.jetzt(), n = 7 - d.getDay();   // bis zum nächsten Sonntag
   return n === 7 ? 0 : n;
 }
+/** Jury-Ansage als Fenster (25.10.): einmal je Saison, ab 4 Tage vor dem 4. Advent. */
+export const juryAnsageFaellig = () => {
+  const n = wettbewerbInTagen();
+  return n != null && n >= 1 && n <= 4 && st.juryAnsage !== Z.saison() && spieltag() + n >= C.WETTBEWERB.abSpieltag;
+};
+export function juryAngesagt() { st.juryAnsage = Z.saison(); speichere(); }
 export function wettbewerbPlatz(s = stimmung()) {
   const i = C.WETTBEWERB.plaetze.findIndex((p) => s >= p.ab);
   return i < 0 ? C.WETTBEWERB.plaetze.length : i;   // plaetze.length = Urkunde

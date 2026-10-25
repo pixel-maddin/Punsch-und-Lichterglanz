@@ -4,14 +4,14 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610251500';
-import * as S from './spiel.js?v=202610251500';
-import * as T from './ton.js?v=202610251500';
-import * as Z from './zeit.js?v=202610251500';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610251500';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610251500';
-import { schriftBild } from './schrift.js?v=202610251500';
-import { fenster, karte } from './ui.js?v=202610251500';
+import * as C from './config.js?v=202610251700';
+import * as S from './spiel.js?v=202610251700';
+import * as T from './ton.js?v=202610251700';
+import * as Z from './zeit.js?v=202610251700';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610251700';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610251700';
+import { schriftBild } from './schrift.js?v=202610251700';
+import { fenster, karte } from './ui.js?v=202610251700';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -395,6 +395,30 @@ export function zeigeWettbewerb(danach) {
     <p class="bonus">+${S.formatGeld(e.betrag)} · Stimmung ♥ ${e.stimmung.toLocaleString('de-DE')}</p>`,
   [{ text: 'Juhu!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
   BILDER.jury(bildKontext(box), e.platz);
+}
+
+/**
+ * Die Jury-Ansage (25.10., Nutzerwunsch „3-4 Tage vorher"): einmal je Saison ab 4 Tage vor dem
+ * 4. Advent (`S.juryAnsageFaellig`). Sagt, wann sie kommt, wie viel ♥ das Haus hat und was für
+ * Bronze, Silber und Gold noch fehlt - damit man die Tage nutzen kann.
+ */
+export function zeigeJuryAnsage(danach) {
+  const tage = S.wettbewerbInTagen();
+  S.juryAngesagt();
+  const s = S.stimmung();
+  T.spiele('spezial');
+  const wann = tage === 1 ? 'morgen' : `in ${tage} Tagen (am 4. Advent)`;
+  const stufen = [...C.WETTBEWERB.plaetze].reverse().map((pl) => s >= pl.ab
+    ? `<li><b>${pl.name}</b> ab ♥ ${pl.ab} - schon geschafft!</li>`
+    : `<li><b>${pl.name}</b> ab ♥ ${pl.ab} - noch ♥ ${(pl.ab - s).toLocaleString('de-DE')}</li>`).join('');
+  const box = fenster('Die Jury kommt!', `
+    <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
+    <p>Das Dorf sucht das <b>schönste Haus</b>! Die Jury kommt ${wann} und schaut sich jedes Haus genau an.</p>
+    <p>Dein Haus hat gerade <b>♥ ${s.toLocaleString('de-DE')}</b> Stimmung:</p>
+    <ul class="jury-stufen">${stufen}</ul>
+    <p class="klein">Mehr Deko bringt mehr Stimmung - und jeder Platz eine Belohnung.</p>`,
+  [{ text: 'Ich schmücke weiter!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
+  BILDER.jury(bildKontext(box), 0);
 }
 
 /**

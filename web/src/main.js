@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610251500';
-import * as S from './spiel.js?v=202610251500';
-import * as Z from './zeit.js?v=202610251500';
-import * as T from './ton.js?v=202610251500';
-import * as LI from './lichtung.js?v=202610251500';
-import * as CB from './christbaum.js?v=202610251500';
-import * as KA from './karte.js?v=202610251500';
-import * as SB from './schlitten.js?v=202610251500';
-import * as EB from './schlittschuh.js?v=202610251500';
-import * as BS from './backstube.js?v=202610251500';
-import * as UI from './ui.js?v=202610251500';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610251500';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610251500';
-import * as Kacheln from './kacheln.js?v=202610251500';
-import * as Lernen from './lernen.js?v=202610251500';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610251500';
-import * as A from './auftraege.js?v=202610251500';
-import * as E from './erfolge.js?v=202610251500';
-import * as ZL from './ziele.js?v=202610251500';
+import * as C from './config.js?v=202610251700';
+import * as S from './spiel.js?v=202610251700';
+import * as Z from './zeit.js?v=202610251700';
+import * as T from './ton.js?v=202610251700';
+import * as LI from './lichtung.js?v=202610251700';
+import * as CB from './christbaum.js?v=202610251700';
+import * as KA from './karte.js?v=202610251700';
+import * as SB from './schlitten.js?v=202610251700';
+import * as EB from './schlittschuh.js?v=202610251700';
+import * as BS from './backstube.js?v=202610251700';
+import * as UI from './ui.js?v=202610251700';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610251700';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610251700';
+import * as Kacheln from './kacheln.js?v=202610251700';
+import * as Lernen from './lernen.js?v=202610251700';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610251700';
+import * as A from './auftraege.js?v=202610251700';
+import * as E from './erfolge.js?v=202610251700';
+import * as ZL from './ziele.js?v=202610251700';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -249,9 +249,11 @@ function ankommen(erstesMal) {
   if (brief) setTimeout(() => UI.toast(brief === 'neu' ? 'Ein Brief steckt im Briefkasten am Haus!' : 'Im Briefkasten liegt ein Dankeschön für dich!', 'spezial'), 1500);
   // Am 4. Advent die Jury: gleich nach dessen Fenster (11.10.)
   if (S.wettbewerbFaellig()) meldungen.push(['wettbewerb']);
+  // 4 Tage vorher (25.10.): einmal ein richtiges Fenster mit dem Stand der Stimmung
+  if (S.juryAnsageFaellig()) meldungen.push(['juryAnsage']);
   // Vorher, ab dem 3. Advent: einmal am Tag die Ansage
   const inTagen = S.wettbewerbInTagen();
-  if (inTagen != null && inTagen > 0 && S.spieltag() + inTagen >= C.WETTBEWERB.abSpieltag && S.st.wettbewerbAnsage !== Z.tagesSchluessel()) {
+  if (inTagen != null && inTagen > 0 && !S.juryAnsageFaellig() && S.spieltag() + inTagen >= C.WETTBEWERB.abSpieltag && S.st.wettbewerbAnsage !== Z.tagesSchluessel()) {   // am Tag des Fensters keine Einblendung dazu
     S.st.wettbewerbAnsage = Z.tagesSchluessel();
     setTimeout(() => UI.toast(inTagen === 1 ? 'Morgen kommt die Jury: Wer hat das schönste Haus im Dorf?' : `In ${inTagen} Tagen kürt das Dorf das schönste Haus - mehr Deko, mehr Stimmung!`, 'spezial'), 3600);
   }
@@ -298,6 +300,7 @@ function zeigeNaechste(kette) {
   if (m[0] === 'advent') zeigeAdvent(m[1], weiter);
   else if (m[0] === 'heiligabend') { if (S.heiligabendFaellig()) zeigeHeiligabend(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'wettbewerb') { if (S.wettbewerbFaellig()) zeigeWettbewerb(weiter); else zeigeNaechste(kette); }
+  else if (m[0] === 'juryAnsage') { if (S.juryAnsageFaellig()) zeigeJuryAnsage(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'silvester') { if (S.silvesterFaellig()) zeigeSilvester(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'schnee') zeigeErsterSchnee(weiter);
   // Kiste nur, wenn noch etwas drin ist: Ankommen läuft beim Laden und beim

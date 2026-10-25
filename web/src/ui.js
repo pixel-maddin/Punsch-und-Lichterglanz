@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610251500';
-import * as S from './spiel.js?v=202610251500';
-import * as Z from './zeit.js?v=202610251500';
-import * as T from './ton.js?v=202610251500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610251500';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610251500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610251500';
-import * as A from './auftraege.js?v=202610251500';
-import * as E from './erfolge.js?v=202610251500';
-import * as ZL from './ziele.js?v=202610251500';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610251500';
-import * as KA from './karte.js?v=202610251500';
-import { zeigeRueckblick } from './ereignis.js?v=202610251500';
-import { barbaraZweig } from './szene.js?v=202610251500';
-import * as SW from './schneeball.js?v=202610251500';
-import * as LI from './lichtung.js?v=202610251500';
-import * as CB from './christbaum.js?v=202610251500';
-import * as SB from './schlitten.js?v=202610251500';
-import * as EB from './schlittschuh.js?v=202610251500';
-import * as BS from './backstube.js?v=202610251500';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610251500';
+import * as C from './config.js?v=202610251700';
+import * as S from './spiel.js?v=202610251700';
+import * as Z from './zeit.js?v=202610251700';
+import * as T from './ton.js?v=202610251700';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610251700';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610251700';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610251700';
+import * as A from './auftraege.js?v=202610251700';
+import * as E from './erfolge.js?v=202610251700';
+import * as ZL from './ziele.js?v=202610251700';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610251700';
+import * as KA from './karte.js?v=202610251700';
+import { zeigeRueckblick } from './ereignis.js?v=202610251700';
+import { barbaraZweig } from './szene.js?v=202610251700';
+import * as SW from './schneeball.js?v=202610251700';
+import * as LI from './lichtung.js?v=202610251700';
+import * as CB from './christbaum.js?v=202610251700';
+import * as SB from './schlitten.js?v=202610251700';
+import * as EB from './schlittschuh.js?v=202610251700';
+import * as BS from './backstube.js?v=202610251700';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610251700';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -737,6 +737,8 @@ function wunschText(b) {
   return 'ich trau mich noch nicht auf die <b>Eisbahn</b>. Fährst du mal eine Runde und zeigst mir, wie man springt?';
 }
 function gruss(b) { return `${b.maedchen ? 'Deine' : 'Dein'} ${b.kind} (${b.alter})`; }
+/** Erster Buchstabe groß - der Wunschtext beginnt klein, weil er im Brief hinter „Liebes Haus …," steht (25.10.). */
+const gross1 = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 /** Eine Kinderzeichnung: Haus, Sonne, das Kind - und das, was es sich gewünscht hat. */
 /**
  * Das Dankesbild wird als 48 x 36 gemalt und per Scale2x auf 96 x 72 gebracht
@@ -1757,7 +1759,7 @@ function wunschKarte() {
   const status = b.dank ? `Erfüllt! ${b.kind} hat dir ein Dankeschön in den Briefkasten gelegt.`
     : b.offen ? 'Ungelesen - der Brief steckt im Briefkasten am Haus.' : 'Noch offen. Kein Zeitdruck.';
   z.innerHTML = `<div class="bitte-kopf"><div class="mitte"><b>Brief von ${esc(b.kind)} (${b.alter})</b>
-      <span class="bitte-text">${b.offen && !b.dank ? 'Ein Brief für dich!' : `„${wunschText(b).replace(/<\/?b>/g, '')}“`}</span></div></div>
+      <span class="bitte-text">${b.offen && !b.dank ? 'Ein Brief für dich!' : `„${gross1(wunschText(b).replace(/<\/?b>/g, ''))}“`}</span></div></div>
     <div class="bitte-fuss"><div class="bitte-knopf"><small>${status}</small></div></div>`;
   const k = el('button', 'k' + (b.dank ? ' k--kauf' : ' k--neben'), b.dank ? 'Abholen' : b.offen ? 'Lesen' : 'Nochmal lesen');
   k.onclick = () => { T.spiele('klick'); schliesseBlatt(); zeigeBrief(); };

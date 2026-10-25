@@ -1369,3 +1369,8 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #modal .stamm-buch .gesperrt { color: var(--text3); }
 #modal .stamm-buch .gesperrt::after { content: '🔒'; margin-left: auto; padding-left: calc(var(--px) * 1); opacity: 0.6; }
 #modal .stamm-buch .geschenk.erzaehlt { font-style: normal; color: #8a5a10; }
+
+/* Jury-Ansage (25.10.): Bronze, Silber, Gold mit dem, was noch fehlt */
+#modal .jury-stufen { list-style: none; margin: calc(var(--px) * 1) auto; padding: 0; max-width: calc(var(--px) * 120); text-align: left; font-size: var(--t-text); }
+#modal .jury-stufen li { padding: calc(var(--px) * 1) calc(var(--px) * 2); border-bottom: calc(var(--px) * 0.4) solid #e6d4ac; }
+#modal .jury-stufen li:last-child { border-bottom: none; }
