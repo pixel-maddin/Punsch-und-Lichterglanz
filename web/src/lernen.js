@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610251900';
-import * as S from './spiel.js?v=202610251900';
-import * as A from './auftraege.js?v=202610251900';
-import * as E from './erfolge.js?v=202610251900';
-import * as Z from './ziele.js?v=202610251900';
-import * as KA from './karte.js?v=202610251900';
-import { zellePos } from './tresen.js?v=202610251900';
+import * as C from './config.js?v=202610260900';
+import * as S from './spiel.js?v=202610260900';
+import * as A from './auftraege.js?v=202610260900';
+import * as E from './erfolge.js?v=202610260900';
+import * as Z from './ziele.js?v=202610260900';
+import * as KA from './karte.js?v=202610260900';
+import { zellePos } from './tresen.js?v=202610260900';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -369,6 +369,9 @@ function hinweise(dt) {
     if (st.tipps[h.id] || ruheT < (h.sofort ? HINWEIS_PAUSE_SOFORT : HINWEIS_PAUSE) || !h.wann()) continue;
     aktuell = { h, t: 0 };
     if (h.id === 'chef') { st.chefBonus = true; S.speichere(); }   // der Bonus gilt, sobald er erklärt wird
+    // 26.10. (gemeldet): Festplatz und Minispiele gehen auf, sobald der Hinweis sie NENNT - vorher erst,
+    // wenn er erledigt war (= Karte geöffnet). Wer ihm folgte, sah zuerst nur gesperrte „?"-Schilder.
+    if (h.id === 'karte_mehr') { st.karteMehrGezeigt = true; S.speichere(); }
     // Verwandte Hinweise gelten mit als erklärt (Aufträge kam sonst doppelt)
     for (const id of h.ersetzt || []) st.tipps[id] = true;
     return hinweise(0);

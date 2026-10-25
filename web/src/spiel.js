@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610251900';
-import * as Z from './zeit.js?v=202610251900';
-import { neueFarben } from './pixel.js?v=202610251900';
+import * as C from './config.js?v=202610260900';
+import * as Z from './zeit.js?v=202610260900';
+import { neueFarben } from './pixel.js?v=202610260900';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -359,7 +359,7 @@ export const einstieg = (was) => !!DEMO || spieltag() >= (C.EINSTIEG[was] || 0);
 export function ortOffen(o) {
   if (DEMO || st.orteAlle) return true;
   const z = st.lernen >= 99 ? st.ziel || 0 : -1;
-  const karte = !!(st.tipps && st.tipps.karte_mehr);
+  const karte = !!((st.tipps && st.tipps.karte_mehr) || st.karteMehrGezeigt);   // schon beim Erscheinen des Hinweises (lernen.js)
   if (o.spiel) return karte && miniOffen(o.spiel);
   return { haus: true, super: true, dorf: z >= 1, wichtel: z >= 2, bau: z >= 5, festplatz: karte, baumschule: karte && miniOffen('baum') }[o.id] ?? true;
 }
