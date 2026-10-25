@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610251700';
-import * as S from './spiel.js?v=202610251700';
-import * as Z from './zeit.js?v=202610251700';
-import * as T from './ton.js?v=202610251700';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610251700';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610251700';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610251700';
-import * as A from './auftraege.js?v=202610251700';
-import * as E from './erfolge.js?v=202610251700';
-import * as ZL from './ziele.js?v=202610251700';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610251700';
-import * as KA from './karte.js?v=202610251700';
-import { zeigeRueckblick } from './ereignis.js?v=202610251700';
-import { barbaraZweig } from './szene.js?v=202610251700';
-import * as SW from './schneeball.js?v=202610251700';
-import * as LI from './lichtung.js?v=202610251700';
-import * as CB from './christbaum.js?v=202610251700';
-import * as SB from './schlitten.js?v=202610251700';
-import * as EB from './schlittschuh.js?v=202610251700';
-import * as BS from './backstube.js?v=202610251700';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610251700';
+import * as C from './config.js?v=202610251900';
+import * as S from './spiel.js?v=202610251900';
+import * as Z from './zeit.js?v=202610251900';
+import * as T from './ton.js?v=202610251900';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610251900';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610251900';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610251900';
+import * as A from './auftraege.js?v=202610251900';
+import * as E from './erfolge.js?v=202610251900';
+import * as ZL from './ziele.js?v=202610251900';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610251900';
+import * as KA from './karte.js?v=202610251900';
+import { zeigeRueckblick } from './ereignis.js?v=202610251900';
+import { barbaraZweig } from './szene.js?v=202610251900';
+import * as SW from './schneeball.js?v=202610251900';
+import * as LI from './lichtung.js?v=202610251900';
+import * as CB from './christbaum.js?v=202610251900';
+import * as SB from './schlitten.js?v=202610251900';
+import * as EB from './schlittschuh.js?v=202610251900';
+import * as BS from './backstube.js?v=202610251900';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610251900';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -78,6 +78,18 @@ let letztesZiel = '';
 /** Die Leiste pulst einmal kurz (Ziel geschafft). */
 export function zielPuls() { const b = $('#ziel'); b.classList.remove('puls'); void b.offsetWidth; b.classList.add('puls'); }
 let leistenModus = '';   // 'ziel' | 'ansturm' | ''
+/** Betrag mit der Sterngrafik der Kopfzeile statt des Worts „Sterne" (25.10.). */
+let sternBild = '';
+function zielZahl(n) {
+  if (!sternBild) {
+    const cv = document.querySelector('#geld canvas');
+    try {   // erst nehmen, wenn der Stern schon gemalt ist (sonst bliebe ein leeres Bild gemerkt)
+      if (cv && cv.width && cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data.some((v, i) => i % 4 === 3 && v > 0)) sternBild = cv.toDataURL();
+    } catch (e) { /* ohne Bild */ }
+  }
+  const z = Math.max(0, Math.round(n)).toLocaleString('de-DE');
+  return sternBild ? `${z}<img class="stern" src="${sternBild}" alt="Sterne">` : `${z} ★`;
+}
 export function zielLeiste() {
   const z = ZL.aktuell();
   const k = ZL.kaufziel();   // nach den Startzielen das laufende nächste Ziel (13.10.)
@@ -127,9 +139,10 @@ export function zielLeiste() {
     const a = S.ARTIKEL_MAP[weiter.id];
     const stufe = Array.isArray(a.kosten) ? ` <i>Stufe ${S.stufe(a.id) + 1}</i>` : '';
     const herz = Array.isArray(a.stimmung) ? a.stimmung[S.stufe(a.id)] : a.stimmung;
-    const was = `${a.name}${stufe}${herz ? ` <i>♥+${herz}</i>` : a.tab === 'super' ? ' <i>neues Getränk</i>' : a.tab === 'wichtel' ? ' <i>Helfer</i>' : ZL.istMeilenstein(a) ? ' <i>für den Stand</i>' : ''}`;
-    b.innerHTML = `<span class="nr">Nächstes</span><span class="was">${was}</span>`
-      + (bereit ? '<span class="los">Los ▸</span>' : `<small>noch ${S.formatGeld(weiter.kosten - S.st.geld)}</small>`)
+    const was = `${a.name}${stufe}${herz ? ` <i>♥+${herz}</i>` : a.tab === 'super' ? (!C.PRODUKT[a.id] ? '' : C.PRODUKT[a.id].art === 'topf' ? ' <i>neues Getränk</i>' : ' <i>neue Leckerei</i>')   /* 25.10.: Lebkuchen und Crêpe sind kein Getränk */ : a.tab === 'wichtel' ? ' <i>Helfer</i>' : ZL.istMeilenstein(a) ? ' <i>für den Stand</i>' : ''}`;
+    // 25.10.: so hoch wie die Knöpfe daneben - Ziel oben, darunter klein „Nächstes · noch N ★"
+    b.innerHTML = `<span class="mitte"><span class="was">${was}</span><small>Nächstes${bereit ? '' : ` · noch ${zielZahl(weiter.kosten - S.st.geld)}`}</small></span>`
+      + (bereit ? '<span class="los">Los ▸</span>' : '')
       + `<span class="fort"><span style="width:${Math.round(Math.max(0, Math.min(1, S.st.geld / weiter.kosten)) * 100)}%"></span></span>`;
     b.classList.toggle('bereit', bereit);
     b.classList.remove('versteckt');
@@ -138,12 +151,12 @@ export function zielLeiste() {
   }
   if (!z) { b.classList.add('versteckt'); return; }
   const zahl = z.ziel > 1 ? ` <i>${z.stand()}/${z.ziel}</i>` : '';
-  const nochNicht = k && !bereit ? `<small>noch ${S.formatGeld(k.kosten - S.st.geld)}</small>` : '';
+  const nochNicht = k && !bereit ? ` · noch ${zielZahl(k.kosten - S.st.geld)}` : '';
   // Fortschrittsbalken an der Unterkante: Sterne bis zum nächsten Kauf,
   // sonst wie weit das Ziel selbst ist
   const anteil = bereit ? 1 : k ? S.st.geld / k.kosten : z.anteil ? z.anteil() : z.stand() / z.ziel;
-  b.innerHTML = `<span class="nr">Ziel ${ZL.nummer()}/${ZL.ZIELE.length}</span><span class="was">${z.text}${zahl}</span>`
-    + (bereit ? '<span class="los">Los ▸</span>' : nochNicht || `<span class="lohn">+${z.lohn} ★</span>`)
+  b.innerHTML = `<span class="mitte"><span class="was">${z.text}${zahl}</span><small>Ziel ${ZL.nummer()}/${ZL.ZIELE.length}${nochNicht}</small></span>`
+    + (bereit ? '<span class="los">Los ▸</span>' : `<span class="lohn">+${zielZahl(z.lohn)}</span>`)
     + `<span class="fort"><span style="width:${Math.round(Math.max(0, Math.min(1, anteil)) * 100)}%"></span></span>`;
   b.classList.toggle('bereit', bereit);
   b.classList.remove('versteckt');

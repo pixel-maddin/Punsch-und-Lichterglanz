@@ -1374,3 +1374,13 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #modal .jury-stufen { list-style: none; margin: calc(var(--px) * 1) auto; padding: 0; max-width: calc(var(--px) * 120); text-align: left; font-size: var(--t-text); }
 #modal .jury-stufen li { padding: calc(var(--px) * 1) calc(var(--px) * 2); border-bottom: calc(var(--px) * 0.4) solid #e6d4ac; }
 #modal .jury-stufen li:last-child { border-bottom: none; }
+
+/* Zielleiste so hoch wie „Haus" und „Angebot" daneben (25.10.): Ziel oben, darunter klein
+   „Ziel 2/7 · noch 120 ★" bzw. „Nächstes · …", der Stern als Grafik der Kopfzeile */
+#ziel { height: calc(var(--px) * 25); box-sizing: border-box; padding-top: 0; padding-bottom: 0; }
+.knopf-oben { height: calc(var(--px) * 25); box-sizing: border-box; }   /* beide gleich hoch, sonst bestimmt der Inhalt die Knopfhöhe */
+#ziel .mitte { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: calc(var(--px) * 0.5); }
+#ziel .mitte .was { font-size: var(--t-text); line-height: 1.12; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+#ziel .mitte small { font-size: var(--t-mini); line-height: 1.1; }
+#ziel img.stern { width: calc(var(--px) * 4.6); height: calc(var(--px) * 4.6); margin-left: calc(var(--px) * 0.6); vertical-align: calc(var(--px) * -0.8); image-rendering: pixelated; }
+#ziel .lohn img.stern { width: calc(var(--px) * 5); height: calc(var(--px) * 5); }

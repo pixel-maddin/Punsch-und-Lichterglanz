@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610251700';
-import * as S from './spiel.js?v=202610251700';
-import * as A from './auftraege.js?v=202610251700';
-import * as E from './erfolge.js?v=202610251700';
-import * as Z from './ziele.js?v=202610251700';
-import * as KA from './karte.js?v=202610251700';
-import { zellePos } from './tresen.js?v=202610251700';
+import * as C from './config.js?v=202610251900';
+import * as S from './spiel.js?v=202610251900';
+import * as A from './auftraege.js?v=202610251900';
+import * as E from './erfolge.js?v=202610251900';
+import * as Z from './ziele.js?v=202610251900';
+import * as KA from './karte.js?v=202610251900';
+import { zellePos } from './tresen.js?v=202610251900';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -81,6 +81,16 @@ const ausgussZiel = () => ({ x: 165, y: G + C.T_GAST + 11 });
 function zellZiel(i) { const q = zellePos(i); return q ? { x: q.x, y: G + C.T_GAST + C.T_BRETT + q.y } : null; }
 const ladenZiel = () => ({ x: 18, y: H - 14 });
 const auftragZiel = () => ({ x: 54, y: H - 14 });
+/** Mitte eines DOM-Elements in Spielpixeln (25.10.: die Herzen saßen nach dem Umbau der Kopfzeile woanders als x 90). */
+function domZiel(sel, ersatz) {
+  const el = document.querySelector(sel), par = zeiger.parentElement;   // nicht offsetParent: der ist leer, solange der Zeiger versteckt ist
+  const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 0;
+  if (!el || !par || !px) return ersatz;
+  const r = el.getBoundingClientRect(), p = par.getBoundingClientRect();
+  if (!r.width) return ersatz;
+  return { x: Math.round((r.left + r.width / 2 - p.left) / px), y: Math.round((r.top + r.height / 2 - p.top) / px) };
+}
+const herzZiel = () => domZiel('#stimmung .hud-ico', { x: 90, y: 10 });
 const kalenderZiel = () => ({ x: 90, y: H - 14 });
 
 function gastAmTresen() { return S.lauf.gaeste.find((g) => g.am && !g.gehen && !g.bedient); }
@@ -160,7 +170,7 @@ const HINWEISE = [
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
     text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung - je mehr, desto mehr Gäste. Tipp: Mit dem Knopf „Haus" oben links schmückst du es (Lichter, Farben, Varianten).',
-    ziel: () => ({ x: 90, y: 10 }), dauer: 9 },
+    ziel: herzZiel, dauer: 9 },
   { id: 'gegangen', ruhig: true, wann: () => S.st.stats.verpasst >= 1,
     text: () => 'Ein Gast ist weitergegangen - nicht schlimm, es kommen neue! Aber Achtung: Manchmal kommt jemand GANZ BESONDERES vorbei - den solltest du nicht warten lassen.',
     ziel: () => gastZiel(0), dauer: 8 },
@@ -213,7 +223,7 @@ const HINWEISE = [
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen },
   { id: 'herz_ziel', ruhig: true, wann: () => istZiel('auftrag'),   // 24.10.: Ziel „15 ♥" gibt es nicht mehr; hält das Spiel nicht mehr an
     text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter.',
-    ziel: () => ({ x: 90, y: 10 }), dauer: 10 },
+    ziel: herzZiel, dauer: 10 },
   { id: 'ziele_fertig', sofort: true, wann: () => Z.fertig() && S.st.tipps.wichtel_weg,
     text: () => 'Alle sieben Ziele geschafft - jetzt weißt du alles Wichtige! Genieße die Weihnachtszeit und schmücke dein Haus, wie es dir gefällt. Schau jeden Tag mal rein: Es gibt neue Aufträge, ein Türchen im Adventskalender und besondere Ereignisse.',
     ziel: null, dauer: 10 },
@@ -299,7 +309,9 @@ function griffText(k) {
     + (g.timing ? ' Achte auf den Balken: Der weiße Strich muss im grünen Bereich sein, zu früh oder zu spät gibt es keinen Bonus.' : '')
     + (k === 'zucker' ? ` Danach brennt er ${C.FEUER_FENSTER} Sekunden - nur so lange gibt es den Bonus.` : '')
     + (h && h.schritt > 0 ? ' Manche Getränke brauchen zwei Handgriffe nacheinander.' : '')
-    + ` Fertig zahlt der Gast ${bonus} % mehr. Das kannst nur du - die Wichtel lassen es weg.`;
+    + ` Fertig zahlt der Gast ${bonus} % mehr.`
+    // 25.10.: die Wichtel erst erwähnen, wenn es einen gibt (beim ersten Handgriff war noch keiner da)
+    + (['spuel', 'nachfuell', 'servier'].some((w) => S.hat(w)) ? ' Das kannst nur du - die Wichtel lassen es weg.' : '');
 }
 
 function extraOffen() {
