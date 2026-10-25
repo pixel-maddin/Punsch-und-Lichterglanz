@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610251000';
-import * as Z from './zeit.js?v=202610251000';
-import * as S from './spiel.js?v=202610251000';
-import { FASSADEN } from './config.js?v=202610251000';
-import * as C from './config.js?v=202610251000';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610251300';
+import * as Z from './zeit.js?v=202610251300';
+import * as S from './spiel.js?v=202610251300';
+import { FASSADEN } from './config.js?v=202610251300';
+import * as C from './config.js?v=202610251300';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1632,6 +1632,71 @@ function kutsche(c, L, G, t, w) {
   L.push({ rect: [x + 11, fuss - 12, 4, 4], f: '#ffd070', halo: 5, an: 0.7 });
 }
 
+/**
+ * Die Weihnachtseisenbahn (Finale, 25.10.): Dampflok mit drei Wagen (Geschenke, beleuchteter
+ * Personenwagen, Christbaum) tuckert von rechts nach links über die Fahrbahn. Im selben
+ * 45-s-Takt wie die Kutsche, aber versetzt - die beiden begegnen sich nie. Nach dem Öffnen des
+ * Finales (`lauf.zugJetzt`) fährt sie sofort einmal vorbei.
+ */
+let zugAb = null;
+function eisenbahn(c, L, G, t, w) {
+  if (S.lauf.zugJetzt) { zugAb = t; S.lauf.zugJetzt = false; }
+  const phase = zugAb != null && t - zugAb < 14 ? t - zugAb : (t + 20) % 45;
+  if (phase > 14) return;
+  const x = Math.round(184 - phase * 18), fuss = G - 3, takt = Math.floor(t * 8) % 2;
+  const schnee = w.schnee > 0;
+  // Gleis nur unter dem Zug
+  r(c, x - 3, fuss, 72, 1, '#6a6a78');
+  for (let k = x - 2; k < x + 69; k += 3) p(c, k, fuss + 1, '#5a3a22');
+  // Rad: dunkel mit goldener Nabe, dreht sich (Speiche springt)
+  const rad = (rx, gross) => { const s = gross ? 4 : 3; r(c, rx - 1, fuss - s, s, s, '#2a2a32'); p(c, rx - 1 + (takt ? 1 : 0), fuss - s + 1, '#c8a040'); };
+  // --- Lok (vorn links) ---
+  r(c, x + 1, fuss - 5, 20, 2, '#1a1a20');                                     // Rahmen
+  r(c, x + 2, fuss - 12, 12, 7, '#2a2a34'); r(c, x + 2, fuss - 12, 12, 1, '#4a4a5a'); r(c, x + 2, fuss - 6, 12, 1, '#16161c');   // Kessel
+  r(c, x + 2, fuss - 9, 12, 1, '#c8322e');                                     // rotes Band
+  r(c, x + 1, fuss - 12, 1, 7, '#c8a040');                                     // Kesselfront
+  r(c, x + 4, fuss - 16, 3, 4, '#1a1a20'); r(c, x + 3, fuss - 17, 5, 1, '#c8a040');   // Schornstein
+  r(c, x + 9, fuss - 14, 3, 2, '#c8a040');                                     // Dampfdom
+  r(c, x - 1, fuss - 4, 3, 2, '#c8322e'); p(c, x - 1, fuss - 2, '#a82424');    // Schienenräumer
+  p(c, x, fuss - 10, '#ffe490');                                               // Lampe
+  r(c, x + 14, fuss - 16, 8, 11, '#c8322e'); r(c, x + 13, fuss - 17, 10, 1, '#2a2a34');   // Führerhaus
+  r(c, x + 16, fuss - 14, 4, 4, '#ffd070'); p(c, x + 18, fuss - 14, '#fff2c0');
+  if (schnee) { r(c, x + 13, fuss - 18, 10, 1, '#ffffff'); r(c, x + 3, fuss - 13, 6, 1, '#eef3fa'); }
+  rad(x + 5, true); rad(x + 10, true); rad(x + 18, false);
+  r(c, x + 4 + takt, fuss - 3, 8, 1, '#c8a040');                               // Pleuelstange
+  // Rauch: Wölkchen, die nach hinten (rechts) wegziehen
+  for (let k = 0; k < 4; k++) {
+    const a = ((t * 1.6 + k / 4) % 1), sx = x + 5 + Math.round(a * 16), sy = fuss - 19 - Math.round(a * 8), g = a < 0.5 ? 2 : 3;
+    r(c, sx, sy, g, g, a < 0.6 ? '#e2e6f0' : '#b8bed0');
+  }
+  // --- Wagen ---
+  const kupplung = (kx) => r(c, kx, fuss - 4, 2, 1, '#3a3a44');
+  let wx = x + 24;
+  kupplung(wx - 2);
+  // 1. Geschenkewagen (offen)
+  r(c, wx, fuss - 7, 13, 3, '#2f7d3a'); r(c, wx, fuss - 7, 13, 1, '#4a9a52'); r(c, wx, fuss - 5, 13, 1, '#1f5a2a');
+  for (const [gx, gw, gh, f, band] of [[1, 4, 4, '#d83a3a', '#ffd84a'], [5, 3, 5, '#2f5d9e', '#efe6d2'], [8, 4, 3, '#e8b030', '#c8322e']]) {
+    r(c, wx + gx, fuss - 7 - gh, gw, gh, f); r(c, wx + gx + (gw >> 1), fuss - 7 - gh, 1, gh, band); p(c, wx + gx + (gw >> 1), fuss - 8 - gh, band);
+  }
+  rad(wx + 3, false); rad(wx + 11, false);
+  wx += 15; kupplung(wx - 2);
+  // 2. Personenwagen mit Licht
+  r(c, wx, fuss - 13, 13, 9, '#2a4a8a'); r(c, wx, fuss - 13, 13, 1, '#4a6aaa'); r(c, wx - 1, fuss - 14, 15, 1, '#1a2a50');
+  for (const fx of [wx + 2, wx + 8]) { r(c, fx, fuss - 11, 3, 3, '#ffd070'); L.push({ rect: [fx, fuss - 11, 3, 3], f: '#ffd070', halo: 4, an: 0.7 }); }
+  r(c, wx, fuss - 6, 13, 1, '#c8a040');
+  if (schnee) r(c, wx - 1, fuss - 15, 15, 1, '#ffffff');
+  rad(wx + 3, false); rad(wx + 11, false);
+  wx += 15; kupplung(wx - 2);
+  // 3. Christbaumwagen
+  r(c, wx, fuss - 6, 13, 2, '#6a4428'); r(c, wx, fuss - 6, 13, 1, '#8a5e38');
+  for (let k = 0; k < 9; k++) { const bw = Math.floor(k / 2); r(c, wx + 6 - bw, fuss - 15 + k, 2 * bw + 1, 1, k % 3 === 2 ? '#1f5a2e' : '#2e7a3e'); }
+  p(c, wx + 6, fuss - 16, '#ffd84a');
+  for (const [bx, by, f] of [[5, -12, '#ff4a4a'], [8, -10, '#4aa0ff'], [4, -8, '#ffd040']]) { p(c, wx + bx, fuss + by, f); L.push({ x: wx + bx, y: fuss + by, f, halo: 2, an: 0.8 }); }
+  rad(wx + 3, false); rad(wx + 11, false);
+  L.push({ x, y: fuss - 10, f: '#ffe490', halo: 6, an: 0.9 });               // Lokscheinwerfer
+  L.push({ rect: [x + 16, fuss - 14, 4, 4], f: '#ffd070', halo: 4, an: 0.6 });
+}
+
 // ---------------------------------------------------------------------------
 // Aus dem Christbaumverkauf (09.10.)
 // ---------------------------------------------------------------------------
@@ -2150,6 +2215,7 @@ function vorDenLeuten(c, L, G, GW, t, w, opts) {
   if (S.zeigt('g_vorrat')) schneeballVorrat(c, 12, GW - 1);
   if (Z.schnee() > 0) eigenerSchneemann(c, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
   if (S.zeigt('m_kutsche') && !opts.karte) kutsche(c, L, G, t, w);
+  if (S.zeigt('f_eisenbahn') && !opts.karte) eisenbahn(c, L, G, t, w);   // Finale (25.10.)
   if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(c, GW, t, w);
 }
 
@@ -2439,7 +2505,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], sp_pokal: [42, -58], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [31, -71], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], f_eisenbahn: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], sp_pokal: [42, -58], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [31, -71], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];

@@ -131,6 +131,10 @@ warten kürzer, zahlen aber doppelt.
 Im zweiten Reiter hängt die **Erfolgswand**: 24 Socken über dem Kamin, eine
 je Erfolg. Mit jeder Socke wird das Wohnzimmer weihnachtlicher.
 
+Wer **wirklich alles** gekauft und voll ausgebaut hat (auch die ✦ Extras), findet
+vor dem Kamin ein goldenes Geschenk. Darin steckt das letzte Stück fürs Haus:
+die **Weihnachtseisenbahn**, die ab und zu vor dem Haus vorbeituckert.
+
 ## Die Karte
 
 Der Knopf **Karte** unten links öffnet eine Übersichtskarte der Gegend, mit

@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202610251000';
-import * as S from './spiel.js?v=202610251000';
-import { iconGross, scale2x, r, p } from './pixel.js?v=202610251000';
-import { naechsterSchritt } from './tresen.js?v=202610251000';
+import * as C from './config.js?v=202610251300';
+import * as S from './spiel.js?v=202610251300';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202610251300';
+import { naechsterSchritt } from './tresen.js?v=202610251300';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;

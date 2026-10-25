@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610251000';
-import * as S from './spiel.js?v=202610251000';
-import * as Z from './zeit.js?v=202610251000';
-import * as T from './ton.js?v=202610251000';
-import * as LI from './lichtung.js?v=202610251000';
-import * as CB from './christbaum.js?v=202610251000';
-import * as KA from './karte.js?v=202610251000';
-import * as SB from './schlitten.js?v=202610251000';
-import * as EB from './schlittschuh.js?v=202610251000';
-import * as BS from './backstube.js?v=202610251000';
-import * as UI from './ui.js?v=202610251000';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610251000';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610251000';
-import * as Kacheln from './kacheln.js?v=202610251000';
-import * as Lernen from './lernen.js?v=202610251000';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610251000';
-import * as A from './auftraege.js?v=202610251000';
-import * as E from './erfolge.js?v=202610251000';
-import * as ZL from './ziele.js?v=202610251000';
+import * as C from './config.js?v=202610251300';
+import * as S from './spiel.js?v=202610251300';
+import * as Z from './zeit.js?v=202610251300';
+import * as T from './ton.js?v=202610251300';
+import * as LI from './lichtung.js?v=202610251300';
+import * as CB from './christbaum.js?v=202610251300';
+import * as KA from './karte.js?v=202610251300';
+import * as SB from './schlitten.js?v=202610251300';
+import * as EB from './schlittschuh.js?v=202610251300';
+import * as BS from './backstube.js?v=202610251300';
+import * as UI from './ui.js?v=202610251300';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610251300';
+import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610251300';
+import * as Kacheln from './kacheln.js?v=202610251300';
+import * as Lernen from './lernen.js?v=202610251300';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeSilvester } from './ereignis.js?v=202610251300';
+import * as A from './auftraege.js?v=202610251300';
+import * as E from './erfolge.js?v=202610251300';
+import * as ZL from './ziele.js?v=202610251300';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -401,6 +401,11 @@ setInterval(() => {
   // Einblendung je Minute, mehrere zusammengefasst
   const neu = S.pruefeFreischaltungen();
   if (neu.length) { neuGesammelt.push(...neu); S.speichere(); }
+  // Finale (25.10.): einmal sagen, wo das goldene Geschenk wartet
+  if (!S.st.finaleGemeldet && !UI.fensterOffen() && S.finaleBereit()) {
+    S.st.finaleGemeldet = true; T.spiele('spezial');
+    UI.toast('Du hast wirklich alles gekauft! Unter AUFTRÄGE → Erfolge wartet vor dem Kamin ein Geschenk.', 'spezial');
+  }
   if (neuGesammelt.length && S.startzieleFertig() && Date.now() - neuZuletzt > 60000) {
     T.spiele('spezial');
     UI.toast(neuGesammelt.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neuGesammelt[0].id)}!` : `${neuGesammelt.length} neue Dinge in den Läden!`, 'neu');
@@ -519,7 +524,7 @@ function demo(art) {
     for (const d of C.AUFTRAG_DEKO) st.kalDeko[d.id] = true;
     // Händler-Szenen: drei Stücke schon gekauft, zwei noch im Angebot
     // Varianten-Szenen: alle Plätze auf Variante 2 bzw. 3
-    if (art === 'alles' || art === 'marktdeko') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO, ...C.SPECIAL_DEKO]) st.kalDeko[d.id] = true;
+    if (art === 'alles' || art === 'marktdeko') for (const d of [...C.HAENDLER_DEKO, ...C.LICHTUNG_DEKO, ...C.MARKT_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO, ...C.SPECIAL_DEKO, ...C.FINALE_DEKO]) st.kalDeko[d.id] = true;
     // Markttag erzwingen: Anker so legen, dass heute der erste Markt ist
     if (art === 'markt' || art === 'marktkarte') st.markt = { anker: Math.round(new Date(Z.jetzt()).setHours(0, 0, 0, 0) / 86400000) - C.MARKT_ERST, seed: 1, besucht: 0, angesagt: 0 };
     if (art === 'meinhaus') { st.var = { 'tanne:1': true, 'kranz:1': true, 'kranz:2': true }; st.wahl = { kranz: 2 }; }

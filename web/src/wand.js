@@ -9,7 +9,7 @@
  *
  * Nicht erreichte Socken sind dunkle Schattenrisse.
  */
-import { r, p } from './pixel.js?v=202610251000';
+import { r, p } from './pixel.js?v=202610251300';
 
 export const W = 160, H = 150;
 const REIHEN = [11, 38, 65];            // y der drei Schnüre
@@ -90,7 +90,7 @@ function shade(hex) {
  * n = erreichte Socken, hat(i) = Socke i erreicht?, t = Zeit (Feuer),
  * neu(i) = gerade neu (funkelt).
  */
-export function zeichneWand(c, n, hat, t, neu) {
+export function zeichneWand(c, n, hat, t, neu, finale = false) {
   c.clearRect(0, 0, W, H);
   wandHolz(c);
   boden(c, n);
@@ -115,6 +115,33 @@ export function zeichneWand(c, n, hat, t, neu) {
     const s = sockenPlatz(i);
     socke(c, i, s.x - 5, s.y + 2, !hat(i));
     if (neu(i) && Math.sin(t * 6 + i) > 0) { p(c, s.x + 5, s.y + 3, '#fff6b0'); p(c, s.x + 6, s.y + 2, '#ffd84a'); p(c, s.x + 4, s.y + 2, '#ffd84a'); p(c, s.x + 5, s.y + 1, '#ffd84a'); }
+  }
+  if (finale) goldGeschenk(c, t);
+}
+
+/**
+ * Das Finale (25.10.): ein großes goldenes Geschenk vor dem Kamin, nach dem Abdunkeln gezeichnet,
+ * damit es leuchtet; Funkelsterne reihum. Tippfläche: GESCHENK (ui.js).
+ */
+export const GESCHENK = { x: 72, y: 139, w: 17, h: 10 };   // auf dem Teppich, unter der Glut (sonst verschwimmt es mit dem Feuer)
+function goldGeschenk(c, t) {
+  const { x, y, w, h } = GESCHENK, hop = Math.sin(t * 3) > 0.85 ? 1 : 0;   // hüpft ab und zu kurz
+  const g = c.createRadialGradient(x + w / 2, y + h / 2, 2, x + w / 2, y + h / 2, 22);
+  g.addColorStop(0, 'rgba(255,220,110,0.45)'); g.addColorStop(1, 'rgba(255,200,80,0)');
+  c.fillStyle = g; c.fillRect(x - 16, y - 20, w + 32, h + 26);
+  const yy = y - hop;
+  r(c, x + 1, y + h, w - 1, 1, 'rgba(0,0,0,0.35)');                                                   // Schatten
+  r(c, x, yy + 3, w, h - 3, '#e8b030'); r(c, x, yy + 3, w, 1, '#ffe27a'); r(c, x + w - 2, yy + 4, 2, h - 4, '#b8861a');
+  r(c, x - 1, yy, w + 2, 4, '#ffd040'); r(c, x - 1, yy, w + 2, 1, '#fff2b0'); r(c, x + w - 1, yy + 1, 2, 3, '#c89a20');   // Deckel
+  r(c, x + 7, yy, 3, h, '#c8322e'); r(c, x + 7, yy + 1, 1, h - 1, '#e8504a');                        // Band
+  r(c, x + 3, yy - 3, 4, 3, '#c8322e'); r(c, x + 10, yy - 3, 4, 3, '#c8322e'); r(c, x + 7, yy - 2, 3, 2, '#a82424');   // Schleife
+  p(c, x + 4, yy - 2, '#e8504a'); p(c, x + 12, yy - 2, '#e8504a');
+  for (let i = 0; i < 5; i++) {
+    const k = (t * 0.8 + i / 5) % 1, hell = Math.sin(k * Math.PI);
+    if (hell < 0.3) continue;
+    const sx = Math.round(x + w / 2 + Math.cos(i * 1.3) * 14), sy = Math.round(y + 3 + Math.sin(i * 2.1) * 8);
+    p(c, sx, sy, '#ffffff');
+    if (hell > 0.7) { p(c, sx - 1, sy, '#ffd84a'); p(c, sx + 1, sy, '#ffd84a'); p(c, sx, sy - 1, '#ffd84a'); p(c, sx, sy + 1, '#ffd84a'); }
   }
 }
 

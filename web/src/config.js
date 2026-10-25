@@ -1037,6 +1037,11 @@ export const SPECIAL_TEXT = {
 };
 // Nach SPECIAL_DEKO_AB geschafften Specials (je Tag eins, Runde mit Punkten)
 // gibt es ein Stück fürs Haus
+// Das Finale (25.10., Nutzerwunsch): Wer wirklich ALLES gekauft und voll ausgebaut hat (auch die
+// ✦ Extras), findet vor dem Kamin der Erfolgswand ein goldenes Geschenk - darin das letzte Stück.
+export const FINALE_DEKO = [
+  { id: 'f_eisenbahn', name: 'Weihnachtseisenbahn', stimmung: 10, text: 'Eine kleine Dampflok mit beleuchteten Waggons tuckert ab und zu vor deinem Haus vorbei.' },
+];
 export const SPECIAL_DEKO_AB = 5;
 export const SPECIAL_DEKO = [
   { id: 'sp_pokal', name: 'Goldener Pokal', stimmung: 7, text: 'Für fünf geschaffte Minispiel-Specials: ein goldener Pokal am Haus.' },
