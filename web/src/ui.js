@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610261500';
-import * as S from './spiel.js?v=202610261500';
-import * as Z from './zeit.js?v=202610261500';
-import * as T from './ton.js?v=202610261500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610261500';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610261500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610261500';
-import * as A from './auftraege.js?v=202610261500';
-import * as E from './erfolge.js?v=202610261500';
-import * as ZL from './ziele.js?v=202610261500';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610261500';
-import * as KA from './karte.js?v=202610261500';
-import { zeigeRueckblick } from './ereignis.js?v=202610261500';
-import { barbaraZweig } from './szene.js?v=202610261500';
-import * as SW from './schneeball.js?v=202610261500';
-import * as LI from './lichtung.js?v=202610261500';
-import * as CB from './christbaum.js?v=202610261500';
-import * as SB from './schlitten.js?v=202610261500';
-import * as EB from './schlittschuh.js?v=202610261500';
-import * as BS from './backstube.js?v=202610261500';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610261500';
+import * as C from './config.js?v=202610261700';
+import * as S from './spiel.js?v=202610261700';
+import * as Z from './zeit.js?v=202610261700';
+import * as T from './ton.js?v=202610261700';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610261700';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610261700';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610261700';
+import * as A from './auftraege.js?v=202610261700';
+import * as E from './erfolge.js?v=202610261700';
+import * as ZL from './ziele.js?v=202610261700';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610261700';
+import * as KA from './karte.js?v=202610261700';
+import { zeigeRueckblick } from './ereignis.js?v=202610261700';
+import { barbaraZweig } from './szene.js?v=202610261700';
+import * as SW from './schneeball.js?v=202610261700';
+import * as LI from './lichtung.js?v=202610261700';
+import * as CB from './christbaum.js?v=202610261700';
+import * as SB from './schlitten.js?v=202610261700';
+import * as EB from './schlittschuh.js?v=202610261700';
+import * as BS from './backstube.js?v=202610261700';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610261700';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -113,7 +113,7 @@ export function zielLeiste() {
   b.classList.toggle('ansturm', !!ansturm);
   b.classList.toggle('zimt', !!zimt);
   if (ansturm) {
-    b.innerHTML = `<span class="nr">ANSTURM</span><span class="was">Trinkgeld ×${C.ANSTURM_MULT} - nur wenn du servierst!</span><span class="los">${ansturm} s</span>`
+    b.innerHTML = `<span class="nr">ANSTURM</span><span class="was">${C.ANSTURM_MULT === 3 ? 'Dreifaches' : C.ANSTURM_MULT + '-faches'} Trinkgeld - nur wenn du servierst!</span><span class="los">${ansturm} s</span>`
       + `<span class="fort"><span style="width:${Math.round(ansturm / C.ANSTURM_DAUER * 100)}%"></span></span>`;
     b.classList.remove('bereit', 'versteckt');
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
@@ -121,7 +121,7 @@ export function zielLeiste() {
   }
   if (zimt) {
     const m = Math.floor(zimt / 60), sek = String(zimt % 60).padStart(2, '0');
-    b.innerHTML = `<span class="nr">ZIMTSTERN</span><span class="was">Doppelte Sterne, wenn du servierst</span><span class="los">${m}:${sek}</span>`
+    b.innerHTML = `<span class="nr">ZIMTSTERN</span><span class="was">Selbst serviert: noch einmal doppelt</span><span class="los">${m}:${sek}</span>`
       + `<span class="fort"><span style="width:${Math.round(zimt / C.HAENDLER_GUTSCHEIN.dauer * 100)}%"></span></span>`;
     b.classList.remove('bereit', 'versteckt');
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
@@ -195,9 +195,19 @@ export function toast(text, art = 'normal') {
     if (nachrichten.length > NACHR_MAX) nachrichten.shift();
     nachrSpeichern();
   }
+  // 26.10. (Testbericht: ~30 Einblendungen in den ersten 15 Minuten, sie liefen minutenlang
+  // hinterher): Höchstens TOAST_STAU warten. Was darüber ist, fällt weg - kurze Rückmeldungen
+  // zuerst; alles andere steht ja schon im Verlauf (Knopf oben links, mit Punkt).
+  while (toastWarteschlange.length >= TOAST_STAU) {
+    const i = toastWarteschlange.findIndex((w) => w[1] === 'hinweis');
+    const [w] = toastWarteschlange.splice(i >= 0 ? i : 0, 1);
+    if (w[2]) w[2].gezeigt = true;
+  }
+  nachrPunkt();
   toastWarteschlange.push([text, art, eintrag]);
   if (!toastT) naechsterToast();
 }
+const TOAST_STAU = 3;
 /** Fenster mit dem Verlauf. Öffnen heißt: alles gelesen. */
 function zeigeNachrichten() {
   const liste = nachrichten.slice().reverse();
@@ -449,7 +459,7 @@ function miniFenster(titel, o, knoepfe, name, starte) {
   const chips = `<div class="mini-chips">
       <span><canvas data-ico="uhr"></canvas><b>${o.dauer} s</b></span>
       <span><canvas data-ico="pokal"></canvas>Rekord <b>${zahl(best)}</b></span>
-      <span><canvas data-ico="stern"></canvas>${rest ? `<b>${rest}×</b>&nbsp;Sterne` : 'Sterne&nbsp;morgen'}</span>
+      <span><canvas data-ico="stern"></canvas>${rest ? `<b>${rest}</b>&nbsp;${rest === 1 ? 'Runde' : 'Runden'}` : 'morgen&nbsp;wieder'}</span>
     </div>`;
   const ziel = o.deko ? `<p class="mini-ziel">Neues Deko-Stück ab <b>${zahl(o.deko.ab)}</b> Punkten Rekord</p>` : '';
   const anl = `<ol class="mini-anleitung">${o.schritte.map((s) => `<li>${s}</li>`).join('')}</ol>${o.mehr ? '<div class="anl-mehr"></div>' : ''}`;
@@ -467,7 +477,8 @@ function miniFenster(titel, o, knoepfe, name, starte) {
   };
   const reihe = box.querySelector('.stufen');
   C.MINI_STUFEN.forEach((stufe, i) => {
-    const b = el('button', 'k stufe' + (i === gewaehlt ? ' gewaehlt' : ''), `${stufe.name}<small>Punkte ×${String(stufe.punkte).replace('.', ',')}</small>`);
+    // 26.10.: „×" nur noch für Sterne - die Stufe sagt, wie viele Punkte es gibt
+    const b = el('button', 'k stufe' + (i === gewaehlt ? ' gewaehlt' : ''), `${stufe.name}<small>${Math.round(stufe.punkte * 100)}&nbsp;% Punkte</small>`);
     b.onclick = () => {
       T.spiele('klick');
       gewaehlt = i;
@@ -489,7 +500,7 @@ function miniErgebnis(name, punkte, zeile, titel, nochmal, danach) {
     <p>${zeile}</p>
     <p class="summe">${punkte.toLocaleString('de-DE')} Punkte</p>
     ${e.sterne ? `<p class="bonus">+ ${S.formatGeld(e.sterne)}${e.special ? ' (Special: doppelt!)' : ''}</p>` : ''}
-    <p class="mini-ziel">Rekord <b>${e.best.toLocaleString('de-DE')}</b>${e.sterne ? (e.rest ? ` · noch <b>${e.rest}×</b> Sterne heute` : ' · das war die letzte Sternerunde für heute') : punkte > 0 ? ' · heute keine Sterne mehr' : ' · ohne Punkte zählt die Runde nicht'}</p>
+    <p class="mini-ziel">Rekord <b>${e.best.toLocaleString('de-DE')}</b>${e.sterne ? (e.rest ? ` · heute noch <b>${e.rest}</b> ${e.rest === 1 ? 'Runde' : 'Runden'} mit Sternen` :' · das war die letzte Sternerunde für heute') : punkte > 0 ? ' · heute keine Sterne mehr' : ' · ohne Punkte zählt die Runde nicht'}</p>
     ${deko}${extra}`,
   // Neue Deko: gleich ansehen - auf der Karte sähe man das Funkeln am Haus nicht
   e.neu.length
@@ -505,7 +516,7 @@ function zeigeBaumspiel() {
   const ware = S.baumschule().ware.length;
   miniFenster('Christbaumverkauf', {
     dauer: C.BAUM_DAUER, deko: C.BAUM_DEKO.find((d) => !S.st.kalDeko[d.id]),
-    zusatz: ware ? `<p class="bonus">${ware} eigene ${ware === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft ×3!</p>` : '',
+    zusatz: ware ? `<p class="bonus">${ware} eigene ${ware === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft gibt es dreifache Punkte!</p>` : '',
     schritte: [
       'Die <b>Sprechblase</b> zeigt, welche Größe und Sorte der Kunde will.',
       'Baum antippen, <b>3× sägen</b>, <b>3× aufs Netz</b>, dann <b>aufs Auto</b>.',
@@ -535,7 +546,7 @@ export function zeigeBaumschule() {
     ${erklaerung('baumschule', `<ol class="mini-anleitung">
       <li><b>Pflanze</b> eine Tanne in ein freies Beet.</li>
       <li>Ab dem nächsten Tag einmal täglich <b>gießen</b> und <b>düngen</b>: Ohne Pflege dauert es ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, mit Gießen 3, mit beidem 2. Nichts verdorrt.</li>
-      <li>Fertige Bäume <b>erntest</b> du: Im Christbaumverkauf stehen sie golden und bringen <b>×3 Punkte</b>.</li></ol>`)}
+      <li>Fertige Bäume <b>erntest</b> du: Im Christbaumverkauf stehen sie golden und bringen <b>dreifache Punkte</b>.</li></ol>`)}
     <div class="beete"></div>
     <p class="mini-ziel bs-text"></p>`,
   [{ text: 'Gießen', aktion: () => { if (S.giesse()) { toast('Gegossen - die Bäume wachsen heute schneller.', 'gut'); } neu(); return false; } },
@@ -572,7 +583,7 @@ export function zeigeBaumschule() {
           const voll = B.ware.length >= C.BAUMSCHULE_WARE_MAX;
           const k = el('button', 'k k--kauf', voll ? 'Erst verkaufen' : 'Ernten');
           k.disabled = voll;
-          k.onclick = () => { if (S.ernte(i)) toast(`${SORTE_KURZ[b.art]} geerntet - steht jetzt golden im Christbaumverkauf (×3)!`, 'gut'); neu(); };
+          k.onclick = () => { if (S.ernte(i)) toast(`${SORTE_KURZ[b.art]} geerntet - steht jetzt golden im Christbaumverkauf (dreifache Punkte)!`, 'gut'); neu(); };
           karte.appendChild(k);
         }
       }
@@ -905,7 +916,7 @@ function baueLaden() {
         z.classList.add('blitz'); setTimeout(() => z.classList.remove('blitz'), 500);
         const hinweis = (a.id in C.LICHTER || S.istDeko(a) || a.wahl) && !(S.st.tipps && S.st.tipps.meinHaus);
         // 17.10.: „Mein Haus" heißt seit 09.10. „Haus schmücken" und öffnet sich über das Haus
-        toast(hinweis ? `${a.name} gekauft! Ein- und ausschalten, Farbe und Varianten: Knopf „Haus" oben links.` : `${a.name} gekauft!`, 'gut');
+        toast(hinweis ? `${a.name} gekauft! Ein- und ausschalten, Farbe und Varianten: Knopf „Haus“ oben links.` :`${a.name} gekauft!`, 'gut');
         if (hinweis) { S.st.tipps = S.st.tipps || {}; S.st.tipps.meinHaus = true; }
         zeigeKauf(a.id);
       }
@@ -1588,7 +1599,7 @@ export function zeigeHaendler() {
     k.onclick = () => {
       if (!S.kaufeBeimHaendler(w.id)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
       schliesseFenster();
-      if (w === C.HAENDLER_GUTSCHEIN) { toast(`Zimtstern-Gutschein: ${Math.round(w.dauer / 60)} Minuten doppelte Sterne fürs Servieren!`, 'spezial'); zielLeiste(); return; }
+      if (w === C.HAENDLER_GUTSCHEIN) { toast(`Zimtstern-Gutschein: ${Math.round(w.dauer / 60)} Minuten lang bringt selbst Serviertes noch einmal doppelt so viele Sterne!`, 'spezial'); zielLeiste(); return; }
       toast(`${w.name} gekauft! Nur beim Händler zu haben.`, 'gut');
       const o = ortVon(w.id);
       if (o) funkeln(o.x, o.y, `+${w.stimmung} ♥`);
@@ -1775,6 +1786,8 @@ function bitteKarte() {
   const d = A.bitteDef(b);
   const hw = d.art === 'getraenk' && !b.abgeholt && !fertig ? angebotHinweis(d.p) : null;
   if (hw) z.querySelector('.bitte-fuss').appendChild(hw);
+  // 26.10.: unter Aufsicht lassen die Wichtel diese Gäste stehen (S.nurVonHand)
+  else if (d.art === 'getraenk' && !b.abgeholt && !fertig && S.aufsicht()) z.querySelector('.bitte-fuss').appendChild(el('p', 'klein', `Wer ${C.PRODUKT[d.p].name} bestellt, wartet auf dich - die Wichtel lassen diese Gäste stehen.`));
   return z;
 }
 /**
@@ -2078,7 +2091,7 @@ export function zeigeStamm(f) {
 /**
  * Die Geschichten eines Stammgastes nachlesen (25.10., Nutzerwunsch): Porträt, wie weit die
  * Geschichte ist, die erzählten Sätze - und für jeden noch fehlenden eine gesperrte Zeile, damit
- * man sieht, wie viele noch kommen. Am Ende das Abschiedsgeschenk (24.-26.12.), bis dahin verdeckt.
+ * man sieht, wie viele noch kommen. Am Ende das Abschiedsgeschenk (24.12. bis 6.1.), bis dahin verdeckt.
  */
 function zeigeStammBuch(id) {
   const def = C.GAESTE[id], s = C.STAMMGAESTE[id];
@@ -2176,7 +2189,7 @@ export function oeffneKalender() {
       if (!betrag) { T.spiele('falsch'); toast(S.spieltag() < 1 ? 'Das erste Päckchen gibt es morgen.' : 'Das nächste Päckchen gibt es morgen.', 'hinweis'); return; }
       T.spiele('tuer');
       oeffneKalender();
-      fenster('Vorfreude!', `<div class="gross-ico">🎁</div><p>Ein Päckchen mit</p><p class="summe">${S.formatGeld(betrag)}</p><p class="klein">Bis zum 1. Dezember gibt es jeden Tag eins.</p>`);
+      fenster('Vorfreude!', `<div class="gross-ico">🎁</div><p>Im Päckchen stecken</p><p class="summe">${S.formatGeld(betrag)}</p><p class="klein">Bis zum 1. Dezember gibt es jeden Tag eins.</p>`);
     };
     liste.appendChild(vf);
   }
@@ -2246,7 +2259,8 @@ export function zeigeInstallTipp() {
       <li><b>„Zum Home-Bildschirm“</b> wählen (evtl. etwas nach unten scrollen)</li>
       <li>Oben rechts auf <b>Hinzufügen</b></li>
     </ol>
-    <p class="klein">Warum? Safari löscht die Daten einer Webseite, die 7 Tage lang nicht geöffnet wurde - auch deinen Spielstand. Als App auf dem Home-Bildschirm passiert das nicht. Danach startest du das Spiel nur noch über das neue Symbol.</p>`,
+    <p class="klein">Warum? Safari löscht die Daten einer Webseite, die 7 Tage lang nicht geöffnet wurde - auch deinen Spielstand. Als App auf dem Home-Bildschirm passiert das nicht. Danach startest du das Spiel nur noch über das neue Symbol.</p>
+    <p class="hinweis-kasten"><b>Wichtig:</b> Die App fängt mit einem eigenen Spielstand an - dein Fortschritt hier im Browser kommt nicht mit. Am besten wechselst du gleich jetzt. Schon weiter? Dann im Menü „Spielstand sichern“ und in der App „Spielstand laden“.</p>`,
   [{ text: 'Alles klar' }]);
 }
 
@@ -2265,7 +2279,7 @@ function feedbackInfo() {
 function zeigeFeedback() {
   const info = feedbackInfo();
   fenster('Feedback geben', `
-    <p>Danke, dass du testest! Was ist dir aufgefallen - ein Fehler, etwas Unklares, eine Idee? Schreib es einfach rein.</p>
+    <p>Danke für dein Feedback! Was ist dir aufgefallen - ein Fehler, etwas Unklares, eine Idee? Schreib es einfach rein.</p>
     <p class="klein">Das Formular öffnet sich in einem neuen Fenster (Google Formulare). Mitgeschickt wird nur diese Zeile, damit wir die Meldung einordnen können - kein Name, kein Spielstand:</p>
     <p class="klein"><code>${esc(info)}</code></p>`, [
     { text: 'Zum Formular', aktion: () => {
@@ -2296,11 +2310,14 @@ export function oeffneMenue() {
     <div><span>Wichtel verdienen</span><b>${S.formatGeld(S.wichtelProSekunde() * 60)}/min</b></div>
     <div><span>Bedient</span><b>${S.st.stats.bedient.toLocaleString('de-DE')}</b></div>
     <div><span>Verdient insgesamt</span><b>${S.formatGeld(S.st.gesamt)}</b></div>
-    ${S.st.andenken ? `<div class="breit"><span>Andenken aus früheren Jahren</span><b>★ ${S.st.andenken}</b></div>` : ''}`;
+    ${S.st.andenken ? `<div class="breit"><span>Andenken (ein ★ für jedes geschmückte Jahr)</span><b>★ ${S.st.andenken}</b></div>` : ''}`;
+  // 26.10.: wann die Kiste kommt und wann sie voll ist (Testbericht: kurze Besuche verstehen)
+  if (S.hat('servier')) stat.insertAdjacentHTML('beforeend', `<div class="breit"><span>Wichtel-Kiste</span><b>ab 1 Std. weg · voll nach ${String(S.offlineStunden()).replace('.', ',')} Std.</b></div>`);
   const karte = el('div', 'menue-statistik');
   karte.appendChild(el('h3', null, 'Statistik'));
   karte.appendChild(stat);
   liste.appendChild(karte);
+  liste.appendChild(sterneJetzt());
 
   const ton = el('div', 'schalter');
   const mk = (label, an, f) => { const k = el('button', 'k k--wahl' + (an ? ' gewaehlt' : ''), `${label}: ${an ? 'an' : 'aus'}`); k.onclick = () => { f(); oeffneMenue(); }; return k; };
@@ -2385,6 +2402,39 @@ export function oeffneMenue() {
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
 }
 
+/**
+ * „Was bringt gerade mehr Sterne?" (26.10., Testbericht: zu viele „×2", die man nicht
+ * auseinanderhält). Nur, was JETZT gilt, in Worten - Selbst servieren steht immer oben.
+ */
+function sterneJetzt() {
+  const z = [];
+  const pz = (f) => `+${Math.round(f * 100)}${' '}%`;
+  z.push(['Selbst servieren', 'doppelte Sterne und Trinkgeld']);
+  const zimt = S.zimtRest();
+  if (zimt) z.push(['Zimtstern', `selbst Serviertes noch einmal doppelt (noch ${Math.floor(zimt / 60)}:${String(zimt % 60).padStart(2, '0')})`]);
+  if (S.lauf.ansturm) z.push(['Ansturm', 'dreifaches Trinkgeld']);
+  const haus = (1 + S.stimmung() * C.STIMMUNG_PREIS) * (1 + S.boni().preis) - 1;
+  if (haus > 0.005) z.push(['Stimmung und Deko', `alle Preise ${pz(haus)}`]);
+  const r = S.ruf();
+  if (r.stufe) z.push([`Ruf Stufe ${r.stufe}`, `alle Preise ${pz(r.stufe * C.RUF_JE_STUFE)}`]);
+  const rez = C.MARKT_REZEPTE.filter((x) => (S.st.rezepte || {})[x.id]);
+  if (rez.length) z.push(['Marktrezepte', `${rez.length * 2} Getränke ${pz(rez[0].plus)}`]);
+  const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
+  if (lage) z.push([lage.name, `${lage.text.replace(/^Heute /, '')} (${pz(lage.bonus)})`]);
+  if (S.chorJetzt()) z.push(['Chor vor dem Haus', `alle Gäste zahlen ${pz(C.CHOR.bonus)} (bis ${C.CHOR.bis} Uhr)`]);
+  if (S.dose().length) z.push(['Plätzchendose', `selbst bedient ${pz(C.DOSE_BONUS)} (noch ${S.dose().length})`]);
+  const gaeste = [];
+  if (Z.adventssonntag()) gaeste.push('Adventssonntag');
+  if (S.marktHeute()) gaeste.push('Markttag');
+  if (S.feierabend()) gaeste.push(`Feierabend bis ${C.FEIERABEND.bis} Uhr`);
+  if (gaeste.length) z.push(['Mehr Gäste', gaeste.join(', ')]);
+  // Zugeklappt (sonst schob es die Knöpfe des Menüs aus dem Bild), oben die Namen als Vorschau
+  const k = el('details', 'menue-statistik sterne-jetzt');
+  k.appendChild(el('summary', null, `<b>Mehr Sterne gerade</b><small>${z.map(([a]) => a).join(' · ')}</small>`));
+  k.appendChild(el('div', 'statistik kompakt', z.map(([a, b]) => `<div class="breit"><span>${a}</span><b>${b}</b></div>`).join('')));
+  return k;
+}
+
 /** Unterseite „Einstellungen" im Menü (21.10.): Geräusche, Vorschau, Haus umbenennen, So geht's. */
 function oeffneEinstellungen() {
   oeffneBlatt('menue', 'Einstellungen');
@@ -2450,7 +2500,8 @@ async function standSichern() {
     const f = new File([text], name, { type: 'text/plain' });
     if (handy && navigator.canShare && navigator.canShare({ files: [f] })) {
       await navigator.share({ files: [f], title: 'Punsch & Lichterglanz - Spielstand' });
-      toast('Spielstand gesichert.', 'gut');
+      // 26.10.: Ob das Ziel die Datei wirklich ablegt, wissen wir nicht - also nicht „gesichert"
+      toast('Spielstand weitergegeben - leg die Datei an einem sicheren Ort ab (z. B. „In Dateien sichern“).', 'gut');
       return;
     }
   } catch (e) {
@@ -2460,7 +2511,7 @@ async function standSichern() {
   const a = document.createElement('a');
   a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
-  toast('Spielstand gesichert.', 'gut');
+  toast('Spielstand als Datei heruntergeladen.', 'gut');
 }
 function standLaden() {
   const inp = document.createElement('input');
@@ -2549,7 +2600,7 @@ function werkstatt() {
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
     ${umbenennen ? '' : '<p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>'}
-    <label>Wie heißt euer Haus?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
+    <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {
     const v = box.querySelector('#hausName').value.trim();
     S.st.name = v || 'Unser Haus';
@@ -2622,9 +2673,9 @@ export function vorschauText() {
 export function zeigeZieleFrage() {
   T.spiele('spezial');
   fenster('Wie geht es weiter?', `
-    <p><b>Die ersten Schritte hast du geschafft!</b> Ab jetzt entscheidest du.</p>
+    <p><b>Alle sieben Startziele geschafft!</b> Ab jetzt entscheidest du - ein paar Dinge zeige ich dir noch nach und nach.</p>
     <p>Soll dir das Spiel oben in der Leiste immer ein <b>nächstes Ziel</b> vorschlagen - ein neues Getränk, einen Helfer oder einen Ausbau für den Stand, dazwischen Deko? Oder möchtest du lieber <b>selbst erkunden</b>, was es in den Läden gibt?</p>
-    <p class="klein">Du kannst das jederzeit im Menü umstellen.</p>`,
+    <p class="klein">Du kannst das jederzeit im Menü umstellen. Schau jeden Tag mal rein: Es gibt neue Aufträge, Türchen im Kalender und Überraschungen.</p>`,
   [{ text: 'Selbst erkunden', neben: true, aktion: () => { S.st.zieleWeiter = false; S.speichere(); zielLeiste(); } },
     { text: 'Ziele vorschlagen', aktion: () => { S.st.zieleWeiter = true; S.speichere(); zielLeiste(); } }]);
 }
@@ -2640,8 +2691,8 @@ export function zeigeZiel(modus, fertig) {
     <ul class="ziel">
       <li>☕ Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
       <li>🛒 Kaufe mit den Sternen Lichter, Deko, Farbe und Helfer.</li>
-      <li>🎄 Schmücke es bis zum 24. Dezember Stück für Stück.</li>
-      <li>📷 Zeig dein Haus als Weihnachtskarte.</li>
+      <li>🎄 Jeden Tag gibt es Neues zu entdecken.</li>
+      <li>📷 Mach mit „Foto“ eine Weihnachtskarte von deinem Haus.</li>
     </ul>
     <p class="klein">${start} Ab dem 1. Dezember geht jeden Tag ein Türchen auf, und jeder Advent bringt eine Überraschung.</p>`,
   [{ text: 'Los geht’s!', aktion: () => { if (fertig) setTimeout(fertig, 60); } }]);
@@ -2657,11 +2708,11 @@ export function zeigeHilfe() {
       <li><b>Leer?</b> Das Getränk unten ein paarmal antippen, dann ist es wieder voll.</li>
       <li><b>Zu langsam?</b> Nicht schlimm - dann geht der Gast eben weiter. Nur besondere Gäste solltest du nicht verpassen - wer das ist, merkst du schon.</li>
     </ol>
-    <p>Wer zügig hintereinander bedient, baut <b>Schwung</b> auf (bis ×1,40). Wer länger bleibt, bekommt Besuch von ganzen Gruppen - und manchmal von jemand ganz Besonderem.</p>
+    <p>Wer zügig hintereinander bedient, baut <b>Schwung</b> auf (bis zu 40 % mehr Sterne). Wer länger bleibt, bekommt Besuch von ganzen Gruppen - und manchmal von jemand ganz Besonderem.</p>
     <p>Mit den Sternen kaufst du Deko, Farbe, Zutaten und Wichtel. Je gemütlicher das Haus, desto mehr Gäste kommen und desto mehr zahlen sie.</p>
     <p>Oben links schmückst du mit <b>Haus</b> dein Haus (Lichter, Farben, Varianten). Oben rechts stellst du mit <b>Angebot</b> zusammen, welche Sorten dein Stand anbietet - höchstens ${C.ANGEBOT_MAX}. Schnelle Sorten bringen weniger je Glas, langsame mehr.</p>
     <p>Auf der <b>Karte</b> warten Läden, Minispiele (zuerst nur die Waldlichtung, alle paar Tage kommt ein neues dazu) und alle paar Tage der Weihnachtsmarkt.${S.miniOffen('back') ? ' Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr.' : ''} Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an - offene Wunschzettel stehen auch unter Aufträge.${S.baumschuleOffen() ? ' In der <b>Baumschule</b> ziehst du eigene Tannen für den Christbaumverkauf.' : ''}${S.hat('futterhaus') ? ' Das <b>Futterhaus</b> im Baum antippen: nachfüllen und Vögel beobachten.' : ''} Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
-    <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.${S.aufsicht() ? ' Deine Wichtel bedienen normale Gäste jetzt allein - du kümmerst dich um die <b>goldenen Gäste</b>: Sie drängeln vor und zahlen viel mehr.' : ''}</p>
+    <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.${S.aufsicht() ? ' Deine Wichtel bedienen normale Gäste jetzt allein - du kümmerst dich um die <b>goldenen Gäste</b> (sie drängeln vor und zahlen viel mehr), um eilige Gäste und um Bestellungen für eine Bitte.' : ''}</p>
     <p><b>Ruf:</b> Jeden Tag, an dem du ein bisschen mitarbeitest, steigt der Ruf deines Standes - und alle Preise mit. Wie weit du heute bist, steht unter Aufträge.</p>
     <p class="klein">Das Spiel läuft mit deiner echten Uhr: Nachts ist es dunkel, ab dem 1. Dezember liegt Schnee und jeden Tag geht ein Türchen auf.</p>`);
 }

@@ -43,7 +43,8 @@ viele Sterne wie bei den Wichteln, und Trinkgeld gibt es nur von dir.
 **Goldene Gäste:** Ab der zweiten Stufe des Servier-Wichtels bedienen die
 Wichtel normale Gäste allein, auch wenn du da bist. Du kümmerst dich dann um
 die goldenen Gäste (goldene Blase mit Funkeln): Alle paar Sekunden kommt
-einer, er drängelt vor, nur du kannst ihn bedienen, und er zahlt viel mehr.
+einer, er drängelt vor, nur du kannst ihn bedienen, und er zahlt viel mehr. Eilige Gäste und
+Bestellungen für eine Bitte lassen die Wichtel dann ebenfalls für dich stehen.
 
 **Ruf deines Standes:** Jeden Tag, an dem du ein bisschen mitarbeitest
 (5 goldene oder besondere Gäste oder eine Minispielrunde - vorher 25 Gäste
@@ -55,7 +56,8 @@ braucht.
 **Stammgäste:** Oma Hilde mit Dackel Waldi, Postbotin Sophia, Karl mit
 seinen Witzen, die kleine Lena und Förster Franz kommen jeden Tag einmal
 vorbei - zu jeder Uhrzeit, sobald du am Stand bist (jeder hat aber seine
-Lieblingszeit). Jeder erzählt Stück für Stück seine Geschichte.
+Lieblingszeit). Jeder erzählt Stück für Stück seine Geschichte, und zwischen
+24.12. und 6.1. bringt jeder, der dich schon kennt, ein Abschiedsgeschenk.
 
 **Bitten der Stammgäste:** Einmal am Tag hat einer der Stammgäste, die du
 schon kennst, eine Bitte an dich - fünf Kinderpunsch für Hildes Strickrunde,
@@ -68,7 +70,7 @@ Wichtel schauen nur zu.
 **Während du weg bist**, arbeiten die Wichtel weiter. Warst du nur kurz weg
 (unter einer Stunde), gibt es ihre Sterne gleich beim Zurückkommen. Länger weg,
 legen sie alles in eine Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst
-höchstens 3 Stunden Arbeit (in den ersten zwei Tagen etwas weniger) - wer
+höchstens 3 Stunden Arbeit - wer
 mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
 
 Aufträge und Bitten, die ein Getränk verlangen, das gerade nicht in deinem
@@ -86,8 +88,8 @@ wenn man die zweite hat. Jede zusätzliche bringt ♥ +2.
 **Der fahrende Händler** kommt bis zu zweimal am Tag mit seinem Karren vorbei
 (links vor dem Haus antippen). Er hat Deko, die es nur bei ihm gibt -
 Riesen-Schneekugel, Lichter-Flamingo, Polarlicht-Laterne, Drehorgel-Wichtel,
-Wetterhahn-Rentier - und einen Zimtstern-Gutschein: 10 Minuten doppelte
-Sterne fürs Servieren.
+Wetterhahn-Rentier - und einen Zimtstern-Gutschein: 10 Minuten (nur, solange du spielst)
+noch einmal doppelte Sterne fürs Selbstservieren.
 
 **Luxus-Stücke** (✦ Extra für Profis: Lichtershow, Festbeleuchtung, Stand
 Stufe 3) braucht man fürs schönste Haus nicht - mit 10 bis 15 Minuten am
@@ -159,7 +161,7 @@ darauf, und jedes zeigt beim Öffnen oben ein Bild von sich:
 
 **Minispiele kommen nach und nach:** Am Anfang steht nur die Waldlichtung
 auf der Karte. Alle zwei bis drei Tage kommt ein neues dazu (Christbaumverkauf
-am 3. Spieltag, Backstube am 6., Eisbahn am 8., Schlittenberg am 11.), jeweils
+am 3. Spieltag, Backstube am 6., Eisbahn am 8., Schlittenberg am 11., Schneeballwiese am 13.), jeweils
 mit einem Fenster, das es vorstellt. Bis dahin sieht man auf der Karte nur das
 Bild des Ortes, ohne Schild. Wer erst im Dezember anfängt, bekommt sie
 schneller - spätestens am 14.12. ist alles offen.
@@ -216,7 +218,7 @@ Fensterbilder, Lebkuchenherzen), dazu jedes Mal ein Rezept, mit dem zwei
 Getränke dauerhaft 20 % mehr Sterne bringen.
 
 **Waldlichtung (Minispiel):** Hasen, Eichhörnchen und Rehe ziehen durch die
-Lichtung - die Rehe im schnellen Galopp - tippe sie an, um sie zu füttern. 30 Sekunden, schnelles Füttern
+Lichtung - die Rehe im schnellen Galopp - tippe sie an, um sie zu füttern. 40 Sekunden, schnelles Füttern
 hintereinander gibt eine Kette bis ×5, selten kommt ein goldener Schneehase.
 Gefüttert wird an der Raufe mitten in der Lichtung - Möhren, Nüsse und Äpfel.
 Für die ersten drei Runden am Tag gibt es Sterne, dazu einen eigenen Rekord.
@@ -321,7 +323,7 @@ Im Menü steht die Anleitung jederzeit unter „Als App speichern“.
 ## Feedback
 
 Im Menü: **Feedback geben** öffnet ein kurzes Google-Formular. Eine Zeile mit
-Spielversion, Spieltag, Gerät und Bildgröße ist schon ausgefüllt, damit sich
+Spielversion, Spielmodus, Spieltag, Spieldatum, Stimmung, Startziel, Gerät, Browser und Bildgröße ist schon ausgefüllt, damit sich
 die Meldung einordnen lässt - kein Name, kein Spielstand.
 
 ## Teilen

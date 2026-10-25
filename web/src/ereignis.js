@@ -4,14 +4,14 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610261500';
-import * as S from './spiel.js?v=202610261500';
-import * as T from './ton.js?v=202610261500';
-import * as Z from './zeit.js?v=202610261500';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610261500';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610261500';
-import { schriftBild } from './schrift.js?v=202610261500';
-import { fenster, karte } from './ui.js?v=202610261500';
+import * as C from './config.js?v=202610261700';
+import * as S from './spiel.js?v=202610261700';
+import * as T from './ton.js?v=202610261700';
+import * as Z from './zeit.js?v=202610261700';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610261700';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610261700';
+import { schriftBild } from './schrift.js?v=202610261700';
+import { fenster, karte } from './ui.js?v=202610261700';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -435,7 +435,7 @@ export function zeigeSilvester(danach) {
     <p>${neu ? `Das Dorf hat ${jahr} mit einem großen Feuerwerk begrüßt` : 'Das ganze Dorf steht draußen, Raketen steigen über die Dächer'} - und dein Haus leuchtet mittendrin.</p>
     <div class="abschied"></div>
     <p>Vielen Dank fürs Spielen! :)</p>
-    <p class="klein">Dein Haus bleibt so geschmückt, wie es ist. Im nächsten Advent geht es von vorne los - und alles, was du dieses Jahr geschafft hast, bleibt als Andenken.</p>`,
+    <p class="klein">Dein Haus bleibt so geschmückt, wie es ist. Im nächsten Advent geht es von vorne los - und als Andenken an dieses Jahr bekommst du einen Stern, der im Menü bleibt.</p>`,
   [
     { text: 'Mein Advent', aktion: () => { setTimeout(() => zeigeRueckblick(danach), 60); } },
     { text: 'Weiter', neben: true, aktion: () => { if (danach) setTimeout(danach, 60); } },

@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610261500';
-import * as S from './spiel.js?v=202610261500';
-import * as Z from './zeit.js?v=202610261500';
-import * as T from './ton.js?v=202610261500';
-import * as LI from './lichtung.js?v=202610261500';
-import * as CB from './christbaum.js?v=202610261500';
-import * as KA from './karte.js?v=202610261500';
-import * as SB from './schlitten.js?v=202610261500';
-import * as EB from './schlittschuh.js?v=202610261500';
-import * as BS from './backstube.js?v=202610261500';
-import * as UI from './ui.js?v=202610261500';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610261500';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610261500';
-import * as Kacheln from './kacheln.js?v=202610261500';
-import * as Lernen from './lernen.js?v=202610261500';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610261500';
-import * as A from './auftraege.js?v=202610261500';
-import * as E from './erfolge.js?v=202610261500';
-import * as ZL from './ziele.js?v=202610261500';
+import * as C from './config.js?v=202610261700';
+import * as S from './spiel.js?v=202610261700';
+import * as Z from './zeit.js?v=202610261700';
+import * as T from './ton.js?v=202610261700';
+import * as LI from './lichtung.js?v=202610261700';
+import * as CB from './christbaum.js?v=202610261700';
+import * as KA from './karte.js?v=202610261700';
+import * as SB from './schlitten.js?v=202610261700';
+import * as EB from './schlittschuh.js?v=202610261700';
+import * as BS from './backstube.js?v=202610261700';
+import * as UI from './ui.js?v=202610261700';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610261700';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610261700';
+import * as Kacheln from './kacheln.js?v=202610261700';
+import * as Lernen from './lernen.js?v=202610261700';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610261700';
+import * as A from './auftraege.js?v=202610261700';
+import * as E from './erfolge.js?v=202610261700';
+import * as ZL from './ziele.js?v=202610261700';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -181,7 +181,7 @@ cv.addEventListener('pointerdown', (e) => {
       T.spiele('falsch');
       S.lauf.wackel['z' + p0.id] = 0.3;
       if (S.freiErfuellt(p0.id)) UI.toast(`${p0.name} gibt es im Supermarkt auf der Karte (${S.formatGeld(p0.kosten)}).`, 'hinweis');
-      else UI.toast(`Noch verdeckt. Frei ab: ${S.freiText(p0.id)}`, 'hinweis');
+      else UI.toast(`Noch verdeckt. Frei ab ${S.freiText(p0.id)}`, 'hinweis');
     }
   }
   else if (tr.art === 'gast') S.tippeGast(tr.platz);
@@ -227,7 +227,9 @@ function ankommen(erstesMal) {
   const neueSaison = S.pruefeSaison();
   const off = S.offlineAbrechnen();
   const meldungen = [];
-  if (neueSaison) meldungen.push(['Eine neue Adventszeit!', `<p>Das Haus ist wieder kahl und grau - Zeit, es erneut herzurichten.</p>${S.st.andenken ? `<p class="bonus">★ ${S.st.andenken} Andenken aus früheren Jahren</p>` : ''}`]);
+  if (neueSaison) meldungen.push(['Eine neue Adventszeit!', `<p>Das Haus ist wieder kahl und grau - Zeit, es erneut herzurichten.</p>${S.st.andenken ? `<p class="bonus">★ ${S.st.andenken} Andenken - ein Stern für jedes Jahr, in dem du dein Haus geschmückt hast</p>` : ''}`]);
+  // 26.10.: Nach mindestens 10 Minuten weg ist es ein neuer Besuch - wieder Platz für Vorstellungen
+  if (off && off.sek >= C.OFFLINE_MELDUNG) Lernen.neuerBesuch();
   if (off && off.betrag > 0 && off.sek >= C.OFFLINE_MELDUNG && off.sek < C.OFFLINE_FENSTER) {
     // Eine Weile weg: kein Fenster, nur ein Hinweis (ganz kurz weg: still gutgeschrieben)
     UI.toast(`Die Wichtel haben weitergearbeitet: +${S.formatGeld(off.betrag)}`, 'gut');
@@ -264,7 +266,8 @@ function ankommen(erstesMal) {
   // Silvester: der Abschluss der Saison (11.10.)
   if (S.silvesterFaellig()) meldungen.push(['silvester']);
   const tueren = S.offeneTueren();
-  if (tueren > 0 && !erstesMal) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
+  // 26.10.: höchstens einmal am Tag - vorher bei jeder Rückkehr in die App wieder („24 Türchen warten …")
+  if (tueren > 0 && !erstesMal && S.st.tuerMeldung !== Z.tagesSchluessel() && (S.st.tuerMeldung = Z.tagesSchluessel())) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
   S.speichere();
   // Schon Wartendes nicht doppelt (Kiste, Ereignisse)
   for (const m of meldungen) if (!warteschlange.some((w) => w[0] === m[0] && w[1] === m[1])) warteschlange.push(m);
@@ -404,6 +407,7 @@ setInterval(() => {
   // Neu Freigeschaltetes: während der Startziele nur die NEU-Marken (sonst
   // kamen in den ersten Minuten ~15 Einblendungen), danach höchstens eine
   // Einblendung je Minute, mehrere zusammengefasst
+  S.setzeHandWuensche(A.handWuensche());   // 26.10.: Gäste mit dem Getränk einer offenen Bitte bedienst du
   const neu = S.pruefeFreischaltungen();
   if (neu.length) { neuGesammelt.push(...neu); S.speichere(); }
   // Finale (25.10.): einmal sagen, wo das goldene Geschenk wartet
@@ -416,9 +420,10 @@ setInterval(() => {
     UI.toast(neuGesammelt.length === 1 ? `Neu freigeschaltet: ${S.artikelName(neuGesammelt[0].id)}!` : `${neuGesammelt.length} neue Dinge in den Läden!`, 'neu');
     neuGesammelt = []; neuZuletzt = Date.now();
   } else if (!S.startzieleFertig()) neuGesammelt = [];
-  // iPhone im Browser: einmal der Tipp zum Home-Bildschirm (12.10.) - nach
-  // den Startzielen und eineinhalb ruhigen Minuten, nie über etwas anderem
-  if (!S.st.installTipp && UI.iosImBrowser() && S.startzieleFertig() && S.lauf.t > 90 && S.nachStartRuhe() && fensterFrei()
+  // iPhone im Browser: einmal der Tipp zum Home-Bildschirm (12.10.), nie über etwas anderem.
+  // 26.10.: gleich nach der Einführung statt nach den Startzielen - die App auf dem Home-Bildschirm
+  // hat ihren EIGENEN Speicher, wer erst später wechselt, finge dort von vorne an
+  if (!S.st.installTipp && UI.iosImBrowser() && S.st.lernen >= 99 && S.lauf.t > 5 && fensterFrei()
       && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) UI.zeigeInstallTipp();
   // Kirchenglocken zur vollen Stunde (nicht im Minispiel - dort läuft dessen Welt)
   const gl = S.glockenFaellig();

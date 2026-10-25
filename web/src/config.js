@@ -176,7 +176,7 @@ export const OFFLINE_ANTEIL = 0.65;  // nach INAKTIV_AB: so viel schaffen die Wi
 // und man vorher Deko kauft (gemessen: 12 Dinge fehlten am 24.12.).
 export const OFFLINE_JE_TAG = {
   anteil:  [0.15, 0.25, 0.35, 0.45, 0.50, 0.55, OFFLINE_ANTEIL],
-  stunden: [2, 2.5, OFFLINE_MAX_H],
+  stunden: [OFFLINE_MAX_H],   // 26.10.: von Anfang an 3 h (vorher 2 / 2,5 / 3) - der kleine Anteil am Anfang bremst genug
 };
 export const INAKTIV_AB = 300;       // s ohne dich - bis dahin arbeiten sie voll weiter
 // 26.10. (Testbericht): Bis dahin rechneten die Wichtel erst ab einer Stunde ab - wer alle
@@ -215,7 +215,7 @@ export const GAESTE = {
 };
 
 // Stammgäste (12.10.): Sätze in Reihenfolge (einer je Besuch), danach im
-// Wechsel `immer`. Zwischen 24. und 26.12. einmal das Abschiedsgeschenk
+// Wechsel `immer`. Zwischen 24.12. und 6.1. einmal das Abschiedsgeschenk
 // (Sterne für GESCHENK_MIN Minuten Einnahmen).
 // Seit 17.10. KEINE festen Zeitfenster mehr (Nutzerwunsch: „es gibt Spieler,
 // die nur nachts reinschauen"): Jeder kommt einmal am Tag, wann immer man am
@@ -367,7 +367,7 @@ export const STAMM_BITTEN = {
       text: 'Ich lerne Pirouette! Aber ich fall immer um. Zeigst du mir auf der Eisbahn, wie das geht?',
       dank: 'Ich hab mich dreimal gedreht und bin erst danach umgefallen. Das ist ein Rekord!' },
     { art: 'getraenk', p: 'schoko', n: 3, griff: true,
-      text: 'Meine Tante hat aus Australien geschrieben: Da essen sie Eis am Strand! Ich will das Gegenteil. Drei heiße Schokoladen mit Sahne - für Mama, mich und den Schneemann.',
+      text: 'Meine Tante hat aus Australien geschrieben: Da essen sie Eis am Strand! Ich will das Gegenteil. Drei Heiße Schoki mit Sahne - für Mama, mich und den Schneemann.',
       dank: 'Der Schneemann wollte seine nicht. Hab ich getrunken. Er wär sonst geschmolzen.' },
     { art: 'mini', spiel: 'baum',
       text: 'Wir haben noch keinen Christbaum. Mama sagt, dieses Jahr brauchen wir einen GANZ großen. Suchst du schon mal einen schönen aus?',
@@ -388,7 +388,7 @@ export const STAMM_BITTEN = {
       dank: 'Die Kinder haben Spuren gelesen und Plätzchen gegessen. Die Krümel haben übrigens die Meisen gefunden.' },
     { art: 'getraenk', p: 'gluehwein', n: 8,
       text: 'Vor Heiligabend gehen wir vom Forst noch auf einen Punsch. Acht Sternenpunsch, bitte - das Heu für die Rehe ist schon geladen.',
-      dank: 'Die Kollegen sagen danke. Rehe sind übrigens keine kleinen Hirsche, sondern eine eigene Art. Das hab ich ihnen auch erzählt. Dreimal.' },
+      dank: 'Die Kollegen sagen danke. Das Reh ist übrigens nicht die Frau vom Hirsch, sondern eine eigene Art. Das hab ich ihnen auch erzählt. Dreimal.' },
   ],
 };
 
@@ -587,8 +587,9 @@ export const GLOCKEN_ABEND = 18, GLOCKEN_ABEND_DAUER = 12;   // Abendläuten nac
 export const CHOR = { von: 15, bis: 20, bonus: 0.5 };
 export const ADVENT_GAESTE = 0.5;   // +50 % Gäste am Adventssonntag
 export const ADVENT_EREIGNIS = {
-  1: { titel: '1. Advent', zeile: 'Weihnachtsmarkt in der Stadt!', bild: 'markt',
-       text: 'In der Stadt hat der Weihnachtsmarkt eröffnet. Alle sind in Stimmung - und auf dem Heimweg kommen sie an deinem Stand vorbei.' },
+  // 26.10.: „Adventsmarkt" - der Weihnachtsmarkt ist im Spiel der auf dem Festplatz im Dorf
+  1: { titel: '1. Advent', zeile: 'Adventsmarkt in der Stadt!', bild: 'markt',
+       text: 'In der Stadt hat der große Adventsmarkt eröffnet. Alle sind in Stimmung - und auf dem Heimweg kommen sie an deinem Stand vorbei.' },
   2: { titel: '2. Advent', zeile: 'Es hat die ganze Nacht geschneit!', bild: 'schnee',
        text: 'Über Nacht ist ein halber Meter Neuschnee gefallen. Die Kinder bauen Schneemänner, und alle wollen etwas Warmes.' },
   3: { titel: '3. Advent', zeile: 'Der Chor gibt ein Konzert!', bild: 'chor',
@@ -697,7 +698,9 @@ export const HAENDLER_DEKO = [
 ];
 // Dazu jedes Mal ein Gutschein zum Verbrauchen
 export const HAENDLER_GUTSCHEIN = { id: 'h_zimt', name: 'Zimtstern-Gutschein', minuten: 3, min: 250, dauer: 600, mult: 2,
-  text: '10 Minuten lang bringt alles, was du selbst servierst, doppelt so viele Sterne.' };
+  // 26.10.: Selbst servieren zählt ohnehin doppelt - der Gutschein verdoppelt das NOCH EINMAL. Und er
+  // läuft nur, solange du spielst (Spielzeit, st.zimt)
+  text: '10 Minuten am Stand: Was du selbst servierst, bringt noch einmal doppelt so viele Sterne. Die Zeit läuft nur, solange du spielst.' };
 // Der Weihnachtsmarkt auf dem Festplatz (09.10.): zufällig alle paar Tage,
 // mit Ansage. Er hat Deko, die es nur dort gibt (je Markt MARKT_ANGEBOT
 // Stücke, die man noch nicht hat), ein Rezept, das zwei Getränke dauerhaft

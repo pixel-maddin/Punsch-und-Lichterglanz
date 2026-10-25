@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610261500';
-import * as S from './spiel.js?v=202610261500';
-import * as A from './auftraege.js?v=202610261500';
-import * as E from './erfolge.js?v=202610261500';
-import * as Z from './ziele.js?v=202610261500';
-import * as KA from './karte.js?v=202610261500';
-import { zellePos } from './tresen.js?v=202610261500';
+import * as C from './config.js?v=202610261700';
+import * as S from './spiel.js?v=202610261700';
+import * as A from './auftraege.js?v=202610261700';
+import * as E from './erfolge.js?v=202610261700';
+import * as Z from './ziele.js?v=202610261700';
+import * as KA from './karte.js?v=202610261700';
+import { zellePos } from './tresen.js?v=202610261700';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -41,6 +41,14 @@ const HINWEIS_PAUSE = 25;       // s Ruhe zwischen zwei Hinweisen
 const HINWEIS_PAUSE_SOFORT = 6; // s für Hinweise, deren Lage gleich vorbei ist
 const NACH_EINFUEHRUNG = 40;    // s nach „Geschafft!", bevor der erste Hinweis kommt
 let ruheT = 0;                  // s seit dem letzten Hinweis (zählt nur, wenn nichts offen ist)
+// 26.10. (Testbericht: nach dem Servier-Wichtel 9 Blasen und ein Fenster in rund 2 Minuten):
+// Nach den Startzielen höchstens HINWEISE_JE_BESUCH Vorstellungen je Besuch, mit längerer Pause.
+// Ausgenommen sind `sofort`-Hinweise - die erklären, was gerade auf dem Schirm passiert.
+const HINWEIS_PAUSE_SPAETER = 45;
+const HINWEISE_JE_BESUCH = 3;
+let besuchZahl = 0;
+/** Ein neuer Besuch (main.js, nach mindestens 10 Minuten weg): wieder Platz für Vorstellungen. */
+export function neuerBesuch() { besuchZahl = 0; }
 
 /**
  * Wohin soll der Laden springen, wenn man ihn öffnet? Erst eine laufende
@@ -159,23 +167,22 @@ const HINWEISE = [
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
   // 19.10.: Angebot (höchstens fünf Sorten) und Knopf „Haus" oben links
   { id: 'angebot', wann: () => S.produkteBesessen().length > C.ANGEBOT_MAX,
-    text: () => `Dein Angebot ist voll: Höchstens ${C.ANGEBOT_MAX} Sorten passen unten hin. Neues ersetzt von selbst das Günstigste. Mit „ANGEBOT" oben rechts stellst du es selbst zusammen - schnelle Sorten bringen weniger je Glas, langsame mehr.`,
+    text: () => `Dein Angebot ist voll: Höchstens ${C.ANGEBOT_MAX} Sorten passen unten hin. Neues ersetzt von selbst das Günstigste. Mit „Angebot“ oben rechts stellst du es selbst zusammen - schnelle Sorten bringen weniger je Glas, langsame mehr.`,
     ziel: () => ({ x: 164, y: 30 }), dauer: 14 },
-  { id: 'hausknopf', wann: () => S.hat('kranz') && S.st.stats.bedient >= 30,
-    text: () => 'Dein Haus schmückst du mit dem Knopf „HAUS" oben links: Lichter, Farben und Varianten.',
-    ziel: () => ({ x: 16, y: 30 }), dauer: 9 },
+  // 26.10.: `hausknopf` ist weg - `deko_danach` und die Kauf-Einblendung nennen den Knopf schon
   { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
     info: () => (S.hat('kranz') ? 'Deine erste Deko hängt!' : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen.') + ' Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus im Dorf werden!',
     text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
-    text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung - je mehr, desto mehr Gäste. Tipp: Mit dem Knopf „Haus" oben links schmückst du es (Lichter, Farben, Varianten).',
+    // 26.10.: nimmt den Satz aus `herz_ziel` mit auf (♥ schaltet Neues frei) - eine Blase weniger
+    text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung - je mehr, desto mehr Gäste, und mehr ♥ schaltet Neues frei. Mit dem Knopf „Haus“ oben links schmückst du dein Haus (Lichter, Farben, Varianten).',
     ziel: herzZiel, dauer: 9 },
   { id: 'gegangen', ruhig: true, wann: () => S.st.stats.verpasst >= 1,
     text: () => 'Ein Gast ist weitergegangen - nicht schlimm, es kommen neue! Aber Achtung: Manchmal kommt jemand GANZ BESONDERES vorbei - den solltest du nicht warten lassen.',
     ziel: () => gastZiel(0), dauer: 8 },
   { id: 'schwung', ruhig: true, wann: () => S.lauf.schwung >= 2,
-    text: () => 'Schwung! Wenn du zügig hintereinander servierst, gibt es mehr Sterne (bis ×1,40).',
+    text: () => 'Schwung! Wenn du zügig hintereinander servierst, gibt es mehr Sterne - bis zu 40 % mehr.',
     ziel: () => ({ x: 140, y: G + 2 }), dauer: 5 },
   // Die drei ersten Wichtel (Startziele 3-5): erst erklären, was sie tun, dann zum Laden
   { id: 'w_spuel', sofort: true, wann: () => zielDran('spuel', 'spuel'),
@@ -187,12 +194,14 @@ const HINWEISE = [
     text: () => 'Tippe auf KARTE - im Wichtelwald findest du ihn.',
     ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, lang: true },
   { id: 'w_servier', sofort: true, wann: () => zielDran('servier', 'servier'),
-    info: () => (S.hat('servier') ? 'Und der wichtigste Helfer ist auch schon da: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand jetzt von selbst - sogar wenn du nicht da bist.' : 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand dann von selbst - sogar wenn du nicht da bist.'),
+    // 26.10.: das „auch wenn du nicht da bist" erklärt `wichtel_weg` gleich danach - hier nicht doppelt
+    info: () => (S.hat('servier') ? 'Und der wichtigste Helfer ist auch schon da: Der SERVIER-WICHTEL bedient Gäste ganz allein.' : 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand dann von selbst.'),
     text: () => 'Tippe auf KARTE - im Wichtelwald wartet der Servier-Wichtel.',
     ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
-    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn du nicht da bist, und verdienen dir Sterne - ist die App länger als eine Stunde zu, wartet eine Kiste auf dich. Am Stand arbeiten sie in den ersten ${Math.round(C.INAKTIV_AB / 60)} Minuten mit voller Kraft, danach gemütlicher. Ihre Kiste fasst bis zu ${C.OFFLINE_MAX_H} Stunden Arbeit - schau also ruhig mehrmals am Tag vorbei. Und: Was DU selbst servierst, bringt doppelt so viele Sterne.`,
+    // 26.10.: kürzer, und passend zur neuen Abrechnung (kurze Pausen direkt, ab einer Stunde die Kiste)
+    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn die App zu ist: Kommst du bald zurück, gibt es ihre Sterne gleich - nach mehr als einer Stunde wartet eine Kiste mit bis zu ${C.OFFLINE_MAX_H} Stunden Arbeit. Und: Was DU selbst servierst, bringt doppelt so viele Sterne.`,
     ziel: null, dauer: 12 },
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
@@ -206,7 +215,8 @@ const HINWEISE = [
   // nach dem dritten Wichtel acht Blasen in einer Minute (Servier-Wichtel, Karte, Wichtel weg,
   // Baumarkt, Minispiele, Wichtel am Tablett) - mitten im Ziel „Heißer Apfel". Der Baumarkt ist
   // trotzdem schon offen (ortOffen), nur die Vorstellung wartet.
-  { id: 'baumarkt', wann: () => !!S.st.tipps.wichtel_weg && Z.fertig() && !!S.st.tipps.ziele_fertig,   // nach „Alle sieben Ziele geschafft“
+  // 26.10.: nach der Frage „Wie geht es weiter?" (die sagt jetzt, was die Blase `ziele_fertig` sagte)
+  { id: 'baumarkt', wann: () => !!S.st.tipps.wichtel_weg && Z.fertig() && (S.st.zieleWeiter != null || !!S.st.tipps.ziele_fertig),
     info: () => 'Neu auf der Karte: der BAUMARKT! Dort gibt es größere Töpfe, einen längeren Tresen für mehr Gäste, ein Tablett für mehr Gläser - und neue Farbe für dein Haus.',
     text: () => 'Tippe auf KARTE - der Baumarkt ist jetzt offen.',
     // 13.10.: ohne `lang` - wer nicht hingeht, hatte den Zeiger sonst für immer über dem Stand
@@ -221,12 +231,8 @@ const HINWEISE = [
     },
     text: () => 'Tippe auf KARTE und schau dich um.',
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen },
-  { id: 'herz_ziel', ruhig: true, wann: () => istZiel('auftrag'),   // 24.10.: Ziel „15 ♥" gibt es nicht mehr; hält das Spiel nicht mehr an
-    text: () => 'Gut zu wissen: Mehr ♥ Stimmung schaltet auf der Karte Neues frei - weitere Getränke, Deko und Lichter.',
-    ziel: herzZiel, dauer: 10 },
-  { id: 'ziele_fertig', sofort: true, wann: () => Z.fertig() && S.st.tipps.wichtel_weg,
-    text: () => 'Alle sieben Ziele geschafft - jetzt weißt du alles Wichtige! Genieße die Weihnachtszeit und schmücke dein Haus, wie es dir gefällt. Schau jeden Tag mal rein: Es gibt neue Aufträge, ein Türchen im Adventskalender und besondere Ereignisse.',
-    ziel: null, dauer: 10 },
+  // 26.10.: `herz_ziel` (steht jetzt in `deko_danach`) und `ziele_fertig` (steht jetzt im Fenster
+  // „Wie geht es weiter?") sind weg - zwei Blasen weniger im dichtesten Moment des Einstiegs
   // Besondere Gäste stellen sich hinten an und gehen, wenn es zu lange
   // dauert - das muss man einmal gesagt bekommen (gemeldet: Rentier war weg)
   { id: 'sonder_schlange', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => C.GAESTE[g.typ].spezial && g.platz == null && !g.gehen && !g.laeuft),
@@ -255,7 +261,7 @@ const HINWEISE = [
     text: () => `Du bist der Chef! Solange du am Stand mit anpackst, arbeiten die Wichtel ${C.CHEF_TEMPO === 2 ? 'doppelt' : '×' + String(C.CHEF_TEMPO).replace('.', ',')} so schnell (grüne Tafel links neben dem Schild). Besondere Gäste bedienst nur du.`,
     ziel: () => ({ x: 40, y: G + 2 }), dauer: 8 },
   { id: 'schild', ruhig: true, wann: () => S.st.stats.bedient >= 40 && !S.st.standName,
-    text: () => 'Tipp: Tippe auf das rote Schild über dem Stand - dann kannst du ihm einen eigenen Namen geben.',
+    text: () => 'Tipp: Das rote Schild über dem Stand kannst du antippen und ihm einen eigenen Namen geben.',
     ziel: () => ({ x: 90, y: G + 1 }), fertig: () => !!S.st.standName, dauer: 7 },
   { id: 'eilig', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => g.eilig && g.am && !g.bedient),
     text: () => 'Ein eiliger Gast (orange Blase)! Er wartet nur kurz, zahlt aber doppelt.',
@@ -263,7 +269,7 @@ const HINWEISE = [
   // Aufträge und Socken erst nach den Startzielen (Einstieg in Wellen, 11.10.)
   // Aufsicht und goldene Gäste (17.10.): beim ersten goldenen Gast am Tresen
   { id: 'gold', sofort: true, wann: () => S.lauf.gaeste.some((g) => g.gold && g.am && !g.bedient),
-    text: () => 'Ein GOLDENER Gast! Deine Wichtel sind jetzt so gut, dass sie normale Gäste allein bedienen - auch wenn du da bist. Du kümmerst dich um die goldenen: Nur du kannst sie bedienen, sie drängeln vor und zahlen viel mehr. Alle paar Sekunden kommt einer.',
+    text: () => 'Ein GOLDENER Gast! Deine Wichtel sind jetzt so gut, dass sie normale Gäste allein bedienen - auch wenn du da bist. Du kümmerst dich um die goldenen: Nur du kannst sie bedienen, sie drängeln vor und zahlen viel mehr. Alle paar Sekunden kommt einer. Eilige Gäste (orange Blase) und Bestellungen für eine Bitte lassen die Wichtel auch für dich stehen.',
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.gold && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 10 },
   { id: 'ruf', ruhig: true, wann: () => Z.fertig() && S.ruf().stufe >= 1,
     text: () => 'Dein Stand spricht sich herum! Jeden Tag, an dem du ein bisschen mitarbeitest, steigt sein RUF - und alle Preise mit. Wie weit du heute bist, steht unter AUFTRÄGE.',
@@ -365,8 +371,12 @@ function hinweise(dt) {
     return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
   }
   ruheT += dt;
+  const spaeter = Z.fertig();   // nach den Startzielen: Vorstellungen sparsam (26.10.)
   for (const h of HINWEISE) {
-    if (st.tipps[h.id] || ruheT < (h.sofort ? HINWEIS_PAUSE_SOFORT : HINWEIS_PAUSE) || !h.wann()) continue;
+    if (st.tipps[h.id]) continue;
+    if (h.sofort ? ruheT < HINWEIS_PAUSE_SOFORT : ruheT < (spaeter ? HINWEIS_PAUSE_SPAETER : HINWEIS_PAUSE) || (spaeter && besuchZahl >= HINWEISE_JE_BESUCH)) continue;
+    if (!h.wann()) continue;
+    if (spaeter && !h.sofort) besuchZahl++;
     aktuell = { h, t: 0 };
     if (h.id === 'chef') { st.chefBonus = true; S.speichere(); }   // der Bonus gilt, sobald er erklärt wird
     // 26.10. (gemeldet): Festplatz und Minispiele gehen auf, sobald der Hinweis sie NENNT - vorher erst,

@@ -27,12 +27,14 @@
      Nunito für alle Texte, Pixelify Sans nur für Titel - Pixelschrift wird klein unscharf. */
   --schrift: "Nunito", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   --titelschrift: "Pixelify Sans", "Nunito", system-ui, sans-serif;
+  /* 26.10. (Testbericht: Fließtext ~10 px, Zoom ist gesperrt): mini 4,2 → 4,5, klein 4,6 → 4,9,
+     text 5 → 5,3. Betont und größer bleiben - Zielleiste und Knöpfe haben feste Höhen. */
   /* Schriftleiter (19.10., Durchsicht als UI/UX-Designer): sieben Stufen statt
      vorher 25 verschiedener GrÃ¶ÃŸen. Ausnahmen nur fÃ¼r Zahlen-/SymbolgrÃ¶ÃŸen
      (Summe, TÃ¼rchen-Ziffern, Emoji-Symbole) und die winzigen Kartenschilder. */
-  --t-mini:   calc(var(--px) * 4.2);   /* Kleingedrucktes, FuÃŸnoten, StÃ¤nde unter Karten */
-  --t-klein:  calc(var(--px) * 4.6);   /* Nebentext, Reiter, AbschnittskÃ¶pfe */
-  --t-text:   calc(var(--px) * 5);     /* FlieÃŸtext, Zeilentext, KnÃ¶pfe in Listen */
+  --t-mini:   calc(var(--px) * 4.5);   /* Kleingedrucktes, FuÃŸnoten, StÃ¤nde unter Karten */
+  --t-klein:  calc(var(--px) * 4.9);   /* Nebentext, Reiter, AbschnittskÃ¶pfe */
+  --t-text:   calc(var(--px) * 5.3);   /* FlieÃŸtext, Zeilentext, KnÃ¶pfe in Listen */
   --t-betont: calc(var(--px) * 5.6);   /* Namen in Zeilen, Hinweise, HauptknÃ¶pfe */
   --t-gross:  calc(var(--px) * 6.2);   /* FensterknÃ¶pfe, Eingaben, hervorgehobene Einblendung */
   --t-titel:  calc(var(--px) * 7);     /* groÃŸe Zwischenzeilen, Symbole in KnÃ¶pfen */
@@ -1094,6 +1096,9 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   color: #fff; transition: transform 0.08s, filter 0.08s;
 }
 .kachel canvas { width: calc(var(--px) * 20); height: calc(var(--px) * 20); margin: calc(var(--px) * 1) 0; image-rendering: pixelated; }
+/* 26.10.: Die Schrift ist größer geworden - aber nicht in den Bedienleisten mit fester Höhe
+   (Kacheln, Kopfzeile, Zielleiste, Knöpfe oben, Leiste, Minispiel-Kopf): dort die alten Stufen */
+#theke, #hud, #ziel, .knopf-oben, #leiste, #minispiel { --t-mini: calc(var(--px) * 4.2); --t-klein: calc(var(--px) * 4.6); --t-text: calc(var(--px) * 5); }
 .k-name { max-width: 100%; margin-top: calc(var(--px) * 0.6); font: 800 var(--t-mini) var(--schrift); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; letter-spacing: -0.01em; }
 .k-preis { margin-top: calc(var(--px) * 0.4); font: 900 var(--t-klein) var(--schrift); color: #ffe27a; text-shadow: 0 calc(var(--px) * 0.5) 0 rgba(0, 0, 0, 0.45); }
 .k-info { position: absolute; top: calc(var(--px) * 1.6); left: 50%; transform: translateX(-50%); white-space: nowrap;
@@ -1209,6 +1214,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .menue-statistik { margin: 0 0 calc(var(--px) * 3); border: calc(var(--px) * 0.6) solid #d8b880; border-radius: calc(var(--px) * 2); background: var(--papier2); }
 .menue-statistik summary { list-style: none; cursor: pointer; padding: calc(var(--px) * 2.4) calc(var(--px) * 3); font: 800 var(--t-text) var(--schrift); color: var(--tinte); display: flex; align-items: baseline; gap: calc(var(--px) * 1.5); }
 .menue-statistik summary::-webkit-details-marker { display: none; }
+.menue-statistik summary b { flex: none; white-space: nowrap; }   /* 26.10.: „Mehr Sterne gerade" */
 .menue-statistik summary::after { content: '▾'; margin-left: auto; color: var(--text3); transition: transform 0.15s; }
 .menue-statistik[open] summary::after { transform: rotate(180deg); }
 .menue-statistik summary small { font-weight: 600; font-size: var(--t-mini); color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

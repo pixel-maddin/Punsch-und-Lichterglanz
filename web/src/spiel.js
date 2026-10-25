@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610261500';
-import * as Z from './zeit.js?v=202610261500';
-import { neueFarben } from './pixel.js?v=202610261500';
+import * as C from './config.js?v=202610261700';
+import * as Z from './zeit.js?v=202610261700';
+import { neueFarben } from './pixel.js?v=202610261700';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -138,6 +138,8 @@ if (!st.sterne10) {
 }
 // Alte Spielstände: Musik war ein Schalter (true/false), jetzt eine Stufe
 if (typeof st.ton.musik === 'boolean') st.ton.musik = st.ton.musik ? 3 : 0;
+// Zimtstern-Gutschein lief bis 26.10. in Echtzeit (`zimtBis`) - jetzt Restsekunden Spielzeit (`zimt`)
+if (st.zimtBis) { st.zimt = Math.max(0, (st.zimtBis - Date.now()) / 1000); delete st.zimtBis; }
 
 let speichernGesperrt = false;   // nach dem Einlesen einer Datei bis zum Neuladen
 export function speichere() {
@@ -187,6 +189,9 @@ export function uebernehmeStand(stand) {
 }
 
 export function allesLoeschen() {
+  // 26.10.: auch den Nachrichtenverlauf (eigener Schlüssel, ui.js) - sonst standen nach „Neu
+  // anfangen" die letzten Meldungen des alten Spiels darin. Der Vorführmodus lässt ihn stehen.
+  if (!DEMO) try { localStorage.removeItem('adventshaus.nachrichten'); } catch (e) { /* egal */ }
   st = neuerStand();
   resetLauf();
   speichere();
@@ -424,7 +429,7 @@ export function angebot() {
     const billig = st.angebot.slice().sort((a, b) => C.PRODUKT[a].preis - C.PRODUKT[b].preis)[0];
     if (billig && C.PRODUKT[billig].preis < C.PRODUKT[id].preis) {
       st.angebot[st.angebot.indexOf(billig)] = id;
-      hooks.toast(`${C.PRODUKT[id].name} ist jetzt in deinem Angebot statt ${C.PRODUKT[billig].name}. Umstellen: „Angebot" oben rechts.`, 'neu');
+      hooks.toast(`${C.PRODUKT[id].name} ist jetzt in deinem Angebot statt ${C.PRODUKT[billig].name}. Umstellen: „Angebot“ oben rechts.`, 'neu');
     }
     st.angebotNeu = true;   // Punkt an der Karte, bis man sie ansieht
   }
@@ -523,14 +528,15 @@ export function freiText(id) {
   if (!f) return '';
   const t = [];
   if (f.herzen) t.push(`♥ ${f.herzen} Stimmung (du hast ${stimmung()})`);
-  if (f.gesamt) t.push(`insgesamt ${formatGeld(f.gesamt)} verdient (bisher ${formatGeld(Math.floor(st.gesamt))})`);
+  // 26.10.: steht hinter „Frei ab" - daher „500 verdienten Sternen" statt „insgesamt 500 Sterne verdient"
+  if (f.gesamt) t.push(`${Math.round(f.gesamt).toLocaleString('de-DE')} verdienten Sternen (bisher ${Math.floor(st.gesamt).toLocaleString('de-DE')})`);
   if (f.advent) { const a = Z.adventDatum(f.advent); t.push(`dem ${f.advent}. Advent (${a.getDate()}.${a.getMonth() + 1}.)`); }
   return t.join(' und ');
 }
 
 /** Der Satz unter einem verdeckten Artikel. */
 export function bedingungText(a) {
-  if (!freiErfuellt(a.id)) return `Wird freigeschaltet bei: ${freiText(a.id)}`;
+  if (!freiErfuellt(a.id)) return `Frei ab ${freiText(a.id)}`;
   if (a.braucht && !hat(a.braucht)) return `Wird freigeschaltet, sobald du ${artikelName(a.braucht)} hast.`;
   return '';
 }
@@ -860,13 +866,23 @@ export function stammBedient(g) {   // exportiert nur für Tests
   const e = st.stamm[g.typ] = st.stamm[g.typ] || { n: 0 };
   e.tag = Z.tagesSchluessel();
   const dt = Z.dezemberTag();
-  if (dt >= 24 && dt <= 26 && e.n >= 3 && e.geschenk !== Z.saison()) {   // nur wer sich schon kennt
+  // 26.10.: vom 24.12. bis zum 6.1. (vorher nur 24.-26.12. - wer an den Feiertagen nicht spielte, bekam es nie)
+  if (dt >= 24 && dt <= 37 && e.n >= 3 && e.geschenk !== Z.saison()) {   // nur wer sich schon kennt
     e.geschenk = Z.saison();
     const betrag = zehner(einnahmenProMinute() * C.STAMM_GESCHENK_MIN * dev.geld);
     if (betrag > 0) verdiene(betrag);
     stammFenster({ id: g.typ, geschenk: true, text: s.geschenk, betrag });
     return;
   }
+  // 26.10. (Testbericht): Wartet von diesem Gast noch ein ungelesenes Fenster, ist er jetzt zurück -
+  // das alte fällt weg und sein Satz kommt jetzt dran. Vorher wurde der neue Satz dahinter gereiht,
+  // das alte Fenster verfiel nach 20 min und setzte den Zähler zurück: Satz 3 kam vor Satz 2, und
+  // Satz 3 wurde beim übernächsten Besuch noch einmal erzählt.
+  if (st.stammNeu) st.stammNeu = st.stammNeu.filter((f) => {
+    if (f.id !== g.typ || f.geschenk || !f.nr) return true;
+    e.n = Math.min(e.n, f.nr - 1);
+    return false;
+  });
   // Die Geschichte (17.10.): als eigenes Fenster, das das Spiel anhält -
   // als Einblendung ging sie beim Weiterbedienen unter. Ist die Geschichte
   // erzählt, kommen die kurzen Sätze wie bisher als Einblendung.
@@ -1180,7 +1196,14 @@ export const wichtelWartezeit = () => chefAktiv() ? C.WICHTEL_WARTEN : C.WICHTEL
  * (25.10.: vorher stand die Regel nur hier im Filter - ein vom Wichtel eingeschenktes Glas
  * servierte er nach der Wartezeit trotzdem selbst, auch einem besonderen Gast).
  */
-export const nurVonHand = (g) => !!(g.gross || g.ansturm || g.gold || C.GAESTE[g.typ].spezial);
+// 26.10. (Testbericht): Unter Aufsicht schnappten die Wichtel auch eilige Gäste und die Gäste,
+// die das Getränk einer offenen Bitte wollten - Aufträge „eilige Gäste", die Socke „Flinke Hände"
+// und Handgriff-Bitten hießen dann, den eigenen Wichteln zuvorkommen. Bist du am Stand, bleiben
+// sie jetzt für dich (wie goldene Gäste). Die Bitte-Getränke setzt main.js je Sekunde.
+let handWuensche = new Set();
+export function setzeHandWuensche(s) { handWuensche = s; }
+export const nurVonHand = (g) => !!(g.gross || g.ansturm || g.gold || C.GAESTE[g.typ].spezial
+  || (aufsicht() && chefAktiv() && (g.eilig || handWuensche.has(g.wunsch))));
 function servierKandidat() {
   return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !nurVonHand(x) && verfuegbar(x.wunsch)
     && !lauf.hand.some((h) => h.fuer === x.id))
@@ -1295,7 +1318,7 @@ function bediene(g, auto, faktor = 1) {
     // Selbst serviert zählt doppelt (09.10., Nutzerwunsch: „wesentlich mehr
     // Sterne, wenn man selbst bedient") - die Wichtel kassieren nur den Preis
     betrag *= C.SELBST_MULT;
-    if (Date.now() < (st.zimtBis || 0)) betrag *= C.HAENDLER_GUTSCHEIN.mult;   // Zimtstern-Gutschein vom Händler
+    if (st.zimt > 0) betrag *= C.HAENDLER_GUTSCHEIN.mult;   // Zimtstern-Gutschein vom Händler
     // Plätzchendose (10.10.): Wer selbst bedient wird, nimmt eins und gibt mehr
     if (st.dose && st.dose.length) { st.dose.shift(); betrag *= 1 + C.DOSE_BONUS; zaehleErfolg('kekse'); }
     lauf.schwung = lauf.schwungT > 0 ? Math.min(C.SCHWUNG_MAX, lauf.schwung + 1) : 1;
@@ -1345,6 +1368,7 @@ function zaehleBedient(g, auto, faktor, schwungVorher) {
 export function update(dt) {
   lauf.t += dt;
   lauf.chefT += dt;
+  if (st.zimt > 0) st.zimt = Math.max(0, st.zimt - dt);   // Zimtstern zählt nur, solange gespielt wird (26.10.)
   const G = lauf.gaeste;
   const wt = dt * wichtelTempo();   // Wichtel-Zeit: schneller, wenn du da bist
   const ht = dt * helferTempo();    // Spülen und Nachfüllen: nie langsamer als normal
@@ -1658,7 +1682,7 @@ export function kaufeBeimHaendler(id) {
   if (w === C.HAENDLER_GUTSCHEIN) {
     if (!h.gutschein) return false;
     h.gutschein = false;
-    st.zimtBis = Math.max(Date.now(), st.zimtBis || 0) + w.dauer * 1000;
+    st.zimt = (st.zimt || 0) + w.dauer;
   } else {
     if (st.kalDeko[id]) return false;
     st.kalDeko[id] = true;
@@ -1670,8 +1694,8 @@ export function kaufeBeimHaendler(id) {
   speichere();
   return true;
 }
-/** Restzeit des Zimtstern-Gutscheins in Sekunden (0 = keiner). */
-export const zimtRest = () => Math.max(0, Math.ceil(((st.zimtBis || 0) - Date.now()) / 1000));
+/** Restzeit des Zimtstern-Gutscheins in Sekunden Spielzeit (0 = keiner). */
+export const zimtRest = () => Math.max(0, Math.ceil(st.zimt || 0));
 
 // ---------------------------------------------------------------------------
 // Der Weihnachtsmarkt (09.10.)

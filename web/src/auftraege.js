@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610261500';
-import * as S from './spiel.js?v=202610261500';
-import * as Z from './zeit.js?v=202610261500';
+import * as C from './config.js?v=202610261700';
+import * as S from './spiel.js?v=202610261700';
+import * as Z from './zeit.js?v=202610261700';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -23,7 +23,8 @@ const TYPEN = {
   kinder:   { stufen: [5, 10, 18],   text: (n) => `Bediene ${n} Kinder`, geht: () => S.hat('kinderpunsch') },
   omas:     { stufen: [4, 8, 14],    text: (n) => `Bediene ${n} Omas und Opas` },
   eilig:    { stufen: [2, 4, 7],     text: (n) => `Bediene ${n} eilige Gäste`, geht: () => S.st.stats.bedient >= 30 },
-  schwung:  { stufen: [1, 1, 3],     text: (n) => n > 1 ? `Erreiche ${n}-mal vollen Schwung` : 'Erreiche vollen Schwung (×1,40)' },
+  // 26.10.: nicht unter Aufsicht - dann bedienen die Wichtel die normalen Gäste, Schwung baut man kaum auf
+  schwung:  { stufen: [1, 1, 3],     text: (n) => n > 1 ? `Erreiche ${n}-mal vollen Schwung` : 'Erreiche vollen Schwung (40 % mehr Sterne)', geht: () => !S.aufsicht() },
   spezial:  { stufen: [1, 1, 2],     text: (n) => n > 1 ? `Bediene ${n} besondere Gäste` : 'Bediene einen besonderen Gast' },
   stoss:    { stufen: [3, 5, 6],     text: (n) => `Bediene ${n} Gäste einer Stoßzeit` },
   gold:     { stufen: [3, 6, 10],    text: (n) => `Bediene ${n} goldene Gäste`, geht: () => S.aufsicht() },
@@ -157,6 +158,11 @@ export function bitte() {
   S.hooks.toast(`${C.GAESTE[gast].name} hat eine Bitte an dich - steht unter Aufträge.`, 'neu');
   return S.st.bitte;
 }
+/** Welche Getränke muss man gerade selbst servieren (offene Bitte)? Für S.nurVonHand (26.10.). */
+export function handWuensche() {
+  const b = bitte(), d = b && bitteDef(b);
+  return new Set(d && d.art === 'getraenk' && !b.abgeholt && !bitteFertig(b) ? [d.p] : []);
+}
 /** Erfüllte Bitte abholen: Sterne und der Dank. */
 export function bitteAbholen() {
   const b = S.st.bitte;
@@ -212,6 +218,8 @@ export function bedient(g, auto, stoss) {
   zaehle('produkt', (a) => a.param === g.wunsch);
   if (g.typ === 'kind') zaehle('kinder');
   if (g.typ === 'oma' || g.typ === 'opa') zaehle('omas');
+  // 26.10.: Gruppen sind normale Gäste - unter Aufsicht bedienen sie die Wichtel, also zählen sie mit
+  if (stoss && auto) zaehle('stoss');
   if (auto) return;
   if (g.gold) zaehle('gold');
   if (g.eilig) zaehle('eilig');

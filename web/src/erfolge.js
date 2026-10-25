@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=202610261500';
-import * as S from './spiel.js?v=202610261500';
+import * as C from './config.js?v=202610261700';
+import * as S from './spiel.js?v=202610261700';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;
@@ -21,7 +21,7 @@ const WICHTEL = ['spuel', 'nachfuell', 'servier'];
 export const ERFOLGE = [
   // id bleibt 'bedient1' (alte Spielstände), das Ziel sind seit 29.09. 15 Gäste
   { id: 'bedient1',    name: 'Die ersten Becher',      text: 'Bediene deine ersten 15 Gäste.',              ziel: 15,   wert: () => zahl('bedient') },
-  { id: 'schwung',     name: 'In Schwung',             text: 'Erreiche vollen Schwung (×1,40).',            ziel: 1,    wert: () => zahl('schwungVoll') },
+  { id: 'schwung',     name: 'In Schwung',             text: 'Erreiche vollen Schwung (40 % mehr Sterne).',            ziel: 1,    wert: () => zahl('schwungVoll') },
   { id: 'bedient100',  name: 'Stammkundschaft',        text: 'Bediene 100 Gäste.',                          ziel: 100,  wert: () => zahl('bedient') },
   { id: 'sonder1',     name: 'Hoher Besuch',           text: 'Bediene einen besonderen Gast.',              ziel: 1,    wert: () => SONDER.reduce((a, t) => a + typ(t), 0) },
   { id: 'kinder',      name: 'Leuchtende Kinderaugen', text: 'Bediene 25 Kinder.',                          ziel: 25,   wert: () => typ('kind') },
