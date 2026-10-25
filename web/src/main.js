@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610260900';
-import * as S from './spiel.js?v=202610260900';
-import * as Z from './zeit.js?v=202610260900';
-import * as T from './ton.js?v=202610260900';
-import * as LI from './lichtung.js?v=202610260900';
-import * as CB from './christbaum.js?v=202610260900';
-import * as KA from './karte.js?v=202610260900';
-import * as SB from './schlitten.js?v=202610260900';
-import * as EB from './schlittschuh.js?v=202610260900';
-import * as BS from './backstube.js?v=202610260900';
-import * as UI from './ui.js?v=202610260900';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610260900';
-import { zeichneTresen, treffer, trifftSchild } from './tresen.js?v=202610260900';
-import * as Kacheln from './kacheln.js?v=202610260900';
-import * as Lernen from './lernen.js?v=202610260900';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610260900';
-import * as A from './auftraege.js?v=202610260900';
-import * as E from './erfolge.js?v=202610260900';
-import * as ZL from './ziele.js?v=202610260900';
+import * as C from './config.js?v=202610261000';
+import * as S from './spiel.js?v=202610261000';
+import * as Z from './zeit.js?v=202610261000';
+import * as T from './ton.js?v=202610261000';
+import * as LI from './lichtung.js?v=202610261000';
+import * as CB from './christbaum.js?v=202610261000';
+import * as KA from './karte.js?v=202610261000';
+import * as SB from './schlitten.js?v=202610261000';
+import * as EB from './schlittschuh.js?v=202610261000';
+import * as BS from './backstube.js?v=202610261000';
+import * as UI from './ui.js?v=202610261000';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610261000';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610261000';
+import * as Kacheln from './kacheln.js?v=202610261000';
+import * as Lernen from './lernen.js?v=202610261000';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610261000';
+import * as A from './auftraege.js?v=202610261000';
+import * as E from './erfolge.js?v=202610261000';
+import * as ZL from './ziele.js?v=202610261000';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -117,6 +117,8 @@ cv.addEventListener('pointerdown', (e) => {
   }
   // Das Schild „DEIN STAND" lässt sich beschriften
   if (trifftSchild(x, y, G)) { T.spiele('klick'); UI.schildBeschriften(); return; }
+  // Die Tafel „TEMPO x2" erklärt sich (26.10.: wurde für doppelte Sterne gehalten)
+  if (trifftChef(x, y)) { T.spiele('klick'); UI.toast(`Solange du am Stand mit anpackst, arbeiten deine Wichtel ${C.CHEF_TEMPO === 2 ? 'doppelt' : String(C.CHEF_TEMPO).replace('.', ',') + '-mal'} so schnell. Doppelte Sterne gibt es, wenn du selbst servierst - das ist etwas anderes.`, 'hinweis'); return; }
   const tr = treffer(x, y, G);
   if (!tr) {
     // Das Haus angetippt (Wand und Dach): Haus schmücken

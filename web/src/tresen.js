@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610260900';
-import * as C from './config.js?v=202610260900';
-import * as S from './spiel.js?v=202610260900';
-import * as Z from './zeit.js?v=202610260900';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610261000';
+import * as C from './config.js?v=202610261000';
+import * as S from './spiel.js?v=202610261000';
+import * as Z from './zeit.js?v=202610261000';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -328,10 +328,18 @@ function balken(c, y0) {
  * Tafel links neben dem Schild zeigt es (Gegenstück zum Schwung rechts);
  * der Balken darunter ist die Zeit, bis sie dich vermissen.
  */
+let chefFeld = null;   // wo die Tafel zuletzt stand (für den Tipp, main.js)
+/** Trifft ein Tipp die Chef-Tafel? */
+export const trifftChef = (x, y) => !!chefFeld && x >= chefFeld.x - 2 && x <= chefFeld.x + chefFeld.b + 2 && y >= chefFeld.y - 3 && y <= chefFeld.y + 14;
 function chefAnzeige(c, y0, rechts) {
+  chefFeld = null;
   if (!S.hatWichtel() || !S.chefAktiv() || !S.chefBonus()) return;
-  const s = 'x' + String(C.CHEF_TEMPO).replace('.', ',');
+  // 26.10. (gemeldet): „x2" allein las sich wie doppelte Sterne - es ist das TEMPO der Wichtel.
+  // Bei sehr langem Standnamen reicht der Platz links nicht, dann bleibt es kurz.
+  const zahl = 'x' + String(C.CHEF_TEMPO).replace('.', ',');
+  const lang = 'TEMPO ' + zahl, s = rechts - (textBreite(lang) + 14) >= 2 ? lang : zahl;
   const b = textBreite(s) + 14, x = rechts - b, y = y0 - 4;
+  chefFeld = { x, y, b };
   r(c, x - 1, y - 1, b + 2, 14, '#3a2010');
   r(c, x, y, b, 12, '#1f4a2a');
   r(c, x, y, b, 1, '#3a6a44');
