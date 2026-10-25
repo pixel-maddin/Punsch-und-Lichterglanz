@@ -65,9 +65,14 @@ Gastes weiter. Erfüllt gibt es Sterne und einen Dank.
 Einmal am Tag kommt ein **Ansturm**: 60 Sekunden dreifaches Trinkgeld, die
 Wichtel schauen nur zu.
 
-**Während du weg bist**, arbeiten die Wichtel weiter und legen alles in eine
-Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst höchstens 3 Stunden
-Arbeit - wer mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
+**Während du weg bist**, arbeiten die Wichtel weiter. Warst du nur kurz weg
+(unter einer Stunde), gibt es ihre Sterne gleich beim Zurückkommen. Länger weg,
+legen sie alles in eine Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst
+höchstens 3 Stunden Arbeit (in den ersten zwei Tagen etwas weniger) - wer
+mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
+
+Aufträge und Bitten, die ein Getränk verlangen, das gerade nicht in deinem
+**Angebot** steht, sagen das und haben einen Knopf „Angebot öffnen“.
 
 **Haus schmücken:** Knopf „Haus" oben links, mit den Reitern Haus, Garten,
 Stand, Lichter und Geschenke. Jedes Teil hat einen Schalter An/Aus; antippen

@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610261000';
-import * as S from './spiel.js?v=202610261000';
-import * as Z from './zeit.js?v=202610261000';
-import * as T from './ton.js?v=202610261000';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610261000';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610261000';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610261000';
-import * as A from './auftraege.js?v=202610261000';
-import * as E from './erfolge.js?v=202610261000';
-import * as ZL from './ziele.js?v=202610261000';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610261000';
-import * as KA from './karte.js?v=202610261000';
-import { zeigeRueckblick } from './ereignis.js?v=202610261000';
-import { barbaraZweig } from './szene.js?v=202610261000';
-import * as SW from './schneeball.js?v=202610261000';
-import * as LI from './lichtung.js?v=202610261000';
-import * as CB from './christbaum.js?v=202610261000';
-import * as SB from './schlitten.js?v=202610261000';
-import * as EB from './schlittschuh.js?v=202610261000';
-import * as BS from './backstube.js?v=202610261000';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610261000';
+import * as C from './config.js?v=202610261400';
+import * as S from './spiel.js?v=202610261400';
+import * as Z from './zeit.js?v=202610261400';
+import * as T from './ton.js?v=202610261400';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610261400';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610261400';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610261400';
+import * as A from './auftraege.js?v=202610261400';
+import * as E from './erfolge.js?v=202610261400';
+import * as ZL from './ziele.js?v=202610261400';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610261400';
+import * as KA from './karte.js?v=202610261400';
+import { zeigeRueckblick } from './ereignis.js?v=202610261400';
+import { barbaraZweig } from './szene.js?v=202610261400';
+import * as SW from './schneeball.js?v=202610261400';
+import * as LI from './lichtung.js?v=202610261400';
+import * as CB from './christbaum.js?v=202610261400';
+import * as SB from './schlitten.js?v=202610261400';
+import * as EB from './schlittschuh.js?v=202610261400';
+import * as BS from './backstube.js?v=202610261400';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610261400';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -1736,6 +1736,20 @@ function rufKarte() {
   return z;
 }
 
+/**
+ * Braucht eine Aufgabe ein Getränk, das gerade nicht im Angebot steht? (26.10., Testbericht:
+ * Neues verdrängt das Günstigste von selbst - Sophias Sternenpunsch oder Hildes Kinderpunsch
+ * bestellte dann niemand mehr, und nichts sagte, warum.) Hinweis mit Knopf zum Angebot.
+ */
+function angebotHinweis(id) {
+  if (!id || S.aufKarte(id)) return null;
+  const z = el('div', 'hinweis-kasten angebot-hinweis', `<span>${C.PRODUKT[id].name} steht gerade nicht in deinem Angebot - so bestellt es niemand.</span>`);
+  const k = el('button', 'k k--neben', 'Angebot öffnen');
+  k.onclick = () => { T.spiele('klick'); schliesseBlatt(); zeigeStandkarte(); };
+  z.appendChild(k);
+  return z;
+}
+
 /** Bitte eines Stammgastes (17.10.): Text, Aufgabe mit Balken, Abholen → Dank. */
 function bitteKarte() {
   const b = A.bitte();
@@ -1758,6 +1772,9 @@ function bitteKarte() {
     fenster(e.name, `<p>„${e.dank}“</p><p class="bonus">+ ${S.formatGeld(e.lohn)}</p>`, [{ text: 'Schön!' }]);
   };
   z.querySelector('.bitte-knopf').appendChild(k);
+  const d = A.bitteDef(b);
+  const hw = d.art === 'getraenk' && !b.abgeholt && !fertig ? angebotHinweis(d.p) : null;
+  if (hw) z.querySelector('.bitte-fuss').appendChild(hw);
   return z;
 }
 /**
@@ -1857,6 +1874,9 @@ export function oeffneAuftraege(reiter) {
     };
     z.appendChild(k);
     liste.appendChild(z);
+    // Wer die Sorte heute selbst aus dem Angebot genommen hat (26.10.)
+    const hw = a.typ === 'produkt' && !a.abgeholt && !A.fertig(a) ? angebotHinweis(a.param) : null;
+    if (hw) liste.appendChild(hw);
   });
   liste.appendChild(el('p', 'klein', S.aufsicht()
     ? 'Morgen gibt es neue Aufträge. Es zählt, was am Tresen passiert, während du da bist - Besonderes nur, wenn du selbst bedienst.'

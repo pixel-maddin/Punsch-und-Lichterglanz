@@ -1323,6 +1323,10 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* .bs-intro entfällt (24.10.): Erklärung der Baumschule über erklaerung() */
 /* Hinweis im Fenster, z. B. Meisenknödel ohne Futterhaus (23.10.) */
 .hinweis-kasten { margin: calc(var(--px) * 2) 0; padding: calc(var(--px) * 2.4) calc(var(--px) * 3); border: calc(var(--px) * 0.6) solid var(--gold); border-radius: calc(var(--px) * 2); background: #fff6d4; font-size: var(--t-klein); text-align: left; }
+/* 26.10.: Getränk einer Aufgabe steht nicht im Angebot - Satz links, Knopf rechts */
+.angebot-hinweis { display: flex; align-items: center; gap: calc(var(--px) * 2); }
+.angebot-hinweis span { flex: 1; min-width: 0; }
+.angebot-hinweis .k { flex: none; }
 
 /* Minispiel-Special (24.10.): goldener Streifen im Startfenster */
 .special-streifen {

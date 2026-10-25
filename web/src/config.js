@@ -179,8 +179,13 @@ export const OFFLINE_JE_TAG = {
   stunden: [2, 2.5, OFFLINE_MAX_H],
 };
 export const INAKTIV_AB = 300;       // s ohne dich - bis dahin arbeiten sie voll weiter
-export const OFFLINE_AB = 3600;      // s weg, ab denen die Wichtel abrechnen (18.10.: war 15 s - jede kurze Pause gab eine Meldung, jetzt erst nach einer Stunde)
-export const OFFLINE_FENSTER = 300;  // kürzer weg: nur eine Einblendung statt Fenster
+// 26.10. (Testbericht): Bis dahin rechneten die Wichtel erst ab einer Stunde ab - wer alle
+// 30-50 Minuten reinschaute, bekam für die Zeit dazwischen NICHTS. Jetzt zählt jede Pause
+// ab einer Minute; gemeldet wird erst ab 10 Minuten (18.10.: jede kurze Pause gab eine
+// Meldung), die Kiste kommt ab einer Stunde.
+export const OFFLINE_AB = 60;          // s weg, ab denen die Wichtel abrechnen
+export const OFFLINE_MELDUNG = 600;    // ab so lange weg: Einblendung „Die Wichtel haben weitergearbeitet“ (kürzer: still)
+export const OFFLINE_FENSTER = 3600;   // ab so lange weg: die Kiste statt direkt gutschreiben
 
 // typ: Aussehen und Verhalten. gewicht nur für normale Gäste.
 export const GAESTE = {

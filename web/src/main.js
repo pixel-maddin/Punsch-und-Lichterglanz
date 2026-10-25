@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610261000';
-import * as S from './spiel.js?v=202610261000';
-import * as Z from './zeit.js?v=202610261000';
-import * as T from './ton.js?v=202610261000';
-import * as LI from './lichtung.js?v=202610261000';
-import * as CB from './christbaum.js?v=202610261000';
-import * as KA from './karte.js?v=202610261000';
-import * as SB from './schlitten.js?v=202610261000';
-import * as EB from './schlittschuh.js?v=202610261000';
-import * as BS from './backstube.js?v=202610261000';
-import * as UI from './ui.js?v=202610261000';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610261000';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610261000';
-import * as Kacheln from './kacheln.js?v=202610261000';
-import * as Lernen from './lernen.js?v=202610261000';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610261000';
-import * as A from './auftraege.js?v=202610261000';
-import * as E from './erfolge.js?v=202610261000';
-import * as ZL from './ziele.js?v=202610261000';
+import * as C from './config.js?v=202610261400';
+import * as S from './spiel.js?v=202610261400';
+import * as Z from './zeit.js?v=202610261400';
+import * as T from './ton.js?v=202610261400';
+import * as LI from './lichtung.js?v=202610261400';
+import * as CB from './christbaum.js?v=202610261400';
+import * as KA from './karte.js?v=202610261400';
+import * as SB from './schlitten.js?v=202610261400';
+import * as EB from './schlittschuh.js?v=202610261400';
+import * as BS from './backstube.js?v=202610261400';
+import * as UI from './ui.js?v=202610261400';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610261400';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610261400';
+import * as Kacheln from './kacheln.js?v=202610261400';
+import * as Lernen from './lernen.js?v=202610261400';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610261400';
+import * as A from './auftraege.js?v=202610261400';
+import * as E from './erfolge.js?v=202610261400';
+import * as ZL from './ziele.js?v=202610261400';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -228,8 +228,8 @@ function ankommen(erstesMal) {
   const off = S.offlineAbrechnen();
   const meldungen = [];
   if (neueSaison) meldungen.push(['Eine neue Adventszeit!', `<p>Das Haus ist wieder kahl und grau - Zeit, es erneut herzurichten.</p>${S.st.andenken ? `<p class="bonus">★ ${S.st.andenken} Andenken aus früheren Jahren</p>` : ''}`]);
-  if (off && off.betrag > 0 && off.sek < C.OFFLINE_FENSTER) {
-    // Kurz weg (Handy gesperrt, App gewechselt): kein Fenster, nur ein Hinweis
+  if (off && off.betrag > 0 && off.sek >= C.OFFLINE_MELDUNG && off.sek < C.OFFLINE_FENSTER) {
+    // Eine Weile weg: kein Fenster, nur ein Hinweis (ganz kurz weg: still gutgeschrieben)
     UI.toast(`Die Wichtel haben weitergearbeitet: +${S.formatGeld(off.betrag)}`, 'gut');
   }
   // Länger weg: die Kiste (auch eine, die beim letzten Mal ungeöffnet blieb)

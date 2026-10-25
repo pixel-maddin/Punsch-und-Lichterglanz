@@ -23,13 +23,13 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610261000';
-import * as S from './spiel.js?v=202610261000';
-import * as A from './auftraege.js?v=202610261000';
-import * as E from './erfolge.js?v=202610261000';
-import * as Z from './ziele.js?v=202610261000';
-import * as KA from './karte.js?v=202610261000';
-import { zellePos } from './tresen.js?v=202610261000';
+import * as C from './config.js?v=202610261400';
+import * as S from './spiel.js?v=202610261400';
+import * as A from './auftraege.js?v=202610261400';
+import * as E from './erfolge.js?v=202610261400';
+import * as Z from './ziele.js?v=202610261400';
+import * as KA from './karte.js?v=202610261400';
+import { zellePos } from './tresen.js?v=202610261400';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -391,7 +391,10 @@ export function update(dt, blockiert) {
   // ist genau dann erfüllt, wenn die Karte offen ist - und dann blockiert sie.
   // Ohne diese Prüfung galt der Hinweis nie als erledigt und kam nach jedem
   // Schließen der Karte wieder (bei `lang` für immer).
-  if (blockiert && st.lernen >= 99 && aktuell && aktuell.gelesen !== false && aktuell.h.fertig && !aktuell.h.ruhig && aktuell.h.fertig()) {
+  // 26.10. (Testbericht): nur, wenn die Erklärung schon mit „Weiter" GELESEN wurde. Vorher
+  // reichte `gelesen !== false` - das ist auch bei `undefined` wahr: Wer während der Blase die
+  // Zielleiste antippte und kaufte, bekam die Erklärung (etwa zum Spül-Wichtel) nie zu sehen.
+  if (blockiert && st.lernen >= 99 && aktuell && aktuell.gelesen === true && aktuell.h.fertig && !aktuell.h.ruhig && aktuell.h.fertig()) {
     st.tipps[aktuell.h.id] = true; aktuell = null; ruheT = 0; S.speichere();
   }
   if (blockiert || !st.intro) { zeige(null); aktuelleBlase = null; return; }
