@@ -5,27 +5,27 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610251300';
-import * as S from './spiel.js?v=202610251300';
-import * as Z from './zeit.js?v=202610251300';
-import * as T from './ton.js?v=202610251300';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610251300';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610251300';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610251300';
-import * as A from './auftraege.js?v=202610251300';
-import * as E from './erfolge.js?v=202610251300';
-import * as ZL from './ziele.js?v=202610251300';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610251300';
-import * as KA from './karte.js?v=202610251300';
-import { zeigeRueckblick } from './ereignis.js?v=202610251300';
-import { barbaraZweig } from './szene.js?v=202610251300';
-import * as SW from './schneeball.js?v=202610251300';
-import * as LI from './lichtung.js?v=202610251300';
-import * as CB from './christbaum.js?v=202610251300';
-import * as SB from './schlitten.js?v=202610251300';
-import * as EB from './schlittschuh.js?v=202610251300';
-import * as BS from './backstube.js?v=202610251300';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610251300';
+import * as C from './config.js?v=202610251500';
+import * as S from './spiel.js?v=202610251500';
+import * as Z from './zeit.js?v=202610251500';
+import * as T from './ton.js?v=202610251500';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610251500';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610251500';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610251500';
+import * as A from './auftraege.js?v=202610251500';
+import * as E from './erfolge.js?v=202610251500';
+import * as ZL from './ziele.js?v=202610251500';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610251500';
+import * as KA from './karte.js?v=202610251500';
+import { zeigeRueckblick } from './ereignis.js?v=202610251500';
+import { barbaraZweig } from './szene.js?v=202610251500';
+import * as SW from './schneeball.js?v=202610251500';
+import * as LI from './lichtung.js?v=202610251500';
+import * as CB from './christbaum.js?v=202610251500';
+import * as SB from './schlitten.js?v=202610251500';
+import * as EB from './schlittschuh.js?v=202610251500';
+import * as BS from './backstube.js?v=202610251500';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610251500';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -2040,6 +2040,28 @@ export function zeigeStamm(f) {
   maleStamm(box.querySelector('canvas'), f.id);
 }
 
+/**
+ * Die Geschichten eines Stammgastes nachlesen (25.10., Nutzerwunsch): Porträt, wie weit die
+ * Geschichte ist, die erzählten Sätze - und für jeden noch fehlenden eine gesperrte Zeile, damit
+ * man sieht, wie viele noch kommen. Am Ende das Abschiedsgeschenk (24.-26.12.), bis dahin verdeckt.
+ */
+function zeigeStammBuch(id) {
+  const def = C.GAESTE[id], s = C.STAMMGAESTE[id];
+  const e = (S.st.stamm || {})[id] || { n: 0 };
+  const erzaehlt = Math.min(e.n || 0, s.saetze.length), alle = s.saetze.length;
+  const zeilen = s.saetze.map((satz, i) => i < erzaehlt
+    ? `<li class="erzaehlt"><span class="nr">${i + 1}</span>„${esc(S.mitGruss(id, satz))}“</li>`
+    : `<li class="gesperrt"><span class="nr">${i + 1}</span>Noch nicht erzählt - ${i === erzaehlt ? `beim nächsten Besuch erzählt ${def.name.split(' ').pop()} weiter.` : 'spiel weiter!'}</li>`).join('');
+  const geschenk = e.geschenk
+    ? `<li class="erzaehlt geschenk"><span class="nr">★</span>${esc(s.geschenk)}</li>`
+    : `<li class="gesperrt geschenk"><span class="nr">★</span>Eine Überraschung an den Feiertagen - wenn ihr euch gut kennt.</li>`;
+  const box = fenster(def.name, `
+    <canvas class="stamm-portraet" width="${PORTRAET_W * 2}" height="${PORTRAET_H * 2}"></canvas>
+    <div class="story-stand"><span>${erzaehlt} von ${alle} Geschichten</span><div class="balken"><i style="width:${Math.round(100 * erzaehlt / alle)}%"></i></div></div>
+    <ol class="stamm-buch">${zeilen}${geschenk}</ol>`, [{ text: 'Schließen' }]);
+  maleStamm(box.querySelector('canvas'), id);
+}
+
 function baueAlbum(liste) {
   const typ = S.st.stats.typ || {}, tiere = S.st.stats.tiere || {};
   const kopf = (titel, da, alle) => liste.appendChild(el('p', 'gruppe', `${titel}: ${da} / ${alle}`));
@@ -2052,7 +2074,12 @@ function baueAlbum(liste) {
   const stamm = Object.keys(C.STAMMGAESTE);
   kopf('Stammgäste', stamm.filter((id) => S.stammBesuche(id)).length, stamm.length);
   const sg = el('div', 'album-raster');
-  for (const id of stamm) sg.appendChild(albumKarte(C.GAESTE[id].name, S.stammBesuche(id), (ctx) => figurKlein(ctx, { typ: id, farben: { ...C.GAESTE[id].farben }, phase: 0, laeuft: false }, id === 'hilde' ? 16 : 12, 22, 0), id === 'hilde' ? 28 : 24, 24, '× da gewesen'));
+  for (const id of stamm) {
+    const k = albumKarte(C.GAESTE[id].name, S.stammBesuche(id), (ctx) => figurKlein(ctx, { typ: id, farben: { ...C.GAESTE[id].farben }, phase: 0, laeuft: false }, id === 'hilde' ? 16 : 12, 22, 0), id === 'hilde' ? 28 : 24, 24, '× da gewesen');
+    // 25.10.: antippen = die Geschichten nachlesen (wer noch nie da war, bleibt ???)
+    if (S.stammBesuche(id)) { k.classList.add('tippbar'); k.onclick = () => { T.spiele('klick'); zeigeStammBuch(id); }; }
+    sg.appendChild(k);
+  }
   liste.appendChild(sg);
   // Tiere der Waldlichtung
   kopf('Tiere der Waldlichtung', ALBUM_TIERE.filter(([a]) => tiere[a] || (!S.st.stats.tiere && S.miniRekord('lichtung') > 0 && ALBUM_TIERE_ALT.includes(a))).length, ALBUM_TIERE.length);

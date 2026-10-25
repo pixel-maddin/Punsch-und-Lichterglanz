@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610251300';
-import * as Z from './zeit.js?v=202610251300';
-import { neueFarben } from './pixel.js?v=202610251300';
+import * as C from './config.js?v=202610251500';
+import * as Z from './zeit.js?v=202610251500';
+import { neueFarben } from './pixel.js?v=202610251500';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -847,7 +847,7 @@ function stammFaellig() {
   return zufallGewichtet(dran, ([, s]) => (h >= s.von && h < s.bis ? C.STAMM_LIEBLING : 1))[0];
 }
 /** Begrüßung passend zur Uhrzeit (17.10.) - ersetzt {gruss} im ersten Satz. */
-function mitGruss(id, satz) {
+export function mitGruss(id, satz) {
   if (!satz.includes('{gruss}')) return satz;
   const h = Z.jetzt().getHours();
   const i = h >= 5 && h < 11 ? 0 : h >= 11 && h < 17 ? 1 : h >= 17 && h < 22 ? 2 : 3;
@@ -1174,8 +1174,15 @@ export const wichtelWartezeit = () => chefAktiv() ? C.WICHTEL_WARTEN : C.WICHTEL
  * Tresen - aber keine besonderen Gäste und Großbestellungen (Sache des
  * Chefs) und keinen, für den schon ein Glas auf dem Tablett steht.
  */
+/**
+ * Wen bedienst NUR du? Großbestellungen, Ansturm-Gäste, goldene Gäste und alle besonderen
+ * (Weihnachtsmann, Rentier, Schneemann, Grummel und die Stammgäste). Die eine Stelle dafür
+ * (25.10.: vorher stand die Regel nur hier im Filter - ein vom Wichtel eingeschenktes Glas
+ * servierte er nach der Wartezeit trotzdem selbst, auch einem besonderen Gast).
+ */
+export const nurVonHand = (g) => !!(g.gross || g.ansturm || g.gold || C.GAESTE[g.typ].spezial);
 function servierKandidat() {
-  return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !x.gross && !x.ansturm && !x.gold && !C.GAESTE[x.typ].spezial && verfuegbar(x.wunsch)
+  return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !nurVonHand(x) && verfuegbar(x.wunsch)
     && !lauf.hand.some((h) => h.fuer === x.id))
     .sort((a, b) => a.geduld - b.geduld)[0] || null;
 }
@@ -1532,7 +1539,7 @@ export function update(dt) {
         // länger keiner, kippt der Wichtel es weg - sonst stand das Tablett
         // irgendwann voll, und Spül- und Servier-Wichtel kamen nicht mehr
         // dran (gemeldet 13.10.: Wichtel füllen nicht mehr nach).
-        const neu = G.find((x) => x.am && !x.bedient && !x.gehen && x.wunsch === h.id && !lauf.hand.some((o) => o.fuer === x.id));
+        const neu = G.find((x) => x.am && !x.bedient && !x.gehen && !nurVonHand(x) && x.wunsch === h.id && !lauf.hand.some((o) => o.fuer === x.id));
         if (neu) { h.fuer = neu.id; h.wartetT = 0; h.liegtT = 0; continue; }
         h.fuer = null;
         h.liegtT = (h.liegtT || 0) + dt;
@@ -1540,7 +1547,8 @@ export function update(dt) {
         continue;
       }
       h.wartetT = (h.wartetT || 0) + dt;
-      if (h.wartetT >= wichtelWartezeit()) {
+      // Besondere Gäste serviert er nie selbst - das Glas wartet auf deinen Tipp
+      if (h.wartetT >= wichtelWartezeit() && !nurVonHand(g)) {
         lauf.hand.splice(i, 1);
         bediene(g, true, h.extraFertig ? 1 + (C.PRODUKT[h.id].bonus || C.EXTRA_BONUS) : 1);
       }

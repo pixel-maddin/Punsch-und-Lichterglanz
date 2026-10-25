@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610251300';
-import * as Z from './zeit.js?v=202610251300';
-import * as S from './spiel.js?v=202610251300';
-import { FASSADEN } from './config.js?v=202610251300';
-import * as C from './config.js?v=202610251300';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610251500';
+import * as Z from './zeit.js?v=202610251500';
+import * as S from './spiel.js?v=202610251500';
+import { FASSADEN } from './config.js?v=202610251500';
+import * as C from './config.js?v=202610251500';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -97,7 +97,7 @@ function himmel(c, G, w, t) {
     const sx = 16 + w.li.sonne * 148, sy = horizont - 8 - Math.sin(Math.max(0, Math.min(1, w.li.sonne)) * Math.PI) * (horizont - 40);
     const f = w.li.daemmer > 0.2 ? '#ffc070' : '#fff6c8';
     r(c, sx - 3, sy - 2, 7, 5, f); r(c, sx - 2, sy - 3, 5, 7, f);
-  } else if (w.dunkel > 0.5) mond(c, 146, 34, w.mond, oben);
+  } else if (w.dunkel > 0.5) mond(c, 128, 37, w.mond, oben);   // 25.10.: war 146/34 - hing am Knopf „Angebot" (iPhone)
   // Wolken
   if (w.wetter.art !== 'klar' || herbst) {
     const wf = mische('#1c2040', herbst ? '#b4b8ba' : '#e8eef4', hell);

@@ -1359,3 +1359,13 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   font: inherit; font-size: var(--t-text); color: var(--text2); cursor: pointer;
 }
 .anl-mehr .rezeptbuch { margin-top: calc(var(--px) * 1); }
+
+/* Stammgast-Geschichten zum Nachlesen (Album, 25.10.) */
+#modal .stamm-buch { list-style: none; margin: calc(var(--px) * 2) 0 0; padding: 0; text-align: left; max-height: calc(var(--px) * 150); overflow-y: auto; }
+#modal .stamm-buch li { display: flex; gap: calc(var(--px) * 2); padding: calc(var(--px) * 1.4) calc(var(--px) * 1); border-bottom: calc(var(--px) * 0.4) solid #e6d4ac; font-size: var(--t-text); line-height: 1.35; }
+#modal .stamm-buch li:last-child { border-bottom: none; }
+#modal .stamm-buch .nr { flex: none; width: calc(var(--px) * 6); color: #b8862a; font-weight: bold; text-align: right; }
+#modal .stamm-buch .erzaehlt { font-style: italic; }
+#modal .stamm-buch .gesperrt { color: var(--text3); }
+#modal .stamm-buch .gesperrt::after { content: '🔒'; margin-left: auto; padding-left: calc(var(--px) * 1); opacity: 0.6; }
+#modal .stamm-buch .geschenk.erzaehlt { font-style: normal; color: #8a5a10; }
