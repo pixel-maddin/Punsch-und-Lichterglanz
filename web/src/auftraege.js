@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610261400';
-import * as S from './spiel.js?v=202610261400';
-import * as Z from './zeit.js?v=202610261400';
+import * as C from './config.js?v=202610261500';
+import * as S from './spiel.js?v=202610261500';
+import * as Z from './zeit.js?v=202610261500';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -32,7 +32,18 @@ const LEICHT = ['bediene', 'produkt', 'kinder', 'omas'];
 const MITTEL = ['bediene', 'produkt', 'kinder', 'omas', 'eilig', 'schwung', 'stoss', 'gold'];
 const SCHWER = ['bediene', 'produkt', 'eilig', 'schwung', 'spezial', 'stoss', 'gold'];
 
-function zufall(seed) { let n = seed; return () => { n = (n * 1103515245 + 12345) & 0x7fffffff; return n / 0x7fffffff; }; }
+// 26.10. (Testbericht): vorher `n * 1103515245` in normaler Zahl - das liegt über 2^53, die unteren
+// Bits gingen verloren, und der erste Wert hatte nur 8 Stufen (leichte Aufträge fast nur „Bediene"
+// und „Kinder", „Verkaufe" fast immer dieselbe Sorte). Jetzt mulberry32 mit Math.imul (32 Bit genau).
+function zufall(seed) {
+  let n = seed >>> 0;
+  return () => {
+    n = (n + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(n ^ (n >>> 15), n | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 /** Einnahmen je Minute, grob: damit der Lohn mit dem Spiel mitwächst. */
 function proMinute() { return S.einnahmenProMinute(); }
@@ -43,7 +54,7 @@ function lohnMinuten(stufe) {
 }
 
 function erzeuge(tag) {
-  const z = zufall([...tag].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7));
+  const z = zufall([...tag].reduce((a, ch) => (Math.imul(a, 31) + ch.charCodeAt(0)) | 0, 7));
   const liste = [];
   const benutzt = new Set();
   [LEICHT, MITTEL, SCHWER].forEach((pool, stufe) => {
