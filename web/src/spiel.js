@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610242300';
-import * as Z from './zeit.js?v=202610242300';
-import { neueFarben } from './pixel.js?v=202610242300';
+import * as C from './config.js?v=202610251000';
+import * as Z from './zeit.js?v=202610251000';
+import { neueFarben } from './pixel.js?v=202610251000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -75,6 +75,12 @@ function laden() {
       // Seit dem Einstieg in Wellen (11.10.) hingen sonst Händler, Gäste und
       // Nikolaus für solche Spieler für immer an Spieltag 0.
       if (!('startTag' in alt) && alt.intro) stand.startTag = null;
+      // 25.10. (gemeldet: „Markt in 4 Tagen", jeden Tag wieder): Wer zwischen 01.10. und 11.10.
+      // geladen hat, bekam startTag 0 aus neuerStand() GESPEICHERT - die Reparatur oben greift
+      // nur, wenn der Eintrag fehlt. Spieltag blieb 0, der Markt-Anker wanderte täglich mit.
+      // Wer schon losgespielt hat (intro), hat nie legitim 0 (setzeStartTag kommt mit intro).
+      // Dann wie ein alter Stand behandeln, und der erste Markt ist gleich heute.
+      if (alt.intro && alt.startTag === 0) { stand.startTag = null; stand.marktHeilen = true; }
       // Minispiele kommen seit 10.10. nach und nach. Wer die Karte schon
       // vorher kannte, hatte alle fünf - ihm verschwindet keins. Erkannt an der
       // fehlenden Marke `miniStaffel` (nicht an `miniGemeldet`: das hat die
@@ -1652,6 +1658,8 @@ function marktStand() {
   // jemand nach dem Markt fragt - das war das erste Öffnen der Karte und
   // konnte auch Tag 2 sein. Alte Spielstände (spieltag 99): heute.
   const sp = spieltag();
+  // Reparierter Stand (startTag war 0, siehe laden()): Takt neu, erster Markt heute
+  if (st.marktHeilen) { delete st.marktHeilen; st.markt = { anker: tagNr() - C.MARKT_ERST, seed: (st.markt && st.markt.seed) || Math.floor(Math.random() * 1e6), besucht: 0, angesagt: 0 }; }
   if (!st.markt) st.markt = { anker: tagNr() - (sp < 99 ? sp : 0), seed: Math.floor(Math.random() * 1e6), besucht: 0, angesagt: 0 };
   // Anker immer aus dem ersten Spieltag (22.10.): Wer den Markt früher morgens
   // vor der Startuhrzeit zum ersten Mal abfragte, hatte ihn einen Tag zu spät
