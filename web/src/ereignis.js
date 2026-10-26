@@ -4,14 +4,14 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610261700';
-import * as S from './spiel.js?v=202610261700';
-import * as T from './ton.js?v=202610261700';
-import * as Z from './zeit.js?v=202610261700';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610261700';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610261700';
-import { schriftBild } from './schrift.js?v=202610261700';
-import { fenster, karte } from './ui.js?v=202610261700';
+import * as C from './config.js?v=202610271000';
+import * as S from './spiel.js?v=202610271000';
+import * as T from './ton.js?v=202610271000';
+import * as Z from './zeit.js?v=202610271000';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610271000';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610271000';
+import { schriftBild } from './schrift.js?v=202610271000';
+import { fenster, karte } from './ui.js?v=202610271000';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -326,7 +326,7 @@ export function zeigeAdvent(n, danach) {
     <p>${e.text}</p>
     ${neu.length ? `<p class="bonus">Neu freigeschaltet: ${neu.join(', ')}</p>` : ''}
     ${Z.adventssonntag() === n ? '<p class="klein">Heute, am Adventssonntag, kommen besonders viele Gäste.</p>' : ''}
-    ${n === 3 && Z.adventKerzen() === 3 && S.spieltag() + 7 >= C.WETTBEWERB.abSpieltag ? '<p class="bonus">Am 4. Advent kürt das Dorf das schönste Haus - schmück, was das Zeug hält!</p>' : ''}`,
+    ${n === 3 && Z.adventKerzen() === 3 && S.wettbewerbInTagen() != null && S.spieltag() + S.wettbewerbInTagen() >= C.WETTBEWERB.abSpieltag ? `<p class="bonus">Am ${C.WETTBEWERB.tag}. Dezember kürt das Dorf das schönste Haus - schmück, was das Zeug hält!</p>` : ''}`,
   [{ text: 'Wunderbar!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
   BILDER[e.bild](bildKontext(box));
 }
@@ -407,7 +407,7 @@ export function zeigeJuryAnsage(danach) {
   S.juryAngesagt();
   const s = S.stimmung();
   T.spiele('spezial');
-  const wann = tage === 1 ? 'morgen' : `in ${tage} Tagen (am 4. Advent)`;
+  const wann = tage === 1 ? 'morgen' : `in ${tage} Tagen (am ${C.WETTBEWERB.tag}. Dezember)`;
   const stufen = [...C.WETTBEWERB.plaetze].reverse().map((pl) => s >= pl.ab
     ? `<li><b>${pl.name}</b> ab ♥ ${pl.ab} - schon geschafft!</li>`
     : `<li><b>${pl.name}</b> ab ♥ ${pl.ab} - noch ♥ ${(pl.ab - s).toLocaleString('de-DE')}</li>`).join('');

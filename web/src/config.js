@@ -1109,6 +1109,13 @@ export const VOGEL_BLEIBT = [7, 14];  // s am Futterhaus
 export const VOGEL_MAX = 3;           // gleichzeitig
 export const VOGEL_STERNE = 20;       // Antippen im Futterhaus-Fenster, einmal je Besuch; je Art `sterne` in VOEGEL (21.10.: mindestens 20, seltener = mehr)
 export const GUCK_STERNE = 100;       // Vogel, der selten aus dem Flugloch schaut: einmal antippen (19.10.)
+// 27.10. (gemeldet: „am Ende zu wenig"): Die festen Beträge wachsen jetzt mit dem Stand mit -
+// je Stern aus `sterne` VOGEL_MINUTEN_JE_STERN Minuten Einnahmen (Spatz 20 → 0,1 min, Seidenschwanz
+// 150 → 0,75 min), der Gucker GUCK_MINUTEN. Die festen Werte bleiben die Untergrenze. Grob gerechnet
+// bringt ein offenes Futterhaus-Fenster dann etwa 0,7 Minuten Einnahmen je Minute - das Spiel steht
+// solange, der Stand verdient nichts, also kein Ersatz fürs Bedienen.
+export const VOGEL_MINUTEN_JE_STERN = 1 / 200;
+export const GUCK_MINUTEN = 0.3;
 export const KNOEDEL_SELTEN = 2;
 
 // Der eigene Schneemann (11.10.): ab dem ersten Schnee auf dem Gehweg links.
@@ -1134,6 +1141,9 @@ export const WETTBEWERB = {
   lohn: [30, 20, 12, 6],     // Gold, Silber, Bronze, Urkunde
   lohnMin: 2000,
   abSpieltag: 4,
+  tag: 23,   // 27.10. (Nutzerwunsch): Die Jury kommt am 23.12. (vorher am 4. Advent). Schwellen unverändert -
+             // gemessen waren sie am 20.12., drei Tage mehr Deko machen es also etwas leichter
+
 };
 
 // Silvester (11.10.): ab 18 Uhr am 31.12. Feuerwerk über dem Dorf, dazu der

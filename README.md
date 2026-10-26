@@ -294,7 +294,7 @@ Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
   Heiligabend spielt (bis zum 6. Januar), bekommt es nachgereicht. Den
   Rückblick gibt es danach auch im Menü.
 - **Das schönste Haus im Dorf:** Ab dem 3. Advent wird es angekündigt, am
-  4. Advent kommt die Jury. Je nach Stimmung gibt es Gold, Silber oder
+  23. Dezember kommt die Jury. Je nach Stimmung gibt es Gold, Silber oder
   Bronze (oder eine Urkunde), Sterne und eine Plakette an der Hauswand.
   Wer erst seit ein paar Tagen spielt, ist noch nicht dabei.
 - **Silvester:** Ab 18 Uhr steigen Raketen über dem Dorf, um Mitternacht das

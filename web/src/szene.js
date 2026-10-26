@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610261700';
-import * as Z from './zeit.js?v=202610261700';
-import * as S from './spiel.js?v=202610261700';
-import { FASSADEN } from './config.js?v=202610261700';
-import * as C from './config.js?v=202610261700';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610271000';
+import * as Z from './zeit.js?v=202610271000';
+import * as S from './spiel.js?v=202610271000';
+import { FASSADEN } from './config.js?v=202610271000';
+import * as C from './config.js?v=202610271000';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -3076,10 +3076,12 @@ function voegel(c, GW, t, L) {
     if (v.t < FLUG) {
       // Anflug von der Seite, in einem flachen Bogen
       const k = v.t / FLUG, e = k * k * (3 - 2 * k), sx = v.links ? -8 : 188;
-      x = sx + (zx - sx) * e; y = zy - 30 * (1 - e) - Math.sin(k * Math.PI) * 6; fliegt = true; links = !v.links;
+      x = sx + (zx - sx) * e; y = zy - 30 * (1 - e) - Math.sin(k * Math.PI) * 6; fliegt = true; links = zx < sx;   // Blick in Flugrichtung
     } else if (v.t > v.bleibt) {
       const k = Math.min(1, (v.t - v.bleibt) / FLUG), e = k * k, ex = v.links ? 190 : -10;
-      x = zx + (ex - zx) * e; y = zy - 40 * e; fliegt = true; links = v.links;
+      // 27.10. (gemeldet: Blickrichtung stimmt nur in eine Richtung): Wer von links kam (v.links), fliegt nach
+      // RECHTS weg - Blick also nach rechts. Vorher `links = v.links`: beim Abflug flog jeder Vogel rückwärts
+      x = zx + (ex - zx) * e; y = zy - 40 * e; fliegt = true; links = ex < zx;
     }
     const pickt = !fliegt && Math.sin(v.t * 5 + v.platz) > 0.6;
     zeichneVogel(c, Math.round(x), Math.round(y), v.art, { links, fliegt, fluegel: Math.floor(t * (v.art === 'waldkauz' ? 6 : 14)) % 2, pickt: pickt && v.art !== 'waldkauz', t, L });

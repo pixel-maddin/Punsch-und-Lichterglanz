@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610261700';
-import * as Z from './zeit.js?v=202610261700';
-import { neueFarben } from './pixel.js?v=202610261700';
+import * as C from './config.js?v=202610271000';
+import * as Z from './zeit.js?v=202610271000';
+import { neueFarben } from './pixel.js?v=202610271000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2453,18 +2453,20 @@ export function vogelAntippen(b) {
   if (!b || b.belohnt || b.t < 1.2 || b.t > b.bleibt) return 0;   // nur solange er sitzt
   b.belohnt = true;
   const v = C.VOEGEL.find((q) => q.id === b.art);
-  const betrag = (v && v.sterne) || C.VOGEL_STERNE;
+  const basis = (v && v.sterne) || C.VOGEL_STERNE;
+  const betrag = zehner(Math.max(basis, einnahmenProMinute() * basis * C.VOGEL_MINUTEN_JE_STERN) * dev.geld);   // 27.10.: wächst mit
   verdiene(betrag);
   speichere();
   return betrag;
 }
-/** Der Vogel im Flugloch angetippt (19.10.): einmal C.GUCK_STERNE. */
+/** Der Vogel im Flugloch angetippt (19.10.): einmal GUCK_MINUTEN Einnahmen, mindestens C.GUCK_STERNE. */
 export function guckVogelAntippen(g) {
   if (!g || g.belohnt || !g.sichtbar) return 0;
   g.belohnt = true;
-  verdiene(C.GUCK_STERNE);
+  const betrag = zehner(Math.max(C.GUCK_STERNE, einnahmenProMinute() * C.GUCK_MINUTEN) * dev.geld);
+  verdiene(betrag);
   speichere();
-  return C.GUCK_STERNE;
+  return betrag;
 }
 /** Auch vom Futterhaus-Fenster aufgerufen: dort steht das Spiel, aber die Vögel kommen und gehen weiter. */
 export function vogelTakt(dt) {
@@ -2533,21 +2535,23 @@ export function baueSchneekatze() {
 }
 
 // ---------------------------------------------------------------------------
-// Das schönste Haus im Dorf (11.10.): die Jury am 4. Advent
+// Das schönste Haus im Dorf (11.10.): die Jury - seit 27.10. am 23.12. (C.WETTBEWERB.tag, Nutzerwunsch;
+// vorher am 4. Advent, je nach Jahr schon am 18.-24.12.). Am 24. wird sie noch nachgeholt.
 // ---------------------------------------------------------------------------
 export function wettbewerbFaellig() {
   if (st.lernen < 99 || DEMO) return false;
   if (st.wettbewerb && st.wettbewerb.saison === Z.saison()) return false;
-  if (Z.adventKerzen() < 4 || Z.dezemberTag() > 24) return false;
+  const dt = Z.dezemberTag();
+  if (dt < C.WETTBEWERB.tag || dt > 24) return false;
   return spieltag() >= C.WETTBEWERB.abSpieltag;
 }
-/** Vor dem 4. Advent: in wie vielen Tagen kommt die Jury? (null = nicht dabei) */
+/** Ab dem 3. Advent: in wie vielen Tagen kommt die Jury? (null = nicht dabei / schon vorbei) */
 export function wettbewerbInTagen() {
-  if (st.lernen < 99 || Z.adventKerzen() !== 3 || Z.dezemberTag() > 24) return null;
-  const d = Z.jetzt(), n = 7 - d.getDay();   // bis zum nächsten Sonntag
-  return n === 7 ? 0 : n;
+  const dt = Z.dezemberTag();
+  if (st.lernen < 99 || Z.adventKerzen() < 3 || dt > C.WETTBEWERB.tag) return null;
+  return C.WETTBEWERB.tag - dt;
 }
-/** Jury-Ansage als Fenster (25.10.): einmal je Saison, ab 4 Tage vor dem 4. Advent. */
+/** Jury-Ansage als Fenster (25.10.): einmal je Saison, ab 4 Tage vor dem Jury-Tag. */
 export const juryAnsageFaellig = () => {
   const n = wettbewerbInTagen();
   return n != null && n >= 1 && n <= 4 && st.juryAnsage !== Z.saison() && spieltag() + n >= C.WETTBEWERB.abSpieltag;

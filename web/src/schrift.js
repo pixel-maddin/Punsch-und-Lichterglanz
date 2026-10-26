@@ -86,6 +86,8 @@ function hash(n) { const s = Math.sin(n * 91.3 + 7.1) * 43758.5453; return s - M
 
 const cache = new Map();
 /** Text als Canvas in der Weihnachtsschrift. Wird je (Text, Stil, k) gemerkt. */
+/** Kann die Schrift dieses Zeichen? (27.10., für den Gruß auf der Weihnachtskarte) */
+export const kannSchrift = (ch) => !!G[String(ch).toUpperCase()];
 export function schriftBild(text, stil = 'gold', k = 1) {
   text = String(text).toUpperCase();
   const schl = `${text}|${stil}|${k}`;

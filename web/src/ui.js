@@ -5,27 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610261700';
-import * as S from './spiel.js?v=202610261700';
-import * as Z from './zeit.js?v=202610261700';
-import * as T from './ton.js?v=202610261700';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610261700';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610261700';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610261700';
-import * as A from './auftraege.js?v=202610261700';
-import * as E from './erfolge.js?v=202610261700';
-import * as ZL from './ziele.js?v=202610261700';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610261700';
-import * as KA from './karte.js?v=202610261700';
-import { zeigeRueckblick } from './ereignis.js?v=202610261700';
-import { barbaraZweig } from './szene.js?v=202610261700';
-import * as SW from './schneeball.js?v=202610261700';
-import * as LI from './lichtung.js?v=202610261700';
-import * as CB from './christbaum.js?v=202610261700';
-import * as SB from './schlitten.js?v=202610261700';
-import * as EB from './schlittschuh.js?v=202610261700';
-import * as BS from './backstube.js?v=202610261700';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610261700';
+import * as C from './config.js?v=202610271000';
+import * as S from './spiel.js?v=202610271000';
+import * as Z from './zeit.js?v=202610271000';
+import * as T from './ton.js?v=202610271000';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271000';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610271000';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271000';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271000';
+import * as A from './auftraege.js?v=202610271000';
+import * as E from './erfolge.js?v=202610271000';
+import * as ZL from './ziele.js?v=202610271000';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271000';
+import * as KA from './karte.js?v=202610271000';
+import { zeigeRueckblick } from './ereignis.js?v=202610271000';
+import { barbaraZweig } from './szene.js?v=202610271000';
+import * as SW from './schneeball.js?v=202610271000';
+import * as LI from './lichtung.js?v=202610271000';
+import * as CB from './christbaum.js?v=202610271000';
+import * as SB from './schlitten.js?v=202610271000';
+import * as EB from './schlittschuh.js?v=202610271000';
+import * as BS from './backstube.js?v=202610271000';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271000';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -2833,6 +2834,27 @@ function kartenSchrift(c, text, x, y, groesse, stil, farbe, umriss, maxB) {
   c.fillText(text, x, y);
 }
 
+/**
+ * Der Gruß oben im Himmel des Kartenbilds (27.10.), in der Weihnachtsschrift der Minispiele
+ * (schrift.js: Kontur, Schneekappe, Funkeln). Pixelgenau: k = 2 doppelt gezogen, für lange
+ * Grüße k = 1 dreifach bzw. doppelt. Zeichen, die die Schrift nicht kann, werden umschrieben
+ * (ß → SS, & → UND, … → ...) oder fallen weg.
+ */
+function grussImHimmel(c, gruss, rand, bildB, stil) {
+  const t = String(gruss).replace(/ß/g, 'ss').replace(/&/g, 'und').replace(/…/g, '...')
+    .split('').filter((ch) => kannSchrift(ch)).join('').replace(/\s+/g, ' ').trim();
+  if (!t) return;
+  // So groß wie es passt: k = 2 vier-, drei- oder zweifach, sonst k = 1 drei- oder zweifach
+  const maxB = bildB - 40;
+  let bild = schriftBild(t, stil, 2), s = [4, 3, 2].find((n) => bild.width * n <= maxB);
+  if (!s) { bild = schriftBild(t, stil, 1); s = bild.width * 3 <= maxB ? 3 : 2; }
+  const w = bild.width * s, h = bild.height * s;
+  c.save();
+  c.imageSmoothingEnabled = false;
+  c.drawImage(bild, Math.round(rand + (bildB - w) / 2), rand + 22, w, h);
+  c.restore();
+}
+
 /** Eigener Kartentext: Gruß und Grußzeile. Datum und Hausname bleiben fest. */
 function kartenText(nr, ohneLeute, gruss) {
   const k = S.st.karteText || {};
@@ -2860,7 +2882,9 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   // Ab Heiligabend ist die Festtagskarte die erste, die man sieht
   if (rahmenNr == null && S.heiligabendJetzt()) rahmenNr = 'heilig';
   const heilig = rahmenNr === 'heilig';
-  const rand = 44, unten = heilig ? 226 : 190;
+  // 27.10. (Nutzerwunsch: „oben zu viel Himmel"): Der Gruß steht jetzt in der Weihnachtsschrift oben
+  // im Himmel des Bildes - unten bleiben nur Grußzeile und Datum, der Streifen ist dafür schmaler
+  const rand = 44, unten = heilig ? 168 : 128;
   const cv = document.createElement('canvas');
   cv.width = 180 * SK + rand * 2; cv.height = WG * SK + rand + unten;
   // Im Hauptspeicher malen, nicht auf der Grafikkarte: Fürs PNG muss das Bild
@@ -2879,14 +2903,14 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   if (!festerGruss && !eigen.gruss && Z.phase() === 'weihnacht' && Z.jetzt().getMonth() === 11 && Z.jetzt().getDate() >= 27) gruss = 'Einen guten Rutsch!';
   const von = `${eigen.von || VON_VORGABE} ${S.st.name || 'uns'}`;
   const y0 = WG * SK + rand, mx = cv.width / 2, maxB = cv.width - 70;
+  grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'zucker', Schneeflocken: 'eis', Stechpalme: 'rot' }[R.name] || 'gold');
   c.textAlign = 'center';
-  kartenSchrift(c, gruss, mx, y0 + 72, 52, 'bold italic', R.titel, R.umriss, maxB);
-  kartenSchrift(c, von, mx, y0 + 122, 30, '', R.text, R.umriss, maxB);
+  kartenSchrift(c, von, mx, y0 + 54, 32, '', R.titel, R.umriss, maxB);
   if (heilig) {
     const rb = S.rueckblick(), z = (n) => Math.round(n).toLocaleString('de-DE');
-    kartenSchrift(c, `Unser Advent: ${z(rb.bedient)} Gäste · ${z(rb.deko)} Deko-Stücke · ♥ ${z(rb.stimmung)}`, mx, y0 + 160, 22, 'italic', R.titel, R.umriss, maxB);
+    kartenSchrift(c, `Unser Advent: ${z(rb.bedient)} Gäste · ${z(rb.deko)} Deko-Stücke · ♥ ${z(rb.stimmung)}`, mx, y0 + 94, 22, 'italic', R.titel, R.umriss, maxB);
   }
-  kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + (heilig ? 196 : 158), 20, '', R.text, R.umriss, maxB);
+  kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + (heilig ? 132 : 94), 20, '', R.text, R.umriss, maxB);
 
   // Gemeldet: auf Android dauerte es „ewig" bis zur Karte. Das Fenster zeigt
   // jetzt SOFORT das gemalte Bild selbst; die PNG-Datei fürs Teilen entsteht
