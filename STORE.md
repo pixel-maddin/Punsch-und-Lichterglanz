@@ -22,6 +22,13 @@ und den Test **spätestens Mitte Oktober** starten.
 
 ## 2. Adresse festlegen und Besitz nachweisen
 
+> **Stand 26.10.2026: erledigt.** Das Repo `pixel-maddin.github.io` gibt es, mit `.nojekyll` und
+> `.well-known/assetlinks.json` (Paket `io.github.pixel_maddin.punsch`, Fingerabdruck des am 26.10.
+> bei PWABuilder erzeugten Schlüssels). Die APK für Freunde liegt außerhalb des Repos in
+> `Claude Projekte/punsch-android/` samt Schlüssel. Für den Play Store fehlt in `assetlinks.json`
+> nur noch Googles zweiter Fingerabdruck (Schritt 5) - dieselben Schlüsseldateien wiederverwenden,
+> NICHT bei PWABuilder neu erzeugen.
+
 Die App ist eine Hülle um die Webseite (Trusted Web Activity). Google prüft
 über eine Datei `/.well-known/assetlinks.json` **ganz oben auf der Domain**,
 dass die Seite dir gehört.
