@@ -5,28 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610271000';
-import * as S from './spiel.js?v=202610271000';
-import * as Z from './zeit.js?v=202610271000';
-import * as T from './ton.js?v=202610271000';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271000';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610271000';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271000';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271000';
-import * as A from './auftraege.js?v=202610271000';
-import * as E from './erfolge.js?v=202610271000';
-import * as ZL from './ziele.js?v=202610271000';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271000';
-import * as KA from './karte.js?v=202610271000';
-import { zeigeRueckblick } from './ereignis.js?v=202610271000';
-import { barbaraZweig } from './szene.js?v=202610271000';
-import * as SW from './schneeball.js?v=202610271000';
-import * as LI from './lichtung.js?v=202610271000';
-import * as CB from './christbaum.js?v=202610271000';
-import * as SB from './schlitten.js?v=202610271000';
-import * as EB from './schlittschuh.js?v=202610271000';
-import * as BS from './backstube.js?v=202610271000';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271000';
+import * as C from './config.js?v=202610271100';
+import * as S from './spiel.js?v=202610271100';
+import * as Z from './zeit.js?v=202610271100';
+import * as T from './ton.js?v=202610271100';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271100';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610271100';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271100';
+import * as A from './auftraege.js?v=202610271100';
+import * as E from './erfolge.js?v=202610271100';
+import * as ZL from './ziele.js?v=202610271100';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271100';
+import * as KA from './karte.js?v=202610271100';
+import { zeigeRueckblick } from './ereignis.js?v=202610271100';
+import { barbaraZweig } from './szene.js?v=202610271100';
+import * as SW from './schneeball.js?v=202610271100';
+import * as LI from './lichtung.js?v=202610271100';
+import * as CB from './christbaum.js?v=202610271100';
+import * as SB from './schlitten.js?v=202610271100';
+import * as EB from './schlittschuh.js?v=202610271100';
+import * as BS from './backstube.js?v=202610271100';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
