@@ -722,7 +722,7 @@ export const MARKT_DEKO = [
 // Rezepte (seit 27.10. im Supermarkt) in drei Stufen (Nutzerwunsch): Stufe 1 +20 %, Stufe 2 nochmal
 // +30 % (zusammen +50 %), Stufe 3 nochmal +40 % (zusammen +90 %) auf die zwei Getränke. `preis` = Faktor auf
 // Minuten und Mindestpreis des Rezepts (`minuten`, `min`) - spätere Stufen kosten entsprechend mehr.
-export const REZEPT_STUFEN = [{ plus: 0.2, preis: 1 }, { plus: 0.3, preis: 2 }, { plus: 0.4, preis: 3.5 }];
+export const REZEPT_STUFEN = [{ plus: 0.2, preis: 1 }, { plus: 0.3, preis: 3 }, { plus: 0.4, preis: 7 }];
 export const MARKT_REZEPTE = [
   { id: 'r_zimt',   name: 'Zimtstangen-Bündel',  fuer: ['gluehwein', 'kinderpunsch'], plus: 0.2, minuten: 20, min: 600 },
   { id: 'r_apfel',  name: 'Bratapfel-Gewürz',    fuer: ['apfel', 'lebkuchen'],        plus: 0.2, minuten: 22, min: 900 },

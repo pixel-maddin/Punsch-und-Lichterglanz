@@ -21,7 +21,7 @@
 let ctx = null, fxGain = null, musikGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -14,9 LUFS, recht laut)
-const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610272300', karte: 'audio/musik-karte.m4a?v=202610272300' };
+const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610272330', karte: 'audio/musik-karte.m4a?v=202610272330' };
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
 const spuren = {};        // name -> { el, gain }
 let szene = 'haus';       // welches Stück gerade dran ist
