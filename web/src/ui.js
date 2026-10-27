@@ -5,28 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610271500';
-import * as S from './spiel.js?v=202610271500';
-import * as Z from './zeit.js?v=202610271500';
-import * as T from './ton.js?v=202610271500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271500';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610271500';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271500';
-import * as A from './auftraege.js?v=202610271500';
-import * as E from './erfolge.js?v=202610271500';
-import * as ZL from './ziele.js?v=202610271500';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271500';
-import * as KA from './karte.js?v=202610271500';
-import { zeigeRueckblick } from './ereignis.js?v=202610271500';
-import { barbaraZweig } from './szene.js?v=202610271500';
-import * as SW from './schneeball.js?v=202610271500';
-import * as LI from './lichtung.js?v=202610271500';
-import * as CB from './christbaum.js?v=202610271500';
-import * as SB from './schlitten.js?v=202610271500';
-import * as EB from './schlittschuh.js?v=202610271500';
-import * as BS from './backstube.js?v=202610271500';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271500';
+import * as C from './config.js?v=202610271600';
+import * as S from './spiel.js?v=202610271600';
+import * as Z from './zeit.js?v=202610271600';
+import * as T from './ton.js?v=202610271600';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271600';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610271600';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271600';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271600';
+import * as A from './auftraege.js?v=202610271600';
+import * as E from './erfolge.js?v=202610271600';
+import * as ZL from './ziele.js?v=202610271600';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271600';
+import * as KA from './karte.js?v=202610271600';
+import { zeigeRueckblick } from './ereignis.js?v=202610271600';
+import { barbaraZweig } from './szene.js?v=202610271600';
+import * as SW from './schneeball.js?v=202610271600';
+import * as LI from './lichtung.js?v=202610271600';
+import * as CB from './christbaum.js?v=202610271600';
+import * as SB from './schlitten.js?v=202610271600';
+import * as EB from './schlittschuh.js?v=202610271600';
+import * as BS from './backstube.js?v=202610271600';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271600';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -771,7 +771,33 @@ const gross1 = (s) => s.charAt(0).toUpperCase() + s.slice(1);
  * Fenster und im Album, mit gröberen Pixeln als alles andere.
  */
 const _dank = document.createElement('canvas');
+/**
+ * Selbst gemalte Dankesbilder (27.10., Nutzerwunsch): je Kind eine Datei
+ * `bilder/dank/<name klein>.png`, 96 x 72, rechts unten frei - dort setzt das Spiel den Wunsch
+ * (16 x 16, verdoppelt auf 32 x 32, ab x 62 / y 30). Geladen wird nur, wer in C.DANK_BILDER steht
+ * (sonst gäbe es für jedes fehlende Bild einen 404); fehlt eins oder lädt es noch, malt das Spiel selbst.
+ */
+const dankBilder = new Map();
+for (const name of C.DANK_BILDER) {
+  const img = new Image();
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610271600`;
+  dankBilder.set(name.toLowerCase(), img);
+}
+function eigenesDankesbild(kind) {
+  const img = dankBilder.get(String(kind).toLowerCase());
+  return img && img.complete && img.naturalWidth ? img : null;
+}
 export function zeichneDankesbild(ziel, b) {
+  const eigen = eigenesDankesbild(b.kind);
+  if (eigen) {
+    ziel.width = 96; ziel.height = 72;
+    const c = ziel.getContext('2d');
+    c.imageSmoothingEnabled = false;
+    c.drawImage(eigen, 0, 0, 96, 72);
+    // Der Wunsch rechts unten - über eine EIGENE Leinwand je Bild (Safari, siehe unten)
+    c.drawImage(scale2x(wunschBild(b), 16, 16, document.createElement('canvas')), 96 - 34, 72 - 42);
+    return;
+  }
   _dank.width = 48; _dank.height = 36;
   maleDankesbild(_dank, b);
   // 27.10. (gemeldet: im Album zeigten alle Dankesbilder dasselbe - das zuletzt gemalte): Scale2x schreibt
@@ -801,16 +827,20 @@ function maleDankesbild(cv, b) {
   r(c, kx + 1, ky - 9, 2, 5, b.maedchen ? '#e85a8a' : '#3a6ab8'); r(c, kx - 1, ky - 8, 6, 1, '#3a3a44');
   r(c, kx, ky - 4, 1, 4, '#3a3a44'); r(c, kx + 3, ky - 4, 1, 4, '#3a3a44');
   for (const [dx, dy] of [[0, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [1, 3]]) p(c, kx - 1 + dx, ky - 20 + dy, '#e83a4a');
-  // Der Wunsch, rechts oben
+  // Der Wunsch, rechts unten
+  c.drawImage(wunschBild(b), W2 - 17, H2 - 21);
+  // Rahmen aus Wachsmalstrichen
+  c.strokeStyle = '#e8b030'; c.lineWidth = 1; c.strokeRect(0.5, 0.5, W2 - 1, H2 - 1);
+}
+/** Was sich das Kind gewünscht hat, als 16 x 16 (neue Leinwand je Aufruf). */
+function wunschBild(b) {
   const tmp = document.createElement('canvas'); tmp.width = 16; tmp.height = 16;
-  const tc = tmp.getContext('2d');
+  const tc = tmp.getContext('2d', { willReadFrequently: true });
   if (b.ziel) { const a = C.ARTIKEL.find((x) => x.id === b.ziel); if (a) zeichneIcon(tmp, a); }
   else if (b.art === 'backen') { BS.zeichnePlaetzchen(tc, 0, 2, 'stern', 'golden', 'guss', 1); BS.zeichnePlaetzchen(tc, 7, 7, 'herz', 'golden', 'schoko', 1); }
   else if (b.art === 'santa') { figurKlein(tc, { typ: 'weihnachtsmann', farben: neueFarben('erwachsen'), phase: 0, laeuft: false }, 8, 15, 0); }
   else { r(tc, 2, 8, 5, 4, '#c83a32'); r(tc, 9, 8, 5, 4, '#3a6ab8'); r(tc, 1, 12, 7, 1, '#c8ccd8'); r(tc, 8, 12, 7, 1, '#c8ccd8'); }
-  c.drawImage(tmp, W2 - 17, H2 - 21);
-  // Rahmen aus Wachsmalstrichen
-  c.strokeStyle = '#e8b030'; c.lineWidth = 1; c.strokeRect(0.5, 0.5, W2 - 1, H2 - 1);
+  return tmp;
 }
 export function zeigeBrief() {
   const B = S.briefe(), b = B.aktiv;

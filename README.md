@@ -255,7 +255,9 @@ Haustür - die Fahne ist dann oben. Ein Kind aus dem Dorf wünscht sich etwas:
 ein Stück Deko, ein Getränk an deinem Stand, Plätzchen aus der Backstube, eine
 Runde auf der Eisbahn oder dass du den Weihnachtsmann auf der Karte findest.
 Es gibt keine Frist. Ist der Wunsch erfüllt, liegt ein Dankeschön im Kasten:
-ein gemaltes Bild und ein paar Sterne. Ein Brief zur Zeit, der nächste
+ein gemaltes Bild und ein paar Sterne. Eigene Bilder je Kind: `web/bilder/dank/<name>.png`
+(96 × 72 Pixel, rechts unten ab x 62 / y 30 frei - dort setzt das Spiel den Wunsch hinein), dann den
+Namen in `DANK_BILDER` in `config.js` eintragen. Fehlt ein Bild, malt das Spiel es selbst. Ein Brief zur Zeit, der nächste
 frühestens am Tag danach, höchstens zehn je Adventszeit.
 
 **Album** (Aufträge → Album): alle Besucher, die du schon bedient hast

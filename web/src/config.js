@@ -962,6 +962,10 @@ export const BRIEF_KINDER = [
   { name: 'Vincent', alter: 8 }, { name: 'Jonathan', alter: 7 }, { name: 'Nora', alter: 5, maedchen: true },
   { name: 'Emil', alter: 7 }, { name: 'Anna', alter: 8, maedchen: true }, { name: 'Paul', alter: 6 }, { name: 'Mia', alter: 5, maedchen: true },
 ];
+// Selbst gemalte Dankesbilder (27.10.): Namen der Kinder, für die es `web/bilder/dank/<name klein>.png`
+// gibt (96 x 72, rechts unten ab x 62 / y 30 frei für den Wunsch). Nur diese werden geladen - fehlt ein
+// Kind hier, malt das Spiel sein Bild selbst. Neue Datei = Namen hier eintragen.
+export const DANK_BILDER = [];
 export const DOSE_MAX = 30;
 export const DOSE_BONUS = 0.25;
 
