@@ -4,14 +4,14 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610272330';
-import * as S from './spiel.js?v=202610272330';
-import * as T from './ton.js?v=202610272330';
-import * as Z from './zeit.js?v=202610272330';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610272330';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610272330';
-import { schriftBild } from './schrift.js?v=202610272330';
-import { fenster, karte } from './ui.js?v=202610272330';
+import * as C from './config.js?v=202610272345';
+import * as S from './spiel.js?v=202610272345';
+import * as T from './ton.js?v=202610272345';
+import * as Z from './zeit.js?v=202610272345';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610272345';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610272345';
+import { schriftBild } from './schrift.js?v=202610272345';
+import { fenster, karte } from './ui.js?v=202610272345';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -274,6 +274,7 @@ export const BILDER = {
  */
 export function zeigeHeiligabend(danach) {
   S.heiligabendGesehen();   // gleich merken - sonst käme es nach jedem Wegklicken wieder
+  T.jingle();
   T.spiele('spezial');
   T.spiele('glocken'); setTimeout(() => T.spiele('glocken'), 1300); setTimeout(() => T.spiele('glocken'), 2600);
   const bz = S.barbaraZustand();
@@ -319,6 +320,7 @@ export function zeigeAdvent(n, danach) {
   const e = C.ADVENT_EREIGNIS[n];
   if (!e) { danach && danach(); return; }
   const neu = S.adventFreischaltungen(n);
+  T.jingle();
   T.spiele('spezial');
   const box = fenster(e.titel, `
     <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
@@ -364,6 +366,7 @@ export function zeigeErsterSchnee(danach) {
   setTimeout(() => {
     ov.classList.add('weg');
     T.musikPause(false);
+    T.jingle();
     setTimeout(() => ov.remove(), 900);
     const box = fenster('Der erste Schnee!', `
       <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
@@ -383,6 +386,7 @@ export function zeigeErsterSchnee(danach) {
 export function zeigeWettbewerb(danach) {
   const e = S.wettbewerbAuswerten();
   const pl = C.WETTBEWERB.plaetze[e.platz];
+  T.jingle();
   T.spiele(pl ? 'spezialKasse' : 'kasse');
   const kopf = pl ? `${e.platz + 1}. Platz!` : 'Eine Urkunde!';
   const text = pl
@@ -406,6 +410,7 @@ export function zeigeJuryAnsage(danach) {
   const tage = S.wettbewerbInTagen();
   S.juryAngesagt();
   const s = S.stimmung();
+  T.jingle();
   T.spiele('spezial');
   const wann = tage === 1 ? 'morgen' : `in ${tage} Tagen (am ${C.WETTBEWERB.tag}. Dezember)`;
   const stufen = [...C.WETTBEWERB.plaetze].reverse().map((pl) => s >= pl.ab
@@ -427,6 +432,7 @@ export function zeigeJuryAnsage(danach) {
  */
 export function zeigeSilvester(danach) {
   S.silvesterGesehen();
+  T.jingle();
   T.spiele('feuerwerk'); setTimeout(() => T.spiele('feuerwerk'), 700); setTimeout(() => T.spiele('feuerwerk'), 1500);
   const d = Z.jetzt(), neu = d.getMonth() === 0;
   const jahr = neu ? d.getFullYear() : d.getFullYear() + 1;

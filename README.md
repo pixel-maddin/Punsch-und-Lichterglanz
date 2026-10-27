@@ -188,8 +188,7 @@ schneller du im Ziel bist, desto mehr Punkte. Ab 1.000, 1.550 und 1.900 Punkten
 Rekord: Rodelkinder auf dem Gehweg, dein Wok als Trophäe an der Hauswand und
 ein Rodelhang am Horizont.
 
-In allen Minispielen pausiert die Musik und läuft danach an derselben Stelle
-weiter. Jedes Minispiel hat drei Schwierigkeiten: Leicht (Punkte ×0,7),
+In den Minispielen läuft eigene Musik (eins von zwei Stücken, zufällig). Jedes Minispiel hat drei Schwierigkeiten: Leicht (Punkte ×0,7),
 Normal und Schwer (Punkte ×1,4) - der Rekord gilt für alle.
 
 **Special des Tages:** Sobald drei Minispiele offen sind, glitzert jeden zweiten Tag eines golden
@@ -344,8 +343,7 @@ Karte, die man sieht.
 
 Reines Canvas 2D (180 Pixel breit, per CSS hochskaliert), ES-Module,
 kein Node, kein npm, keine Bilddatei - Grafik und Geräusche entstehen im
-Code. Einzige Fremddateien sind die zwei Musikstücke (`web/audio/musik-haus.m4a`
-am Haus, `web/audio/musik-karte.m4a` auf der Karte und in den Minispielen,
+Code. Einzige Fremddateien sind die Musikstücke in `web/audio/` (siehe *Musik*,
 weich übergeblendet), im Menü lauter, leiser oder ganz aus. Dazu zwei
 Schriften in `web/fonts/`: **Nunito** für Texte und **Pixelify Sans** für Titel,
 beide unter der SIL Open Font License (Lizenztexte daneben), damit das Spiel auf
@@ -360,9 +358,20 @@ alte Dateien.
 
 ## Musik
 
-Zwei Stücke: `musik-haus.m4a` läuft am Haus, `musik-karte.m4a` auf der
-Karte und in den Minispielen. Beide werden nicht-kommerziell verwendet.
-(Bis 10.10. lief „Music2", mit [Suno](https://suno.com) erstellt.)
+- **Am Haus** drei Stücke in zufälliger Reihenfolge; vom 24. bis 26. Dezember
+  kommt im Wechsel ein Weihnachtsstück dazu.
+- **Auf der Karte** bis zum 1. Advent ein Stück, danach mit jedem Advent
+  (1. bis 3.) ein neues - das neue läuft beim ersten Öffnen zuerst.
+- **In den Minispielen** eins von zwei Stücken, zufällig.
+- **Bei großen Ereignissen** (Advent, erster Schnee, Jury, Heiligabend,
+  Silvester, Finale) ein kurzer Jingle, die Musik wird solange leiser.
+
+Neun Stücke sind von [Pixabay](https://pixabay.com/music/) (Pixabay Content
+License) - von alex-morgan, Denis-Pavlov-Music, Clavier-Music, The_Mountain,
+TheStorytellingPodcast, Top-Flow und kaazoom. Im Spiel stehen alle unter
+Menü → Einstellungen → **Credits**. Zwei Stücke (`musik-haus.m4a`,
+`musik-karte.m4a`) sind mit [Suno](https://suno.com) entstanden und werden
+nicht-kommerziell verwendet.
 
 ## Nutzung
 

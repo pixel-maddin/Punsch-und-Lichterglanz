@@ -1,15 +1,17 @@
 /*
  * ton.js - Geräusche (synthetisiert) und die Musik.
  *
- * MUSIK (seit 11.10.): ZWEI Stücke, je nach Ort.
- *   haus  - `audio/musik-haus.m4a`  (Quelle musik-quelle/music-bg.mp3), am Haus
- *   karte - `audio/musik-karte.m4a` (Quelle music-map.mp3), auf der Karte und
- *           in den Minispielen (vorher ruhte die Musik dort)
- *   (27.10.: Ein eigenes Minispiel-Stück „Schlittenfahrt" war kurz drin und ist auf Wunsch wieder raus.)
- * Gewechselt wird mit kurzer Überblendung; jedes Stück läuft beim nächsten
- * Mal an seiner Stelle weiter. Beide endlos in Schleife, beide HE-AAC 48 kbps
- * und auf dieselbe Lautheit gezogen (-14,9 LUFS) - siehe CLAUDE.md.
- * Davor gab es ein Stück (`musik.m4a`, „Music2").
+ * MUSIK (seit 27.10.): drei Szenen mit je einer Wiedergabeliste, dazu ein Jingle.
+ *   haus  - `musik-haus` (Suno, auf 4:10 gekürzt), `haus-lofi`, `haus-jazz` (auf 3:52 gekürzt) in
+ *           zufälliger Reihenfolge. 24.-26.12. abwechselnd `xmas` und eins davon.
+ *   karte - bis zum 1. Advent `musik-karte` (Suno), danach je Advent ein Stück mehr (`karte-1..3`);
+ *           das neueste kommt beim ersten Öffnen der Sitzung zuerst, danach zufällig.
+ *   mini  - `mini-1`/`mini-2`, zufällig je Minispiel, in Schleife.
+ *   jingle - 16 s bei großen Ereignisfenstern (`jingle()`), die Musik wird solange leiser.
+ * Herkunft und Künstler: `C.MUSIK_CREDITS` (Fenster „Credits" in den Einstellungen).
+ * Jede Szene hat EIN Audio-Element (die Quelle wechselt am Stückende) und läuft beim nächsten Mal
+ * an ihrer Stelle weiter (außer Minispielen, die beginnen von vorn). Alle Dateien AAC LC 80 kbps,
+ * -15 LUFS (zwei Durchgänge loudnorm, linear) - Neubau siehe CLAUDE.md.
  *
  * Die Versionsnummer hängt an der URL, damit Browser nach einem Austausch
  * nicht das alte Stück aus dem Zwischenspeicher spielen.
@@ -18,14 +20,50 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-let ctx = null, fxGain = null, musikGain = null;
+import * as Z from './zeit.js?v=202610272345';
+
+let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
-const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -14,9 LUFS, recht laut)
-const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610272330', karte: 'audio/musik-karte.m4a?v=202610272330' };
+const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
+const url = (id) => `audio/${id}.m4a?v=202610272345`;
+const HAUS = ['musik-haus', 'haus-lofi', 'haus-jazz'];
+const XMAS = 'xmas';
+const KARTE_ALT = 'musik-karte';
+const KARTE_ADVENT = ['karte-1', 'karte-2', 'karte-3'];   // 1., 2., 3. Advent
+const MINI = ['mini-1', 'mini-2'];
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
-const spuren = {};        // name -> { el, gain }
-let szene = 'haus';       // welches Stück gerade dran ist
+const DUCK = 0.15;        // so laut bleibt die Musik unter dem Jingle
+const spuren = {};        // szene -> { el, gain, stueck }
+let jingleEl = null;
+let szene = 'haus';       // welche Szene gerade dran ist
 let karteOffen = false, miniOffen = false, musikRuht = false;
+const gehoert = new Set();   // Kartenstücke, die in dieser Sitzung schon liefen
+
+const zufall = (liste, nicht) => { const l = liste.filter((x) => x !== nicht); const w = l.length ? l : liste; return w[Math.floor(Math.random() * w.length)]; };
+const xmasTage = () => { const t = Z.dezemberTag(); return t >= 24 && t <= 26; };
+function karteListe() {
+  const adv = Z.adventKerzen();
+  return adv < 1 ? [KARTE_ALT] : KARTE_ADVENT.slice(0, Math.min(adv, KARTE_ADVENT.length));
+}
+/** Welches Stück kommt in dieser Szene als Nächstes? */
+function naechstes(name, jetzt) {
+  if (name === 'haus') {
+    if (xmasTage()) return jetzt === XMAS ? zufall(HAUS) : XMAS;
+    return zufall(HAUS, jetzt);
+  }
+  if (name === 'karte') {
+    const l = karteListe(), neuestes = l[l.length - 1];
+    return gehoert.has(neuestes) ? zufall(l, jetzt) : neuestes;
+  }
+  return zufall(MINI);
+}
+/** Stück in einer Szene setzen (von vorn). */
+function setze(name, id) {
+  const s = spuren[name];
+  if (!s) return;
+  if (s.stueck !== id) { s.stueck = id; s.el.src = url(id); } else s.el.currentTime = 0;
+  if (name === 'karte') gehoert.add(id);
+}
 
 export function init() {
   if (ctx) { if (ctx.state === 'suspended') ctx.resume(); starteMusik(); return; }
@@ -34,77 +72,109 @@ export function init() {
   ctx = new AC();
   fxGain = ctx.createGain(); fxGain.gain.value = fxAn ? 0.5 : 0; fxGain.connect(ctx.destination);
   musikGain = ctx.createGain(); musikGain.gain.value = 0; musikGain.connect(ctx.destination);
-  for (const [name, url] of Object.entries(STUECKE)) {
-    const el = new Audio(url);
-    el.loop = true;
-    el.preload = name === szene ? 'auto' : 'metadata';
+  busGain = ctx.createGain(); busGain.gain.value = 1; busGain.connect(musikGain);
+  for (const name of ['haus', 'karte', 'mini']) {
+    const el = new Audio();
+    el.loop = name === 'mini';
+    el.preload = name === szene ? 'auto' : 'none';
     const gain = ctx.createGain();
     gain.gain.value = name === szene ? 1 : 0;
-    try { ctx.createMediaElementSource(el).connect(gain); gain.connect(musikGain); spuren[name] = { el, gain }; }
-    catch (e) { /* ohne Graph lieber keine Musik als eine unregelbare */ }
+    try { ctx.createMediaElementSource(el).connect(gain); gain.connect(busGain); spuren[name] = { el, gain, stueck: null }; }
+    catch (e) { continue; /* ohne Graph lieber keine Musik als eine unregelbare */ }
+    // Stückende: das nächste aus der Liste (Minispiele laufen in Schleife)
+    el.addEventListener('ended', () => { setze(name, naechstes(name, spuren[name].stueck)); if (szene === name) starteMusik(); });
   }
+  if (spuren.haus) setze('haus', naechstes('haus', null));
+  try {
+    jingleEl = new Audio(url('jingle')); jingleEl.preload = 'auto';
+    ctx.createMediaElementSource(jingleEl).connect(musikGain);
+    jingleEl.addEventListener('ended', () => rampe(busGain, 1, 1.2));
+  } catch (e) { jingleEl = null; }
   stelleMusik();
   starteMusik();
+}
+function rampe(g, ziel, dauer) {
+  if (!ctx || !g) return;
+  const t = ctx.currentTime;
+  g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(ziel, t + dauer);
 }
 /** Kurz ganz still (der erste Schnee). Danach geht es an derselben Stelle weiter. */
 export function musikPause(an) {
   musikRuht = an;
   if (an) for (const s of Object.values(spuren)) s.el.pause(); else starteMusik();
 }
-/** Karte offen/zu (karte.js) - auf der Karte läuft das Kartenstück. */
+/** Karte offen/zu (karte.js) - auf der Karte läuft die Kartenliste. */
 export function musikKarte(an) { karteOffen = an; wechsle(); }
-/** Minispiel läuft/ist vorbei - dort läuft ebenfalls das Kartenstück. */
+/** Minispiel läuft/ist vorbei - dort läuft eines der Minispiel-Stücke. */
 export function musikMinispiel(an) { miniOffen = an; wechsle(); }
 export const imMinispiel = () => miniOffen;
+/**
+ * Jingle bei großen Ereignisfenstern (Advent, erster Schnee, Jury, Heiligabend, Silvester, Finale).
+ * Die Musik geht solange auf DUCK und blendet danach wieder hoch.
+ */
+export function jingle() {
+  if (!ctx || !jingleEl || musikStufe === 0 || document.hidden) return;
+  rampe(busGain, DUCK, 0.3);
+  jingleEl.currentTime = 0;
+  jingleEl.play().catch(() => rampe(busGain, 1, 0.5));
+}
 
 function wechsle() {
-  const neu = karteOffen || miniOffen ? 'karte' : 'haus';
+  const neu = miniOffen ? 'mini' : karteOffen ? 'karte' : 'haus';
   if (neu === szene) return;
   const alt = spuren[szene], jetzt = spuren[neu];
   szene = neu;
   if (!ctx) return;
-  const t = ctx.currentTime;
+  // Minispiel immer von vorn mit einem zufälligen Stück; Karte nur neu, wenn ihr Stück nicht
+  // (mehr) in der Liste ist (vor dem 1. Advent das alte) oder ein neues Adventsstück dazukam
+  if (neu === 'mini') setze('mini', naechstes('mini'));
+  if (neu === 'karte' && jetzt) { const l = karteListe(); if (!l.includes(jetzt.stueck) || !gehoert.has(l[l.length - 1])) setze('karte', naechstes('karte', jetzt.stueck)); }
   if (alt) {
-    alt.gain.gain.cancelScheduledValues(t); alt.gain.gain.setValueAtTime(alt.gain.gain.value, t); alt.gain.gain.linearRampToValueAtTime(0, t + BLENDE);
+    rampe(alt.gain, 0, BLENDE);
     setTimeout(() => { if (spuren[szene] !== alt) alt.el.pause(); }, BLENDE * 1000 + 80);
   }
   if (jetzt) {
     jetzt.el.preload = 'auto';
-    jetzt.gain.gain.cancelScheduledValues(t); jetzt.gain.gain.setValueAtTime(jetzt.gain.gain.value, t); jetzt.gain.gain.linearRampToValueAtTime(1, t + BLENDE);
+    rampe(jetzt.gain, 1, BLENDE);
   }
   starteMusik();
 }
 function starteMusik() {
   const s = spuren[szene];
   if (!s || musikStufe === 0 || document.hidden || musikRuht) return;
+  if (!s.stueck) setze(szene, naechstes(szene, null));
   if (s.el.paused) s.el.play().catch(() => {});
 }
 export function schlafen() {
   for (const s of Object.values(spuren)) s.el.pause();
+  if (jingleEl) jingleEl.pause();
+  if (busGain) rampe(busGain, 1, 0.05);
   if (ctx && ctx.state === 'running') ctx.suspend();
 }
 export function wecken() { if (ctx && ctx.state === 'suspended') ctx.resume(); starteMusik(); }
 
-/** Für Tests: welches Stück, läuft es, wie laut? */
+/** Für Tests: welche Szene, welches Stück, läuft es, wie laut? */
 export function musikZustand() {
   const s = spuren[szene];
-  return s ? { stueck: szene, laeuft: !s.el.paused, zeit: s.el.currentTime, stufe: musikStufe, gain: musikGain.gain.value,
-    andere: Object.entries(spuren).filter(([n]) => n !== szene).map(([n, x]) => ({ stueck: n, laeuft: !x.el.paused, zeit: x.el.currentTime })), ctx: ctx.state } : null;
+  return s ? { szene, stueck: s.stueck, laeuft: !s.el.paused, zeit: s.el.currentTime, stufe: musikStufe, gain: musikGain.gain.value, bus: busGain.gain.value,
+    jingle: jingleEl ? !jingleEl.paused : null, karteListe: karteListe(), xmas: xmasTage(),
+    andere: Object.entries(spuren).filter(([n]) => n !== szene).map(([n, x]) => ({ szene: n, stueck: x.stueck, laeuft: !x.el.paused, zeit: x.el.currentTime })), ctx: ctx.state } : null;
 }
+/** Für Tests: Stückende der laufenden Szene auslösen (Spulen geht mit werkzeug/serve.ps1 nicht - kein Range). */
+export function musikEnde() { const s = spuren[szene]; if (s) s.el.dispatchEvent(new Event('ended')); }
 
 export function setzeFx(an) { fxAn = an; if (fxGain) fxGain.gain.value = an ? 0.5 : 0; }
 /** Musiklautstärke 0 (aus) bis 5. */
 export function setzeMusik(stufe) {
   musikStufe = Math.max(0, Math.min(5, stufe));
   stelleMusik();
-  if (musikStufe === 0) { for (const sp of Object.values(spuren)) sp.el.pause(); } else starteMusik();
+  if (musikStufe === 0) { for (const sp of Object.values(spuren)) sp.el.pause(); if (jingleEl) jingleEl.pause(); } else starteMusik();
 }
 function stelleMusik() {
   if (!musikGain) return;
   const g = musikStufe === 0 ? 0 : MUSIK_MAX * Math.pow(musikStufe / 5, 1.6);
   musikGain.gain.setTargetAtTime(g, ctx.currentTime, 0.15);
 }
-
 function ton(freq, dauer, typ = 'square', laut = 0.2, start = 0, ziel = fxGain, gleiten = 0) {
   if (!ctx) return;
   const t0 = ctx.currentTime + start;

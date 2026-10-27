@@ -5,28 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610272330';
-import * as S from './spiel.js?v=202610272330';
-import * as Z from './zeit.js?v=202610272330';
-import * as T from './ton.js?v=202610272330';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610272330';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610272330';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610272330';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610272330';
-import * as A from './auftraege.js?v=202610272330';
-import * as E from './erfolge.js?v=202610272330';
-import * as ZL from './ziele.js?v=202610272330';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610272330';
-import * as KA from './karte.js?v=202610272330';
-import { zeigeRueckblick } from './ereignis.js?v=202610272330';
-import { barbaraZweig } from './szene.js?v=202610272330';
-import * as SW from './schneeball.js?v=202610272330';
-import * as LI from './lichtung.js?v=202610272330';
-import * as CB from './christbaum.js?v=202610272330';
-import * as SB from './schlitten.js?v=202610272330';
-import * as EB from './schlittschuh.js?v=202610272330';
-import * as BS from './backstube.js?v=202610272330';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610272330';
+import * as C from './config.js?v=202610272345';
+import * as S from './spiel.js?v=202610272345';
+import * as Z from './zeit.js?v=202610272345';
+import * as T from './ton.js?v=202610272345';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610272345';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610272345';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610272345';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610272345';
+import * as A from './auftraege.js?v=202610272345';
+import * as E from './erfolge.js?v=202610272345';
+import * as ZL from './ziele.js?v=202610272345';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610272345';
+import * as KA from './karte.js?v=202610272345';
+import { zeigeRueckblick } from './ereignis.js?v=202610272345';
+import { barbaraZweig } from './szene.js?v=202610272345';
+import * as SW from './schneeball.js?v=202610272345';
+import * as LI from './lichtung.js?v=202610272345';
+import * as CB from './christbaum.js?v=202610272345';
+import * as SB from './schlitten.js?v=202610272345';
+import * as EB from './schlittschuh.js?v=202610272345';
+import * as BS from './backstube.js?v=202610272345';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610272345';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -780,7 +780,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610272330`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610272345`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1600,6 +1600,7 @@ function baueErfolge(liste) {
 function zeigeFinale() {
   const d = S.finaleOeffnen();
   if (!d) return;
+  T.jingle();
   fenster('Alles geschafft!', `
     <p><b>Puh, das war ganz schön viel Arbeit - aber du hast wirklich alles freigeschaltet!</b> Glückwunsch!</p>
     <p>Als Dankeschön bekommst du ein letztes Stück für dein Haus: die <b>${d.name}</b>. Ab und zu tuckert sie jetzt mit beleuchteten Waggons vor deinem Haus vorbei.</p>
@@ -2524,7 +2525,9 @@ function oeffneEinstellungen() {
   nm.onclick = () => frageName(true);
   const hilfe = el('button', 'k k--neben', 'So geht’s');
   hilfe.onclick = () => zeigeHilfe();
-  schalter.appendChild(nm); schalter.appendChild(hilfe);
+  const cred = el('button', 'k k--neben', 'Credits');
+  cred.onclick = () => zeigeCredits();
+  schalter.appendChild(nm); schalter.appendChild(hilfe); schalter.appendChild(cred);
   liste.appendChild(schalter);
   const zurueck = el('div', 'schalter neustart');
   const zk = el('button', 'k', '‹ Zurück zum Menü');
@@ -2532,6 +2535,19 @@ function oeffneEinstellungen() {
   zurueck.appendChild(zk);
   liste.appendChild(zurueck);
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
+}
+
+/** Credits (27.10.): Musik von Pixabay mit Künstlernamen, dazu Suno und die Schriften. */
+function zeigeCredits() {
+  const gruppen = C.MUSIK_CREDITS.map((g) => `<p class="credits-wo">${g.wo}</p>
+    <ul class="credits">${g.stuecke.map((s) => `<li><a href="https://pixabay.com/music/${s.seite}/" target="_blank" rel="noopener">„${esc(s.titel)}“</a><br><span class="klein">von <b>${esc(s.von)}</b></span></li>`).join('')}</ul>`).join('');
+  fenster('Credits', `
+    <p><b>Musik</b> von <b>Pixabay</b> (Pixabay Content License) - vielen Dank an:</p>
+    ${gruppen}
+    <p class="klein">Zwei weitere Stücke (am Haus und auf der Karte bis zum 1. Advent) sind mit Suno entstanden.</p>
+    <p><b>Schriften:</b> Nunito und Pixelify Sans (SIL Open Font License).</p>
+    <p class="klein">Alles andere - Bilder, Figuren, Geräusche - ist für dieses Spiel selbst gemacht.</p>`,
+  [{ text: 'Schließen' }]);
 }
 
 /**

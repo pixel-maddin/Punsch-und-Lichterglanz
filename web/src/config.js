@@ -1165,4 +1165,22 @@ export const SILVESTER_STUNDE = 18;
 // zum Formular (…/viewform), `infoFeld` = die Kennung des Kurzantwort-Felds
 // für die Spielinfos („entry.123456789", aus „Vorausgefüllten Link abrufen").
 // Solange `url` leer ist, gibt es keinen Feedback-Knopf.
+// Credits (27.10., Fenster „Credits" in den Einstellungen). Die Pixabay-Stücke brauchen laut Lizenz
+// keine Nennung - der Nutzer möchte die Leute trotzdem nennen. `seite` = Adresse unter pixabay.com/music/.
+export const MUSIK_CREDITS = [
+  { wo: 'Am Haus', stuecke: [
+    { titel: 'Lofi Christmas Music', von: 'alex-morgan', seite: 'modern-jazz-lofi-christmas-music-552764' },
+    { titel: 'Jazz Christmas New Year Eve Cozy Winter Vibes', von: 'Denis-Pavlov-Music', seite: 'traditional-jazz-jazz-christmas-new-year-eve-cozy-winter-vibes-449122' } ] },
+  { wo: 'An den Weihnachtstagen', stuecke: [
+    { titel: 'Soft Christmas Piano Music for Cozy Nights', von: 'Clavier-Music', seite: 'christmas-soft-christmas-piano-music-for-cozy-nights-250833' } ] },
+  { wo: 'Auf der Karte', stuecke: [
+    { titel: 'Christmas Present', von: 'The_Mountain', seite: 'christmas-christmas-present-141479' },
+    { titel: 'Christmas Background Music', von: 'The_Mountain', seite: 'christmas-christmas-christmas-background-music-449474' },
+    { titel: 'Magical Christmas Fairytale', von: 'TheStorytellingPodcast', seite: 'christmas-magical-christmas-fairytale-607872' } ] },
+  { wo: 'In den Minispielen', stuecke: [
+    { titel: 'Christmas Spirit', von: 'Top-Flow', seite: 'christmas-christmas-spirit-265741' },
+    { titel: 'Magic Christmas Night', von: 'Top-Flow', seite: 'christmas-magic-christmas-night-264068' } ] },
+  { wo: 'Bei besonderen Ereignissen', stuecke: [
+    { titel: 'The Magic Of Midnight', von: 'kaazoom', seite: 'orchestral-the-magic-of-midnight-15-sec-stinger-christmas-cinematic-597243' } ] },
+];
 export const FEEDBACK = { url: 'https://docs.google.com/forms/d/e/1FAIpQLSe54k8PrZGDBAHZaaTWH2LiJfo0OlOnMgKxy0DlxTuXnf-vzw/viewform', infoFeld: 'entry.364683706' };
