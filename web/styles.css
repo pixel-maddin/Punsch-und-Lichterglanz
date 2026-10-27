@@ -32,9 +32,9 @@
   /* Schriftleiter (19.10., Durchsicht als UI/UX-Designer): sieben Stufen statt
      vorher 25 verschiedener GrÃ¶ÃŸen. Ausnahmen nur fÃ¼r Zahlen-/SymbolgrÃ¶ÃŸen
      (Summe, TÃ¼rchen-Ziffern, Emoji-Symbole) und die winzigen Kartenschilder. */
-  --t-mini:   calc(var(--px) * 4.5);   /* Kleingedrucktes, FuÃŸnoten, StÃ¤nde unter Karten */
-  --t-klein:  calc(var(--px) * 4.9);   /* Nebentext, Reiter, AbschnittskÃ¶pfe */
-  --t-text:   calc(var(--px) * 5.3);   /* FlieÃŸtext, Zeilentext, KnÃ¶pfe in Listen */
+  --t-mini:   calc(var(--px) * 4.8);   /* Kleingedrucktes, FuÃŸnoten, StÃ¤nde unter Karten */
+  --t-klein:  calc(var(--px) * 5.2);   /* Nebentext, Reiter, AbschnittskÃ¶pfe */
+  --t-text:   calc(var(--px) * 5.5);   /* FlieÃŸtext, Zeilentext, KnÃ¶pfe in Listen */
   --t-betont: calc(var(--px) * 5.6);   /* Namen in Zeilen, Hinweise, HauptknÃ¶pfe */
   --t-gross:  calc(var(--px) * 6.2);   /* FensterknÃ¶pfe, Eingaben, hervorgehobene Einblendung */
   --t-titel:  calc(var(--px) * 7);     /* groÃŸe Zwischenzeilen, Symbole in KnÃ¶pfen */
@@ -544,6 +544,10 @@ html, body {
 .statistik.rueckblick { margin-bottom: calc(var(--px) * 4); }
 p.hinweis, p.klein { font-size: var(--t-text); line-height: 1.35; }
 p.klein { color: var(--text3); font-size: var(--t-klein); }
+/* 27.10. (gemeldet: kleine Texte immer noch zu klein): Kleingedrucktes in Fenstern und Listen kräftiger
+   und eine Spur dunkler - zusätzlich zu den größeren Stufen --t-mini/--t-klein/--t-text */
+#modal .klein, #blatt .klein, #modal small, #blatt small { font-weight: 700; }
+#modal p.klein, #blatt p.klein { color: var(--text2); }
 
 /* ---------------------------------------------------------------- Menü */
 .statistik { display: grid; gap: calc(var(--px) * 3); margin: calc(var(--px) * 3) 0 calc(var(--px) * 7); }
@@ -573,6 +577,14 @@ p.klein { color: var(--text3); font-size: var(--t-klein); }
   padding: calc(var(--px) * 6) calc(var(--px) * 6) calc(var(--px) * 5);
   text-align: center;
   animation: aufploppen 0.22s ease-out;
+  /* 27.10. (gemeldet bei den Stammgast-Geschichten: Scrollen ging manchmal nicht, „Schließen" war
+     nicht zu sehen): Titel oben und Knöpfe unten stehen fest, nur der Inhalt dazwischen scrollt */
+  display: flex; flex-direction: column; overflow: hidden;
+}
+#modal .box > h2, #modal .box > .knoepfe { flex: none; }
+#modal .box > .inhalt {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y;
 }
 @keyframes aufploppen { from { transform: scale(0.85); opacity: 0; } }
 #modal h2 { margin: 0 0 calc(var(--px) * 3); color: var(--rot2); font: 600 var(--t-kopf) var(--titelschrift); letter-spacing: 0.02em; }
@@ -1371,7 +1383,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .anl-mehr .rezeptbuch { margin-top: calc(var(--px) * 1); }
 
 /* Stammgast-Geschichten zum Nachlesen (Album, 25.10.) */
-#modal .stamm-buch { list-style: none; margin: calc(var(--px) * 2) 0 0; padding: 0; text-align: left; max-height: calc(var(--px) * 150); overflow-y: auto; }
+#modal .stamm-buch { list-style: none; margin: calc(var(--px) * 2) 0 0; padding: 0; text-align: left; }   /* 27.10.: kein eigener Scrollbereich mehr - im Fenster scrollte sonst ein Bereich IM Bereich (auf dem iPhone ging das oft nicht) */
 #modal .stamm-buch li { display: flex; gap: calc(var(--px) * 2); padding: calc(var(--px) * 1.4) calc(var(--px) * 1); border-bottom: calc(var(--px) * 0.4) solid #e6d4ac; font-size: var(--t-text); line-height: 1.35; }
 #modal .stamm-buch li:last-child { border-bottom: none; }
 #modal .stamm-buch .nr { flex: none; width: calc(var(--px) * 6); color: #b8862a; font-weight: bold; text-align: right; }

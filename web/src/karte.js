@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610271100';
-import * as S from './spiel.js?v=202610271100';
-import * as Z from './zeit.js?v=202610271100';
-import * as FEIN from './fein.js?v=202610271100';
-import * as T from './ton.js?v=202610271100';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610271100';
+import * as C from './config.js?v=202610271300';
+import * as S from './spiel.js?v=202610271300';
+import * as Z from './zeit.js?v=202610271300';
+import * as FEIN from './fein.js?v=202610271300';
+import * as T from './ton.js?v=202610271300';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610271300';
 
 const $ = (s) => document.querySelector(s);
 
@@ -1160,8 +1160,8 @@ function zeichneSanta(t, dt, winter) {
     hoch = 9 + Math.round(Math.sin(Math.min(1, s.gefunden / 0.6) * Math.PI) * 10);
     if (s.gefunden > 1.4) { santa = null; return; }
   } else {
-    const k = s.t % 3.5;
-    hoch = k < 0.4 ? Math.round(k / 0.4 * 9) : k < 2.4 ? 9 : k < 2.8 ? Math.round((2.8 - k) / 0.4 * 9) : 0;
+    const k = s.t % 4.5;   // 27.10.: länger zu sehen (vorher 3,5-s-Takt, 2 s ganz oben)
+    hoch = k < 0.4 ? Math.round(k / 0.4 * 9) : k < 3.8 ? 9 : k < 4.2 ? Math.round((4.2 - k) / 0.4 * 9) : 0;
   }
   if (hoch > 0) {
     const y = fuss - 4 - hoch;   // Oberkante der Mütze
@@ -1171,7 +1171,7 @@ function zeichneSanta(t, dt, winter) {
     r(c, x - 2, y + 4, 4, 2, '#f2c9a0'); p(c, x - 1, y + 4, '#2a1a1a'); p(c, x + 1, y + 4, '#2a1a1a');
     r(c, x - 3, y + 6, 6, 3, '#ffffff'); p(c, x, y + 6, '#e8a0a0');
     r(c, x - 3, y + 9, 6, 4, '#c82828');
-    if (s.gefunden >= 0 || (s.t % 3.5) > 0.6) {
+    if (s.gefunden >= 0 || (s.t % 4.5) > 0.6) {
       const w = Math.floor(t * 6) % 2;
       r(c, x + 3, y + 6 - w, 1, 3, '#c82828'); p(c, x + 4, y + 5 - w, '#ffffff');
     }

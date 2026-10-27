@@ -5,28 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610271100';
-import * as S from './spiel.js?v=202610271100';
-import * as Z from './zeit.js?v=202610271100';
-import * as T from './ton.js?v=202610271100';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271100';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610271100';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271100';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271100';
-import * as A from './auftraege.js?v=202610271100';
-import * as E from './erfolge.js?v=202610271100';
-import * as ZL from './ziele.js?v=202610271100';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271100';
-import * as KA from './karte.js?v=202610271100';
-import { zeigeRueckblick } from './ereignis.js?v=202610271100';
-import { barbaraZweig } from './szene.js?v=202610271100';
-import * as SW from './schneeball.js?v=202610271100';
-import * as LI from './lichtung.js?v=202610271100';
-import * as CB from './christbaum.js?v=202610271100';
-import * as SB from './schlitten.js?v=202610271100';
-import * as EB from './schlittschuh.js?v=202610271100';
-import * as BS from './backstube.js?v=202610271100';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271100';
+import * as C from './config.js?v=202610271300';
+import * as S from './spiel.js?v=202610271300';
+import * as Z from './zeit.js?v=202610271300';
+import * as T from './ton.js?v=202610271300';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271300';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610271300';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271300';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271300';
+import * as A from './auftraege.js?v=202610271300';
+import * as E from './erfolge.js?v=202610271300';
+import * as ZL from './ziele.js?v=202610271300';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271300';
+import * as KA from './karte.js?v=202610271300';
+import { zeigeRueckblick } from './ereignis.js?v=202610271300';
+import { barbaraZweig } from './szene.js?v=202610271300';
+import * as SW from './schneeball.js?v=202610271300';
+import * as LI from './lichtung.js?v=202610271300';
+import * as CB from './christbaum.js?v=202610271300';
+import * as SB from './schlitten.js?v=202610271300';
+import * as EB from './schlittschuh.js?v=202610271300';
+import * as BS from './backstube.js?v=202610271300';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271300';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -928,7 +928,39 @@ function baueLaden() {
     liste.appendChild(z);
     zeilen.push({ a, z, knopf, txt, versteckt });
   }
+  if (ladenTab === 'super') rezeptZeilen(liste);
   aktualisiereLaden();
+}
+/**
+ * Rezepte im Supermarkt (27.10., Nutzerwunsch: vorher nur eins je Markttag auf dem Festplatz).
+ * Je Rezept +20 % auf zwei Getränke, Preis wie früher auf dem Markt (Minuten Einnahmen).
+ */
+function rezeptZeilen(liste) {
+  liste.appendChild(el('div', 'gruppe haus-abschnitt', 'Rezepte'));
+  for (const w of C.MARKT_REZEPTE) {
+    const hat = !!(S.st.rezepte || {})[w.id];
+    const z = el('div', 'zeile' + (hat ? ' besessen' : ''));
+    const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
+    zeichneIcon(cv, w);
+    z.appendChild(cv);
+    const keinGetraenk = !w.fuer.some((id) => S.hat(id));
+    z.appendChild(el('div', 'txt', `<b>${w.name}</b><span>${marktText(w)}${!hat && keinGetraenk ? ' Du hast noch keins der beiden Getränke.' : ''}</span>`));
+    const platz = el('div', 'knopfplatz');
+    if (hat) platz.innerHTML = '<button class="k k--fertig" disabled><span class="haken">✓</span></button>';
+    else {
+      const preis = S.haendlerPreis(w);
+      const k = el('button', 'k k--kauf' + (S.st.geld >= preis ? '' : ' gesperrt'), S.formatGeld(preis));
+      k.onclick = () => {
+        if (!S.kaufeRezept(w.id)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
+        T.spiele('spezial');
+        toast(`${w.name}: ${marktText(w)}`, 'spezial');
+        const pos = liste.scrollTop; baueLaden(); liste.scrollTop = pos;
+      };
+      platz.appendChild(k);
+    }
+    z.appendChild(platz);
+    liste.appendChild(z);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1628,12 +1660,12 @@ function rezeptHinweis(id) {
 export function zeigeMarkt() {
   const m = S.marktInfo();
   const deko = C.MARKT_DEKO.filter((d) => S.st.kalDeko[d.id]).length;
-  const rez = C.MARKT_REZEPTE.filter((x) => (S.st.rezepte || {})[x.id]).length;
   // 24.10.: Sammelstand als Kärtchen, die Erklärung nur beim ersten Mal offen
-  const stand = `<div class="mini-chips"><span>Markt-Deko <b>${deko}/${C.MARKT_DEKO.length}</b></span><span>Rezepte <b>${rez}/${C.MARKT_REZEPTE.length}</b></span></div>`;
+  // 27.10.: Rezepte gibt es nicht mehr hier, sondern jederzeit im Supermarkt
+  const stand = `<div class="mini-chips"><span>Markt-Deko <b>${deko}/${C.MARKT_DEKO.length}</b></span></div>`;
   const wasGibts = erklaerung('markt', `<ol class="mini-anleitung">
-      <li><b>Deko</b>, die es nur auf dem Markt gibt.</li>
-      <li><b>Rezepte</b>: Deine Getränke bringen dauerhaft mehr Sterne.</li>
+      <li><b>Deko</b>, die es nur auf dem Markt gibt - jedes Mal eine andere Auswahl.</li>
+      <li><b>Rezepte</b> für mehr Sterne gibt es jederzeit im Supermarkt.</li>
       <li>Am Markttag kommen <b>${Math.round(C.MARKT_GAESTE * 100)} % mehr Gäste</b> an deinen Stand.</li></ol>`, 'Was gibt es dort?');
   if (!m.heute) {
     const wann = m.inTagen === 1 ? 'morgen' : `am ${WOCHENTAG[m.datum.getDay()]}, ${m.datum.getDate()}.${m.datum.getMonth() + 1}. (in ${m.inTagen} Tagen)`;

@@ -192,7 +192,7 @@ In allen Minispielen pausiert die Musik und läuft danach an derselben Stelle
 weiter. Jedes Minispiel hat drei Schwierigkeiten: Leicht (Punkte ×0,7),
 Normal und Schwer (Punkte ×1,4) - der Rekord gilt für alle.
 
-**Special des Tages:** Alle zwei bis drei Tage glitzert ein Minispiel golden
+**Special des Tages:** Sobald drei Minispiele offen sind, glitzert jeden zweiten Tag eines golden
 auf der Karte. Dort gibt es an diesem Tag **doppelte Sterne**, dafür ist es
 schwerer: etwas schneller und mit einem eigenen Dreh (mehr Rehe, ungeduldige
 Kunden, schmaler goldener Bereich, mehr Hindernisse oder mehr Wichtel). Nach
@@ -214,8 +214,10 @@ bekommt Sterne geschenkt.
 ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.
 Am Markttag kommen 20 % mehr Gäste an deinen Stand, und auf dem Markt gibt es
 Deko, die es nur dort gibt (Riesenrad, Herrnhuter Stern, Pferdekutsche,
-Fensterbilder, Lebkuchenherzen), dazu jedes Mal ein Rezept, mit dem zwei
-Getränke dauerhaft 20 % mehr Sterne bringen.
+Fensterbilder, Lebkuchenherzen) - jedes Mal drei davon, immer andere.
+
+**Rezepte** (Supermarkt, jederzeit): Jedes lässt zwei Getränke dauerhaft 20 %
+mehr Sterne bringen.
 
 **Waldlichtung (Minispiel):** Hasen, Eichhörnchen und Rehe ziehen durch die
 Lichtung - die Rehe im schnellen Galopp - tippe sie an, um sie zu füttern. 40 Sekunden, schnelles Füttern

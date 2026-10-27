@@ -728,8 +728,8 @@ export const MARKT_REZEPTE = [
 ];
 // Der Weihnachtsmann versteckt sich auf der Karte (10.10.): selten, an
 // wechselnden Stellen. Antippen schenkt Sterne.
-export const SANTA_CHANCE = 0.2;       // je Öffnen der Karte
-export const SANTA_PRO_TAG = 2;
+export const SANTA_CHANCE = 0.35;      // je Öffnen der Karte (27.10.: 0,2 - kam zu selten); mit offenem Wunsch immer
+export const SANTA_PRO_TAG = 3;        // 27.10.: vorher 2
 export const SANTA_MINUTEN = 5;        // so viele Minuten Einnahmen …
 export const SANTA_MIN = 300;          // … mindestens
 // Tagesansturm: einmal am Tag, nach so vielen Sekunden am Stand
@@ -1034,7 +1034,8 @@ export const MINI_SPECIAL = { laeuft: null };
 export const SPECIAL_TEMPO = 1.2;
 export const SPECIAL_STERNE = 2;
 export const SPECIAL_AB_TAG = 4;          // vorher wäre es zu viel auf einmal
-export const SPECIAL_ABSTAND = [2, 3];    // Tage zwischen zwei Specials
+export const SPECIAL_ABSTAND = 2;         // Tage zwischen zwei Specials (27.10.: vorher 2-3, Ausweichen vor dem Markttag)
+export const SPECIAL_MIN_SPIELE = 3;      // 27.10.: erst ab so vielen offenen Minispielen (vorher 2)
 export const SPECIAL_TEXT = {
   lichtung: 'mehr Rehe und Eichhörnchen!',
   baum:     'ungeduldige Kunden!',

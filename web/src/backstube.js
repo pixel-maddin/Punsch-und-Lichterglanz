@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610271100';
-import * as Z from './zeit.js?v=202610271100';
-import * as T from './ton.js?v=202610271100';
-import * as MH from './minihud.js?v=202610271100';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610271100';
+import * as C from './config.js?v=202610271300';
+import * as Z from './zeit.js?v=202610271300';
+import * as T from './ton.js?v=202610271300';
+import * as MH from './minihud.js?v=202610271300';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610271300';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -34,6 +34,8 @@ const MASKEN = {
   herz:  ['.##...##.', '####.####', '#########', '#########', '.#######.', '..#####..', '...###...', '....#....'],
   baum:  ['....#....', '...###...', '..#####..', '...###...', '..#####..', '.#######.', '#########', '....#....'],
   kreis: ['..#####..', '.#######.', '####.####', '###...###', '####.####', '.#######.', '..#####..'],
+  // 27.10.: kein Rezept - der viereckige Lebkuchen unter jeder Schale zeigt, wie die Verzierung aussieht
+  quadrat: ['.#######.', '#########', '#########', '#########', '#########', '#########', '.#######.'],
 };
 const istTeig = (m, x, y) => y >= 0 && y < m.length && x >= 0 && x < m[0].length && m[y][x] === '#';
 /** Innen = alle vier Nachbarn sind Teig (dort liegt die Verzierung). */
@@ -120,8 +122,11 @@ export const zustand = () => spiel;
 const THEKE = () => Math.round(H * 0.34);
 const BLECH = () => ({ x: 104, y: Math.round(H * 0.5) });
 const OFEN = () => ({ x: 134, y: Math.round(H * 0.4), b: 42, h: Math.round(H * 0.2) });
-const FORM_Y = () => Math.round(H * 0.7);
-const SCHALE_Y = () => Math.round(H * 0.87);
+// 27.10. (gemeldet: Zutaten zu weit unten, Puderzucker und Guss nicht auseinanderzuhalten): beide
+// Reihen höher, unter jeder Schale ein Lebkuchen mit der Verzierung als Vorschau (VORSCHAU_DY)
+const FORM_Y = () => Math.round(H * 0.66);
+const SCHALE_Y = () => Math.round(H * 0.78);
+const VORSCHAU_DY = 9;   // Oberkante des Vorschau-Lebkuchens unter der Schalenmitte
 const KUNDE = () => ({ x: 150, y: THEKE() + 1 });
 const slot = (i, n) => Math.round((i + 0.5) * W / n);
 
@@ -223,7 +228,7 @@ export function tippeAuf(x, y) {
     return;
   }
   // 3. Verzierung
-  if (Math.abs(y - sy) < 16) {
+  if (y > sy - 18 && y < sy + VORSCHAU_DY + 22) {   // Schale, Vorschau-Lebkuchen oder Schild
     if (g.schritt !== 'verzieren' || !g.ware) { fehl(x, y); return; }
     const i = Math.max(0, Math.min(dekos.length - 1, Math.floor(x / (W / dekos.length))));
     const d = dekos[i];
@@ -522,16 +527,19 @@ function baueKulisse(nacht) {
   const fy0 = FORM_Y() - 13;
   r(c, 2, fy0, W - 4, 26, '#f4ecdc'); r(c, 2, fy0 + 26, W - 4, 1, 'rgba(50,25,10,0.35)'); r(c, 2, fy0, W - 4, 1, '#fffaf2');
   for (let i = 0; i < 20; i++) p(c, 3 + Math.floor(hash(i + 300) * (W - 6)), fy0 + 1 + Math.floor(hash(i + 310) * 24), '#ffffff');
-  const sy0 = SCHALE_Y() - 13;
-  r(c, 2, sy0, W - 4, 26, '#e8dcc4'); r(c, 2, sy0 + 1, W - 4, 1, '#c84040'); r(c, 2, sy0 + 24, W - 4, 1, '#c84040'); r(c, 2, sy0 + 26, W - 4, 1, 'rgba(50,25,10,0.35)');
-  for (let i = 0; i < 30; i++) p(c, 3 + Math.floor(hash(i + 340) * (W - 6)), sy0 + 3 + Math.floor(hash(i + 350) * 20), '#ddd0b6');   // Leinenstruktur
+  // Läufer reicht seit 27.10. bis unter die Vorschau-Lebkuchen und die Schilder
+  const sy0 = SCHALE_Y() - 13, sh = VORSCHAU_DY + 44;
+  r(c, 2, sy0, W - 4, sh, '#e8dcc4'); r(c, 2, sy0 + 1, W - 4, 1, '#c84040'); r(c, 2, sy0 + sh - 2, W - 4, 1, '#c84040'); r(c, 2, sy0 + sh, W - 4, 1, 'rgba(50,25,10,0.35)');
+  for (let i = 0; i < 44; i++) p(c, 3 + Math.floor(hash(i + 340) * (W - 6)), sy0 + 3 + Math.floor(hash(i + 350) * (sh - 6)), '#ddd0b6');   // Leinenstruktur
   c = ziel;
 
   // Lichtkarte: dämmriger Grund, helle Inseln - wird über die fertige Szene multipliziert
   lichtKarte = document.createElement('canvas');
   lichtKarte.width = W; lichtKarte.height = H;
   const l = lichtKarte.getContext('2d');
-  l.fillStyle = nacht ? '#4a3a4e' : '#9c887a'; l.fillRect(0, 0, W, H);
+  // 27.10. (gemeldet: nachts schlecht lesbar): Grund nachts heller (vorher #4a3a4e), dazu unten
+  // eigenes Arbeitslicht über den beiden Reihen, in denen man tippt
+  l.fillStyle = nacht ? '#6a5864' : '#9c887a'; l.fillRect(0, 0, W, H);
   const insel = (x, y, rad, farbe, a) => {
     const g = l.createRadialGradient(x, y, 0, x, y, rad);
     g.addColorStop(0, `rgba(${farbe},${a})`); g.addColorStop(0.5, `rgba(${farbe},${(a * 0.45).toFixed(3)})`); g.addColorStop(1, `rgba(${farbe},0)`);
@@ -543,6 +551,10 @@ function baueKulisse(nacht) {
   insel(25, 32, 26, '255,190,110', nacht ? 0.5 : 0.25);                       // Schwibbogen
   insel(STERN.x, STERN.y, 50, '255,200,120', nacht ? 0.55 : 0.3);            // Herrnhuter Stern
   insel(155, H * 0.5, 60, '255,170,110', nacht ? 0.2 : 0.12);                // Ofenecke
+  for (const yy of [FORM_Y(), SCHALE_Y() + 8]) {                              // Arbeitslicht über den Tipp-Reihen
+    insel(W * 0.25, yy, 70, '255,236,200', nacht ? 0.5 : 0.25);
+    insel(W * 0.75, yy, 70, '255,236,200', nacht ? 0.5 : 0.25);
+  }
 }
 
 /** Was flackert und funkelt (jedes Bild, NACH der Lichtkarte): Kerzen, Lichterkette, Lampe. */
@@ -666,7 +678,11 @@ function schale(i, n, d) {
     r(c, x - 4, y - 18, 9, 3, '#9a9aa8'); r(c, x - 3, y - 16, 7, 1, '#c8c8d4'); r(c, x + 5, y - 17, 5, 1, '#6a4a32');
     for (let k = 0; k < 6; k++) p(c, x - 3 + (k * 3) % 7, y - 14 + k, '#ffffff');
   } else r(c, x + 8, y - 12, 1, 8, '#c8a878');   // Löffel / Pinsel
-  MH.label('schale' + i, x, y + 9, C.BACK_DEKOS[d].kurz, 'schild');
+  // Vorschau (27.10.): ein viereckiger Lebkuchen mit genau dieser Verzierung, mit kleinem Schatten
+  const vy = y + VORSCHAU_DY;
+  r(c, x - 8, vy + 2, 18, 13, 'rgba(70,40,20,0.25)');
+  zeichnePlaetzchen(c, x - 9, vy, 'quadrat', 'dunkel', d, 2);
+  MH.label('schale' + i, x, vy + 16, C.BACK_DEKOS[d].kurz, 'schild');
 }
 // Kunden doppelt so groß wie auf der Straße (sonst ging er hinter der Theke
 // unter). Seit 11.10. die GROSSE Figur vom Tresen, nativ gezeichnet - vorher

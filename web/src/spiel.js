@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610271100';
-import * as Z from './zeit.js?v=202610271100';
-import { neueFarben } from './pixel.js?v=202610271100';
+import * as C from './config.js?v=202610271300';
+import * as Z from './zeit.js?v=202610271300';
+import { neueFarben } from './pixel.js?v=202610271300';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1737,8 +1737,20 @@ export function marktAngebot() {
   const d = tagNr();
   const rest = C.MARKT_DEKO.filter((x) => !st.kalDeko[x.id]);
   rest.sort((a, b) => Z.hash(d * 7 + a.id.length * 13 + a.id.charCodeAt(2)) - Z.hash(d * 7 + b.id.length * 13 + b.id.charCodeAt(2)));
-  const rezept = C.MARKT_REZEPTE.find((x) => !(st.rezepte || {})[x.id] && x.fuer.some((id) => hat(id) || id === 'gluehwein'));
-  return { deko: rest.slice(0, C.MARKT_ANGEBOT), rezept: rezept || null };
+  // 27.10. (Nutzerwunsch): Rezepte gibt es nicht mehr auf dem Markt, sondern jederzeit im Supermarkt
+  return { deko: rest.slice(0, C.MARKT_ANGEBOT), rezept: null };
+}
+/** Ein Rezept im Supermarkt kaufen (27.10.). true = gekauft. */
+export function kaufeRezept(id) {
+  const w = C.MARKT_REZEPTE.find((x) => x.id === id);
+  if (!w || (st.rezepte || {})[id]) return false;
+  const preis = haendlerPreis(w);
+  if (st.geld < preis) return false;
+  st.rezepte = st.rezepte || {}; st.rezepte[id] = true;
+  st.geld -= preis;
+  hooks.ton('kauf'); hooks.geld();
+  speichere();
+  return true;
 }
 /** Aufschlag eines Getränks durch Rezepte vom Markt. */
 export function produktPreis(p) {
@@ -1822,11 +1834,10 @@ export function miniErgebnis(name, punkte) {
   return { sterne, special, rekord: punkte > vorher && vorher > 0, best: l.best, neu, rest: miniRest(name) };
 }
 /*
- * Minispiel-Special (24.10.): ab SPECIAL_AB_TAG nach dem ersten Spieltag alle
- * 2-3 Tage, Takt aus dem Markt-Seed (gleich nach jedem Neuladen), Spiele reihum, nie an
- * einem Markttag (dann einen Tag später) und nie zweimal dasselbe Spiel
- * hintereinander. Nur offene Spiele, erst wenn mindestens zwei offen sind und
- * die Karte vorgestellt ist. Je Tag einmal gerechnet.
+ * Minispiel-Special (24.10., Takt 27.10.): ab SPECIAL_AB_TAG nach dem ersten Spieltag jeden
+ * SPECIAL_ABSTAND-ten Tag, Spiele reihum (Reihenfolge aus dem Markt-Seed), nie zweimal dasselbe
+ * Spiel hintereinander. Nur offene Spiele, erst ab SPECIAL_MIN_SPIELE offenen und wenn die Karte
+ * vorgestellt ist. Fällt es auf einen Markttag, ist beides am selben Tag. Je Tag einmal gerechnet.
  */
 let specialMerk = { schluessel: '', name: null };
 export function specialHeute() {
@@ -1835,8 +1846,10 @@ export function specialHeute() {
   const heute = tagNr(), schluessel = heute + ':' + offen.join(',');
   if (specialMerk.schluessel === schluessel) return specialMerk.name;
   let name = null;
-  if (offen.length >= 2) {
-    const m = marktStand(), [a, b] = C.SPECIAL_ABSTAND;
+  // 27.10. (Nutzerwunsch): alle SPECIAL_ABSTAND (2) Tage, erst ab SPECIAL_MIN_SPIELE (3) offenen
+  // Minispielen - ohne Ausweichen vor dem Markttag (vorher 2-3 Tage, nie am Markttag, ab 2 Spielen)
+  if (offen.length >= C.SPECIAL_MIN_SPIELE) {
+    const m = marktStand();
     // Feste, je Spielstand gemischte Reihenfolge ALLER Spiele, der Reihe nach (Betatest 24.10.:
     // mit einem Zufallsgriff in die heute offenen war die Backstube 6 von 13 Mal dran, und weil
     // sich die Liste mit jedem neuen Spiel änderte, griff die Sperre gegen Wiederholung nicht).
@@ -1846,17 +1859,13 @@ export function specialHeute() {
     // Nie zweimal dasselbe hintereinander: verglichen mit dem Special, das WIRKLICH zuletzt dran war
     // (st.specialLetzt) - nachgerechnet kam rückwirkend etwas anderes heraus, sobald ein Spiel aufging
     const letzt = st.specialLetzt;
-    let k = m.anker + C.SPECIAL_AB_TAG;
-    for (let i = 0; i < 80 && k <= heute; i++) {
-      const tag = istMarkt(k) ? k + 1 : k;   // Markttag: einen Tag später, der Takt bleibt
-      if (tag === heute) {
-        if (letzt && letzt.tag === heute && offen.includes(letzt.name)) { name = letzt.name; break; }   // heute schon festgelegt
-        name = nimm(i);
+    const start = m.anker + C.SPECIAL_AB_TAG, seit = heute - start;
+    if (seit >= 0 && seit % C.SPECIAL_ABSTAND === 0) {
+      if (letzt && letzt.tag === heute && offen.includes(letzt.name)) name = letzt.name;   // heute schon festgelegt
+      else {
+        name = nimm(seit / C.SPECIAL_ABSTAND);
         if (letzt && letzt.tag < heute && letzt.name === name) name = nimm(reihe.indexOf(name) + 1);
-        break;
       }
-      if (tag > heute) break;
-      k = tag === k ? k + a + (Z.hash(m.seed + k * 2.3 + 7) < 0.5 ? 0 : b - a) : tag + a;   // nach einer Verschiebung nie zwei Tage hintereinander
     }
     if (name && (!letzt || letzt.tag !== heute)) st.specialLetzt = { tag: heute, name };
   }
@@ -1898,10 +1907,22 @@ export const lichtungRekord = () => miniRekord('lichtung');
 export const lichtungErgebnis = (punkte) => miniErgebnis('lichtung', punkte);
 
 /** Versteckt sich der Weihnachtsmann diesmal auf der Karte? (würfelt, zählt je Tag) */
+/**
+ * Sucht gerade jemand den Weihnachtsmann (Wunschzettel oder Bitte von Sophia)? Dann zeigt er sich
+ * bei jedem Öffnen der Karte (27.10., gemeldet: „zu selten, besonders mit dem Brief"). Kein
+ * Dauer-Geschenk: Der Wunsch ist mit dem ersten Fund erfüllt.
+ */
+function santaGesucht() {
+  const b = st.briefe && st.briefe.aktiv;
+  if (b && b.art === 'santa' && !b.dank && (st.stats.santa || 0) <= (b.start || 0)) return true;
+  const bt = st.bitte, d = bt && C.STAMM_BITTEN[bt.gast] && C.STAMM_BITTEN[bt.gast][bt.i];
+  return !!(d && d.art === 'santa' && !bt.abgeholt && (st.stats.santa || 0) <= (bt.start || 0));
+}
 export function santaWuerfeln() {
   if (st.lernen < 99 || !st.tipps || !st.tipps.karte_mehr || !einstieg('santa')) return false;
   const s = st.santaKarte && st.santaKarte.tag === echtMitternacht() ? st.santaKarte : { tag: echtMitternacht(), n: 0 };
   st.santaKarte = s;
+  if (santaGesucht()) { s.n++; speichere(); return true; }
   if (s.n >= C.SANTA_PRO_TAG || Math.random() >= C.SANTA_CHANCE) return false;
   s.n++;
   speichere();
