@@ -686,7 +686,7 @@ export const HAENDLER_PRO_TAG = 2;
 export const HAENDLER_ERST = [60, 150];   // s am Stand bis zum ersten Besuch der Sitzung
 export const HAENDLER_PAUSE = 360;        // s am Stand bis zum zweiten
 export const HAENDLER_BLEIBT = 150;
-export const HAENDLER_X = 16;             // Halteplatz auf dem Gehweg (links vor dem Haus)
+export const HAENDLER_X = 48;             // Halteplatz auf dem Gehweg (links vor dem Haus; 27.10.: vorher 16, klebte am Rand - Karren bei 34-47, rechts vom eigenen Schneemann)
 // Preise in Minuten Einnahmen (einnahmenProMinute), damit er früh wie spät
 // etwas kostet, aber erreichbar bleibt - mindestens `min` Sterne
 export const HAENDLER_DEKO = [
@@ -1169,7 +1169,6 @@ export const SILVESTER_STUNDE = 18;
 // keine Nennung - der Nutzer möchte die Leute trotzdem nennen. `seite` = Adresse unter pixabay.com/music/.
 export const MUSIK_CREDITS = [
   { wo: 'Am Haus', stuecke: [
-    { titel: 'Lofi Christmas Music', von: 'alex-morgan', seite: 'modern-jazz-lofi-christmas-music-552764' },
     { titel: 'Jazz Christmas New Year Eve Cozy Winter Vibes', von: 'Denis-Pavlov-Music', seite: 'traditional-jazz-jazz-christmas-new-year-eve-cozy-winter-vibes-449122' } ] },
   { wo: 'An den Weihnachtstagen', stuecke: [
     { titel: 'Soft Christmas Piano Music for Cozy Nights', von: 'Clavier-Music', seite: 'christmas-soft-christmas-piano-music-for-cozy-nights-250833' } ] },

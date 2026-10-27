@@ -2,8 +2,8 @@
  * ton.js - Geräusche (synthetisiert) und die Musik.
  *
  * MUSIK (seit 27.10.): drei Szenen mit je einer Wiedergabeliste, dazu ein Jingle.
- *   haus  - `musik-haus` (Suno, auf 4:10 gekürzt), `haus-lofi`, `haus-jazz` (auf 3:52 gekürzt) in
- *           zufälliger Reihenfolge. 24.-26.12. abwechselnd `xmas` und eins davon.
+ *   haus  - `musik-haus` (Suno, auf 4:10 gekürzt) und `haus-jazz` (auf 3:52 gekürzt) im Wechsel
+ *           (27.10.: `haus-lofi` auf Wunsch wieder raus). 24.-26.12. abwechselnd `xmas` und eins davon.
  *   karte - bis zum 1. Advent `musik-karte` (Suno), danach je Advent ein Stück mehr (`karte-1..3`);
  *           das neueste kommt beim ersten Öffnen der Sitzung zuerst, danach zufällig.
  *   mini  - `mini-1`/`mini-2`, zufällig je Minispiel, in Schleife.
@@ -20,13 +20,13 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-import * as Z from './zeit.js?v=202610272345';
+import * as Z from './zeit.js?v=202610280000';
 
 let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
-const url = (id) => `audio/${id}.m4a?v=202610272345`;
-const HAUS = ['musik-haus', 'haus-lofi', 'haus-jazz'];
+const url = (id) => `audio/${id}.m4a?v=202610280000`;
+const HAUS = ['musik-haus', 'haus-jazz'];
 const XMAS = 'xmas';
 const KARTE_ALT = 'musik-karte';
 const KARTE_ADVENT = ['karte-1', 'karte-2', 'karte-3'];   // 1., 2., 3. Advent

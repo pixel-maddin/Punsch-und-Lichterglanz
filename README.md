@@ -358,7 +358,7 @@ alte Dateien.
 
 ## Musik
 
-- **Am Haus** drei Stücke in zufälliger Reihenfolge; vom 24. bis 26. Dezember
+- **Am Haus** zwei Stücke im Wechsel; vom 24. bis 26. Dezember
   kommt im Wechsel ein Weihnachtsstück dazu.
 - **Auf der Karte** bis zum 1. Advent ein Stück, danach mit jedem Advent
   (1. bis 3.) ein neues - das neue läuft beim ersten Öffnen zuerst.
@@ -366,8 +366,8 @@ alte Dateien.
 - **Bei großen Ereignissen** (Advent, erster Schnee, Jury, Heiligabend,
   Silvester, Finale) ein kurzer Jingle, die Musik wird solange leiser.
 
-Neun Stücke sind von [Pixabay](https://pixabay.com/music/) (Pixabay Content
-License) - von alex-morgan, Denis-Pavlov-Music, Clavier-Music, The_Mountain,
+Acht Stücke sind von [Pixabay](https://pixabay.com/music/) (Pixabay Content
+License) - von Denis-Pavlov-Music, Clavier-Music, The_Mountain,
 TheStorytellingPodcast, Top-Flow und kaazoom. Im Spiel stehen alle unter
 Menü → Einstellungen → **Credits**. Zwei Stücke (`musik-haus.m4a`,
 `musik-karte.m4a`) sind mit [Suno](https://suno.com) entstanden und werden
