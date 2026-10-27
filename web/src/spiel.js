@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610272200';
-import * as Z from './zeit.js?v=202610272200';
-import { neueFarben } from './pixel.js?v=202610272200';
+import * as C from './config.js?v=202610272300';
+import * as Z from './zeit.js?v=202610272300';
+import { neueFarben } from './pixel.js?v=202610272300';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1740,13 +1740,25 @@ export function marktAngebot() {
   // 27.10. (Nutzerwunsch): Rezepte gibt es nicht mehr auf dem Markt, sondern jederzeit im Supermarkt
   return { deko: rest.slice(0, C.MARKT_ANGEBOT), rezept: null };
 }
-/** Ein Rezept im Supermarkt kaufen (27.10.). true = gekauft. */
+/** Stufe eines Rezepts 0..3 (27.10.; alte Spielstände speicherten `true` = Stufe 1). */
+export function rezeptStufe(id) { const v = (st.rezepte || {})[id]; return v === true ? 1 : Math.max(0, Math.min(C.REZEPT_STUFEN.length, v | 0)); }
+/** Aufschlag eines Rezepts bis zur erreichten Stufe (0,2 · 0,5 · 0,9). */
+export function rezeptPlus(id, stufe = rezeptStufe(id)) { return C.REZEPT_STUFEN.slice(0, stufe).reduce((a, x) => a + x.plus, 0); }
+/** Preis der nächsten Stufe (oder null, wenn ausgebaut). */
+export function rezeptPreis(w) {
+  const s = rezeptStufe(w.id);
+  if (s >= C.REZEPT_STUFEN.length) return null;
+  const f = C.REZEPT_STUFEN[s].preis;
+  return haendlerPreis({ min: w.min * f, minuten: w.minuten * f });
+}
+/** Ein Rezept im Supermarkt kaufen (27.10.), je Kauf eine Stufe mehr. true = gekauft. */
 export function kaufeRezept(id) {
   const w = C.MARKT_REZEPTE.find((x) => x.id === id);
-  if (!w || (st.rezepte || {})[id]) return false;
-  const preis = haendlerPreis(w);
+  const s = rezeptStufe(id);
+  if (!w || s >= C.REZEPT_STUFEN.length) return false;
+  const preis = rezeptPreis(w);
   if (st.geld < preis) return false;
-  st.rezepte = st.rezepte || {}; st.rezepte[id] = true;
+  st.rezepte = st.rezepte || {}; st.rezepte[id] = s + 1;
   st.geld -= preis;
   hooks.ton('kauf'); hooks.geld();
   speichere();
@@ -1755,7 +1767,7 @@ export function kaufeRezept(id) {
 /** Aufschlag eines Getränks durch Rezepte vom Markt. */
 export function produktPreis(p) {
   let f = 1;
-  if (st.rezepte) for (const x of C.MARKT_REZEPTE) if (st.rezepte[x.id] && x.fuer.includes(p.id)) f += x.plus;
+  for (const x of C.MARKT_REZEPTE) if (x.fuer.includes(p.id)) f += rezeptPlus(x.id);
   return p.preis * f;
 }
 /** Auf dem Markt kaufen (Deko oder Rezept). true = gekauft. */

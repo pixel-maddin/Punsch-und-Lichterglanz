@@ -216,8 +216,9 @@ Am Markttag kommen 20 % mehr Gäste an deinen Stand, und auf dem Markt gibt es
 Deko, die es nur dort gibt (Riesenrad, Herrnhuter Stern, Pferdekutsche,
 Fensterbilder, Lebkuchenherzen) - jedes Mal drei davon, immer andere.
 
-**Rezepte** (Supermarkt, jederzeit): Jedes lässt zwei Getränke dauerhaft 20 %
-mehr Sterne bringen.
+**Rezepte** (Supermarkt, jederzeit): Jedes lässt zwei Getränke dauerhaft mehr
+Sterne bringen, in drei Stufen - erst +20 %, dann nochmal +30 %, dann nochmal +40 %
+(zusammen +90 %). Jede Stufe kostet mehr als die vorige.
 
 **Waldlichtung (Minispiel):** Hasen, Eichhörnchen und Rehe ziehen durch die
 Lichtung - die Rehe im schnellen Galopp - tippe sie an, um sie zu füttern. 40 Sekunden, schnelles Füttern

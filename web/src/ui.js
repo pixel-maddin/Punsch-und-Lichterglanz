@@ -5,28 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610272200';
-import * as S from './spiel.js?v=202610272200';
-import * as Z from './zeit.js?v=202610272200';
-import * as T from './ton.js?v=202610272200';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610272200';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610272200';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610272200';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610272200';
-import * as A from './auftraege.js?v=202610272200';
-import * as E from './erfolge.js?v=202610272200';
-import * as ZL from './ziele.js?v=202610272200';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610272200';
-import * as KA from './karte.js?v=202610272200';
-import { zeigeRueckblick } from './ereignis.js?v=202610272200';
-import { barbaraZweig } from './szene.js?v=202610272200';
-import * as SW from './schneeball.js?v=202610272200';
-import * as LI from './lichtung.js?v=202610272200';
-import * as CB from './christbaum.js?v=202610272200';
-import * as SB from './schlitten.js?v=202610272200';
-import * as EB from './schlittschuh.js?v=202610272200';
-import * as BS from './backstube.js?v=202610272200';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610272200';
+import * as C from './config.js?v=202610272300';
+import * as S from './spiel.js?v=202610272300';
+import * as Z from './zeit.js?v=202610272300';
+import * as T from './ton.js?v=202610272300';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610272300';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610272300';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610272300';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610272300';
+import * as A from './auftraege.js?v=202610272300';
+import * as E from './erfolge.js?v=202610272300';
+import * as ZL from './ziele.js?v=202610272300';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610272300';
+import * as KA from './karte.js?v=202610272300';
+import { zeigeRueckblick } from './ereignis.js?v=202610272300';
+import { barbaraZweig } from './szene.js?v=202610272300';
+import * as SW from './schneeball.js?v=202610272300';
+import * as LI from './lichtung.js?v=202610272300';
+import * as CB from './christbaum.js?v=202610272300';
+import * as SB from './schlitten.js?v=202610272300';
+import * as EB from './schlittschuh.js?v=202610272300';
+import * as BS from './backstube.js?v=202610272300';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610272300';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -780,7 +780,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610272200`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610272300`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -965,28 +965,35 @@ function baueLaden() {
   aktualisiereLaden();
 }
 /**
- * Rezepte im Supermarkt (27.10., Nutzerwunsch: vorher nur eins je Markttag auf dem Festplatz).
- * Je Rezept +20 % auf zwei Getränke, Preis wie früher auf dem Markt (Minuten Einnahmen).
+ * Rezepte im Supermarkt (27.10., Nutzerwunsch: vorher nur eins je Markttag auf dem Festplatz),
+ * in drei Stufen (C.REZEPT_STUFEN: +20 %, nochmal +30 %, nochmal +40 % auf zwei Getränke).
  */
 function rezeptZeilen(liste) {
   liste.appendChild(el('div', 'gruppe haus-abschnitt', 'Rezepte'));
+  const pz = (f) => `${Math.round(f * 100)}${' '}%`;
+  const N = C.REZEPT_STUFEN.length;
   for (const w of C.MARKT_REZEPTE) {
-    const hat = !!(S.st.rezepte || {})[w.id];
-    const z = el('div', 'zeile' + (hat ? ' besessen' : ''));
+    const stufe = S.rezeptStufe(w.id), voll = stufe >= N;
+    const z = el('div', 'zeile' + (voll ? ' besessen' : ''));
     const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
     zeichneIcon(cv, w);
     z.appendChild(cv);
+    const namen = w.fuer.map((id) => C.PRODUKT[id].name).join(' und ');
+    const jetzt = S.rezeptPlus(w.id), naechst = voll ? null : C.REZEPT_STUFEN[stufe].plus;
+    const was = stufe === 0 ? `${namen} bringen dauerhaft ${pz(naechst)} mehr Sterne.`
+      : voll ? `${namen} bringen dauerhaft ${pz(jetzt)} mehr Sterne - ganz ausgebaut.`
+      : `${namen}: jetzt +${pz(jetzt)}. Stufe ${stufe + 1} bringt nochmal +${pz(naechst)} (dann +${pz(jetzt + naechst)}).`;
     const keinGetraenk = !w.fuer.some((id) => S.hat(id));
-    z.appendChild(el('div', 'txt', `<b>${w.name}</b><span>${marktText(w)}${!hat && keinGetraenk ? ' Du hast noch keins der beiden Getränke.' : ''}</span>`));
+    z.appendChild(el('div', 'txt', `<b>${w.name}${stufe ? ` <i>Stufe ${stufe}/${N}</i>` : ''}</b><span>${was}${!voll && keinGetraenk ? ' Du hast noch keins der beiden Getränke.' : ''}</span>`));
     const platz = el('div', 'knopfplatz');
-    if (hat) platz.innerHTML = '<button class="k k--fertig" disabled><span class="haken">✓</span></button>';
+    if (voll) platz.innerHTML = '<button class="k k--fertig" disabled><span class="haken">✓</span></button>';
     else {
-      const preis = S.haendlerPreis(w);
+      const preis = S.rezeptPreis(w);
       const k = el('button', 'k k--kauf' + (S.st.geld >= preis ? '' : ' gesperrt'), S.formatGeld(preis));
       k.onclick = () => {
         if (!S.kaufeRezept(w.id)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
         T.spiele('spezial');
-        toast(`${w.name}: ${marktText(w)}`, 'spezial');
+        toast(`${w.name} Stufe ${S.rezeptStufe(w.id)}: ${namen} bringen jetzt ${pz(S.rezeptPlus(w.id))} mehr Sterne.`, 'spezial');
         const pos = liste.scrollTop; baueLaden(); liste.scrollTop = pos;
       };
       platz.appendChild(k);
@@ -1687,8 +1694,8 @@ function marktText(w) {
 }
 /** „ · Marktrezept +20 %" hinter dem Getränk, wenn ein Rezept es teurer macht. */
 function rezeptHinweis(id) {
-  const x = C.MARKT_REZEPTE.find((r) => (S.st.rezepte || {})[r.id] && r.fuer.includes(id));
-  return x ? ` · <i class="rezept">Marktrezept +${Math.round(x.plus * 100)} %</i>` : '';
+  const x = C.MARKT_REZEPTE.find((r) => S.rezeptStufe(r.id) && r.fuer.includes(id));
+  return x ? ` · <i class="rezept">Rezept +${Math.round(S.rezeptPlus(x.id) * 100)} %</i>` : '';
 }
 export function zeigeMarkt() {
   const m = S.marktInfo();
@@ -2483,8 +2490,8 @@ function sterneJetzt() {
   if (haus > 0.005) z.push(['Stimmung und Deko', `alle Preise ${pz(haus)}`]);
   const r = S.ruf();
   if (r.stufe) z.push([`Ruf Stufe ${r.stufe}`, `alle Preise ${pz(r.stufe * C.RUF_JE_STUFE)}`]);
-  const rez = C.MARKT_REZEPTE.filter((x) => (S.st.rezepte || {})[x.id]);
-  if (rez.length) z.push(['Marktrezepte', `${rez.length * 2} Getränke ${pz(rez[0].plus)}`]);
+  const rez = C.MARKT_REZEPTE.filter((x) => S.rezeptStufe(x.id));
+  if (rez.length) z.push(['Rezepte', rez.map((x) => `${x.fuer.map((id) => C.PRODUKT[id].name).join(' und ')} ${pz(S.rezeptPlus(x.id))}`).join(' · ')]);
   const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
   if (lage) z.push([lage.name, `${lage.text.replace(/^Heute /, '')} (${pz(lage.bonus)})`]);
   if (S.chorJetzt()) z.push(['Chor vor dem Haus', `alle Gäste zahlen ${pz(C.CHOR.bonus)} (bis ${C.CHOR.bis} Uhr)`]);
