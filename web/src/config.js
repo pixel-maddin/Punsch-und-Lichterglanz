@@ -870,7 +870,7 @@ export const LICHTUNG_DEKO = [
 ];
 // Minispiel Christbaumverkauf (09.10.): 60 s, Kunden wollen einen bestimmten
 // Baum (Sorte und Größe). Fällen (3x tippen), einnetzen (3x), aufs Autodach.
-export const BAUM_DAUER = 70;   // 23.10.: 60 → 70 s (Nutzerwunsch)
+export const BAUM_DAUER = 65;   // 23.10.: 60 → 70 s, 27.10.: 70 → 65 s (beides Nutzerwunsch)
 // Baumschule (22.10., 23.10. neu eingestellt): 4 Beete. Ohne Pflege 6 Tage, mit täglich Gießen 3,
 // mit Gießen und Düngen 2. Gießen und Düngen erst ab dem Tag nach dem Pflanzen.
 export const BAUMSCHULE_BEETE = 4;

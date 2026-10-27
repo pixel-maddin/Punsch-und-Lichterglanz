@@ -169,7 +169,7 @@ schneller - spätestens am 14.12. ist alles offen.
 **Christbaumverkauf (Minispiel):** Kunden fahren vor und wollen einen
 bestimmten Baum - Größe und Sorte (Nordmanntanne, Blaufichte, Fichte) stehen
 in der Sprechblase. Den richtigen Baum dreimal antippen zum Sägen, dreimal ins
-Netz, dann aufs Autodach. 70 Sekunden; je schneller, desto mehr Punkte, und
+Netz, dann aufs Autodach. 65 Sekunden; je schneller, desto mehr Punkte, und
 fehlerfreie Kunden hintereinander geben eine Kette bis ×3. Sterne für die
 ersten drei Runden am Tag, Rekord, und ab bestimmten Rekorden Deko:
 Riesenkugeln im Baum, ein Bäumchen auf dem Dachfirst und ein Lichterwald.

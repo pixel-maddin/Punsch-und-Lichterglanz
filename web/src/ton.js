@@ -1,10 +1,11 @@
 /*
  * ton.js - Geräusche (synthetisiert) und die Musik.
  *
- * MUSIK (seit 11.10.): ZWEI Stücke, je nach Ort.
+ * MUSIK: DREI Stücke, je nach Ort.
  *   haus  - `audio/musik-haus.m4a`  (Quelle musik-quelle/music-bg.mp3), am Haus
- *   karte - `audio/musik-karte.m4a` (Quelle music-map.mp3), auf der Karte und
- *           in den Minispielen (vorher ruhte die Musik dort)
+ *   karte - `audio/musik-karte.m4a` (Quelle music-map.mp3), auf der Karte
+ *   mini  - `audio/musik-mini.m4a`  (8-Bit-Clip „Schlittenfahrt", 35 s, ruhig,
+ *           selbst gerechnet mit werkzeug/musik-mini.py), in den Minispielen
  * Gewechselt wird mit kurzer Überblendung; jedes Stück läuft beim nächsten
  * Mal an seiner Stelle weiter. Beide endlos in Schleife, beide HE-AAC 48 kbps
  * und auf dieselbe Lautheit gezogen (-14,9 LUFS) - siehe CLAUDE.md.
@@ -20,7 +21,7 @@
 let ctx = null, fxGain = null, musikGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -14,9 LUFS, recht laut)
-const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610271600', karte: 'audio/musik-karte.m4a?v=202610271600' };
+const STUECKE = { haus: 'audio/musik-haus.m4a?v=202610272100', karte: 'audio/musik-karte.m4a?v=202610272100', mini: 'audio/musik-mini.m4a?v=202610272100' };
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
 const spuren = {};        // name -> { el, gain }
 let szene = 'haus';       // welches Stück gerade dran ist
@@ -57,7 +58,7 @@ export function musikMinispiel(an) { miniOffen = an; wechsle(); }
 export const imMinispiel = () => miniOffen;
 
 function wechsle() {
-  const neu = karteOffen || miniOffen ? 'karte' : 'haus';
+  const neu = miniOffen ? 'mini' : karteOffen ? 'karte' : 'haus';
   if (neu === szene) return;
   const alt = spuren[szene], jetzt = spuren[neu];
   szene = neu;
