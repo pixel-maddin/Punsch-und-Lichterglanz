@@ -958,8 +958,8 @@ export const BRIEF_LOHN_MIN = 200;        // … mindestens so viele Sterne
 export const BRIEF_KINDER = [
   // 27.10.: Namen vom Nutzer (vorher Lena, Paul, Mia, Jonas, Emil, Hanna, Ben, Lotta, Finn, Ida - Lena gab es
   // auch als Stammgast). Briefe, die schon im Spielstand liegen, behalten ihren alten Namen.
-  { name: 'Frida', alter: 7, maedchen: true }, { name: 'Emma', alter: 6, maedchen: true }, { name: 'Benjamin', alter: 8 },
-  { name: 'Vincent', alter: 5 }, { name: 'Jonathan', alter: 9 }, { name: 'Nora', alter: 6, maedchen: true },
+  { name: 'Frida', alter: 6, maedchen: true }, { name: 'Emma', alter: 9, maedchen: true }, { name: 'Benjamin', alter: 6 },
+  { name: 'Vincent', alter: 8 }, { name: 'Jonathan', alter: 7 }, { name: 'Nora', alter: 5, maedchen: true },
   { name: 'Emil', alter: 7 }, { name: 'Anna', alter: 8, maedchen: true }, { name: 'Paul', alter: 6 }, { name: 'Mia', alter: 5, maedchen: true },
 ];
 export const DOSE_MAX = 30;

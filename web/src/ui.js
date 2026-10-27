@@ -5,28 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610271400';
-import * as S from './spiel.js?v=202610271400';
-import * as Z from './zeit.js?v=202610271400';
-import * as T from './ton.js?v=202610271400';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271400';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610271400';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271400';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271400';
-import * as A from './auftraege.js?v=202610271400';
-import * as E from './erfolge.js?v=202610271400';
-import * as ZL from './ziele.js?v=202610271400';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271400';
-import * as KA from './karte.js?v=202610271400';
-import { zeigeRueckblick } from './ereignis.js?v=202610271400';
-import { barbaraZweig } from './szene.js?v=202610271400';
-import * as SW from './schneeball.js?v=202610271400';
-import * as LI from './lichtung.js?v=202610271400';
-import * as CB from './christbaum.js?v=202610271400';
-import * as SB from './schlitten.js?v=202610271400';
-import * as EB from './schlittschuh.js?v=202610271400';
-import * as BS from './backstube.js?v=202610271400';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271400';
+import * as C from './config.js?v=202610271500';
+import * as S from './spiel.js?v=202610271500';
+import * as Z from './zeit.js?v=202610271500';
+import * as T from './ton.js?v=202610271500';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610271500';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610271500';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610271500';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610271500';
+import * as A from './auftraege.js?v=202610271500';
+import * as E from './erfolge.js?v=202610271500';
+import * as ZL from './ziele.js?v=202610271500';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610271500';
+import * as KA from './karte.js?v=202610271500';
+import { zeigeRueckblick } from './ereignis.js?v=202610271500';
+import { barbaraZweig } from './szene.js?v=202610271500';
+import * as SW from './schneeball.js?v=202610271500';
+import * as LI from './lichtung.js?v=202610271500';
+import * as CB from './christbaum.js?v=202610271500';
+import * as SB from './schlitten.js?v=202610271500';
+import * as EB from './schlittschuh.js?v=202610271500';
+import * as BS from './backstube.js?v=202610271500';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610271500';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -774,8 +774,11 @@ const _dank = document.createElement('canvas');
 export function zeichneDankesbild(ziel, b) {
   _dank.width = 48; _dank.height = 36;
   maleDankesbild(_dank, b);
+  // 27.10. (gemeldet: im Album zeigten alle Dankesbilder dasselbe - das zuletzt gemalte): Scale2x schreibt
+  // jetzt direkt in die Ziel-Leinwand. Vorher ging jedes Bild über DIESELBE Zwischenleinwand per drawImage,
+  // und Safari auf dem iPhone kopiert das verzögert (dieselbe Falle wie bei den Kacheln am 19.10.)
   ziel.width = 96; ziel.height = 72;
-  ziel.getContext('2d').drawImage(scale2x(_dank), 0, 0);
+  scale2x(_dank, 48, 36, ziel);
 }
 function maleDankesbild(cv, b) {
   const c = cv.getContext('2d', { willReadFrequently: true }), W2 = cv.width, H2 = cv.height;

@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610271400';
-import * as S from './spiel.js?v=202610271400';
-import * as Z from './zeit.js?v=202610271400';
-import * as T from './ton.js?v=202610271400';
-import * as LI from './lichtung.js?v=202610271400';
-import * as CB from './christbaum.js?v=202610271400';
-import * as KA from './karte.js?v=202610271400';
-import * as SB from './schlitten.js?v=202610271400';
-import * as EB from './schlittschuh.js?v=202610271400';
-import * as BS from './backstube.js?v=202610271400';
-import * as UI from './ui.js?v=202610271400';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610271400';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610271400';
-import * as Kacheln from './kacheln.js?v=202610271400';
-import * as Lernen from './lernen.js?v=202610271400';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610271400';
-import * as A from './auftraege.js?v=202610271400';
-import * as E from './erfolge.js?v=202610271400';
-import * as ZL from './ziele.js?v=202610271400';
+import * as C from './config.js?v=202610271500';
+import * as S from './spiel.js?v=202610271500';
+import * as Z from './zeit.js?v=202610271500';
+import * as T from './ton.js?v=202610271500';
+import * as LI from './lichtung.js?v=202610271500';
+import * as CB from './christbaum.js?v=202610271500';
+import * as KA from './karte.js?v=202610271500';
+import * as SB from './schlitten.js?v=202610271500';
+import * as EB from './schlittschuh.js?v=202610271500';
+import * as BS from './backstube.js?v=202610271500';
+import * as UI from './ui.js?v=202610271500';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610271500';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610271500';
+import * as Kacheln from './kacheln.js?v=202610271500';
+import * as Lernen from './lernen.js?v=202610271500';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610271500';
+import * as A from './auftraege.js?v=202610271500';
+import * as E from './erfolge.js?v=202610271500';
+import * as ZL from './ziele.js?v=202610271500';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -581,9 +581,9 @@ function demo(art) {
   // Wunschzettel und Album (10.10.)
   if (['brief', 'dank', 'album', 'kasten'].includes(art)) {
     const kind = (name, alter, maedchen) => ({ kind: name, alter, maedchen });
-    st.briefe = { aktiv: { art: art === 'dank' ? 'backen' : 'deko', ziel: art === 'dank' ? null : 'schneemann', ...kind('Frida', 7, true), start: 0, tag: 0, offen: true, dank: art === 'dank', v: 0 }, erfuellt: [], ab: 0, n: 1 };
+    st.briefe = { aktiv: { art: art === 'dank' ? 'backen' : 'deko', ziel: art === 'dank' ? null : 'schneemann', ...kind('Frida', 6, true), start: 0, tag: 0, offen: true, dank: art === 'dank', v: 0 }, erfuellt: [], ab: 0, n: 1 };
     if (art === 'album') {
-      st.briefe = { aktiv: null, ab: 0, n: 4, erfuellt: [{ art: 'deko', ziel: 'schneemann', ...kind('Frida', 7, true) }, { art: 'backen', ...kind('Paul', 6) }, { art: 'santa', ...kind('Mia', 8, true) }, { art: 'getraenk', ziel: 'schoko', ...kind('Jonas', 5) }] };
+      st.briefe = { aktiv: null, ab: 0, n: 4, erfuellt: [{ art: 'deko', ziel: 'schneemann', ...kind('Frida', 6, true) }, { art: 'backen', ...kind('Paul', 6) }, { art: 'santa', ...kind('Mia', 5, true) }, { art: 'getraenk', ziel: 'schoko', ...kind('Vincent', 8) }] };
       st.stats.typ = { erwachsen: 812, kind: 240, oma: 133, opa: 120, rentier: 4, schneemann: 2, grummel: 3 };
       st.stats.tiere = { hase: 61, eich: 40, reh: 22 };
       st.mini = { back: { best: 1700, tag: 0, runden: 0 } };
