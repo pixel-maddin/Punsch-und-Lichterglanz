@@ -956,9 +956,11 @@ export const BRIEF_BACKEN = 5;            // so viele Plätzchen wünscht sich d
 export const BRIEF_LOHN_MINUTEN = 4;      // Dank: so viele Minuten Einnahmen …
 export const BRIEF_LOHN_MIN = 200;        // … mindestens so viele Sterne
 export const BRIEF_KINDER = [
-  { name: 'Lena', alter: 7, maedchen: true }, { name: 'Paul', alter: 6 }, { name: 'Mia', alter: 8, maedchen: true },
-  { name: 'Jonas', alter: 5 }, { name: 'Emil', alter: 9 }, { name: 'Hanna', alter: 6, maedchen: true },
-  { name: 'Ben', alter: 7 }, { name: 'Lotta', alter: 8, maedchen: true }, { name: 'Finn', alter: 6 }, { name: 'Ida', alter: 5, maedchen: true },
+  // 27.10.: Namen vom Nutzer (vorher Lena, Paul, Mia, Jonas, Emil, Hanna, Ben, Lotta, Finn, Ida - Lena gab es
+  // auch als Stammgast). Briefe, die schon im Spielstand liegen, behalten ihren alten Namen.
+  { name: 'Frida', alter: 7, maedchen: true }, { name: 'Emma', alter: 6, maedchen: true }, { name: 'Benjamin', alter: 8 },
+  { name: 'Vincent', alter: 5 }, { name: 'Jonathan', alter: 9 }, { name: 'Nora', alter: 6, maedchen: true },
+  { name: 'Emil', alter: 7 }, { name: 'Anna', alter: 8, maedchen: true }, { name: 'Paul', alter: 6 }, { name: 'Mia', alter: 5, maedchen: true },
 ];
 export const DOSE_MAX = 30;
 export const DOSE_BONUS = 0.25;
