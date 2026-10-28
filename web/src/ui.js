@@ -5,28 +5,28 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281230';
-import * as S from './spiel.js?v=202610281230';
-import * as Z from './zeit.js?v=202610281230';
-import * as T from './ton.js?v=202610281230';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281230';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281230';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281230';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281230';
-import * as A from './auftraege.js?v=202610281230';
-import * as E from './erfolge.js?v=202610281230';
-import * as ZL from './ziele.js?v=202610281230';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281230';
-import * as KA from './karte.js?v=202610281230';
-import { zeigeRueckblick } from './ereignis.js?v=202610281230';
-import { barbaraZweig } from './szene.js?v=202610281230';
-import * as SW from './schneeball.js?v=202610281230';
-import * as LI from './lichtung.js?v=202610281230';
-import * as CB from './christbaum.js?v=202610281230';
-import * as SB from './schlitten.js?v=202610281230';
-import * as EB from './schlittschuh.js?v=202610281230';
-import * as BS from './backstube.js?v=202610281230';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281230';
+import * as C from './config.js?v=202610281300';
+import * as S from './spiel.js?v=202610281300';
+import * as Z from './zeit.js?v=202610281300';
+import * as T from './ton.js?v=202610281300';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281300';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281300';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281300';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281300';
+import * as A from './auftraege.js?v=202610281300';
+import * as E from './erfolge.js?v=202610281300';
+import * as ZL from './ziele.js?v=202610281300';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281300';
+import * as KA from './karte.js?v=202610281300';
+import { zeigeRueckblick } from './ereignis.js?v=202610281300';
+import { barbaraZweig } from './szene.js?v=202610281300';
+import * as SW from './schneeball.js?v=202610281300';
+import * as LI from './lichtung.js?v=202610281300';
+import * as CB from './christbaum.js?v=202610281300';
+import * as SB from './schlitten.js?v=202610281300';
+import * as EB from './schlittschuh.js?v=202610281300';
+import * as BS from './backstube.js?v=202610281300';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281300';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -714,7 +714,7 @@ function rezeptbuch() {
   for (const rz of C.BACK_REZEPTE) {
     const da = best >= rz.ab;
     const k = el('div', 'rezept' + (da ? '' : ' zu'));
-    k.innerHTML = `<canvas width="20" height="18"></canvas><b>${da ? rz.name : '???'}</b><small>${da ? `${C.dekoListe(rz.deko).map((d) => C.BACK_DEKOS[d].name).join(' + ')}` : `ab ${rz.ab} Punkten Rekord`}</small>`;
+    k.innerHTML = `<canvas width="20" height="18"></canvas><b>${da ? trennbar(rz.name) : '???'}</b><small>${da ? `${C.dekoListe(rz.deko).map((d) => C.BACK_DEKOS[d].name).join(', ')}` : `Rekord ab ${rz.ab.toLocaleString('de-DE')}`}</small>`;
     const ctx = k.querySelector('canvas').getContext('2d');
     BS.zeichnePlaetzchen(ctx, 1, 1, rz.form, 'golden', da ? rz.deko : null, 2);
     if (!da) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#6a5a4a'; ctx.fillRect(0, 0, 20, 18); }
@@ -780,7 +780,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281230`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281300`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1983,12 +1983,17 @@ const ALBUM_GAESTE = [['erwachsen', 'Spaziergänger'], ['kind', 'Kinder'], ['oma
   ['rentier', 'Rentier'], ['schneemann', 'Schneemann'], ['grummel', 'Grummel'], ['weihnachtsmann', 'Weihnachtsmann']];
 const ALBUM_TIERE = [['hase', 'Feldhase'], ['eich', 'Eichhörnchen'], ['reh', 'Reh'], ['gold', 'Goldhase'], ['fuchs', 'Fuchs'], ['schwein', 'Wildschwein'], ['igel', 'Igel']];
 const ALBUM_TIERE_ALT = ['hase', 'eich', 'reh'];   // die gab es schon vor dem Album (alte Spielstände)
+// Weiche Trennstellen an den Wortfugen (28.10.): Die Kacheln sind schmal, „Tannenbäumchen" passt nicht in eine
+// Zeile, und hyphens:auto trennt nicht in jedem Browser. Ein Strich erscheint nur, wenn wirklich umbrochen wird.
+const FUGEN = ['Weihnachts', 'Lebkuchen', 'Tannen', 'Vanille', 'Spazier', 'Seiden', 'Schoko', 'Schnee', 'Eich', 'Kohl', 'Blau', 'Wild', 'Wald', 'Feld', 'Gold', 'Rot', 'Zimt'];
+const trennbar = (name) => name.split(' ').map((wort) => { const f = FUGEN.find((x) => wort.startsWith(x) && wort.length - x.length >= 3); return f ? f + '­' + wort.slice(f.length) : wort; }).join(' ');
 function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
   const k = el('div', 'album-karte' + (n ? '' : ' zu'));
   // n < 0: schon gesehen, aber vor dem Album (10.10.) nicht mitgezählt
-  k.innerHTML = `<canvas width="${w}" height="${h}"></canvas><b>${n ? name : '???'}</b><small>${n > 0 ? `${n.toLocaleString('de-DE')}${einheit}` : n < 0 ? 'schon gesehen' : 'noch nicht gesehen'}</small>`;
+  k.innerHTML = `<canvas width="${w}" height="${h}"></canvas><b>${n ? esc(trennbar(name)) : '???'}</b><small>${n > 0 ? `${n.toLocaleString('de-DE')}${einheit}` : n < 0 ? 'schon gesehen' : 'noch nicht gesehen'}</small>`;
   const cv = k.querySelector('canvas'), ctx = cv.getContext('2d');
   cv.style.width = `calc(var(--px) * ${w})`; cv.style.height = `calc(var(--px) * ${h})`;   // 1:1 (11.10.: Tiere sind 28 x 26)
+  cv.style.margin = `calc(var(--px) * ${Math.max(0, (28 - h) / 2)}) 0`;   // festes 28er-Bildfeld (28.10.: alle Kacheln gleich)
   male(ctx);
   if (!n) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#5a4a3e'; ctx.fillRect(0, 0, w, h); }
   return k;
