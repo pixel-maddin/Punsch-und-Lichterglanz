@@ -349,7 +349,7 @@ Karte, die man sieht.
 Reines Canvas 2D (180 Pixel breit, per CSS hochskaliert), ES-Module,
 kein Node, kein npm, keine Bilddatei - Grafik und Geräusche entstehen im
 Code. Einzige Fremddateien sind die Musikstücke in `web/audio/` (siehe *Musik*,
-weich übergeblendet), im Menü lauter, leiser oder ganz aus. Dazu zwei
+weich übergeblendet), unter Menü → Einstellungen lauter, leiser oder ganz aus. Dazu zwei
 Schriften in `web/fonts/`: **Nunito** für Texte und **Pixelify Sans** für Titel,
 beide unter der SIL Open Font License (Lizenztexte daneben), damit das Spiel auf
 jedem Gerät gleich aussieht und ohne fremde Server auskommt. Spielstand in `localStorage` (`adventshaus.v1`).

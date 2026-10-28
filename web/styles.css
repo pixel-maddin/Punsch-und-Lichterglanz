@@ -1564,3 +1564,16 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .bereich .auftrag2:last-of-type, .bereich .bitte-zettel:last-child { margin-bottom: calc(var(--px) * 2.5); }
 .bereich .sammel2 { margin-bottom: calc(var(--px) * 2.5); }
 .bereich-heute > summary small { color: #2e7a3a; }
+
+/* Menü (28.10. abends): alle Knöpfe untereinander; „Statistiken & Infos" und „Sternebonus" als hohe Knöpfe,
+   damit sie sich von den normalen Knöpfen darunter abheben (Titel links, rechts Wetter bzw. Pfeil) */
+#blatt[data-art="menue"] .schalter { grid-template-columns: 1fr; }
+.menue-statistik > summary { min-height: calc(var(--px) * 20); box-sizing: border-box; }
+.statistik-auf summary { display: flex; align-items: center; gap: calc(var(--px) * 2.5); padding: calc(var(--px) * 3) calc(var(--px) * 3.5); }
+.statistik-auf summary::after { margin-left: 0; }
+.statistik-auf .st-titel { flex: 1; min-width: 0; font: 800 var(--t-gross) var(--schrift); color: var(--rot2); }
+.statistik-auf .st-wetter { flex: none; font-size: var(--t-betont); font-weight: 800; color: var(--text2); white-space: nowrap; }
+.sterne-jetzt > summary { align-items: center; padding: calc(var(--px) * 3) calc(var(--px) * 3.5); }
+.sterne-jetzt > summary b { font: 800 var(--t-gross) var(--schrift); color: var(--rot2); }
+/* Bereichs-Kästen in den Läden und unter Geschenke: Zeilen bekommen innen etwas Luft */
+.bereich .zeile:last-child { border-bottom: 0; }

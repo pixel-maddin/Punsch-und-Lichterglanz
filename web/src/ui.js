@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281800';
-import * as S from './spiel.js?v=202610281800';
-import * as Z from './zeit.js?v=202610281800';
-import * as T from './ton.js?v=202610281800';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281800';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281800';
-import { zielHaus } from './fein.js?v=202610281800';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281800';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281800';
-import * as A from './auftraege.js?v=202610281800';
-import * as E from './erfolge.js?v=202610281800';
-import * as ZL from './ziele.js?v=202610281800';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281800';
-import * as KA from './karte.js?v=202610281800';
-import { zeigeRueckblick } from './ereignis.js?v=202610281800';
-import { barbaraZweig } from './szene.js?v=202610281800';
-import * as SW from './schneeball.js?v=202610281800';
-import * as LI from './lichtung.js?v=202610281800';
-import * as CB from './christbaum.js?v=202610281800';
-import * as SB from './schlitten.js?v=202610281800';
-import * as EB from './schlittschuh.js?v=202610281800';
-import * as BS from './backstube.js?v=202610281800';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281800';
+import * as C from './config.js?v=202610281830';
+import * as S from './spiel.js?v=202610281830';
+import * as Z from './zeit.js?v=202610281830';
+import * as T from './ton.js?v=202610281830';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281830';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281830';
+import { zielHaus } from './fein.js?v=202610281830';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281830';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281830';
+import * as A from './auftraege.js?v=202610281830';
+import * as E from './erfolge.js?v=202610281830';
+import * as ZL from './ziele.js?v=202610281830';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281830';
+import * as KA from './karte.js?v=202610281830';
+import { zeigeRueckblick } from './ereignis.js?v=202610281830';
+import { barbaraZweig } from './szene.js?v=202610281830';
+import * as SW from './schneeball.js?v=202610281830';
+import * as LI from './lichtung.js?v=202610281830';
+import * as CB from './christbaum.js?v=202610281830';
+import * as SB from './schlitten.js?v=202610281830';
+import * as EB from './schlittschuh.js?v=202610281830';
+import * as BS from './backstube.js?v=202610281830';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281830';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -334,6 +334,7 @@ export function oeffneLaden(tab, zeigeId, modus) {
   // Vom Regal aus geöffnet: die Zeile des Getränks zeigen und aufleuchten lassen
   const z = zeigeId && zeilen.find((x) => x.a.id === zeigeId);
   if (z) {
+    const kasten = z.z.closest('details'); if (kasten) kasten.open = true;
     z.z.scrollIntoView({ block: 'center' });
     z.z.classList.add('blitz'); setTimeout(() => z.z.classList.remove('blitz'), 900);
     if (f) { z.z.classList.add('fuehrung'); z.txt.appendChild(el('span', 'fuehr-pfeil', f.leisten === false ? 'Dein nächstes Ziel - noch etwas sparen' : 'Tippe hier auf Kaufen ▸')); }
@@ -783,7 +784,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281800`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281830`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -910,24 +911,27 @@ function baueLaden() {
     sprung = el('div', 'haus-sprung');
     for (const g of abschnitte) {
       const b = el('button', 'hs-k', g.replace(/^(Am|Im) /, ''));
-      b.onclick = () => { T.spiele('klick'); const z = liste.querySelector(`[data-abschnitt="${g}"]`); if (z) liste.scrollTo({ top: z.offsetTop - sprung.offsetHeight - liste.offsetTop - 8, behavior: 'smooth' }); };
+      b.onclick = () => { T.spiele('klick'); const z = liste.querySelector(`[data-abschnitt="${g}"]`); if (z) { z.open = true; liste.scrollTo({ top: z.offsetTop - sprung.offsetHeight - liste.offsetTop - 8, behavior: 'smooth' }); } };
       sprung.appendChild(b);
     }
     liste.appendChild(sprung);
   }
-  let gruppe = null;
+  // 28.10. abends: jeder Abschnitt ein Bereichs-Kasten (wie Aufträge); der Supermarkt hat zwei - Getränke
+  // und Rezepte. Rechts steht, wie viel davon schon gekauft ist.
+  let gruppe = null, ziel = liste;
+  const gekauft = (g) => { const t = artikel.filter((a) => abschnittVon(a) === g); return `${t.filter((a) => S.hat(a.id)).length} von ${t.length} gekauft`; };
   if (ladenTab === 'super') {
-    liste.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.${rezeptHinweis('gluehwein')}</span></div><div class="knopfplatz"><button class="k k--fertig" disabled><span class="haken">✓</span></button></div>`));
-    zeichneIcon(liste.lastChild.querySelector('canvas'), { id: 'gluehwein', produkt: true });
+    ziel = bereichKasten(liste, 'laden_super_getraenke', 'Getränke', `${artikel.filter((a) => S.hat(a.id)).length + 1} von ${artikel.length + 1}`);
+    ziel.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.${rezeptHinweis('gluehwein')}</span></div><div class="knopfplatz"><button class="k k--fertig" disabled><span class="haken">✓</span></button></div>`));
+    zeichneIcon(ziel.lastChild.querySelector('canvas'), { id: 'gluehwein', produkt: true });
   }
   const neu = S.st.neu || {};
   for (const a of artikel) {
     // Überschrift nur, wo es mehrere Gruppen gibt (11.10.: „Zutaten" im Supermarkt war überflüssig)
     if (mitAbschnitten && abschnittVon(a) !== gruppe) {
       gruppe = abschnittVon(a);
-      const h = el('div', 'gruppe haus-abschnitt', gruppe);
-      h.dataset.abschnitt = gruppe;
-      liste.appendChild(h);
+      ziel = bereichKasten(liste, `laden_${ladenTab}_${gruppe}`, gruppe, gekauft(gruppe));
+      ziel.dataset.abschnitt = gruppe;
     }
     const versteckt = S.status(a).versteckt;
     const z = el('div', 'zeile' + (versteckt ? ' verdeckt' : '') + (neu[a.id] ? ' neu' : ''));
@@ -961,7 +965,7 @@ function baueLaden() {
     };
     platz.appendChild(knopf);
     z.appendChild(platz);
-    liste.appendChild(z);
+    ziel.appendChild(z);
     zeilen.push({ a, z, knopf, txt, versteckt });
   }
   if (ladenTab === 'super') rezeptZeilen(liste);
@@ -977,7 +981,8 @@ function baueLaden() {
 let rezeptKnoepfe = [];
 function rezeptZeilen(liste) {
   rezeptKnoepfe = [];
-  liste.appendChild(el('div', 'gruppe haus-abschnitt', 'Rezepte'));
+  const N0 = C.REZEPT_STUFEN.length, stufenGesamt = C.MARKT_REZEPTE.reduce((n, x) => n + S.rezeptStufe(x.id), 0);
+  const box = bereichKasten(liste, 'laden_super_rezepte', 'Rezepte', `${stufenGesamt} von ${C.MARKT_REZEPTE.length * N0} Stufen`);
   const pz = (f) => `${Math.round(f * 100)}${' '}%`;
   const N = C.REZEPT_STUFEN.length;
   for (const w of C.MARKT_REZEPTE) {
@@ -1009,7 +1014,7 @@ function rezeptZeilen(liste) {
       platz.appendChild(k);
     }
     z.appendChild(platz);
-    liste.appendChild(z);
+    box.appendChild(z);
   }
 }
 
@@ -1274,7 +1279,7 @@ function baueGeschenkt(liste, gesch) {
   for (const [titel, passt] of QUELLEN) {
     const teil = gesch.filter((d) => !vergeben.has(d.id) && passt(d));
     if (!teil.length) continue;
-    liste.appendChild(el('p', 'haus-quelle', titel));
+    const box = bereichKasten(liste, 'geschenk_' + titel, titel, `${teil.length}`);
     for (const d of teil) {
       vergeben.add(d.id);
       // Minispiel-Deko: aus welchem Spiel, ab welchem Rekord (wer ein neues Präfix einführt, trägt es hier ein)
@@ -1285,7 +1290,7 @@ function baueGeschenkt(liste, gesch) {
       const an = S.zeigt(d.id);
       const z = hausZeileKompakt(d.id, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab, kipp(an, (v) => S.setzeDeko(d.id, v)), null);
       if (!an) z.classList.add('ist-aus');
-      liste.appendChild(z);
+      box.appendChild(z);
       delete neu[d.id];
     }
   }
@@ -1926,6 +1931,21 @@ function maleStammKlein(cv, id) {
 }
 
 // ---------------------------------------------------------------------------
+// Bereichs-Kästen (28.10. abends, zuerst für die Aufträge, dann überall, wo es mehrere Kategorien gibt:
+// Läden, Album, Geschenke): ein eigener Kasten je Kategorie, Kopf zum Auf- und Zuklappen mit Kurzinfo
+// rechts. Standard offen; was zugeklappt wird, merkt st.zuBereiche[id].
+// ---------------------------------------------------------------------------
+function bereichKasten(ziel, id, titel, rechts) {
+  const d = el('details', 'bereich bereich-' + id.replace(/[^a-z0-9_-]/gi, '_'));
+  S.st.zuBereiche = S.st.zuBereiche || {};
+  d.open = !S.st.zuBereiche[id];
+  d.appendChild(el('summary', null, `<span>${titel}</span>${rechts ? `<small>${rechts}</small>` : ''}`));
+  d.addEventListener('toggle', () => { S.st.zuBereiche[id] = !d.open; S.speichere(); });
+  ziel.appendChild(d);
+  return d;
+}
+
+// ---------------------------------------------------------------------------
 // Tagesaufträge
 // ---------------------------------------------------------------------------
 let auftragReiter = 'heute';   // 'heute' | 'erfolge'
@@ -1960,15 +1980,7 @@ export function oeffneAuftraege(reiter) {
   // Erledigtes schrumpft auf eine grüne Zeile; Schwierigkeit EINMAL (Farbstreifen + Wort).
   // 28.10. abends (gemeldet: immer noch viel los): jeder Bereich ein eigener Kasten zum Auf- und Zuklappen
   // (Standard offen, gemerkt in st.zuBereiche). Zugeklappt steht rechts das Wichtigste.
-  const bereich = (id, titel, rechts) => {
-    const d = el('details', 'bereich bereich-' + id);
-    S.st.zuBereiche = S.st.zuBereiche || {};
-    d.open = !S.st.zuBereiche[id];
-    d.appendChild(el('summary', null, `<span>${titel}</span>${rechts ? `<small>${rechts}</small>` : ''}`));
-    d.addEventListener('toggle', () => { S.st.zuBereiche[id] = !d.open; S.speichere(); });
-    liste.appendChild(d);
-    return d;
-  };
+  const bereich = (id, titel, rechts) => bereichKasten(liste, id, titel, rechts);
   const r0 = S.ruf();
   const rufB = bereich('ruf', 'Ruf deines Standes', r0.max ? 'höchste Stufe' : `Stufe ${r0.stufe} · ${r0.fertig ? 'heute ✓' : Math.round(100 * Math.min(1, r0.punkte / C.RUF_PUNKTE)) + ' %'}`);
   rufB.appendChild(rufKarte());
@@ -2267,12 +2279,14 @@ function zeigeStammBuch(id) {
 
 function baueAlbum(liste) {
   const typ = S.st.stats.typ || {}, tiere = S.st.stats.tiere || {};
-  const kopf = (titel, da, alle) => liste.appendChild(el('p', 'gruppe', `${titel}: ${da} / ${alle}`));
+  // 28.10. abends: jeder Abschnitt ein Bereichs-Kasten (aufklappbar), Zähler rechts im Kopf
+  let ziel = liste;
+  const kopf = (titel, da, alle) => { ziel = bereichKasten(liste, 'album_' + titel, titel, `${da} / ${alle}`); };
   // Besucher am Stand
   kopf('Besucher am Stand', ALBUM_GAESTE.filter(([t]) => typ[t]).length, ALBUM_GAESTE.length);
   const g = el('div', 'album-raster set-gaeste');
   for (const [t, name] of ALBUM_GAESTE) g.appendChild(albumKarte(name, typ[t] || 0, (ctx) => figurKlein(ctx, { typ: t, farben: neueFarben(t), phase: 0, laeuft: false }, 12, 22, 0), 24, 24, '× bedient'));
-  liste.appendChild(g);
+  ziel.appendChild(g);
   // Stammgäste (13.10.): wer schon da war, mit der Zahl der Besuche
   const stamm = Object.keys(C.STAMMGAESTE);
   kopf('Stammgäste', stamm.filter((id) => S.stammBesuche(id)).length, stamm.length);
@@ -2283,14 +2297,14 @@ function baueAlbum(liste) {
     if (S.stammBesuche(id)) { k.classList.add('tippbar'); k.onclick = () => { T.spiele('klick'); zeigeStammBuch(id); }; }
     sg.appendChild(k);
   }
-  liste.appendChild(sg);
+  ziel.appendChild(sg);
   // Tiere der Waldlichtung
   kopf('Tiere der Waldlichtung', ALBUM_TIERE.filter(([a]) => tiere[a] || (!S.st.stats.tiere && S.miniRekord('lichtung') > 0 && ALBUM_TIERE_ALT.includes(a))).length, ALBUM_TIERE.length);
   const ti = el('div', 'album-raster set-tiere');
   // Alte Spielstände: Wer die Lichtung schon gespielt hat, kennt Hase, Eichhörnchen und Reh
   const frueher = !S.st.stats.tiere && S.miniRekord('lichtung') > 0;
   for (const [a, name] of ALBUM_TIERE) ti.appendChild(albumKarte(name, tiere[a] || (frueher && ALBUM_TIERE_ALT.includes(a) ? -1 : 0), (ctx) => LI.zeichneTierAlbum(ctx, a, 14, 24), 28, 26, '× gefüttert'));
-  liste.appendChild(ti);
+  ziel.appendChild(ti);
   // Vögel am Futterhaus (11.10.) - erst, wenn es eins gibt; Seltene als „???"-Umriss
   if (S.hat('futterhaus') || Object.keys(S.st.voegel || {}).length) {
     const vg = S.st.voegel || {};
@@ -2301,24 +2315,24 @@ function baueAlbum(liste) {
       // Gesehene Vögel lassen sich antippen: Steckbrief wie beim ersten Besuch (14.10.)
       if (vg[v.id]) { k.classList.add('tippbar'); k.onclick = () => { T.spiele('klick'); zeigeVogel(v.id, false); }; }
     }
-    liste.appendChild(vr);
+    ziel.appendChild(vr);
   }
   // Rezepte - erst, wenn die Backstube auf der Karte steht (Minispiele kommen nach und nach)
   if (S.miniOffen('back')) {
     kopf('Rezepte aus der Backstube', S.backRezepte().length, C.BACK_REZEPTE.length);
-    liste.appendChild(rezeptbuch());
+    ziel.appendChild(rezeptbuch());
   }
   // Dankesbilder
   const bilder = S.briefe().erfuellt;
   kopf('Dankesbilder', bilder.length, C.BRIEF_MAX);
-  if (!bilder.length) liste.appendChild(el('p', 'klein', 'Noch keine. Ab und zu steckt ein Brief im Briefkasten neben deiner Haustür - wer einen Wunsch erfüllt bekommt, malt dir ein Bild.'));
+  if (!bilder.length) ziel.appendChild(el('p', 'klein', 'Noch keine. Ab und zu steckt ein Brief im Briefkasten neben deiner Haustür - wer einen Wunsch erfüllt bekommt, malt dir ein Bild.'));
   const bw = el('div', 'album-bilder');
   for (const b of bilder) {
     const k = el('div', 'album-bild', `<canvas width="48" height="36"></canvas><small>von ${esc(b.kind)} (${b.alter})</small>`);
     zeichneDankesbild(k.querySelector('canvas'), b);
     bw.appendChild(k);
   }
-  liste.appendChild(bw);
+  ziel.appendChild(bw);
 }
 
 // ---------------------------------------------------------------------------
@@ -2465,6 +2479,7 @@ export function oeffneMenue() {
   // stehen (das will man ohne Aufklappen sehen). Darunter klein „Statistik", aufgeklappt der Rest.
   const stat = el('div', 'statistik kompakt');
   stat.innerHTML = `
+    <div class="breit"><span>Haus</span><b>${esc(S.st.name || '-')}</b></div>
     <div><span>Spielmodus</span><b>${MODUS_NAME[S.st.modus === 'eigen' ? 'eigen' : 'echt']}</b></div>
     <div><span>Stimmung</span><b>♥ ${S.stimmung()}</b></div>
     <div><span>Gäste kommen alle</span><b>${S.gastTakt().toFixed(1).replace('.', ',')} s</b></div>
@@ -2477,39 +2492,19 @@ export function oeffneMenue() {
   if (S.hat('servier')) stat.insertAdjacentHTML('beforeend', `<div class="breit"><span>Wichtel-Kiste</span><b>ab 1 Std. weg · voll nach ${String(S.offlineStunden()).replace('.', ',')} Std.</b></div>`);
   const tw = Z.tagesWetter();
   const karte = el('details', 'menue-statistik statistik-auf');
-  karte.appendChild(el('summary', null, `<span class="st-haus">${esc(S.st.name || 'Dein Haus')}</span>
-    <span class="st-wetter">${wetterEmoji()} ${(C.WETTER_LAGEN[tw.art] || { name: 'Ruhiges Wetter' }).name} · ${tw.temp}°</span>
-    <small>Statistik</small>`));
+  // 28.10. abends (Nutzerwunsch): zugeklappt nur „Statistiken & Infos", rechts auf gleicher Höhe das Wetter
+  karte.appendChild(el('summary', null, `<span class="st-titel">Statistiken & Infos</span>
+    <span class="st-wetter">${wetterEmoji()} ${tw.temp}°</span>`));
+  stat.insertAdjacentHTML('afterbegin', `<div class="breit"><span>Wetter heute</span><b>${wetterEmoji()} ${(C.WETTER_LAGEN[tw.art] || { name: 'Ruhiges Wetter' }).name}, ${tw.temp}°</b></div>`);
   karte.appendChild(stat);
   liste.appendChild(karte);
   liste.appendChild(sterneJetzt());
 
+  // 28.10. abends: Musik und „Nächstes Ziel" stehen jetzt unter Einstellungen; alle Knöpfe untereinander
   const ton = el('div', 'schalter');
-  const mk = (label, an, f) => { const k = el('button', 'k k--wahl' + (an ? ' gewaehlt' : ''), `${label}: ${an ? 'an' : 'aus'}`); k.onclick = () => { f(); oeffneMenue(); }; return k; };
-  // Musik: Regler 0 (aus) bis 5
-  const regler = el('div', 'regler');
-  const stufe = () => S.st.ton.musik;
-  regler.innerHTML = `<span class="rname">🎵 Musik</span>
-    <button class="k k--neben rk" data-d="-1">−</button>
-    <input type="range" min="0" max="5" step="1" value="${stufe()}">
-    <button class="k k--neben rk" data-d="1">+</button>
-    <b class="rwert"></b>`;
-  const feld = regler.querySelector('input'), wert = regler.querySelector('.rwert');
-  const setze = (v) => {
-    S.st.ton.musik = Math.max(0, Math.min(5, v)); feld.value = S.st.ton.musik;
-    wert.textContent = S.st.ton.musik === 0 ? 'aus' : S.st.ton.musik;
-    T.init(); T.setzeMusik(S.st.ton.musik); S.speichere();
-  };
-  feld.oninput = () => setze(Number(feld.value));
-  for (const b of regler.querySelectorAll('.rk')) b.onclick = () => setze(stufe() + Number(b.dataset.d));
-  wert.textContent = stufe() === 0 ? 'aus' : stufe();
-  liste.appendChild(regler);
-  // Geräusche, Vorschau, Haus umbenennen, So geht's liegen seit 21.10. unter „Einstellungen"
   const einst = el('button', 'k k--neben', 'Einstellungen');
   einst.onclick = () => oeffneEinstellungen();
   ton.appendChild(einst);
-  // Nach den Startzielen: nächstes Ziel vorschlagen lassen oder selbst erkunden (13.10.)
-  if (ZL.fertig()) ton.appendChild(mk('Nächstes Ziel zeigen', S.st.zieleWeiter === true, () => { S.st.zieleWeiter = S.st.zieleWeiter !== true; S.speichere(); zielLeiste(); }));
   liste.appendChild(ton);
 
   const zeile = el('div', 'schalter');
@@ -2594,13 +2589,34 @@ function sterneJetzt() {
   if (S.feierabend()) gaeste.push(`Feierabend bis ${C.FEIERABEND.bis} Uhr`);
   if (gaeste.length) z.push(['Mehr Gäste', gaeste.join(', ')]);
   // Zugeklappt (sonst schob es die Knöpfe des Menüs aus dem Bild), oben die Namen als Vorschau
+  // 28.10. abends (Nutzerwunsch): heißt „Sternebonus", zugeklappt ohne Vorschau daneben
   const k = el('details', 'menue-statistik sterne-jetzt');
-  k.appendChild(el('summary', null, `<b>Mehr Sterne gerade</b><small>${z.map(([a]) => a).join(' · ')}</small>`));
+  k.appendChild(el('summary', null, '<b>Sternebonus</b>'));
   k.appendChild(el('div', 'statistik kompakt', z.map(([a, b]) => `<div class="breit"><span>${a}</span><b>${b}</b></div>`).join('')));
   return k;
 }
 
-/** Unterseite „Einstellungen" im Menü (21.10.): Geräusche, Vorschau, Haus umbenennen, So geht's. */
+/** Musik: Regler 0 (aus) bis 5 (seit 28.10. abends in den Einstellungen statt im Menü). */
+function musikRegler() {
+  const regler = el('div', 'regler');
+  const stufe = () => S.st.ton.musik;
+  regler.innerHTML = `<span class="rname">🎵 Musik</span>
+    <button class="k k--neben rk" data-d="-1">−</button>
+    <input type="range" min="0" max="5" step="1" value="${stufe()}">
+    <button class="k k--neben rk" data-d="1">+</button>
+    <b class="rwert"></b>`;
+  const feld = regler.querySelector('input'), wert = regler.querySelector('.rwert');
+  const setze = (v) => {
+    S.st.ton.musik = Math.max(0, Math.min(5, v)); feld.value = S.st.ton.musik;
+    wert.textContent = S.st.ton.musik === 0 ? 'aus' : S.st.ton.musik;
+    T.init(); T.setzeMusik(S.st.ton.musik); S.speichere();
+  };
+  feld.oninput = () => setze(Number(feld.value));
+  for (const b of regler.querySelectorAll('.rk')) b.onclick = () => setze(stufe() + Number(b.dataset.d));
+  wert.textContent = stufe() === 0 ? 'aus' : stufe();
+  return regler;
+}
+/** Unterseite „Einstellungen" im Menü (21.10.): Musik, Nächstes Ziel, Geräusche, Vorschau, Haus umbenennen, So geht's, Credits. */
 function oeffneEinstellungen() {
   oeffneBlatt('menue', 'Einstellungen');
   $('#blattTabs').classList.add('versteckt');
@@ -2608,7 +2624,10 @@ function oeffneEinstellungen() {
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
   const mk = (label, an, f) => { const k = el('button', 'k k--wahl' + (an ? ' gewaehlt' : ''), `${label}: ${an ? 'an' : 'aus'}`); k.onclick = () => { f(); oeffneEinstellungen(); }; return k; };
+  liste.appendChild(musikRegler());
   const schalter = el('div', 'schalter einzeln');
+  // Nach den Startzielen: nächstes Ziel vorschlagen lassen oder selbst erkunden (13.10.; seit 28.10. hier)
+  if (ZL.fertig()) schalter.appendChild(mk('Nächstes Ziel zeigen', S.st.zieleWeiter === true, () => { S.st.zieleWeiter = S.st.zieleWeiter !== true; S.speichere(); zielLeiste(); }));
   schalter.appendChild(mk('Geräusche', S.st.ton.fx, () => { S.st.ton.fx = !S.st.ton.fx; T.setzeFx(S.st.ton.fx); S.speichere(); }));
   // Vorschau „Morgen wartet …" abschaltbar (13.10.)
   schalter.appendChild(mk('Vorschau auf morgen', S.st.vorschauAus !== true, () => { S.st.vorschauAus = S.st.vorschauAus !== true; S.speichere(); }));

@@ -24,12 +24,12 @@
  * Drehung, das Auto federt ein, ein Gurt schnappt zu.
  * Dazu eigene Bäume aus der Baumschule (`eigen`): golden markiert, ×3 Punkte.
  */
-import * as C from './config.js?v=202610281800';
-import * as Z from './zeit.js?v=202610281800';
-import * as T from './ton.js?v=202610281800';
-import * as MH from './minihud.js?v=202610281800';
-import * as L from './licht.js?v=202610281800';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610281800';
+import * as C from './config.js?v=202610281830';
+import * as Z from './zeit.js?v=202610281830';
+import * as T from './ton.js?v=202610281830';
+import * as MH from './minihud.js?v=202610281830';
+import * as L from './licht.js?v=202610281830';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202610281830';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
