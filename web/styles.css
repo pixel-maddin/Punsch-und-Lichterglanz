@@ -1509,3 +1509,23 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .statistik-auf summary small { grid-area: klein; font-size: var(--t-mini); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
 .statistik-auf[open] summary { border-bottom: calc(var(--px) * 0.5) dashed #e0c898; margin-bottom: calc(var(--px) * 2); }
 .statistik-auf summary::before { display: none; }   /* der Stern der „Mehr Sterne"-Leiste gehört nicht hierher */
+
+/* Album-Bildkasten weihnachtlich (28.10. abends, Nutzerwunsch): gleicher Abstand rundum (vorher negativer Rand
+   an den Seiten), dazu je Abschnitt ein dunklerer Winterhimmel statt Hellrot/Hellgrün, pixelige Schneeflocken
+   (kleine SVG-Kachel, 1 Spielpixel = 1 Einheit) und unten ein Schneestreifen, auf dem die Figuren stehen. */
+.ak-bild { margin: 0; align-self: stretch; align-items: flex-end; padding-bottom: calc(var(--px) * 3); box-sizing: border-box;
+  --oben: #2c3a6a; --unten: #4a5a8e;
+  background-color: var(--unten);
+  background-image:
+    linear-gradient(to top, #e8eff8 0, #e8eff8 calc(var(--px) * 3), #c8d6ea calc(var(--px) * 3), #c8d6ea calc(var(--px) * 4), transparent calc(var(--px) * 4)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Cg fill='%23ffffff'%3E%3Crect x='3' y='4' width='1' height='1' opacity='.75'/%3E%3Crect x='15' y='2' width='1' height='1' opacity='.5'/%3E%3Crect x='20' y='11' width='1' height='1' opacity='.7'/%3E%3Crect x='8' y='14' width='1' height='1' opacity='.45'/%3E%3Crect x='12' y='20' width='1' height='1' opacity='.6'/%3E%3Crect x='1' y='18' width='1' height='1' opacity='.4'/%3E%3Crect x='17' y='17' width='1' height='1' opacity='.55'/%3E%3Crect x='10' y='7' width='1' height='1' opacity='.35'/%3E%3C/g%3E%3Cg fill='%23ffffff' opacity='.55'%3E%3Crect x='21' y='3' width='1' height='3'/%3E%3Crect x='20' y='4' width='3' height='1'/%3E%3Crect x='5' y='9' width='1' height='3'/%3E%3Crect x='4' y='10' width='3' height='1'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(var(--oben), var(--unten));
+  background-size: 100% 100%, calc(var(--px) * 24) calc(var(--px) * 24), 100% 100%;
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 calc(var(--px) * 0.6) rgba(0, 0, 0, 0.25); }
+.album-raster.set-gaeste .ak-bild { --oben: #2c3a6a; --unten: #50609a; }      /* Nachtblau */
+.album-raster.set-stamm .ak-bild { --oben: #24443c; --unten: #3e6a5a; }       /* Tannengrün bei Nacht */
+.album-raster.set-tiere .ak-bild { --oben: #2e4630; --unten: #4e6a44; }       /* Wald */
+.album-raster.set-voegel .ak-bild { --oben: #3a5a8a; --unten: #6a8cba; }      /* Winterhimmel am Tag */
+.rezeptbuch .rezept .ak-bild { --oben: #6a2a24; --unten: #94443a; }           /* Weihnachtsrot */
+.album-raster .album-karte.zu .ak-bild, .rezeptbuch .rezept.zu .ak-bild { --oben: #8a8296; --unten: #a8a0b2; }
