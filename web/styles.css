@@ -1602,3 +1602,8 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Minispiele: Leicht / Normal / Schwer ohne Textschatten (kam vom allgemeinen Knopfstil) */
 .stufen .k.stufe, .stufen .k.stufe * { text-shadow: none; }
 .statistik-auf .st-wetter small { text-transform: none; letter-spacing: 0; overflow: visible; }   /* nicht wie die alte „STATISTIK"-Zeile */
+/* Leicht / Normal / Schwer (28.10. abends, gemeldet: schwarze Pixel unten links und rechts): Die Knöpfe erbten den
+   fast schwarzen Schatten des grünen Hauptknopfs (rgb 12,36,20); an den runden Ecken der hellen Knöpfe blitzte er
+   heraus. Jetzt ein eigener Schatten in der Rahmenfarbe. */
+.stufen .k.stufe { box-shadow: 0 calc(var(--px) * 1) 0 #b8884a, inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.5); }
+.stufen .k.stufe.gewaehlt { box-shadow: 0 calc(var(--px) * 1) 0 var(--rot2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.2); }
