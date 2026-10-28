@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281430';
-import * as S from './spiel.js?v=202610281430';
-import * as Z from './zeit.js?v=202610281430';
-import * as T from './ton.js?v=202610281430';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281430';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281430';
-import { zielHaus } from './fein.js?v=202610281430';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281430';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281430';
-import * as A from './auftraege.js?v=202610281430';
-import * as E from './erfolge.js?v=202610281430';
-import * as ZL from './ziele.js?v=202610281430';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281430';
-import * as KA from './karte.js?v=202610281430';
-import { zeigeRueckblick } from './ereignis.js?v=202610281430';
-import { barbaraZweig } from './szene.js?v=202610281430';
-import * as SW from './schneeball.js?v=202610281430';
-import * as LI from './lichtung.js?v=202610281430';
-import * as CB from './christbaum.js?v=202610281430';
-import * as SB from './schlitten.js?v=202610281430';
-import * as EB from './schlittschuh.js?v=202610281430';
-import * as BS from './backstube.js?v=202610281430';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281430';
+import * as C from './config.js?v=202610281500';
+import * as S from './spiel.js?v=202610281500';
+import * as Z from './zeit.js?v=202610281500';
+import * as T from './ton.js?v=202610281500';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281500';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281500';
+import { zielHaus } from './fein.js?v=202610281500';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281500';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281500';
+import * as A from './auftraege.js?v=202610281500';
+import * as E from './erfolge.js?v=202610281500';
+import * as ZL from './ziele.js?v=202610281500';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281500';
+import * as KA from './karte.js?v=202610281500';
+import { zeigeRueckblick } from './ereignis.js?v=202610281500';
+import { barbaraZweig } from './szene.js?v=202610281500';
+import * as SW from './schneeball.js?v=202610281500';
+import * as LI from './lichtung.js?v=202610281500';
+import * as CB from './christbaum.js?v=202610281500';
+import * as SB from './schlitten.js?v=202610281500';
+import * as EB from './schlittschuh.js?v=202610281500';
+import * as BS from './backstube.js?v=202610281500';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281500';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -715,7 +715,7 @@ function rezeptbuch() {
   for (const rz of C.BACK_REZEPTE) {
     const da = best >= rz.ab;
     const k = el('div', 'rezept' + (da ? '' : ' zu'));
-    k.innerHTML = `<canvas width="20" height="18"></canvas><b>${da ? trennbar(rz.name) : '???'}</b><small>${da ? `${C.dekoListe(rz.deko).map((d) => C.BACK_DEKOS[d].name).join(', ')}` : `Rekord ab ${rz.ab.toLocaleString('de-DE')}`}</small>`;
+    k.innerHTML = `<div class="ak-bild"><canvas width="20" height="18"></canvas></div><b>${da ? trennbar(rz.name) : '???'}</b><small>${da ? `${C.dekoListe(rz.deko).map((d) => C.BACK_DEKOS[d].name).join(', ')}` : `Rekord ab ${rz.ab.toLocaleString('de-DE')}`}</small>`;
     const ctx = k.querySelector('canvas').getContext('2d');
     BS.zeichnePlaetzchen(ctx, 1, 1, rz.form, 'golden', da ? rz.deko : null, 2);
     if (!da) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#6a5a4a'; ctx.fillRect(0, 0, 20, 18); }
@@ -781,7 +781,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281430`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281500`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2015,10 +2015,9 @@ const trennbar = (name) => name.split(' ').map((wort) => { const f = FUGEN.find(
 function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
   const k = el('div', 'album-karte' + (n ? '' : ' zu'));
   // n < 0: schon gesehen, aber vor dem Album (10.10.) nicht mitgezählt
-  k.innerHTML = `<canvas width="${w}" height="${h}"></canvas><b>${n ? esc(trennbar(name)) : '???'}</b><small>${n > 0 ? `${n.toLocaleString('de-DE')}${einheit}` : n < 0 ? 'schon gesehen' : 'noch nicht gesehen'}</small>`;
+  k.innerHTML = `<div class="ak-bild"><canvas width="${w}" height="${h}"></canvas></div><b>${n ? esc(trennbar(name)) : '???'}</b><small>${n > 0 ? `${n.toLocaleString('de-DE')}${einheit}` : n < 0 ? 'schon gesehen' : 'noch nicht gesehen'}</small>`;
   const cv = k.querySelector('canvas'), ctx = cv.getContext('2d');
   cv.style.width = `calc(var(--px) * ${w})`; cv.style.height = `calc(var(--px) * ${h})`;   // 1:1 (11.10.: Tiere sind 28 x 26)
-  cv.style.margin = `calc(var(--px) * ${Math.max(0, (28 - h) / 2)}) 0`;   // festes 28er-Bildfeld (28.10.: alle Kacheln gleich)
   male(ctx);
   if (!n) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#5a4a3e'; ctx.fillRect(0, 0, w, h); }
   return k;
@@ -2219,13 +2218,13 @@ function baueAlbum(liste) {
   const kopf = (titel, da, alle) => liste.appendChild(el('p', 'gruppe', `${titel}: ${da} / ${alle}`));
   // Besucher am Stand
   kopf('Besucher am Stand', ALBUM_GAESTE.filter(([t]) => typ[t]).length, ALBUM_GAESTE.length);
-  const g = el('div', 'album-raster');
+  const g = el('div', 'album-raster set-gaeste');
   for (const [t, name] of ALBUM_GAESTE) g.appendChild(albumKarte(name, typ[t] || 0, (ctx) => figurKlein(ctx, { typ: t, farben: neueFarben(t), phase: 0, laeuft: false }, 12, 22, 0), 24, 24, '× bedient'));
   liste.appendChild(g);
   // Stammgäste (13.10.): wer schon da war, mit der Zahl der Besuche
   const stamm = Object.keys(C.STAMMGAESTE);
   kopf('Stammgäste', stamm.filter((id) => S.stammBesuche(id)).length, stamm.length);
-  const sg = el('div', 'album-raster');
+  const sg = el('div', 'album-raster set-stamm');
   for (const id of stamm) {
     const k = albumKarte(C.GAESTE[id].name, S.stammBesuche(id), (ctx) => figurKlein(ctx, { typ: id, farben: { ...C.GAESTE[id].farben }, phase: 0, laeuft: false }, id === 'hilde' ? 16 : 12, 22, 0), id === 'hilde' ? 28 : 24, 24, '× da gewesen');
     // 25.10.: antippen = die Geschichten nachlesen (wer noch nie da war, bleibt ???)
@@ -2235,7 +2234,7 @@ function baueAlbum(liste) {
   liste.appendChild(sg);
   // Tiere der Waldlichtung
   kopf('Tiere der Waldlichtung', ALBUM_TIERE.filter(([a]) => tiere[a] || (!S.st.stats.tiere && S.miniRekord('lichtung') > 0 && ALBUM_TIERE_ALT.includes(a))).length, ALBUM_TIERE.length);
-  const ti = el('div', 'album-raster');
+  const ti = el('div', 'album-raster set-tiere');
   // Alte Spielstände: Wer die Lichtung schon gespielt hat, kennt Hase, Eichhörnchen und Reh
   const frueher = !S.st.stats.tiere && S.miniRekord('lichtung') > 0;
   for (const [a, name] of ALBUM_TIERE) ti.appendChild(albumKarte(name, tiere[a] || (frueher && ALBUM_TIERE_ALT.includes(a) ? -1 : 0), (ctx) => LI.zeichneTierAlbum(ctx, a, 14, 24), 28, 26, '× gefüttert'));
@@ -2244,7 +2243,7 @@ function baueAlbum(liste) {
   if (S.hat('futterhaus') || Object.keys(S.st.voegel || {}).length) {
     const vg = S.st.voegel || {};
     kopf('Vögel am Futterhaus', C.VOEGEL.filter((v) => vg[v.id]).length, C.VOEGEL.length);
-    const vr = el('div', 'album-raster');
+    const vr = el('div', 'album-raster set-voegel');
     for (const v of C.VOEGEL) {
       const k = vr.appendChild(albumKarte(v.name, vg[v.id] || 0, (ctx) => maleVogel(ctx, v.id), 28, 28, '× gesehen'));
       // Gesehene Vögel lassen sich antippen: Steckbrief wie beim ersten Besuch (14.10.)

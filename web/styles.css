@@ -1471,3 +1471,25 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .sammel-teil small { font-size: var(--t-mini); font-weight: 700; color: var(--text3); line-height: 1.15; -webkit-hyphens: manual; hyphens: manual; overflow-wrap: break-word; max-width: 100%; }
 .sammel-teil.hat { background: #fff3c4; border-style: solid; border-color: var(--gold); }
 .sammel-teil.hat small { color: #4a2c18; }
+
+/* Album als Sammelkarten (28.10., Nutzerwunsch): drei je Reihe (fast 2:3 wie echte Sammelkarten), Rahmen in der
+   Farbe des Abschnitts, das Bild in einem eigenen Kasten, Name und Zahl darunter. Gesperrte Karten grau gestrichelt. */
+.album-raster, .rezeptbuch { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: calc(var(--px) * 66); gap: calc(var(--px) * 3); }
+.album-karte, .rezeptbuch .rezept { --rahmen: #c8963a; --bild: #fbecc4;
+  background: linear-gradient(#fffaf0, #f6e8cc); border: calc(var(--px) * 1) solid var(--rahmen); border-radius: calc(var(--px) * 2.5);
+  padding: calc(var(--px) * 2); gap: calc(var(--px) * 1.2); justify-content: flex-start;
+  box-shadow: 0 calc(var(--px) * 0.8) 0 rgba(90, 58, 20, 0.25), inset 0 0 0 calc(var(--px) * 0.6) #fffdf6; }
+.ak-bild { flex: none; width: 100%; height: calc(var(--px) * 34); display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  background: var(--bild); border: calc(var(--px) * 0.6) solid rgba(90, 58, 20, 0.22); border-radius: calc(var(--px) * 1.5);
+  box-shadow: inset 0 calc(var(--px) * 0.8) calc(var(--px) * 1.5) rgba(0, 0, 0, 0.1); }
+.ak-bild canvas, .rezeptbuch .ak-bild canvas { margin: 0; }
+.album-karte b, .rezeptbuch .rezept b { margin-top: calc(var(--px) * 0.4); }
+.album-raster.set-gaeste .album-karte { --rahmen: #b8463a; --bild: #f8e0d6; }
+.album-raster.set-stamm .album-karte { --rahmen: #3a8a4a; --bild: #dcefd6; }
+.album-raster.set-tiere .album-karte { --rahmen: #8a5a2a; --bild: #efe0c4; }
+.album-raster.set-voegel .album-karte { --rahmen: #3a6aa8; --bild: #dce8f4; }
+.album-raster .album-karte.zu, .rezeptbuch .rezept.zu { opacity: 1; --rahmen: #bcae94; --bild: #e2d8c4; border-style: dashed;
+  background: #f0e8d8; box-shadow: none; }
+.album-karte.zu b, .album-karte.zu small, .rezeptbuch .rezept.zu b, .rezeptbuch .rezept.zu small { color: #9a8a72; }
+.album-karte.tippbar { cursor: pointer; }
+.album-karte.tippbar:active { transform: translateY(calc(var(--px) * 0.6)); box-shadow: none; }
