@@ -5,28 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281330';
-import * as S from './spiel.js?v=202610281330';
-import * as Z from './zeit.js?v=202610281330';
-import * as T from './ton.js?v=202610281330';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281330';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281330';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281330';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281330';
-import * as A from './auftraege.js?v=202610281330';
-import * as E from './erfolge.js?v=202610281330';
-import * as ZL from './ziele.js?v=202610281330';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281330';
-import * as KA from './karte.js?v=202610281330';
-import { zeigeRueckblick } from './ereignis.js?v=202610281330';
-import { barbaraZweig } from './szene.js?v=202610281330';
-import * as SW from './schneeball.js?v=202610281330';
-import * as LI from './lichtung.js?v=202610281330';
-import * as CB from './christbaum.js?v=202610281330';
-import * as SB from './schlitten.js?v=202610281330';
-import * as EB from './schlittschuh.js?v=202610281330';
-import * as BS from './backstube.js?v=202610281330';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281330';
+import * as C from './config.js?v=202610281400';
+import * as S from './spiel.js?v=202610281400';
+import * as Z from './zeit.js?v=202610281400';
+import * as T from './ton.js?v=202610281400';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281400';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281400';
+import { zielHaus } from './fein.js?v=202610281400';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281400';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281400';
+import * as A from './auftraege.js?v=202610281400';
+import * as E from './erfolge.js?v=202610281400';
+import * as ZL from './ziele.js?v=202610281400';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281400';
+import * as KA from './karte.js?v=202610281400';
+import { zeigeRueckblick } from './ereignis.js?v=202610281400';
+import { barbaraZweig } from './szene.js?v=202610281400';
+import * as SW from './schneeball.js?v=202610281400';
+import * as LI from './lichtung.js?v=202610281400';
+import * as CB from './christbaum.js?v=202610281400';
+import * as SB from './schlitten.js?v=202610281400';
+import * as EB from './schlittschuh.js?v=202610281400';
+import * as BS from './backstube.js?v=202610281400';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281400';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -780,7 +781,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281330`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281400`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2716,18 +2717,20 @@ export function waehleModus(fertig) {
   const bis = Math.ceil((new Date(Z.saison(heute), 11, 1) - heute) / 86400000);
   const datum = `${heute.getDate()}.${heute.getMonth() + 1}.`;
   const wann = bis > 1 ? `in ${bis} Tagen` : bis === 1 ? 'morgen' : null;
-  // Lange vor Dezember ist der eigene Advent für fast jeden die bessere Wahl:
-  // dann steht er oben und ist als Empfehlung markiert (Betatest 2)
-  const klassisch = `<button class="modus" data-m="echt">
-      <b>🕯️ ${MODUS_NAME.echt}</b>
-      <span>Das Spiel hat das echte Datum (heute der ${datum}). ${wann ? `Das erste Türchen gibt es am 1. Dezember - also ${wann}.` : 'Du steigst mitten im Advent ein.'}</span>
+  // Empfohlen (28.10., Nutzerwunsch): vom 24. November bis Ende Dezember der echte Kalender - dann ist
+  // ohnehin Advent bzw. gleich so weit. Sonst der eigene Advent (Betatest 2). Die Empfehlung steht oben.
+  const m = heute.getMonth(), echtEmpf = (m === 10 && heute.getDate() >= 24) || m === 11;
+  const marke = ' <i class="empf">Empfohlen</i>';
+  const klassisch = `<button class="modus${echtEmpf ? ' empfohlen' : ''}" data-m="echt">
+      <b>🕯️ ${MODUS_NAME.echt}${echtEmpf ? marke : ''}</b>
+      <span>Das Spiel hat das echte Datum (heute der ${datum}). ${wann ? `Das erste Türchen gibt es am 1. Dezember - also ${wann}.` : m === 11 ? 'Du steigst mitten im Advent ein.' : 'Die Adventszeit ist gerade vorbei - sie kommt erst im Dezember wieder.'}</span>
     </button>`;
-  const individuell = `<button class="modus${bis > 7 ? ' empfohlen' : ''}" data-m="eigen">
-      <b>🎄 ${MODUS_NAME.eigen}${bis > 7 ? ' <i class="empf">Empfohlen</i>' : ''}</b>
+  const individuell = `<button class="modus${echtEmpf ? '' : ' empfohlen'}" data-m="eigen">
+      <b>🎄 ${MODUS_NAME.eigen}${echtEmpf ? '' : marke}</b>
       <span>Das Spiel beginnt am 24. November - egal, wann du anfängst. Nach einer Woche geht das erste Türchen auf, und du erlebst den ganzen Advent.</span>
     </button>`;
   const box = fenster('Wann beginnt dein Advent?', `
-    ${bis > 7 ? individuell + klassisch : klassisch + individuell}
+    ${echtEmpf ? klassisch + individuell : individuell + klassisch}
     <p class="klein">Bis zum ersten Türchen wartet jeden Tag ein Vorfreude-Päckchen. Die Uhrzeit ist immer die echte - nachts ist es dunkel.</p>`, []);
   // 13.10.: Das Fenster blendet ein - ein Tipp in den ersten 0,7 s zählt nicht
   // (Betatest: der Tipp auf den eigenen Advent landete auf dem echten Kalender). Und wer im
@@ -2782,7 +2785,7 @@ export function zeigeZiel(modus, fertig) {
     ? 'Dein Spiel beginnt am 24. November - du hast also gut vier Wochen.'
     : `Heute ist der ${Z.datumLang()}.`;
   fenster('Dein Ziel', `
-    <div class="gross-ico">🏡✨</div>
+    <canvas class="ziel-haus" width="72" height="62"></canvas>
     <p><b>Mach dein Haus bis Heiligabend zum schönsten im Dorf!</b></p>
     <ul class="ziel">
       <li>☕ Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
@@ -2792,6 +2795,7 @@ export function zeigeZiel(modus, fertig) {
     </ul>
     <p class="klein">${start} Jeder Advent bringt eine Überraschung.</p>`,
   [{ text: 'Los geht’s!', aktion: () => { if (fertig) setTimeout(fertig, 60); } }]);
+  zielHaus(document.querySelector('#modal canvas.ziel-haus'));
 }
 
 export function zeigeHilfe() {

@@ -10,8 +10,8 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202610281330';
-import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610281330';
+import * as Z from './zeit.js?v=202610281400';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610281400';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
@@ -279,6 +279,27 @@ export function haus(c, x, fuss, b, h, o = {}) {
     if (o.rauch !== false) for (let i = 0; i < 6; i++) { const rx = kx + 2 + Math.round(Math.sin(i * 1.3) * 2 + i * 0.6), ry = ky - 9 - i * 3; r(c, rx, ry, 2 + (i > 2 ? 1 : 0), 2, i < 3 ? '#d8dce4' : '#c4c8d4'); }
   }
   return fuss - h - dh;
+}
+
+/**
+ * Das Haus im Startfenster „Dein Ziel" (28.10., statt der Emojis 🏡✨): rotes Holzhaus mit Schnee
+ * auf dem Dach, bunter Lichterkette, Kranz und Rauch, daneben eine Tanne mit Lichtern, auf einem
+ * kleinen Schneehügel. Durchsichtiger Grund, damit es auf dem Papier des Fensters steht. 72 x 62.
+ */
+export function zielHaus(cv) {
+  if (!cv) return;
+  const c = cv.getContext('2d'), w = cv.width, fuss = cv.height - 4;
+  c.clearRect(0, 0, w, cv.height);
+  neueLichter();
+  // Schneehügel: oben leicht gewölbt, mit hellem Saum und Schatten unten
+  for (let x = 2; x < w - 2; x++) {
+    const a = (x - w / 2) / (w / 2 - 2), top = Math.round(fuss - 3 - 3 * Math.sqrt(Math.max(0, 1 - a * a)));
+    for (let y = top; y < cv.height; y++) p(c, x, y, y === top ? '#e2eaf4' : y > fuss + 1 ? '#dde6f0' : hash(x * 7 + y) > 0.96 ? '#ffffff' : '#f6f9fc');
+  }
+  tanne(c, 12, fuss - 3, 22, { schnee: true, lichter: 6, stern: true });
+  haus(c, 26, fuss - 2, 30, 20, { wand: '#c8473a', dach: '#5a3a3a', schnee: true, licht: 'bunt' });
+  leuchten(c, 0.9);
+  feinGroesse(cv);
 }
 
 // ---------------------------------------------------------------------------

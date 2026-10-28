@@ -1425,3 +1425,6 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .rezeptbuch b { margin-top: 0; }
 /* Lange Namen (Tannenbäumchen, Weihnachtsmann, Seidenschwanz) an den weichen Trennstellen aus trennbar() umbrechen */
 .album-karte b, .album-karte small, .rezeptbuch b, .rezeptbuch small { -webkit-hyphens: manual; hyphens: manual; overflow-wrap: break-word; max-width: 100%; }
+
+/* Startfenster „Dein Ziel" (28.10.): gemaltes Haus statt Emojis, Größe setzt feinGroesse() */
+#modal canvas.ziel-haus { display: block; margin: calc(var(--px) * 1) auto calc(var(--px) * 2); image-rendering: pixelated; }
