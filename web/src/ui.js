@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281400';
-import * as S from './spiel.js?v=202610281400';
-import * as Z from './zeit.js?v=202610281400';
-import * as T from './ton.js?v=202610281400';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281400';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281400';
-import { zielHaus } from './fein.js?v=202610281400';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281400';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281400';
-import * as A from './auftraege.js?v=202610281400';
-import * as E from './erfolge.js?v=202610281400';
-import * as ZL from './ziele.js?v=202610281400';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281400';
-import * as KA from './karte.js?v=202610281400';
-import { zeigeRueckblick } from './ereignis.js?v=202610281400';
-import { barbaraZweig } from './szene.js?v=202610281400';
-import * as SW from './schneeball.js?v=202610281400';
-import * as LI from './lichtung.js?v=202610281400';
-import * as CB from './christbaum.js?v=202610281400';
-import * as SB from './schlitten.js?v=202610281400';
-import * as EB from './schlittschuh.js?v=202610281400';
-import * as BS from './backstube.js?v=202610281400';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281400';
+import * as C from './config.js?v=202610281430';
+import * as S from './spiel.js?v=202610281430';
+import * as Z from './zeit.js?v=202610281430';
+import * as T from './ton.js?v=202610281430';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281430';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281430';
+import { zielHaus } from './fein.js?v=202610281430';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281430';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281430';
+import * as A from './auftraege.js?v=202610281430';
+import * as E from './erfolge.js?v=202610281430';
+import * as ZL from './ziele.js?v=202610281430';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281430';
+import * as KA from './karte.js?v=202610281430';
+import { zeigeRueckblick } from './ereignis.js?v=202610281430';
+import { barbaraZweig } from './szene.js?v=202610281430';
+import * as SW from './schneeball.js?v=202610281430';
+import * as LI from './lichtung.js?v=202610281430';
+import * as CB from './christbaum.js?v=202610281430';
+import * as SB from './schlitten.js?v=202610281430';
+import * as EB from './schlittschuh.js?v=202610281430';
+import * as BS from './backstube.js?v=202610281430';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281430';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -781,7 +781,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281400`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281430`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1812,11 +1812,13 @@ function rufKarte() {
   const preis = Math.round(r.stufe * C.RUF_JE_STUFE * 100);
   const heute = r.max ? 'Höchste Stufe erreicht!'
     : r.fertig ? 'Heute geschafft - morgen geht es weiter.'
-    : S.aufsicht() ? `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.gold)} goldene Gäste oder eine Minispielrunde`
-    : `Heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.normal)} Gäste selbst bedienen oder eine Minispielrunde`;
-  z.innerHTML = `<div class="ruf-stern"><small>Stufe</small><b>${r.stufe}</b></div>
+    : S.aufsicht() ? `Für heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.gold)} goldene Gäste oder eine Minispielrunde`
+    : `Für heute: ${Math.round(C.RUF_PUNKTE / C.RUF_JE.normal)} Gäste selbst bedienen oder eine Minispielrunde`;
+  // 28.10. (UI-Durchsicht, gemeldet „sehr viel los"): hell statt dunkelblauer Block, „Stufe" steht im
+  // Titel, der Preisaufschlag nur, wenn es einen gibt
+  z.innerHTML = `<div class="ruf-stern"><b>${r.stufe}</b></div>
     <div class="mitte">
-      <div class="ruf-titel"><b>Ruf deines Standes</b><span>${preis ? `Preise +${preis} %` : 'Preise normal'}</span></div>
+      <div class="ruf-titel"><b>Ruf deines Standes · Stufe ${r.stufe}</b>${preis ? `<span>Preise +${preis} %</span>` : ''}</div>
       <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * anteil)}%"></i></div><span class="zahl">${fertig ? '✓' : Math.round(100 * anteil) + ' %'}</span></div>
       <small>${heute}</small></div>`;
   return z;
@@ -1848,8 +1850,9 @@ function bitteKarte() {
       <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * (b.abgeholt ? 1 : stand / ziel))}%"></i></div><span class="zahl">${b.abgeholt ? '✓' : `${stand} / ${ziel}`}</span></div>
       <div class="bitte-knopf"><small>${b.abgeholt ? 'Erledigt - morgen hat wieder jemand eine Bitte.' : A.bitteAufgabe(b)}</small></div></div>`;
   maleStammKlein(z.querySelector('canvas'), b.gast);
-  const k = el('button', 'k k--kauf', b.abgeholt ? '✓' : 'Abholen');
-  k.disabled = b.abgeholt || !fertig;
+  // 28.10.: Der Knopf erscheint nur, wenn es etwas abzuholen gibt (ein grauer „Abholen" sah kaputt aus)
+  const k = el('button', 'k k--kauf', 'Abholen');
+  if (b.abgeholt || !fertig) k.style.display = 'none';
   k.onclick = () => {
     const e = A.bitteAbholen();
     if (!e) return;
@@ -1915,7 +1918,7 @@ export function oeffneAuftraege(reiter) {
   S.st.tipps = S.st.tipps || {};
   if (auftragReiter === 'erfolge') S.st.tipps.erfolge = true;
   else if (auftragReiter === 'heute') S.st.tipps.auftraege_neu = S.st.tipps.auftrag = true;
-  oeffneBlatt('auftraege', auftragReiter === 'erfolge' ? 'Erfolgswand' : auftragReiter === 'album' ? 'Album' : 'Aufträge für heute');
+  oeffneBlatt('auftraege', auftragReiter === 'erfolge' ? 'Erfolgswand' : auftragReiter === 'album' ? 'Album' : 'Aufträge');
   const kopf = $('#blattTabs');
   kopf.innerHTML = '';
   const rt = el('div', 'reiter');
@@ -1934,44 +1937,65 @@ export function oeffneAuftraege(reiter) {
   if (auftragReiter === 'erfolge') return baueErfolge(liste);
   if (auftragReiter === 'album') return baueAlbum(liste);
   if (S.st.lernen < 99) { liste.appendChild(el('p', 'hinweis', 'Nach der Einführung gibt es hier jeden Tag drei Aufträge.')); return; }
-  // 17.10.: drei Bereiche, optisch getrennt - Ruf (Kopf), Bitte (Zettel), Tagesaufträge
+  // 28.10. (UI-Durchsicht, gemeldet „sehr viel los"): Ruf kompakt oben, dann HEUTE mit den drei Aufträgen,
+  // dann was Gäste sich wünschen, zuletzt die Sammelstücke. Knöpfe nur, wenn man etwas tun kann;
+  // Erledigtes schrumpft auf eine grüne Zeile; Schwierigkeit EINMAL (Farbstreifen + Wort).
   liste.appendChild(rufKarte());
-  const bk = bitteKarte();
-  if (bk) { liste.appendChild(el('p', 'aufgaben-titel', 'Bitte eines Stammgasts')); liste.appendChild(bk); }
-  const wk = wunschKarte();
-  if (wk) { liste.appendChild(el('p', 'aufgaben-titel', 'Wunschzettel')); liste.appendChild(wk); }
-  liste.appendChild(el('p', 'aufgaben-titel', 'Tagesaufträge'));
+  const heute = A.heute(), abgeholt = heute.filter((a) => a.abgeholt).length;
+  const abschnitt = (titel, rechts) => liste.appendChild(el('div', 'abschnitt-kopf', `<span>${titel}</span>${rechts ? `<small>${rechts}</small>` : ''}`));
+  abschnitt('Heute', `${abgeholt} von ${heute.length} abgeholt`);
+  liste.appendChild(el('p', 'abschnitt-info', S.aufsicht()
+    ? 'Es zählt, was am Tresen passiert, während du da bist - Besonderes nur, wenn du selbst bedienst. Morgen gibt es neue.'
+    : 'Es zählt nur, was du selbst am Tresen machst. Morgen gibt es neue.'));
   const stufenName = ['leicht', 'mittel', 'schwer'];
-  A.heute().forEach((a, i) => {
-    const z = el('div', 'auftrag' + (a.abgeholt ? ' erledigt' : ''));
+  const sterne = (n) => `${Math.round(n).toLocaleString('de-DE')} ★`;
+  heute.forEach((a, i) => {
+    const bereit = !a.abgeholt && A.fertig(a);
+    const z = el('div', `auftrag2 s${a.stufe}` + (a.abgeholt ? ' erledigt' : bereit ? ' bereit' : ''));
     const deko = a.stufe === 2 ? A.naechstesSammelstueck() : null;
-    z.innerHTML = `<span class="stufe s${a.stufe}">${i + 1}</span>
-      <div class="mitte"><b>${A.text(a)}</b>
-        <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * a.stand / a.ziel)}%"></i></div><span class="zahl">${a.stand} / ${a.ziel}</span></div>
-        <small>${stufenName[a.stufe]} · ${S.formatGeld(a.lohn)}${deko ? ' + Sammelstück' : ''}</small></div>`;
-    const k = el('button', 'k k--kauf', a.abgeholt ? '✓' : 'Abholen');
-    k.disabled = a.abgeholt || !A.fertig(a);
-    k.onclick = () => {
-      const e = A.abholen(i);
-      if (!e) return;
-      T.spiele('kauf');
-      oeffneAuftraege('heute');
-      if (e.deko) {
-        fenster('Sammelstück!', `<div class="gross-ico">🎁</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p><p class="klein">Gibt es nur für schwere Aufträge.</p>`, [{ text: 'Ansehen', aktion: () => { schliesseBlatt(); const o = ortVon(e.deko.id); if (o) funkeln(o.x, o.y); } }]);
-      } else toast(`+${S.formatGeld(e.lohn)} für den Auftrag!`, 'gut');
-    };
-    z.appendChild(k);
+    if (a.abgeholt) z.innerHTML = `<span class="haken">✓</span><b>${A.text(a)}</b><span class="lohn">+${sterne(a.lohn)}</span>`;
+    else {
+      z.innerHTML = `<div class="kopf"><b>${A.text(a)}</b><span class="lohn">${sterne(a.lohn)}</span></div>
+        <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * Math.min(1, a.stand / a.ziel))}%"></i></div><span class="zahl">${Math.min(a.stand, a.ziel)} / ${a.ziel}</span></div>
+        <div class="fuss"><span class="stufe-name">${stufenName[a.stufe]}</span>${deko ? '<span>+ Sammelstück</span>' : ''}</div>`;
+      if (bereit) {
+        const k = el('button', 'k k--kauf', 'Abholen');
+        k.onclick = () => {
+          const e = A.abholen(i);
+          if (!e) return;
+          T.spiele('kauf');
+          oeffneAuftraege('heute');
+          if (e.deko) {
+            fenster('Sammelstück!', `<div class="gross-ico">🎁</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p><p class="klein">Gibt es nur für schwere Aufträge.</p>`, [{ text: 'Ansehen', aktion: () => { schliesseBlatt(); const o = ortVon(e.deko.id); if (o) funkeln(o.x, o.y); } }]);
+          } else toast(`+${S.formatGeld(e.lohn)} für den Auftrag!`, 'gut');
+        };
+        z.appendChild(k);
+      }
+    }
     liste.appendChild(z);
     // Wer die Sorte heute selbst aus dem Angebot genommen hat (26.10.)
     const hw = a.typ === 'produkt' && !a.abgeholt && !A.fertig(a) ? angebotHinweis(a.param) : null;
     if (hw) liste.appendChild(hw);
   });
-  liste.appendChild(el('p', 'klein', S.aufsicht()
-    ? 'Morgen gibt es neue Aufträge. Es zählt, was am Tresen passiert, während du da bist - Besonderes nur, wenn du selbst bedienst.'
-    : 'Morgen gibt es neue Aufträge. Zählt nur, was du selbst am Tresen machst.'));
-  const samm = el('div', 'sammlung');
-  for (const d of C.AUFTRAG_DEKO) samm.appendChild(el('span', S.st.kalDeko[d.id] ? 'hat' : '', S.st.kalDeko[d.id] ? '★ ' + d.name : '???'));
-  liste.appendChild(el('p', 'gruppe', `Sammlung: ${C.AUFTRAG_DEKO.filter((d) => S.st.kalDeko[d.id]).length} / ${C.AUFTRAG_DEKO.length}`));
+  // Was Gäste sich wünschen: Bitte eines Stammgasts und Wunschzettel unter EINER Überschrift
+  const bk = bitteKarte(), wk = wunschKarte();
+  if (bk || wk) {
+    abschnitt('Von deinen Gästen');
+    if (bk) liste.appendChild(bk);
+    if (wk) liste.appendChild(wk);
+  }
+  // Sammelstücke als kleine Bilder (vorher „???"-Kärtchen); was fehlt, ist ein Schattenriss
+  const hat = C.AUFTRAG_DEKO.filter((d) => S.st.kalDeko[d.id]).length;
+  abschnitt('Sammelstücke', `${hat} von ${C.AUFTRAG_DEKO.length} · aus schweren Aufträgen`);
+  const samm = el('div', 'sammel2');
+  for (const d of C.AUFTRAG_DEKO) {
+    const da = !!S.st.kalDeko[d.id];
+    const t = el('div', 'sammel-teil' + (da ? ' hat' : ''), `<canvas width="16" height="16"></canvas><small>${da ? trennbar(d.name) : '???'}</small>`);
+    const cv = t.querySelector('canvas');
+    zeichneIcon(cv, d);
+    if (!da) { const c = cv.getContext('2d'); c.globalCompositeOperation = 'source-atop'; c.fillStyle = '#8a7a6a'; c.fillRect(0, 0, 16, 16); }
+    samm.appendChild(t);
+  }
   liste.appendChild(samm);
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
 }
@@ -1986,7 +2010,7 @@ const ALBUM_TIERE = [['hase', 'Feldhase'], ['eich', 'Eichhörnchen'], ['reh', 'R
 const ALBUM_TIERE_ALT = ['hase', 'eich', 'reh'];   // die gab es schon vor dem Album (alte Spielstände)
 // Weiche Trennstellen an den Wortfugen (28.10.): Die Kacheln sind schmal, „Tannenbäumchen" passt nicht in eine
 // Zeile, und hyphens:auto trennt nicht in jedem Browser. Ein Strich erscheint nur, wenn wirklich umbrochen wird.
-const FUGEN = ['Weihnachts', 'Lebkuchen', 'Tannen', 'Vanille', 'Spazier', 'Seiden', 'Schoko', 'Schnee', 'Eich', 'Kohl', 'Blau', 'Wild', 'Wald', 'Feld', 'Gold', 'Rot', 'Zimt'];
+const FUGEN = ['Weihnachts', 'Geschenke', 'Lebkuchen', 'Tannen', 'Vanille', 'Spazier', 'Seiden', 'Schoko', 'Schnee', 'Eich', 'Kohl', 'Blau', 'Wild', 'Wald', 'Feld', 'Gold', 'Rot', 'Zimt'];
 const trennbar = (name) => name.split(' ').map((wort) => { const f = FUGEN.find((x) => wort.startsWith(x) && wort.length - x.length >= 3); return f ? f + '­' + wort.slice(f.length) : wort; }).join(' ');
 function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
   const k = el('div', 'album-karte' + (n ? '' : ' zu'));

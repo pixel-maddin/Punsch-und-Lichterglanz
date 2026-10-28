@@ -1428,3 +1428,46 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 
 /* Startfenster „Dein Ziel" (28.10.): gemaltes Haus statt Emojis, Größe setzt feinGroesse() */
 #modal canvas.ziel-haus { display: block; margin: calc(var(--px) * 1) auto calc(var(--px) * 2); image-rendering: pixelated; }
+
+/* Aufträge neu (28.10., UI-Durchsicht): ein Ruf-Kasten in Papier statt Dunkelblau, Abschnitte mit EINER Überschrift,
+   Auftragskarten mit Farbstreifen für die Schwierigkeit, Knopf nur wenn abholbar, Erledigtes als grüne Zeile */
+.ruf-kopf { background: #fff6dc; border: calc(var(--px) * 0.6) solid #e8c878; color: #4a2c18; box-shadow: none; padding: calc(var(--px) * 2.5) calc(var(--px) * 3); gap: calc(var(--px) * 2.5); }
+.ruf-kopf .ruf-stern { width: calc(var(--px) * 13); height: calc(var(--px) * 13); }
+.ruf-kopf .ruf-stern b { font-size: var(--t-gross); }
+.ruf-kopf .ruf-titel b { color: var(--rot2, #8a2a1a); font-size: var(--t-text); }
+.ruf-kopf .ruf-titel span { color: #2e7a3a; }
+.ruf-kopf .balken { background: #ecdcb8; }
+.ruf-kopf .zahl, .ruf-kopf small { color: var(--text3); }
+.ruf-kopf small { font-size: var(--t-mini); font-weight: 700; }
+.abschnitt-kopf { display: flex; justify-content: space-between; align-items: baseline; gap: calc(var(--px) * 2);
+  margin: calc(var(--px) * 5) 0 calc(var(--px) * 1); padding-bottom: calc(var(--px) * 1); border-bottom: calc(var(--px) * 0.5) solid #e8d4a8;
+  font-size: var(--t-klein); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
+.abschnitt-kopf small { font-size: var(--t-mini); font-weight: 700; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+.abschnitt-info { margin: 0 0 calc(var(--px) * 2.5); font-size: var(--t-mini); font-weight: 700; color: var(--text3); line-height: 1.35; }
+.auftrag2 { --stufe: #6a9a4a; background: #fffaf0; border: calc(var(--px) * 0.6) solid #e8d4a8; border-left: calc(var(--px) * 2) solid var(--stufe);
+  border-radius: calc(var(--px) * 2); padding: calc(var(--px) * 2.5) calc(var(--px) * 3); margin-bottom: calc(var(--px) * 2.5); }
+.auftrag2.s1 { --stufe: #d8942a; }
+.auftrag2.s2 { --stufe: #b83a2e; }
+.auftrag2 .kopf { display: flex; justify-content: space-between; align-items: baseline; gap: calc(var(--px) * 2); }
+.auftrag2 .kopf b { font-size: var(--t-text); line-height: 1.25; }
+.auftrag2 .lohn { flex: none; white-space: nowrap; font-weight: 800; font-size: var(--t-klein); color: #a8701a; }
+.auftrag2 .balken-zeile { margin: calc(var(--px) * 1) 0 calc(var(--px) * 0.5); }
+.auftrag2 .fuss { display: flex; gap: calc(var(--px) * 2.5); font-size: var(--t-mini); font-weight: 700; color: var(--text3); }
+.auftrag2 .stufe-name { color: var(--stufe); text-transform: uppercase; letter-spacing: 0.05em; }
+.auftrag2 .k { display: block; width: 100%; margin-top: calc(var(--px) * 2.5); min-width: 0; }
+.auftrag2.bereit { border-color: var(--gold); border-left-color: var(--stufe); box-shadow: 0 0 0 calc(var(--px) * 0.8) rgba(232, 176, 48, 0.3); }
+.auftrag2.bereit .balken i { background: linear-gradient(90deg, #4aa84a, #8ad06a); }
+.auftrag2.erledigt { display: flex; align-items: center; gap: calc(var(--px) * 2); padding: calc(var(--px) * 1.8) calc(var(--px) * 3);
+  background: #eef6e4; border-color: #c4dcae; border-left-color: #6aa84a; }
+.auftrag2.erledigt b { flex: 1; min-width: 0; font-size: var(--t-klein); font-weight: 700; color: var(--text2); }
+.auftrag2.erledigt .lohn { color: #3a8a3a; }
+.auftrag2 .haken { flex: none; width: calc(var(--px) * 8); height: calc(var(--px) * 8); border-radius: 50%; background: #5aa84a; color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: var(--t-mini); font-weight: 800; }
+.bitte-zettel { margin-bottom: calc(var(--px) * 2.5); }
+.sammel2 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(var(--px) * 2.5); margin: calc(var(--px) * 1.5) 0 calc(var(--px) * 3); }
+.sammel-teil { display: flex; flex-direction: column; align-items: center; gap: calc(var(--px) * 1); padding: calc(var(--px) * 2) calc(var(--px) * 1);
+  background: var(--papier2); border: calc(var(--px) * 0.6) dashed #d8b880; border-radius: calc(var(--px) * 1.5); text-align: center; }
+.sammel-teil canvas { width: calc(var(--px) * 16); height: calc(var(--px) * 16); image-rendering: pixelated; }
+.sammel-teil small { font-size: var(--t-mini); font-weight: 700; color: var(--text3); line-height: 1.15; -webkit-hyphens: manual; hyphens: manual; overflow-wrap: break-word; max-width: 100%; }
+.sammel-teil.hat { background: #fff3c4; border-style: solid; border-color: var(--gold); }
+.sammel-teil.hat small { color: #4a2c18; }
