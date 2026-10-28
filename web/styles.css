@@ -1493,10 +1493,19 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .album-karte.zu b, .album-karte.zu small, .rezeptbuch .rezept.zu b, .rezeptbuch .rezept.zu small { color: #9a8a72; }
 .album-karte.tippbar { cursor: pointer; }
 .album-karte.tippbar:active { transform: translateY(calc(var(--px) * 0.6)); box-shadow: none; }
-/* Größere Bilder (28.10.): Kasten 46 hoch, Karte 80 */
-.album-raster, .rezeptbuch { grid-auto-rows: calc(var(--px) * 80); }
-.ak-bild { height: calc(var(--px) * 46); }
-/* Bildkasten bis fast an den Kartenrand (Rahmen als Innenschatten): innen ~46 breit, damit auch Reh und
-   Wildschwein doppelt groß hineinpassen */
+/* Bilder wieder 1:1 (28.10. abends): Kasten 30 hoch (das höchste Bild ist 28), Karte 58 */
+.album-raster, .rezeptbuch { grid-auto-rows: calc(var(--px) * 58); }
+.ak-bild { height: calc(var(--px) * 30); }
+/* Bildkasten bis fast an den Kartenrand (Rahmen als Innenschatten) - wie das Bildfenster einer Sammelkarte */
 .ak-bild { width: auto; align-self: stretch; margin: 0 calc(var(--px) * -1.6); border: 0; overflow: hidden;
   box-shadow: inset 0 0 0 calc(var(--px) * 0.6) rgba(90, 58, 20, 0.22), inset 0 calc(var(--px) * 0.8) calc(var(--px) * 1.5) rgba(0, 0, 0, 0.1); }
+
+/* Menü: Statistik eingeklappt (28.10.) - großer Knopf mit Hausname (groß), Wetter mit Emoji und „Statistik" */
+.statistik-auf summary { display: grid; grid-template-columns: 1fr auto; grid-template-areas: 'haus pfeil' 'wetter pfeil' 'klein pfeil';
+  align-items: center; row-gap: calc(var(--px) * 0.6); padding: calc(var(--px) * 3) calc(var(--px) * 3.5); }
+.statistik-auf summary::after { grid-area: pfeil; margin-left: calc(var(--px) * 2); font-size: var(--t-gross); }
+.statistik-auf .st-haus { grid-area: haus; font: 800 var(--t-gross) var(--schrift); color: var(--rot2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.statistik-auf .st-wetter { grid-area: wetter; font-size: var(--t-text); font-weight: 700; color: var(--text2); }
+.statistik-auf summary small { grid-area: klein; font-size: var(--t-mini); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
+.statistik-auf[open] summary { border-bottom: calc(var(--px) * 0.5) dashed #e0c898; margin-bottom: calc(var(--px) * 2); }
+.statistik-auf summary::before { display: none; }   /* der Stern der „Mehr Sterne"-Leiste gehört nicht hierher */

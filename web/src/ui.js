@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281530';
-import * as S from './spiel.js?v=202610281530';
-import * as Z from './zeit.js?v=202610281530';
-import * as T from './ton.js?v=202610281530';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281530';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281530';
-import { zielHaus } from './fein.js?v=202610281530';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281530';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281530';
-import * as A from './auftraege.js?v=202610281530';
-import * as E from './erfolge.js?v=202610281530';
-import * as ZL from './ziele.js?v=202610281530';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281530';
-import * as KA from './karte.js?v=202610281530';
-import { zeigeRueckblick } from './ereignis.js?v=202610281530';
-import { barbaraZweig } from './szene.js?v=202610281530';
-import * as SW from './schneeball.js?v=202610281530';
-import * as LI from './lichtung.js?v=202610281530';
-import * as CB from './christbaum.js?v=202610281530';
-import * as SB from './schlitten.js?v=202610281530';
-import * as EB from './schlittschuh.js?v=202610281530';
-import * as BS from './backstube.js?v=202610281530';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281530';
+import * as C from './config.js?v=202610281600';
+import * as S from './spiel.js?v=202610281600';
+import * as Z from './zeit.js?v=202610281600';
+import * as T from './ton.js?v=202610281600';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281600';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281600';
+import { zielHaus } from './fein.js?v=202610281600';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281600';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281600';
+import * as A from './auftraege.js?v=202610281600';
+import * as E from './erfolge.js?v=202610281600';
+import * as ZL from './ziele.js?v=202610281600';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281600';
+import * as KA from './karte.js?v=202610281600';
+import { zeigeRueckblick } from './ereignis.js?v=202610281600';
+import { barbaraZweig } from './szene.js?v=202610281600';
+import * as SW from './schneeball.js?v=202610281600';
+import * as LI from './lichtung.js?v=202610281600';
+import * as CB from './christbaum.js?v=202610281600';
+import * as SB from './schlitten.js?v=202610281600';
+import * as EB from './schlittschuh.js?v=202610281600';
+import * as BS from './backstube.js?v=202610281600';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281600';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -783,7 +783,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281530`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281600`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2017,7 +2017,9 @@ const trennbar = (name) => name.split(' ').map((wort) => { const f = FUGEN.find(
 // Album-Bilder groß (28.10., Nutzerwunsch): auf den Inhalt zuschneiden und per Scale2x verdoppeln, wenn das
 // Ergebnis in den Bildkasten passt (sonst 1:1). Jede Karte hat eigene Leinwände - Safari kopiert eine
 // gemeinsame Zwischenleinwand per drawImage verzögert (siehe Kacheln, Dankesbild).
-const ALBUM_BILD_B = 46, ALBUM_BILD_H = 46;   // Kasten innen ~46 x 45 Einheiten (bei 320 und 375 px gleich, --px wächst mit)
+// 28.10. abends (Nutzer: größer sah nicht so gut aus): wieder 1:1 - die Grenzen stehen auf 0, verdoppelt wird nichts.
+// Wer es wieder will: 46 / 46 (so groß ist der Kasten dann innen höchstens - Kasten und Karte mit vergrößern).
+const ALBUM_BILD_B = 0, ALBUM_BILD_H = 0;
 function albumBild(cv, quelle) {
   const w = quelle.width, h = quelle.height, d = quelle.getContext('2d').getImageData(0, 0, w, h).data;
   let x0 = w, y0 = h, x1 = -1, y1 = -1;
@@ -2413,19 +2415,26 @@ function zeigeFeedback() {
   ]);
 }
 
+/** Emoji zum Wetter gerade (28.10.): Schneefall/Regen von jetzt vor der Lage des Tages, sonst Sonne bzw. Mond. */
+function wetterEmoji() {
+  const w = Z.wetter(), lage = Z.tagesWetter().art;
+  if (w.art === 'schnee') return '🌨️';
+  if (w.art === 'regen') return '🌧️';
+  if (lage === 'frost') return '❄️';
+  if (lage === 'schmuddel') return '☁️';
+  return Z.licht().hell < 0.3 ? '🌙' : '☀️';
+}
 export function oeffneMenue() {
   oeffneBlatt('menue', 'Punsch & Lichterglanz');
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
   const b = S.boni();
-  // 21.10.: Statistik wieder offen, aber kompakt in zwei Spalten (Name oben klein,
-  // Wert darunter) - so passt das Menü auch bei 9:16 ohne Aufklappfeld
+  // 28.10. (Nutzerwunsch): Statistik wieder eingeklappt - als großer Knopf, auf dem Hausname und Wetter
+  // stehen (das will man ohne Aufklappen sehen). Darunter klein „Statistik", aufgeklappt der Rest.
   const stat = el('div', 'statistik kompakt');
   stat.innerHTML = `
-    <div class="breit"><span>Haus</span><b>${esc(S.st.name || '-')}</b></div>
     <div><span>Spielmodus</span><b>${MODUS_NAME[S.st.modus === 'eigen' ? 'eigen' : 'echt']}</b></div>
-    <div><span>Wetter heute</span><b>${(C.WETTER_LAGEN[Z.tagesWetter().art] || { name: 'Ruhig' }).name}, ${Z.tagesWetter().temp}°</b></div>
     <div><span>Stimmung</span><b>♥ ${S.stimmung()}</b></div>
     <div><span>Gäste kommen alle</span><b>${S.gastTakt().toFixed(1).replace('.', ',')} s</b></div>
     <div><span>Preisaufschlag</span><b>+${Math.round((S.preisFaktor() - 1) * 100)} %</b></div>
@@ -2435,8 +2444,11 @@ export function oeffneMenue() {
     ${S.st.andenken ? `<div class="breit"><span>Andenken (ein ★ für jedes geschmückte Jahr)</span><b>★ ${S.st.andenken}</b></div>` : ''}`;
   // 26.10.: wann die Kiste kommt und wann sie voll ist (Testbericht: kurze Besuche verstehen)
   if (S.hat('servier')) stat.insertAdjacentHTML('beforeend', `<div class="breit"><span>Wichtel-Kiste</span><b>ab 1 Std. weg · voll nach ${String(S.offlineStunden()).replace('.', ',')} Std.</b></div>`);
-  const karte = el('div', 'menue-statistik');
-  karte.appendChild(el('h3', null, 'Statistik'));
+  const tw = Z.tagesWetter();
+  const karte = el('details', 'menue-statistik statistik-auf');
+  karte.appendChild(el('summary', null, `<span class="st-haus">${esc(S.st.name || 'Dein Haus')}</span>
+    <span class="st-wetter">${wetterEmoji()} ${(C.WETTER_LAGEN[tw.art] || { name: 'Ruhiges Wetter' }).name} · ${tw.temp}°</span>
+    <small>Statistik</small>`));
   karte.appendChild(stat);
   liste.appendChild(karte);
   liste.appendChild(sterneJetzt());
