@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610280000';
-import * as Z from './zeit.js?v=202610280000';
-import * as S from './spiel.js?v=202610280000';
-import { FASSADEN } from './config.js?v=202610280000';
-import * as C from './config.js?v=202610280000';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610281200';
+import * as Z from './zeit.js?v=202610281200';
+import * as S from './spiel.js?v=202610281200';
+import { FASSADEN } from './config.js?v=202610281200';
+import * as C from './config.js?v=202610281200';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2100,7 +2100,7 @@ function stand(c, G, w, t, L) {
     for (let i = 0; i < n; i++) {
       const rz = C.BACK_REZEPTE.find((x) => x.id === dose[dose.length - 1 - i]);
       const px = tx + 2 + i * 4;
-      r(c, px, ty - 2, 3, 2, '#d89a48'); p(c, px + 1, ty - 2, rz ? DF[rz.deko] : '#e8b870'); r(c, px, ty - 1, 3, 1, '#b07a38');
+      r(c, px, ty - 2, 3, 2, '#d89a48'); p(c, px + 1, ty - 2, rz ? DF[C.dekoListe(rz.deko)[0]] : '#e8b870'); r(c, px, ty - 1, 3, 1, '#b07a38');
     }
   }
   if (S.zeigt('musik')) {

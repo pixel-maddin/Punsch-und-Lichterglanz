@@ -938,9 +938,11 @@ export const BACK_REZEPTE = [
   { id: 'kipferl',     name: 'Vanillekipferl', form: 'mond',  deko: 'puder',     ab: 0,    text: 'Kleine Hörnchen, dick in Vanillezucker gewälzt.' },
   { id: 'herz',        name: 'Lebkuchenherz',  form: 'herz',  deko: 'schoko',    ab: 0,    text: 'Würzig, weich und mit Schokolade überzogen.' },
   { id: 'baeumchen',   name: 'Tannenbäumchen', form: 'baum',  deko: 'gruen',     ab: 800,  text: 'Butterplätzchen mit grünem Guss und bunten Streuseln.' },
-  { id: 'spitzbube',   name: 'Spitzbube',      form: 'kreis', deko: 'marmelade', ab: 1600, text: 'Zwei Mürbeteigtaler, dazwischen rote Marmelade.' },
+  { id: 'spitzbube',   name: 'Spitzbube',      form: 'kreis', deko: ['marmelade', 'puder'], ab: 1600, text: 'Zwei Mürbeteigtaler, dazwischen rote Marmelade, oben Puderzucker.' },
   { id: 'schokostern', name: 'Schokostern',    form: 'stern', deko: 'schoko',    ab: 2600, text: 'Wie der Zimtstern, nur in Schokolade getaucht.' },
 ];
+// `deko` ist eine Verzierung oder eine Liste, die nacheinander drauf muss (28.10.: Spitzbube Marmelade, dann Puder)
+export const dekoListe = (d) => (d == null ? [] : Array.isArray(d) ? d : [d]);
 // Die Plätzchendose auf dem Stand: Jeder Gast, den du SELBST bedienst, nimmt
 // ein Plätzchen und zahlt dafür etwas mehr. Die Wichtel verteilen keine.
 // Wetter mit Folgen (10.10.): An kalten Tagen geht Punsch besser, an

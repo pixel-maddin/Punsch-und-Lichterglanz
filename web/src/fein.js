@@ -10,8 +10,8 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202610280000';
-import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610280000';
+import * as Z from './zeit.js?v=202610281200';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610281200';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
@@ -648,6 +648,31 @@ function christbaumverkauf(c, x, fuss, winter) {
   r(c, ax + 2, fuss - 6, 26, 2, '#2a6038'); for (let i = 0; i < 26; i += 2) p(c, ax + 2 + i, fuss - 7, '#3a7a48'); r(c, ax + 26, fuss - 6, 3, 2, '#5a3a22');
   if (winter) r(c, ax + 3, fuss - 8, 22, 1, '#ffffff');
 }
+/**
+ * Ein Schlittschuh von der Seite (28.10.), Spitze nach rechts, 14 x 11, (x, y) = Kufe unten links.
+ * Stiefel in `farbe` mit Schnürung, Sohle, zwei Haltern und silberner Kufe mit Bogen vorn.
+ * `hinten` = der zweite Schuh des Paars, etwas dunkler.
+ */
+const SCHUH = [
+  '..oooo........',
+  '..owwo........',
+  '..owlo........',
+  '..owlwo.......',
+  '..owlwwo......',
+  '..owwwwwoo....',
+  '..owwwwwwwo...',
+  '..ossssssso...',
+  '...h.....h....',
+  '.kkkkkkkkkkkk.',
+  '............k.',
+];
+function schlittschuh(c, x, y, farbe, hinten) {
+  const w = hinten ? ton(farbe, -0.18) : farbe;
+  const F = { o: '#3a2a2a', w, l: hinten ? '#c8c0b0' : '#fffaf0', s: '#5a4434', h: '#6a7484', k: hinten ? '#6a7484' : '#8a96a8' };
+  SCHUH.forEach((zeile, j) => { for (let i = 0; i < zeile.length; i++) if (F[zeile[i]]) p(c, x + i, y - SCHUH.length + 1 + j, F[zeile[i]]); });
+  p(c, x + 4, y - 9, ton(w, 0.25)); p(c, x + 4, y - 8, ton(w, 0.25));   // Glanz am Schaft
+  if (!hinten) p(c, x + 3, y - 1, '#ffffff');                           // Glanz auf der Kufe
+}
 function eisbahn(c, x, fuss, winter) {
   // Zugefrorener Weiher, oval, mit Glanz und Kufenspuren
   for (let yy = fuss - 14; yy < fuss + 10; yy++) for (let xx = x - 80; xx < x + 80; xx++) {
@@ -656,10 +681,11 @@ function eisbahn(c, x, fuss, winter) {
   }
   for (let i = 0; i < 60; i++) { const a = i / 60 * Math.PI * 2; p(c, Math.round(x + Math.cos(a) * 50), Math.round(fuss - 2 + Math.sin(a) * 6), '#d8ecf8'); p(c, Math.round(x + 10 + Math.cos(a) * 30), Math.round(fuss - 1 + Math.sin(a) * 4), '#d8ecf8'); }
   for (const [dx, dy] of [[-40, -6], [22, -8], [50, -2]]) r(c, x + dx, fuss + dy, 9, 1, '#ffffff');
-  // Läufer: bunte kleine Figuren mit Kufen
-  for (const [dx, dy, typ] of [[-26, 2, 'erwachsen'], [-14, 5, 'kind'], [12, 0, 'erwachsen'], [30, 4, 'kind'], [46, -3, 'oma']]) {
-    figurKlein(c, { typ, farben: neueFarben(typ), phase: dx, laeuft: true }, x + dx, fuss + dy, 0.2);
-    r(c, x + dx - 2, fuss + dy + 1, 5, 1, '#8a8a96');
+  // 28.10.: Statt winziger Läufer (auf 20 % geschrumpft nur noch bunte Klötzchen) zwei Paar Schlittschuhe
+  // auf dem Eis - je ein Schuh vorn und einer leicht versetzt dahinter
+  for (const [dx, dy, farbe] of [[-30, 2, '#f4f0ea'], [22, 0, '#c83a3a']]) {
+    schlittschuh(c, x + dx + 5, fuss + dy - 3, farbe, true);
+    schlittschuh(c, x + dx, fuss + dy, farbe, false);
   }
   // Lichterkette auf Pfosten rundherum, Bank, Glühwein-Hütte
   for (const px of [-86, -44, 0, 44, 86]) { r(c, x + px, fuss - 24, 1, 12, '#5a3a22'); }

@@ -10,12 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202610280000';
-import * as Z from './zeit.js?v=202610280000';
-import * as T from './ton.js?v=202610280000';
-import * as MH from './minihud.js?v=202610280000';
-import * as L from './licht.js?v=202610280000';
-import { r, p, ton, mische } from './pixel.js?v=202610280000';
+import * as C from './config.js?v=202610281200';
+import * as Z from './zeit.js?v=202610281200';
+import * as T from './ton.js?v=202610281200';
+import * as MH from './minihud.js?v=202610281200';
+import * as L from './licht.js?v=202610281200';
+import { r, p, ton, mische } from './pixel.js?v=202610281200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -136,7 +136,15 @@ function neuesDing(g) {
   // kleinere Fangzone (unten) - man muss den Sprung timen, statt jeden Stern
   // im Vorbeihüpfen mitzunehmen. Der Sprung hat seinen Scheitel bei 36,6.
   if (Math.random() < 0.7) g.dinge.push({ art: 'stern', x: g.naechstes + zufall(-6, 6), hoehe: zufall(26, 36), gross: Math.random() < 0.25, weg: false });
-  g.naechstes += zufall(150, 240) * (0.85 + g.v / TEMPO[1] * 0.35) * (stufe.special ? 0.86 : 1);   // Special: dichter
+  const abst = zufall(150, 240) * (0.85 + g.v / TEMPO[1] * 0.35) * (stufe.special ? 0.86 : 1);   // Special: dichter
+  // 28.10. (Nutzerwunsch): auch zwischen den Hindernissen Sterne auf der Bahn - mitten in der Lücke,
+  // damit man nach dem Sprung nicht aufs nächste Hindernis fällt. Ab Höhe 16 muss man dafür springen
+  // (am Boden liegt die Fangmitte bei 8). Einzeln oder als Bogen aus drei kleinen.
+  const mitte = g.naechstes + abst * zufall(0.42, 0.58), los = Math.random();
+  if (los < 0.3) g.dinge.push({ art: 'stern', x: mitte, hoehe: zufall(16, 32), gross: Math.random() < 0.2, weg: false });
+  // Bogen: folgt der Sprungkurve (Fangmitte im Scheitel bei 44,6) - wer genau in der Mitte springt, holt alle drei
+  else if (los < 0.55) for (const [dx, h] of [[-12, 40], [0, 44], [12, 40]]) g.dinge.push({ art: 'stern', x: mitte + dx, hoehe: h, gross: false, weg: false });
+  g.naechstes += abst;
 }
 
 function schritt(dt) {

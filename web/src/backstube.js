@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202610280000';
-import * as Z from './zeit.js?v=202610280000';
-import * as T from './ton.js?v=202610280000';
-import * as MH from './minihud.js?v=202610280000';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610280000';
+import * as C from './config.js?v=202610281200';
+import * as Z from './zeit.js?v=202610281200';
+import * as T from './ton.js?v=202610281200';
+import * as MH from './minihud.js?v=202610281200';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202610281200';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -70,9 +70,9 @@ function maske(form, k) {
 /**
  * Ein Plätzchen malen (auch fürs Rezeptbuch in ui.js). `k` = 1 oder 2
  * (Größe; die Pixel bleiben Spielpixel), `grad` = Backgrad, `deko` =
- * Verzierung oder null. (x, y) = linke obere Ecke.
+ * Verzierung, eine Liste von Verzierungen (übereinander) oder null. (x, y) = linke obere Ecke.
  */
-export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
+export function zeichnePlaetzchen(ctx, x, y, form, grad, dekos, k = 1) {
   const m = maske(form, k), w = m[0].length;
   const px = (xx, yy, f) => { ctx.fillStyle = f; ctx.fillRect(x + xx, y + yy, 1, 1); };
   const teig = BACKFARBE[grad] || BACKFARBE.golden;
@@ -88,9 +88,9 @@ export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
     else if ((xx * 7 + yy * 13) % 11 === 0 && grad !== 'roh') f = krume;
     px(xx, yy, f);
   }
-  if (!deko || grad === 'verbrannt') return;
+  if (!dekos || grad === 'verbrannt') return;
   const n = m.length;
-  for (let yy = 0; yy < n; yy++) for (let xx = 0; xx < w; xx++) {
+  for (const deko of C.dekoListe(dekos)) for (let yy = 0; yy < n; yy++) for (let xx = 0; xx < w; xx++) {
     const i = innen(m, xx, yy), t = istTeig(m, xx, yy);
     const bx = Math.floor(xx / k), by = Math.floor(yy / k);   // Stelle auf der kleinen Maske
     // Guss (11.10. deutlicher): deckend weiß, glänzend, mit Glanzstreifen und
@@ -105,7 +105,7 @@ export function zeichnePlaetzchen(ctx, x, y, form, grad, deko, k = 1) {
       // Spitzbube: das Loch in der Mitte zeigt rote Marmelade; sonst ein Klecks
       if (!t && by > 1 && by < n / k - 2 && bx > 1 && bx < 7) px(xx, yy, '#c8283a');
       else if (form !== 'kreis' && i && Math.abs(bx - 4) <= 1 && Math.abs(by - 4) <= 1) px(xx, yy, (xx + yy) % 5 === 0 ? '#e8505a' : '#c8283a');
-      else if (form === 'kreis' && t && (xx + yy) % 3 === 0) px(xx, yy, '#fbf8f2');
+      // (28.10.: Der Zuckerstaub auf dem Spitzbuben ist jetzt ein eigener Schritt - Puderzucker)
     }
   }
 }
@@ -164,7 +164,7 @@ export function schliesse() {
 function setzeRezepte(liste) {
   rezepte = liste && liste.length ? liste : C.BACK_REZEPTE.slice(0, 3);
   formen = C.BACK_FORMEN.filter((f) => rezepte.some((x) => x.form === f));
-  dekos = Object.keys(C.BACK_DEKOS).filter((d) => rezepte.some((x) => x.deko === d));
+  dekos = Object.keys(C.BACK_DEKOS).filter((d) => rezepte.some((x) => C.dekoListe(x.deko).includes(d)));
 }
 
 const wahl = (l) => l[Math.floor(Math.random() * l.length)];
@@ -232,7 +232,9 @@ export function tippeAuf(x, y) {
     if (g.schritt !== 'verzieren' || !g.ware) { fehl(x, y); return; }
     const i = Math.max(0, Math.min(dekos.length - 1, Math.floor(x / (W / dekos.length))));
     const d = dekos[i];
-    if (d !== k.rezept.deko) {
+    // Mehrere Verzierungen (Spitzbube: Marmelade, dann Puderzucker) - immer die nächste fällige
+    const soll = C.dekoListe(k.rezept.deko), schon = C.dekoListe(g.ware.deko);
+    if (d !== soll[schon.length]) {
       k.fehler = true; nimmGeduld(g, 2); g.kette = 1;
       const minus = abzug(g, 'falsch');
       g.texte.push({ x: slot(i, dekos.length), y: sy - 18, text: 'NEIN! -' + minus, farbe: '#ff7a6a', t: 0 });
@@ -240,7 +242,10 @@ export function tippeAuf(x, y) {
       return;
     }
     T.spiele('blubb');
-    g.ware.deko = d; g.ware.phase = 'fliegt'; g.ware.t = 0; g.ware.vonX = g.ware.x; g.ware.vonY = g.ware.y;
+    const neu = [...schon, d];
+    g.ware.deko = neu.length === 1 ? d : neu;
+    if (neu.length < soll.length) { g.texte.push({ x: slot(i, dekos.length), y: sy - 18, text: 'JETZT ' + C.BACK_DEKOS[soll[neu.length]].kurz + '!', farbe: '#ffe060', t: 0 }); return; }
+    g.ware.phase = 'fliegt'; g.ware.t = 0; g.ware.vonX = g.ware.x; g.ware.vonY = g.ware.y;
     g.schritt = 'warten';
     return;
   }
@@ -403,7 +408,7 @@ export function messe(takt = 0.35, treffer = 1, goldAnteil = 1, hoehe = 380, stu
       if (falsch && formen.length > 1) i = (i + 1) % formen.length;
       tippeAuf(slot(i, formen.length), FORM_Y());
     } else if (g.schritt === 'verzieren') {
-      let i = dekos.indexOf(k.rezept.deko);
+      let i = dekos.indexOf(C.dekoListe(k.rezept.deko)[C.dekoListe(g.ware.deko).length]);
       if (falsch && dekos.length > 1) i = (i + 1) % dekos.length;
       tippeAuf(slot(i, dekos.length), SCHALE_Y());
     }
@@ -730,7 +735,7 @@ function zeichne(t) {
   // Hinweis, was dran ist
   // Was dran ist - direkt über der Reihe, in der man tippen muss (11.10.: oben
   // auf dem Regal war es klein und schlecht zu lesen)
-  const was = !k || k.phase !== 'wartet' ? '' : g.schritt === 'stechen' ? 'Tippe die richtige AUSSTECHFORM' : g.schritt === 'backen' ? 'Im GELBEN Bereich rausholen!' : g.schritt === 'verzieren' ? 'Tippe die richtige VERZIERUNG' : '';
+  const was = !k || k.phase !== 'wartet' ? '' : g.schritt === 'stechen' ? 'Tippe die richtige AUSSTECHFORM' : g.schritt === 'backen' ? 'Im GELBEN Bereich rausholen!' : g.schritt === 'verzieren' ? (C.dekoListe(g.ware && g.ware.deko).length ? `Jetzt noch ${C.BACK_DEKOS[C.dekoListe(k.rezept.deko)[C.dekoListe(g.ware.deko).length]].kurz}!` : 'Tippe die richtige VERZIERUNG') : '';
   // Beim Backen links neben dem Ofen - darüber verdeckte er Ofen und Anzeige
   const woY = g.schritt === 'stechen' ? FORM_Y() - 24 : g.schritt === 'verzieren' ? SCHALE_Y() - 26 : OFEN().y + 6;
   const woX = g.schritt === 'backen' ? Math.round(OFEN().x / 2) : null;

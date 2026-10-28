@@ -202,6 +202,9 @@ Wichtel springen - über Schneemänner, Steine, Holzstapel und Eislöcher. In de
 Luft wischen macht Tricks: nach oben ein Salto, nach links eine Pirouette,
 nach rechts eine Grätsche. Zwei Tricks in einem Sprung sind eine Kombo mit
 doppelten Punkten - aber wer landet, bevor der Trick fertig ist, fällt hin.
+Sterne hängen über den Hindernissen und auch zwischen ihnen auf der Bahn -
+manchmal als Bogen aus drei Sternen, den man mit einem genau getimten Sprung
+ganz einsammelt.
 Ab 700, 1.400 und 2.400 Punkten Rekord: Schlittschuhe neben der Haustür, ein
 Pinguin auf dem Gehweg und Sternschnuppen am Nachthimmel.
 
@@ -235,7 +238,8 @@ in der Sprechblase. Die richtige Ausstechform antippen (das Plätzchen rutscht
 von selbst in den Ofen), es goldbraun herausholen, solange der Balken über dem
 Ofen im gelben Bereich steht (zu früh blass, zu spät dunkel, am Ende
 verbrannt), dann die richtige Verzierung: Zuckerguss, Puderzucker,
-Schokolade, grüner Guss oder Marmelade. 60 Sekunden, Kette bis ×3. Statt Deko
+Schokolade, grüner Guss oder Marmelade - beim Spitzbuben erst Marmelade, dann
+Puderzucker. 60 Sekunden, Kette bis ×3. Statt Deko
 fürs Haus gibt es ein **Rezeptbuch**: Zimtstern, Vanillekipferl und
 Lebkuchenherz von Anfang an, ab 800, 1.600 und 2.600 Punkten Rekord
 Tannenbäumchen, Spitzbube und Schokostern - die kommen dann auch in den
