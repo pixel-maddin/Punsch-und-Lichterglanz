@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281915';
-import * as S from './spiel.js?v=202610281915';
-import * as Z from './zeit.js?v=202610281915';
-import * as T from './ton.js?v=202610281915';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281915';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281915';
-import { zielHaus } from './fein.js?v=202610281915';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281915';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281915';
-import * as A from './auftraege.js?v=202610281915';
-import * as E from './erfolge.js?v=202610281915';
-import * as ZL from './ziele.js?v=202610281915';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281915';
-import * as KA from './karte.js?v=202610281915';
-import { zeigeRueckblick } from './ereignis.js?v=202610281915';
-import { barbaraZweig } from './szene.js?v=202610281915';
-import * as SW from './schneeball.js?v=202610281915';
-import * as LI from './lichtung.js?v=202610281915';
-import * as CB from './christbaum.js?v=202610281915';
-import * as SB from './schlitten.js?v=202610281915';
-import * as EB from './schlittschuh.js?v=202610281915';
-import * as BS from './backstube.js?v=202610281915';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281915';
+import * as C from './config.js?v=202610281945';
+import * as S from './spiel.js?v=202610281945';
+import * as Z from './zeit.js?v=202610281945';
+import * as T from './ton.js?v=202610281945';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281945';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281945';
+import { zielHaus } from './fein.js?v=202610281945';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281945';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281945';
+import * as A from './auftraege.js?v=202610281945';
+import * as E from './erfolge.js?v=202610281945';
+import * as ZL from './ziele.js?v=202610281945';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281945';
+import * as KA from './karte.js?v=202610281945';
+import { zeigeRueckblick } from './ereignis.js?v=202610281945';
+import { barbaraZweig } from './szene.js?v=202610281945';
+import * as SW from './schneeball.js?v=202610281945';
+import * as LI from './lichtung.js?v=202610281945';
+import * as CB from './christbaum.js?v=202610281945';
+import * as SB from './schlitten.js?v=202610281945';
+import * as EB from './schlittschuh.js?v=202610281945';
+import * as BS from './backstube.js?v=202610281945';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281945';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -784,7 +784,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281915`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281945`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1145,12 +1145,32 @@ function baueHaus(behalteScroll) {
   if (behalteScroll) liste.scrollTop = pos;
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
 }
-/** Kippschalter An/Aus (ein Knopf, sieht aus wie ein Schalter). */
-function kipp(an, setze) {
+/**
+ * Kippschalter An/Aus (ein Knopf, sieht aus wie ein Schalter). Mit `id` zeigt er am Haus, was passiert
+ * (28.10., Nutzerwunsch): einschalten = Kreis am Teil wie beim Kauf; ausschalten = Kreis, dann blendet das
+ * Teil langsam aus (Schnappschuss vorher, szene.ausblenden). Das Blatt tritt dafür kurz zur Seite.
+ */
+function kipp(an, setze, id) {
   const b = el('button', 'kipp' + (an ? ' an' : ''), `<i></i><span>${an ? 'An' : 'Aus'}</span>`);
   b.setAttribute('role', 'switch'); b.setAttribute('aria-checked', an ? 'true' : 'false');
-  b.onclick = (e) => { e.stopPropagation(); setze(!an); baueHaus(true); };
+  b.onclick = (e) => {
+    e.stopPropagation();
+    const vorher = id && an ? bildKopie() : null;
+    setze(!an); baueHaus(true);
+    if (!id) return;
+    const o = ortVon(id);
+    if (vorher && o) ausblenden(vorher, o.x, o.y);
+    zeigeVariante(id);
+  };
   return b;
+}
+/** Kopie des Spielbilds, wie es gerade zu sehen ist (für das Ausblenden). Eigene Leinwand je Aufruf. */
+function bildKopie() {
+  const cv = $('#cv');
+  if (!cv || !cv.width) return null;
+  const k = document.createElement('canvas'); k.width = cv.width; k.height = cv.height;
+  k.getContext('2d', { willReadFrequently: true }).drawImage(cv, 0, 0);
+  return k;
 }
 /** Grundgerüst einer Zeile: Bild, Name, Unterzeile, rechts der Schalter; antippen klappt auf. */
 function hausZeileKompakt(id, iconArtikel, name, unter, schalter, aufklapp) {
@@ -1170,15 +1190,18 @@ function hausZeileKompakt(id, iconArtikel, name, unter, schalter, aufklapp) {
   }
   return z;
 }
+// 28.10. (Nutzerwunsch): der Anstrich ist nicht mehr aufklappbar - die Farben stehen immer da
 function anstrichZeile(anstriche) {
   const akt = anstriche.find((a) => a.fassade === S.st.fassade);
-  return hausZeileKompakt('anstrich', akt || anstriche[0], 'Anstrich', akt ? akt.name : 'Alter Anstrich', null, (inhalt) => {
-    const werte = [{ wert: 'trist', text: 'Alt' }, ...anstriche.map((a) => ({ wert: a.fassade, text: a.name.replace(/haus$/i, '').split(' ')[0] }))];
-    const stil = Object.fromEntries(werte.map((v) => [v.wert, C.FASSADEN[v.wert].wand]));
-    const wahl = punktWahl(werte, S.st.fassade, (v) => S.setzeFassade(v), stil);
-    wahl.classList.add('anstrich-wahl');
-    inhalt.appendChild(wahl);
-  });
+  const z = hausZeileKompakt('anstrich', akt || anstriche[0], 'Anstrich', akt ? akt.name : 'Alter Anstrich', null, null);
+  const werte = [{ wert: 'trist', text: 'Alt' }, ...anstriche.map((a) => ({ wert: a.fassade, text: a.name.replace(/haus$/i, '').split(' ')[0] }))];
+  const stil = Object.fromEntries(werte.map((v) => [v.wert, C.FASSADEN[v.wert].wand]));
+  const wahl = punktWahl(werte, S.st.fassade, (v) => { S.setzeFassade(v); zeigeVariante('farbe_weiss'); }, stil);
+  wahl.classList.add('anstrich-wahl');
+  const inhalt = el('div', 'hz-inhalt immer');
+  inhalt.appendChild(wahl);
+  z.appendChild(inhalt);
+  return z;
 }
 /** Eine Zeile in „Haus schmücken": Name, Kippschalter, aufgeklappt Farbe, Zaunfarbe, Varianten. */
 function hausKarte(a) {
@@ -1195,60 +1218,53 @@ function hausKarte(a) {
   const schalter = kipp(an, (neu) => {
     if (istLicht) S.setzeLicht(a.id, neu ? (farbe && S.bunt(farbe) ? 'bunt' : farbe ? 'weiss' : 'an') : 'aus');
     else S.setzeDeko(a.id, neu);
-  });
+  }, a.id);
   const klappt = vs || farbe || zaunFarbe;
+  // 28.10. (Nutzerwunsch „noch zu chaotisch"): aufgeklappt ein ruhiger Kasten mit beschrifteten Teilen -
+  // AUSSEHEN (alle Varianten als gleich große Kacheln) und FARBE (zwei gleich breite Knöpfe)
+  const teil = (inhalt, titel, kern) => { const t = el('div', 'hz-teil', `<p class="hz-titel">${titel}</p>`); t.appendChild(kern); inhalt.appendChild(t); };
   const z = hausZeileKompakt(a.id, a, a.name, teile.join(' · '), schalter, klappt ? (inhalt) => {
-    if (farbe) {
-      const zus = el('div', 'haus-zusatz', '<span>Farbe</span>');
-      zus.appendChild(punktWahl([{ wert: 'weiss', text: 'Weiß' }, { wert: 'bunt', text: 'Bunt' }], S.bunt(farbe) ? 'bunt' : 'weiss',
-        (v) => S.setzeLicht(a.id, v), { weiss: '#fff2cc', bunt: 'conic-gradient(#ff4a4a, #ffd040, #5aff6a, #4a8aff, #ff6adf, #ff4a4a)' }));
-      inhalt.appendChild(zus);
-    }
-    if (zaunFarbe) {
-      const zus = el('div', 'haus-zusatz', '<span>Farbe</span>');
-      zus.appendChild(punktWahl([{ wert: 'hell', text: 'Hell' }, { wert: 'braun', text: 'Braun' }],
-        S.st.zaunfarbe === 'braun' ? 'braun' : 'hell', (v) => S.setzeZaunfarbe(v), { hell: '#e2d5bb', braun: '#7a5234' }));
-      inhalt.appendChild(zus);
-    }
-    if (vs) inhalt.appendChild(variantenReihe(a.id));
+    if (vs) teil(inhalt, 'Aussehen', variantenReihe(a.id));
+    if (farbe) teil(inhalt, 'Farbe', punktWahl([{ wert: 'weiss', text: 'Warmweiß' }, { wert: 'bunt', text: 'Bunt' }], S.bunt(farbe) ? 'bunt' : 'weiss',
+      (v) => { S.setzeLicht(a.id, v); zeigeVariante(a.id); }, { weiss: '#fff2cc', bunt: 'conic-gradient(#ff4a4a, #ffd040, #5aff6a, #4a8aff, #ff6adf, #ff4a4a)' }));
+    if (zaunFarbe) teil(inhalt, 'Farbe', punktWahl([{ wert: 'hell', text: 'Hell' }, { wert: 'braun', text: 'Braun' }],
+      S.st.zaunfarbe === 'braun' ? 'braun' : 'hell', (v) => { S.setzeZaunfarbe(v); zeigeVariante('zaun'); }, { hell: '#e2d5bb', braun: '#7a5234' }));
   } : null);
   if (!an) z.classList.add('ist-aus');
   return z;
 }
 /** Varianten eines Platzes: gekaufte zur Auswahl, die nächste als EIN Kaufknopf. */
+// 28.10.: alle drei Varianten als gleich große Kacheln nebeneinander - gekauft (wählbar, Gold = gewählt),
+// die nächste zum Kaufen mit Preis, die dritte gesperrt („erst nach Variante 2"). Vorher: ein Goldknopf,
+// ein breiter Kaufknopf und ein loser Satz darunter.
 function variantenReihe(pl) {
   const vs = C.VARIANTEN[pl], aktiv = S.variante(pl);
-  const box = el('div', 'varbox');
-  const reihe = el('div', 'varwahl');
-  let kaufen = null, spaeter = false;
+  const reihe = el('div', 'varwahl vk-reihe');
+  let kaufAngeboten = false;
   vs.forEach((v, i) => {
     const st = S.varianteStatus(pl, i);
+    let b;
     if (st.hat) {
-      const b = el('button', 'vw' + (i === aktiv ? ' aktiv' : ''), `<b>${v.kurz}</b>`);
+      b = el('button', 'vk' + (i === aktiv ? ' aktiv' : ''), `<b>${v.kurz}</b><small>${i === aktiv ? '✓ gewählt' : 'wählen'}</small>`);
       b.onclick = () => {
         if (i === aktiv) return;
         S.waehleVariante(pl, i);
         if (!S.zeigt(pl)) S.setzeDeko(pl, true);   // eine Variante wählen heißt: zeigen
         baueHaus(true); zeigeVariante(pl);
       };
-      reihe.appendChild(b);
-    } else if (st.versteckt) spaeter = true;
-    else if (!kaufen) kaufen = { v, i, st };
+    } else if (!st.versteckt && !kaufAngeboten) {
+      kaufAngeboten = true;
+      b = el('button', 'vk kauf' + (st.leisten ? '' : ' teuer'), `<b>${v.kurz}</b><small>★ ${S.formatGeld(st.kosten).replace(' Sterne', '')}</small>`);
+      b.onclick = () => {
+        if (!S.kaufeVariante(pl, i)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
+        if (!S.zeigt(pl)) S.setzeDeko(pl, true);
+        toast(`${v.name} gekauft! ♥ +${C.VARIANTE_HERZEN}`, 'gut');
+        baueHaus(true); zeigeVariante(pl, `+${C.VARIANTE_HERZEN} ♥`);
+      };
+    } else b = el('div', 'vk zu', `<b>Variante ${i + 1}</b><small>erst nach Variante ${i}</small>`);
+    reihe.appendChild(b);
   });
-  box.appendChild(reihe);
-  if (kaufen) {
-    const { v, i, st } = kaufen;
-    const b = el('button', 'var-kauf' + (st.leisten ? '' : ' teuer'), `<span>+ Variante: <b>${v.kurz}</b></span><small>★ ${S.formatGeld(st.kosten).replace(' Sterne', '')} · ♥ +${C.VARIANTE_HERZEN}</small>`);
-    b.onclick = () => {
-      if (!S.kaufeVariante(pl, i)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
-      if (!S.zeigt(pl)) S.setzeDeko(pl, true);
-      toast(`${v.name} gekauft! ♥ +${C.VARIANTE_HERZEN}`, 'gut');
-      baueHaus(true); zeigeVariante(pl, `+${C.VARIANTE_HERZEN} ♥`);
-    };
-    box.appendChild(b);
-  }
-  if (spaeter) box.appendChild(el('p', 'var-spaeter', 'Die 3. Variante gibt es, sobald du die 2. hast.'));
-  return box;
+  return reihe;
 }
 /** Oben im Reiter „Lichter": alle auf einmal aus, warmweiß oder bunt. */
 function alleLichter() {
@@ -1289,7 +1305,7 @@ function baueGeschenkt(liste, gesch) {
         : d.id.startsWith('sp_') ? `Für ${C.SPECIAL_DEKO_AB} geschaffte Specials`
         : d.id === 'kal_knoedel' && !S.hat('futterhaus') ? 'Hängt erst, wenn du ein Futterhaus hast' : '';
       const an = S.zeigt(d.id);
-      const z = hausZeileKompakt(d.id, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab, kipp(an, (v) => S.setzeDeko(d.id, v)), null);
+      const z = hausZeileKompakt(d.id, d, d.name + (neu[d.id] ? ' <i class="neuTag">NEU</i>' : ''), ab, kipp(an, (v) => S.setzeDeko(d.id, v), d.id), null);
       if (!an) z.classList.add('ist-aus');
       box.appendChild(z);
       delete neu[d.id];

@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610281915';
-import * as Z from './zeit.js?v=202610281915';
-import * as S from './spiel.js?v=202610281915';
-import { FASSADEN } from './config.js?v=202610281915';
-import * as C from './config.js?v=202610281915';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610281945';
+import * as Z from './zeit.js?v=202610281945';
+import * as S from './spiel.js?v=202610281945';
+import { FASSADEN } from './config.js?v=202610281945';
+import * as C from './config.js?v=202610281945';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2496,6 +2496,8 @@ function fahrbahn(c, GW, G, w) {
 // Wo steht was? Für das Funkeln nach dem Kauf. y relativ zur Bodenlinie.
 // ---------------------------------------------------------------------------
 const ORTE = {
+  // 28.10.: auch die Kalender-Geschenke (für den Kreis beim Ein-/Ausschalten unter Haus schmücken)
+  kal_kranz: [104, -44], kal_stiefel: [78, -27], kal_mistel: [80, -44], kal_knoedel: [134, -44], kal_goldstern: [80, -112],
   futterhaus: [132, -48], kranz: [80, -38], tuerbogenkranz: [80, -55], lichter_dach: [80, -66], fensterstern: [80, -80], schwibbogen: [56, -44],
   lichter_bunt: [80, -66], nussknacker: [96, -32], lichter_fenster: [104, -50], lichter_zaun: [60, -18],
   eiszapfen: [80, -64], dach_nikolaus: [110, -90], lichtershow: [80, -50],
@@ -2509,6 +2511,38 @@ const ORTE = {
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
+/**
+ * Ausschalten zeigen (28.10., Nutzerwunsch: „man soll sehen, was passiert ist"): ui.js gibt einen Schnappschuss
+ * des Bildes VOR dem Ausschalten. Im ersten neuen Bild werden rund um das Teil die Pixel verglichen; was sich
+ * geändert hat (= das Teil), kommt als „Geist" über das neue Bild und blendet nach einer kurzen Pause aus.
+ */
+let geist = null;
+export function ausblenden(alt, x, y) { geist = { alt, x, y, t0: performance.now(), bild: null }; }
+const GEIST_VOR = 450, GEIST_DAUER = 1500;
+function zeichneGeist(c, GW) {
+  if (!geist) return;
+  const g = geist, a = performance.now() - g.t0;
+  if (a > GEIST_VOR + GEIST_DAUER) { geist = null; return; }
+  if (!g.bild) {
+    const hoehe = c.canvas.height, grenze = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(v)));
+    const x0 = grenze(g.x - 52, 0, 180), x1 = grenze(g.x + 52, 0, 180);
+    const y0 = grenze(GW + g.y - 62, 0, hoehe), y1 = grenze(GW + g.y + 24, 0, hoehe);
+    const b = x1 - x0, h = y1 - y0;
+    if (b <= 0 || h <= 0) { geist = null; return; }
+    const neu = c.getImageData(x0, y0, b, h).data;
+    const alt = g.alt.getContext('2d').getImageData(x0, y0, b, h);
+    const d = alt.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const diff = Math.abs(d[i] - neu[i]) + Math.abs(d[i + 1] - neu[i + 1]) + Math.abs(d[i + 2] - neu[i + 2]);
+      d[i + 3] = diff > 30 ? 255 : 0;
+    }
+    g.bild = document.createElement('canvas'); g.bild.width = b; g.bild.height = h;
+    g.bild.getContext('2d').putImageData(alt, 0, 0);
+    g.x0 = x0; g.y0 = y0; g.alt = null;
+  }
+  const al = a < GEIST_VOR ? 1 : 1 - (a - GEIST_VOR) / GEIST_DAUER;
+  c.save(); c.globalAlpha = Math.max(0, al); c.drawImage(g.bild, g.x0, g.y0); c.restore();
+}
 /**
  * Funkeln an einer Stelle der Welt. `text` (z. B. „+3 ♥") steigt dabei über
  * dem Teil auf - nach dem Kauf sieht man so, WAS es gebracht hat, und vor
@@ -2702,6 +2736,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   c.drawImage(ebene, 0, 0, 180, G, 0, 0, 180, G);
   if (S.zeigt('kal_goldstern')) goldstern(c, L, t, GW);
   lichter(c, L, Math.max(w.dunkel, 0.0));
+  if (!opts.karte) zeichneGeist(c, GW);   // ausgeschaltetes Teil blendet aus (vor Wetter und Funkeln)
   const fw = opts.karte ? 0 : S.feuerwerk(d);
   if (!opts.karte && (fw > 0 || fwRaketen.length || fwFunken.length)) feuerwerk(c, GW, fw, dt);
   wetter(c, G, w, t, dt);

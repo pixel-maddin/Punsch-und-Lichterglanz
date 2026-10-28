@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610281915';
-import * as S from './spiel.js?v=202610281915';
-import * as Z from './zeit.js?v=202610281915';
+import * as C from './config.js?v=202610281945';
+import * as S from './spiel.js?v=202610281945';
+import * as Z from './zeit.js?v=202610281945';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {

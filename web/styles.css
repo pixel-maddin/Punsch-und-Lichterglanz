@@ -1607,3 +1607,28 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
    heraus. Jetzt ein eigener Schatten in der Rahmenfarbe. */
 .stufen .k.stufe { box-shadow: 0 calc(var(--px) * 1) 0 #b8884a, inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.5); }
 .stufen .k.stufe.gewaehlt { box-shadow: 0 calc(var(--px) * 1) 0 var(--rot2), inset 0 calc(var(--px) * 0.8) 0 rgba(255, 255, 255, 0.2); }
+
+/* Haus schmücken (28.10.): Ein/Aus-Schalter alle gleich breit; aufgeklappt ein ruhiger Kasten mit beschrifteten
+   Teilen (Aussehen = drei gleiche Kacheln, Farbe = zwei gleich breite Knöpfe); der Anstrich ist immer offen */
+.kipp { box-sizing: border-box; width: calc(var(--px) * 25); justify-content: space-between; }
+.kipp span { flex: 1; min-width: 0; }
+.zeile.haus .hz-inhalt { flex: 1 1 100%; margin-top: calc(var(--px) * 2); padding: calc(var(--px) * 2.5); display: flex; flex-direction: column; gap: calc(var(--px) * 2.5);
+  background: #f6ecd6; border: calc(var(--px) * 0.6) solid #e2cc9c; border-radius: calc(var(--px) * 2); }
+.zeile.haus .hz-inhalt.immer { background: transparent; border: 0; padding: 0; }
+.hz-teil .hz-titel { margin: 0 0 calc(var(--px) * 1.2); font-size: var(--t-mini); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
+.vk-reihe { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(var(--px) * 1.5); }
+.vk { min-width: 0; min-height: calc(var(--px) * 17); box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--px) * 0.6);
+  padding: calc(var(--px) * 1.5) calc(var(--px) * 1); border-radius: calc(var(--px) * 2); text-align: center; cursor: pointer;
+  background: #fffaf0; border: calc(var(--px) * 0.6) solid #d8bc84; color: var(--tinte); font: inherit; }
+.vk b { font-size: var(--t-klein); line-height: 1.15; overflow-wrap: break-word; max-width: 100%; }
+.vk small { font-size: var(--t-mini); font-weight: 700; color: var(--text3); }
+.vk.aktiv { background: #fff3c4; border-color: var(--gold); box-shadow: 0 0 0 calc(var(--px) * 0.6) var(--gold); }
+.vk.aktiv small { color: #8a6414; }
+.vk.kauf { background: #eef7e6; border: calc(var(--px) * 0.6) dashed var(--gruen); }
+.vk.kauf small { color: var(--gruen2); }
+.vk.kauf.teuer { opacity: 0.6; }
+.vk.zu { background: #ece4d6; border-style: dashed; color: #a89880; cursor: default; }
+.vk.zu small { color: #a89880; }
+.vk:not(.zu):active { transform: scale(0.95); }
+.hz-teil .punktwahl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(var(--px) * 1.5); }
+.hz-teil .punktwahl .pw { min-width: 0; justify-content: center; }
