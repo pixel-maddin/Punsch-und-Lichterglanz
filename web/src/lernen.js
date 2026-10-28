@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610281945';
-import * as S from './spiel.js?v=202610281945';
-import * as A from './auftraege.js?v=202610281945';
-import * as E from './erfolge.js?v=202610281945';
-import * as Z from './ziele.js?v=202610281945';
-import * as ZE from './zeit.js?v=202610281945';
-import * as KA from './karte.js?v=202610281945';
-import { zellePos } from './tresen.js?v=202610281945';
+import * as C from './config.js?v=202610282000';
+import * as S from './spiel.js?v=202610282000';
+import * as A from './auftraege.js?v=202610282000';
+import * as E from './erfolge.js?v=202610282000';
+import * as Z from './ziele.js?v=202610282000';
+import * as ZE from './zeit.js?v=202610282000';
+import * as KA from './karte.js?v=202610282000';
+import { zellePos } from './tresen.js?v=202610282000';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -259,7 +259,8 @@ const HINWEISE = [
   })),
   // Crêpe wenden passiert auf der Platte, nicht auf dem Tablett
   { id: 'griff_wenden', sofort: true, wann: () => wendenOffen(),
-    text: () => `Crêpe wenden: Tippe die Platte an, wenn der weiße Strich im GRÜNEN Bereich ist. Zu früh oder zu spät gibt es keinen Bonus - richtig gewendet zahlt der Gast ${Math.round((C.PRODUKT.crepe.bonus || C.EXTRA_BONUS) * 100)} % mehr.`,
+    // 28.10.: Die Platte ist seit dem Umbau auf Kacheln die Crêpe-Kachel unten (dort steht „Wenden!")
+    text: () => `Crêpe wenden: Tippe unten auf den CRÊPE, sobald „Wenden!“ dasteht und der weiße Strich im GRÜNEN Bereich ist. Zu früh oder zu spät gibt es keinen Bonus - richtig gewendet zahlt der Gast ${Math.round((C.PRODUKT.crepe.bonus || C.EXTRA_BONUS) * 100)} % mehr.`,
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.crepe)), fertig: () => !wendenOffen() },
   { id: 'gross', sofort: true, wann: () => S.lauf.gaeste.some((g) => g.gross && g.am && !g.bedient),
     text: () => { const g = S.lauf.gaeste.find((x) => x.gross); return g ? `Großbestellung! ${g.gross.name} will ${g.gross.n} × ${C.PRODUKT[g.gross.id].name}. Bring alle, bevor die Zeit abläuft - das gibt richtig viele Sterne. Die Wichtel trauen sich da nicht ran.` : ''; },
@@ -324,8 +325,10 @@ function griffText(k) {
   const g = C.HANDGRIFF[k], p = h ? C.PRODUKT[h.id] : null;
   const bonus = Math.round(((p && p.bonus) || C.EXTRA_BONUS) * 100);
   const satz = g.satz.charAt(0).toUpperCase() + g.satz.slice(1);
-  return `${p ? p.name + ': ' : ''}Tippe das Glas auf dem Tablett an. ${satz}!`
-    + (g.n > 1 ? ' Die Zahl über dem Glas zeigt, wie oft noch.' : '')
+  // 28.10. (gemeldet): Der Lebkuchen ist kein Glas - Gebäck heißt beim Namen
+  const ding = p && p.art === 'dose' ? `den ${p.name}` : 'das Glas', drueber = p && p.art === 'dose' ? 'darüber' : 'über dem Glas';
+  return `${p ? p.name + ': ' : ''}Tippe ${ding} auf dem Tablett an. ${satz}!`
+    + (g.n > 1 ? ` Die Zahl ${drueber} zeigt, wie oft noch.` : '')
     + (g.timing ? ' Achte auf den Balken: Der weiße Strich muss im grünen Bereich sein, zu früh oder zu spät gibt es keinen Bonus.' : '')
     + (k === 'zucker' ? ` Danach brennt er ${C.FEUER_FENSTER} Sekunden - nur so lange gibt es den Bonus.` : '')
     + (h && h.schritt > 0 ? ' Manche Getränke brauchen zwei Handgriffe nacheinander.' : '')
