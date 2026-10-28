@@ -18,19 +18,19 @@
  * (ui.js fragt `fuehrung()`). Nach dem Kauf erklärt ein Folgehinweis,
  * was es gebracht hat.
  *
- * Erklär-Blasen mit „Weiter ▸" HALTEN DAS SPIEL AN, bis man sie antippt -
+ * Erklär-Blasen mit „Weiter ▸" HALTEN DAS SPIEL AN, bis man „Weiter" oder ✕ tippt (seit 28.10. nur noch die) -
  * in der Einführung die ersten und das „Geschafft!", bei den Hinweisen
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610281730';
-import * as S from './spiel.js?v=202610281730';
-import * as A from './auftraege.js?v=202610281730';
-import * as E from './erfolge.js?v=202610281730';
-import * as Z from './ziele.js?v=202610281730';
-import * as ZE from './zeit.js?v=202610281730';
-import * as KA from './karte.js?v=202610281730';
-import { zellePos } from './tresen.js?v=202610281730';
+import * as C from './config.js?v=202610281800';
+import * as S from './spiel.js?v=202610281800';
+import * as A from './auftraege.js?v=202610281800';
+import * as E from './erfolge.js?v=202610281800';
+import * as Z from './ziele.js?v=202610281800';
+import * as ZE from './zeit.js?v=202610281800';
+import * as KA from './karte.js?v=202610281800';
+import { zellePos } from './tresen.js?v=202610281800';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -69,14 +69,20 @@ const zielDran = (ziel, id) => (istZiel(ziel) && kannKaufen(id)) || !!(S.st.ziel
 
 export function layout(g, h) { G = g; H = h; }
 
-// Antippen der Blase blendet sie aus: ein Hinweis ist damit erledigt, ein
+// 28.10. (Nutzerwunsch): Ein Tipp IRGENDWO auf die Blase schloss sie bzw. löste „Weiter" aus - das passierte
+// ständig aus Versehen (die Blasen stehen unten, wo man ohnehin tippt). Jetzt zählen nur noch der Knopf
+// „Weiter ▸" und das ✕ oben rechts. Das ✕ einer Erklärung mit „Weiter" macht dasselbe wie „Weiter"
+// (sonst bliebe die Einführung hängen); sonst schließt es: ein Hinweis ist damit erledigt, ein
 // Einführungsschritt bleibt weg, bis der nächste Schritt dran ist.
 let weggetippt = '';
 let aktuelleBlase = null;
 export function pausiert() { return !!(aktuelleBlase && aktuelleBlase.weiter); }
 tipp.addEventListener('pointerdown', (e) => {
   e.preventDefault(); e.stopPropagation();
+  const weiterK = e.target.closest('.weiter'), zuK = e.target.closest('.tipp-zu');
+  if (!weiterK && !zuK) return;   // Tipp auf den Text: nichts
   if (aktuelleBlase && aktuelleBlase.weiter) { aktuelleBlase.weiter(); aktuelleBlase = null; zeige(null); return; }
+  if (!zuK) return;
   if (S.st.lernen < 99) weggetippt = S.st.lernen + '|' + letzterText;
   else if (aktuell) { S.st.tipps[aktuell.h.id] = true; aktuell = null; ruheT = 0; S.speichere(); }
   zeige(null);
@@ -361,7 +367,10 @@ function hinweise(dt) {
     // Im Betatest kamen sonst ~15 Pausen in 13 Minuten.
     if (h.ruhig) {
       const fertigR = h.fertig ? h.fertig() : false;
-      if (fertigR || aktuell.t > Math.max(h.dauer || 7, 7) + (h.fertig ? 8 : 0)) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
+      // 28.10. (gemeldet: „manchmal zu schnell weg"): erst nach 3 s sichtbar darf die erledigte Lage sie
+      // schließen, und die Zeit ist mindestens 10 s (vorher 7). `t` läuft nur, solange die Blase zu sehen ist
+      // (update() ruft hinweise() nicht, solange ein Fenster, Blatt oder die Karte offen ist).
+      if ((fertigR && aktuell.t > 3) || aktuell.t > Math.max(h.dauer || 10, 10) + (h.fertig ? 8 : 0)) { st.tipps[h.id] = true; aktuell = null; ruheT = 0; S.speichere(); return null; }
       return { text: h.text(), ziel: h.ziel ? h.ziel() : null };
     }
     if (!aktuell.gelesen) {
@@ -434,6 +443,8 @@ function zeige(z) {
   if (z.text !== letzterText) {
     tipp.textContent = z.text;
     if (z.weiter) { const w = document.createElement('span'); w.className = 'weiter'; w.textContent = 'Weiter ▸'; tipp.appendChild(w); }
+    const zu = document.createElement('span'); zu.className = 'tipp-zu'; zu.textContent = '✕'; zu.setAttribute('role', 'button'); zu.setAttribute('aria-label', 'Hinweis schließen');
+    tipp.appendChild(zu);
     tipp.classList.toggle('mit-weiter', !!z.weiter);
     letzterText = z.text;
   }

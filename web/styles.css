@@ -626,7 +626,7 @@ p.klein { color: var(--text3); font-size: var(--t-klein); }
 /* ---------------------------------------------------------------- Einführung */
 #tipp {
   position: absolute; left: calc(var(--px) * 6); right: calc(var(--px) * 6);
-  z-index: 7; pointer-events: auto; cursor: pointer;
+  z-index: 7; pointer-events: auto; cursor: default;
   background: #fffaf0; color: var(--hinweis);
   border: calc(var(--px) * 1) solid var(--gold);
   border-radius: calc(var(--px) * 2.5);
@@ -636,10 +636,14 @@ p.klein { color: var(--text3); font-size: var(--t-klein); }
   text-align: center;
   animation: aufploppen 0.2s ease-out;
 }
-#tipp::before {
-  content: '✕'; position: absolute; top: calc(var(--px) * 1); right: calc(var(--px) * 2.5);
-  font-size: var(--t-klein); color: #a88a6a;
-}
+/* 28.10.: Das ✕ ist ein eigener runder Knopf oben rechts (vorher ein blasses Zeichen; die ganze Blase schloss) */
+#tipp { padding-right: calc(var(--px) * 9); }
+#tipp .tipp-zu { position: absolute; top: calc(var(--px) * -3.5); right: calc(var(--px) * -3.5); cursor: pointer;
+  width: calc(var(--px) * 10); height: calc(var(--px) * 10); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(#c84a3a, #a8301f); color: #fff; font-size: var(--t-text); font-weight: 900; line-height: 1;
+  border: calc(var(--px) * 0.8) solid #fffaf0; box-shadow: 0 calc(var(--px) * 0.8) 0 #7a2014, 0 0 calc(var(--px) * 2) rgba(0, 0, 0, 0.3); }
+#tipp .tipp-zu:active { transform: translateY(calc(var(--px) * 0.6)); box-shadow: none; }
+#tipp .weiter { cursor: pointer; }
 #tipp .weiter {
   display: block; width: fit-content; margin: calc(var(--px) * 2.5) auto 0;
   background: linear-gradient(#5a9a4a, var(--gruen)); color: #fff;
@@ -648,7 +652,6 @@ p.klein { color: var(--text3); font-size: var(--t-klein); }
   padding: calc(var(--px) * 1.5) calc(var(--px) * 6); font-size: var(--t-betont); font-weight: bold;
   animation: pulsieren 1.4s infinite;
 }
-#tipp.mit-weiter::before { display: none; }
 #tipp[data-pfeil]::after {
   content: ''; position: absolute; left: var(--pfeil-x);
   border: calc(var(--px) * 6) solid transparent;
@@ -1541,3 +1544,23 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   box-shadow: inset 0 0 0 calc(var(--px) * 0.6) rgba(60, 30, 10, 0.45), inset 0 calc(var(--px) * 0.8) calc(var(--px) * 1.5) rgba(0, 0, 0, 0.18); }
 .rezeptbuch .rezept.zu .ak-bild { background-color: #a89c8e;
   background-image: linear-gradient(#b4a898, #9a8e80); background-size: 100% 100%; }
+
+/* Aufträge in Bereichen (28.10. abends): jeder Bereich ein eigener Kasten, Kopfzeile zum Auf-/Zuklappen mit
+   rundem Pfeil, rechts das Wichtigste. Innen sitzen die Karten auf etwas dunklerem Papier, so heben sie sich ab. */
+.bereich { margin: 0 0 calc(var(--px) * 4); background: #f6e9cc; border: calc(var(--px) * 0.8) solid #d8bc84; border-radius: calc(var(--px) * 3);
+  box-shadow: 0 calc(var(--px) * 0.8) 0 rgba(120, 80, 30, 0.18); }
+.bereich > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: calc(var(--px) * 2);
+  padding: calc(var(--px) * 2.6) calc(var(--px) * 3); font-size: var(--t-klein); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rot2); }
+.bereich > summary::-webkit-details-marker { display: none; }
+.bereich > summary small { margin-left: auto; font-size: var(--t-mini); font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text3); white-space: nowrap; }
+.bereich > summary::after { content: '▾'; flex: none; width: calc(var(--px) * 8); height: calc(var(--px) * 8); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: #e8d4a4; color: var(--rot2); font-size: var(--t-klein); transition: transform 0.15s; }
+.bereich[open] > summary::after { transform: rotate(180deg); }
+.bereich[open] > summary { border-bottom: calc(var(--px) * 0.5) solid #e0c898; }
+.bereich > :not(summary) { margin-left: calc(var(--px) * 2.5); margin-right: calc(var(--px) * 2.5); }
+.bereich > :not(summary):first-of-type, .bereich > summary + * { margin-top: calc(var(--px) * 2.5); }
+.bereich > :last-child { margin-bottom: calc(var(--px) * 2.5); }
+.bereich .ruf-kopf { margin-bottom: calc(var(--px) * 2.5); }
+.bereich .auftrag2:last-of-type, .bereich .bitte-zettel:last-child { margin-bottom: calc(var(--px) * 2.5); }
+.bereich .sammel2 { margin-bottom: calc(var(--px) * 2.5); }
+.bereich-heute > summary small { color: #2e7a3a; }

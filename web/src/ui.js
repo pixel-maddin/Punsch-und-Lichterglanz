@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281730';
-import * as S from './spiel.js?v=202610281730';
-import * as Z from './zeit.js?v=202610281730';
-import * as T from './ton.js?v=202610281730';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281730';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281730';
-import { zielHaus } from './fein.js?v=202610281730';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281730';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281730';
-import * as A from './auftraege.js?v=202610281730';
-import * as E from './erfolge.js?v=202610281730';
-import * as ZL from './ziele.js?v=202610281730';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281730';
-import * as KA from './karte.js?v=202610281730';
-import { zeigeRueckblick } from './ereignis.js?v=202610281730';
-import { barbaraZweig } from './szene.js?v=202610281730';
-import * as SW from './schneeball.js?v=202610281730';
-import * as LI from './lichtung.js?v=202610281730';
-import * as CB from './christbaum.js?v=202610281730';
-import * as SB from './schlitten.js?v=202610281730';
-import * as EB from './schlittschuh.js?v=202610281730';
-import * as BS from './backstube.js?v=202610281730';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281730';
+import * as C from './config.js?v=202610281800';
+import * as S from './spiel.js?v=202610281800';
+import * as Z from './zeit.js?v=202610281800';
+import * as T from './ton.js?v=202610281800';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281800';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281800';
+import { zielHaus } from './fein.js?v=202610281800';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281800';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281800';
+import * as A from './auftraege.js?v=202610281800';
+import * as E from './erfolge.js?v=202610281800';
+import * as ZL from './ziele.js?v=202610281800';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281800';
+import * as KA from './karte.js?v=202610281800';
+import { zeigeRueckblick } from './ereignis.js?v=202610281800';
+import { barbaraZweig } from './szene.js?v=202610281800';
+import * as SW from './schneeball.js?v=202610281800';
+import * as LI from './lichtung.js?v=202610281800';
+import * as CB from './christbaum.js?v=202610281800';
+import * as SB from './schlitten.js?v=202610281800';
+import * as EB from './schlittschuh.js?v=202610281800';
+import * as BS from './backstube.js?v=202610281800';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281800';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -783,7 +783,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281730`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281800`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1836,7 +1836,7 @@ function rufKarte() {
   // Titel, der Preisaufschlag nur, wenn es einen gibt
   z.innerHTML = `<div class="ruf-stern"><b>${r.stufe}</b></div>
     <div class="mitte">
-      <div class="ruf-titel"><b>Ruf deines Standes · Stufe ${r.stufe}</b>${preis ? `<span>Preise +${preis} %</span>` : ''}</div>
+      <div class="ruf-titel"><b>Stufe ${r.stufe}</b>${preis ? `<span>Preise +${preis} %</span>` : ''}</div>
       <div class="balken-zeile"><div class="balken"><i style="width:${Math.round(100 * anteil)}%"></i></div><span class="zahl">${fertig ? '✓' : Math.round(100 * anteil) + ' %'}</span></div>
       <small>${heute}</small></div>`;
   return z;
@@ -1958,11 +1958,24 @@ export function oeffneAuftraege(reiter) {
   // 28.10. (UI-Durchsicht, gemeldet „sehr viel los"): Ruf kompakt oben, dann HEUTE mit den drei Aufträgen,
   // dann was Gäste sich wünschen, zuletzt die Sammelstücke. Knöpfe nur, wenn man etwas tun kann;
   // Erledigtes schrumpft auf eine grüne Zeile; Schwierigkeit EINMAL (Farbstreifen + Wort).
-  liste.appendChild(rufKarte());
+  // 28.10. abends (gemeldet: immer noch viel los): jeder Bereich ein eigener Kasten zum Auf- und Zuklappen
+  // (Standard offen, gemerkt in st.zuBereiche). Zugeklappt steht rechts das Wichtigste.
+  const bereich = (id, titel, rechts) => {
+    const d = el('details', 'bereich bereich-' + id);
+    S.st.zuBereiche = S.st.zuBereiche || {};
+    d.open = !S.st.zuBereiche[id];
+    d.appendChild(el('summary', null, `<span>${titel}</span>${rechts ? `<small>${rechts}</small>` : ''}`));
+    d.addEventListener('toggle', () => { S.st.zuBereiche[id] = !d.open; S.speichere(); });
+    liste.appendChild(d);
+    return d;
+  };
+  const r0 = S.ruf();
+  const rufB = bereich('ruf', 'Ruf deines Standes', r0.max ? 'höchste Stufe' : `Stufe ${r0.stufe} · ${r0.fertig ? 'heute ✓' : Math.round(100 * Math.min(1, r0.punkte / C.RUF_PUNKTE)) + ' %'}`);
+  rufB.appendChild(rufKarte());
   const heute = A.heute(), abgeholt = heute.filter((a) => a.abgeholt).length;
-  const abschnitt = (titel, rechts) => liste.appendChild(el('div', 'abschnitt-kopf', `<span>${titel}</span>${rechts ? `<small>${rechts}</small>` : ''}`));
-  abschnitt('Heute', `${abgeholt} von ${heute.length} abgeholt`);
-  liste.appendChild(el('p', 'abschnitt-info', S.aufsicht()
+  const bereit0 = heute.filter((a) => !a.abgeholt && A.fertig(a)).length;
+  const heuteB = bereich('heute', 'Aufträge heute', bereit0 ? `${bereit0} abholbereit` : `${abgeholt} von ${heute.length} abgeholt`);
+  heuteB.appendChild(el('p', 'abschnitt-info', S.aufsicht()
     ? 'Es zählt, was am Tresen passiert, während du da bist - Besonderes nur, wenn du selbst bedienst. Morgen gibt es neue.'
     : 'Es zählt nur, was du selbst am Tresen machst. Morgen gibt es neue.'));
   const stufenName = ['leicht', 'mittel', 'schwer'];
@@ -1990,21 +2003,23 @@ export function oeffneAuftraege(reiter) {
         z.appendChild(k);
       }
     }
-    liste.appendChild(z);
+    heuteB.appendChild(z);
     // Wer die Sorte heute selbst aus dem Angebot genommen hat (26.10.)
     const hw = a.typ === 'produkt' && !a.abgeholt && !A.fertig(a) ? angebotHinweis(a.param) : null;
-    if (hw) liste.appendChild(hw);
+    if (hw) heuteB.appendChild(hw);
   });
   // Was Gäste sich wünschen: Bitte eines Stammgasts und Wunschzettel unter EINER Überschrift
   const bk = bitteKarte(), wk = wunschKarte();
   if (bk || wk) {
-    abschnitt('Von deinen Gästen');
-    if (bk) liste.appendChild(bk);
-    if (wk) liste.appendChild(wk);
+    const n = (bk ? 1 : 0) + (wk ? 1 : 0);
+    const gB = bereich('gaeste', 'Von deinen Gästen', n === 1 ? (bk ? 'eine Bitte' : 'ein Wunschzettel') : 'Bitte und Wunschzettel');
+    if (bk) gB.appendChild(bk);
+    if (wk) gB.appendChild(wk);
   }
   // Sammelstücke als kleine Bilder (vorher „???"-Kärtchen); was fehlt, ist ein Schattenriss
   const hat = C.AUFTRAG_DEKO.filter((d) => S.st.kalDeko[d.id]).length;
-  abschnitt('Sammelstücke', `${hat} von ${C.AUFTRAG_DEKO.length} · aus schweren Aufträgen`);
+  const sB = bereich('sammel', 'Sammelstücke', `${hat} von ${C.AUFTRAG_DEKO.length}`);
+  sB.appendChild(el('p', 'abschnitt-info', 'Jeder schwere Auftrag bringt eins, bis alle vier da sind.'));
   const samm = el('div', 'sammel2');
   for (const d of C.AUFTRAG_DEKO) {
     const da = !!S.st.kalDeko[d.id];
@@ -2014,7 +2029,7 @@ export function oeffneAuftraege(reiter) {
     if (!da) { const c = cv.getContext('2d'); c.globalCompositeOperation = 'source-atop'; c.fillStyle = '#8a7a6a'; c.fillRect(0, 0, 16, 16); }
     samm.appendChild(t);
   }
-  liste.appendChild(samm);
+  sB.appendChild(samm);
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
 }
 
