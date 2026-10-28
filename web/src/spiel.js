@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610281200';
-import * as Z from './zeit.js?v=202610281200';
-import { neueFarben } from './pixel.js?v=202610281200';
+import * as C from './config.js?v=202610281230';
+import * as Z from './zeit.js?v=202610281230';
+import { neueFarben } from './pixel.js?v=202610281230';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2390,12 +2390,12 @@ export function fangeEichhoernchen() {
 // ---------------------------------------------------------------------------
 /**
  * Seltene Gäste der Waldlichtung (10.10.): Fuchs, Wildschwein, Igel. Einer
- * kommt nur alle 4-7 Runden. `st.lichtungSelten.rest` = so viele Runden
+ * kommt alle 2-4 Runden (28.10., Nutzerwunsch „ein bisschen öfter“ - vorher alle 4-7). `st.lichtungSelten.rest` = so viele Runden
  * noch ohne; bei 0 ist diese Runde die seltene. Gewählt wird bevorzugt ein
  * Tier, das man noch nicht gefüttert hat (fürs Album).
  */
 const SELTEN = ['fuchs', 'schwein', 'igel'];
-const seltenPause = () => 3 + Math.floor(Math.random() * 4);   // 3-6 Runden ohne → alle 4-7
+const seltenPause = () => 1 + Math.floor(Math.random() * 3);   // 1-3 Runden ohne → alle 2-4
 export function lichtungSelten() {
   const L = st.lichtungSelten || (st.lichtungSelten = { rest: seltenPause(), art: null });
   if (L.rest > 0) return null;

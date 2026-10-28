@@ -10,8 +10,8 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202610281200';
-import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610281200';
+import * as Z from './zeit.js?v=202610281230';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202610281230';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
