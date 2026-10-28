@@ -23,13 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610281300';
-import * as S from './spiel.js?v=202610281300';
-import * as A from './auftraege.js?v=202610281300';
-import * as E from './erfolge.js?v=202610281300';
-import * as Z from './ziele.js?v=202610281300';
-import * as KA from './karte.js?v=202610281300';
-import { zellePos } from './tresen.js?v=202610281300';
+import * as C from './config.js?v=202610281330';
+import * as S from './spiel.js?v=202610281330';
+import * as A from './auftraege.js?v=202610281330';
+import * as E from './erfolge.js?v=202610281330';
+import * as Z from './ziele.js?v=202610281330';
+import * as ZE from './zeit.js?v=202610281330';
+import * as KA from './karte.js?v=202610281330';
+import { zellePos } from './tresen.js?v=202610281330';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -283,7 +284,14 @@ const HINWEISE = [
   { id: 'erfolge', ruhig: true, wann: () => Z.fertig() && E.anzahl() >= 1,
     text: () => (E.anzahl() > 1 ? `Schon ${E.anzahl()} Socken hängen an der Erfolgswand!` : 'Deine erste Socke hängt an der Erfolgswand!') + ' Du findest sie unter AUFTRÄGE → Erfolge. Mit jeder Socke wird es dort weihnachtlicher.',
     ziel: auftragZiel, dauer: 8 },
-  { id: 'kalender', ruhig: true, wann: () => S.offeneTueren() > 0,
+  // 28.10. (Nutzerwunsch): Den Adventskalender erklärt nicht mehr das Startfenster, sondern dieser Hinweis,
+  // sobald das erste echte Türchen wartet (1. Dezember oder der erste Spieltag danach). Verpasste bleiben offen.
+  { id: 'kalender_auf', sofort: true, bleibt: true, ersetzt: ['kalender'], wann: () => Z.fertig() && Array.from({ length: 24 }, (_, i) => i + 1).some((n) => S.tuerBereit(n)),
+    info: () => `${ZE.dezemberTag() === 1 ? 'Heute ist der 1. Dezember!' : 'Es ist Adventszeit!'} Ab jetzt kannst du im KALENDER jeden Tag ein Türchen öffnen - bis Heiligabend. Dahinter warten Sterne und Deko, die es nur dort gibt. Ein verpasstes Türchen kannst du später nachholen.`,
+    text: () => 'Tippe auf KALENDER und öffne dein erstes Türchen.',
+    ziel: kalenderZiel, fertig: () => !Array.from({ length: 24 }, (_, i) => i + 1).some((n) => S.tuerBereit(n)) },
+  // Kurzer Hinweis: vor dem Dezember für das Vorfreude-Päckchen, danach erst, wenn der Kalender erklärt ist
+  { id: 'kalender', ruhig: true, wann: () => S.offeneTueren() > 0 && (S.vorfreudeBereit() || !!S.st.tipps.kalender_auf),
     text: () => S.vorfreudeBereit() ? 'Im Kalender wartet ein Vorfreude-Päckchen auf dich!' : 'Im Adventskalender wartet ein Türchen auf dich!',
     ziel: kalenderZiel, dauer: 6 },
 ];
@@ -471,7 +479,7 @@ export function ueberspringen() {
   const st = S.st;
   st.lernen = 99; st.lernInfo = 2; S.lauf.lernen = false;
   st.tipps = st.tipps || {};
-  for (const h of HINWEISE) st.tipps[h.id] = true;
+  for (const h of HINWEISE) if (!h.bleibt) st.tipps[h.id] = true;   // `bleibt`: kein Teil der Einführung (Kalender am 1.12.)
   st.ziel = Z.ZIELE.length;
   aktuell = null; aktuelleBlase = null; zeige(null);
   S.speichere();

@@ -272,9 +272,10 @@ Umriss da.
 
 ## Echte Zeit
 
-Beim ersten Start wählt man: **Klassisch** (das Spiel folgt dem echten
-Kalender) oder **Individuell** (das Spiel beginnt immer eine Woche vor dem
-1. Dezember, egal wann man startet). Die Uhrzeit ist in beiden Fällen echt.
+Beim ersten Start wählt man: **Eigener Advent** (das Spiel beginnt immer am
+24. November, eine Woche vor dem ersten Türchen, egal wann man startet) oder
+**Echter Kalender** (das Spiel hat das echte Datum). Die Uhrzeit ist in beiden
+Fällen echt.
 
 - Nachts ist es dunkel, die Lichter leuchten.
 - Bis zum 30. November ist Spätherbst: kahle Bäume, fallendes Laub, Regen.
