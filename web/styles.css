@@ -1577,3 +1577,28 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .sterne-jetzt > summary b { font: 800 var(--t-gross) var(--schrift); color: var(--rot2); }
 /* Bereichs-Kästen in den Läden und unter Geschenke: Zeilen bekommen innen etwas Luft */
 .bereich .zeile:last-child { border-bottom: 0; }
+
+/* Statistik (28.10. abends, zweite Fassung): Wetter unter dem Titel, klein beschriftet, fett die Lage */
+.statistik-auf summary { flex-wrap: wrap; }
+.statistik-auf .st-titel { flex: 1 1 auto; }
+.statistik-auf .st-wetter { order: 3; flex: 1 0 100%; display: flex; flex-direction: column; gap: calc(var(--px) * 0.3); white-space: normal; }
+.statistik-auf .st-wetter small { font-size: var(--t-mini); font-weight: 700; color: var(--text3); }
+.statistik-auf .st-wetter b { font-size: var(--t-text); font-weight: 800; color: var(--text2); }
+.statistik-auf summary::after { order: 2; }
+/* Sternebonus: Zeile je Quelle, aktiv = grüner Haken, sonst grauer leerer Kreis */
+.sterne-jetzt > summary .bonus-zahl { margin-left: auto; margin-right: calc(var(--px) * 1.5); font-size: var(--t-mini); font-weight: 800; color: #fff;
+  background: #4a9a4a; border-radius: calc(var(--px) * 3); padding: calc(var(--px) * 0.8) calc(var(--px) * 2.2); white-space: nowrap; }
+.sterne-jetzt > summary::after { margin-left: 0; }
+.bonus-liste { padding: 0 calc(var(--px) * 3) calc(var(--px) * 2.5); }
+.bonus-teil { margin: calc(var(--px) * 2.5) 0 calc(var(--px) * 1); font-size: var(--t-mini); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
+.bonus-zeile { display: flex; gap: calc(var(--px) * 2); align-items: flex-start; padding: calc(var(--px) * 1.4) 0; border-bottom: calc(var(--px) * 0.5) dashed #e0c898; }
+.bonus-zeile:last-child { border-bottom: 0; }
+.bonus-zeile .bonus-mark { flex: none; width: calc(var(--px) * 7); height: calc(var(--px) * 7); margin-top: calc(var(--px) * 0.4); border-radius: 50%; box-sizing: border-box;
+  border: calc(var(--px) * 0.8) solid #c4b496; display: flex; align-items: center; justify-content: center; font-size: var(--t-mini); font-weight: 900; color: #fff; }
+.bonus-zeile.an .bonus-mark { background: #4a9a4a; border-color: #3a7a3a; }
+.bonus-zeile b { display: block; font-size: var(--t-klein); }
+.bonus-zeile small { display: block; font-size: var(--t-mini); font-weight: 700; color: var(--text3); line-height: 1.3; }
+.bonus-zeile:not(.an) b { color: #8a7a62; }
+/* Minispiele: Leicht / Normal / Schwer ohne Textschatten (kam vom allgemeinen Knopfstil) */
+.stufen .k.stufe, .stufen .k.stufe * { text-shadow: none; }
+.statistik-auf .st-wetter small { text-transform: none; letter-spacing: 0; overflow: visible; }   /* nicht wie die alte „STATISTIK"-Zeile */

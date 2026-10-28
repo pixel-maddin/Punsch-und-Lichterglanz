@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281830';
-import * as S from './spiel.js?v=202610281830';
-import * as Z from './zeit.js?v=202610281830';
-import * as T from './ton.js?v=202610281830';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281830';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281830';
-import { zielHaus } from './fein.js?v=202610281830';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281830';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281830';
-import * as A from './auftraege.js?v=202610281830';
-import * as E from './erfolge.js?v=202610281830';
-import * as ZL from './ziele.js?v=202610281830';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281830';
-import * as KA from './karte.js?v=202610281830';
-import { zeigeRueckblick } from './ereignis.js?v=202610281830';
-import { barbaraZweig } from './szene.js?v=202610281830';
-import * as SW from './schneeball.js?v=202610281830';
-import * as LI from './lichtung.js?v=202610281830';
-import * as CB from './christbaum.js?v=202610281830';
-import * as SB from './schlitten.js?v=202610281830';
-import * as EB from './schlittschuh.js?v=202610281830';
-import * as BS from './backstube.js?v=202610281830';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281830';
+import * as C from './config.js?v=202610281900';
+import * as S from './spiel.js?v=202610281900';
+import * as Z from './zeit.js?v=202610281900';
+import * as T from './ton.js?v=202610281900';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281900';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281900';
+import { zielHaus } from './fein.js?v=202610281900';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281900';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281900';
+import * as A from './auftraege.js?v=202610281900';
+import * as E from './erfolge.js?v=202610281900';
+import * as ZL from './ziele.js?v=202610281900';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281900';
+import * as KA from './karte.js?v=202610281900';
+import { zeigeRueckblick } from './ereignis.js?v=202610281900';
+import { barbaraZweig } from './szene.js?v=202610281900';
+import * as SW from './schneeball.js?v=202610281900';
+import * as LI from './lichtung.js?v=202610281900';
+import * as CB from './christbaum.js?v=202610281900';
+import * as SB from './schlitten.js?v=202610281900';
+import * as EB from './schlittschuh.js?v=202610281900';
+import * as BS from './backstube.js?v=202610281900';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281900';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -784,7 +784,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281830`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281900`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -920,6 +920,7 @@ function baueLaden() {
   // und Rezepte. Rechts steht, wie viel davon schon gekauft ist.
   let gruppe = null, ziel = liste;
   const gekauft = (g) => { const t = artikel.filter((a) => abschnittVon(a) === g); return `${t.filter((a) => S.hat(a.id)).length} von ${t.length} gekauft`; };
+  if (!mitAbschnitten && ladenTab !== 'super') ziel = bereichKasten(liste, `laden_${ladenTab}`, ladenTab === 'wichtel' ? 'Deine Wichtel' : (abschnitte[0] || 'Angebot'), `${artikel.filter((a) => S.hat(a.id)).length} von ${artikel.length}`);
   if (ladenTab === 'super') {
     ziel = bereichKasten(liste, 'laden_super_getraenke', 'Getränke', `${artikel.filter((a) => S.hat(a.id)).length + 1} von ${artikel.length + 1}`);
     ziel.appendChild(el('div', 'zeile besessen', `<canvas width="16" height="16" class="ico"></canvas><div class="txt"><b>Sternenpunsch</b><span>Den gibt es von Anfang an. Gäste zahlen 10 Sterne.${rezeptHinweis('gluehwein')}</span></div><div class="knopfplatz"><button class="k k--fertig" disabled><span class="haken">✓</span></button></div>`));
@@ -2492,10 +2493,10 @@ export function oeffneMenue() {
   if (S.hat('servier')) stat.insertAdjacentHTML('beforeend', `<div class="breit"><span>Wichtel-Kiste</span><b>ab 1 Std. weg · voll nach ${String(S.offlineStunden()).replace('.', ',')} Std.</b></div>`);
   const tw = Z.tagesWetter();
   const karte = el('details', 'menue-statistik statistik-auf');
-  // 28.10. abends (Nutzerwunsch): zugeklappt nur „Statistiken & Infos", rechts auf gleicher Höhe das Wetter
+  // 28.10. abends (Nutzerwunsch, zweite Fassung): Titel „Statistiken & Infos", darunter - auch zugeklappt - das
+  // Wetter so, wie es aufgeklappt als Zeile stand (klein „Wetter heute", darunter fett die Lage)
   karte.appendChild(el('summary', null, `<span class="st-titel">Statistiken & Infos</span>
-    <span class="st-wetter">${wetterEmoji()} ${tw.temp}°</span>`));
-  stat.insertAdjacentHTML('afterbegin', `<div class="breit"><span>Wetter heute</span><b>${wetterEmoji()} ${(C.WETTER_LAGEN[tw.art] || { name: 'Ruhiges Wetter' }).name}, ${tw.temp}°</b></div>`);
+    <span class="st-wetter"><small>Wetter heute</small><b>${wetterEmoji()} ${(C.WETTER_LAGEN[tw.art] || { name: 'Ruhiges Wetter' }).name}, ${tw.temp}°</b></span>`));
   karte.appendChild(stat);
   liste.appendChild(karte);
   liste.appendChild(sterneJetzt());
@@ -2563,36 +2564,37 @@ export function oeffneMenue() {
 }
 
 /**
- * „Was bringt gerade mehr Sterne?" (26.10., Testbericht: zu viele „×2", die man nicht
- * auseinanderhält). Nur, was JETZT gilt, in Worten - Selbst servieren steht immer oben.
+ * Sternebonus (28.10. abends, gemeldet: „versteht man als User nicht"). Vorher eine Liste nur der Dinge, die
+ * gerade gelten, in Fachworten. Jetzt ALLE Quellen untereinander, jede mit Zustand: aktiv = grüner Haken und was
+ * sie gerade bringt; nicht aktiv = grauer Kreis und wie bzw. wann man sie bekommt. Aktive stehen oben.
  */
 function sterneJetzt() {
-  const z = [];
-  const pz = (f) => `+${Math.round(f * 100)}${' '}%`;
-  z.push(['Selbst servieren', 'doppelte Sterne und Trinkgeld']);
+  const pz = (f) => `+${Math.round(f * 100)}${' '}%`;
+  const L = [];   // [aktiv, Name, Text]
+  L.push([true, 'Selbst servieren', 'Was du selbst servierst, bringt doppelte Sterne und Trinkgeld.']);
   const zimt = S.zimtRest();
-  if (zimt) z.push(['Zimtstern', `selbst Serviertes noch einmal doppelt (noch ${Math.floor(zimt / 60)}:${String(zimt % 60).padStart(2, '0')})`]);
-  if (S.lauf.ansturm) z.push(['Ansturm', 'dreifaches Trinkgeld']);
+  L.push([!!zimt, 'Zimtstern-Gutschein', zimt ? `Selbst Serviertes bringt noch einmal doppelt - noch ${Math.floor(zimt / 60)}:${String(zimt % 60).padStart(2, '0')} Min.` : 'Gibt es beim fahrenden Händler.']);
+  L.push([!!S.lauf.ansturm, 'Ansturm', S.lauf.ansturm ? 'Gerade jetzt: dreifaches Trinkgeld.' : 'Kommt einmal am Tag, wenn du am Stand bist - dann dreifaches Trinkgeld.']);
   const haus = (1 + S.stimmung() * C.STIMMUNG_PREIS) * (1 + S.boni().preis) - 1;
-  if (haus > 0.005) z.push(['Stimmung und Deko', `alle Preise ${pz(haus)}`]);
+  L.push([haus > 0.005, 'Stimmung und Deko', haus > 0.005 ? `Alle Preise ${pz(haus)}.` : 'Schmück dein Haus - jede Deko macht alles etwas teurer.']);
   const r = S.ruf();
-  if (r.stufe) z.push([`Ruf Stufe ${r.stufe}`, `alle Preise ${pz(r.stufe * C.RUF_JE_STUFE)}`]);
+  L.push([r.stufe > 0, 'Ruf des Standes', r.stufe ? `Stufe ${r.stufe}: alle Preise ${pz(r.stufe * C.RUF_JE_STUFE)}.` : 'Steigt, wenn du an einem Tag ein bisschen mitarbeitest (unter Aufträge).']);
   const rez = C.MARKT_REZEPTE.filter((x) => S.rezeptStufe(x.id));
-  if (rez.length) z.push(['Rezepte', rez.map((x) => `${x.fuer.map((id) => C.PRODUKT[id].name).join(' und ')} ${pz(S.rezeptPlus(x.id))}`).join(' · ')]);
+  L.push([rez.length > 0, 'Rezepte', rez.length ? rez.map((x) => `${x.fuer.map((id) => C.PRODUKT[id].name).join(' und ')} ${pz(S.rezeptPlus(x.id))}`).join(' · ') : 'Im Supermarkt: Rezepte machen zwei Getränke dauerhaft teurer.']);
   const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
-  if (lage) z.push([lage.name, `${lage.text.replace(/^Heute /, '')} (${pz(lage.bonus)})`]);
-  if (S.chorJetzt()) z.push(['Chor vor dem Haus', `alle Gäste zahlen ${pz(C.CHOR.bonus)} (bis ${C.CHOR.bis} Uhr)`]);
-  if (S.dose().length) z.push(['Plätzchendose', `selbst bedient ${pz(C.DOSE_BONUS)} (noch ${S.dose().length})`]);
+  L.push([!!lage, 'Wetter', lage ? `${lage.name}: ${lage.text.replace(/^Heute /, '')} (${pz(lage.bonus)}).` : 'Bei Frost oder Schmuddelwetter gehen bestimmte Getränke besser.']);
+  L.push([S.chorJetzt(), 'Chor vor dem Haus', S.chorJetzt() ? `Alle Gäste zahlen ${pz(C.CHOR.bonus)} - bis ${C.CHOR.bis} Uhr.` : `An Adventssonntagen von ${C.CHOR.von} bis ${C.CHOR.bis} Uhr.`]);
+  if (S.miniOffen('back')) L.push([S.dose().length > 0, 'Plätzchendose', S.dose().length ? `Selbst bedient ${pz(C.DOSE_BONUS)} - noch ${S.dose().length} Plätzchen.` : 'Plätzchen aus der Backstube füllen sie.']);
   const gaeste = [];
   if (Z.adventssonntag()) gaeste.push('Adventssonntag');
   if (S.marktHeute()) gaeste.push('Markttag');
   if (S.feierabend()) gaeste.push(`Feierabend bis ${C.FEIERABEND.bis} Uhr`);
-  if (gaeste.length) z.push(['Mehr Gäste', gaeste.join(', ')]);
-  // Zugeklappt (sonst schob es die Knöpfe des Menüs aus dem Bild), oben die Namen als Vorschau
-  // 28.10. abends (Nutzerwunsch): heißt „Sternebonus", zugeklappt ohne Vorschau daneben
+  L.push([gaeste.length > 0, 'Mehr Gäste', gaeste.length ? gaeste.join(', ') + '.' : `Am Adventssonntag, am Markttag und zum Feierabend (${C.FEIERABEND.von}-${C.FEIERABEND.bis} Uhr).`]);
+  const aktiv = L.filter((x) => x[0]), aus = L.filter((x) => !x[0]);
+  const zeile = ([an, name, text]) => `<div class="bonus-zeile${an ? ' an' : ''}"><span class="bonus-mark">${an ? '✓' : ''}</span><div><b>${name}</b><small>${text}</small></div></div>`;
   const k = el('details', 'menue-statistik sterne-jetzt');
-  k.appendChild(el('summary', null, '<b>Sternebonus</b>'));
-  k.appendChild(el('div', 'statistik kompakt', z.map(([a, b]) => `<div class="breit"><span>${a}</span><b>${b}</b></div>`).join('')));
+  k.appendChild(el('summary', null, `<b>Sternebonus</b><span class="bonus-zahl">${aktiv.length} aktiv</span>`));
+  k.appendChild(el('div', 'bonus-liste', `<p class="bonus-teil">Gerade aktiv</p>${aktiv.map(zeile).join('')}<p class="bonus-teil">Gerade nicht aktiv</p>${aus.map(zeile).join('')}`));
   return k;
 }
 
