@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281630';
-import * as S from './spiel.js?v=202610281630';
-import * as Z from './zeit.js?v=202610281630';
-import * as T from './ton.js?v=202610281630';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281630';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281630';
-import { zielHaus } from './fein.js?v=202610281630';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281630';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281630';
-import * as A from './auftraege.js?v=202610281630';
-import * as E from './erfolge.js?v=202610281630';
-import * as ZL from './ziele.js?v=202610281630';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281630';
-import * as KA from './karte.js?v=202610281630';
-import { zeigeRueckblick } from './ereignis.js?v=202610281630';
-import { barbaraZweig } from './szene.js?v=202610281630';
-import * as SW from './schneeball.js?v=202610281630';
-import * as LI from './lichtung.js?v=202610281630';
-import * as CB from './christbaum.js?v=202610281630';
-import * as SB from './schlitten.js?v=202610281630';
-import * as EB from './schlittschuh.js?v=202610281630';
-import * as BS from './backstube.js?v=202610281630';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281630';
+import * as C from './config.js?v=202610281700';
+import * as S from './spiel.js?v=202610281700';
+import * as Z from './zeit.js?v=202610281700';
+import * as T from './ton.js?v=202610281700';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281700';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281700';
+import { zielHaus } from './fein.js?v=202610281700';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281700';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281700';
+import * as A from './auftraege.js?v=202610281700';
+import * as E from './erfolge.js?v=202610281700';
+import * as ZL from './ziele.js?v=202610281700';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281700';
+import * as KA from './karte.js?v=202610281700';
+import { zeigeRueckblick } from './ereignis.js?v=202610281700';
+import { barbaraZweig } from './szene.js?v=202610281700';
+import * as SW from './schneeball.js?v=202610281700';
+import * as LI from './lichtung.js?v=202610281700';
+import * as CB from './christbaum.js?v=202610281700';
+import * as SB from './schlitten.js?v=202610281700';
+import * as EB from './schlittschuh.js?v=202610281700';
+import * as BS from './backstube.js?v=202610281700';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281700';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -783,7 +783,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281630`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281700`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
