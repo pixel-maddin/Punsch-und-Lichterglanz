@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610281700';
-import * as S from './spiel.js?v=202610281700';
-import * as Z from './zeit.js?v=202610281700';
-import * as T from './ton.js?v=202610281700';
-import * as LI from './lichtung.js?v=202610281700';
-import * as CB from './christbaum.js?v=202610281700';
-import * as KA from './karte.js?v=202610281700';
-import * as SB from './schlitten.js?v=202610281700';
-import * as EB from './schlittschuh.js?v=202610281700';
-import * as BS from './backstube.js?v=202610281700';
-import * as UI from './ui.js?v=202610281700';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610281700';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610281700';
-import * as Kacheln from './kacheln.js?v=202610281700';
-import * as Lernen from './lernen.js?v=202610281700';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610281700';
-import * as A from './auftraege.js?v=202610281700';
-import * as E from './erfolge.js?v=202610281700';
-import * as ZL from './ziele.js?v=202610281700';
+import * as C from './config.js?v=202610281730';
+import * as S from './spiel.js?v=202610281730';
+import * as Z from './zeit.js?v=202610281730';
+import * as T from './ton.js?v=202610281730';
+import * as LI from './lichtung.js?v=202610281730';
+import * as CB from './christbaum.js?v=202610281730';
+import * as KA from './karte.js?v=202610281730';
+import * as SB from './schlitten.js?v=202610281730';
+import * as EB from './schlittschuh.js?v=202610281730';
+import * as BS from './backstube.js?v=202610281730';
+import * as UI from './ui.js?v=202610281730';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610281730';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610281730';
+import * as Kacheln from './kacheln.js?v=202610281730';
+import * as Lernen from './lernen.js?v=202610281730';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610281730';
+import * as A from './auftraege.js?v=202610281730';
+import * as E from './erfolge.js?v=202610281730';
+import * as ZL from './ziele.js?v=202610281730';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -84,6 +84,17 @@ groesse();
 // ---------------------------------------------------------------------------
 // Tippen
 // ---------------------------------------------------------------------------
+// 28.10. (gemeldet, Android/Firefox: Stand umbenennen ging nicht, das Fenster blitzte nur kurz auf): Fenster
+// öffnen schon beim Aufsetzen des Fingers. Beim Loslassen schickt der Browser noch einen Klick - und lag dort
+// jetzt ein Knopf des neuen Fensters („Speichern"), war es gleich wieder zu. Öffnet ein Tipp aufs Spielbild ein
+// Fenster oder Blatt, wird der Klick dieses Fingers deshalb verschluckt (höchstens 700 ms lang).
+let vorherOffen = false, klickSchluckenBis = 0;
+cv.addEventListener('pointerdown', () => { vorherOffen = UI.fensterOffen() || !!UI.panelOffen(); }, true);
+document.addEventListener('click', (e) => {
+  if (!klickSchluckenBis) return;
+  if (performance.now() < klickSchluckenBis) { e.stopPropagation(); e.preventDefault(); }
+  klickSchluckenBis = 0;   // nur der eine Klick
+}, true);
 cv.addEventListener('pointerdown', (e) => {
   e.preventDefault();
   bildVeraltet = true;   // auch in der Pause neu zeichnen (z. B. Topf nachfüllen unter einer Blase)
@@ -192,6 +203,10 @@ cv.addEventListener('pointerdown', (e) => {
   const i = nachher.findIndex((h, k) => h !== vorher[k]);
   if (i >= 0) { S.lauf.neuInHand = i; S.lauf.neuInHandT = 0.15; }
 }, { passive: false });
+// …und danach: Ist durch diesen Tipp ein Fenster oder Blatt aufgegangen, den folgenden Klick verschlucken
+cv.addEventListener('pointerdown', () => {
+  if (!vorherOffen && (UI.fensterOffen() || UI.panelOffen())) klickSchluckenBis = performance.now() + 700;
+});
 document.addEventListener('pointerdown', () => T.init(), { once: false, passive: true });
 // Doppeltipp-Zoom auf iOS verhindern
 document.addEventListener('dblclick', (e) => e.preventDefault());

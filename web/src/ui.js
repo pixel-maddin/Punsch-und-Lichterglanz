@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281700';
-import * as S from './spiel.js?v=202610281700';
-import * as Z from './zeit.js?v=202610281700';
-import * as T from './ton.js?v=202610281700';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281700';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281700';
-import { zielHaus } from './fein.js?v=202610281700';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281700';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281700';
-import * as A from './auftraege.js?v=202610281700';
-import * as E from './erfolge.js?v=202610281700';
-import * as ZL from './ziele.js?v=202610281700';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281700';
-import * as KA from './karte.js?v=202610281700';
-import { zeigeRueckblick } from './ereignis.js?v=202610281700';
-import { barbaraZweig } from './szene.js?v=202610281700';
-import * as SW from './schneeball.js?v=202610281700';
-import * as LI from './lichtung.js?v=202610281700';
-import * as CB from './christbaum.js?v=202610281700';
-import * as SB from './schlitten.js?v=202610281700';
-import * as EB from './schlittschuh.js?v=202610281700';
-import * as BS from './backstube.js?v=202610281700';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281700';
+import * as C from './config.js?v=202610281730';
+import * as S from './spiel.js?v=202610281730';
+import * as Z from './zeit.js?v=202610281730';
+import * as T from './ton.js?v=202610281730';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281730';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281730';
+import { zielHaus } from './fein.js?v=202610281730';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281730';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281730';
+import * as A from './auftraege.js?v=202610281730';
+import * as E from './erfolge.js?v=202610281730';
+import * as ZL from './ziele.js?v=202610281730';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281730';
+import * as KA from './karte.js?v=202610281730';
+import { zeigeRueckblick } from './ereignis.js?v=202610281730';
+import { barbaraZweig } from './szene.js?v=202610281730';
+import * as SW from './schneeball.js?v=202610281730';
+import * as LI from './lichtung.js?v=202610281730';
+import * as CB from './christbaum.js?v=202610281730';
+import * as SB from './schlitten.js?v=202610281730';
+import * as EB from './schlittschuh.js?v=202610281730';
+import * as BS from './backstube.js?v=202610281730';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281730';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -783,7 +783,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281700`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281730`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -971,7 +971,12 @@ function baueLaden() {
  * Rezepte im Supermarkt (27.10., Nutzerwunsch: vorher nur eins je Markttag auf dem Festplatz),
  * in drei Stufen (C.REZEPT_STUFEN: +20 %, nochmal +30 %, nochmal +40 % auf zwei Getränke).
  */
+// 28.10. (gemeldet, Android): Der Rezept-Knopf war grün, obwohl die Sterne nicht reichten - er bekam nur die
+// Klasse „gesperrt" (für Knöpfe ohne Stil) und wurde nie nachgeführt. Jetzt wie die anderen Kaufknöpfe:
+// `disabled`, solange es nicht reicht, und aktualisiereLaden() führt Preis und Zustand laufend nach.
+let rezeptKnoepfe = [];
 function rezeptZeilen(liste) {
+  rezeptKnoepfe = [];
   liste.appendChild(el('div', 'gruppe haus-abschnitt', 'Rezepte'));
   const pz = (f) => `${Math.round(f * 100)}${' '}%`;
   const N = C.REZEPT_STUFEN.length;
@@ -992,7 +997,9 @@ function rezeptZeilen(liste) {
     if (voll) platz.innerHTML = '<button class="k k--fertig" disabled><span class="haken">✓</span></button>';
     else {
       const preis = S.rezeptPreis(w);
-      const k = el('button', 'k k--kauf' + (S.st.geld >= preis ? '' : ' gesperrt'), S.formatGeld(preis));
+      const k = el('button', 'k k--kauf', S.formatGeld(preis));
+      k.disabled = S.st.geld < preis;
+      rezeptKnoepfe.push({ w, k });
       k.onclick = () => {
         if (!S.kaufeRezept(w.id)) { T.spiele('falsch'); toast('Dafür reichen deine Sterne noch nicht.', 'hinweis'); return; }
         T.spiele('spezial');
@@ -1351,6 +1358,15 @@ export function aktualisiereLaden() {
     const grund = z.querySelector('.grund');
     if (s.grund && !grund) z.querySelector('.txt').appendChild(el('i', 'grund', s.grund));
     else if (!s.grund && grund) grund.remove();
+  }
+  // Rezepte stehen nicht in `zeilen` - Preis (wächst mit den Einnahmen) und Zustand hier nachführen
+  for (const { w, k } of rezeptKnoepfe) {
+    if (!k.isConnected) continue;
+    const preis = S.rezeptPreis(w);
+    if (preis == null) continue;
+    const txt = S.formatGeld(preis);
+    if (k.textContent !== txt) k.textContent = txt;
+    k.disabled = S.st.geld < preis;
   }
   $('#blattGeld').textContent = S.formatGeld(S.st.geld);
 }
