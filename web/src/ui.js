@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610281500';
-import * as S from './spiel.js?v=202610281500';
-import * as Z from './zeit.js?v=202610281500';
-import * as T from './ton.js?v=202610281500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281500';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610281500';
-import { zielHaus } from './fein.js?v=202610281500';
-import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281500';
-import * as A from './auftraege.js?v=202610281500';
-import * as E from './erfolge.js?v=202610281500';
-import * as ZL from './ziele.js?v=202610281500';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281500';
-import * as KA from './karte.js?v=202610281500';
-import { zeigeRueckblick } from './ereignis.js?v=202610281500';
-import { barbaraZweig } from './szene.js?v=202610281500';
-import * as SW from './schneeball.js?v=202610281500';
-import * as LI from './lichtung.js?v=202610281500';
-import * as CB from './christbaum.js?v=202610281500';
-import * as SB from './schlitten.js?v=202610281500';
-import * as EB from './schlittschuh.js?v=202610281500';
-import * as BS from './backstube.js?v=202610281500';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281500';
+import * as C from './config.js?v=202610281530';
+import * as S from './spiel.js?v=202610281530';
+import * as Z from './zeit.js?v=202610281530';
+import * as T from './ton.js?v=202610281530';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610281530';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610281530';
+import { zielHaus } from './fein.js?v=202610281530';
+import { zeichneWelt, ortVon, funkeln, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610281530';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610281530';
+import * as A from './auftraege.js?v=202610281530';
+import * as E from './erfolge.js?v=202610281530';
+import * as ZL from './ziele.js?v=202610281530';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610281530';
+import * as KA from './karte.js?v=202610281530';
+import { zeigeRueckblick } from './ereignis.js?v=202610281530';
+import { barbaraZweig } from './szene.js?v=202610281530';
+import * as SW from './schneeball.js?v=202610281530';
+import * as LI from './lichtung.js?v=202610281530';
+import * as CB from './christbaum.js?v=202610281530';
+import * as SB from './schlitten.js?v=202610281530';
+import * as EB from './schlittschuh.js?v=202610281530';
+import * as BS from './backstube.js?v=202610281530';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610281530';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -716,9 +716,11 @@ function rezeptbuch() {
     const da = best >= rz.ab;
     const k = el('div', 'rezept' + (da ? '' : ' zu'));
     k.innerHTML = `<div class="ak-bild"><canvas width="20" height="18"></canvas></div><b>${da ? trennbar(rz.name) : '???'}</b><small>${da ? `${C.dekoListe(rz.deko).map((d) => C.BACK_DEKOS[d].name).join(', ')}` : `Rekord ab ${rz.ab.toLocaleString('de-DE')}`}</small>`;
-    const ctx = k.querySelector('canvas').getContext('2d');
+    const q = document.createElement('canvas'); q.width = 20; q.height = 18;
+    const ctx = q.getContext('2d', { willReadFrequently: true });
     BS.zeichnePlaetzchen(ctx, 1, 1, rz.form, 'golden', da ? rz.deko : null, 2);
     if (!da) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#6a5a4a'; ctx.fillRect(0, 0, 20, 18); }
+    albumBild(k.querySelector('canvas'), q);
     buch.appendChild(k);
   }
   return buch;
@@ -781,7 +783,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281500`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610281530`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2012,14 +2014,31 @@ const ALBUM_TIERE_ALT = ['hase', 'eich', 'reh'];   // die gab es schon vor dem A
 // Zeile, und hyphens:auto trennt nicht in jedem Browser. Ein Strich erscheint nur, wenn wirklich umbrochen wird.
 const FUGEN = ['Weihnachts', 'Geschenke', 'Lebkuchen', 'Tannen', 'Vanille', 'Spazier', 'Seiden', 'Schoko', 'Schnee', 'Eich', 'Kohl', 'Blau', 'Wild', 'Wald', 'Feld', 'Gold', 'Rot', 'Zimt'];
 const trennbar = (name) => name.split(' ').map((wort) => { const f = FUGEN.find((x) => wort.startsWith(x) && wort.length - x.length >= 3); return f ? f + '­' + wort.slice(f.length) : wort; }).join(' ');
+// Album-Bilder groß (28.10., Nutzerwunsch): auf den Inhalt zuschneiden und per Scale2x verdoppeln, wenn das
+// Ergebnis in den Bildkasten passt (sonst 1:1). Jede Karte hat eigene Leinwände - Safari kopiert eine
+// gemeinsame Zwischenleinwand per drawImage verzögert (siehe Kacheln, Dankesbild).
+const ALBUM_BILD_B = 46, ALBUM_BILD_H = 46;   // Kasten innen ~46 x 45 Einheiten (bei 320 und 375 px gleich, --px wächst mit)
+function albumBild(cv, quelle) {
+  const w = quelle.width, h = quelle.height, d = quelle.getContext('2d').getImageData(0, 0, w, h).data;
+  let x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) { x0 = 0; y0 = 0; x1 = w - 1; y1 = h - 1; }
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+  const t = document.createElement('canvas'); t.width = bw; t.height = bh;
+  t.getContext('2d').drawImage(quelle, x0, y0, bw, bh, 0, 0, bw, bh);
+  if (bw * 2 <= ALBUM_BILD_B && bh * 2 <= ALBUM_BILD_H) scale2x(t, bw, bh, cv);
+  else { cv.width = bw; cv.height = bh; cv.getContext('2d').drawImage(t, 0, 0); }
+  cv.style.width = `calc(var(--px) * ${cv.width})`; cv.style.height = `calc(var(--px) * ${cv.height})`;
+}
 function albumKarte(name, n, male, w = 24, h = 24, einheit = '×') {
   const k = el('div', 'album-karte' + (n ? '' : ' zu'));
   // n < 0: schon gesehen, aber vor dem Album (10.10.) nicht mitgezählt
   k.innerHTML = `<div class="ak-bild"><canvas width="${w}" height="${h}"></canvas></div><b>${n ? esc(trennbar(name)) : '???'}</b><small>${n > 0 ? `${n.toLocaleString('de-DE')}${einheit}` : n < 0 ? 'schon gesehen' : 'noch nicht gesehen'}</small>`;
-  const cv = k.querySelector('canvas'), ctx = cv.getContext('2d');
-  cv.style.width = `calc(var(--px) * ${w})`; cv.style.height = `calc(var(--px) * ${h})`;   // 1:1 (11.10.: Tiere sind 28 x 26)
+  const q = document.createElement('canvas'); q.width = w; q.height = h;
+  const ctx = q.getContext('2d', { willReadFrequently: true });
   male(ctx);
   if (!n) { ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = '#5a4a3e'; ctx.fillRect(0, 0, w, h); }
+  albumBild(k.querySelector('canvas'), q);
   return k;
 }
 /** Vogel auf 28 x 28: klein malen, zweimal per Scale2x vergrößern - Pixel bleiben Spielpixel. */
