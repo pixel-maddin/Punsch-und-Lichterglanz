@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610292100';
-import * as S from './spiel.js?v=202610292100';
-import * as Z from './zeit.js?v=202610292100';
-import * as T from './ton.js?v=202610292100';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610292100';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610292100';
-import { zielHaus } from './fein.js?v=202610292100';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610292100';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610292100';
-import * as A from './auftraege.js?v=202610292100';
-import * as E from './erfolge.js?v=202610292100';
-import * as ZL from './ziele.js?v=202610292100';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610292100';
-import * as KA from './karte.js?v=202610292100';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610292100';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610292100';
-import * as SW from './schneeball.js?v=202610292100';
-import * as LI from './lichtung.js?v=202610292100';
-import * as CB from './christbaum.js?v=202610292100';
-import * as SB from './schlitten.js?v=202610292100';
-import * as EB from './schlittschuh.js?v=202610292100';
-import * as BS from './backstube.js?v=202610292100';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610292100';
+import * as C from './config.js?v=202610292130';
+import * as S from './spiel.js?v=202610292130';
+import * as Z from './zeit.js?v=202610292130';
+import * as T from './ton.js?v=202610292130';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610292130';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610292130';
+import { zielHaus } from './fein.js?v=202610292130';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610292130';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610292130';
+import * as A from './auftraege.js?v=202610292130';
+import * as E from './erfolge.js?v=202610292130';
+import * as ZL from './ziele.js?v=202610292130';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610292130';
+import * as KA from './karte.js?v=202610292130';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610292130';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610292130';
+import * as SW from './schneeball.js?v=202610292130';
+import * as LI from './lichtung.js?v=202610292130';
+import * as CB from './christbaum.js?v=202610292130';
+import * as SB from './schlitten.js?v=202610292130';
+import * as EB from './schlittschuh.js?v=202610292130';
+import * as BS from './backstube.js?v=202610292130';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610292130';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -823,7 +823,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610292100`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610292130`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -3140,20 +3140,9 @@ function grussImHimmel(c, gruss, rand, bildB, stil) {
   const x = Math.round(rand + (bildB - w) / 2), y = rand + 22;
   c.save();
   c.imageSmoothingEnabled = false;
-  // 29.10. (gemeldet: rote und rot-weiße Schrift oft schlecht lesbar - Rot verschwindet im
-  // Nachthimmel, die weißen Streifen im hellen Taghimmel): dahinter ein weicher dunkler Schein,
-  // und um die dunkle Kontur ein heller Rand, je einen Schriftpixel breit
-  if (stil === 'rot') {
-    const sil = document.createElement('canvas');   // je Aufruf frisch (Safari)
-    sil.width = bild.width; sil.height = bild.height;
-    const sc = sil.getContext('2d');
-    sc.drawImage(bild, 0, 0);
-    sc.globalCompositeOperation = 'source-in'; sc.fillStyle = '#fff4e4'; sc.fillRect(0, 0, sil.width, sil.height);
-    c.shadowColor = 'rgba(8, 10, 34, 0.9)'; c.shadowBlur = 8 * s;
-    c.drawImage(sil, x, y, w, h);
-    c.shadowColor = 'transparent'; c.shadowBlur = 0;
-    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) c.drawImage(sil, x + dx * s, y + dy * s, w, h);
-  }
+  // 29.10.: Die helle Creme-Schrift (Zuckerstange) bekommt einen weichen dunklen Schein - im hellen
+  // Taghimmel ging sie sonst unter. (Rot und Rot-Weiß gibt es auf dem Foto nicht mehr, Nutzerwunsch.)
+  if (stil === 'creme') { c.shadowColor = 'rgba(8, 10, 34, 0.85)'; c.shadowBlur = 8 * s; c.drawImage(bild, x, y, w, h); c.shadowColor = 'transparent'; c.shadowBlur = 0; }
   c.drawImage(bild, x, y, w, h);
   c.restore();
 }
@@ -3206,7 +3195,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   if (!festerGruss && !eigen.gruss && Z.phase() === 'weihnacht' && Z.jetzt().getMonth() === 11 && Z.jetzt().getDate() >= 27) gruss = 'Einen guten Rutsch!';
   const von = `${eigen.von || VON_VORGABE} ${S.st.name || 'uns'}`;
   const y0 = WG * SK + rand, mx = cv.width / 2, maxB = cv.width - 70;
-  grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'rot', Schneeflocken: 'eis', Stechpalme: 'rot' }[R.name] || 'gold');   // 29.10.: keine rot-weiße Schrift mehr (Nutzerwunsch)
+  grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'creme', Schneeflocken: 'eis', Stechpalme: 'gold' }[R.name] || 'gold');   // 29.10.: keine rote und rot-weiße Schrift mehr (Nutzerwunsch)
   c.textAlign = 'center';
   kartenSchrift(c, von, mx, y0 + 54, 32, '', R.titel, R.umriss, maxB);
   if (heilig) {
