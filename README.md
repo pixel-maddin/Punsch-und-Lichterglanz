@@ -87,7 +87,8 @@ Dach warten Rentiere oder ein steckengebliebener Nikolaus, am Stand spielt
 eine Blaskapelle oder der Elvis-Wichtel. Die dritte Variante zeigt sich erst,
 wenn man die zweite hat. Jede zusätzliche bringt ♥ +2.
 
-**Der fahrende Händler** kommt bis zu zweimal am Tag mit seinem Karren vorbei
+**Der fahrende Händler** kommt ab dem sechsten Spieltag (wer erst ab Mitte Dezember
+spielt, ab dem zweiten) bis zu zweimal am Tag mit seinem Karren vorbei
 (links vor dem Haus antippen). Er hat Deko, die es nur bei ihm gibt -
 Riesen-Schneekugel, Lichter-Flamingo, Polarlicht-Laterne, Drehorgel-Wichtel,
 Wetterhahn-Rentier - und einen Zimtstern-Gutschein: 10 Minuten (nur, solange du spielst)

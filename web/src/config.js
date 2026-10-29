@@ -1098,7 +1098,10 @@ export const MINI_ALLE_DEZ = 14;
 // der Markt kam erst an Tag 6 oder 7.
 // 13.10.: sonder 1 → 0 (Betatest: am ersten Tag nach den Startzielen passierte nichts mehr - jetzt kommt
 // der erste besondere Gast und mit ihm die Stammgäste noch in der ersten Sitzung)
-export const EINSTIEG = { sonder: 0, ansturm: 1, haendler: 1, wetter: 1, schlitten: 2, santa: 3, markt: 4 };
+// 29.10. (Nutzerwunsch): der fahrende Händler erst, wenn man im Spiel drin ist - Tag 6, nach dem ersten Markt.
+// Wer spät im Dezember anfängt, bekommt ihn ab HAENDLER_SPAET_DEZ schon ab dem zweiten Tag (sonst verpasst er die Händler-Deko)
+export const EINSTIEG = { sonder: 0, ansturm: 1, haendler: 5, wetter: 1, schlitten: 2, santa: 3, markt: 4 };
+export const HAENDLER_SPAET_DEZ = 14;
 export const VORSCHAU_NACH = 480;   // s in der Sitzung, bis „Morgen wartet …“ kommt (einmal am Tag)
 export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Großbestellung, Gruppe, Ansturm, Sondergast
 

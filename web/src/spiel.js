@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610292130';
-import * as Z from './zeit.js?v=202610292130';
-import { neueFarben } from './pixel.js?v=202610292130';
+import * as C from './config.js?v=202610292200';
+import * as Z from './zeit.js?v=202610292200';
+import { neueFarben } from './pixel.js?v=202610292200';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -353,7 +353,8 @@ export const startzieleFertig = () => st.lernen >= 99 && (st.ziel || 0) >= ziele
  */
 export const nachStartRuhe = () => startzieleFertig() && (lauf.startzieleT == null || lauf.t - lauf.startzieleT > C.RUHE_NACH_START);
 /** Darf ein Sonderereignis schon kommen? Nach Spieltag, siehe C.EINSTIEG. */
-export const einstieg = (was) => !!DEMO || spieltag() >= (C.EINSTIEG[was] || 0);
+export const einstieg = (was) => !!DEMO || spieltag() >= (C.EINSTIEG[was] || 0)
+  || (was === 'haendler' && spieltag() >= 1 && Z.dezemberTag() >= C.HAENDLER_SPAET_DEZ);   // 29.10.: Spätstarter
 /**
  * Steht ein Ort schon auf der Karte? Die Orte gehen mit der Einführung auf:
  * Zuhause und Supermarkt sofort, der Weihnachtsladen mit dem Deko-Ziel, der
