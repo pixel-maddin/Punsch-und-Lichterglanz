@@ -1651,3 +1651,5 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 #modal .barbara-gross { display: block; margin: 0 auto calc(var(--px) * 3); box-sizing: content-box;
   width: calc(var(--px) * 100); height: calc(var(--px) * 100); image-rendering: pixelated;
   border: calc(var(--px) * 1) solid var(--holz); border-radius: calc(var(--px) * 1.5); }
+/* 29.10. (Nutzer: dauerhaftes Pulsieren irritiert): Der Barbarazweig ist nur golden umrandet, wenn es etwas zu tun gibt - ohne Pulsieren */
+.vorfreude.barbara.bereit { animation: none; }
