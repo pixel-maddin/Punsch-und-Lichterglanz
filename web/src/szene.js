@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610282000';
-import * as Z from './zeit.js?v=202610282000';
-import * as S from './spiel.js?v=202610282000';
-import { FASSADEN } from './config.js?v=202610282000';
-import * as C from './config.js?v=202610282000';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610291500';
+import * as Z from './zeit.js?v=202610291500';
+import * as S from './spiel.js?v=202610291500';
+import { FASSADEN } from './config.js?v=202610291500';
+import * as C from './config.js?v=202610291500';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -1989,6 +1989,15 @@ function goldstern(c, L, t, G) {
 // ---------------------------------------------------------------------------
 // Der Stand (klein, in der Welt)
 // ---------------------------------------------------------------------------
+/** Holzbrett mit zwei Zeilen Aufschrift, an zwei Schnüren unter der Markise, mitten vor den Töpfen (29.10.). */
+function zuBrett(c, x0, G, zeilen, w) {
+  const bw = Math.max(...zeilen.map(textBreite)) + 7, bh = 15, bx = x0 + 24 - Math.round(bw / 2), by = G - 36;
+  r(c, bx + 3, G - 43, 1, by - (G - 43), '#3a2414'); r(c, bx + bw - 4, G - 43, 1, by - (G - 43), '#3a2414');
+  r(c, bx, by, bw, bh, '#7a4e2a'); r(c, bx, by, bw, 1, '#a0703e'); r(c, bx, by + bh - 1, bw, 1, '#4a2c16');
+  r(c, bx, by, 1, bh, '#5a3a1e'); r(c, bx + bw - 1, by, 1, bh, '#5a3a1e');
+  if (w.schnee > 0) r(c, bx + 1, by - 1, bw - 2, 1, '#f6f9fc');
+  zeilen.forEach((z, i) => pixText(c, z, bx + Math.round((bw - textBreite(z)) / 2), by + 2 + i * 6, '#fff2d0', '#3a2010'));
+}
 function stand(c, G, w, t, L) {
   const x0 = 128, x1 = 176;
   const markise = G - 44;
@@ -2005,7 +2014,7 @@ function stand(c, G, w, t, L) {
     if (Math.sin(t * 3 + i) > 0) p(c, tx + 3, G - 29 - (Math.floor(t * 2 + i) % 2), '#e8eef4');
   }
   // Wichtel, die schon mitarbeiten, schauen über den Tresen
-  const helfer = ['spuel', 'nachfuell', 'servier', 'crepe_w', 'kasse'].filter((id) => S.zeigt(id));
+  const helfer = S.winterpause() ? [] : ['spuel', 'nachfuell', 'servier', 'crepe_w', 'kasse'].filter((id) => S.zeigt(id));   // 29.10.: Winterpause
   helfer.forEach((id, i) => wichtelKlein(c, x0 + 10 + i * 8, G - 21, t, i));
   // Gemütliche Pause (du warst 5 Minuten nicht da): kleine „z" steigen auf
   if (helfer.length && S.wichtelRuhen()) for (let i = 0; i < 2; i++) {
@@ -2014,6 +2023,8 @@ function stand(c, G, w, t, L) {
   }
   // Pfosten (die Zuckerstangen stehen seit dem 29.09. im Vorgarten)
   for (const px of [x0, x1 - 2]) { r(c, px, markise, 2, G - 10 - markise, '#7a5230'); r(c, px, markise, 1, G - 10 - markise, '#94683e'); }
+  // Stand zu (29.10.): ein Brett vor Töpfen und Pfosten - Heiligabend „FROHES FEST“, sonst „WINTERPAUSE“
+  if (S.standZu()) zuBrett(c, x0, G, S.winterpause() ? ['WINTER', 'PAUSE'] : ['FROHES', 'FEST'], w);
   // Ausbaustufen des Stands: Holzdach, dann Laternen und Grün, dann Stern und Lichter
   const ausbau = S.zeigt('stand') ? S.stufe('stand') : 0;
   if (ausbau >= 1) {
@@ -2214,9 +2225,10 @@ function saenger(c, L, fuss, t) {
 function vorDenLeuten(c, L, G, GW, t, w, opts) {
   if (S.zeigt('g_vorrat')) schneeballVorrat(c, 12, GW - 1);
   if (Z.schnee() > 0) eigenerSchneemann(c, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
-  if (S.zeigt('m_kutsche') && !opts.karte) kutsche(c, L, G, t, w);
+  const pause = S.winterpause();   // 29.10.: in der Winterpause ist niemand mehr unterwegs
+  if (S.zeigt('m_kutsche') && !opts.karte && !pause) kutsche(c, L, G, t, w);
   if (S.zeigt('f_eisenbahn') && !opts.karte) eisenbahn(c, L, G, t, w);   // Finale (25.10.)
-  if (S.zeigt('s_kinder') && !opts.karte) rodelkinder(c, GW, t, w);
+  if (S.zeigt('s_kinder') && !opts.karte && !pause) rodelkinder(c, GW, t, w);
 }
 
 function strasse(c, G, t, L = null) {
@@ -3244,7 +3256,7 @@ function feuerwerk(c, GW, staerke, dt) {
         fwFunken.push({ x: q.x, y: q.y, vx: Math.cos(w) * s, vy: Math.sin(w) * s, t: 0, life: 1.1 + Math.random() * 0.7, f: q.f });
       }
       fwFunken.push({ x: q.x, y: q.y, vx: 0, vy: 0, t: 0, life: 0.18, f: ['#ffffff', '#ffffff'], blitz: true });
-      if (dt > 0) S.hooks.ton('feuerwerk');
+      if (dt > 0 && !S.feuerwerkLeise()) S.hooks.ton('feuerwerk');   // 29.10.: am 31.12. ohne Knall
     }
   }
   // Raketen: heller Kopf, glühende Spur

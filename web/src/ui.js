@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610282000';
-import * as S from './spiel.js?v=202610282000';
-import * as Z from './zeit.js?v=202610282000';
-import * as T from './ton.js?v=202610282000';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610282000';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610282000';
-import { zielHaus } from './fein.js?v=202610282000';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610282000';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610282000';
-import * as A from './auftraege.js?v=202610282000';
-import * as E from './erfolge.js?v=202610282000';
-import * as ZL from './ziele.js?v=202610282000';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610282000';
-import * as KA from './karte.js?v=202610282000';
-import { zeigeRueckblick } from './ereignis.js?v=202610282000';
-import { barbaraZweig } from './szene.js?v=202610282000';
-import * as SW from './schneeball.js?v=202610282000';
-import * as LI from './lichtung.js?v=202610282000';
-import * as CB from './christbaum.js?v=202610282000';
-import * as SB from './schlitten.js?v=202610282000';
-import * as EB from './schlittschuh.js?v=202610282000';
-import * as BS from './backstube.js?v=202610282000';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610282000';
+import * as C from './config.js?v=202610291500';
+import * as S from './spiel.js?v=202610291500';
+import * as Z from './zeit.js?v=202610291500';
+import * as T from './ton.js?v=202610291500';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291500';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610291500';
+import { zielHaus } from './fein.js?v=202610291500';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291500';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291500';
+import * as A from './auftraege.js?v=202610291500';
+import * as E from './erfolge.js?v=202610291500';
+import * as ZL from './ziele.js?v=202610291500';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291500';
+import * as KA from './karte.js?v=202610291500';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291500';
+import { barbaraZweig } from './szene.js?v=202610291500';
+import * as SW from './schneeball.js?v=202610291500';
+import * as LI from './lichtung.js?v=202610291500';
+import * as CB from './christbaum.js?v=202610291500';
+import * as SB from './schlitten.js?v=202610291500';
+import * as EB from './schlittschuh.js?v=202610291500';
+import * as BS from './backstube.js?v=202610291500';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291500';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -65,7 +65,7 @@ export function hud() {
   $('#uhr').textContent = u + ((Z.zeitVerstellt() || S.devAn()) && !S.DEMO ? ' ⚙' : '');
   // Eine Zahl nur für Belohnungen, die man abholen kann; neue Erfolge sind
   // nur ein Punkt (Betatest 2: „Aufträge 10" nach 20 Minuten)
-  const ab = A.abholbar(), en = E.neuZahl() + (S.finaleBereit() ? 1 : 0);   // + goldenes Geschenk (Finale)
+  const ab = S.winterpause() ? 0 : A.abholbar(), en = E.neuZahl() + (S.finaleBereit() ? 1 : 0);   // + goldenes Geschenk (Finale)
   const bA = $('#aufBadge'); bA.textContent = ab || ''; bA.classList.toggle('versteckt', ab === 0 && en === 0); bA.classList.toggle('punkt', ab === 0 && en > 0);
   $('#btnAuftraege').classList.toggle('lockt', ab > 0);
   const b = $('#kalBadge');
@@ -99,6 +99,22 @@ export function zielLeiste() {
   // Der Kontostand gehört in die Signatur: „noch 186 Sterne" blieb sonst
   // stehen, während man längst 179 hatte (Betatest 02.10.)
   // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist kurz)
+  // 29.10.: Hat der Stand zu (Heiligabend ab 17 Uhr, Winterpause), sagt die Leiste das - vor allem anderen
+  const zu = S.standZu() ? (S.winterpause() ? 'pause' : 'abend') : '';
+  if (zu) {
+    leistenModus = 'zu';
+    if (letztesZiel === 'zu|' + zu) return;
+    letztesZiel = 'zu|' + zu;
+    const b = $('#ziel');
+    $('#huelle').classList.add('mit-ziel');
+    b.className = 'zu';
+    b.innerHTML = zu === 'pause'
+      ? '<span class="nr">WINTERPAUSE</span><span class="was">Stand zu bis zum nächsten Advent</span><span class="los">Info ▸</span>'
+      : '<span class="nr">HEILIGABEND</span><span class="was">Keine Gäste mehr - ab morgen wieder</span>';
+    $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
+    return;
+  }
+  $('#ziel').classList.remove('zu');
   const ansturm = S.lauf.ansturm ? Math.max(0, Math.ceil(S.lauf.stossBis - S.lauf.t)) : 0;
   const zimt = !ansturm && !z ? S.zimtRest() : 0;
   const markt = !ansturm && !z && !zimt && S.marktHeute() && !S.marktBesucht();
@@ -260,6 +276,7 @@ function naechsterToast() {
 export function fenster(titel, inhaltHtml, knoepfe = [{ text: 'Weiter' }]) {
   const m = $('#modal');
   m.innerHTML = '';
+  m.classList.remove('dunkel', 'sofort');   // 29.10.: nur das Weihnachtsfenster dunkelt stärker ab
   const box = el('div', 'box');
   box.appendChild(el('h2', null, titel));
   const inhalt = el('div', 'inhalt', inhaltHtml);
@@ -784,7 +801,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610282000`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291500`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1992,6 +2009,7 @@ export function oeffneAuftraege(reiter) {
   if (auftragReiter === 'erfolge') return baueErfolge(liste);
   if (auftragReiter === 'album') return baueAlbum(liste);
   if (S.st.lernen < 99) { liste.appendChild(el('p', 'hinweis', 'Nach der Einführung gibt es hier jeden Tag drei Aufträge.')); return; }
+  if (S.winterpause()) { liste.appendChild(el('p', 'hinweis pause-leer', 'Hier gibt es nichts mehr zu tun. Komm zur nächsten Adventszeit wieder vorbei! :)')); return; }   // 29.10.
   // 28.10. (UI-Durchsicht, gemeldet „sehr viel los"): Ruf kompakt oben, dann HEUTE mit den drei Aufträgen,
   // dann was Gäste sich wünschen, zuletzt die Sammelstücke. Knöpfe nur, wenn man etwas tun kann;
   // Erledigtes schrumpft auf eine grüne Zeile; Schwierigkeit EINMAL (Farbstreifen + Wort).
@@ -2834,6 +2852,9 @@ export function frageName(umbenennen = false, danach) {
 export const MODUS_NAME = { eigen: 'Eigener Advent', echt: 'Echter Kalender' };
 export function waehleModus(fertig) {
   const heute = new Date();
+  // 29.10. (Nutzerwunsch): Nach dem Ende der Saison (ab 7. Januar) gibt es keine Wahl - der echte
+  // Kalender stünde in der Winterpause. Neue Spieler beginnen dann immer ihren eigenen Advent.
+  if (Z.dezemberTag(Z.jetzt()) >= C.SAISON_ENDE_TAG) { setTimeout(() => fertig('eigen'), 0); return; }
   // Tage bis zum echten 1. Dezember - bei „Echter Kalender" im Oktober fast zwei Monate ohne Türchen und
   // Schnee. Das muss man VOR der Wahl wissen (Betatest 02.10.)
   const bis = Math.ceil((new Date(Z.saison(heute), 11, 1) - heute) / 86400000);
@@ -2875,6 +2896,7 @@ export function waehleModus(fertig) {
 export function vorschauText() {
   const teile = [];
   const dt = Z.dezemberTag();
+  if (dt >= C.SAISON_ENDE_TAG - 1) return '';   // 29.10.: morgen ist Winterpause
   if (dt >= 1 && dt < 24) teile.push(`Türchen ${dt + 1}`);
   else if (dt < 1) teile.push('ein Vorfreude-Päckchen');
   teile.push('neue Aufträge');
@@ -2926,7 +2948,8 @@ export function zeigeHilfe() {
       <li><b>Glas holen</b> - links auf dem Tresen.</li>
       <li><b>Abfüllen</b> - unten auf das passende Getränk tippen. Das Bild im Bläschen des Gastes ist dasselbe wie unten.</li>
       <li><b>Servieren</b> - ist das Glas fertig, tragen Glas und Bläschen einen grünen Haken. Dann auf den Gast tippen. Je schneller, desto mehr Trinkgeld.</li>
-      <li><b>Handgriffe</b> - Zuckerstange, Umrühren, Zuckerguss, Sahne, Zimt, Milchschaum, Zuckerhut: das fertige Glas (beim Lebkuchen den Lebkuchen) auf dem Tablett antippen (die goldene Blase zeigt, was fehlt). Den Crêpe wendest du unten auf seiner Kachel, sobald „Wenden!“ dasteht. Dann zahlt der Gast mehr, je nach Getränk 20 bis 50 %. Wichtel lassen sie weg.</li>
+      <li><b>Lebkuchen</b> brauchen kein Glas: Tipp auf die Dose (oder auf den Gast), und er bekommt ihn direkt.</li>
+      <li><b>Handgriffe</b> - Zuckerstange, Umrühren, Sahne, Zimt, Milchschaum, Zuckerhut: das fertige Glas auf dem Tablett antippen (die goldene Blase zeigt, was fehlt). Den Crêpe wendest du unten auf seiner Kachel, sobald „Wenden!“ dasteht. Dann zahlt der Gast mehr, je nach Getränk 20 bis 50 %. Wichtel lassen sie weg.</li>
       <li><b>Leer?</b> Das Getränk unten ein paarmal antippen, dann ist es wieder voll.</li>
       <li><b>Zu langsam?</b> Nicht schlimm - dann geht der Gast eben weiter. Nur besondere Gäste solltest du nicht verpassen - wer das ist, merkst du schon.</li>
     </ol>
@@ -3175,6 +3198,7 @@ export function verdrahte() {
     T.spiele('klick');
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
     if (leistenModus === 'markt') { oeffneKarte('festplatz'); return; }
+    if (leistenModus === 'zu') { if (S.winterpause()) zeigeWinterpause(null, false); else toast(S.zuText(), 'hinweis'); return; }
     const zl = leistenModus === 'ziel' && ZL.aktuell();
     if (zl && zl.oeffne === 'auftraege') { offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege('heute'); return; }
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();

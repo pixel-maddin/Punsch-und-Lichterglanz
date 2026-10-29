@@ -22,8 +22,10 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
 3. **Kurz warten**, bis das Glas voll ist - teure Getränke brauchen länger.
 4. **Servieren** - auf den Gast tippen. Je schneller, desto mehr Trinkgeld.
 5. **Leerer Topf** - ein paarmal antippen, dann ist er wieder voll.
+   **Lebkuchen** brauchen kein Glas: auf die Dose tippen, und der Gast, der
+   ihn möchte, bekommt ihn direkt.
 6. **Handgriffe** - fast jedes Getränk hat seinen eigenen: Zuckerstange
-   (Kinderpunsch), dreimal umrühren (Apfel), Zuckerguss (Lebkuchen), Sahne
+   (Kinderpunsch), dreimal umrühren (Apfel), Sahne
    (Schokolade), Sahne und Zimt (Herzwärmer), Milchschaum und Zimtstange
    (Zimtwolke), Zuckerhut anzünden (Feuerzauber). Das fertige Glas auf dem
    Tablett antippen - die goldene Blase zeigt, was fehlt. Dann zahlt der Gast
@@ -295,7 +297,13 @@ Fällen echt.
   und an Heiligabend blüht er auf: je gegossenem Tag eine Blüte mehr
   (4 bis 24). Wer nicht gießt oder später schneidet, verliert nichts,
   er blüht trotzdem, nur kleiner.
-- **Heiligabend** schneit es ab dem Nachmittag. Ab 17 Uhr läuten die
+- **Heiligabend morgens** (ab 6 Uhr) wird beim ersten Öffnen der Bildschirm
+  dunkel, die Weihnachtsmusik setzt ein, und ein großes Fenster mit dem
+  eigenen Haus wünscht frohe Weihnachten. Es sagt auch, wie es weitergeht:
+  Gäste kommen an diesem Tag bis **17 Uhr**, das Finale gibt es zwischen
+  17 und 22 Uhr.
+- **Heiligabend** schneit es ab dem Nachmittag. Ab 17 Uhr kommen keine
+  Gäste mehr (am Stand hängt „FROHES FEST“), und bis 22 Uhr läuten die
   Glocken: Die Kirche ist hell, ihre Tür steht offen, und vor dem Haus
   singen Leute mit Kerzen. Einmal kommt das **Finale** mit Bild und
   danach **Mein Advent**, ein Rückblick mit Gästen, Sternen, Deko,
@@ -306,10 +314,20 @@ Fällen echt.
   23. Dezember kommt die Jury. Je nach Stimmung gibt es Gold, Silber oder
   Bronze (oder eine Urkunde), Sterne und eine Plakette an der Hauswand.
   Wer erst seit ein paar Tagen spielt, ist noch nicht dabei.
-- **Silvester:** Ab 18 Uhr steigen Raketen über dem Dorf, um Mitternacht das
-  große Feuerwerk. Einmal kommt der Abschluss der Adventszeit: „Bis zum
-  nächsten Jahr! Vielen Dank fürs Spielen!" (wer später spielt, bekommt ihn
+- **Silvester:** Schon den ganzen Tag steigen leise ein paar Raketen über
+  dem Dorf, ab 18 Uhr immer mehr, um Mitternacht das große Feuerwerk. Einmal
+  kommt der Abschluss der Adventszeit: „Bis zum nächsten Jahr! Vielen Dank
+  fürs Spielen!" (wer bis zum 6. Januar später spielt, bekommt ihn
   nachgereicht).
+- **Winterpause ab dem 7. Januar:** Bis zum 6. Januar geht alles ganz normal
+  weiter, vom 2. Januar an sagt das Spiel jeden Tag, wie lange noch. Danach
+  hat der Stand zu (Brett „WINTERPAUSE“, Schild in der Tresenansicht, oben
+  die Leiste „WINTERPAUSE · Info“): keine Gäste, Wichtel, Aufträge,
+  Minispiele, Briefe, kein Markt und kein Nikolaus. Haus schmücken, Foto
+  und Einkaufen im Weihnachtsladen, Supermarkt und Baumarkt gehen weiter.
+  Beim ersten Öffnen erklärt es ein Fenster. Im September beginnt die neue
+  Saison. Wer in der Winterpause neu anfängt, startet automatisch seinen
+  eigenen Advent (ab 24. November).
 - **Wetter mit Folgen:** Jeder Tag hat sein Wetter, mit Temperatur an der
   Uhr. An Tagen mit **klirrender Kälte** (nur mit Schnee) wird Punsch öfter
   bestellt und bringt 20 % mehr, die Gäste haben Atemwölkchen. An
@@ -363,8 +381,9 @@ alte Dateien.
 
 ## Musik
 
-- **Am Haus** zwei Stücke im Wechsel; vom 24. bis 26. Dezember
-  kommt im Wechsel ein Weihnachtsstück dazu.
+- **Am Haus** zwei Stücke im Wechsel; vom 24. (ab 6 Uhr, mit dem
+  Weihnachtsfenster) bis 26. Dezember kommt im Wechsel ein Weihnachtsstück
+  dazu.
 - **Auf der Karte** bis zum 1. Advent ein Stück, danach mit jedem Advent
   (1. bis 3.) ein neues - das neue läuft beim ersten Öffnen zuerst.
 - **In den Minispielen** eins von zwei Stücken, zufällig.

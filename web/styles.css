@@ -1632,3 +1632,17 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .vk:not(.zu):active { transform: scale(0.95); }
 .hz-teil .punktwahl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(var(--px) * 1.5); }
 .hz-teil .punktwahl .pw { min-width: 0; justify-content: center; }
+
+/* 29.10.: Weihnachtsfenster - der Bildschirm wird dunkel, solange es offen ist */
+#modal.dunkel { animation: weihnachtDunkel 1.6s ease forwards; }
+#modal.dunkel.sofort { animation: none; background: rgba(6, 6, 22, 0.86); }
+@keyframes weihnachtDunkel { from { background: rgba(10, 6, 20, 0.6); } to { background: rgba(6, 6, 22, 0.86); } }
+#modal .haus-bild { display: block; margin: 0 auto calc(var(--px) * 3); box-sizing: content-box;
+  width: calc(var(--px) * 132); height: calc(var(--px) * 112); image-rendering: pixelated;
+  border: calc(var(--px) * 1) solid var(--holz); border-radius: calc(var(--px) * 1.5); }
+/* Stand zu: Leiste oben in Winterblau */
+#ziel.zu .nr { background: #3a5a9a; }
+#ziel.zu .los { background: #3a5a9a; }
+/* Karte: Orte in der Winterpause blass */
+#kartenOrte .ort.pause { opacity: 0.7; filter: grayscale(0.6); }
+.pause-leer { text-align: center; margin-top: calc(var(--px) * 10); }

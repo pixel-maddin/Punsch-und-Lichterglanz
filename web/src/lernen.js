@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610282000';
-import * as S from './spiel.js?v=202610282000';
-import * as A from './auftraege.js?v=202610282000';
-import * as E from './erfolge.js?v=202610282000';
-import * as Z from './ziele.js?v=202610282000';
-import * as ZE from './zeit.js?v=202610282000';
-import * as KA from './karte.js?v=202610282000';
-import { zellePos } from './tresen.js?v=202610282000';
+import * as C from './config.js?v=202610291500';
+import * as S from './spiel.js?v=202610291500';
+import * as A from './auftraege.js?v=202610291500';
+import * as E from './erfolge.js?v=202610291500';
+import * as Z from './ziele.js?v=202610291500';
+import * as ZE from './zeit.js?v=202610291500';
+import * as KA from './karte.js?v=202610291500';
+import { zellePos } from './tresen.js?v=202610291500';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -155,6 +155,11 @@ function einfuehrung() {
 // Einzelne Hinweise, je einer einmal
 // ---------------------------------------------------------------------------
 const HINWEISE = [
+  { id: 'lebkuchen_direkt', ruhig: true, sofort: true, dauer: 9,
+    wann: () => S.hat('lebkuchen') && S.lauf.gaeste.some((g) => g.am && !g.bedient && !g.gehen && g.wunsch === 'lebkuchen'),
+    text: () => 'Lebkuchen brauchen kein Glas: Tippe unten auf die LEBKUCHEN-Dose - der Gast bekommt ihn direkt.',
+    ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.lebkuchen)),
+    fertig: () => !S.lauf.gaeste.some((g) => g.am && !g.bedient && !g.gehen && g.wunsch === 'lebkuchen') },
   { id: 'leer', ruhig: true, sofort: true, wann: () => !S.stufe('nachfuell') && leererTopf() >= 0,
     text: () => `Leer! Tippe das Getränk unten ${C.NACHFUELL_TIPPS}-mal an, dann ist es wieder voll.`,
     ziel: () => zellZiel(leererTopf()), fertig: () => leererTopf() < 0 },

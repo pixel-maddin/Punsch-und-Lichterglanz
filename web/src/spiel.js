@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610282000';
-import * as Z from './zeit.js?v=202610282000';
-import { neueFarben } from './pixel.js?v=202610282000';
+import * as C from './config.js?v=202610291500';
+import * as Z from './zeit.js?v=202610291500';
+import { neueFarben } from './pixel.js?v=202610291500';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -801,6 +801,7 @@ function waehleTyp(erlaubeSpezial) {
 }
 
 export function neuerGast(typ, gross) {
+  if (standZu()) return null;   // 29.10.: Heiligabend ab 17 Uhr und Winterpause
   typ = typ || waehleTyp(true);
   const wunsch = gross ? gross.id : wunschFuer(typ);
   if (!wunsch) return null;
@@ -979,6 +980,7 @@ function platzFuerEssen() {
 }
 
 export function tippeGlaeser() {
+  if (standZu()) { selten('zu', zuText()); return; }
   if (lauf.hand.length >= handMax()) { hooks.ton('falsch'); lauf.wackel.hand = 0.3; return; }
   lauf.hand.push({ art: 'glas' });
   hooks.ton('glas');
@@ -988,6 +990,7 @@ export function tippeGlaeser() {
 export function tippeZelle(i) {
   const p = C.PRODUKTE[i];
   if (!p) return;
+  if (standZu() && hat(p.id)) { selten('zu', zuText()); return; }
   if (!hat(p.id)) return 'laden';
   const hand = lauf.hand;
   if (p.art === 'platte') {
@@ -1025,13 +1028,7 @@ export function tippeZelle(i) {
     }
     return;
   }
-  if (p.art === 'dose') {
-    if (!platzFuerEssen()) { hooks.ton('falsch'); lauf.wackel.hand = 0.3; return; }
-    hand.push({ art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit, ...neueGriffe(p) });
-    st.toepfe[p.id]--;
-    hooks.ton('greifen');
-    return;
-  }
+  if (p.art === 'dose') { direktGeben(p, null); return; }
   // Topf: braucht ein leeres Glas. Dann dauert das Zubereiten ein wenig.
   const glas = hand.findIndex((h) => h.art === 'glas');
   if (glas >= 0) hand[glas] = { art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit, ...neueGriffe(p) };
@@ -1145,9 +1142,34 @@ function selten(art, text) {
   z[art] = lauf.t; n[art] = (n[art] || 0) + 1;
   hooks.toast(text, 'hinweis');
 }
+/**
+ * Lebkuchen (29.10., gemeldet: „irritiert, dass man sie wie Getränke servieren muss"): kein Tablett,
+ * kein Zuckerguss. Ein Tipp auf die Dose gibt ihn dem Gast am Tresen, der ihn möchte (dem
+ * ungeduldigsten), ein Tipp auf so einen Gast ebenso. Zählt als ganz normaler Verkauf von dir.
+ */
+function direktGeben(p, g) {
+  if (!g) g = lauf.gaeste.filter((x) => x.am && !x.gehen && !x.bedient && x.wunsch === p.id)
+    .sort((a, b) => a.geduld - b.geduld)[0];
+  if (!g) {
+    lauf.wackel['z' + p.id] = 0.3; hooks.ton('falsch');
+    selten('direkt' + p.id, `Gerade möchte niemand am Tresen ${p.name} - schau auf die Bläschen.`);
+    return;
+  }
+  if ((st.toepfe[p.id] || 0) <= 0) {
+    lauf.wackel['z' + p.id] = 0.3; hooks.ton('falsch');
+    selten('leer' + p.id, stufe('nachfuell') ? `${p.name} ist leer - der Nachfüll-Wichtel ist schon unterwegs!` : `${p.name} ist leer - tippe ein paarmal auf die Dose, dann ist sie wieder voll.`);
+    return;
+  }
+  st.toepfe[p.id]--;
+  hooks.ton('greifen');
+  if (g.gross) return liefereGross(g, 1);
+  bediene(g, false, 1);
+}
+
 export function tippeGast(platz) {
   const g = lauf.gaeste.find((x) => x.platz === platz && x.am && !x.gehen);
   if (!g || g.bedient) return;
+  if (C.PRODUKT[g.wunsch].art === 'dose') { direktGeben(C.PRODUKT[g.wunsch], g); return; }
   // Zuerst das Glas, das ihm gehört (grüner Haken), sonst jedes passende fertige
   glaeserZuordnen();
   let i = lauf.hand.findIndex((h) => bereit(h) && h.id === g.wunsch && h.ziel === g.id);
@@ -1254,7 +1276,7 @@ function wichtelEinschenken(g) {
  */
 function wichtelGlas(g) {
   const p = C.PRODUKT[g.wunsch];
-  if (p.art === 'platte' || (st.toepfe[p.id] || 0) <= 0) return false;
+  if (p.art !== 'topf' || (st.toepfe[p.id] || 0) <= 0) return false;   // Lebkuchen gibt er direkt (29.10.)
   let i = lauf.hand.findIndex((h) => h.art === 'glas');
   if (i < 0) { if (lauf.hand.length >= handMax()) return false; i = lauf.hand.length; }
   st.toepfe[p.id]--;
@@ -1406,7 +1428,7 @@ export function update(dt) {
   // schauen nur zu - der Moment, für den man reinschaut.
   if (chefAktiv() && !lauf.lernen) lauf.ansturmT += dt;
   if (lauf.ansturm && lauf.t >= lauf.stossBis) lauf.ansturm = false;
-  if (lauf.ansturmT >= C.ANSTURM_NACH && st.ansturmTag !== echtMitternacht() && nachStartRuhe() && einstieg('ansturm')
+  if (lauf.ansturmT >= C.ANSTURM_NACH && st.ansturmTag !== echtMitternacht() && nachStartRuhe() && !standZu() && einstieg('ansturm')
       && lauf.stossRest === 0 && lauf.t > lauf.stossBis && produkteFrei().length >= 2) {
     st.ansturmTag = echtMitternacht();
     lauf.stossRest = C.ANSTURM_GAESTE;
@@ -1420,7 +1442,7 @@ export function update(dt) {
 
   // Der erste Sondergast kommt garantiert früh - die erste Überraschung
   // soll nicht erst nach 20 Minuten kommen
-  if (!st.ersterSonder && st.lernen >= 99 && chefAktiv() && sonderBereit() && lauf.t > C.ERSTER_SONDERGAST && wartende().length < C.SCHLANGE_MAX) {
+  if (!st.ersterSonder && st.lernen >= 99 && !standZu() && chefAktiv() && sonderBereit() && lauf.t > C.ERSTER_SONDERGAST && wartende().length < C.SCHLANGE_MAX) {
     st.ersterSonder = true; neuerGast('rentier');
   }
 
@@ -1515,7 +1537,8 @@ export function update(dt) {
     }
   }
   // Spül-Wichtel: stellt nach und nach saubere Gläser aufs Tablett
-  if (hat('spuel') && lauf.hand.length < handMax()) {
+  const zuJetzt = standZu();   // 29.10.: Stand zu - die Wichtel räumen nichts mehr hin
+  if (hat('spuel') && !zuJetzt && lauf.hand.length < handMax()) {
     lauf.spuelT = (lauf.spuelT || 0) + ht;
     if (lauf.spuelT >= C.SPUEL_ZEIT) { lauf.hand.push({ art: 'glas' }); lauf.spuelT = 0; hooks.ton('glas'); }
   } else lauf.spuelT = 0;
@@ -1543,7 +1566,7 @@ export function update(dt) {
   if (cr.backT >= 0) {
     cr.backT += hat('crepe_w') ? wt : dt;
     if (cr.backT >= C.CREPE_ZEIT) { cr.backT = -1; cr.fertig = true; hooks.ton('fertig'); }
-  } else if (!cr.fertig && hat('crepe_w') && hat('crepe')) { cr.backT = 0; cr.gewendet = false; cr.verpasst = false; }
+  } else if (!cr.fertig && !zuJetzt && hat('crepe_w') && hat('crepe')) { cr.backT = 0; cr.gewendet = false; cr.verpasst = false; }
 
   // Servier-Wichtel. Bist du am Stand, bedient er nicht sofort, sondern
   // schenkt sichtbar auf dein Tablett ein - dann hast du Zeit für den
@@ -1597,7 +1620,7 @@ export function update(dt) {
   }
 
   // Der Nikolaus fliegt vorbei
-  if (!lauf.schlitten && lauf.t >= lauf.schlittenAb && st.lernen >= 99 && einstieg('schlitten')) {
+  if (!lauf.schlitten && lauf.t >= lauf.schlittenAb && st.lernen >= 99 && einstieg('schlitten') && !winterpause()) {
     lauf.schlitten = { t: 0, dauer: C.SCHLITTEN_DAUER, y: 0.12 + Math.random() * 0.3, gefangen: null };
     lauf.schlittenAb = lauf.t + C.SCHLITTEN_PAUSE[0] + Math.random() * (C.SCHLITTEN_PAUSE[1] - C.SCHLITTEN_PAUSE[0]);
     hooks.ton('glocken');
@@ -1643,7 +1666,7 @@ function haendlerTakt(dt) {
   if (chefAktiv() && !lauf.lernen) lauf.haendlerT += dt;
   // Erst nach dem Hinweis auf die Karte: Vorher kam er nach 2,5 Minuten,
   // bevor man die erste Deko kannte (Betatest 2)
-  if (!lauf.haendler && lauf.haendlerT >= lauf.haendlerAb && st.lernen >= 99 && st.tipps && st.tipps.karte_mehr && einstieg('haendler') && produkteFrei().length >= 2
+  if (!lauf.haendler && lauf.haendlerT >= lauf.haendlerAb && st.lernen >= 99 && st.tipps && st.tipps.karte_mehr && einstieg('haendler') && !standZu() && produkteFrei().length >= 2
       && haendlerHeute() < C.HAENDLER_PRO_TAG) {
     st.haendler = { tag: echtMitternacht(), n: haendlerHeute() + 1 };
     lauf.haendler = { x: -26, t: 0, phase: 'kommt', angebot: haendlerAngebot(), gutschein: true };
@@ -1717,6 +1740,7 @@ function marktStand() {
 }
 /** Ist an Tag `d` Markt? Erster Markt MARKT_ERST Tage nach dem Anker, dann alle 3-4 Tage. */
 function istMarkt(d) {
+  if (Z.dezemberTag(new Date(d * 86400000 + 12 * 3600000)) >= 24) return false;   // 29.10.: ab Heiligabend kein Markt mehr
   const m = marktStand();
   let k = m.anker + C.MARKT_ERST;
   while (k < d) k += C.MARKT_ABSTAND[0] + (Z.hash(m.seed + k) < 0.5 ? 0 : C.MARKT_ABSTAND[1] - C.MARKT_ABSTAND[0]);
@@ -1730,6 +1754,7 @@ export function marktInfo() {
   let n = Math.max(0, (C.EINSTIEG.markt || 0) - spieltag());   // der erste Markt erst ab dem Einstiegstag
   while (n < 12 && !istMarkt(heute + n)) n++;
   const datum = new Date(echtMitternacht() + n * 86400000 + 12 * 3600000);
+  if (n >= 12) return { heute: false, inTagen: null, datum: null };   // 29.10.: in dieser Saison keiner mehr
   return { heute: st.lernen >= 99 && n === 0, inTagen: n, datum };
 }
 /** Heutiges Angebot: Deko (bis MARKT_ANGEBOT, die man nicht hat, je Tag gemischt) und ein Rezept. */
@@ -1796,7 +1821,7 @@ function marktAnsage() {
   const m = marktStand();
   if (m.angesagt === tagNr()) return;
   const i = marktInfo();
-  if (i.inTagen > C.MARKT_ANSAGE) return;
+  if (i.inTagen == null || i.inTagen > C.MARKT_ANSAGE) return;
   m.angesagt = tagNr();
   if (i.heute) { hooks.toast('Heute ist Weihnachtsmarkt auf dem Festplatz! Schau auf der Karte vorbei.', 'spezial'); hooks.ton('spezial'); }
   else hooks.toast(i.inTagen === 1 ? 'Morgen ist Weihnachtsmarkt auf dem Festplatz!' : `In ${i.inTagen} Tagen ist Weihnachtsmarkt auf dem Festplatz!`, 'hinweis');
@@ -1931,7 +1956,7 @@ function santaGesucht() {
   return !!(d && d.art === 'santa' && !bt.abgeholt && (st.stats.santa || 0) <= (bt.start || 0));
 }
 export function santaWuerfeln() {
-  if (st.lernen < 99 || !st.tipps || !st.tipps.karte_mehr || !einstieg('santa')) return false;
+  if (st.lernen < 99 || winterpause() || !st.tipps || !st.tipps.karte_mehr || !einstieg('santa')) return false;
   const s = st.santaKarte && st.santaKarte.tag === echtMitternacht() ? st.santaKarte : { tag: echtMitternacht(), n: 0 };
   st.santaKarte = s;
   if (santaGesucht()) { s.n++; speichere(); return true; }
@@ -2044,7 +2069,13 @@ export function wichtelProSekunde() {
 export function offlineAbrechnen() {
   const weg = (Date.now() - st.zuletzt) / 1000;
   if (weg < C.OFFLINE_AB) return null;
-  const sek = Math.min(weg, offlineStunden() * 3600);
+  let sek = Math.min(weg, offlineStunden() * 3600);
+  // 29.10.: Heiligabend ab 17 Uhr und in der Winterpause hat der Stand zu - diese Zeit zählt nicht
+  const jetztMs = Z.jetzt().getTime(), SCHRITT = 300;
+  let zu = 0;
+  for (let s = SCHRITT / 2; s < sek; s += SCHRITT) if (standZu(new Date(jetztMs - s * 1000))) zu += SCHRITT;
+  sek = Math.max(0, sek - zu);
+  if (sek <= 0) return { sek: 0, betrag: 0, portionen: 0 };
   const sv = stufe('servier');
   if (!sv) return { sek, betrag: 0, portionen: 0 };
   const rate = Math.min(1 / C.SERVIER_TAKT[sv], 1 / gastTakt());
@@ -2178,9 +2209,42 @@ export function heiligabendJetzt() {
   const d = Z.jetzt(), dt = Z.dezemberTag(d);
   return (dt === 24 && d.getHours() >= C.HEILIGABEND_STUNDE) || (dt > 24 && dt <= 37);
 }
-/** Der Abend selbst: Glocken, Sänger vor dem Haus, Kirche hell. */
+/** Der Abend selbst: Glocken, Sänger vor dem Haus, Kirche hell - seit 29.10. von 17 bis 22 Uhr. */
 export function heiligabendAbend(d = Z.jetzt()) {
-  return Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE - 1;
+  const h = d.getHours();
+  return Z.dezemberTag(d) === 24 && h >= C.HEILIGABEND_STUNDE && h < C.HEILIGABEND_BIS;
+}
+
+// ---------------------------------------------------------------------------
+// Heiligabend-Morgen, Stand zu, Winterpause (29.10., Nutzerwunsch: „den Tag mehr zelebrieren“
+// und ein klares Ende der Saison). Ablauf: 24.12. ab 6 Uhr das Fenster „Frohe Weihnachten!“ (mit
+// dem eigenen Haus, Weihnachtsmusik), Gäste bis 17 Uhr, 17-22 Uhr das Finale am Haus. Vom 25.12.
+// bis 6.1. ganz normal. Ab 7.1. Winterpause bis zur neuen Saison: nur schmücken und einkaufen.
+// ---------------------------------------------------------------------------
+export const winterpause = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) >= C.SAISON_ENDE_TAG;
+/** Heiligabend ab 17 Uhr bis Mitternacht: keine Gäste mehr. */
+export const heiligabendZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE;
+export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);
+/** Hat dieser Ort der Karte gerade Winterpause? */
+export const ortPause = (o) => winterpause() && !C.PAUSE_ORTE.includes(o.id);
+export const zuText = () => winterpause()
+  ? 'Winterpause - dein Stand hat bis zum nächsten Advent zu. Schmücken und einkaufen geht weiter!'
+  : 'Heute ist Heiligabend - dein Stand hat zu. Ab morgen kommen wieder Gäste!';
+export function weihnachtMorgenFaellig() {
+  const d = Z.jetzt(), h = d.getHours();
+  return st.lernen >= 99 && !DEMO && Z.dezemberTag(d) === 24 && h >= C.WEIHNACHT_MORGEN && h < C.HEILIGABEND_STUNDE && st.weihnachtMorgen !== Z.saison();
+}
+export function weihnachtMorgenGesehen() { st.weihnachtMorgen = Z.saison(); speichere(); }
+export const winterpauseFaellig = () => st.lernen >= 99 && winterpause() && st.winterpause !== Z.saison();
+export function winterpauseGesehen() { st.winterpause = Z.saison(); speichere(); }
+/** 2. bis 6. Januar einmal am Tag: wie lange noch Gäste kommen. null = heute nichts zu sagen. */
+export function pauseAnsage() {
+  const dt = Z.dezemberTag();
+  if (st.lernen < 99 || DEMO || dt < C.SAISON_ENDE_TAG - 5 || dt >= C.SAISON_ENDE_TAG || st.pauseAnsage === Z.tagesSchluessel()) return null;
+  st.pauseAnsage = Z.tagesSchluessel();
+  const n = C.SAISON_ENDE_TAG - dt;
+  return n === 1 ? 'Heute ist der letzte Tag mit Gästen - ab morgen macht dein Stand Winterpause.'
+    : `Noch ${n} Tage kommen Gäste an deinen Stand - ab dem 7. Januar ist Winterpause.`;
 }
 export function heiligabendFaellig() {
   return st.lernen >= 99 && heiligabendJetzt() && st.heiligabend !== Z.saison();
@@ -2257,7 +2321,7 @@ export function briefErfuellt(b) {
  * merken. Gibt 'neu' | 'dank' | null zurück (für einen kurzen Hinweis).
  */
 export function briefPruefen() {
-  if (st.lernen < 99 || spieltag() < C.BRIEF_AB_TAG) return null;
+  if (st.lernen < 99 || spieltag() < C.BRIEF_AB_TAG || winterpause()) return null;
   const B = briefe();
   if (B.aktiv) {
     if (!B.aktiv.dank && briefErfuellt(B.aktiv)) { B.aktiv.dank = true; B.aktiv.offen = true; speichere(); return 'dank'; }
@@ -2429,7 +2493,7 @@ export function feierabend(d = Z.jetzt()) {
 }
 /** Einmal am Tag sagen, wenn der Feierabend beginnt (aus der Sekundenschleife). */
 export function feierabendAnsage() {
-  if (st.lernen < 99 || !feierabend() || !startzieleFertig()) return false;
+  if (st.lernen < 99 || !feierabend() || !startzieleFertig() || standZu()) return false;
   const k = Z.tagesSchluessel();
   if (st.feierabendTag === k) return false;
   st.feierabendTag = k;
@@ -2612,12 +2676,15 @@ export const plakette = () => (st.wettbewerb && st.wettbewerb.saison === Z.saiso
 export function feuerwerk(d = Z.jetzt()) {
   const m = d.getMonth(), tag = d.getDate(), h = d.getHours() + d.getMinutes() / 60;
   if (m === 11 && tag === 31 && h >= C.SILVESTER_STUNDE) return h >= 23.75 ? 0.7 : 0.25 + (h - C.SILVESTER_STUNDE) / 6 * 0.25;
+  if (m === 11 && tag === 31) return 0.22;   // 29.10. (Easter Egg): den ganzen Silvestertag ein paar Raketen, ohne Knall
   if (m === 0 && tag === 1 && h < 3) return h < 0.5 ? 1 : h < 1 ? 0.6 : 0.3 * (3 - h) / 2;
   return 0;
 }
+/** Am 31.12. knallt es nicht (Nutzerwunsch: Feuerwerk den ganzen Tag, aber ohne Ton). Neujahrsnacht wie gehabt. */
+export const feuerwerkLeise = (d = Z.jetzt()) => d.getMonth() === 11 && d.getDate() === 31;
 export function silvesterJetzt(d = Z.jetzt()) {
   const dt = Z.dezemberTag(d);
-  return (dt === 31 && d.getHours() >= C.SILVESTER_STUNDE) || (dt > 31 && dt <= 60);
+  return (dt === 31 && d.getHours() >= C.SILVESTER_STUNDE) || (dt > 31 && dt < C.SAISON_ENDE_TAG);   // 29.10.: danach Winterpause-Fenster
 }
 export const silvesterFaellig = () => st.lernen >= 99 && !DEMO && silvesterJetzt() && st.silvester !== Z.saison();
 export function silvesterGesehen() { st.silvester = Z.saison(); speichere(); }

@@ -20,12 +20,12 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-import * as Z from './zeit.js?v=202610282000';
+import * as Z from './zeit.js?v=202610291500';
 
 let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
-const url = (id) => `audio/${id}.m4a?v=202610282000`;
+const url = (id) => `audio/${id}.m4a?v=202610291500`;
 const HAUS = ['musik-haus', 'haus-jazz'];
 const XMAS = 'xmas';
 const KARTE_ALT = 'musik-karte';
@@ -40,7 +40,8 @@ let karteOffen = false, miniOffen = false, musikRuht = false;
 const gehoert = new Set();   // Kartenstücke, die in dieser Sitzung schon liefen
 
 const zufall = (liste, nicht) => { const l = liste.filter((x) => x !== nicht); const w = l.length ? l : liste; return w[Math.floor(Math.random() * w.length)]; };
-const xmasTage = () => { const t = Z.dezemberTag(); return t >= 24 && t <= 26; };
+// 29.10.: Am 24.12. erst ab 6 Uhr (dann kommt auch das Fenster „Frohe Weihnachten!")
+const xmasTage = () => { const d = Z.jetzt(), t = Z.dezemberTag(d); return (t === 24 && d.getHours() >= 6) || t === 25 || t === 26; };
 function karteListe() {
   const adv = Z.adventKerzen();
   return adv < 1 ? [KARTE_ALT] : KARTE_ADVENT.slice(0, Math.min(adv, KARTE_ADVENT.length));
@@ -99,6 +100,13 @@ function rampe(g, ziel, dauer) {
   g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(ziel, t + dauer);
 }
 /** Kurz ganz still (der erste Schnee). Danach geht es an derselben Stelle weiter. */
+/** 24.12. (29.10.): Das Fenster „Frohe Weihnachten!" startet die Weihnachtsmusik sofort, nicht erst nach dem laufenden Stück. */
+export function weihnachtsMusik() {
+  const s = spuren.haus;
+  if (!s || s.stueck === XMAS) return;
+  setze('haus', XMAS);
+  if (szene === 'haus') starteMusik();
+}
 export function musikPause(an) {
   musikRuht = an;
   if (an) for (const s of Object.values(spuren)) s.el.pause(); else starteMusik();

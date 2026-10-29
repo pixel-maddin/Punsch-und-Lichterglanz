@@ -9,16 +9,30 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610282000';
-import * as C from './config.js?v=202610282000';
-import * as S from './spiel.js?v=202610282000';
-import * as Z from './zeit.js?v=202610282000';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610291500';
+import * as C from './config.js?v=202610291500';
+import * as S from './spiel.js?v=202610291500';
+import * as Z from './zeit.js?v=202610291500';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
+
+/**
+ * Stand zu (29.10.): großes Schild in der Gästezone, damit niemand denkt, das Spiel hängt.
+ * Heiligabend ab 17 Uhr bis Mitternacht, und in der Winterpause ab dem 7. Januar.
+ */
+function zuSchild(c, y0) {
+  const zeilen = S.winterpause() ? ['WINTERPAUSE', 'BIS ZUM', 'NÄCHSTEN ADVENT!'] : ['FROHE WEIHNACHTEN!', 'AB MORGEN', 'WIEDER GEÖFFNET'];
+  const bw = Math.max(...zeilen.map(textBreite)) + 12, bh = 30, bx = Math.round((C.B - bw) / 2), by = y0 + 11;
+  r(c, bx + 8, y0, 1, by - y0, '#3a2414'); r(c, bx + bw - 9, y0, 1, by - y0, '#3a2414');
+  r(c, bx, by, bw, bh, '#7a4e2a'); r(c, bx + 1, by + 1, bw - 2, bh - 2, '#8a5a30');
+  r(c, bx, by, bw, 1, '#a8783e'); r(c, bx, by + bh - 1, bw, 1, '#4a2c16');
+  zeilen.forEach((z, i) => text(c, z, Math.round((C.B - textBreite(z)) / 2), by + 4 + i * 8, i ? '#fff2d0' : '#ffd860', '#3a2010'));
+}
 
 export function zeichneTresen(c, y0, t, w) {
   const yb = y0 + C.T_GAST, yr = yb + C.T_BRETT;
   gaestezone(c, y0, t, w);
+  if (S.standZu() && !S.lauf.gaeste.some((g) => !g.gehen)) zuSchild(c, y0);
   brett(c, yb, t);
   regal(c, yr, t);
   // Holzsockel als Abstand zur Leiste (C.LEISTE_LUFT). Ein Tipp darauf zählt noch
@@ -535,7 +549,7 @@ function brett(c, y, t) {
   for (let i = 0; i < 3; i++) glas(c, gx + i * 9, gy + 3);
   glas(c, gx + 4, gy - 3); glas(c, gx + 13, gy - 3);
   // Spül-Wichtel (19.10.: ohne Balken - das neue Glas erscheint einfach)
-  if (S.hat('spuel')) wichtelKlein(c, gx + 30, y + 17, t);
+  if (S.hat('spuel') && !S.winterpause()) wichtelKlein(c, gx + 30, y + 17, t);
 
   // Hand
   const n = S.handMax();

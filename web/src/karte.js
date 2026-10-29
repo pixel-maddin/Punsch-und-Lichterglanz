@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610282000';
-import * as S from './spiel.js?v=202610282000';
-import * as Z from './zeit.js?v=202610282000';
-import * as FEIN from './fein.js?v=202610282000';
-import * as T from './ton.js?v=202610282000';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610282000';
+import * as C from './config.js?v=202610291500';
+import * as S from './spiel.js?v=202610291500';
+import * as Z from './zeit.js?v=202610291500';
+import * as FEIN from './fein.js?v=202610291500';
+import * as T from './ton.js?v=202610291500';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610291500';
 
 const $ = (s) => document.querySelector(s);
 
@@ -155,6 +155,25 @@ function baueSchilder(hervor) {
       box.appendChild(f);
       continue;
     }
+    // Winterpause (29.10.): Minispiele, Markt, Wichtelwald und Baumschule tragen „Winterpause“ und sagen kurz Bescheid
+    if (S.ortPause(o)) {
+      const zu = () => { T.spiele('klick'); S.hooks.toast(`${o.name}: Winterpause - im nächsten Advent wieder offen!`, 'hinweis'); };
+      const b = document.createElement('button');
+      b.className = 'ort pause';
+      const [sdx, sdy] = o.schild || [0, 0];
+      b.style.left = `calc(var(--px) * ${o.x + sdx})`;
+      b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy + vers()})`;
+      b.innerHTML = `${o.name}<small>Winterpause</small>`;
+      b.onclick = zu;
+      box.appendChild(b);
+      const f = document.createElement('button');
+      f.className = 'ort-flaeche';
+      f.style.left = `calc(var(--px) * ${o.x - 16})`;
+      f.style.top = `calc(var(--px) * ${yPx(o) - 18 + vers()})`;
+      f.onclick = zu;
+      box.appendChild(f);
+      continue;
+    }
     const b = document.createElement('button');
     b.className = 'ort' + (o.bald ? ' bald' : '') + (o.id === hervor ? ' hervor' : '') + (o.id === 'haus' ? ' zuhause' : '');
     const [sdx, sdy] = o.schild || [0, 0];
@@ -168,7 +187,7 @@ function baueSchilder(hervor) {
     if (o.spiel && S.specialHeute() === o.spiel) { unter = 'Special heute!'; b.classList.add('special'); }
     if (o.markt) {
       const m = S.marktInfo();
-      unter = m.heute ? 'heute Weihnachtsmarkt!' : m.inTagen === 1 ? 'Markt morgen' : `Markt in ${m.inTagen} Tagen`;
+      unter = m.heute ? 'heute Weihnachtsmarkt!' : m.inTagen == null ? 'nächstes Jahr wieder' : m.inTagen === 1 ? 'Markt morgen' : `Markt in ${m.inTagen} Tagen`;
       if (m.heute) b.classList.add('markt-heute');
     }
     b.innerHTML = `${o.name}${n ? '<b class="ort-neu punkt"></b>' : ''}${nieGespielt ? '<b class="ort-neu">NEU</b>' : ''}${unter ? `<small>${unter}</small>` : ''}`;

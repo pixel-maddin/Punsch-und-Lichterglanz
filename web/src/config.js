@@ -33,7 +33,8 @@ export const T_ZELLE_H = 22;   // halbe Höhe der Kachelreihe (19.10.: 27 → 22
 //       Teurere Getränke brauchen länger - sie bringen mehr, kosten aber
 //       Zeit am Tresen. (Crêpe: siehe CREPE_ZEIT, das Backen ist die Zeit.)
 // art: 'topf'   = Glas holen, abfüllen, Topf leert sich
-//      'dose'   = direkt greifen (kein Glas), Dose leert sich
+//      'dose'   = direkt übergeben: Tipp auf die Dose, und der Gast am Tresen, der ihn will,
+//                 bekommt ihn (29.10., vorher aufs Tablett wie ein Getränk - irritierte Tester)
 //      'platte' = backen lassen, dann greifen
 // alk: Kinder bestellen nur, was false ist. Seit 30.09. ist ALLES alkoholfrei
 //      (Nutzerwunsch, auch für den Play Store): fiktive Namen statt Glühwein,
@@ -48,7 +49,7 @@ export const PRODUKTE = [
   { id: 'gluehwein',    name: 'Sternenpunsch',    preis: 10, zeit: 0.4,  kosten: 0,     art: 'topf',   farbe: '#8a1830', alk: false },
   { id: 'kinderpunsch', name: 'Kinderpunsch',     preis: 12, zeit: 0.5,  kosten: 200,    art: 'topf',   farbe: '#ee6d9a', alk: false, griffe: ['zuckerstange'], bonus: 0.20 },
   { id: 'apfel',        name: 'Heißer Apfel',     preis: 14, zeit: 0.7,  kosten: 600,    art: 'topf',   farbe: '#e8942e', alk: false, griffe: ['ruehren'], bonus: 0.25 },
-  { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false, griffe: ['guss'], bonus: 0.25 },
+  { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false },   // 29.10.: ohne Zuckerguss, wird direkt übergeben
   { id: 'schoko',       name: 'Heiße Schoki',      preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, griffe: ['sahne'], bonus: 0.30 },
   { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 19, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, griffe: ['sahne', 'zimtpulver'], bonus: 0.40 },
   { id: 'jaegertee',    name: 'Waldtee',          preis: 22, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false, griffe: ['beutel'], bonus: 0.40 },
@@ -67,7 +68,6 @@ export const PRODUKTE = [
 export const HANDGRIFF = {
   zuckerstange: { name: 'Zuckerstange', satz: 'eine Zuckerstange rein', n: 1 },
   ruehren:      { name: 'Umrühren',     satz: 'dreimal umrühren', n: 3 },
-  guss:         { name: 'Zuckerguss',   satz: 'Zuckerguss drauf', n: 1 },
   sahne:        { name: 'Sahne',        satz: 'Sahne drauf', n: 1 },
   zimtpulver:   { name: 'Zimt',         satz: 'Zimt darüberstreuen', n: 1 },
   schaum:       { name: 'Milchschaum',  satz: 'Milch aufschäumen (2-mal tippen)', n: 2 },
@@ -343,8 +343,8 @@ export const STAMM_BITTEN = {
     { art: 'mini', spiel: 'baum',
       text: 'Ich hab einen Witz über Tannenbäume, aber mir fehlt die Pointe. Verkauf mal ein paar Bäume - vielleicht kommt mir dabei was.',
       dank: 'Warum ist der Tannenbaum nie einsam? Er hat immer seine Zweige dabei. ... Ich arbeite noch dran.' },
-    { art: 'getraenk', p: 'lebkuchen', n: 6, griff: true,
-      text: 'Ich muss einen Lebkuchenwitz am lebenden Objekt üben. Also, am Lebkuchen. Sechs Stück mit Zuckerguss, bitte.',
+    { art: 'getraenk', p: 'lebkuchen', n: 6,
+      text: 'Ich muss einen Lebkuchenwitz am lebenden Objekt üben. Also, am Lebkuchen. Verkauf mal sechs Stück, dann hab ich Publikum.',
       dank: 'Was sagt der Lebkuchen zum Zuckerguss? ‚Ohne dich bin ich nur Kuchen.‘ ... Die Lebkuchen waren besser als der Witz.' },
     { art: 'gold', n: 4,
       text: 'Ich brauch Publikum. Gute Laune, volle Becher. Bedienst du ein paar goldene Gäste? Die lachen immer am lautesten.',
@@ -750,9 +750,16 @@ export const KALENDER_REIHE = [7, 15, 2, 20, 11, 24, 4, 18, 9, 13, 1, 22, 16, 6,
 export const BARBARA_TAG = 4;
 export const BARBARA_BLUETEN_MIN = 4;
 export const BARBARA_BLUETEN_MAX = 24;
-// Heiligabend (10.10.): ab dieser Stunde läuft das Finale; eine Stunde vorher
-// stehen schon die Sänger vor dem Haus
+// Heiligabend (10.10.): ab dieser Stunde läuft das Finale. Seit 29.10. kommen dann auch keine
+// Gäste mehr (bis Mitternacht), und das Finale am Haus (Sänger, Glocken, Kirche hell) gibt es
+// nur bis HEILIGABEND_BIS - wer später kommt, bekommt die stille Fassung „Frohe Weihnachten!".
 export const HEILIGABEND_STUNDE = 17;
+export const HEILIGABEND_BIS = 22;
+export const WEIHNACHT_MORGEN = 6;    // ab dann am 24.12. das Fenster „Frohe Weihnachten!" und die Xmas-Musik
+// Winterpause (29.10.): ab diesem Dezembertag (38 = 7. Januar) bis zur neuen Saison im September
+// hat der Stand zu - keine Gäste, Aufträge, Minispiele, kein Markt. Schmücken und einkaufen geht.
+export const SAISON_ENDE_TAG = 38;
+export const PAUSE_ORTE = ['haus', 'super', 'dorf', 'bau'];   // diese Orte der Karte bleiben offen
 
 // ---------------------------------------------------------------------------
 // Varianten je Deko-Platz (09.10., Nutzerwunsch: „jedes Haus sieht gleich aus,

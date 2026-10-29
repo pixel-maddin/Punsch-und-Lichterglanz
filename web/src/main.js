@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610282000';
-import * as S from './spiel.js?v=202610282000';
-import * as Z from './zeit.js?v=202610282000';
-import * as T from './ton.js?v=202610282000';
-import * as LI from './lichtung.js?v=202610282000';
-import * as CB from './christbaum.js?v=202610282000';
-import * as KA from './karte.js?v=202610282000';
-import * as SB from './schlitten.js?v=202610282000';
-import * as EB from './schlittschuh.js?v=202610282000';
-import * as BS from './backstube.js?v=202610282000';
-import * as UI from './ui.js?v=202610282000';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610282000';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610282000';
-import * as Kacheln from './kacheln.js?v=202610282000';
-import * as Lernen from './lernen.js?v=202610282000';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester } from './ereignis.js?v=202610282000';
-import * as A from './auftraege.js?v=202610282000';
-import * as E from './erfolge.js?v=202610282000';
-import * as ZL from './ziele.js?v=202610282000';
+import * as C from './config.js?v=202610291500';
+import * as S from './spiel.js?v=202610291500';
+import * as Z from './zeit.js?v=202610291500';
+import * as T from './ton.js?v=202610291500';
+import * as LI from './lichtung.js?v=202610291500';
+import * as CB from './christbaum.js?v=202610291500';
+import * as KA from './karte.js?v=202610291500';
+import * as SB from './schlitten.js?v=202610291500';
+import * as EB from './schlittschuh.js?v=202610291500';
+import * as BS from './backstube.js?v=202610291500';
+import * as UI from './ui.js?v=202610291500';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610291500';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610291500';
+import * as Kacheln from './kacheln.js?v=202610291500';
+import * as Lernen from './lernen.js?v=202610291500';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610291500';
+import * as A from './auftraege.js?v=202610291500';
+import * as E from './erfolge.js?v=202610291500';
+import * as ZL from './ziele.js?v=202610291500';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -238,10 +238,14 @@ T.setzeMusik(S.st.ton.musik);
 // ---------------------------------------------------------------------------
 // Ankommen: neue Saison, Wichtel-Einnahmen, Schnee, Türchen
 // ---------------------------------------------------------------------------
+let abendErinnert = 0;
 function ankommen(erstesMal) {
   const neueSaison = S.pruefeSaison();
   const off = S.offlineAbrechnen();
   const meldungen = [];
+  // 29.10.: Heiligabend-Morgen und Winterpause zuerst - das ist DER Moment beim Öffnen
+  if (S.weihnachtMorgenFaellig()) meldungen.push(['weihnachtMorgen']);
+  if (S.winterpauseFaellig()) meldungen.push(['winterpause']);
   if (neueSaison) meldungen.push(['Eine neue Adventszeit!', `<p>Das Haus ist wieder kahl und grau - Zeit, es erneut herzurichten.</p>${S.st.andenken ? `<p class="bonus">★ ${S.st.andenken} Andenken - ein Stern für jedes Jahr, in dem du dein Haus geschmückt hast</p>` : ''}`]);
   // 26.10.: Nach mindestens 10 Minuten weg ist es ein neuer Besuch - wieder Platz für Vorstellungen
   if (off && off.sek >= C.OFFLINE_MELDUNG) Lernen.neuerBesuch();
@@ -259,7 +263,7 @@ function ankommen(erstesMal) {
   for (const n of S.neueAdventsereignisse()) meldungen.push(['advent', n]);
   // Wetter mit Folgen: einmal am Tag sagen, was heute gut geht
   const lage = C.WETTER_LAGEN[Z.tagesWetter().art];
-  if (lage && S.st.lernen >= 99 && S.einstieg('wetter') && S.st.wetterTag !== Z.tagesSchluessel()) {
+  if (lage && S.st.lernen >= 99 && S.einstieg('wetter') && !S.standZu() && S.st.wetterTag !== Z.tagesSchluessel()) {
     S.st.wetterTag = Z.tagesSchluessel();
     setTimeout(() => UI.toast(`${lage.name}! ${lage.text} (+${Math.round(lage.bonus * 100)} %)`, 'spezial'), 2600);
   }
@@ -278,6 +282,15 @@ function ankommen(erstesMal) {
   }
   // Heiligabend: das Finale, einmal je Saison (nach den Adventen)
   if (S.heiligabendFaellig()) meldungen.push(['heiligabend']);
+  // 24.12. tagsüber: ans Finale erinnern (29.10., Nutzerfrage: „bekommt der User einen Hinweis?“)
+  const dh = Z.jetzt();
+  if (Z.dezemberTag(dh) === 24 && dh.getHours() < C.HEILIGABEND_STUNDE && S.st.weihnachtMorgen === Z.saison() && !S.weihnachtMorgenFaellig() && Date.now() - abendErinnert > 30 * 60000) {
+    abendErinnert = Date.now();
+    setTimeout(() => UI.toast('Heute zwischen 17 und 22 Uhr wird es vor deinem Haus festlich - schau dann noch einmal vorbei!', 'spezial'), 2400);
+  }
+  // 2. bis 6. Januar: wie lange noch Gäste kommen (29.10.)
+  const pa = S.pauseAnsage();
+  if (pa) setTimeout(() => UI.toast(pa, 'spezial'), 3000);
   // Silvester: der Abschluss der Saison (11.10.)
   if (S.silvesterFaellig()) meldungen.push(['silvester']);
   const tueren = S.offeneTueren();
@@ -313,11 +326,17 @@ const fensterFrei = () => !UI.fensterOffen() && !UI.panelOffen() && !Lernen.paus
 /** Das nächste Ankommen-Fenster. `kette` = direkt nach dem vorigen (dann nur, solange die Welle nicht voll ist). */
 function zeigeNaechste(kette) {
   if (!warteschlange.length) return;
+  // 29.10.: Ein offenes Fenster nie ersetzen - ankommen() läuft beim Laden UND beim Sichtbarwerden,
+  // der zweite Lauf legte die Jury über das gerade aufgegangene Weihnachtsfenster. Der Rest kommt
+  // über den Sekundentakt, sobald es zu ist.
+  if (UI.fensterOffen()) return;
   fensterTakt();
   if (kette && welleZahl >= WELLE_MAX) return;   // Rest später (Sekundentakt)
   const m = warteschlange.shift();
   const weiter = () => setTimeout(() => zeigeNaechste(true), 60);
   if (m[0] === 'advent') zeigeAdvent(m[1], weiter);
+  else if (m[0] === 'weihnachtMorgen') { if (S.weihnachtMorgenFaellig()) zeigeWeihnachtsmorgen(weiter); else zeigeNaechste(kette); }
+  else if (m[0] === 'winterpause') { if (S.winterpauseFaellig()) zeigeWinterpause(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'heiligabend') { if (S.heiligabendFaellig()) zeigeHeiligabend(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'wettbewerb') { if (S.wettbewerbFaellig()) zeigeWettbewerb(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'juryAnsage') { if (S.juryAnsageFaellig()) zeigeJuryAnsage(weiter); else zeigeNaechste(kette); }
@@ -400,6 +419,7 @@ setInterval(() => {
   const k = Z.tagesSchluessel();
   if (k !== letzterTag) { letzterTag = k; ankommen(false); }
   // Heiligabend bricht an, während man spielt: warten, bis nichts offen ist
+  else if (S.weihnachtMorgenFaellig() && !UI.fensterOffen() && !UI.panelOffen()) zeigeWeihnachtsmorgen();
   else if (S.heiligabendFaellig() && !UI.fensterOffen() && !UI.panelOffen()) zeigeHeiligabend();
   // Jury und Silvester brechen an, während man spielt (11.10.)
   else if (S.wettbewerbFaellig() && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) zeigeWettbewerb();
