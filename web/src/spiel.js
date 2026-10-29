@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610291630';
-import * as Z from './zeit.js?v=202610291630';
-import { neueFarben } from './pixel.js?v=202610291630';
+import * as C from './config.js?v=202610291800';
+import * as Z from './zeit.js?v=202610291800';
+import { neueFarben } from './pixel.js?v=202610291800';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2228,7 +2228,7 @@ export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);
 /** Hat dieser Ort der Karte gerade Winterpause? */
 export const ortPause = (o) => winterpause() && !C.PAUSE_ORTE.includes(o.id);
 export const zuText = () => winterpause()
-  ? 'Winterpause - dein Stand hat bis zum nächsten Advent zu. Schmücken und einkaufen geht weiter!'
+  ? 'Pause - dein Stand hat bis zum nächsten Advent zu. Schmücken und einkaufen geht weiter!'
   : 'Heute ist Heiligabend - dein Stand hat zu. Ab morgen kommen wieder Gäste!';
 export function weihnachtMorgenFaellig() {
   const d = Z.jetzt(), h = d.getHours();
@@ -2243,8 +2243,8 @@ export function pauseAnsage() {
   if (st.lernen < 99 || DEMO || dt < C.SAISON_ENDE_TAG - 5 || dt >= C.SAISON_ENDE_TAG || st.pauseAnsage === Z.tagesSchluessel()) return null;
   st.pauseAnsage = Z.tagesSchluessel();
   const n = C.SAISON_ENDE_TAG - dt;
-  return n === 1 ? 'Heute ist der letzte Tag mit Gästen - ab morgen macht dein Stand Winterpause.'
-    : `Noch ${n} Tage kommen Gäste an deinen Stand - ab dem 7. Januar ist Winterpause.`;
+  return n === 1 ? 'Heute ist der letzte Tag mit Gästen - ab morgen macht dein Stand Pause.'
+    : `Noch ${n} Tage kommen Gäste an deinen Stand - ab dem 7. Januar macht er Pause.`;
 }
 export function heiligabendFaellig() {
   return st.lernen >= 99 && heiligabendJetzt() && st.heiligabend !== Z.saison();

@@ -1646,3 +1646,8 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 /* Karte: Orte in der Winterpause blass */
 #kartenOrte .ort.pause { opacity: 0.7; filter: grayscale(0.6); }
 .pause-leer { text-align: center; margin-top: calc(var(--px) * 10); }
+
+/* 29.10.: Barbarazweig groß, 1:1 in Spielpixeln */
+#modal .barbara-gross { display: block; margin: 0 auto calc(var(--px) * 3); box-sizing: content-box;
+  width: calc(var(--px) * 100); height: calc(var(--px) * 100); image-rendering: pixelated;
+  border: calc(var(--px) * 1) solid var(--holz); border-radius: calc(var(--px) * 1.5); }

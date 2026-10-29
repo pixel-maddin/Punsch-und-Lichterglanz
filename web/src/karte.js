@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610291630';
-import * as S from './spiel.js?v=202610291630';
-import * as Z from './zeit.js?v=202610291630';
-import * as FEIN from './fein.js?v=202610291630';
-import * as T from './ton.js?v=202610291630';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610291630';
+import * as C from './config.js?v=202610291800';
+import * as S from './spiel.js?v=202610291800';
+import * as Z from './zeit.js?v=202610291800';
+import * as FEIN from './fein.js?v=202610291800';
+import * as T from './ton.js?v=202610291800';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610291800';
 
 const $ = (s) => document.querySelector(s);
 
@@ -157,13 +157,13 @@ function baueSchilder(hervor) {
     }
     // Winterpause (29.10.): Minispiele, Markt, Wichtelwald und Baumschule tragen „Winterpause“ und sagen kurz Bescheid
     if (S.ortPause(o)) {
-      const zu = () => { T.spiele('klick'); S.hooks.toast(`${o.name}: Winterpause - im nächsten Advent wieder offen!`, 'hinweis'); };
+      const zu = () => { T.spiele('klick'); S.hooks.toast(`${o.name}: Pause - im nächsten Advent wieder offen!`, 'hinweis'); };
       const b = document.createElement('button');
       b.className = 'ort pause';
       const [sdx, sdy] = o.schild || [0, 0];
       b.style.left = `calc(var(--px) * ${o.x + sdx})`;
       b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy + vers()})`;
-      b.innerHTML = `${o.name}<small>Winterpause</small>`;
+      b.innerHTML = `${o.name}<small>Pause</small>`;
       b.onclick = zu;
       box.appendChild(b);
       const f = document.createElement('button');

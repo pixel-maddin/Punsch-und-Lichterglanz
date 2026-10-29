@@ -4,15 +4,15 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202610291630';
-import * as S from './spiel.js?v=202610291630';
-import * as T from './ton.js?v=202610291630';
-import * as Z from './zeit.js?v=202610291630';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610291630';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610291630';
-import { schriftBild } from './schrift.js?v=202610291630';
-import { fenster, karte } from './ui.js?v=202610291630';
-import { zeichneWelt } from './szene.js?v=202610291630';
+import * as C from './config.js?v=202610291800';
+import * as S from './spiel.js?v=202610291800';
+import * as T from './ton.js?v=202610291800';
+import * as Z from './zeit.js?v=202610291800';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202610291800';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202610291800';
+import { schriftBild } from './schrift.js?v=202610291800';
+import { fenster, karte } from './ui.js?v=202610291800';
+import { zeichneWelt } from './szene.js?v=202610291800';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -279,7 +279,7 @@ export function zeigeHeiligabend(danach) {
   T.spiele('spezial');
   T.spiele('glocken'); setTimeout(() => T.spiele('glocken'), 1300); setTimeout(() => T.spiele('glocken'), 2600);
   const bz = S.barbaraZustand();
-  const zweig = bz ? `<p>Und am Fenster ist dein Barbarazweig aufgeblüht - mit ${bz.blueten} Blüten.</p>` : '';
+  const zweig = bz ? `<p>Und am Fenster ist dein Barbarazweig aufgeblüht - mit ${bz.blueten} Blüten. Im Kalender kannst du ihn dir groß ansehen.</p>` : '';
   const spaet = !S.heiligabendAbend();   // 29.10.: das Finale am Haus nur 16-22 Uhr, sonst die stille Fassung
   const box = fenster(spaet ? 'Frohe Weihnachten!' : 'Heiligabend', `
     <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
@@ -463,7 +463,7 @@ export function zeigeWeihnachtsmorgen(danach) {
 function weihnachtsmorgen2(danach) {
   fenster('Wie geht es weiter?', `
     <p>Vom <b>25. Dezember bis zum 6. Januar</b> kommen wieder Gäste, und du kannst ganz normal weiterspielen.</p>
-    <p>Ab dem <b>7. Januar</b> macht dein Stand Winterpause: keine Gäste, keine Aufträge und keine Minispiele mehr. Dein Haus kannst du aber weiter schmücken, und mit übrigen Sternen kaufst du im Weihnachtsladen, im Supermarkt und im Baumarkt ein.</p>
+    <p>Ab dem <b>7. Januar</b> macht dein Stand Pause: keine Gäste, keine Aufträge und keine Minispiele mehr. Dein Haus kannst du aber weiter schmücken, und mit übrigen Sternen kaufst du im Weihnachtsladen, im Supermarkt und im Baumarkt ein.</p>
     <p>Wir sehen uns dann im nächsten Advent wieder! 😊</p>`,
   [{ text: 'Schöne Feiertage!', aktion: () => { if (danach) setTimeout(danach, 60); } }]);
   abdunkeln(true);
@@ -478,7 +478,7 @@ export function zeigeWinterpause(danach, merken = true) {
   if (merken) T.jingle();
   const box = fenster('Die Adventszeit ist vorbei', `
     ${hausLeinwand()}
-    <p>Dein Stand macht jetzt <b>Winterpause</b>: Es kommen keine Gäste mehr, und Aufträge, Minispiele, Wichtel und der Weihnachtsmarkt ruhen bis zum nächsten Advent.</p>
+    <p>Dein Stand macht jetzt <b>Pause</b>: Es kommen keine Gäste mehr, und Aufträge, Minispiele, Wichtel und der Weihnachtsmarkt ruhen bis zum nächsten Advent.</p>
     <p>Dein Haus bleibt so schön geschmückt, wie es ist. Umdekorieren kannst du jederzeit (Haus antippen), und mit übrigen Sternen kaufst du weiter im Weihnachtsladen, im Supermarkt und im Baumarkt ein.</p>
     <p>Danke fürs Mitspielen - wir sehen uns im nächsten Advent wieder! 😊</p>`,
   [
@@ -503,7 +503,7 @@ export function zeigeSilvester(danach) {
     <p>${neu ? `Das Dorf hat ${jahr} mit einem großen Feuerwerk begrüßt` : 'Das ganze Dorf steht draußen, Raketen steigen über die Dächer'} - und dein Haus leuchtet mittendrin.</p>
     <div class="abschied"></div>
     <p>Vielen Dank fürs Spielen! :)</p>
-    <p class="klein">Bis zum 6. Januar kommen noch Gäste, danach macht dein Stand Winterpause. Dein Haus bleibt so geschmückt, wie es ist, und im nächsten Advent geht es von vorne los - als Andenken an dieses Jahr bekommst du einen Stern, der im Menü bleibt.</p>`,
+    <p class="klein">Bis zum 6. Januar kommen noch Gäste, danach macht dein Stand Pause. Dein Haus bleibt so geschmückt, wie es ist, und im nächsten Advent geht es von vorne los - als Andenken an dieses Jahr bekommst du einen Stern, der im Menü bleibt.</p>`,
   [
     { text: 'Mein Advent', aktion: () => { setTimeout(() => zeigeRueckblick(danach), 60); } },
     { text: 'Weiter', neben: true, aktion: () => { if (danach) setTimeout(danach, 60); } },

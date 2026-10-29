@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610291630';
-import * as C from './config.js?v=202610291630';
-import * as S from './spiel.js?v=202610291630';
-import * as Z from './zeit.js?v=202610291630';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610291800';
+import * as C from './config.js?v=202610291800';
+import * as S from './spiel.js?v=202610291800';
+import * as Z from './zeit.js?v=202610291800';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -21,7 +21,7 @@ const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
  * Heiligabend ab 16 Uhr bis Mitternacht, und in der Winterpause ab dem 7. Januar.
  */
 function zuSchild(c, y0) {
-  const zeilen = S.winterpause() ? ['WINTERPAUSE', 'BIS ZUM', 'NÄCHSTEN ADVENT!'] : ['FROHE WEIHNACHTEN!', 'AB MORGEN', 'WIEDER GEÖFFNET'];
+  const zeilen = S.winterpause() ? ['PAUSE', 'BIS ZUM', 'NÄCHSTEN ADVENT!'] : ['FROHE WEIHNACHTEN!', 'AB MORGEN', 'WIEDER GEÖFFNET'];
   const bw = Math.max(...zeilen.map(textBreite)) + 12, bh = 30, bx = Math.round((C.B - bw) / 2), by = y0 + 11;
   r(c, bx + 8, y0, 1, by - y0, '#3a2414'); r(c, bx + bw - 9, y0, 1, by - y0, '#3a2414');
   r(c, bx, by, bw, bh, '#7a4e2a'); r(c, bx + 1, by + 1, bw - 2, bh - 2, '#8a5a30');

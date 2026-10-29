@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610291630';
-import * as Z from './zeit.js?v=202610291630';
-import * as S from './spiel.js?v=202610291630';
-import { FASSADEN } from './config.js?v=202610291630';
-import * as C from './config.js?v=202610291630';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610291800';
+import * as Z from './zeit.js?v=202610291800';
+import * as S from './spiel.js?v=202610291800';
+import { FASSADEN } from './config.js?v=202610291800';
+import * as C from './config.js?v=202610291800';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -870,6 +870,87 @@ export function barbaraZweig(c, x0, fuss, z, L, t) {
       p(c, px, py + 1, z.wachs > 0.4 ? '#8ab060' : '#6a8a4a');
       if (z.wachs > 0.7) p(c, px, py, '#f0e4e8');
     }
+  }
+}
+
+/**
+ * Der Barbarazweig groß (29.10., Nutzerfrage: „Ich gieße ihn und sehe ihn nur in der Minivorschau“):
+ * 100 x 100 Spielpixel, 1:1 neu gezeichnet. Fensterbank vor dem Fenster (Himmel nach Tageszeit,
+ * Schnee), Glasvase, verzweigter Kirschzweig. Jede Blüte ist einzeln da - so viele Knospen, wie
+ * `z.blueten` sagt (4 + gegossene Tage); an Heiligabend gehen sie als Kirschblüten auf.
+ */
+const ZWEIG_GROSS_AESTE = [
+  [[50, 60], [49, 40], [47, 22], [45, 10]],
+  [[49, 44], [38, 34], [30, 24]], [[38, 34], [34, 38], [27, 40]],
+  [[48, 32], [58, 22], [66, 14]], [[58, 22], [64, 26], [70, 27]],
+  [[50, 52], [60, 46], [68, 40]], [[60, 46], [64, 50]],
+  [[47, 22], [40, 16], [36, 8]],
+];
+const ZWEIG_GROSS_KNOSPEN = [[45, 10], [30, 24], [66, 14], [68, 40], [36, 8], [27, 40], [70, 27], [64, 50], [49, 37], [38, 33],
+  [58, 21], [60, 46], [47, 26], [34, 29], [62, 18], [55, 49], [41, 15], [31, 39], [65, 25], [44, 41], [53, 28], [46, 17], [64, 43], [35, 20]];
+export function barbaraGross(c, z, t = 0) {
+  const W = 100, H = 100;
+  const li = Z.licht(), schnee = Z.schnee() > 0;
+  // Wand und Fensteröffnung
+  r(c, 0, 0, W, H, '#e6d2ae');
+  for (let y = 0; y < H; y += 4) for (let x = (y / 4) % 2 ? 2 : 0; x < W; x += 4) p(c, x, y, '#dcc6a0');
+  const fx = 10, fy = 4, fw = 80, fh = 70;
+  for (let y = 0; y < fh; y++) r(c, fx, fy + y, fw, 1, mische(mische('#1a2448', '#8cb4dc', li.hell), '#e8a070', li.daemmer * 0.5 * (y / fh)));
+  if (li.hell < 0.5) for (let i = 0; i < 14; i++) p(c, fx + 3 + (i * 37) % (fw - 6), fy + 3 + (i * 23) % 34, i % 3 ? '#c8d4f0' : '#ffffff');
+  if (schnee) {
+    for (let i = 0; i < 18; i++) { const x = fx + 2 + (i * 29 + Math.floor(t * 9 + i * 3)) % (fw - 4), y = fy + 2 + ((i * 17 + Math.floor(t * 7)) % (fh - 10)); p(c, x, y, '#f4f8ff'); }
+    r(c, fx, fy + fh - 5, fw, 5, '#e8eef6'); r(c, fx, fy + fh - 5, fw, 1, '#ffffff');
+  }
+  // Fensterrahmen mit Kreuz
+  const holz = '#8a5a34', hell = '#a8784a';
+  r(c, fx - 3, fy - 3, fw + 6, 3, holz); r(c, fx - 3, fy - 3, fw + 6, 1, hell);
+  r(c, fx - 3, fy, 3, fh, holz); r(c, fx + fw, fy, 3, fh, holz);
+  r(c, fx + fw / 2 - 1, fy, 2, fh, holz); r(c, fx, fy + 30, fw, 2, holz); r(c, fx, fy + 30, fw, 1, hell);
+  // Fensterbank
+  r(c, 4, 74, W - 8, 6, '#9a6a3e'); r(c, 4, 74, W - 8, 1, '#c08a52'); r(c, 6, 80, W - 12, 2, '#6a4224');
+  // Zweig: Hauptast 2 Pixel dick, Seitenäste 1
+  const ast = '#4a2e22', astHell = '#6e4630';
+  ZWEIG_GROSS_AESTE.forEach((zw, ai) => {
+    for (let i = 1; i < zw.length; i++) {
+      const [ax, ay] = zw[i - 1], [bx, by] = zw[i];
+      const n = Math.max(Math.abs(bx - ax), Math.abs(by - ay));
+      for (let k = 0; k <= n; k++) {
+        const x = Math.round(ax + (bx - ax) * k / n), y = Math.round(ay + (by - ay) * k / n);
+        p(c, x, y, ast);
+        if (ai === 0 || (ai % 2 === 1 && i === 1)) { p(c, x + 1, y, ast); p(c, x - 1, y, astHell); }
+      }
+    }
+  });
+  // Knospen bzw. Blüten
+  const n = Math.min(z.blueten || 0, ZWEIG_GROSS_KNOSPEN.length);
+  for (let i = 0; i < n; i++) {
+    const [x, y] = ZWEIG_GROSS_KNOSPEN[i];
+    if (z.bluehen) {
+      const weiss = '#ffffff', schatten = '#f2d6e0';
+      r(c, x - 1, y - 1, 3, 3, weiss);
+      p(c, x, y - 2, weiss); p(c, x - 2, y, weiss); p(c, x + 2, y, schatten); p(c, x, y + 2, schatten); p(c, x + 1, y + 1, schatten);
+      p(c, x, y, '#ec7ea2'); p(c, x + 1, y - 1, '#f4d060');
+    } else if (z.wachs > 0.7) {
+      r(c, x, y - 1, 2, 3, '#7a9e52'); p(c, x, y - 1, '#f6e4ea'); p(c, x + 1, y - 1, '#f2c8d6'); p(c, x, y + 1, '#5a7a3a');
+    } else if (z.wachs > 0.35) {
+      r(c, x, y, 2, 2, '#6a8e48'); p(c, x, y, '#9ac06a');
+    } else {
+      p(c, x, y, '#6a8a4a'); p(c, x, y - 1, '#8ab060');
+    }
+  }
+  // Glasvase mit Wasser (vor dem Zweig)
+  const vx = 43, vy = 56, vw = 14, vh = 18;
+  r(c, vx + 1, vy, vw - 2, vh, '#c4e0ec'); r(c, vx, vy + 3, vw, vh - 4, '#c4e0ec');
+  r(c, vx, vy + 9, vw, vh - 10, '#7eaed0'); r(c, vx + 1, vy + vh - 1, vw - 2, 1, '#6a98bc');
+  r(c, vx + 1, vy + 9, vw - 2, 1, '#a8d0e8');
+  r(c, vx + 2, vy + 4, 1, 9, '#f2fafe');
+  r(c, vx + 1, vy, vw - 2, 1, '#e8f6fc');
+  for (let y = vy + 1; y < vy + vh; y++) { p(c, vx + (y < vy + 3 ? 1 : 0), y, '#8ab8d0'); p(c, vx + vw - (y < vy + 3 ? 2 : 1), y, '#8ab8d0'); }
+  // An Heiligabend eine Kerze daneben
+  if (z.bluehen) {
+    r(c, 66, 64, 4, 10, '#f4ece0'); r(c, 66, 64, 1, 10, '#ffffff'); r(c, 64, 73, 8, 1, '#c8a040');
+    const fl = Math.floor(t * 6) % 2;
+    p(c, 68, 62, '#ffd860'); p(c, 68, 61 - fl, '#fff4c0'); p(c, 67 + fl, 62, '#ffb030');
   }
 }
 
@@ -1989,9 +2070,9 @@ function goldstern(c, L, t, G) {
 // ---------------------------------------------------------------------------
 // Der Stand (klein, in der Welt)
 // ---------------------------------------------------------------------------
-/** Holzbrett mit zwei Zeilen Aufschrift, an zwei Schnüren unter der Markise, mitten vor den Töpfen (29.10.). */
+/** Holzbrett mit ein oder zwei Zeilen Aufschrift, an zwei Schnüren unter der Markise, mitten vor den Töpfen (29.10.). */
 function zuBrett(c, x0, G, zeilen, w) {
-  const bw = Math.max(...zeilen.map(textBreite)) + 7, bh = 15, bx = x0 + 24 - Math.round(bw / 2), by = G - 36;
+  const bw = Math.max(...zeilen.map(textBreite)) + 7, bh = 3 + zeilen.length * 6, bx = x0 + 24 - Math.round(bw / 2), by = G - 21 - bh;
   r(c, bx + 3, G - 43, 1, by - (G - 43), '#3a2414'); r(c, bx + bw - 4, G - 43, 1, by - (G - 43), '#3a2414');
   r(c, bx, by, bw, bh, '#7a4e2a'); r(c, bx, by, bw, 1, '#a0703e'); r(c, bx, by + bh - 1, bw, 1, '#4a2c16');
   r(c, bx, by, 1, bh, '#5a3a1e'); r(c, bx + bw - 1, by, 1, bh, '#5a3a1e');
@@ -2023,8 +2104,8 @@ function stand(c, G, w, t, L) {
   }
   // Pfosten (die Zuckerstangen stehen seit dem 29.09. im Vorgarten)
   for (const px of [x0, x1 - 2]) { r(c, px, markise, 2, G - 10 - markise, '#7a5230'); r(c, px, markise, 1, G - 10 - markise, '#94683e'); }
-  // Stand zu (29.10.): ein Brett vor Töpfen und Pfosten - Heiligabend „FROHES FEST“, sonst „WINTERPAUSE“
-  if (S.standZu()) zuBrett(c, x0, G, S.winterpause() ? ['WINTER', 'PAUSE'] : ['FROHES', 'FEST'], w);
+  // Stand zu (29.10.): ein Brett vor Töpfen und Pfosten - Heiligabend „FROHES FEST“, sonst „PAUSE“
+  if (S.standZu()) zuBrett(c, x0, G, S.winterpause() ? ['PAUSE'] : ['FROHES', 'FEST'], w);
   // Ausbaustufen des Stands: Holzdach, dann Laternen und Grün, dann Stern und Lichter
   const ausbau = S.zeigt('stand') ? S.stufe('stand') : 0;
   if (ausbau >= 1) {

@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610291630';
-import * as S from './spiel.js?v=202610291630';
-import * as Z from './zeit.js?v=202610291630';
-import * as T from './ton.js?v=202610291630';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291630';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610291630';
-import { zielHaus } from './fein.js?v=202610291630';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291630';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291630';
-import * as A from './auftraege.js?v=202610291630';
-import * as E from './erfolge.js?v=202610291630';
-import * as ZL from './ziele.js?v=202610291630';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291630';
-import * as KA from './karte.js?v=202610291630';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291630';
-import { barbaraZweig } from './szene.js?v=202610291630';
-import * as SW from './schneeball.js?v=202610291630';
-import * as LI from './lichtung.js?v=202610291630';
-import * as CB from './christbaum.js?v=202610291630';
-import * as SB from './schlitten.js?v=202610291630';
-import * as EB from './schlittschuh.js?v=202610291630';
-import * as BS from './backstube.js?v=202610291630';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291630';
+import * as C from './config.js?v=202610291800';
+import * as S from './spiel.js?v=202610291800';
+import * as Z from './zeit.js?v=202610291800';
+import * as T from './ton.js?v=202610291800';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291800';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610291800';
+import { zielHaus } from './fein.js?v=202610291800';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291800';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291800';
+import * as A from './auftraege.js?v=202610291800';
+import * as E from './erfolge.js?v=202610291800';
+import * as ZL from './ziele.js?v=202610291800';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291800';
+import * as KA from './karte.js?v=202610291800';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291800';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610291800';
+import * as SW from './schneeball.js?v=202610291800';
+import * as LI from './lichtung.js?v=202610291800';
+import * as CB from './christbaum.js?v=202610291800';
+import * as SB from './schlitten.js?v=202610291800';
+import * as EB from './schlittschuh.js?v=202610291800';
+import * as BS from './backstube.js?v=202610291800';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291800';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -109,7 +109,7 @@ export function zielLeiste() {
     $('#huelle').classList.add('mit-ziel');
     b.className = 'zu';
     b.innerHTML = zu === 'pause'
-      ? '<span class="nr">WINTERPAUSE</span><span class="was">Stand zu bis zum nächsten Advent</span><span class="los">Info ▸</span>'
+      ? '<span class="nr">PAUSE</span><span class="was">Stand zu bis zum nächsten Advent</span><span class="los">Info ▸</span>'
       : '<span class="nr">HEILIGABEND</span><span class="was">Keine Gäste mehr - ab morgen wieder</span>';
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
@@ -226,6 +226,17 @@ export function toast(text, art = 'normal') {
   if (!toastT) naechsterToast();
 }
 const TOAST_STAU = 3;
+let aktuellerToast = null;
+/** Geht ein Fenster auf, wartet eine gerade laufende Einblendung (außer kurzen Rückmeldungen), bis es zu ist. */
+function toastZurueckstellen() {
+  const n = aktuellerToast, e = $('#toast');
+  if (!n || n[1] === 'hinweis' || !e.classList.contains('zeigen')) return;
+  clearTimeout(toastT);
+  e.classList.remove('zeigen');
+  toastWarteschlange.unshift(n);
+  aktuellerToast = null;
+  toastT = setTimeout(naechsterToast, 400);
+}
 /** Fenster mit dem Verlauf. Öffnen heißt: alles gelesen. */
 function zeigeNachrichten() {
   const liste = nachrichten.slice().reverse();
@@ -251,7 +262,16 @@ function fliegeZumKnopf(e, eintrag) {
   }, 560);
 }
 function naechsterToast() {
+  // 29.10. (gemeldet: beim Fenster „Frohe Weihnachten!“ ploppten dahinter Einblendungen auf):
+  // Solange ein Fenster offen ist, warten sie. Kurze Rückmeldungen ('hinweis', etwa „reicht noch
+  // nicht“ beim Händler) gehören zum Fenster und kommen sofort.
+  if (toastWarteschlange.length && fensterOffen() && toastWarteschlange[0][1] !== 'hinweis') {
+    $('#toast').classList.remove('zeigen');
+    toastT = setTimeout(naechsterToast, 400);
+    return;
+  }
   const n = toastWarteschlange.shift();
+  aktuellerToast = n || null;
   const e = $('#toast');
   if (!n) { e.classList.remove('zeigen'); toastT = null; return; }
   e.classList.remove('fliegt'); e.style.removeProperty('--fx'); e.style.removeProperty('--fy');
@@ -277,6 +297,7 @@ export function fenster(titel, inhaltHtml, knoepfe = [{ text: 'Weiter' }]) {
   const m = $('#modal');
   m.innerHTML = '';
   m.classList.remove('dunkel', 'sofort');   // 29.10.: nur das Weihnachtsfenster dunkelt stärker ab
+  toastZurueckstellen();
   const box = el('div', 'box');
   box.appendChild(el('h2', null, titel));
   const inhalt = el('div', 'inhalt', inhaltHtml);
@@ -801,7 +822,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291630`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291800`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2400,19 +2421,19 @@ export function oeffneKalender() {
   // Barbarazweig (10.10.): ab dem 4.12. schneiden, dann täglich gießen
   const bz = S.barbaraZustand();
   if (bz || S.barbaraSchneidbar()) {
-    const bb = el('button', 'vorfreude barbara' + (S.barbaraSchneidbar() || S.barbaraGiessbar() ? ' bereit' : ''));
+    const bb = el('button', 'vorfreude barbara' + (S.barbaraSchneidbar() || S.barbaraGiessbar() || (bz && bz.bluehen && !S.st.barbara.angesehen) ? ' bereit' : ''));
     const zeile = !bz ? 'Heute ist Barbaratag! Schneide einen Kirschzweig - an Heiligabend blüht er.'
       : bz.bluehen ? `Er blüht! ${bz.blueten} Blüten - für jeden Tag, an dem du gegossen hast, eine mehr.`
-      : bz.heuteGegossen ? `Heute gegossen. Noch ${24 - Z.dezemberTag()} ${24 - Z.dezemberTag() === 1 ? 'Tag' : 'Tage'} bis Heiligabend.`
+      : bz.heuteGegossen ? `Heute gegossen. Noch ${24 - Z.dezemberTag()} ${24 - Z.dezemberTag() === 1 ? 'Tag' : 'Tage'} bis Heiligabend. Antippen zum Ansehen.`
       : 'Antippen zum Gießen - jeder Tag bringt eine Blüte mehr.';
     if (!bz && Z.dezemberTag() > C.BARBARA_TAG) bb.dataset.spaet = '1';
     bb.innerHTML = `<canvas class="vf-ico zweig" width="14" height="18"></canvas><b>Barbarazweig</b><small>${zeile}${!bz && Z.dezemberTag() > C.BARBARA_TAG ? ' Auch später geschnitten blüht er noch.' : ''}</small>`;
     barbaraZweig(bb.querySelector('canvas').getContext('2d'), 4, 18, bz || { blueten: 0, wachs: 0, bluehen: false }, null, 0);
+    // 29.10.: Antippen öffnet den Zweig groß - dort wird auch gegossen. Geschnitten wird wie bisher direkt.
     bb.onclick = () => {
-      if (S.barbaraSchneiden()) { T.spiele('greifen'); toast('Der Zweig steht jetzt am Fenster.', 'gut'); oeffneKalender(); return; }
-      if (S.barbaraGiessen()) { T.spiele('giessen'); toast('Gegossen - eine Knospe mehr.', 'gut'); oeffneKalender(); return; }
+      if (S.barbaraSchneiden()) { T.spiele('greifen'); oeffneKalender(); zeigeBarbara('Der Zweig steht jetzt am Fenster - gieß ihn jeden Tag!'); return; }
       T.spiele('klick');
-      if (bz && !bz.bluehen) toast('Heute hat er schon Wasser. Morgen wieder!', 'hinweis');
+      zeigeBarbara();
     };
     liste.appendChild(bb);
   }
@@ -2890,6 +2911,27 @@ export function waehleModus(fertig) {
     }
     schliesseFenster(); fertig(b.dataset.m);
   };
+}
+
+/**
+ * Der Barbarazweig groß (29.10., Nutzerwunsch): Bild in Spielpixeln, Stand und - wenn heute
+ * noch nicht - der Knopf zum Gießen. An Heiligabend blüht er; das erste Ansehen dann merkt
+ * `st.barbara.angesehen` (bis dahin pulsiert die Kachel).
+ */
+export function zeigeBarbara(meldung) {
+  const z = S.barbaraZustand();
+  if (!z) return;
+  if (z.bluehen) { S.st.barbara.angesehen = true; S.speichere(); }
+  const dt = Z.dezemberTag(), noch = 24 - dt;
+  const text = z.bluehen
+    ? `<p class="zeile-gross">Er blüht!</p><p>${z.blueten} Kirschblüten - für jeden Tag, an dem du ihn gegossen hast, eine mehr. Frohe Weihnachten! 😊</p>`
+    : `<p>${meldung ? `<b>${meldung}</b> ` : ''}${z.blueten} Knospen sitzen schon dran - jedes Gießen bringt eine mehr. An Heiligabend gehen sie alle auf.</p>
+       <p class="klein">Geschnitten am ${S.st.barbara.geschnitten}. Dezember · ${z.gegossen}-mal gegossen · ${noch === 1 ? 'morgen ist Heiligabend' : `noch ${noch} Tage bis Heiligabend`}${z.heuteGegossen ? ' · heute schon gegossen' : ''}</p>`;
+  const knoepfe = S.barbaraGiessbar() && !z.bluehen
+    ? [{ text: 'Später', neben: true }, { text: 'Gießen', aktion: () => { S.barbaraGiessen(); T.spiele('giessen'); setTimeout(() => { zeigeBarbara('Gegossen - eine Knospe mehr!'); if (offen === 'kalender') oeffneKalender(); }, 60); } }]
+    : [{ text: 'Schließen' }];
+  const box = fenster('Dein Barbarazweig', `<canvas class="barbara-gross" width="100" height="100"></canvas>${text}`, knoepfe);
+  barbaraGross(box.querySelector('canvas.barbara-gross').getContext('2d'), z, performance.now() / 1000);
 }
 
 /** „Morgen wartet …" (13.10.): was es morgen Neues gibt - ohne zu verraten, WAS genau aufgeht. */

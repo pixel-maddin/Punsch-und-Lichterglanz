@@ -296,7 +296,8 @@ Fällen echt.
   Fenster. Jeden Tag kann man ihn einmal gießen, die Knospen schwellen,
   und an Heiligabend blüht er auf: je gegossenem Tag eine Blüte mehr
   (4 bis 24). Wer nicht gießt oder später schneidet, verliert nichts,
-  er blüht trotzdem, nur kleiner.
+  er blüht trotzdem, nur kleiner. Antippen im Kalender zeigt ihn groß auf der
+  Fensterbank, mit jeder Knospe einzeln - dort wird auch gegossen.
 - **Heiligabend morgens** (ab 6 Uhr) wird beim ersten Öffnen der Bildschirm
   dunkel, die Weihnachtsmusik setzt ein, und ein großes Fenster mit dem
   eigenen Haus wünscht frohe Weihnachten. Es sagt auch, wie es weitergeht:
@@ -319,14 +320,14 @@ Fällen echt.
   kommt der Abschluss der Adventszeit: „Bis zum nächsten Jahr! Vielen Dank
   fürs Spielen!" (wer bis zum 6. Januar später spielt, bekommt ihn
   nachgereicht).
-- **Winterpause ab dem 7. Januar:** Bis zum 6. Januar geht alles ganz normal
+- **Pause ab dem 7. Januar:** Bis zum 6. Januar geht alles ganz normal
   weiter, vom 2. Januar an sagt das Spiel jeden Tag, wie lange noch. Danach
-  hat der Stand zu (Brett „WINTERPAUSE“, Schild in der Tresenansicht, oben
-  die Leiste „WINTERPAUSE · Info“): keine Gäste, Wichtel, Aufträge,
+  hat der Stand zu (Brett „PAUSE“, Schild in der Tresenansicht, oben
+  die Leiste „PAUSE · Info“): keine Gäste, Wichtel, Aufträge,
   Minispiele, Briefe, kein Markt und kein Nikolaus. Haus schmücken, Foto
   und Einkaufen im Weihnachtsladen, Supermarkt und Baumarkt gehen weiter.
   Beim ersten Öffnen erklärt es ein Fenster. Im September beginnt die neue
-  Saison. Wer in der Winterpause neu anfängt, startet automatisch seinen
+  Saison. Wer in der Pause neu anfängt, startet automatisch seinen
   eigenen Advent (ab 24. November).
 - **Wetter mit Folgen:** Jeder Tag hat sein Wetter, mit Temperatur an der
   Uhr. An Tagen mit **klirrender Kälte** (nur mit Schnee) wird Punsch öfter
