@@ -79,6 +79,8 @@ const STIL = {
   eis:    { verlauf: ['#ffffff', '#e8f6ff', '#a8d8f8', '#6aa8e0'] },
   gruen:  { verlauf: ['#e4ffd8', '#9aec8a', '#4ab84a', '#2a7a30'] },
   zucker: { streifen: ['#e8283a', '#fff8f4'] },
+  // 29.10.: für den Gruß auf dem Foto - breitere Streifen, das enge Muster flimmerte und war schwer zu lesen
+  zuckerBreit: { streifen: ['#d81c30', '#fff8f4'], breite: 3 },
 };
 const KONTUR = '#3a0c10', SCHATTEN = 'rgba(20,0,0,0.45)', SCHNEE = '#ffffff', SCHNEE2 = '#dcecfa';
 
@@ -134,7 +136,7 @@ export function schriftBild(text, stil = 'gold', k = 1) {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     if (m(x, y)) {
       let f;
-      if (S.streifen) f = S.streifen[Math.floor((x + y) / Math.max(2, k * 1.5)) % 2];
+      if (S.streifen) f = S.streifen[Math.floor((x + y) / (S.breite ? k * S.breite : Math.max(2, k * 1.5))) % 2];
       else {
         const t = Math.max(0, Math.min(0.999, (y - topY) / hoehe));
         f = S.verlauf[Math.floor(t * S.verlauf.length)];

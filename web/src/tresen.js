@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610291930';
-import * as C from './config.js?v=202610291930';
-import * as S from './spiel.js?v=202610291930';
-import * as Z from './zeit.js?v=202610291930';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610292030';
+import * as C from './config.js?v=202610292030';
+import * as S from './spiel.js?v=202610292030';
+import * as Z from './zeit.js?v=202610292030';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -549,7 +549,7 @@ function brett(c, y, t) {
   for (let i = 0; i < 3; i++) glas(c, gx + i * 9, gy + 3);
   glas(c, gx + 4, gy - 3); glas(c, gx + 13, gy - 3);
   // Spül-Wichtel (19.10.: ohne Balken - das neue Glas erscheint einfach)
-  if (S.hat('spuel') && !S.winterpause()) wichtelKlein(c, gx + 30, y + 17, t);
+  if (S.hat('spuel') && !S.standZu()) wichtelKlein(c, gx + 30, y + 17, t);   // 29.10.: Stand zu - Wichtel haben frei
 
   // Hand
   const n = S.handMax();

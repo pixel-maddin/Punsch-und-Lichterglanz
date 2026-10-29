@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610291930';
-import * as S from './spiel.js?v=202610291930';
-import * as Z from './zeit.js?v=202610291930';
-import * as FEIN from './fein.js?v=202610291930';
-import * as T from './ton.js?v=202610291930';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610291930';
+import * as C from './config.js?v=202610292030';
+import * as S from './spiel.js?v=202610292030';
+import * as Z from './zeit.js?v=202610292030';
+import * as FEIN from './fein.js?v=202610292030';
+import * as T from './ton.js?v=202610292030';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610292030';
 
 const $ = (s) => document.querySelector(s);
 
@@ -139,8 +139,13 @@ function baueSchilder(hervor) {
     box.appendChild(f);
   }
   // Stand zu (29.10.): oben ein Schild, warum fast alles grau ist
-  if (S.standZu()) box.appendChild(Object.assign(document.createElement('div'), { className: 'karte-hinweis',
-    textContent: S.winterpause() ? 'Pause bis zum nächsten Advent - Weihnachtsladen, Supermarkt und Baumarkt haben offen.' : 'Heute ist Heiligabend - alles hat zu. Morgen ist wieder alles offen!' }));
+  // Antippen blendet es für den Tag aus (29.10., Nutzerwunsch)
+  if (S.standZu() && S.st.karteHinweisWeg !== Z.tagesSchluessel()) {
+    const hw = Object.assign(document.createElement('button'), { className: 'karte-hinweis',
+      textContent: S.winterpause() ? 'Pause bis zum nächsten Advent - Weihnachtsladen, Supermarkt und Baumarkt haben offen.' : 'Heute ist Heiligabend - alles hat zu. Morgen ist wieder alles offen!' });
+    hw.onclick = () => { T.spiele('klick'); S.st.karteHinweisWeg = Z.tagesSchluessel(); S.speichere(); hw.remove(); };
+    box.appendChild(hw);
+  }
   const neu = S.st.neu || {};
   for (const o of ORTE) {
     // Noch nicht offen (seit 13.10. ein leerer Platz mit „?"-Schild): kein

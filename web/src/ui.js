@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610291930';
-import * as S from './spiel.js?v=202610291930';
-import * as Z from './zeit.js?v=202610291930';
-import * as T from './ton.js?v=202610291930';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291930';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610291930';
-import { zielHaus } from './fein.js?v=202610291930';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291930';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291930';
-import * as A from './auftraege.js?v=202610291930';
-import * as E from './erfolge.js?v=202610291930';
-import * as ZL from './ziele.js?v=202610291930';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291930';
-import * as KA from './karte.js?v=202610291930';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291930';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610291930';
-import * as SW from './schneeball.js?v=202610291930';
-import * as LI from './lichtung.js?v=202610291930';
-import * as CB from './christbaum.js?v=202610291930';
-import * as SB from './schlitten.js?v=202610291930';
-import * as EB from './schlittschuh.js?v=202610291930';
-import * as BS from './backstube.js?v=202610291930';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291930';
+import * as C from './config.js?v=202610292030';
+import * as S from './spiel.js?v=202610292030';
+import * as Z from './zeit.js?v=202610292030';
+import * as T from './ton.js?v=202610292030';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610292030';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610292030';
+import { zielHaus } from './fein.js?v=202610292030';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610292030';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610292030';
+import * as A from './auftraege.js?v=202610292030';
+import * as E from './erfolge.js?v=202610292030';
+import * as ZL from './ziele.js?v=202610292030';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610292030';
+import * as KA from './karte.js?v=202610292030';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610292030';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610292030';
+import * as SW from './schneeball.js?v=202610292030';
+import * as LI from './lichtung.js?v=202610292030';
+import * as CB from './christbaum.js?v=202610292030';
+import * as SB from './schlitten.js?v=202610292030';
+import * as EB from './schlittschuh.js?v=202610292030';
+import * as BS from './backstube.js?v=202610292030';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610292030';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -65,7 +65,7 @@ export function hud() {
   $('#uhr').textContent = u + ((Z.zeitVerstellt() || S.devAn()) && !S.DEMO ? ' ⚙' : '');
   // Eine Zahl nur für Belohnungen, die man abholen kann; neue Erfolge sind
   // nur ein Punkt (Betatest 2: „Aufträge 10" nach 20 Minuten)
-  const ab = S.winterpause() ? 0 : A.abholbar(), en = E.neuZahl() + (S.finaleBereit() ? 1 : 0);   // + goldenes Geschenk (Finale)
+  const ab = S.standZu() ? 0 : A.abholbar(), en = E.neuZahl() + (S.finaleBereit() ? 1 : 0);   // + goldenes Geschenk (Finale)
   const bA = $('#aufBadge'); bA.textContent = ab || ''; bA.classList.toggle('versteckt', ab === 0 && en === 0); bA.classList.toggle('punkt', ab === 0 && en > 0);
   $('#btnAuftraege').classList.toggle('lockt', ab > 0);
   const b = $('#kalBadge');
@@ -823,7 +823,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291930`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610292030`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2032,6 +2032,7 @@ export function oeffneAuftraege(reiter) {
   if (auftragReiter === 'album') return baueAlbum(liste);
   if (S.st.lernen < 99) { liste.appendChild(el('p', 'hinweis', 'Nach der Einführung gibt es hier jeden Tag drei Aufträge.')); return; }
   if (S.winterpause()) { liste.appendChild(el('p', 'hinweis pause-leer', 'Hier gibt es nichts mehr zu tun. Komm zur nächsten Adventszeit wieder vorbei! :)')); return; }   // 29.10.
+  if (S.heiligabendZu()) { liste.appendChild(el('p', 'hinweis pause-leer', 'Heute gibt es hier nichts mehr zu tun - feier schön Weihnachten! 😊 Morgen geht es weiter.')); return; }   // 29.10.
   // 28.10. (UI-Durchsicht, gemeldet „sehr viel los"): Ruf kompakt oben, dann HEUTE mit den drei Aufträgen,
   // dann was Gäste sich wünschen, zuletzt die Sammelstücke. Knöpfe nur, wenn man etwas tun kann;
   // Erledigtes schrumpft auf eine grüne Zeile; Schwierigkeit EINMAL (Farbstreifen + Wort).
@@ -3136,9 +3137,24 @@ function grussImHimmel(c, gruss, rand, bildB, stil) {
   let bild = schriftBild(t, stil, 2), s = [4, 3, 2].find((n) => bild.width * n <= maxB);
   if (!s) { bild = schriftBild(t, stil, 1); s = bild.width * 3 <= maxB ? 3 : 2; }
   const w = bild.width * s, h = bild.height * s;
+  const x = Math.round(rand + (bildB - w) / 2), y = rand + 22;
   c.save();
   c.imageSmoothingEnabled = false;
-  c.drawImage(bild, Math.round(rand + (bildB - w) / 2), rand + 22, w, h);
+  // 29.10. (gemeldet: rote und rot-weiße Schrift oft schlecht lesbar - Rot verschwindet im
+  // Nachthimmel, die weißen Streifen im hellen Taghimmel): dahinter ein weicher dunkler Schein,
+  // und um die dunkle Kontur ein heller Rand, je einen Schriftpixel breit
+  if (stil === 'rot' || stil === 'zuckerBreit') {
+    const sil = document.createElement('canvas');   // je Aufruf frisch (Safari)
+    sil.width = bild.width; sil.height = bild.height;
+    const sc = sil.getContext('2d');
+    sc.drawImage(bild, 0, 0);
+    sc.globalCompositeOperation = 'source-in'; sc.fillStyle = '#fff4e4'; sc.fillRect(0, 0, sil.width, sil.height);
+    c.shadowColor = 'rgba(8, 10, 34, 0.9)'; c.shadowBlur = 8 * s;
+    c.drawImage(sil, x, y, w, h);
+    c.shadowColor = 'transparent'; c.shadowBlur = 0;
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) c.drawImage(sil, x + dx * s, y + dy * s, w, h);
+  }
+  c.drawImage(bild, x, y, w, h);
   c.restore();
 }
 
@@ -3190,7 +3206,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   if (!festerGruss && !eigen.gruss && Z.phase() === 'weihnacht' && Z.jetzt().getMonth() === 11 && Z.jetzt().getDate() >= 27) gruss = 'Einen guten Rutsch!';
   const von = `${eigen.von || VON_VORGABE} ${S.st.name || 'uns'}`;
   const y0 = WG * SK + rand, mx = cv.width / 2, maxB = cv.width - 70;
-  grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'zucker', Schneeflocken: 'eis', Stechpalme: 'rot' }[R.name] || 'gold');
+  grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'zuckerBreit', Schneeflocken: 'eis', Stechpalme: 'rot' }[R.name] || 'gold');
   c.textAlign = 'center';
   kartenSchrift(c, von, mx, y0 + 54, 32, '', R.titel, R.umriss, maxB);
   if (heilig) {

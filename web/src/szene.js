@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610291930';
-import * as Z from './zeit.js?v=202610291930';
-import * as S from './spiel.js?v=202610291930';
-import { FASSADEN } from './config.js?v=202610291930';
-import * as C from './config.js?v=202610291930';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610292030';
+import * as Z from './zeit.js?v=202610292030';
+import * as S from './spiel.js?v=202610292030';
+import { FASSADEN } from './config.js?v=202610292030';
+import * as C from './config.js?v=202610292030';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2074,10 +2074,11 @@ function goldstern(c, L, t, G) {
 function zuBrett(c, x0, G, zeilen, w) {
   const bw = Math.max(...zeilen.map(textBreite)) + 7, bh = 3 + zeilen.length * 6, bx = x0 + 24 - Math.round(bw / 2), by = G - 21 - bh;
   r(c, bx + 3, G - 43, 1, by - (G - 43), '#3a2414'); r(c, bx + bw - 4, G - 43, 1, by - (G - 43), '#3a2414');
-  r(c, bx, by, bw, bh, '#7a4e2a'); r(c, bx, by, bw, 1, '#a0703e'); r(c, bx, by + bh - 1, bw, 1, '#4a2c16');
-  r(c, bx, by, 1, bh, '#5a3a1e'); r(c, bx + bw - 1, by, 1, bh, '#5a3a1e');
+  // 29.10.: helles Brett, dunkelrote Schrift - hell auf dunkel ging zwischen den Standlichtern unter
+  r(c, bx, by, bw, bh, '#f4e6c8'); r(c, bx, by, bw, 1, '#fffaf0'); r(c, bx, by + bh - 1, bw, 1, '#b8946a');
+  r(c, bx, by, 1, bh, '#8a6438'); r(c, bx + bw - 1, by, 1, bh, '#8a6438');
   if (w.schnee > 0) r(c, bx + 1, by - 1, bw - 2, 1, '#f6f9fc');
-  zeilen.forEach((z, i) => pixText(c, z, bx + Math.round((bw - textBreite(z)) / 2), by + 2 + i * 6, '#fff2d0', '#3a2010'));
+  zeilen.forEach((z, i) => pixText(c, z, bx + Math.round((bw - textBreite(z)) / 2), by + 2 + i * 6, '#a81c1c', ''));
 }
 function stand(c, G, w, t, L) {
   const x0 = 128, x1 = 176;
@@ -2095,7 +2096,7 @@ function stand(c, G, w, t, L) {
     if (Math.sin(t * 3 + i) > 0) p(c, tx + 3, G - 29 - (Math.floor(t * 2 + i) % 2), '#e8eef4');
   }
   // Wichtel, die schon mitarbeiten, schauen über den Tresen
-  const helfer = S.winterpause() ? [] : ['spuel', 'nachfuell', 'servier', 'crepe_w', 'kasse'].filter((id) => S.zeigt(id));   // 29.10.: Winterpause
+  const helfer = S.standZu() ? [] : ['spuel', 'nachfuell', 'servier', 'crepe_w', 'kasse'].filter((id) => S.zeigt(id));   // 29.10.: Winterpause
   helfer.forEach((id, i) => wichtelKlein(c, x0 + 10 + i * 8, G - 21, t, i));
   // Gemütliche Pause (du warst 5 Minuten nicht da): kleine „z" steigen auf
   if (helfer.length && S.wichtelRuhen()) for (let i = 0; i < 2; i++) {
@@ -2104,8 +2105,6 @@ function stand(c, G, w, t, L) {
   }
   // Pfosten (die Zuckerstangen stehen seit dem 29.09. im Vorgarten)
   for (const px of [x0, x1 - 2]) { r(c, px, markise, 2, G - 10 - markise, '#7a5230'); r(c, px, markise, 1, G - 10 - markise, '#94683e'); }
-  // Stand zu (29.10.): ein Brett vor Töpfen und Pfosten - Heiligabend „FROHES FEST“, sonst „PAUSE“
-  if (S.standZu()) zuBrett(c, x0, G, S.winterpause() ? ['PAUSE'] : ['FROHES', 'FEST'], w);
   // Ausbaustufen des Stands: Holzdach, dann Laternen und Grün, dann Stern und Lichter
   const ausbau = S.zeigt('stand') ? S.stufe('stand') : 0;
   if (ausbau >= 1) {
@@ -2792,6 +2791,9 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   stand(e, GW, w, t, L);
   if (S.zeigt('baenke')) baenke(e, L, GW, t, w, S.variante('baenke'));   // bis 11.10. gar nicht gezeichnet
   if (S.zeigt('m_herzen')) lebkuchenherzen(e, GW, t);
+  // Stand zu (29.10.): ein Brett vor Töpfen und Pfosten - Heiligabend „FROHES FEST“, sonst „PAUSE“.
+  // Erst nach Bänken und Stehtischen, sonst verdeckte ein Stehtisch den Anfang
+  if (S.standZu()) zuBrett(e, 128, GW, S.winterpause() ? ['PAUSE'] : ['FROHES FEST'], w);
   // Aus der Waldlichtung: Hasen und Reh vor dem Zaun, mit den Füßen gerade
   // auf dem Gehweg (der beginnt bei GW-12). Bis 11.10. bei GW-2 mitten auf
   // dem Gehweg, dann kurz bei GW-13 im Vorgarten - auf Wunsch 2 px tiefer.
