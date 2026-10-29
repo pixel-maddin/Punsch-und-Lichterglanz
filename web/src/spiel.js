@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610292200';
-import * as Z from './zeit.js?v=202610292200';
-import { neueFarben } from './pixel.js?v=202610292200';
+import * as C from './config.js?v=202610292230';
+import * as Z from './zeit.js?v=202610292230';
+import { neueFarben } from './pixel.js?v=202610292230';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1029,7 +1029,13 @@ export function tippeZelle(i) {
     }
     return;
   }
-  if (p.art === 'dose') { direktGeben(p, null); return; }
+  if (p.art === 'dose') {
+    if (!platzFuerEssen()) { hooks.ton('falsch'); lauf.wackel.hand = 0.3; return; }
+    hand.push({ art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit, ...neueGriffe(p) });
+    st.toepfe[p.id]--;
+    hooks.ton('greifen');
+    return;
+  }
   // Topf: braucht ein leeres Glas. Dann dauert das Zubereiten ein wenig.
   const glas = hand.findIndex((h) => h.art === 'glas');
   if (glas >= 0) hand[glas] = { art: 'voll', id: p.id, rest: p.zeit, dauer: p.zeit, ...neueGriffe(p) };
@@ -1143,34 +1149,9 @@ function selten(art, text) {
   z[art] = lauf.t; n[art] = (n[art] || 0) + 1;
   hooks.toast(text, 'hinweis');
 }
-/**
- * Lebkuchen (29.10., gemeldet: „irritiert, dass man sie wie Getränke servieren muss"): kein Tablett,
- * kein Zuckerguss. Ein Tipp auf die Dose gibt ihn dem Gast am Tresen, der ihn möchte (dem
- * ungeduldigsten), ein Tipp auf so einen Gast ebenso. Zählt als ganz normaler Verkauf von dir.
- */
-function direktGeben(p, g) {
-  if (!g) g = lauf.gaeste.filter((x) => x.am && !x.gehen && !x.bedient && x.wunsch === p.id)
-    .sort((a, b) => a.geduld - b.geduld)[0];
-  if (!g) {
-    lauf.wackel['z' + p.id] = 0.3; hooks.ton('falsch');
-    selten('direkt' + p.id, `Gerade möchte niemand am Tresen ${p.name} - schau auf die Bläschen.`);
-    return;
-  }
-  if ((st.toepfe[p.id] || 0) <= 0) {
-    lauf.wackel['z' + p.id] = 0.3; hooks.ton('falsch');
-    selten('leer' + p.id, stufe('nachfuell') ? `${p.name} ist leer - der Nachfüll-Wichtel ist schon unterwegs!` : `${p.name} ist leer - tippe ein paarmal auf die Dose, dann ist sie wieder voll.`);
-    return;
-  }
-  st.toepfe[p.id]--;
-  hooks.ton('greifen');
-  if (g.gross) return liefereGross(g, 1);
-  bediene(g, false, 1);
-}
-
 export function tippeGast(platz) {
   const g = lauf.gaeste.find((x) => x.platz === platz && x.am && !x.gehen);
   if (!g || g.bedient) return;
-  if (C.PRODUKT[g.wunsch].art === 'dose') { direktGeben(C.PRODUKT[g.wunsch], g); return; }
   // Zuerst das Glas, das ihm gehört (grüner Haken), sonst jedes passende fertige
   glaeserZuordnen();
   let i = lauf.hand.findIndex((h) => bereit(h) && h.id === g.wunsch && h.ziel === g.id);
@@ -1277,7 +1258,7 @@ function wichtelEinschenken(g) {
  */
 function wichtelGlas(g) {
   const p = C.PRODUKT[g.wunsch];
-  if (p.art !== 'topf' || (st.toepfe[p.id] || 0) <= 0) return false;   // Lebkuchen gibt er direkt (29.10.)
+  if (p.art === 'platte' || (st.toepfe[p.id] || 0) <= 0) return false;
   let i = lauf.hand.findIndex((h) => h.art === 'glas');
   if (i < 0) { if (lauf.hand.length >= handMax()) return false; i = lauf.hand.length; }
   st.toepfe[p.id]--;

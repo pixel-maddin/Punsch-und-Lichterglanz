@@ -22,10 +22,8 @@ allerdings nur ohne Offline-Teil, dafür braucht es HTTPS oder localhost.
 3. **Kurz warten**, bis das Glas voll ist - teure Getränke brauchen länger.
 4. **Servieren** - auf den Gast tippen. Je schneller, desto mehr Trinkgeld.
 5. **Leerer Topf** - ein paarmal antippen, dann ist er wieder voll.
-   **Lebkuchen** brauchen kein Glas: auf die Dose tippen, und der Gast, der
-   ihn möchte, bekommt ihn direkt.
 6. **Handgriffe** - fast jedes Getränk hat seinen eigenen: Zuckerstange
-   (Kinderpunsch), dreimal umrühren (Apfel), Sahne
+   (Kinderpunsch), dreimal umrühren (Apfel), Zuckerguss (Lebkuchen), Sahne
    (Schokolade), Sahne und Zimt (Herzwärmer), Milchschaum und Zimtstange
    (Zimtwolke), Zuckerhut anzünden (Feuerzauber). Das fertige Glas auf dem
    Tablett antippen - die goldene Blase zeigt, was fehlt. Dann zahlt der Gast

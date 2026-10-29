@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610292200';
-import * as S from './spiel.js?v=202610292200';
-import * as Z from './zeit.js?v=202610292200';
-import * as T from './ton.js?v=202610292200';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610292200';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610292200';
-import { zielHaus } from './fein.js?v=202610292200';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610292200';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610292200';
-import * as A from './auftraege.js?v=202610292200';
-import * as E from './erfolge.js?v=202610292200';
-import * as ZL from './ziele.js?v=202610292200';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610292200';
-import * as KA from './karte.js?v=202610292200';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610292200';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610292200';
-import * as SW from './schneeball.js?v=202610292200';
-import * as LI from './lichtung.js?v=202610292200';
-import * as CB from './christbaum.js?v=202610292200';
-import * as SB from './schlitten.js?v=202610292200';
-import * as EB from './schlittschuh.js?v=202610292200';
-import * as BS from './backstube.js?v=202610292200';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610292200';
+import * as C from './config.js?v=202610292230';
+import * as S from './spiel.js?v=202610292230';
+import * as Z from './zeit.js?v=202610292230';
+import * as T from './ton.js?v=202610292230';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610292230';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610292230';
+import { zielHaus } from './fein.js?v=202610292230';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610292230';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610292230';
+import * as A from './auftraege.js?v=202610292230';
+import * as E from './erfolge.js?v=202610292230';
+import * as ZL from './ziele.js?v=202610292230';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610292230';
+import * as KA from './karte.js?v=202610292230';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610292230';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610292230';
+import * as SW from './schneeball.js?v=202610292230';
+import * as LI from './lichtung.js?v=202610292230';
+import * as CB from './christbaum.js?v=202610292230';
+import * as SB from './schlitten.js?v=202610292230';
+import * as EB from './schlittschuh.js?v=202610292230';
+import * as BS from './backstube.js?v=202610292230';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610292230';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -823,7 +823,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610292200`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610292230`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2992,8 +2992,7 @@ export function zeigeHilfe() {
       <li><b>Glas holen</b> - links auf dem Tresen.</li>
       <li><b>Abfüllen</b> - unten auf das passende Getränk tippen. Das Bild im Bläschen des Gastes ist dasselbe wie unten.</li>
       <li><b>Servieren</b> - ist das Glas fertig, tragen Glas und Bläschen einen grünen Haken. Dann auf den Gast tippen. Je schneller, desto mehr Trinkgeld.</li>
-      <li><b>Lebkuchen</b> brauchen kein Glas: Tipp auf die Dose (oder auf den Gast), und er bekommt ihn direkt.</li>
-      <li><b>Handgriffe</b> - Zuckerstange, Umrühren, Sahne, Zimt, Milchschaum, Zuckerhut: das fertige Glas auf dem Tablett antippen (die goldene Blase zeigt, was fehlt). Den Crêpe wendest du unten auf seiner Kachel, sobald „Wenden!“ dasteht. Dann zahlt der Gast mehr, je nach Getränk 20 bis 50 %. Wichtel lassen sie weg.</li>
+      <li><b>Handgriffe</b> - Zuckerstange, Umrühren, Zuckerguss, Sahne, Zimt, Milchschaum, Zuckerhut: das fertige Glas (beim Lebkuchen den Lebkuchen) auf dem Tablett antippen (die goldene Blase zeigt, was fehlt). Den Crêpe wendest du unten auf seiner Kachel, sobald „Wenden!“ dasteht. Dann zahlt der Gast mehr, je nach Getränk 20 bis 50 %. Wichtel lassen sie weg.</li>
       <li><b>Leer?</b> Das Getränk unten ein paarmal antippen, dann ist es wieder voll.</li>
       <li><b>Zu langsam?</b> Nicht schlimm - dann geht der Gast eben weiter. Nur besondere Gäste solltest du nicht verpassen - wer das ist, merkst du schon.</li>
     </ol>

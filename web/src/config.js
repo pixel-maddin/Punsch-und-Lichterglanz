@@ -33,8 +33,7 @@ export const T_ZELLE_H = 22;   // halbe Höhe der Kachelreihe (19.10.: 27 → 22
 //       Teurere Getränke brauchen länger - sie bringen mehr, kosten aber
 //       Zeit am Tresen. (Crêpe: siehe CREPE_ZEIT, das Backen ist die Zeit.)
 // art: 'topf'   = Glas holen, abfüllen, Topf leert sich
-//      'dose'   = direkt übergeben: Tipp auf die Dose, und der Gast am Tresen, der ihn will,
-//                 bekommt ihn (29.10., vorher aufs Tablett wie ein Getränk - irritierte Tester)
+//      'dose'   = direkt greifen (kein Glas), Dose leert sich
 //      'platte' = backen lassen, dann greifen
 // alk: Kinder bestellen nur, was false ist. Seit 30.09. ist ALLES alkoholfrei
 //      (Nutzerwunsch, auch für den Play Store): fiktive Namen statt Glühwein,
@@ -49,7 +48,7 @@ export const PRODUKTE = [
   { id: 'gluehwein',    name: 'Sternenpunsch',    preis: 10, zeit: 0.4,  kosten: 0,     art: 'topf',   farbe: '#8a1830', alk: false },
   { id: 'kinderpunsch', name: 'Kinderpunsch',     preis: 12, zeit: 0.5,  kosten: 200,    art: 'topf',   farbe: '#ee6d9a', alk: false, griffe: ['zuckerstange'], bonus: 0.20 },
   { id: 'apfel',        name: 'Heißer Apfel',     preis: 14, zeit: 0.7,  kosten: 600,    art: 'topf',   farbe: '#e8942e', alk: false, griffe: ['ruehren'], bonus: 0.25 },
-  { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false },   // 29.10.: ohne Zuckerguss, wird direkt übergeben
+  { id: 'lebkuchen',    name: 'Lebkuchen',        preis: 15, zeit: 0.2,  kosten: 1500,   art: 'dose',   farbe: '#9a5a2a', alk: false, griffe: ['guss'], bonus: 0.25 },
   { id: 'schoko',       name: 'Heiße Schoki',      preis: 18, zeit: 1.0,  kosten: 3000,   art: 'topf',   farbe: '#6b3a22', alk: false, griffe: ['sahne'], bonus: 0.30 },
   { id: 'eierpunsch',   name: 'Herzwärmer',       preis: 19, zeit: 1.2,  kosten: 6000,  art: 'topf',   farbe: '#f3e38a', alk: false, griffe: ['sahne', 'zimtpulver'], bonus: 0.40 },
   { id: 'jaegertee',    name: 'Waldtee',          preis: 22, zeit: 1.4,  kosten: 12000,  art: 'topf',   farbe: '#3f7a3a', alk: false, griffe: ['beutel'], bonus: 0.40 },
@@ -68,6 +67,7 @@ export const PRODUKTE = [
 export const HANDGRIFF = {
   zuckerstange: { name: 'Zuckerstange', satz: 'eine Zuckerstange rein', n: 1 },
   ruehren:      { name: 'Umrühren',     satz: 'dreimal umrühren', n: 3 },
+  guss:         { name: 'Zuckerguss',   satz: 'Zuckerguss drauf', n: 1 },
   sahne:        { name: 'Sahne',        satz: 'Sahne drauf', n: 1 },
   zimtpulver:   { name: 'Zimt',         satz: 'Zimt darüberstreuen', n: 1 },
   schaum:       { name: 'Milchschaum',  satz: 'Milch aufschäumen (2-mal tippen)', n: 2 },
@@ -343,8 +343,8 @@ export const STAMM_BITTEN = {
     { art: 'mini', spiel: 'baum',
       text: 'Ich hab einen Witz über Tannenbäume, aber mir fehlt die Pointe. Verkauf mal ein paar Bäume - vielleicht kommt mir dabei was.',
       dank: 'Warum ist der Tannenbaum nie einsam? Er hat immer seine Zweige dabei. ... Ich arbeite noch dran.' },
-    { art: 'getraenk', p: 'lebkuchen', n: 6,
-      text: 'Ich muss einen Lebkuchenwitz am lebenden Objekt üben. Also, am Lebkuchen. Verkauf mal sechs Stück, dann hab ich Publikum.',
+    { art: 'getraenk', p: 'lebkuchen', n: 6, griff: true,
+      text: 'Ich muss einen Lebkuchenwitz am lebenden Objekt üben. Also, am Lebkuchen. Sechs Stück mit Zuckerguss, bitte.',
       dank: 'Was sagt der Lebkuchen zum Zuckerguss? ‚Ohne dich bin ich nur Kuchen.‘ ... Die Lebkuchen waren besser als der Witz.' },
     { art: 'gold', n: 4,
       text: 'Ich brauch Publikum. Gute Laune, volle Becher. Bedienst du ein paar goldene Gäste? Die lachen immer am lautesten.',
