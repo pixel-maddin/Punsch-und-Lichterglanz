@@ -20,12 +20,12 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-import * as Z from './zeit.js?v=202610291830';
+import * as Z from './zeit.js?v=202610291930';
 
 let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
-const url = (id) => `audio/${id}.m4a?v=202610291830`;
+const url = (id) => `audio/${id}.m4a?v=202610291930`;
 const HAUS = ['musik-haus', 'haus-jazz'];
 const XMAS = 'xmas';
 const KARTE_ALT = 'musik-karte';

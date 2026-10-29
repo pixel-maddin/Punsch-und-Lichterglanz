@@ -1653,3 +1653,10 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   border: calc(var(--px) * 1) solid var(--holz); border-radius: calc(var(--px) * 1.5); }
 /* 29.10. (Nutzer: dauerhaftes Pulsieren irritiert): Der Barbarazweig ist nur golden umrandet, wenn es etwas zu tun gibt - ohne Pulsieren */
 .vorfreude.barbara.bereit { animation: none; }
+
+/* 29.10.: Karte, wenn der Stand zu hat - Orte grauer, oben ein Schild mit dem Grund */
+#kartenOrte .ort.pause { opacity: 0.6; filter: grayscale(1); }
+#kartenOrte .karte-hinweis { position: absolute; left: 50%; transform: translateX(-50%); top: calc(var(--px) * 15); z-index: 2;
+  width: 66%; box-sizing: border-box; text-align: center; pointer-events: none;
+  background: rgba(28, 40, 80, 0.92); color: #fff6dc; border: calc(var(--px) * 0.6) solid #ffd860; border-radius: calc(var(--px) * 2);
+  padding: calc(var(--px) * 1.6) calc(var(--px) * 3); font-size: var(--t-klein); font-weight: 800; line-height: 1.3; }

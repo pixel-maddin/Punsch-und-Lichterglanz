@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610291830';
-import * as Z from './zeit.js?v=202610291830';
-import { neueFarben } from './pixel.js?v=202610291830';
+import * as C from './config.js?v=202610291930';
+import * as Z from './zeit.js?v=202610291930';
+import { neueFarben } from './pixel.js?v=202610291930';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1447,6 +1447,9 @@ export function update(dt) {
   }
 
   // Neue Gäste
+  // 29.10. (gemeldet: am 24.12. nach 16 Uhr kam Karl noch mit seinem Geschenk): Macht der Stand zu,
+  // gehen alle, die noch da sind - freundlich, ohne „verpasst"
+  if (standZu()) for (const g of G) if (!g.gehen && !g.bedient) gehe(g, true);
   lauf.spawnT -= dt;
   const unterwegs = wartende().length;
   if (lauf.spawnT <= 0) {
@@ -2225,8 +2228,8 @@ export const winterpause = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) >= C.SAI
 /** Heiligabend ab 16 Uhr bis Mitternacht: keine Gäste mehr. */
 export const heiligabendZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE;
 export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);
-/** Hat dieser Ort der Karte gerade Winterpause? */
-export const ortPause = (o) => winterpause() && !C.PAUSE_ORTE.includes(o.id);
+/** Hat dieser Ort der Karte gerade zu? Pause: alles außer PAUSE_ORTE. Heiligabend ab 16 Uhr: alles außer Zuhause (29.10.). */
+export const ortPause = (o) => (winterpause() && !C.PAUSE_ORTE.includes(o.id)) || (heiligabendZu() && o.id !== 'haus');
 export const zuText = () => winterpause()
   ? 'Pause - dein Stand hat bis zum nächsten Advent zu. Schmücken und einkaufen geht weiter!'
   : 'Heute ist Heiligabend - dein Stand hat zu. Ab morgen kommen wieder Gäste!';

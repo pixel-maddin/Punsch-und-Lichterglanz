@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610291830';
-import * as Z from './zeit.js?v=202610291830';
-import * as S from './spiel.js?v=202610291830';
-import { FASSADEN } from './config.js?v=202610291830';
-import * as C from './config.js?v=202610291830';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610291930';
+import * as Z from './zeit.js?v=202610291930';
+import * as S from './spiel.js?v=202610291930';
+import { FASSADEN } from './config.js?v=202610291930';
+import * as C from './config.js?v=202610291930';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
@@ -2270,13 +2270,14 @@ function stand(c, G, w, t, L) {
 // ---------------------------------------------------------------------------
 // Heiligabend (10.10.): Das Dorf steht mit Kerzen vor dem Haus und singt.
 // Feste Farben (neueFarben würfelt - die Leute flackerten sonst je Bild).
+// 29.10.: weiter rechts (x 42-73) - links standen Schneemann und Schneeballvorrat davor
 const SAENGER = [
-  { x: 7, typ: 'erwachsen', farben: { mantel: '#3a5a8a', hut: '#c83030', schal: '#f4f0e8', haut: '#f2c9a0', haar: '#5a3a22' } },
-  { x: 13, typ: 'kind', farben: { mantel: '#c84a3a', hut: '#2f7a3a', schal: '#f4f0e8', haut: '#e8b890', haar: '#3a2a1a' } },
-  { x: 19, typ: 'oma', farben: { mantel: '#6a4a8a', hut: '#c83030', schal: '#e8c030', haut: '#f2c9a0', haar: '#d8d8e0' } },
-  { x: 26, typ: 'opa', farben: { mantel: '#4a5a3a', hut: '#6a4a36', schal: '#c83030', haut: '#e8b890', haar: '#d8d8e0' } },
-  { x: 32, typ: 'kind', farben: { mantel: '#2f6a8a', hut: '#e8c030', schal: '#c83030', haut: '#c89070', haar: '#2a1a1a' } },
-  { x: 38, typ: 'erwachsen', farben: { mantel: '#8a3a4a', hut: '#f4f0e8', schal: '#2f7a3a', haut: '#6a4028', haar: '#1a1a1a', frau: true } },
+  { x: 42, typ: 'erwachsen', farben: { mantel: '#3a5a8a', hut: '#c83030', schal: '#f4f0e8', haut: '#f2c9a0', haar: '#5a3a22' } },
+  { x: 48, typ: 'kind', farben: { mantel: '#c84a3a', hut: '#2f7a3a', schal: '#f4f0e8', haut: '#e8b890', haar: '#3a2a1a' } },
+  { x: 54, typ: 'oma', farben: { mantel: '#6a4a8a', hut: '#c83030', schal: '#e8c030', haut: '#f2c9a0', haar: '#d8d8e0' } },
+  { x: 61, typ: 'opa', farben: { mantel: '#4a5a3a', hut: '#6a4a36', schal: '#c83030', haut: '#e8b890', haar: '#d8d8e0' } },
+  { x: 67, typ: 'kind', farben: { mantel: '#2f6a8a', hut: '#e8c030', schal: '#c83030', haut: '#c89070', haar: '#2a1a1a' } },
+  { x: 73, typ: 'erwachsen', farben: { mantel: '#8a3a4a', hut: '#f4f0e8', schal: '#2f7a3a', haut: '#6a4028', haar: '#1a1a1a', frau: true } },
 ];
 function saenger(c, L, fuss, t) {
   for (const g of SAENGER) {
@@ -2290,7 +2291,7 @@ function saenger(c, L, fuss, t) {
   }
   // Noten steigen auf
   for (let i = 0; i < 3; i++) {
-    const ph = (t * 0.35 + i / 3) % 1, nx = Math.round(10 + i * 11 + Math.sin(ph * 6 + i) * 3), ny = Math.round(fuss - 20 - ph * 22);
+    const ph = (t * 0.35 + i / 3) % 1, nx = Math.round(45 + i * 11 + Math.sin(ph * 6 + i) * 3), ny = Math.round(fuss - 20 - ph * 22);
     if (ph > 0.85) continue;
     const f = '#fff4d0';
     p(c, nx, ny + 2, f); p(c, nx + 1, ny + 2, f); r(c, nx + 1, ny - 1, 1, 3, f); p(c, nx + 2, ny - 1, f);

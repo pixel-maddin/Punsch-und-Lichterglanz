@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610291830';
-import * as S from './spiel.js?v=202610291830';
-import * as Z from './zeit.js?v=202610291830';
-import * as T from './ton.js?v=202610291830';
-import * as LI from './lichtung.js?v=202610291830';
-import * as CB from './christbaum.js?v=202610291830';
-import * as KA from './karte.js?v=202610291830';
-import * as SB from './schlitten.js?v=202610291830';
-import * as EB from './schlittschuh.js?v=202610291830';
-import * as BS from './backstube.js?v=202610291830';
-import * as UI from './ui.js?v=202610291830';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610291830';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610291830';
-import * as Kacheln from './kacheln.js?v=202610291830';
-import * as Lernen from './lernen.js?v=202610291830';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610291830';
-import * as A from './auftraege.js?v=202610291830';
-import * as E from './erfolge.js?v=202610291830';
-import * as ZL from './ziele.js?v=202610291830';
+import * as C from './config.js?v=202610291930';
+import * as S from './spiel.js?v=202610291930';
+import * as Z from './zeit.js?v=202610291930';
+import * as T from './ton.js?v=202610291930';
+import * as LI from './lichtung.js?v=202610291930';
+import * as CB from './christbaum.js?v=202610291930';
+import * as KA from './karte.js?v=202610291930';
+import * as SB from './schlitten.js?v=202610291930';
+import * as EB from './schlittschuh.js?v=202610291930';
+import * as BS from './backstube.js?v=202610291930';
+import * as UI from './ui.js?v=202610291930';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610291930';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610291930';
+import * as Kacheln from './kacheln.js?v=202610291930';
+import * as Lernen from './lernen.js?v=202610291930';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610291930';
+import * as A from './auftraege.js?v=202610291930';
+import * as E from './erfolge.js?v=202610291930';
+import * as ZL from './ziele.js?v=202610291930';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -435,7 +435,8 @@ setInterval(() => {
   // Neue Vogelart am Futterhaus (14.10.): Steckbrief
   else if (S.st.vogelNeu && S.st.vogelNeu.length && fensterFrei()) { UI.zeigeVogel(S.st.vogelNeu.shift()); S.speichere(); }
   // Geschichte eines Stammgastes (17.10.): großes Fenster, hält das Spiel an
-  else if (S.st.stammNeu && S.st.stammNeu.length && fensterFrei()) { const f = S.naechstesStammFenster(); if (f) UI.zeigeStamm(f); S.speichere(); }
+  // 29.10.: Stand zu - keine Stammgast-Fenster (das Geschenk wartet bis morgen)
+  else if (S.st.stammNeu && S.st.stammNeu.length && fensterFrei() && !S.standZu()) { const f = S.naechstesStammFenster(); if (f) UI.zeigeStamm(f); S.speichere(); }
   // erst nach einer Minute im Spiel - beim Ankommen kommen Kiste, Wetter und Briefe zuerst
   else if (miniNeu.length && S.lauf.t > 60 && fensterFrei()) { UI.zeigeMiniNeu(miniNeu.shift()); S.speichere(); }
   fensterTakt();

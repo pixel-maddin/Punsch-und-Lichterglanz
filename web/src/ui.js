@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610291830';
-import * as S from './spiel.js?v=202610291830';
-import * as Z from './zeit.js?v=202610291830';
-import * as T from './ton.js?v=202610291830';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291830';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610291830';
-import { zielHaus } from './fein.js?v=202610291830';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291830';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291830';
-import * as A from './auftraege.js?v=202610291830';
-import * as E from './erfolge.js?v=202610291830';
-import * as ZL from './ziele.js?v=202610291830';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291830';
-import * as KA from './karte.js?v=202610291830';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291830';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610291830';
-import * as SW from './schneeball.js?v=202610291830';
-import * as LI from './lichtung.js?v=202610291830';
-import * as CB from './christbaum.js?v=202610291830';
-import * as SB from './schlitten.js?v=202610291830';
-import * as EB from './schlittschuh.js?v=202610291830';
-import * as BS from './backstube.js?v=202610291830';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291830';
+import * as C from './config.js?v=202610291930';
+import * as S from './spiel.js?v=202610291930';
+import * as Z from './zeit.js?v=202610291930';
+import * as T from './ton.js?v=202610291930';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291930';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610291930';
+import { zielHaus } from './fein.js?v=202610291930';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291930';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291930';
+import * as A from './auftraege.js?v=202610291930';
+import * as E from './erfolge.js?v=202610291930';
+import * as ZL from './ziele.js?v=202610291930';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291930';
+import * as KA from './karte.js?v=202610291930';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291930';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610291930';
+import * as SW from './schneeball.js?v=202610291930';
+import * as LI from './lichtung.js?v=202610291930';
+import * as CB from './christbaum.js?v=202610291930';
+import * as SB from './schlitten.js?v=202610291930';
+import * as EB from './schlittschuh.js?v=202610291930';
+import * as BS from './backstube.js?v=202610291930';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291930';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -100,7 +100,8 @@ export function zielLeiste() {
   // stehen, während man längst 179 hatte (Betatest 02.10.)
   // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist kurz)
   // 29.10.: Hat der Stand zu (Heiligabend ab 16 Uhr, Winterpause), sagt die Leiste das - vor allem anderen
-  const zu = S.standZu() ? (S.winterpause() ? 'pause' : 'abend') : '';
+  // Heiligabend: nur bis man sie antippt (29.10., Nutzerwunsch) - gemerkt für den Tag
+  const zu = S.winterpause() ? 'pause' : S.heiligabendZu() && S.st.abendLeisteWeg !== Z.tagesSchluessel() ? 'abend' : '';
   if (zu) {
     leistenModus = 'zu';
     if (letztesZiel === 'zu|' + zu) return;
@@ -110,7 +111,7 @@ export function zielLeiste() {
     b.className = 'zu';
     b.innerHTML = zu === 'pause'
       ? '<span class="nr">PAUSE</span><span class="was">Stand zu bis zum nächsten Advent</span><span class="los">Info ▸</span>'
-      : '<span class="nr">HEILIGABEND</span><span class="was">Keine Gäste mehr - ab morgen wieder</span>';
+      : '<span class="nr">HEILIGABEND</span><span class="was">Keine Gäste mehr - ab morgen wieder</span><span class="los">✕</span>';
     $('#huelle').style.setProperty('--ziel-unten', (b.offsetTop + b.offsetHeight) + 'px');
     return;
   }
@@ -119,7 +120,7 @@ export function zielLeiste() {
   const zimt = !ansturm && !z ? S.zimtRest() : 0;
   const markt = !ansturm && !z && !zimt && S.marktHeute() && !S.marktBesucht();
   // Nach den Startzielen: das laufende nächste Ziel (13.10.)
-  const weiter = !ansturm && !z && !zimt && !markt && k && k.laufend ? k : null;
+  const weiter = !ansturm && !z && !zimt && !markt && !S.standZu() && k && k.laufend ? k : null;   // 29.10.: Läden zu - kein „Nächstes“
   leistenModus = ansturm ? 'ansturm' : z ? 'ziel' : zimt ? 'zimt' : markt ? 'markt' : weiter ? 'weiter' : '';
   const sig = ansturm ? `a|${ansturm}` : zimt ? `z|${zimt}` : markt ? 'markt'
     : weiter ? `w|${weiter.id}|${weiter.kosten}|${bereit}|${bereit ? '' : Math.floor(S.st.geld)}`
@@ -822,7 +823,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291830`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291930`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -3240,7 +3241,11 @@ export function verdrahte() {
     T.spiele('klick');
     if (leistenModus === 'ansturm' || leistenModus === 'zimt') return;   // jetzt servieren, nicht lesen
     if (leistenModus === 'markt') { oeffneKarte('festplatz'); return; }
-    if (leistenModus === 'zu') { if (S.winterpause()) zeigeWinterpause(null, false); else toast(S.zuText(), 'hinweis'); return; }
+    if (leistenModus === 'zu') {
+      if (S.winterpause()) zeigeWinterpause(null, false);
+      else { S.st.abendLeisteWeg = Z.tagesSchluessel(); S.speichere(); letztesZiel = null; zielLeiste(); }
+      return;
+    }
     const zl = leistenModus === 'ziel' && ZL.aktuell();
     if (zl && zl.oeffne === 'auftraege') { offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege('heute'); return; }
     offen === 'laden' ? schliesseBlatt() : oeffneLaden();

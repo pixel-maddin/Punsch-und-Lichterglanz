@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202610291830';
-import * as S from './spiel.js?v=202610291830';
-import * as Z from './zeit.js?v=202610291830';
-import * as FEIN from './fein.js?v=202610291830';
-import * as T from './ton.js?v=202610291830';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610291830';
+import * as C from './config.js?v=202610291930';
+import * as S from './spiel.js?v=202610291930';
+import * as Z from './zeit.js?v=202610291930';
+import * as FEIN from './fein.js?v=202610291930';
+import * as T from './ton.js?v=202610291930';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202610291930';
 
 const $ = (s) => document.querySelector(s);
 
@@ -138,6 +138,9 @@ function baueSchilder(hervor) {
     };
     box.appendChild(f);
   }
+  // Stand zu (29.10.): oben ein Schild, warum fast alles grau ist
+  if (S.standZu()) box.appendChild(Object.assign(document.createElement('div'), { className: 'karte-hinweis',
+    textContent: S.winterpause() ? 'Pause bis zum nächsten Advent - Weihnachtsladen, Supermarkt und Baumarkt haben offen.' : 'Heute ist Heiligabend - alles hat zu. Morgen ist wieder alles offen!' }));
   const neu = S.st.neu || {};
   for (const o of ORTE) {
     // Noch nicht offen (seit 13.10. ein leerer Platz mit „?"-Schild): kein
@@ -157,13 +160,14 @@ function baueSchilder(hervor) {
     }
     // Winterpause (29.10.): Minispiele, Markt, Wichtelwald und Baumschule tragen „Winterpause“ und sagen kurz Bescheid
     if (S.ortPause(o)) {
-      const zu = () => { T.spiele('klick'); S.hooks.toast(`${o.name}: Pause - im nächsten Advent wieder offen!`, 'hinweis'); };
+      const abend = S.heiligabendZu();
+      const zu = () => { T.spiele('klick'); S.hooks.toast(abend ? `Heute ist Heiligabend - ${o.name} hat zu. Morgen ist wieder alles offen!` : `${o.name}: Pause - im nächsten Advent wieder offen!`, 'hinweis'); };
       const b = document.createElement('button');
       b.className = 'ort pause';
       const [sdx, sdy] = o.schild || [0, 0];
       b.style.left = `calc(var(--px) * ${o.x + sdx})`;
       b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy + vers()})`;
-      b.innerHTML = `${o.name}<small>Pause</small>`;
+      b.innerHTML = `${o.name}<small>${abend ? 'morgen wieder' : 'Pause'}</small>`;
       b.onclick = zu;
       box.appendChild(b);
       const f = document.createElement('button');
@@ -1091,7 +1095,7 @@ function zeichne(t, dt) {
   const imNebel = (q) => zu.some((o) => Math.abs(q.x - o.x) < 20 && q.y > yPx(o) - 32 && q.y < yPx(o) + 6);
   const lichterOffen = zu.length ? grundLichter.filter((q) => !imNebel(q)) : grundLichter;
   // Nachts dunkler, dann leuchten Fenster, Laternen und Lichterketten
-  nachtLichter(li, C.B, H, lichterOffen, ORTE.filter((o) => !zu.includes(o)), winter);
+  nachtLichter(li, C.B, H, lichterOffen, ORTE.filter((o) => !zu.includes(o) && !S.ortPause(o)), winter);   // 29.10.: geschlossene Orte ohne Lichthof
   // Gemütlich (10.10.): Jeder Ort hat nachts einen warmen Lichthof, der sanft
   // atmet, und die Schilder glühen (CSS-Klasse .nacht) - man sieht sofort,
   // wohin man tippen kann
@@ -1121,6 +1125,14 @@ function zeichne(t, dt) {
       if (zu.includes(o) || o.id === hervorId) continue;   // ein hervorgehobener Ort hat sein Schild
       // Direkt unter dem Ort - nicht am Schild (die Backstube hat ihr Schild daneben)
       const px2 = Math.round(o.x), py2 = Math.round(yPx(o) + 6);
+      // Hat der Ort gerade zu (Heiligabend-Abend, Pause): grauer Punkt ohne Schein (29.10.)
+      if (S.ortPause(o)) {
+        const rand = '#4a4a50', kern = '#9a9aa2';
+        r(c, px2 - 1, py2 - 3, 3, 1, rand); r(c, px2 - 1, py2 + 3, 3, 1, rand); r(c, px2 - 3, py2 - 1, 1, 3, rand); r(c, px2 + 3, py2 - 1, 1, 3, rand);
+        p(c, px2 - 2, py2 - 2, rand); p(c, px2 + 2, py2 - 2, rand); p(c, px2 - 2, py2 + 2, rand); p(c, px2 + 2, py2 + 2, rand);
+        r(c, px2 - 1, py2 - 2, 3, 5, kern); r(c, px2 - 2, py2 - 1, 5, 3, kern);
+        continue;
+      }
       const neu = o.spiel && !S.miniRekord(o.spiel);
       const atem = 0.75 + Math.sin(t * 2.2 + o.x * 0.3) * 0.25;
       const rgb = neu ? '255,110,90' : '255,214,110';
@@ -1147,7 +1159,7 @@ function zeichne(t, dt) {
 function specialGlitzer(t, zu) {
   const name = S.specialHeute();
   const o = name && ORTE.find((q) => q.spiel === name);
-  if (!o || zu.includes(o)) return;
+  if (!o || zu.includes(o) || S.ortPause(o)) return;   // 29.10.: kein Glanz, wenn der Ort zu hat
   const ox = o.x, oy = yPx(o) - 8, atem = 0.75 + Math.sin(t * 2.4) * 0.25;
   const g = c.createRadialGradient(ox, oy, 2, ox, oy, 22);
   g.addColorStop(0, `rgba(255,214,90,${(0.42 * atem).toFixed(3)})`); g.addColorStop(1, 'rgba(255,200,60,0)');
