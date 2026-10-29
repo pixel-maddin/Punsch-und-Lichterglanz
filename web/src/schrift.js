@@ -79,8 +79,6 @@ const STIL = {
   eis:    { verlauf: ['#ffffff', '#e8f6ff', '#a8d8f8', '#6aa8e0'] },
   gruen:  { verlauf: ['#e4ffd8', '#9aec8a', '#4ab84a', '#2a7a30'] },
   zucker: { streifen: ['#e8283a', '#fff8f4'] },
-  // 29.10.: für den Gruß auf dem Foto - breitere Streifen, das enge Muster flimmerte und war schwer zu lesen
-  zuckerBreit: { streifen: ['#d81c30', '#fff8f4'], breite: 3 },
 };
 const KONTUR = '#3a0c10', SCHATTEN = 'rgba(20,0,0,0.45)', SCHNEE = '#ffffff', SCHNEE2 = '#dcecfa';
 

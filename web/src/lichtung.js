@@ -11,12 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202610292030';
-import * as Z from './zeit.js?v=202610292030';
-import * as T from './ton.js?v=202610292030';
-import * as MH from './minihud.js?v=202610292030';
-import * as L from './licht.js?v=202610292030';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610292030';
+import * as C from './config.js?v=202610292100';
+import * as Z from './zeit.js?v=202610292100';
+import * as T from './ton.js?v=202610292100';
+import * as MH from './minihud.js?v=202610292100';
+import * as L from './licht.js?v=202610292100';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202610292100';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;

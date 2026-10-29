@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610292030';
-import * as S from './spiel.js?v=202610292030';
-import * as Z from './zeit.js?v=202610292030';
-import * as T from './ton.js?v=202610292030';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610292030';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610292030';
-import { zielHaus } from './fein.js?v=202610292030';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610292030';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610292030';
-import * as A from './auftraege.js?v=202610292030';
-import * as E from './erfolge.js?v=202610292030';
-import * as ZL from './ziele.js?v=202610292030';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610292030';
-import * as KA from './karte.js?v=202610292030';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610292030';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610292030';
-import * as SW from './schneeball.js?v=202610292030';
-import * as LI from './lichtung.js?v=202610292030';
-import * as CB from './christbaum.js?v=202610292030';
-import * as SB from './schlitten.js?v=202610292030';
-import * as EB from './schlittschuh.js?v=202610292030';
-import * as BS from './backstube.js?v=202610292030';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610292030';
+import * as C from './config.js?v=202610292100';
+import * as S from './spiel.js?v=202610292100';
+import * as Z from './zeit.js?v=202610292100';
+import * as T from './ton.js?v=202610292100';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610292100';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610292100';
+import { zielHaus } from './fein.js?v=202610292100';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610292100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610292100';
+import * as A from './auftraege.js?v=202610292100';
+import * as E from './erfolge.js?v=202610292100';
+import * as ZL from './ziele.js?v=202610292100';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610292100';
+import * as KA from './karte.js?v=202610292100';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610292100';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610292100';
+import * as SW from './schneeball.js?v=202610292100';
+import * as LI from './lichtung.js?v=202610292100';
+import * as CB from './christbaum.js?v=202610292100';
+import * as SB from './schlitten.js?v=202610292100';
+import * as EB from './schlittschuh.js?v=202610292100';
+import * as BS from './backstube.js?v=202610292100';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610292100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -823,7 +823,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610292030`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610292100`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -3143,7 +3143,7 @@ function grussImHimmel(c, gruss, rand, bildB, stil) {
   // 29.10. (gemeldet: rote und rot-weiße Schrift oft schlecht lesbar - Rot verschwindet im
   // Nachthimmel, die weißen Streifen im hellen Taghimmel): dahinter ein weicher dunkler Schein,
   // und um die dunkle Kontur ein heller Rand, je einen Schriftpixel breit
-  if (stil === 'rot' || stil === 'zuckerBreit') {
+  if (stil === 'rot') {
     const sil = document.createElement('canvas');   // je Aufruf frisch (Safari)
     sil.width = bild.width; sil.height = bild.height;
     const sc = sil.getContext('2d');
@@ -3176,7 +3176,7 @@ function kartenText(nr, ohneLeute, gruss) {
 }
 
 export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
-  T.spiele('klick');
+  // 29.10.: kein eigener Klick mehr - der Knopf im Fenster klickt schon (bei „Andere Karte“ kam er doppelt)
   const WG = 176, SK = 4;
   const welt = document.createElement('canvas');
   welt.width = 180; welt.height = WG;
@@ -3206,7 +3206,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   if (!festerGruss && !eigen.gruss && Z.phase() === 'weihnacht' && Z.jetzt().getMonth() === 11 && Z.jetzt().getDate() >= 27) gruss = 'Einen guten Rutsch!';
   const von = `${eigen.von || VON_VORGABE} ${S.st.name || 'uns'}`;
   const y0 = WG * SK + rand, mx = cv.width / 2, maxB = cv.width - 70;
-  grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'zuckerBreit', Schneeflocken: 'eis', Stechpalme: 'rot' }[R.name] || 'gold');
+  grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'rot', Schneeflocken: 'eis', Stechpalme: 'rot' }[R.name] || 'gold');   // 29.10.: keine rot-weiße Schrift mehr (Nutzerwunsch)
   c.textAlign = 'center';
   kartenSchrift(c, von, mx, y0 + 54, 32, '', R.titel, R.umriss, maxB);
   if (heilig) {
@@ -3272,7 +3272,7 @@ export function verdrahte() {
   $('#miniZu').onclick = () => { T.spiele('klick'); C.MINI_SPECIAL.laeuft = null; LI.schliesse(); CB.schliesse(); SB.schliesse(); SW.schliesse(); EB.schliesse(); BS.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
-  $('#btnKarte').onclick = () => karte();
+  $('#btnKarte').onclick = () => { T.spiele('klick'); karte(); };
   $('#btnMenue').onclick = () => { T.spiele('klick'); offen === 'menue' ? schliesseBlatt() : oeffneMenue(); };
   $('#blattZu').onclick = () => { T.spiele('klick'); schliesseBlatt(); };
 }
