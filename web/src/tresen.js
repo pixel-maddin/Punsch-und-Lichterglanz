@@ -9,16 +9,16 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610291500';
-import * as C from './config.js?v=202610291500';
-import * as S from './spiel.js?v=202610291500';
-import * as Z from './zeit.js?v=202610291500';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610291630';
+import * as C from './config.js?v=202610291630';
+import * as S from './spiel.js?v=202610291630';
+import * as Z from './zeit.js?v=202610291630';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
 /**
  * Stand zu (29.10.): großes Schild in der Gästezone, damit niemand denkt, das Spiel hängt.
- * Heiligabend ab 17 Uhr bis Mitternacht, und in der Winterpause ab dem 7. Januar.
+ * Heiligabend ab 16 Uhr bis Mitternacht, und in der Winterpause ab dem 7. Januar.
  */
 function zuSchild(c, y0) {
   const zeilen = S.winterpause() ? ['WINTERPAUSE', 'BIS ZUM', 'NÄCHSTEN ADVENT!'] : ['FROHE WEIHNACHTEN!', 'AB MORGEN', 'WIEDER GEÖFFNET'];

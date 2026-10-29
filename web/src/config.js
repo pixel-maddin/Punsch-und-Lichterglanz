@@ -753,7 +753,7 @@ export const BARBARA_BLUETEN_MAX = 24;
 // Heiligabend (10.10.): ab dieser Stunde läuft das Finale. Seit 29.10. kommen dann auch keine
 // Gäste mehr (bis Mitternacht), und das Finale am Haus (Sänger, Glocken, Kirche hell) gibt es
 // nur bis HEILIGABEND_BIS - wer später kommt, bekommt die stille Fassung „Frohe Weihnachten!".
-export const HEILIGABEND_STUNDE = 17;
+export const HEILIGABEND_STUNDE = 16;   // 29.10.: 16 statt 17 Uhr (Nutzerwunsch)
 export const HEILIGABEND_BIS = 22;
 export const WEIHNACHT_MORGEN = 6;    // ab dann am 24.12. das Fenster „Frohe Weihnachten!" und die Xmas-Musik
 // Winterpause (29.10.): ab diesem Dezembertag (38 = 7. Januar) bis zur neuen Saison im September

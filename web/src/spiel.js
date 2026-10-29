@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610291500';
-import * as Z from './zeit.js?v=202610291500';
-import { neueFarben } from './pixel.js?v=202610291500';
+import * as C from './config.js?v=202610291630';
+import * as Z from './zeit.js?v=202610291630';
+import { neueFarben } from './pixel.js?v=202610291630';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -801,7 +801,7 @@ function waehleTyp(erlaubeSpezial) {
 }
 
 export function neuerGast(typ, gross) {
-  if (standZu()) return null;   // 29.10.: Heiligabend ab 17 Uhr und Winterpause
+  if (standZu()) return null;   // 29.10.: Heiligabend ab 16 Uhr und Winterpause
   typ = typ || waehleTyp(true);
   const wunsch = gross ? gross.id : wunschFuer(typ);
   if (!wunsch) return null;
@@ -2070,7 +2070,7 @@ export function offlineAbrechnen() {
   const weg = (Date.now() - st.zuletzt) / 1000;
   if (weg < C.OFFLINE_AB) return null;
   let sek = Math.min(weg, offlineStunden() * 3600);
-  // 29.10.: Heiligabend ab 17 Uhr und in der Winterpause hat der Stand zu - diese Zeit zählt nicht
+  // 29.10.: Heiligabend ab 16 Uhr und in der Winterpause hat der Stand zu - diese Zeit zählt nicht
   const jetztMs = Z.jetzt().getTime(), SCHRITT = 300;
   let zu = 0;
   for (let s = SCHRITT / 2; s < sek; s += SCHRITT) if (standZu(new Date(jetztMs - s * 1000))) zu += SCHRITT;
@@ -2218,11 +2218,11 @@ export function heiligabendAbend(d = Z.jetzt()) {
 // ---------------------------------------------------------------------------
 // Heiligabend-Morgen, Stand zu, Winterpause (29.10., Nutzerwunsch: „den Tag mehr zelebrieren“
 // und ein klares Ende der Saison). Ablauf: 24.12. ab 6 Uhr das Fenster „Frohe Weihnachten!“ (mit
-// dem eigenen Haus, Weihnachtsmusik), Gäste bis 17 Uhr, 17-22 Uhr das Finale am Haus. Vom 25.12.
+// dem eigenen Haus, Weihnachtsmusik), Gäste bis 16 Uhr, 16-22 Uhr das Finale am Haus. Vom 25.12.
 // bis 6.1. ganz normal. Ab 7.1. Winterpause bis zur neuen Saison: nur schmücken und einkaufen.
 // ---------------------------------------------------------------------------
 export const winterpause = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) >= C.SAISON_ENDE_TAG;
-/** Heiligabend ab 17 Uhr bis Mitternacht: keine Gäste mehr. */
+/** Heiligabend ab 16 Uhr bis Mitternacht: keine Gäste mehr. */
 export const heiligabendZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE;
 export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);
 /** Hat dieser Ort der Karte gerade Winterpause? */

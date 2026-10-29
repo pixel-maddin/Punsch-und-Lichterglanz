@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610291500';
-import * as S from './spiel.js?v=202610291500';
-import * as Z from './zeit.js?v=202610291500';
-import * as T from './ton.js?v=202610291500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291500';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610291500';
-import { zielHaus } from './fein.js?v=202610291500';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291500';
-import * as A from './auftraege.js?v=202610291500';
-import * as E from './erfolge.js?v=202610291500';
-import * as ZL from './ziele.js?v=202610291500';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291500';
-import * as KA from './karte.js?v=202610291500';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291500';
-import { barbaraZweig } from './szene.js?v=202610291500';
-import * as SW from './schneeball.js?v=202610291500';
-import * as LI from './lichtung.js?v=202610291500';
-import * as CB from './christbaum.js?v=202610291500';
-import * as SB from './schlitten.js?v=202610291500';
-import * as EB from './schlittschuh.js?v=202610291500';
-import * as BS from './backstube.js?v=202610291500';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291500';
+import * as C from './config.js?v=202610291630';
+import * as S from './spiel.js?v=202610291630';
+import * as Z from './zeit.js?v=202610291630';
+import * as T from './ton.js?v=202610291630';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610291630';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610291630';
+import { zielHaus } from './fein.js?v=202610291630';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610291630';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610291630';
+import * as A from './auftraege.js?v=202610291630';
+import * as E from './erfolge.js?v=202610291630';
+import * as ZL from './ziele.js?v=202610291630';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610291630';
+import * as KA from './karte.js?v=202610291630';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610291630';
+import { barbaraZweig } from './szene.js?v=202610291630';
+import * as SW from './schneeball.js?v=202610291630';
+import * as LI from './lichtung.js?v=202610291630';
+import * as CB from './christbaum.js?v=202610291630';
+import * as SB from './schlitten.js?v=202610291630';
+import * as EB from './schlittschuh.js?v=202610291630';
+import * as BS from './backstube.js?v=202610291630';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610291630';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -99,7 +99,7 @@ export function zielLeiste() {
   // Der Kontostand gehört in die Signatur: „noch 186 Sterne" blieb sonst
   // stehen, während man längst 179 hatte (Betatest 02.10.)
   // Dieselbe Leiste trägt seit 03.10. auch den Tagesansturm (Vorrang, er ist kurz)
-  // 29.10.: Hat der Stand zu (Heiligabend ab 17 Uhr, Winterpause), sagt die Leiste das - vor allem anderen
+  // 29.10.: Hat der Stand zu (Heiligabend ab 16 Uhr, Winterpause), sagt die Leiste das - vor allem anderen
   const zu = S.standZu() ? (S.winterpause() ? 'pause' : 'abend') : '';
   if (zu) {
     leistenModus = 'zu';
@@ -801,7 +801,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291500`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610291630`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {

@@ -300,9 +300,9 @@ Fällen echt.
 - **Heiligabend morgens** (ab 6 Uhr) wird beim ersten Öffnen der Bildschirm
   dunkel, die Weihnachtsmusik setzt ein, und ein großes Fenster mit dem
   eigenen Haus wünscht frohe Weihnachten. Es sagt auch, wie es weitergeht:
-  Gäste kommen an diesem Tag bis **17 Uhr**, das Finale gibt es zwischen
-  17 und 22 Uhr.
-- **Heiligabend** schneit es ab dem Nachmittag. Ab 17 Uhr kommen keine
+  Gäste kommen an diesem Tag bis **16 Uhr**, das Finale gibt es zwischen
+  16 und 22 Uhr.
+- **Heiligabend** schneit es ab dem Nachmittag. Ab 16 Uhr kommen keine
   Gäste mehr (am Stand hängt „FROHES FEST“), und bis 22 Uhr läuten die
   Glocken: Die Kirche ist hell, ihre Tür steht offen, und vor dem Haus
   singen Leute mit Kerzen. Einmal kommt das **Finale** mit Bild und
