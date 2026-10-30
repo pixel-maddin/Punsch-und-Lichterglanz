@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610301000';
-import * as S from './spiel.js?v=202610301000';
-import * as A from './auftraege.js?v=202610301000';
-import * as E from './erfolge.js?v=202610301000';
-import * as Z from './ziele.js?v=202610301000';
-import * as ZE from './zeit.js?v=202610301000';
-import * as KA from './karte.js?v=202610301000';
-import { zellePos } from './tresen.js?v=202610301000';
+import * as C from './config.js?v=202610301030';
+import * as S from './spiel.js?v=202610301030';
+import * as A from './auftraege.js?v=202610301030';
+import * as E from './erfolge.js?v=202610301030';
+import * as Z from './ziele.js?v=202610301030';
+import * as ZE from './zeit.js?v=202610301030';
+import * as KA from './karte.js?v=202610301030';
+import { zellePos } from './tresen.js?v=202610301030';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -282,8 +282,10 @@ const HINWEISE = [
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.eilig && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 6 },
   // Aufträge und Socken erst nach den Startzielen (Einstieg in Wellen, 11.10.)
   // Aufsicht und goldene Gäste (17.10.): beim ersten goldenen Gast am Tresen
-  { id: 'gold', sofort: true, wann: () => S.lauf.gaeste.some((g) => g.gold && g.am && !g.bedient),
-    text: () => 'Ein GOLDENER Gast! Deine Wichtel sind jetzt so gut, dass sie normale Gäste allein bedienen - auch wenn du da bist. Du kümmerst dich um die goldenen: Nur du kannst sie bedienen, sie drängeln vor und zahlen viel mehr. Alle paar Sekunden kommt einer. Eilige Gäste (orange Blase) und Bestellungen für eine Bitte lassen die Wichtel auch für dich stehen.',
+  // 30.10. (Nutzer: der letzte Satz ergab keinen Sinn): kürzer, und mit dem „DU!“ als Erkennungszeichen.
+  // Erklärt zugleich, was `nur_du` sagt - darum ersetzt er ihn.
+  { id: 'gold', sofort: true, ersetzt: ['nur_du'], wann: () => S.lauf.gaeste.some((g) => g.gold && g.am && !g.bedient),
+    text: () => 'Ein goldener Gast! Deine Wichtel bedienen die normalen Gäste jetzt allein - auch wenn du da bist. Du kümmerst dich um die goldenen (goldene Blase) und die anderen besonderen Gäste: Nur du kannst sie bedienen, sie drängeln sich vor und zahlen viel mehr. Du erkennst sie am „DU!“ über dem Bläschen.',
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.gold && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 10 },
   { id: 'ruf', ruhig: true, wann: () => Z.fertig() && S.ruf().stufe >= 1,
     text: () => 'Dein Stand spricht sich herum! Jeden Tag, an dem du ein bisschen mitarbeitest, steigt sein RUF - und alle Preise mit. Wie weit du heute bist, steht unter AUFTRÄGE.',
