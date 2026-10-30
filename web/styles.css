@@ -1734,3 +1734,11 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .bereich-ruf, .bereich-heute, .bereich-sammel { border-color: #5a86c0; }
 .bereich-ruf > summary, .bereich-heute > summary, .bereich-sammel > summary { background: #dce8f6; color: #2a4a80; }
 .bereich-ruf > summary small, .bereich-heute > summary small, .bereich-sammel > summary small { color: #2a4a80; }
+/* 30.10. spät (Nutzerwunsch: „edler und weihnachtlicher"): Kopf der Auftragsbereiche Tannengrün mit Gold */
+.bereich-ruf, .bereich-heute, .bereich-gaeste, .bereich-sammel { border-color: #b8923a; }
+.bereich-ruf > summary, .bereich-heute > summary, .bereich-gaeste > summary, .bereich-sammel > summary {
+  background: linear-gradient(#2a5a3a, #1c4229); color: #f4d88a; text-shadow: 0 calc(var(--px) * 0.5) 0 rgba(0, 0, 0, 0.35);
+  border-bottom-color: #b8923a; }
+.bereich-ruf > summary small, .bereich-heute > summary small, .bereich-gaeste > summary small, .bereich-sammel > summary small { color: #e8dcc0; text-shadow: none; }
+.bereich-ruf > summary::after, .bereich-heute > summary::after, .bereich-gaeste > summary::after, .bereich-sammel > summary::after {
+  background: rgba(255, 240, 200, 0.16); color: #f4d88a; border: calc(var(--px) * 0.5) solid rgba(244, 216, 138, 0.6); box-sizing: border-box; }
