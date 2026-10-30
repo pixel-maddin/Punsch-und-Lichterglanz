@@ -1726,3 +1726,11 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   display: flex; flex-direction: column; align-items: center; gap: calc(var(--px) * 0.6); }
 .beet .bw canvas { width: calc(var(--px) * 11); height: calc(var(--px) * 14); image-rendering: pixelated; }
 .beet .bw small { font: 800 calc(var(--px) * 4.4) var(--schrift); line-height: 1.05; hyphens: manual; color: #fff; }
+/* 30.10. abends (gemeldet: Text in den Kacheln unten leicht abgeschnitten): Seit die Schrift größer ist
+   (4,7/5), passten Name und Preis nicht mehr in die 44 Spielpixel hohe Kachel - weniger Luft dazwischen */
+.k-name { margin-top: calc(var(--px) * 2.2); }
+.k-preis { margin-top: calc(var(--px) * 1.6); line-height: 1.05; }
+/* Aufträge (30.10. abends, Nutzerwunsch): alle Bereiche blau wie „Von deinen Gästen" */
+.bereich-ruf, .bereich-heute, .bereich-sammel { border-color: #5a86c0; }
+.bereich-ruf > summary, .bereich-heute > summary, .bereich-sammel > summary { background: #dce8f6; color: #2a4a80; }
+.bereich-ruf > summary small, .bereich-heute > summary small, .bereich-sammel > summary small { color: #2a4a80; }
