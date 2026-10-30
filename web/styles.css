@@ -1742,3 +1742,8 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .bereich-ruf > summary small, .bereich-heute > summary small, .bereich-gaeste > summary small, .bereich-sammel > summary small { color: #e8dcc0; text-shadow: none; }
 .bereich-ruf > summary::after, .bereich-heute > summary::after, .bereich-gaeste > summary::after, .bereich-sammel > summary::after {
   background: rgba(255, 240, 200, 0.16); color: #f4d88a; border: calc(var(--px) * 0.5) solid rgba(244, 216, 138, 0.6); box-sizing: border-box; }
+/* 30.10. spät (Nutzer: Schrift heller, Rahmen im selben Grün) */
+.bereich-ruf, .bereich-heute, .bereich-gaeste, .bereich-sammel { border-color: #1c4229; }
+.bereich-ruf > summary, .bereich-heute > summary, .bereich-gaeste > summary, .bereich-sammel > summary { color: #fff6dc; border-bottom-color: #1c4229; }
+.bereich-ruf > summary small, .bereich-heute > summary small, .bereich-gaeste > summary small, .bereich-sammel > summary small { color: #fffaf0; }
+.bereich-ruf > summary::after, .bereich-heute > summary::after, .bereich-gaeste > summary::after, .bereich-sammel > summary::after { color: #fff6dc; border-color: rgba(255, 246, 220, 0.55); }
