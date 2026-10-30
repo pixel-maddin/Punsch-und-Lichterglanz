@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610301700';
-import * as S from './spiel.js?v=202610301700';
-import * as Z from './zeit.js?v=202610301700';
-import * as T from './ton.js?v=202610301700';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301700';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610301700';
-import { zielHaus } from './fein.js?v=202610301700';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301700';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301700';
-import * as A from './auftraege.js?v=202610301700';
-import * as E from './erfolge.js?v=202610301700';
-import * as ZL from './ziele.js?v=202610301700';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301700';
-import * as KA from './karte.js?v=202610301700';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301700';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610301700';
-import * as SW from './schneeball.js?v=202610301700';
-import * as LI from './lichtung.js?v=202610301700';
-import * as CB from './christbaum.js?v=202610301700';
-import * as SB from './schlitten.js?v=202610301700';
-import * as EB from './schlittschuh.js?v=202610301700';
-import * as BS from './backstube.js?v=202610301700';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301700';
+import * as C from './config.js?v=202610301800';
+import * as S from './spiel.js?v=202610301800';
+import * as Z from './zeit.js?v=202610301800';
+import * as T from './ton.js?v=202610301800';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301800';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610301800';
+import { zielHaus } from './fein.js?v=202610301800';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301800';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301800';
+import * as A from './auftraege.js?v=202610301800';
+import * as E from './erfolge.js?v=202610301800';
+import * as ZL from './ziele.js?v=202610301800';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301800';
+import * as KA from './karte.js?v=202610301800';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301800';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610301800';
+import * as SW from './schneeball.js?v=202610301800';
+import * as LI from './lichtung.js?v=202610301800';
+import * as CB from './christbaum.js?v=202610301800';
+import * as SB from './schlitten.js?v=202610301800';
+import * as EB from './schlittschuh.js?v=202610301800';
+import * as BS from './backstube.js?v=202610301800';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301800';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -304,7 +304,8 @@ export function fenster(titel, inhaltHtml, knoepfe = [{ text: 'Weiter' }]) {
   m.classList.remove('dunkel', 'sofort');   // 29.10.: nur das Weihnachtsfenster dunkelt stärker ab
   toastZurueckstellen();
   const box = el('div', 'box');
-  box.appendChild(el('h2', null, titel));
+  const h2 = el('h2', null, titel); h2.id = 'modalTitel';
+  box.appendChild(h2);
   const inhalt = el('div', 'inhalt', inhaltHtml);
   box.appendChild(inhalt);
   const reihe = el('div', 'knoepfe');
@@ -316,6 +317,9 @@ export function fenster(titel, inhaltHtml, knoepfe = [{ text: 'Weiter' }]) {
   box.appendChild(reihe);
   m.appendChild(box);
   m.classList.remove('versteckt');
+  // 30.10. (UI-Durchsicht): Tastatur und Vorleser landen im Fenster statt dahinter
+  const haupt = reihe.querySelector('.k:not(.k--neben)') || reihe.querySelector('.k');
+  if (haupt) try { haupt.focus({ preventScroll: true }); } catch (e) { /* egal */ }
   return box;
 }
 export function schliesseFenster() { $('#modal').classList.add('versteckt'); }
@@ -831,7 +835,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301700`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301800`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {

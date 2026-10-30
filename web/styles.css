@@ -1695,3 +1695,27 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 
 /* 30.10.: unter den verdeckten Zeilen: wie viele noch kommen */
 .mehr-kommt { text-align: center; color: var(--text3); margin: calc(var(--px) * 2) 0 calc(var(--px) * 1); }
+
+/* ---------------------------------------------------------------- 30.10.: UI-Durchsicht (Touch, Lesbarkeit, Fokus)
+   Gemessen bei 360 x 640 (--px 2): Knöpfe in Blättern und Fenstern 26-30 px hoch, ✕ 30 px, Nachrichten 28 x 23 px,
+   Blatt-Texte 9,6-11 px (Fenster schon 13 px), Kacheln 8,4 px. Aussehen und Pixel-Look bleiben - nur Größen. */
+/* Unsichtbar größere Tippfläche um kleine Knöpfe (das Bild des Knopfs bleibt gleich groß) */
+#blattZu { position: relative; }
+#nachr::after, #blattZu::after, #kartenZu::after, #kartenText::after, #miniZu::after, #tipp .tipp-zu::after {
+  content: ''; position: absolute; inset: calc(var(--px) * -4);
+}
+/* Knöpfe in Blättern und Fenstern mindestens ~36-40 px hoch, Abschnittsköpfe und Sprungleiste ebenso */
+#blatt .k, #modal .k { min-height: calc(var(--px) * 18); }
+.hs-k { min-height: calc(var(--px) * 17); }
+.bereich > summary { min-height: calc(var(--px) * 19); box-sizing: border-box; }
+#blatt[data-art="menue"] .version a { display: inline-block; padding: calc(var(--px) * 3) calc(var(--px) * 2); }
+/* Blätter (Laden, Aufträge, Kalender, Menü, Haus schmücken) eine halbe Stufe größer - näher an den Fenstern */
+#blatt { --t-mini: calc(var(--px) * 5); --t-klein: calc(var(--px) * 5.4); --t-text: calc(var(--px) * 5.8); --t-betont: calc(var(--px) * 6); }
+/* Kacheln am Tresen und Leiste unten etwas größer (Namen kürzen sich weiter mit „…“, falls nötig) */
+#theke { --t-mini: calc(var(--px) * 4.7); --t-klein: calc(var(--px) * 5); }
+#leiste { --t-text: calc(var(--px) * 5.4); }
+/* Sichtbarer Fokus für Tastatur (nicht beim Tippen) - goldener Rahmen wie die Führung */
+:focus { outline: none; }
+:focus-visible { outline: calc(var(--px) * 1) solid #ffd860; outline-offset: calc(var(--px) * 0.6); border-radius: calc(var(--px) * 2); }
+#blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 19); font-size: var(--t-betont); }   /* 30.10.: Menüknöpfe ~38 px hoch */
+.kipp { min-height: calc(var(--px) * 15); }   /* 30.10.: An/Aus-Schalter in „Haus schmücken“ etwas höher */
