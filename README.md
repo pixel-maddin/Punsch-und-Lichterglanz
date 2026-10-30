@@ -228,8 +228,9 @@ Lichtung - die Rehe im schnellen Galopp - tippe sie an, um sie zu füttern. 40 S
 hintereinander gibt eine Kette bis ×5, selten kommt ein goldener Schneehase.
 Gefüttert wird an der Raufe mitten in der Lichtung - Möhren, Nüsse und Äpfel.
 Für die ersten drei Runden am Tag gibt es Sterne, dazu einen eigenen Rekord.
-Ab 800, 1.800 und 3.000 Punkten Rekord ziehen Tiere bei dir ein: eine
-Hasenfamilie, ein Eichhörnchen auf dem Dach und ein Reh am Gartenweg.
+Je Adventswoche zieht ein Tier bei dir ein: die Hasenfamilie sofort (ab 800
+Punkten Rekord), das Eichhörnchen auf dem Dach ab dem 1. Advent (1.600) und
+das Reh am Gartenweg ab dem 2. Advent (2.400).
 Ab und zu - etwa alle zwei bis vier Runden - kommt ein besonderer Gast
 vorbei: ein Fuchs, ein Wildschwein oder ein Igel. Wer ihn füttert, hat ihn
 im Album.

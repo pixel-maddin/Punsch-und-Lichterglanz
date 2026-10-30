@@ -874,10 +874,13 @@ export const MINI_RUNDEN_STERNE = 3;
 export const MINI_JE_MIN = 2000;
 export const MINI_MAX_MIN = 1.5;
 export const LICHTUNG_DAUER = 40;          // s je Runde (11.10.: 30 → 40, im letzten Drittel doppelt so viele Tiere)
+// 30.10. (gemeldet: „meistens schon beim ersten Mal alle drei"): je Adventswoche eins - Hasen sofort,
+// Eichhörnchen ab dem 1., Reh ab dem 2. Advent (`advent` = so viele Kerzen), dazu ein höherer Rekord.
+// `ab` sind Rohpunkte (× skala 0,6 → 800 / 1.600 / 2.400). Gemessen auf Normal: mittel 1.350, gut 2.260.
 export const LICHTUNG_DEKO = [
-  { id: 'l_hasen', name: 'Hasenfamilie',            ab: 800,  stimmung: 5, text: 'Drei Hasen sitzen vor dem Zaun und mümmeln.' },
-  { id: 'l_eich',  name: 'Eichhörnchen auf dem Dach', ab: 1800, stimmung: 5, text: 'Sitzt auf dem Dach und knabbert eine Nuss.' },
-  { id: 'l_reh',   name: 'Reh am Gartenweg',          ab: 3000, stimmung: 7, text: 'Kommt aus dem Wald zu Besuch und bleibt.' },
+  { id: 'l_hasen', name: 'Hasenfamilie',            ab: 1333, advent: 0, stimmung: 5, text: 'Drei Hasen sitzen vor dem Zaun und mümmeln.' },
+  { id: 'l_eich',  name: 'Eichhörnchen auf dem Dach', ab: 2667, advent: 1, stimmung: 5, text: 'Sitzt auf dem Dach und knabbert eine Nuss.' },
+  { id: 'l_reh',   name: 'Reh am Gartenweg',          ab: 4000, advent: 2, stimmung: 7, text: 'Kommt aus dem Wald zu Besuch und bleibt.' },
 ];
 // Minispiel Christbaumverkauf (09.10.): 60 s, Kunden wollen einen bestimmten
 // Baum (Sorte und Größe). Fällen (3x tippen), einnetzen (3x), aufs Autodach.

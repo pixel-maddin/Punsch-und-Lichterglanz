@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610301300';
-import * as Z from './zeit.js?v=202610301300';
-import { neueFarben } from './pixel.js?v=202610301300';
+import * as C from './config.js?v=202610301400';
+import * as Z from './zeit.js?v=202610301400';
+import { neueFarben } from './pixel.js?v=202610301400';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1859,7 +1859,7 @@ export function miniErgebnis(name, punkte) {
   if (sterne) verdiene(sterne);
   const vorher = l.best;
   if (punkte > l.best) l.best = punkte;
-  const neu = [...def.deko.filter((d) => !st.kalDeko[d.id] && l.best >= d.ab), ...neuSp];
+  const neu = [...def.deko.filter((d) => !st.kalDeko[d.id] && l.best >= d.ab && (!d.advent || Z.adventKerzen() >= d.advent)), ...neuSp];   // advent: 30.10.
   st.neu = st.neu || {};
   for (const d of neu) { st.kalDeko[d.id] = true; st.neu[d.id] = true; }
   speichere();

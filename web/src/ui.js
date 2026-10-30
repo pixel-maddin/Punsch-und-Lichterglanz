@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610301300';
-import * as S from './spiel.js?v=202610301300';
-import * as Z from './zeit.js?v=202610301300';
-import * as T from './ton.js?v=202610301300';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301300';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610301300';
-import { zielHaus } from './fein.js?v=202610301300';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301300';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301300';
-import * as A from './auftraege.js?v=202610301300';
-import * as E from './erfolge.js?v=202610301300';
-import * as ZL from './ziele.js?v=202610301300';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301300';
-import * as KA from './karte.js?v=202610301300';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301300';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610301300';
-import * as SW from './schneeball.js?v=202610301300';
-import * as LI from './lichtung.js?v=202610301300';
-import * as CB from './christbaum.js?v=202610301300';
-import * as SB from './schlitten.js?v=202610301300';
-import * as EB from './schlittschuh.js?v=202610301300';
-import * as BS from './backstube.js?v=202610301300';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301300';
+import * as C from './config.js?v=202610301400';
+import * as S from './spiel.js?v=202610301400';
+import * as Z from './zeit.js?v=202610301400';
+import * as T from './ton.js?v=202610301400';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301400';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610301400';
+import { zielHaus } from './fein.js?v=202610301400';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301400';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301400';
+import * as A from './auftraege.js?v=202610301400';
+import * as E from './erfolge.js?v=202610301400';
+import * as ZL from './ziele.js?v=202610301400';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301400';
+import * as KA from './karte.js?v=202610301400';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301400';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610301400';
+import * as SW from './schneeball.js?v=202610301400';
+import * as LI from './lichtung.js?v=202610301400';
+import * as CB from './christbaum.js?v=202610301400';
+import * as SB from './schlitten.js?v=202610301400';
+import * as EB from './schlittschuh.js?v=202610301400';
+import * as BS from './backstube.js?v=202610301400';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301400';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -503,7 +503,11 @@ function miniFenster(titel, o, knoepfe, name, starte) {
       <span><canvas data-ico="pokal"></canvas>Rekord <b>${zahl(best)}</b></span>
       <span><canvas data-ico="stern"></canvas>${rest ? `<b>${rest}</b>&nbsp;${rest === 1 ? 'Runde' : 'Runden'}` : 'morgen&nbsp;wieder'}</span>
     </div>`;
-  const ziel = o.deko ? `<p class="mini-ziel">Neues Deko-Stück ab <b>${zahl(o.deko.ab)}</b> Punkten Rekord</p>` : '';
+  // 30.10.: Deko, die erst ab einem Advent kommt (Waldlichtung), sagt das - mit dem Rekord, den sie braucht
+  const spaeter = o.deko && o.deko.advent && Z.adventKerzen() < o.deko.advent;
+  const ziel = !o.deko ? '' : spaeter
+    ? `<p class="mini-ziel">Neues Deko-Stück ab dem <b>${o.deko.advent}. Advent</b> - mit <b>${zahl(o.deko.ab)}</b> Punkten Rekord</p>`
+    : `<p class="mini-ziel">Neues Deko-Stück ab <b>${zahl(o.deko.ab)}</b> Punkten Rekord</p>`;
   const anl = `<ol class="mini-anleitung">${o.schritte.map((s) => `<li>${s}</li>`).join('')}</ol>${o.mehr ? '<div class="anl-mehr"></div>' : ''}`;
   const html = chips + (o.zusatz || '') + ziel
     + (erstes ? `<div class="mini-anl">${anl}</div>` : `<button class="anl-knopf">Anleitung ▾</button><div class="mini-anl versteckt">${anl}</div>`);
@@ -823,7 +827,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301300`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301400`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
