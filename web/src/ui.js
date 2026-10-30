@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610301130';
-import * as S from './spiel.js?v=202610301130';
-import * as Z from './zeit.js?v=202610301130';
-import * as T from './ton.js?v=202610301130';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301130';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610301130';
-import { zielHaus } from './fein.js?v=202610301130';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301130';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301130';
-import * as A from './auftraege.js?v=202610301130';
-import * as E from './erfolge.js?v=202610301130';
-import * as ZL from './ziele.js?v=202610301130';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301130';
-import * as KA from './karte.js?v=202610301130';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301130';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610301130';
-import * as SW from './schneeball.js?v=202610301130';
-import * as LI from './lichtung.js?v=202610301130';
-import * as CB from './christbaum.js?v=202610301130';
-import * as SB from './schlitten.js?v=202610301130';
-import * as EB from './schlittschuh.js?v=202610301130';
-import * as BS from './backstube.js?v=202610301130';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301130';
+import * as C from './config.js?v=202610301300';
+import * as S from './spiel.js?v=202610301300';
+import * as Z from './zeit.js?v=202610301300';
+import * as T from './ton.js?v=202610301300';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301300';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610301300';
+import { zielHaus } from './fein.js?v=202610301300';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301300';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301300';
+import * as A from './auftraege.js?v=202610301300';
+import * as E from './erfolge.js?v=202610301300';
+import * as ZL from './ziele.js?v=202610301300';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301300';
+import * as KA from './karte.js?v=202610301300';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301300';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610301300';
+import * as SW from './schneeball.js?v=202610301300';
+import * as LI from './lichtung.js?v=202610301300';
+import * as CB from './christbaum.js?v=202610301300';
+import * as SB from './schlitten.js?v=202610301300';
+import * as EB from './schlittschuh.js?v=202610301300';
+import * as BS from './backstube.js?v=202610301300';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301300';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -823,7 +823,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301130`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301300`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -3102,17 +3102,19 @@ const GRUESSE = [
   'Leise rieselt der Schnee …',
 ];
 
-const VON_VORGABE = 'Herzliche Grüße von';
+const VON_VORGABE = 'Herzliche Grüße vom';   // 30.10.: dahinter „Haus …“ - damit klar ist, das ist der Hausname, nicht der Stand
 
 /**
  * Schrift auf der Karte: mit Umriss und Schatten, damit sie auf jedem
  * Rahmen lesbar ist. Zu lange Zeilen werden kleiner statt abgeschnitten.
  */
+// 30.10. (Nutzer: unten „zu klein und filigran"): Pixelify Sans (liegt in web/fonts, SIL OFL) statt
+// Georgia, größer und mit kräftigerem Umriss. `stil` ist jetzt die Strichstärke (600/700).
 function kartenSchrift(c, text, x, y, groesse, stil, farbe, umriss, maxB) {
   let g = groesse;
-  do { c.font = `${stil} ${g}px Georgia, serif`; g -= 2; } while (c.measureText(text).width > maxB && g > 14);
+  do { c.font = `${stil || 700} ${g}px "Pixelify Sans", sans-serif`; g -= 2; } while (c.measureText(text).width > maxB && g > 16);
   c.lineJoin = 'round';
-  c.lineWidth = Math.max(3, g / 7);
+  c.lineWidth = Math.max(4, g / 5);
   c.strokeStyle = umriss;
   c.shadowColor = 'rgba(0,0,0,0.45)'; c.shadowOffsetY = 3; c.shadowBlur = 4;
   c.strokeText(text, x, y);
@@ -3151,7 +3153,7 @@ function kartenText(nr, ohneLeute, gruss) {
   const k = S.st.karteText || {};
   fenster('Text der Karte', `
     <label>Gruß<br><input type="text" id="ktGruss" maxlength="32" value="${esc(k.gruss || gruss)}"></label>
-    <label>Grußzeile (dahinter steht euer Hausname)<br><input type="text" id="ktVon" maxlength="30" value="${esc(k.von || VON_VORGABE)}"></label>
+    <label>Grußzeile (dahinter steht „Haus“ und euer Hausname)<br><input type="text" id="ktVon" maxlength="30" value="${esc(k.von || VON_VORGABE)}"></label>
     <p class="klein">… ${esc(S.st.name || 'uns')} · Datum und „Punsch &amp; Lichterglanz“ stehen immer darunter.</p>`, [
     { text: 'Übernehmen', aktion: (box) => {
       const g = box.querySelector('#ktGruss').value.trim(), v = box.querySelector('#ktVon').value.trim();
@@ -3175,7 +3177,8 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   const heilig = rahmenNr === 'heilig';
   // 27.10. (Nutzerwunsch: „oben zu viel Himmel"): Der Gruß steht jetzt in der Weihnachtsschrift oben
   // im Himmel des Bildes - unten bleiben nur Grußzeile und Datum, der Streifen ist dafür schmaler
-  const rand = 44, unten = heilig ? 168 : 128;
+  const rand = 44, unten = heilig ? 186 : 140;   // 30.10.: Platz für die größere Pixelschrift
+  try { await document.fonts.load('700 40px "Pixelify Sans"'); } catch (e) { /* dann eben Ersatzschrift */ }
   const cv = document.createElement('canvas');
   cv.width = 180 * SK + rand * 2; cv.height = WG * SK + rand + unten;
   // Im Hauptspeicher malen, nicht auf der Grafikkarte: Fürs PNG muss das Bild
@@ -3192,16 +3195,18 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   const eigen = S.st.karteText || {};
   let gruss = festerGruss || eigen.gruss || GRUESSE[Math.floor(Math.random() * GRUESSE.length)];
   if (!festerGruss && !eigen.gruss && Z.phase() === 'weihnacht' && Z.jetzt().getMonth() === 11 && Z.jetzt().getDate() >= 27) gruss = 'Einen guten Rutsch!';
-  const von = `${eigen.von || VON_VORGABE} ${S.st.name || 'uns'}`;
+  const nm = (S.st.name || '').trim();
+  const hausName = /^haus\s/i.test(nm) ? nm : `Haus ${nm}`;
+  const von = nm ? `${eigen.von || VON_VORGABE} ${hausName}` : 'Herzliche Grüße von uns';
   const y0 = WG * SK + rand, mx = cv.width / 2, maxB = cv.width - 70;
   grussImHimmel(c, gruss, rand, 180 * SK, heilig ? 'gold' : { Zuckerstange: 'creme', Schneeflocken: 'eis', Stechpalme: 'gold' }[R.name] || 'gold');   // 29.10.: keine rote und rot-weiße Schrift mehr (Nutzerwunsch)
   c.textAlign = 'center';
-  kartenSchrift(c, von, mx, y0 + 54, 32, '', R.titel, R.umriss, maxB);
+  kartenSchrift(c, von, mx, y0 + 60, 42, 700, R.titel, R.umriss, maxB);
   if (heilig) {
     const rb = S.rueckblick(), z = (n) => Math.round(n).toLocaleString('de-DE');
-    kartenSchrift(c, `Unser Advent: ${z(rb.bedient)} Gäste · ${z(rb.deko)} Deko-Stücke · ♥ ${z(rb.stimmung)}`, mx, y0 + 94, 22, 'italic', R.titel, R.umriss, maxB);
+    kartenSchrift(c, `Unser Advent: ${z(rb.bedient)} Gäste · ${z(rb.deko)} Deko-Stücke · ♥ ${z(rb.stimmung)}`, mx, y0 + 104, 28, 600, R.titel, R.umriss, maxB);
   }
-  kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + (heilig ? 132 : 94), 20, '', R.text, R.umriss, maxB);
+  kartenSchrift(c, `${Z.datumLang()} · Punsch & Lichterglanz`, mx, y0 + (heilig ? 146 : 106), 28, 600, R.text, R.umriss, maxB);
 
   // Gemeldet: auf Android dauerte es „ewig" bis zur Karte. Das Fenster zeigt
   // jetzt SOFORT das gemalte Bild selbst; die PNG-Datei fürs Teilen entsteht

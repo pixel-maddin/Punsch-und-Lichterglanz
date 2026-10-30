@@ -1660,3 +1660,35 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
   width: 70%; box-sizing: border-box; text-align: center; pointer-events: auto; cursor: pointer; font-family: inherit;
   background: rgba(28, 40, 80, 0.92); color: #fff6dc; border: calc(var(--px) * 0.6) solid #ffd860; border-radius: calc(var(--px) * 2);
   padding: calc(var(--px) * 1.6) calc(var(--px) * 3); font-size: var(--t-klein); font-weight: 800; line-height: 1.3; }
+
+/* ---------------------------------------------------------------- 30.10.: UI-Runde */
+/* Menü: Aufklappknöpfe wie in „Haus schmücken" (heller runder Knopf, roter Pfeil) statt roter Punkt */
+.menue-statistik summary::after {
+  width: calc(var(--px) * 11); height: calc(var(--px) * 11); border-radius: 50%;
+  background: var(--papier2); border: calc(var(--px) * 0.6) solid #d8b880; color: var(--rot2);
+  font-size: var(--t-titel); box-sizing: border-box;
+}
+.menue-statistik[open] summary::after { background: #fff3c4; border-color: var(--gold); transform: rotate(180deg); }
+/* Fenster und Hinweisblasen: größere, ruhigere Schrift (gemeldet: „oft zu klein bzw. durcheinander").
+   Alle Größen innen eine Stufe größer, mehr Zeilenabstand, Fließtext nicht mehr kursiv. */
+#modal .box, #tipp {
+  --t-mini: calc(var(--px) * 5.4); --t-klein: calc(var(--px) * 5.8); --t-text: calc(var(--px) * 6.2);
+  --t-betont: calc(var(--px) * 6.4); --t-gross: calc(var(--px) * 6.8);
+}
+#modal .inhalt { line-height: 1.5; color: var(--text, #4a2c18); }
+#modal .inhalt p { margin: calc(var(--px) * 2.8) 0; }
+#modal .inhalt p.klein { line-height: 1.45; }
+#modal .inhalt i, #modal .inhalt em { font-style: normal; }
+#modal .story-text, #modal .stamm-satz { font-style: normal; }
+#tipp { line-height: 1.45; font-weight: 700; padding: calc(var(--px) * 3.4) calc(var(--px) * 9) calc(var(--px) * 3.4) calc(var(--px) * 4.5); }
+/* Aufträge: jeder Bereich mit eigener Farbe - Kopf getönt, farbiger Streifen links (gemeldet: „zu überladen") */
+.bereich-ruf, .bereich-heute, .bereich-gaeste, .bereich-sammel { border-left-width: calc(var(--px) * 2.4); overflow: hidden; }
+.bereich-ruf { border-color: #e0b040; }
+.bereich-ruf > summary { background: #fbe9b4; color: #7a5410; }
+.bereich-heute { border-color: #6aa85a; }
+.bereich-heute > summary { background: #dcefd2; color: #2f6a2f; }
+.bereich-gaeste { border-color: #5a86c0; }
+.bereich-gaeste > summary { background: #dce8f6; color: #2a4a80; }
+.bereich-sammel { border-color: #c0605a; }
+.bereich-sammel > summary { background: #f6dcd6; color: #8a2a24; }
+.bereich-ruf > summary::after, .bereich-heute > summary::after, .bereich-gaeste > summary::after, .bereich-sammel > summary::after { background: rgba(255, 255, 255, 0.7); color: inherit; }

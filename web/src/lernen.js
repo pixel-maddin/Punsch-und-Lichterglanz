@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610301130';
-import * as S from './spiel.js?v=202610301130';
-import * as A from './auftraege.js?v=202610301130';
-import * as E from './erfolge.js?v=202610301130';
-import * as Z from './ziele.js?v=202610301130';
-import * as ZE from './zeit.js?v=202610301130';
-import * as KA from './karte.js?v=202610301130';
-import { zellePos } from './tresen.js?v=202610301130';
+import * as C from './config.js?v=202610301300';
+import * as S from './spiel.js?v=202610301300';
+import * as A from './auftraege.js?v=202610301300';
+import * as E from './erfolge.js?v=202610301300';
+import * as Z from './ziele.js?v=202610301300';
+import * as ZE from './zeit.js?v=202610301300';
+import * as KA from './karte.js?v=202610301300';
+import { zellePos } from './tresen.js?v=202610301300';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
