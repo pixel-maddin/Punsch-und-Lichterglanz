@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610292230';
-import * as S from './spiel.js?v=202610292230';
-import * as A from './auftraege.js?v=202610292230';
-import * as E from './erfolge.js?v=202610292230';
-import * as Z from './ziele.js?v=202610292230';
-import * as ZE from './zeit.js?v=202610292230';
-import * as KA from './karte.js?v=202610292230';
-import { zellePos } from './tresen.js?v=202610292230';
+import * as C from './config.js?v=202610301000';
+import * as S from './spiel.js?v=202610301000';
+import * as A from './auftraege.js?v=202610301000';
+import * as E from './erfolge.js?v=202610301000';
+import * as Z from './ziele.js?v=202610301000';
+import * as ZE from './zeit.js?v=202610301000';
+import * as KA from './karte.js?v=202610301000';
+import { zellePos } from './tresen.js?v=202610301000';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -89,6 +89,7 @@ tipp.addEventListener('pointerdown', (e) => {
 });
 
 // Zielpunkte in Spielpixeln
+const nurDuGast = () => S.lauf.gaeste.find((g) => g.am && !g.bedient && !g.gehen && !g.gross && S.nurVonHand(g));
 function gastZiel(platz = 0) { return { x: S.platzX(platz) - 4, y: G + 30 }; }
 const glaeserZiel = () => ({ x: 17, y: G + C.T_GAST + 11 });
 const ausgussZiel = () => ({ x: 165, y: G + C.T_GAST + 11 });
@@ -271,6 +272,11 @@ const HINWEISE = [
   { id: 'schild', ruhig: true, wann: () => S.st.stats.bedient >= 40 && !S.st.standName,
     text: () => 'Tipp: Das rote Schild über dem Stand kannst du antippen und ihm einen eigenen Namen geben.',
     ziel: () => ({ x: 90, y: G + 1 }), fertig: () => !!S.st.standName, dauer: 7 },
+  // 30.10.: Warum stehen die Wichtel? Gäste mit „DU!" bedienst nur du (Marke in tresen.js)
+  { id: 'nur_du', ruhig: true, sofort: true, dauer: 9,
+    wann: () => S.hat('servier') && !!nurDuGast(),
+    text: () => 'Gäste mit „DU!“ über dem Bläschen bedienst nur du - beim Ansturm, eilige und besondere Gäste und was in einer Bitte gewünscht ist. Die Wichtel warten so lange.',
+    ziel: () => { const g = nurDuGast(); return gastZiel(g ? g.platz : 0); }, fertig: () => !nurDuGast() },
   { id: 'eilig', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => g.eilig && g.am && !g.bedient),
     text: () => 'Ein eiliger Gast (orange Blase)! Er wartet nur kurz, zahlt aber doppelt.',
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.eilig && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 6 },

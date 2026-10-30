@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610292230';
-import * as C from './config.js?v=202610292230';
-import * as S from './spiel.js?v=202610292230';
-import * as Z from './zeit.js?v=202610292230';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610301000';
+import * as C from './config.js?v=202610301000';
+import * as S from './spiel.js?v=202610301000';
+import * as Z from './zeit.js?v=202610301000';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -308,6 +308,15 @@ function gaestezone(c, y0, t, w) {
     if (g.id !== sv.id || g.bedient) continue;
     wichtelKlein(c, x - 3, y + 2, t);
     r(c, x + 1, y - 4, 14, 2, '#2a1a10'); r(c, x + 1, y - 4, Math.max(1, Math.round(14 * sv.anteil)), 2, '#6ad06a');
+  }
+  // 30.10. (gemeldet, mit Video: „die Wichtel arbeiten nicht weiter"): Gäste, die nur du bedienst
+  // (Ansturm, eilig, Bitte-Wunsch, besondere Gäste), tragen ein goldenes „DU!" über dem Bläschen -
+  // sonst sah es aus, als hingen die Wichtel. Nur mit Servier-Wichtel, vorher bedienst du ohnehin alle.
+  if (S.hat('servier')) for (const [g, x, y] of blasen) {
+    if (g.bedient || g.gross || !S.nurVonHand(g)) continue;
+    const bl = Math.floor(t * 2) % 2;
+    r(c, x + 2, y - 8, 13, 7, '#3a2410'); r(c, x + 3, y - 7, 11, 5, bl ? '#5a3418' : '#4a2c16');
+    text(c, 'DU!', x + 4, y - 7, '#ffd860', null);
   }
   if (S.zeigt('musik')) {
     const n2 = (t * 0.7) % 1;
