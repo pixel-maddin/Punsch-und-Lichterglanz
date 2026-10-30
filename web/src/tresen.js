@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610301030';
-import * as C from './config.js?v=202610301030';
-import * as S from './spiel.js?v=202610301030';
-import * as Z from './zeit.js?v=202610301030';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610301130';
+import * as C from './config.js?v=202610301130';
+import * as S from './spiel.js?v=202610301130';
+import * as Z from './zeit.js?v=202610301130';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -270,6 +270,9 @@ function gaestezone(c, y0, t, w) {
     const cx = S.platzX(e.platz, n) - 20;
     const hoch = Math.round(Math.sin(Math.min(1, e.t / 0.6) * Math.PI) * 14);
     wichtelGross(c, cx, y0 + C.T_GAST + 14 - hoch, t);
+    // 30.10. (gemeldet: „manchmal kommen Getränke direkt, ohne Abfüllen"): Der Wichtel trägt sichtbar,
+    // was er bringt - mit Aufsicht bedient er normale Gäste direkt, ohne dein Tablett zu belegen
+    if (e.id) icon(c, e.id, cx + 4, y0 + C.T_GAST + 1 - hoch, t, false);
   }
 
   // Markise von innen (unter dem Balken)

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610301030';
-import * as Z from './zeit.js?v=202610301030';
-import { neueFarben } from './pixel.js?v=202610301030';
+import * as C from './config.js?v=202610301130';
+import * as Z from './zeit.js?v=202610301130';
+import { neueFarben } from './pixel.js?v=202610301130';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1206,8 +1206,18 @@ export const wichtelWartezeit = () => chefAktiv() ? C.WICHTEL_WARTEN : C.WICHTEL
 // sie jetzt für dich (wie goldene Gäste). Die Bitte-Getränke setzt main.js je Sekunde.
 let handWuensche = new Set();
 export function setzeHandWuensche(s) { handWuensche = s; }
-export const nurVonHand = (g) => !!(g.gross || g.ansturm || g.gold || C.GAESTE[g.typ].spezial
-  || (aufsicht() && chefAktiv() && (g.eilig || handWuensche.has(g.wunsch))));
+// 30.10. (gemeldet, mit Video: „DU!" stand dran, und der Wichtel bediente ihn trotzdem): Das hing an
+// chefAktiv() - nach 20 s ohne Tipp verlor der Gast sein „DU!", und der Wichtel nahm ihn. Jetzt gilt
+// für eilige und Bitte-Gäste: Wer mit „DU!" am Tresen steht, bleibt deiner (`g.nurDu`). Erst wenn du
+// INAKTIV_AB (5 min) gar nicht tippst, übernehmen die Wichtel wieder alles.
+export const nurVonHand = (g) => {
+  if (g.gross || g.ansturm || g.gold || C.GAESTE[g.typ].spezial) return true;
+  if (!aufsicht() || lauf.chefT >= C.INAKTIV_AB) return false;
+  if (g.nurDu) return true;
+  const ja = !!(g.eilig || handWuensche.has(g.wunsch));
+  if (ja && g.am) g.nurDu = true;
+  return ja;
+};
 function servierKandidat() {
   return lauf.gaeste.filter((x) => x.am && !x.bedient && !x.gehen && !nurVonHand(x) && verfuegbar(x.wunsch)
     && !lauf.hand.some((h) => h.fuer === x.id))
@@ -1339,7 +1349,7 @@ function bediene(g, auto, faktor = 1) {
   lauf.texte.push({ platz: g.platz, x: g.x, text: '+' + Math.round(betrag), t: 0, gross: !!def.spezial || g.eilig });
   hooks.bedient(g, auto, lauf.t < lauf.stossBis);
   lauf.herzen.push({ x: g.x, t: 0 });
-  if (auto) lauf.elfen.push({ platz: g.platz, t: 0 });
+  if (auto) lauf.elfen.push({ platz: g.platz, t: 0, id: g.wunsch });   // id: das Getränk trägt er in der Hand (30.10.)
   else g.jubelT = C.JUBEL_ZEIT;   // sichtbare Freude, wenn DU bedient hast
   g.bedient = true;
   hooks.ton(def.spezial ? 'spezialKasse' : 'kasse');

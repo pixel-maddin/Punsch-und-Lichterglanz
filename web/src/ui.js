@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610301030';
-import * as S from './spiel.js?v=202610301030';
-import * as Z from './zeit.js?v=202610301030';
-import * as T from './ton.js?v=202610301030';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301030';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610301030';
-import { zielHaus } from './fein.js?v=202610301030';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301030';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301030';
-import * as A from './auftraege.js?v=202610301030';
-import * as E from './erfolge.js?v=202610301030';
-import * as ZL from './ziele.js?v=202610301030';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301030';
-import * as KA from './karte.js?v=202610301030';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301030';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610301030';
-import * as SW from './schneeball.js?v=202610301030';
-import * as LI from './lichtung.js?v=202610301030';
-import * as CB from './christbaum.js?v=202610301030';
-import * as SB from './schlitten.js?v=202610301030';
-import * as EB from './schlittschuh.js?v=202610301030';
-import * as BS from './backstube.js?v=202610301030';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301030';
+import * as C from './config.js?v=202610301130';
+import * as S from './spiel.js?v=202610301130';
+import * as Z from './zeit.js?v=202610301130';
+import * as T from './ton.js?v=202610301130';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301130';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610301130';
+import { zielHaus } from './fein.js?v=202610301130';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301130';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301130';
+import * as A from './auftraege.js?v=202610301130';
+import * as E from './erfolge.js?v=202610301130';
+import * as ZL from './ziele.js?v=202610301130';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301130';
+import * as KA from './karte.js?v=202610301130';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301130';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610301130';
+import * as SW from './schneeball.js?v=202610301130';
+import * as LI from './lichtung.js?v=202610301130';
+import * as CB from './christbaum.js?v=202610301130';
+import * as SB from './schlitten.js?v=202610301130';
+import * as EB from './schlittschuh.js?v=202610301130';
+import * as BS from './backstube.js?v=202610301130';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301130';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -823,7 +823,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301030`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301130`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -3000,7 +3000,7 @@ export function zeigeHilfe() {
     <p>Mit den Sternen kaufst du Deko, Farbe, Zutaten und Wichtel. Je gemütlicher das Haus, desto mehr Gäste kommen und desto mehr zahlen sie.</p>
     <p>Oben links schmückst du mit <b>Haus</b> dein Haus (Lichter, Farben, Varianten). Oben rechts stellst du mit <b>Angebot</b> zusammen, welche Sorten dein Stand anbietet - höchstens ${C.ANGEBOT_MAX}. Schnelle Sorten bringen weniger je Glas, langsame mehr.</p>
     <p>Auf der <b>Karte</b> warten Läden, Minispiele (zuerst nur die Waldlichtung, alle paar Tage kommt ein neues dazu) und alle paar Tage der Weihnachtsmarkt.${S.miniOffen('back') ? ' Plätzchen aus der Backstube kommen in die Dose an deinem Stand - jeder Gast, den du selbst bedienst, zahlt dafür mehr.' : ''} Ist die Fahne am <b>Briefkasten</b> neben der Tür oben, tippe ihn an - offene Wunschzettel stehen auch unter Aufträge.${S.baumschuleOffen() ? ' In der <b>Baumschule</b> ziehst du eigene Tannen für den Christbaumverkauf.' : ''}${S.hat('futterhaus') ? ' Das <b>Futterhaus</b> im Baum antippen: nachfüllen und Vögel beobachten.' : ''} Was du schon entdeckt hast, steht im <b>Album</b> (unter Aufträge).</p>
-    <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.${S.aufsicht() ? ' Deine Wichtel bedienen normale Gäste jetzt allein - du kümmerst dich um die <b>goldenen Gäste</b> (sie drängeln vor und zahlen viel mehr), um eilige Gäste und um Bestellungen für eine Bitte.' : ''}</p>
+    <p><b>Du bist der Chef:</b> Solange du am Stand mit anpackst, arbeiten die Wichtel schneller. Besondere Gäste und Großbestellungen bedienst nur du.${S.aufsicht() ? ' Deine Wichtel bedienen normale Gäste jetzt allein - du kümmerst dich um die <b>goldenen Gäste</b> (sie drängeln vor und zahlen viel mehr), um eilige Gäste und um Bestellungen für eine Bitte.' : ''} Wen nur du bedienst, erkennst du am goldenen <b>„DU!“</b> über dem Bläschen.</p>
     <p><b>Ruf:</b> Jeden Tag, an dem du ein bisschen mitarbeitest, steigt der Ruf deines Standes - und alle Preise mit. Wie weit du heute bist, steht unter Aufträge.</p>
     <p class="klein">Das Spiel läuft mit deiner echten Uhr: Nachts ist es dunkel, ab dem 1. Dezember liegt Schnee und jeden Tag geht ein Türchen auf.</p>`);
 }
