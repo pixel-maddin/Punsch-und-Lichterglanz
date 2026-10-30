@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610301400';
-import * as S from './spiel.js?v=202610301400';
-import * as Z from './zeit.js?v=202610301400';
-import * as T from './ton.js?v=202610301400';
-import * as LI from './lichtung.js?v=202610301400';
-import * as CB from './christbaum.js?v=202610301400';
-import * as KA from './karte.js?v=202610301400';
-import * as SB from './schlitten.js?v=202610301400';
-import * as EB from './schlittschuh.js?v=202610301400';
-import * as BS from './backstube.js?v=202610301400';
-import * as UI from './ui.js?v=202610301400';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610301400';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610301400';
-import * as Kacheln from './kacheln.js?v=202610301400';
-import * as Lernen from './lernen.js?v=202610301400';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610301400';
-import * as A from './auftraege.js?v=202610301400';
-import * as E from './erfolge.js?v=202610301400';
-import * as ZL from './ziele.js?v=202610301400';
+import * as C from './config.js?v=202610301600';
+import * as S from './spiel.js?v=202610301600';
+import * as Z from './zeit.js?v=202610301600';
+import * as T from './ton.js?v=202610301600';
+import * as LI from './lichtung.js?v=202610301600';
+import * as CB from './christbaum.js?v=202610301600';
+import * as KA from './karte.js?v=202610301600';
+import * as SB from './schlitten.js?v=202610301600';
+import * as EB from './schlittschuh.js?v=202610301600';
+import * as BS from './backstube.js?v=202610301600';
+import * as UI from './ui.js?v=202610301600';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610301600';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610301600';
+import * as Kacheln from './kacheln.js?v=202610301600';
+import * as Lernen from './lernen.js?v=202610301600';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610301600';
+import * as A from './auftraege.js?v=202610301600';
+import * as E from './erfolge.js?v=202610301600';
+import * as ZL from './ziele.js?v=202610301600';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -295,7 +295,7 @@ function ankommen(erstesMal) {
   if (S.silvesterFaellig()) meldungen.push(['silvester']);
   const tueren = S.offeneTueren();
   // 26.10.: höchstens einmal am Tag - vorher bei jeder Rückkehr in die App wieder („24 Türchen warten …")
-  if (tueren > 0 && !erstesMal && S.st.tuerMeldung !== Z.tagesSchluessel() && (S.st.tuerMeldung = Z.tagesSchluessel())) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
+  if (tueren > 0 && !erstesMal && !S.winterpause() && S.st.tuerMeldung !== Z.tagesSchluessel() && (S.st.tuerMeldung = Z.tagesSchluessel())) UI.toast(S.vorfreudeBereit() ? 'Ein Vorfreude-Päckchen wartet im Kalender!' : tueren === 1 ? 'Ein Türchen wartet im Adventskalender!' : `${tueren} Türchen warten im Kalender!`, 'spezial');
   S.speichere();
   // Schon Wartendes nicht doppelt (Kiste, Ereignisse)
   for (const m of meldungen) if (!warteschlange.some((w) => w[0] === m[0] && w[1] === m[1])) warteschlange.push(m);
@@ -412,7 +412,7 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', () => S.speichere());
 
-let neuGesammelt = [], neuZuletzt = 0;
+let neuGesammelt = [], neuZuletzt = 0, sockenSammel = [], sockenZuletzt = 0;
 // Neuer Tag / Schnee während die App offen ist: jede Minute nachsehen
 let letzterTag = Z.tagesSchluessel();
 setInterval(() => {
@@ -501,10 +501,12 @@ setInterval(() => {
     S.st.vorschauTag = Z.tagesSchluessel(); S.speichere();
     UI.toast(UI.vorschauText(), 'neu');
   }
-  if (erfolge.length && S.startzieleFertig()) {   // Socken zählen immer, gemeldet erst nach den Startzielen
+  // 30.10. (Testbericht: vier Socken-Einblendungen in zwei Minuten): gesammelt, höchstens eine je 90 s
+  if (erfolge.length && S.startzieleFertig()) { sockenSammel.push(...erfolge); S.speichere(); }   // Socken zählen immer, gemeldet erst nach den Startzielen
+  if (sockenSammel.length && Date.now() - sockenZuletzt > 90000 && !UI.fensterOffen()) {
     T.spiele('spezial');
-    UI.toast(erfolge.length === 1 ? `Neue Socke an der Erfolgswand: ${erfolge[0].name}!` : `${erfolge.length} neue Socken an der Erfolgswand!`, 'neu');
-    S.speichere();
+    UI.toast(sockenSammel.length === 1 ? `Neue Socke an der Erfolgswand: ${sockenSammel[0].name}!` : `${sockenSammel.length} neue Socken an der Erfolgswand: ${sockenSammel.map((e) => e.name).join(', ')}!`, 'neu');
+    sockenSammel = []; sockenZuletzt = Date.now();
   }
   UI.neuMarke();
   UI.aktualisiereLaden();

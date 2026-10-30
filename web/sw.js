@@ -4,7 +4,7 @@
  * mit „Cache zuerst" sähe man nach einer Änderung tagelang die alte
  * Fassung. Offline kommt trotzdem alles aus dem Cache.
  */
-const VERSION = 'adventshaus-202610301400';   // bei jedem Update erhöhen (wie ?v= in index.html)
+const VERSION = 'adventshaus-202610301600';   // bei jedem Update erhöhen (wie ?v= in index.html)
 const SCHALE = ['./', './index.html', './styles.css', './manifest.webmanifest', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './fonts/Nunito.ttf', './fonts/PixelifySans.ttf'];
 
 self.addEventListener('install', (e) => {
@@ -22,6 +22,7 @@ self.addEventListener('fetch', (e) => {
     fetch(req).then((res) => {
       if (res.ok && res.status === 200) { const kopie = res.clone(); caches.open(VERSION).then((c) => c.put(req, kopie)); }
       return res;
-    }).catch(() => caches.match(req).then((r) => r || caches.match('./index.html')))
+    // 30.10.: index.html nur für Seitenaufrufe - ein fehlendes Modul bekam sonst HTML und brach mit Syntaxfehler ab
+    }).catch(() => caches.match(req).then((r) => r || (req.mode === 'navigate' ? caches.match('./index.html') : Response.error())))
   );
 });

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610301400';
-import * as Z from './zeit.js?v=202610301400';
-import { neueFarben } from './pixel.js?v=202610301400';
+import * as C from './config.js?v=202610301600';
+import * as Z from './zeit.js?v=202610301600';
+import { neueFarben } from './pixel.js?v=202610301600';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -75,6 +75,9 @@ function laden() {
       // Seit dem Einstieg in Wellen (11.10.) hingen sonst Händler, Gäste und
       // Nikolaus für solche Spieler für immer an Spieltag 0.
       if (!('startTag' in alt) && alt.intro) stand.startTag = null;
+      // 30.10. (Testbericht): Dieselbe Falle für `lernen` - neuerStand() trägt 0, ein alter Stand ohne die
+      // Marke, der schon gespielt hat, bekam sonst die Einführung noch einmal
+      if (!('lernen' in alt) && alt.intro) stand.lernen = 99;
       // 25.10. (gemeldet: „Markt in 4 Tagen", jeden Tag wieder): Wer zwischen 01.10. und 11.10.
       // geladen hat, bekam startTag 0 aus neuerStand() GESPEICHERT - die Reparatur oben greift
       // nur, wenn der Eintrag fehlt. Spieltag blieb 0, der Markt-Anker wanderte täglich mit.
@@ -1022,7 +1025,7 @@ export function tippeZelle(i) {
     // Wer mit leerem Glas kam, wollte einschenken - sagen, warum nichts passiert
     // (sonst blieb das Glas still leer stehen, Betatest 02.10.). Nur die
     // ersten zwei Male als Text, danach reicht das blinkende LEER am Topf.
-    else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS && (st.topfHinweise || 0) < 2 && st.tipps && st.tipps.leer) {   // 24.10.: nicht neben der Blase „4-mal antippen" (widersprach sich mit „Noch 3×")
+    else if (lauf.fuellen[p.id] < 1.5 / C.NACHFUELL_TIPPS && (st.topfHinweise || 0) < 1 && st.tipps && st.tipps.leer) {   // 30.10.: einmal reicht   // 24.10.: nicht neben der Blase „4-mal antippen" (widersprach sich mit „Noch 3×")
       st.topfHinweise = (st.topfHinweise || 0) + 1;
       const noch = C.NACHFUELL_TIPPS - Math.round(lauf.fuellen[p.id] * C.NACHFUELL_TIPPS);
       hooks.toast(`${p.name} ist leer! Noch ${noch}× antippen, dann ist es wieder voll.`, 'hinweis');
@@ -1411,7 +1414,7 @@ export function update(dt) {
     lauf.stossBis = lauf.t + C.STOSS_DAUER;
     lauf.stossMult = 2; lauf.ansturm = false;
     lauf.stossName = C.STOSS_GRUPPEN[Math.floor(Math.random() * C.STOSS_GRUPPEN.length)];
-    hooks.toast(`${lauf.stossName} kommt! Doppeltes Trinkgeld.`, 'spezial');
+    hooks.toast(`${lauf.stossName} kommt vorbei! Doppeltes Trinkgeld, wenn du servierst.`, 'spezial');   // 30.10.: wie beim Ansturm sagen, dass es nur von dir kommt
     hooks.ton('spezial');
   }
 
@@ -1735,7 +1738,10 @@ function marktStand() {
 }
 /** Ist an Tag `d` Markt? Erster Markt MARKT_ERST Tage nach dem Anker, dann alle 3-4 Tage. */
 function istMarkt(d) {
-  if (Z.dezemberTag(new Date(d * 86400000 + 12 * 3600000)) >= 24) return false;   // 29.10.: ab Heiligabend kein Markt mehr
+  // 29.10.: ab Heiligabend kein Markt; 30.10. (Testbericht, Spätstarter): wieder vom 25.12. bis 6.1. - nur
+  // Heiligabend selbst und die Pause nicht (sonst bekam, wer ab Mitte Dezember spielt, nicht alle Markt-Deko)
+  const mdt = Z.dezemberTag(new Date(d * 86400000 + 12 * 3600000));
+  if (mdt === 24 || mdt >= C.SAISON_ENDE_TAG) return false;
   const m = marktStand();
   let k = m.anker + C.MARKT_ERST;
   while (k < d) k += C.MARKT_ABSTAND[0] + (Z.hash(m.seed + k) < 0.5 ? 0 : C.MARKT_ABSTAND[1] - C.MARKT_ABSTAND[0]);
@@ -2064,6 +2070,10 @@ export function wichtelProSekunde() {
 export function offlineAbrechnen() {
   const weg = (Date.now() - st.zuletzt) / 1000;
   if (weg < C.OFFLINE_AB) return null;
+  // 30.10. (Testbericht, bestätigt: Kiste dreifach): ankommen() läuft beim Laden, bei visibilitychange
+  // und beim Tageswechsel, und speichere() stempelt `zuletzt` nur bei sichtbarer Seite. Lud die Seite
+  // verdeckt, rechnete jeder Lauf dieselbe Abwesenheit noch einmal. Jetzt gilt sie sofort als abgerechnet.
+  st.zuletzt = Date.now();
   let sek = Math.min(weg, offlineStunden() * 3600);
   // 29.10.: Heiligabend ab 16 Uhr und in der Winterpause hat der Stand zu - diese Zeit zählt nicht
   const jetztMs = Z.jetzt().getTime(), SCHRITT = 300;

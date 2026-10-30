@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610301400';
-import * as S from './spiel.js?v=202610301400';
-import * as Z from './zeit.js?v=202610301400';
-import * as T from './ton.js?v=202610301400';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301400';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610301400';
-import { zielHaus } from './fein.js?v=202610301400';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301400';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301400';
-import * as A from './auftraege.js?v=202610301400';
-import * as E from './erfolge.js?v=202610301400';
-import * as ZL from './ziele.js?v=202610301400';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301400';
-import * as KA from './karte.js?v=202610301400';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301400';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610301400';
-import * as SW from './schneeball.js?v=202610301400';
-import * as LI from './lichtung.js?v=202610301400';
-import * as CB from './christbaum.js?v=202610301400';
-import * as SB from './schlitten.js?v=202610301400';
-import * as EB from './schlittschuh.js?v=202610301400';
-import * as BS from './backstube.js?v=202610301400';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301400';
+import * as C from './config.js?v=202610301600';
+import * as S from './spiel.js?v=202610301600';
+import * as Z from './zeit.js?v=202610301600';
+import * as T from './ton.js?v=202610301600';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301600';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610301600';
+import { zielHaus } from './fein.js?v=202610301600';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301600';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301600';
+import * as A from './auftraege.js?v=202610301600';
+import * as E from './erfolge.js?v=202610301600';
+import * as ZL from './ziele.js?v=202610301600';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301600';
+import * as KA from './karte.js?v=202610301600';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301600';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610301600';
+import * as SW from './schneeball.js?v=202610301600';
+import * as LI from './lichtung.js?v=202610301600';
+import * as CB from './christbaum.js?v=202610301600';
+import * as SB from './schlitten.js?v=202610301600';
+import * as EB from './schlittschuh.js?v=202610301600';
+import * as BS from './backstube.js?v=202610301600';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301600';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -227,11 +227,14 @@ export function toast(text, art = 'normal') {
   if (!toastT) naechsterToast();
 }
 const TOAST_STAU = 3;
-let aktuellerToast = null;
+let aktuellerToast = null, toastSeit = 0;
 /** Geht ein Fenster auf, wartet eine gerade laufende Einblendung (außer kurzen Rückmeldungen), bis es zu ist. */
 function toastZurueckstellen() {
   const n = aktuellerToast, e = $('#toast');
   if (!n || n[1] === 'hinweis' || !e.classList.contains('zeigen')) return;
+  // 30.10. (Testbericht, bestätigt: „+200 Sterne“ kam zweimal): Wer sie schon eine Sekunde gesehen hat,
+  // bekommt sie nach dem Fenster nicht noch einmal - sie verschwindet nur (der Verlauf hat sie)
+  if (performance.now() - toastSeit > 1000) { e.classList.remove('zeigen'); return; }
   clearTimeout(toastT);
   e.classList.remove('zeigen');
   toastWarteschlange.unshift(n);
@@ -284,6 +287,7 @@ function naechsterToast() {
   e.style.top = '';
   if (tippOben) e.style.top = (tipp.offsetTop + tipp.offsetHeight + 6) + 'px';
   e.className = 'zeigen ' + n[1];
+  toastSeit = performance.now();
   const dauer = n[1] === 'hinweis' ? 1800 : n[1] === 'neu' ? 3600 : 2600;
   toastT = setTimeout(() => {
     if (n[2]) { fliegeZumKnopf(e, n[2]); toastT = setTimeout(naechsterToast, 650); }
@@ -827,7 +831,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301400`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301600`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -970,6 +974,9 @@ function baueLaden() {
     zeichneIcon(ziel.lastChild.querySelector('canvas'), { id: 'gluehwein', produkt: true });
   }
   const neu = S.st.neu || {};
+  // 30.10. (Testbericht: am ersten Tag mehr „???“ als Kaufbares): je Abschnitt höchstens zwei verdeckte
+  // Zeilen - die, die als Nächstes frei werden. Der Rest steht als eine Zeile darunter.
+  const VERDECKT_MAX = 2, verdeckt = new Map();
   for (const a of artikel) {
     // Überschrift nur, wo es mehrere Gruppen gibt (11.10.: „Zutaten" im Supermarkt war überflüssig)
     if (mitAbschnitten && abschnittVon(a) !== gruppe) {
@@ -978,6 +985,12 @@ function baueLaden() {
       ziel.dataset.abschnitt = gruppe;
     }
     const versteckt = S.status(a).versteckt;
+    if (versteckt) {
+      const v = verdeckt.get(ziel) || { n: 0, rest: 0 };
+      verdeckt.set(ziel, v);
+      if (v.n >= VERDECKT_MAX) { v.rest++; continue; }
+      v.n++;
+    }
     const z = el('div', 'zeile' + (versteckt ? ' verdeckt' : '') + (neu[a.id] ? ' neu' : ''));
     const cv = el('canvas', 'ico'); cv.width = 16; cv.height = 16;
     zeichneIcon(cv, a);
@@ -1012,6 +1025,7 @@ function baueLaden() {
     ziel.appendChild(z);
     zeilen.push({ a, z, knopf, txt, versteckt });
   }
+  for (const [k, v] of verdeckt) if (v.rest) k.appendChild(el('p', 'klein mehr-kommt', `+ ${v.rest} ${v.rest === 1 ? 'weiteres Stück kommt' : 'weitere Stücke kommen'} später dazu.`));
   if (ladenTab === 'super') rezeptZeilen(liste);
   aktualisiereLaden();
 }
@@ -2878,7 +2892,7 @@ export function frageName(umbenennen = false, danach) {
 // Kalender - und je ein Satz, was passiert. Die ids bleiben 'eigen' und 'echt' (Spielstände).
 export const MODUS_NAME = { eigen: 'Eigener Advent', echt: 'Echter Kalender' };
 export function waehleModus(fertig) {
-  const heute = new Date();
+  const heute = Z.jetzt();   // 30.10.: Spieluhr statt new Date() - gleich im Spiel, beim Testen mit ?datum= stimmig
   // 29.10. (Nutzerwunsch): Nach dem Ende der Saison (ab 7. Januar) gibt es keine Wahl - der echte
   // Kalender stünde in der Winterpause. Neue Spieler beginnen dann immer ihren eigenen Advent.
   if (Z.dezemberTag(Z.jetzt()) >= C.SAISON_ENDE_TAG) { setTimeout(() => fertig('eigen'), 0); return; }
@@ -2893,7 +2907,7 @@ export function waehleModus(fertig) {
   const marke = ' <i class="empf">Empfohlen</i>';
   const klassisch = `<button class="modus${echtEmpf ? ' empfohlen' : ''}" data-m="echt">
       <b>🕯️ ${MODUS_NAME.echt}${echtEmpf ? marke : ''}</b>
-      <span>Das Spiel hat das echte Datum (heute der ${datum}). ${wann ? `Das erste Türchen gibt es am 1. Dezember - also ${wann}.` : m === 11 ? 'Du steigst mitten im Advent ein.' : 'Die Adventszeit ist gerade vorbei - sie kommt erst im Dezember wieder.'}</span>
+      <span>Das Spiel läuft mit dem echten Datum (heute ist der ${datum}). ${wann ? `Das erste Türchen gibt es am 1. Dezember - also ${wann}.` : m === 11 ? 'Du steigst mitten im Advent ein.' : 'Die Adventszeit ist gerade vorbei - sie kommt erst im Dezember wieder.'}</span>
     </button>`;
   const individuell = `<button class="modus${echtEmpf ? '' : ' empfohlen'}" data-m="eigen">
       <b>🎄 ${MODUS_NAME.eigen}${echtEmpf ? '' : marke}</b>
@@ -3157,7 +3171,7 @@ function kartenText(nr, ohneLeute, gruss) {
   const k = S.st.karteText || {};
   fenster('Text der Karte', `
     <label>Gruß<br><input type="text" id="ktGruss" maxlength="32" value="${esc(k.gruss || gruss)}"></label>
-    <label>Grußzeile (dahinter steht „Haus“ und euer Hausname)<br><input type="text" id="ktVon" maxlength="30" value="${esc(k.von || VON_VORGABE)}"></label>
+    <label>Grußzeile (dahinter steht „Haus“ und dein Hausname)<br><input type="text" id="ktVon" maxlength="30" value="${esc(k.von || VON_VORGABE)}"></label>
     <p class="klein">… ${esc(S.st.name || 'uns')} · Datum und „Punsch &amp; Lichterglanz“ stehen immer darunter.</p>`, [
     { text: 'Übernehmen', aktion: (box) => {
       const g = box.querySelector('#ktGruss').value.trim(), v = box.querySelector('#ktVon').value.trim();
@@ -3215,7 +3229,7 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   // Gemeldet: auf Android dauerte es „ewig" bis zur Karte. Das Fenster zeigt
   // jetzt SOFORT das gemalte Bild selbst; die PNG-Datei fürs Teilen entsteht
   // danach im Hintergrund und ist meist fertig, bevor man „Teilen" tippt.
-  const box = fenster('Deine Weihnachtskarte', '', [
+  const box = fenster('Dein Weihnachtsfoto', '', [   // 30.10.: „Karte“ ist schon die Landkarte
     { text: 'Teilen', aktion: (b) => {
       const knopf = b.querySelector('.knoepfe .k');
       knopf.textContent = 'Moment …';

@@ -14,8 +14,8 @@
  *
  * Stand in st.ziel (Index des aktuellen Ziels, ZIELE.length = fertig).
  */
-import * as S from './spiel.js?v=202610301400';
-import * as A from './auftraege.js?v=202610301400';
+import * as S from './spiel.js?v=202610301600';
+import * as A from './auftraege.js?v=202610301600';
 
 // Die ersten drei Deko-Teile: die billigsten, die früh zu sehen sind
 export const START_DEKO = ['kranz', 'girlande', 'lichter_dach'];
@@ -81,26 +81,40 @@ export function naechstes() {
   // beim Sparen zweimal von einem Ausbau verdrängt, sobald die Kasse ihn in Reichweite brachte)
   if (gemerkt) {
     const a = S.ARTIKEL_MAP[gemerkt.id], s = a && S.status(a);
-    if (s && S.stufe(a.id) === gemerkt.stufe && !s.versteckt && !s.fertig && !s.grund && s.kosten != null) return a;
+    if (s && S.stufe(a.id) === gemerkt.stufe && !s.versteckt && !s.fertig && !s.grund && s.kosten != null && ortDa(a.tab)) return a;
+    // gekauft (oder weggefallen): Beim nächsten Mal ist die andere Sorte dran (30.10.)
+    zuletztMeilen = !!(a && istMeilenstein(a));
     gemerkt = null;
   }
-  let best = null, preis = Infinity, meilen = null, mPreis = Infinity;
+  let best = null, preis = Infinity, meilen = null, mPreis = Infinity, deko = null, dPreis = Infinity;
   for (const a of S.ARTIKEL_LISTE) {
     if (a.luxus || (a.luxusAb && S.stufe(a.id) >= a.luxusAb - 1)) continue;
+    if (!ortDa(a.tab)) continue;   // 30.10.: nur aus Orten, die schon offen und vorgestellt sind
     const s = S.status(a);
     if (s.versteckt || s.fertig || s.grund || s.kosten == null) continue;
     if (istMeilenstein(a) && s.kosten < mPreis) { mPreis = s.kosten; meilen = a; }
+    if (S.istDeko(a) && s.kosten < dPreis) { dPreis = s.kosten; deko = a; }
     if (s.kosten < preis) { preis = s.kosten; best = a; }
   }
   // 24.10. (Nutzerwunsch, „keine endlose Einkaufsliste"): Meilensteine zuerst - neues Getränk,
   // Helfer oder Ausbau am Stand -, solange der nächste in Reichweite ist (Kasse + REICHWEITE_MIN
   // Minuten Einnahmen). Sonst das billigste Teil, meist Deko, bis man sich ihm nähert.
+  // 30.10. (Testbericht: ♥ blieb nach den Startzielen bei 9, die Leiste schlug nur Stand-Teile vor):
+  // Nach einem Meilenstein ist immer erst ein Deko-Stück dran - das Ziel ist das schönste Haus.
   const reichweite = Math.max(0, S.st.geld) + S.einnahmenProMinute() * REICHWEITE_MIN;
-  const wahl = meilen && mPreis <= reichweite ? meilen : best;
+  const wahl = zuletztMeilen && deko ? deko : meilen && mPreis <= reichweite ? meilen : deko || best;
   if (wahl) gemerkt = { id: wahl.id, stufe: S.stufe(wahl.id) };
   return wahl;
 }
 let gemerkt = null;   // { id, stufe } des gezeigten Ziels - nur für diese Sitzung
+let zuletztMeilen = false;   // war das zuletzt gekaufte Ziel ein Meilenstein? Dann ist Deko dran
+/** Ist der Ort des Ladens schon offen und vorgestellt? Der Baumarkt erst nach seinem Hinweis (30.10., Testbericht). */
+const ORT_ID = { super: 'super', markt: 'dorf', baumarkt: 'bau', wichtel: 'wichtel' };
+function ortDa(tab) {
+  if (!S.ortOffen({ id: ORT_ID[tab] || tab })) return false;
+  if (tab === 'baumarkt' && !(S.st.tipps && (S.st.tipps.baumarkt || S.st.orteAlle))) return false;
+  return true;
+}
 
 /** Bringt das Teil den Stand voran (statt nur das Haus)? Getränke, Wichtel, Ausbauten am Stand. */
 const REICHWEITE_MIN = 8;   // 24.10.: erst 20 - dann kam kaum Deko (♥ 19 nach 22 min)

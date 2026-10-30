@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202610301400';
-import * as S from './spiel.js?v=202610301400';
-import * as A from './auftraege.js?v=202610301400';
-import * as E from './erfolge.js?v=202610301400';
-import * as Z from './ziele.js?v=202610301400';
-import * as ZE from './zeit.js?v=202610301400';
-import * as KA from './karte.js?v=202610301400';
-import { zellePos } from './tresen.js?v=202610301400';
+import * as C from './config.js?v=202610301600';
+import * as S from './spiel.js?v=202610301600';
+import * as A from './auftraege.js?v=202610301600';
+import * as E from './erfolge.js?v=202610301600';
+import * as Z from './ziele.js?v=202610301600';
+import * as ZE from './zeit.js?v=202610301600';
+import * as KA from './karte.js?v=202610301600';
+import { zellePos } from './tresen.js?v=202610301600';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -179,7 +179,11 @@ const HINWEISE = [
     ziel: () => ({ x: 164, y: 30 }), dauer: 14 },
   // 26.10.: `hausknopf` ist weg - `deko_danach` und die Kauf-Einblendung nennen den Knopf schon
   { id: 'deko', sofort: true, wann: () => zielDran('deko', 'kranz') || (istZiel('deko') && S.hat('kranz')),
-    info: () => (S.hat('kranz') ? 'Deine erste Deko hängt!' : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen.') + ' Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus im Dorf werden!',
+    // 30.10. (Testbericht: zwei Blasen hintereinander mit „♥ Stimmung“): Hängt der Kranz schon, steht der
+    // Satz zum Haus-Knopf hier mit drin, und `deko_danach` gilt als gezeigt
+    info: () => S.hat('kranz')
+      ? ((S.st.tipps.deko_danach = true), 'Deine erste Deko hängt! Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, sie zahlen mehr, und mehr ♥ schaltet Neues frei. Mit dem Knopf „Haus“ oben links schmückst du dein Haus (Lichter, Farben, Varianten).')
+      : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen. Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus im Dorf werden!',
     text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
   { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
@@ -278,7 +282,7 @@ const HINWEISE = [
     text: () => 'Gäste mit „DU!“ über dem Bläschen bedienst nur du - beim Ansturm, eilige und besondere Gäste und was in einer Bitte gewünscht ist. Die Wichtel warten so lange.',
     ziel: () => { const g = nurDuGast(); return gastZiel(g ? g.platz : 0); }, fertig: () => !nurDuGast() },
   { id: 'eilig', ruhig: true, sofort: true, wann: () => S.lauf.gaeste.some((g) => g.eilig && g.am && !g.bedient),
-    text: () => 'Ein eiliger Gast (orange Blase)! Er wartet nur kurz, zahlt aber doppelt.',
+    text: () => `Ein eiliger Gast (orange Blase)! Er wartet nur kurz, zahlt aber doppelt.${S.aufsicht() ? ' Ihn bedienst nur du - die Wichtel lassen ihn für dich stehen („DU!“).' : ''}`,
     ziel: () => { const g = S.lauf.gaeste.find((x) => x.eilig && x.am); return gastZiel(g ? g.platz : 0); }, dauer: 6 },
   // Aufträge und Socken erst nach den Startzielen (Einstieg in Wellen, 11.10.)
   // Aufsicht und goldene Gäste (17.10.): beim ersten goldenen Gast am Tresen

@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202610301400';
-import * as S from './spiel.js?v=202610301400';
-import * as Z from './zeit.js?v=202610301400';
+import * as C from './config.js?v=202610301600';
+import * as S from './spiel.js?v=202610301600';
+import * as Z from './zeit.js?v=202610301600';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -95,7 +95,7 @@ export function abholbar() {
 export const MINI_NAME = { lichtung: 'Waldlichtung', baum: 'Christbaumverkauf', back: 'Backstube', eis: 'Eisbahn', berg: 'Schlittenberg', schnee: 'Schneeballwiese' };
 const karteDa = () => !!(S.st.tipps && S.st.tipps.karte_mehr);
 function bitteGeht(d) {
-  if (d.art === 'getraenk') return S.hat(d.p);
+  if (d.art === 'getraenk') return S.hat(d.p) && S.aufKarte(d.p);   // 30.10.: nur, was gerade im Angebot steht (sonst bestellt es niemand)
   if (d.art === 'backen') return karteDa() && S.miniOffen('back');
   if (d.art === 'mini') return karteDa() && S.miniOffen(d.spiel);
   if (d.art === 'futter') return S.hat('futterhaus');
