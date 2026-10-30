@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610301800';
-import * as C from './config.js?v=202610301800';
-import * as S from './spiel.js?v=202610301800';
-import * as Z from './zeit.js?v=202610301800';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202610301900';
+import * as C from './config.js?v=202610301900';
+import * as S from './spiel.js?v=202610301900';
+import * as Z from './zeit.js?v=202610301900';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -581,6 +581,14 @@ function brett(c, y, t) {
     if (!h) { r(c, x + 5, by + 1, 10, 2, '#b0b0bc'); continue; }   // freier Platz
     const hoch = S.lauf.neuInHand === i && S.lauf.neuInHandT > 0 ? 2 : 0;
     if (h.art === 'glas') glasGross(c, x, by - 17 - hoch);
+    else if (h.rest > 0 && C.PRODUKT[h.id].art === 'dose') {
+      // 30.10. (Nutzer: „es füllt sich eine Tasse - gibt wenig Sinn"): Der Lebkuchen steht blass vorgezeichnet
+      // da und baut sich von unten nach oben auf, so lange wie die Zubereitung dauert
+      const a = Math.max(0, Math.min(1, 1 - h.rest / (h.dauer || 1)));
+      c.save(); c.globalAlpha = 0.28; iconGross(c, h.id, x, by - 19, t, true); c.restore();
+      c.save(); c.beginPath(); c.rect(x - 3, by - 19 + Math.round(21 * (1 - a)), 26, 24); c.clip(); iconGross(c, h.id, x, by - 19, t, true); c.restore();
+      if (h.vonWichtel) wichtelKlein(c, x + 1, by, t);
+    }
     else if (h.rest > 0) {
       // In Zubereitung: ein Glas, das sich von unten füllt (19.10.: der gelbe Balken darüber ist weg - das Glas zeigt es schon)
       const a = Math.max(0, Math.min(1, 1 - h.rest / (h.dauer || 1)));

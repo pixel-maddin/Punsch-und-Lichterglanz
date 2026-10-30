@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610301800';
-import * as S from './spiel.js?v=202610301800';
-import * as Z from './zeit.js?v=202610301800';
-import * as T from './ton.js?v=202610301800';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301800';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610301800';
-import { zielHaus } from './fein.js?v=202610301800';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301800';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301800';
-import * as A from './auftraege.js?v=202610301800';
-import * as E from './erfolge.js?v=202610301800';
-import * as ZL from './ziele.js?v=202610301800';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301800';
-import * as KA from './karte.js?v=202610301800';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301800';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610301800';
-import * as SW from './schneeball.js?v=202610301800';
-import * as LI from './lichtung.js?v=202610301800';
-import * as CB from './christbaum.js?v=202610301800';
-import * as SB from './schlitten.js?v=202610301800';
-import * as EB from './schlittschuh.js?v=202610301800';
-import * as BS from './backstube.js?v=202610301800';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301800';
+import * as C from './config.js?v=202610301900';
+import * as S from './spiel.js?v=202610301900';
+import * as Z from './zeit.js?v=202610301900';
+import * as T from './ton.js?v=202610301900';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301900';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610301900';
+import { zielHaus } from './fein.js?v=202610301900';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301900';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301900';
+import * as A from './auftraege.js?v=202610301900';
+import * as E from './erfolge.js?v=202610301900';
+import * as ZL from './ziele.js?v=202610301900';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301900';
+import * as KA from './karte.js?v=202610301900';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301900';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610301900';
+import * as SW from './schneeball.js?v=202610301900';
+import * as LI from './lichtung.js?v=202610301900';
+import * as CB from './christbaum.js?v=202610301900';
+import * as SB from './schlitten.js?v=202610301900';
+import * as EB from './schlittschuh.js?v=202610301900';
+import * as BS from './backstube.js?v=202610301900';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301900';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -593,6 +593,14 @@ export function starteBaumspiel(stufeNr = 1) {
  * Minispiel golden im Feld. Manchmal sitzt ein Eichhörnchen in einem Baum.
  */
 const BS_W = 132, BS_H = 64, BEET_X = [18, 50, 82, 114], BEET_Y = 54;
+/** Kleines Bäumchen (11 x 14) für die Pflanz-Knöpfe, in den Farben der Sorte wie im Christbaumverkauf. */
+const BAEUMCHEN = { nordmann: ['#1f5a32', '#2f7a44'], blau: ['#4a7a98', '#7aa8c4'], fichte: ['#4e8a3a', '#7ab85a'] };
+function baeumchen(cv, art) {
+  const c = cv.getContext('2d'), [d, h] = BAEUMCHEN[art] || BAEUMCHEN.nordmann;
+  [1, 3, 5, 3, 5, 7, 5, 7, 9, 7, 9, 11].forEach((b, y) => { r(c, 5.5 - b / 2, y, b, 1, d); r(c, 5.5 - b / 2, y, Math.ceil(b / 2), 1, h); });
+  r(c, 4, 12, 3, 2, '#6a4222');
+  if (art === 'fichte') { p(c, 3, 8, '#8a5a2a'); p(c, 7, 10, '#8a5a2a'); }
+}
 const SORTE_KURZ = { nordmann: 'Nordmann', blau: 'Blaufichte', fichte: 'Fichte' };
 export function zeigeBaumschule() {
   const box = fenster('Baumschule', `
@@ -622,9 +630,12 @@ export function zeigeBaumschule() {
       const karte = el('div', 'beet');
       if (!b) {
         karte.innerHTML = `<b>Beet ${i + 1}</b><span>leer - was pflanzen?</span>`;
+        // 30.10. (Nutzer: „Buttons zu groß"): drei kleine Knöpfe nebeneinander - Bäumchen, darunter klein der Name
         const reihe = el('div', 'beet-wahl');
         for (const art of Object.keys(SORTE_KURZ)) {
-          const k = el('button', 'k k--neben', SORTE_KURZ[art]);
+          const k = el('button', 'k k--neben bw', `<canvas width="11" height="14"></canvas><small>${SORTE_KURZ[art].replace('Blaufichte', 'Blau\u00ADfichte')}</small>`);
+          k.setAttribute('aria-label', `${SORTE_KURZ[art]} pflanzen`);
+          baeumchen(k.querySelector('canvas'), art);
           k.onclick = () => { S.pflanze(i, art); neu(); };
           reihe.appendChild(k);
         }
@@ -835,7 +846,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301800`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301900`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610301800';
-import * as Z from './zeit.js?v=202610301800';
-import { neueFarben } from './pixel.js?v=202610301800';
+import * as C from './config.js?v=202610301900';
+import * as Z from './zeit.js?v=202610301900';
+import { neueFarben } from './pixel.js?v=202610301900';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1738,10 +1738,9 @@ function marktStand() {
 }
 /** Ist an Tag `d` Markt? Erster Markt MARKT_ERST Tage nach dem Anker, dann alle 3-4 Tage. */
 function istMarkt(d) {
-  // 29.10.: ab Heiligabend kein Markt; 30.10. (Testbericht, Spätstarter): wieder vom 25.12. bis 6.1. - nur
-  // Heiligabend selbst und die Pause nicht (sonst bekam, wer ab Mitte Dezember spielt, nicht alle Markt-Deko)
-  const mdt = Z.dezemberTag(new Date(d * 86400000 + 12 * 3600000));
-  if (mdt === 24 || mdt >= C.SAISON_ENDE_TAG) return false;
+  // 29.10.: ab Heiligabend kein Markt mehr. (30.10. kurz bis 6.1. verlängert - auf Nutzerwunsch wieder zurück:
+  // „nach dem 24.12. sollte der Markt nicht mehr kommen")
+  if (Z.dezemberTag(new Date(d * 86400000 + 12 * 3600000)) >= 24) return false;
   const m = marktStand();
   let k = m.anker + C.MARKT_ERST;
   while (k < d) k += C.MARKT_ABSTAND[0] + (Z.hash(m.seed + k) < 0.5 ? 0 : C.MARKT_ABSTAND[1] - C.MARKT_ABSTAND[0]);

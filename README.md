@@ -213,8 +213,7 @@ Pinguin auf dem Gehweg und Sternschnuppen am Nachthimmel.
 lugt hinter einem Busch oder einer Tanne hervor. Wer ihn findet und antippt,
 bekommt Sterne geschenkt.
 
-**Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt (bis zum 6. Januar,
-nur an Heiligabend nicht) - er wird
+**Weihnachtsmarkt (Festplatz):** Alle drei bis vier Tage ist Markt (bis zum 23. Dezember) - er wird
 ein paar Tage vorher angekündigt, und auf der Karte steht am Festplatz, wann.
 Am Markttag kommen 20 % mehr Gäste an deinen Stand, und auf dem Markt gibt es
 Deko, die es nur dort gibt (Riesenrad, Herrnhuter Stern, Pferdekutsche,

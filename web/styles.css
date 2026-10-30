@@ -1563,7 +1563,7 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .bereich .ruf-kopf { margin-bottom: calc(var(--px) * 2.5); }
 .bereich .auftrag2:last-of-type, .bereich .bitte-zettel:last-child { margin-bottom: calc(var(--px) * 2.5); }
 .bereich .sammel2 { margin-bottom: calc(var(--px) * 2.5); }
-.bereich-heute > summary small { color: #2e7a3a; }
+.bereich-heute > summary small { color: #5a3a7a; }
 
 /* Menü (28.10. abends): alle Knöpfe untereinander; „Statistiken & Infos" und „Sternebonus" als hohe Knöpfe,
    damit sie sich von den normalen Knöpfen darunter abheben (Titel links, rechts Wetter bzw. Pfeil) */
@@ -1685,8 +1685,8 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .bereich-ruf, .bereich-heute, .bereich-gaeste, .bereich-sammel { border-left-width: calc(var(--px) * 2.4); overflow: hidden; }
 .bereich-ruf { border-color: #e0b040; }
 .bereich-ruf > summary { background: #fbe9b4; color: #7a5410; }
-.bereich-heute { border-color: #6aa85a; }
-.bereich-heute > summary { background: #dcefd2; color: #2f6a2f; }
+.bereich-heute { border-color: #9a78b8; }   /* 30.10.: Advents-Violett - Grün bedeutet bei den Karten „erledigt" */
+.bereich-heute > summary { background: #ece2f4; color: #5a3a7a; }
 .bereich-gaeste { border-color: #5a86c0; }
 .bereich-gaeste > summary { background: #dce8f6; color: #2a4a80; }
 .bereich-sammel { border-color: #c0605a; }
@@ -1719,3 +1719,10 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 :focus-visible { outline: calc(var(--px) * 1) solid #ffd860; outline-offset: calc(var(--px) * 0.6); border-radius: calc(var(--px) * 2); }
 #blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 19); font-size: var(--t-betont); }   /* 30.10.: Menüknöpfe ~38 px hoch */
 .kipp { min-height: calc(var(--px) * 15); }   /* 30.10.: An/Aus-Schalter in „Haus schmücken“ etwas höher */
+
+/* 30.10.: Baumschule - drei kleine Pflanz-Knöpfe nebeneinander (vorher drei breite Knöpfe untereinander) */
+.beet-wahl { grid-template-columns: repeat(3, 1fr); gap: calc(var(--px) * 1.2); }
+#modal .beet .k.bw { min-height: 0; padding: calc(var(--px) * 1.4) calc(var(--px) * 0.5) calc(var(--px) * 1);
+  display: flex; flex-direction: column; align-items: center; gap: calc(var(--px) * 0.6); }
+.beet .bw canvas { width: calc(var(--px) * 11); height: calc(var(--px) * 14); image-rendering: pixelated; }
+.beet .bw small { font: 800 calc(var(--px) * 4.4) var(--schrift); line-height: 1.05; hyphens: manual; color: #fff; }
