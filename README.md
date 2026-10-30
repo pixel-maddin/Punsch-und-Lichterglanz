@@ -278,7 +278,9 @@ Umriss da.
 Beim ersten Start wählt man: **Eigener Advent** (das Spiel beginnt immer am
 24. November, eine Woche vor dem ersten Türchen, egal wann man startet) oder
 **Echter Kalender** (das Spiel hat das echte Datum). Die Uhrzeit ist in beiden
-Fällen echt.
+Fällen echt. Ist der eigene Advent vorbei, bevor der echte vorbei ist, läuft das
+Spiel mit dem echten Kalender weiter: Der Stand hat bis zum echten 6. Januar offen,
+und Heiligabend und Silvester werden zum echten Datum noch einmal gefeiert.
 
 - Nachts ist es dunkel, die Lichter leuchten.
 - Bis zum 30. November ist Spätherbst: kahle Bäume, fallendes Laub, Regen.

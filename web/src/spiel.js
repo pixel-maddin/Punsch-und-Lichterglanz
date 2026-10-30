@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202610301600';
-import * as Z from './zeit.js?v=202610301600';
-import { neueFarben } from './pixel.js?v=202610301600';
+import * as C from './config.js?v=202610301700';
+import * as Z from './zeit.js?v=202610301700';
+import { neueFarben } from './pixel.js?v=202610301700';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2187,7 +2187,7 @@ export function barbaraSchneiden() {
 }
 export function barbaraGiessbar() {
   const b = st.barbara;
-  return !!b && Z.phase() === 'advent' && !b.gegossen.includes(Z.dezemberTag());
+  return !!b && Z.phase() === 'advent' && st.echtesFest !== Z.saison() && !b.gegossen.includes(Z.dezemberTag());
 }
 export function barbaraGiessen() {
   if (!barbaraGiessbar()) return false;
@@ -2200,7 +2200,7 @@ const barbaraBlueten = (b) => Math.min(C.BARBARA_BLUETEN_MAX, C.BARBARA_BLUETEN_
 export function barbaraZustand() {
   const b = st.barbara;
   if (!b || !barbaraZeit()) return null;
-  const dt = Math.min(24, Z.dezemberTag());
+  const dt = st.echtesFest === Z.saison() ? 24 : Math.min(24, Z.dezemberTag());   // 30.10.: nach dem Wechsel bleibt er erblüht
   // Wachstum 0..1 vom Schneiden bis Heiligabend
   const wachs = Math.max(0, Math.min(1, (dt - b.geschnitten) / Math.max(1, 24 - b.geschnitten)));
   return { wachs, bluehen: dt >= 24, blueten: barbaraBlueten(b), gegossen: b.gegossen.length, heuteGegossen: b.gegossen.includes(Z.dezemberTag()) };
@@ -2227,6 +2227,25 @@ export function heiligabendAbend(d = Z.jetzt()) {
 // bis 6.1. ganz normal. Ab 7.1. Winterpause bis zur neuen Saison: nur schmücken und einkaufen.
 // ---------------------------------------------------------------------------
 export const winterpause = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) >= C.SAISON_ENDE_TAG;
+/**
+ * Das echte Fest anhängen (30.10., Testbericht + Nutzerwahl): Wer den eigenen Advent früh begonnen hat
+ * (Versatz > 0), ist mit ihm fertig, bevor der echte vorbei ist - und hätte im echten Dezember Pause.
+ * Dann wechselt das Spiel in den echten Kalender: Stand offen bis zum echten 6.1., Weihnachtsmorgen,
+ * Heiligabend, Silvester und das Pause-Fenster kommen zum echten Datum noch einmal. Türchen, Advente,
+ * Jury und Geschenke bleiben, wie man sie erlebt hat. true = gerade gewechselt (main.js zeigt das Fenster).
+ */
+export function pruefeEchtesFest() {
+  const v = st.modus === 'eigen' ? st.versatzTage || 0 : 0;
+  if (v <= 0 || DEMO || !st.intro) return false;
+  const echt = Z.echtJetzt(), eigen = new Date(echt);
+  eigen.setDate(eigen.getDate() + v);
+  if (Z.dezemberTag(eigen) < C.SAISON_ENDE_TAG) return false;                    // eigener Advent läuft noch
+  if (Z.saison(echt) !== st.saison || Z.dezemberTag(echt) >= C.SAISON_ENDE_TAG) return false;   // echter auch schon vorbei
+  st.modus = 'echt'; st.versatzTage = 0; st.echtesFest = st.saison;
+  st.weihnachtMorgen = null; st.heiligabend = null; st.silvester = null; st.winterpause = null; st.pauseAnsage = null;
+  speichere();
+  return true;
+}
 /** Heiligabend ab 16 Uhr bis Mitternacht: keine Gäste mehr. */
 export const heiligabendZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE;
 export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);

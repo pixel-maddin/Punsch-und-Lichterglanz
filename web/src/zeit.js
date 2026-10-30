@@ -23,6 +23,8 @@ export function jetzt() {
   return d;
 }
 
+/** Die Uhr OHNE Kalenderversatz (30.10., für den Wechsel vom eigenen in den echten Advent). */
+export function echtJetzt() { return new Date(basisSpiel + (Date.now() - basisEcht) * tempo); }
 export function setzeZeit(datum, neuesTempo = tempo) {
   basisEcht = Date.now();
   basisSpiel = datum ? datum.getTime() : Date.now();

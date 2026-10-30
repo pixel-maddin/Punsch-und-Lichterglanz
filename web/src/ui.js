@@ -5,29 +5,29 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202610301600';
-import * as S from './spiel.js?v=202610301600';
-import * as Z from './zeit.js?v=202610301600';
-import * as T from './ton.js?v=202610301600';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301600';
-import { schriftBild, kannSchrift } from './schrift.js?v=202610301600';
-import { zielHaus } from './fein.js?v=202610301600';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301600';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301600';
-import * as A from './auftraege.js?v=202610301600';
-import * as E from './erfolge.js?v=202610301600';
-import * as ZL from './ziele.js?v=202610301600';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301600';
-import * as KA from './karte.js?v=202610301600';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301600';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202610301600';
-import * as SW from './schneeball.js?v=202610301600';
-import * as LI from './lichtung.js?v=202610301600';
-import * as CB from './christbaum.js?v=202610301600';
-import * as SB from './schlitten.js?v=202610301600';
-import * as EB from './schlittschuh.js?v=202610301600';
-import * as BS from './backstube.js?v=202610301600';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301600';
+import * as C from './config.js?v=202610301700';
+import * as S from './spiel.js?v=202610301700';
+import * as Z from './zeit.js?v=202610301700';
+import * as T from './ton.js?v=202610301700';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202610301700';
+import { schriftBild, kannSchrift } from './schrift.js?v=202610301700';
+import { zielHaus } from './fein.js?v=202610301700';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202610301700';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202610301700';
+import * as A from './auftraege.js?v=202610301700';
+import * as E from './erfolge.js?v=202610301700';
+import * as ZL from './ziele.js?v=202610301700';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202610301700';
+import * as KA from './karte.js?v=202610301700';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202610301700';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202610301700';
+import * as SW from './schneeball.js?v=202610301700';
+import * as LI from './lichtung.js?v=202610301700';
+import * as CB from './christbaum.js?v=202610301700';
+import * as SB from './schlitten.js?v=202610301700';
+import * as EB from './schlittschuh.js?v=202610301700';
+import * as BS from './backstube.js?v=202610301700';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202610301700';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -831,7 +831,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301600`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202610301700`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2911,7 +2911,7 @@ export function waehleModus(fertig) {
     </button>`;
   const individuell = `<button class="modus${echtEmpf ? '' : ' empfohlen'}" data-m="eigen">
       <b>🎄 ${MODUS_NAME.eigen}${echtEmpf ? '' : marke}</b>
-      <span>Das Spiel beginnt am 24. November - egal, wann du anfängst. Nach einer Woche geht das erste Türchen auf, und du erlebst den ganzen Advent.</span>
+      <span>Das Spiel beginnt am 24. November - egal, wann du anfängst. Nach einer Woche geht das erste Türchen auf, und du erlebst den ganzen Advent. Ist er vor dem echten vorbei, feierst du Weihnachten danach mit dem echten Kalender noch einmal.</span>
     </button>`;
   const box = fenster('Wann beginnt dein Advent?', `
     ${echtEmpf ? klassisch + individuell : individuell + klassisch}
