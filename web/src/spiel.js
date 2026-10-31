@@ -366,7 +366,7 @@ export const einstieg = (was) => !!DEMO || spieltag() >= (C.EINSTIEG[was] || 0)
  * `karte_mehr`) - die Minispiele dann weiter nach Spieltag (miniOffen).
  */
 export function ortOffen(o) {
-  if (DEMO || st.orteAlle) return true;
+  if ((DEMO && !lauf.demoEcht) || st.orteAlle) return true;   // demoEcht: Vorführszene mit echter Staffelung (Instagram-Karte)
   const z = st.lernen >= 99 ? st.ziel || 0 : -1;
   const karte = !!((st.tipps && st.tipps.karte_mehr) || st.karteMehrGezeigt);   // schon beim Erscheinen des Hinweises (lernen.js)
   if (o.spiel) return karte && miniOffen(o.spiel);
@@ -1916,7 +1916,7 @@ export function specialHeute() {
  */
 export function miniOffen(name) {
   const ab = C.MINI_AB_TAG[name] || 0;
-  if (DEMO || st.miniAlle) return true;   // Vorführszenen; Spielstand von vor der Staffelung
+  if ((DEMO && !lauf.demoEcht) || st.miniAlle) return true;   // Vorführszenen (außer demoEcht); Spielstand von vor der Staffelung
   if (!ab || spieltag() >= ab || miniStand(name).best > 0) return true;
   const letzter = Math.max(...Object.values(C.MINI_AB_TAG));
   return Z.dezemberTag() >= C.MINI_ALLE_DEZ - (letzter - ab);

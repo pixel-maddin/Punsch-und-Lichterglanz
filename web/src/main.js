@@ -566,6 +566,25 @@ function demo(art) {
   st.tipps = {}; st.ziel = 99;
   if (art === 'kamin') {   // nur der Kaminofen, damit man die Fenster beurteilen kann
     st.lernen = 99; st.ziel = 99; st.besitz.kamin = 1; st.besitz.kinderpunsch = 1; st.geld = 500; st.gesamt = 2000;
+  } else if (art.startsWith('insta')) {
+    // 31.10.: Bilder für Instagram. Nur Deko aus dem Weihnachtsladen, Lichter in Stufe 1, der Anstrich bleibt
+    // „Alt“ (Farben gibt es im Baumarkt). Nacht: nur ein paar Stücke. Vorher: kahl. Karte: wenig aufgedeckt.
+    st.lernen = 99; st.ziel = 99; st.zieleWeiter = false; st.fassade = 'trist';
+    const hab = (...ids) => { for (const id of ids) st.besitz[id] = 1; };
+    hab('kinderpunsch', 'apfel', 'lebkuchen', 'schoko', 'spuel', 'nachfuell', 'servier', 'tresen', 'tablett');
+    if (art === 'insta-nacht') hab('kranz', 'girlande', 'lichter_dach', 'fensterstern', 'tanne', 'schneemann', 'standlicht');
+    if (art === 'insta-nachher') hab('kranz', 'tuerbogenkranz', 'lichter_dach', 'fensterstern', 'schwibbogen', 'nussknacker', 'lichter_fenster',
+      'tanne', 'tanne_lichter', 'tanne_kugeln', 'tanne_stern', 'baum_girlande', 'futterhaus', 'schneemann', 'schneefrau', 'schneekind',
+      'rentier_licht', 'schlitten', 'girlande', 'zuckerstangen', 'standlicht', 'schild');
+    if (art === 'insta-vorher') { st.besitz = { gluehwein: 1, kinderpunsch: 1 }; }
+    if (art === 'insta-karte') {
+      // Wie ein Spieler am dritten Tag: Läden offen, Festplatz und zwei Minispiele, der Rest unter „?“
+      st.ziel = 7; st.tipps = { karte_mehr: true }; st.karteMehrGezeigt = true; st.orteStaffel = true; st.miniStaffel = true;
+      st.startTag = new Date(Z.jetzt()).setHours(0, 0, 0, 0) - 2 * 86400000;
+      S.lauf.demoEcht = true;
+    }
+    for (const p of C.PRODUKTE) if (st.besitz[p.id]) st.toepfe[p.id] = S.topfMax();
+    st.geld = art === 'insta-vorher' ? 120 : 14650; st.gesamt = art === 'insta-vorher' ? 300 : 52000;
   } else if (art === 'start') {
     // Ganz am Anfang: Startziel oben, das Haus noch kahl
     st.lernen = 99; st.ziel = 1; st.besitz.kinderpunsch = 1; st.geld = 60; st.gesamt = 260;
@@ -613,7 +632,20 @@ function demo(art) {
     if (art === 'haendlerfenster') UI.zeigeHaendler();
   }
   if (art === 'meinhaus') UI.oeffneMeinHaus();
-  if (art === 'landkarte' || art === 'marktkarte' || art === 'santa') UI.oeffneKarte();
+  if (art === 'landkarte' || art === 'marktkarte' || art === 'santa' || art === 'insta-karte') UI.oeffneKarte();
+  if (art.startsWith('insta')) {
+    // Keine Einblendungen und Blasen im Bild
+    document.getElementById('toast').style.display = 'none'; document.getElementById('tipp').style.display = 'none';
+    // ?welt: nur die Spielwelt, 180 x 225 (4:5) bildschirmfüllend - fürs Instagram-Bild ohne Bedienleisten
+    if (new URLSearchParams(location.search).has('welt')) {
+      const cvW = document.createElement('canvas'); cvW.width = 180; cvW.height = 225;
+      cvW.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;image-rendering:pixelated;background:#000';
+      document.body.appendChild(cvW);
+      const g = cvW.getContext('2d');
+      const male = () => { S.lauf.texte.length = 0; S.lauf.herzen.length = 0; g.clearRect(0, 0, 180, 225); zeichneWelt(g, 225, performance.now() / 1000, 0.05, {}); };   // ohne fliegende Beträge
+      male(); setInterval(male, 50);
+    }
+  }
   if (art === 'santa') KA.santaTest(0);
   if (art === 'stufenwahl') { UI.oeffneKarte(); setTimeout(() => [...document.querySelectorAll('#kartenOrte .ort')].find((e) => e.textContent.startsWith('Schlittenberg')).click(), 200); }
   if (art === 'markt') UI.zeigeMarkt();
