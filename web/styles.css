@@ -1747,3 +1747,10 @@ canvas.dankesbild { width: calc(var(--px) * 96); height: calc(var(--px) * 72); i
 .bereich-ruf > summary, .bereich-heute > summary, .bereich-gaeste > summary, .bereich-sammel > summary { color: #fff6dc; border-bottom-color: #1c4229; }
 .bereich-ruf > summary small, .bereich-heute > summary small, .bereich-gaeste > summary small, .bereich-sammel > summary small { color: #fffaf0; }
 .bereich-ruf > summary::after, .bereich-heute > summary::after, .bereich-gaeste > summary::after, .bereich-sammel > summary::after { color: #fff6dc; border-color: rgba(255, 246, 220, 0.55); }
+/* 31.10. (Nutzerwunsch): Dankesbilder in einem goldenen Bilderrahmen - Gold mit heller Kante innen
+   und dunkler außen, dazu der alte Schatten. Gilt im Album und im Dankes-Fenster. */
+canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(var(--px) * 2.4) solid #d8a838;
+  border-top-color: #e8c050; border-left-color: #e8c050; border-bottom-color: #b8862a; border-right-color: #b8862a;
+  outline: calc(var(--px) * 0.6) solid #7a5414;
+  box-shadow: 0 0 0 calc(var(--px) * 1.2) #f4dc8a, 0 calc(var(--px) * 1.5) calc(var(--px) * 3) rgba(0, 0, 0, 0.3); }
+.album-bild small { display: block; margin-top: calc(var(--px) * 2.5); }   /* 31.10.: Platz unter dem Rahmen */
