@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610311030';
-import * as S from './spiel.js?v=202610311030';
-import * as Z from './zeit.js?v=202610311030';
-import * as T from './ton.js?v=202610311030';
-import * as LI from './lichtung.js?v=202610311030';
-import * as CB from './christbaum.js?v=202610311030';
-import * as KA from './karte.js?v=202610311030';
-import * as SB from './schlitten.js?v=202610311030';
-import * as EB from './schlittschuh.js?v=202610311030';
-import * as BS from './backstube.js?v=202610311030';
-import * as UI from './ui.js?v=202610311030';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610311030';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610311030';
-import * as Kacheln from './kacheln.js?v=202610311030';
-import * as Lernen from './lernen.js?v=202610311030';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610311030';
-import * as A from './auftraege.js?v=202610311030';
-import * as E from './erfolge.js?v=202610311030';
-import * as ZL from './ziele.js?v=202610311030';
+import * as C from './config.js?v=202610311245';
+import * as S from './spiel.js?v=202610311245';
+import * as Z from './zeit.js?v=202610311245';
+import * as T from './ton.js?v=202610311245';
+import * as LI from './lichtung.js?v=202610311245';
+import * as CB from './christbaum.js?v=202610311245';
+import * as KA from './karte.js?v=202610311245';
+import * as SB from './schlitten.js?v=202610311245';
+import * as EB from './schlittschuh.js?v=202610311245';
+import * as BS from './backstube.js?v=202610311245';
+import * as UI from './ui.js?v=202610311245';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610311245';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610311245';
+import * as Kacheln from './kacheln.js?v=202610311245';
+import * as Lernen from './lernen.js?v=202610311245';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610311245';
+import * as A from './auftraege.js?v=202610311245';
+import * as E from './erfolge.js?v=202610311245';
+import * as ZL from './ziele.js?v=202610311245';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -570,8 +570,10 @@ function demo(art) {
     // 31.10.: Bilder für Instagram. Nur Deko aus dem Weihnachtsladen, Lichter in Stufe 1, der Anstrich bleibt
     // „Alt“ (Farben gibt es im Baumarkt). Nacht: nur ein paar Stücke. Vorher: kahl. Karte: wenig aufgedeckt.
     st.lernen = 99; st.ziel = 99; st.zieleWeiter = false; st.fassade = 'trist';
+    st.tipps.kalender_auf = true;   // sonst hält die Kalender-Blase (unsichtbar) das Spiel an (bleibt auch nach `ueberspringen`)
     const hab = (...ids) => { for (const id of ids) st.besitz[id] = 1; };
-    hab('kinderpunsch', 'apfel', 'lebkuchen', 'schoko', 'spuel', 'nachfuell', 'servier', 'tresen', 'tablett');
+    // Ohne Servier-Wichtel: sonst ist jeder Gast bedient, bevor er vorn am Tresen steht (Tresen im Bild leer)
+    hab('kinderpunsch', 'apfel', 'lebkuchen', 'schoko', 'spuel', 'nachfuell', 'tresen', 'tablett');
     if (art === 'insta-nacht') hab('kranz', 'girlande', 'lichter_dach', 'fensterstern', 'tanne', 'schneemann', 'standlicht');
     if (art === 'insta-nachher') hab('kranz', 'tuerbogenkranz', 'lichter_dach', 'fensterstern', 'schwibbogen', 'nussknacker', 'lichter_fenster',
       'tanne', 'tanne_lichter', 'tanne_kugeln', 'tanne_stern', 'baum_girlande', 'futterhaus', 'schneemann', 'schneefrau', 'schneekind',
@@ -636,6 +638,8 @@ function demo(art) {
   if (art.startsWith('insta')) {
     // Keine Einblendungen und Blasen im Bild
     document.getElementById('toast').style.display = 'none'; document.getElementById('tipp').style.display = 'none';
+    for (const id of ['nachrPunkt', 'aufBadge', 'kalBadge']) document.getElementById(id).style.visibility = 'hidden';   // keine roten Marken im Bild
+    if (art !== 'insta-karte') Lernen.alleGelesen();   // eine (unsichtbare) Blase hielte sonst das Spiel an
     // ?welt: nur die Spielwelt, 180 x 225 (4:5) bildschirmfüllend - fürs Instagram-Bild ohne Bedienleisten
     if (new URLSearchParams(location.search).has('welt')) {
       const cvW = document.createElement('canvas'); cvW.width = 180; cvW.height = 225;
