@@ -1770,6 +1770,15 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
 #blatt[data-art="menue"] .version { margin-top: calc(var(--px) * 1.4); }
 #blatt[data-art="menue"] .menue-statistik { margin-bottom: calc(var(--px) * 2); }
 #blatt[data-art="menue"] .menue-statistik summary { padding-top: calc(var(--px) * 2.2); padding-bottom: calc(var(--px) * 2.2); }
+/* 31.10. abends (Nutzer, Screenshot iPhone: jetzt viel Luft unten): Abstände wachsen mit der Bildschirmhöhe -
+   kleine Handys bleiben kompakt (Mindestwerte oben), hohe bekommen größere Knöpfe und mehr Luft */
+#blatt[data-art="menue"] { --mehr: max(0px, 100dvh - 640px); }   /* Höhe über 640 px - erst dann wird es luftiger */
+#blatt[data-art="menue"] .schalter .k { min-height: min(calc(var(--px) * 13 + var(--mehr) * 0.05), calc(var(--px) * 19)); }
+#blatt[data-art="menue"] .schalter { gap: min(calc(var(--px) * 1.6 + var(--mehr) * 0.012), calc(var(--px) * 3.4)); margin: min(calc(var(--px) * 1.8 + var(--mehr) * 0.012), calc(var(--px) * 4)) 0; }
+#blatt[data-art="menue"] .menue-statistik { margin-bottom: min(calc(var(--px) * 2 + var(--mehr) * 0.012), calc(var(--px) * 4)); }
+#blatt[data-art="menue"] .neustart { margin-top: min(calc(var(--px) * 2.6 + var(--mehr) * 0.04), calc(var(--px) * 10)); padding-top: min(calc(var(--px) * 2 + var(--mehr) * 0.02), calc(var(--px) * 6)); }
+#blatt[data-art="menue"] .neustart .k { min-height: min(calc(var(--px) * 12 + var(--mehr) * 0.04), calc(var(--px) * 16)); }
+#blatt[data-art="menue"] .version { margin-top: min(calc(var(--px) * 1.4 + var(--mehr) * 0.012), calc(var(--px) * 4)); }
 
 /* 31.10.: Kinderbriefe auf Android in der Spielschrift (fett), siehe main.js */
 .android .brief, .android .brief-text, .android .album-bild small { font-family: var(--schrift); font-weight: 800; }
