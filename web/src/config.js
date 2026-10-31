@@ -974,15 +974,15 @@ export const BRIEF_LOHN_MIN = 200;        // … mindestens so viele Sterne
 export const BRIEF_KINDER = [
   // 27.10.: Namen vom Nutzer (vorher Lena, Paul, Mia, Jonas, Emil, Hanna, Ben, Lotta, Finn, Ida - Lena gab es
   // auch als Stammgast). Briefe, die schon im Spielstand liegen, behalten ihren alten Namen.
-  // 31.10.: Nora -> Lena (Nutzer hat das Bild als lena.png geliefert); 7 wie der Stammgast Lena.
+  // 31.10.: Nora bleibt Nora (Lena ist der Stammgast) - ihr Bild kam als lena.png und heißt jetzt nora.png.
   { name: 'Frida', alter: 6, maedchen: true }, { name: 'Emma', alter: 9, maedchen: true }, { name: 'Benjamin', alter: 6 },
-  { name: 'Vincent', alter: 8 }, { name: 'Jonathan', alter: 7 }, { name: 'Lena', alter: 7, maedchen: true },
+  { name: 'Vincent', alter: 8 }, { name: 'Jonathan', alter: 7 }, { name: 'Nora', alter: 5, maedchen: true },
   { name: 'Emil', alter: 7 }, { name: 'Anna', alter: 8, maedchen: true }, { name: 'Paul', alter: 6 }, { name: 'Mia', alter: 5, maedchen: true },
 ];
 // Selbst gemalte Dankesbilder (27.10.): Namen der Kinder, für die es `web/bilder/dank/<name klein>.png`
 // gibt (96 x 72, rechts unten ab x 62 / y 30 frei für den Wunsch). Nur diese werden geladen - fehlt ein
 // Kind hier, malt das Spiel sein Bild selbst. Neue Datei = Namen hier eintragen.
-export const DANK_BILDER = ['Frida', 'Emma', 'Benjamin', 'Vincent', 'Jonathan', 'Lena', 'Emil', 'Anna', 'Paul', 'Mia'];   // 31.10.: vom Nutzer gemalt (erst je ein Bild für Mädchen und Jungen)
+export const DANK_BILDER = ['Frida', 'Emma', 'Benjamin', 'Vincent', 'Jonathan', 'Nora', 'Emil', 'Anna', 'Paul', 'Mia'];   // 31.10.: vom Nutzer gemalt (erst je ein Bild für Mädchen und Jungen)
 export const DOSE_MAX = 30;
 export const DOSE_BONUS = 0.25;
 
