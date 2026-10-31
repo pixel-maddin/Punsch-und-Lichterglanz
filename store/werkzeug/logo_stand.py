@@ -1,6 +1,7 @@
 """Logo „Punsch & Lichterglanz“ als Punschstand in echten Spielpixeln (wie im Spiel, 3x5-Schrift aus
 pixel.js), transparenter Hintergrund, ganzzahlig hochgezogen.
-Aufruf: logo_stand.py ziel.png [skala] [stand|schild]   schild = nur das Schild mit Lichterkette darunter"""
+Aufruf: logo_stand.py ziel.png [skala] [stand|schild|zeile]   schild = nur das Schild mit Lichterkette darunter,
+zeile = nur der Schriftzug einzeilig (für den Menükopf auf hellem Grund)"""
 import math, os, re, struct, sys, zlib
 
 ZIEL = sys.argv[1]
@@ -29,6 +30,45 @@ def text_pixel(s, x0, y0):
 
 def hx(s):
     return (int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16))
+
+def zeile():
+    """Schriftzug einzeilig auf einer schmalen dunklen Holzleiste (wie das Schild): PUNSCH & in Creme,
+    LICHTERGLANZ in Gold. Ohne Leiste verschmolz die Kontur um das Gold zu einer halben Platte."""
+    t1, t2 = 'PUNSCH &', 'LICHTERGLANZ'
+    b1 = text_breite(t1)
+    w, h = b1 + 4 + text_breite(t2) + 8, 11
+    m1 = text_pixel(t1, 4, 3); m2 = text_pixel(t2, 4 + b1 + 4, 3)
+    px = {}
+    for y in range(h):
+        for x in range(w):
+            if (x in (0, w - 1)) and (y in (0, h - 1)):
+                continue                                     # runde Ecken
+            rand = x in (0, w - 1) or y in (0, h - 1)
+            c = '#2a1606' if rand else '#8a5a2e' if y == 1 or x == 1 else '#5a3418' if y == h - 2 or x == w - 2 else ('#3a2414' if y % 4 else '#32200f')
+            px[(x, y)] = hx(c)
+    for (x, y) in m1 | m2:
+        px[(x + 1, y + 1)] = hx('#1a0e06')                   # Schatten wie pixText im Spiel
+    GOLD = ['#fff0a0', '#ffd84a', '#f4bc32', '#e0a024', '#c48416']
+    for (x, y) in m1:
+        px[(x, y)] = hx('#ffffff') if y == 3 else hx('#fff2d8')
+    for (x, y) in m2:
+        px[(x, y)] = hx(GOLD[y - 3])
+    roh = bytearray()
+    for y in range(h * SK):
+        roh.append(0)
+        for x in range(w * SK):
+            c = px.get((x // SK, y // SK))
+            roh.extend((*c, 255) if c else (0, 0, 0, 0))
+    def chunk(t, d):
+        return struct.pack('>I', len(d)) + t + d + struct.pack('>I', zlib.crc32(t + d) & 0xffffffff)
+    with open(ZIEL, 'wb') as f:
+        f.write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w * SK, h * SK, 8, 6, 0, 0, 0))
+                + chunk(b'IDAT', zlib.compress(bytes(roh), 9)) + chunk(b'IEND', b''))
+    print('ok zeile', w * SK, h * SK)
+    sys.exit(0)
+
+if MODUS == 'zeile':
+    zeile()
 
 W, H = 74, (54 if MODUS == 'stand' else 36)   # mit Rand für Umriss, Schatten und Funkeln
 bild = [[None] * W for _ in range(H)]

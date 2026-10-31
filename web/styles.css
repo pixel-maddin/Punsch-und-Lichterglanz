@@ -1758,7 +1758,8 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
 /* 31.10.: Logo (Standschild mit Lichterkette, bilder/logo.png 74 x 36) - im Willkommen-Fenster 1:1 in
    Spielpixeln, im Menükopf klein (halbe Größe) statt des Titeltexts */
 .logo-bild { display: block; margin: 0 auto calc(var(--px) * 2); width: calc(var(--px) * 74); height: calc(var(--px) * 36); image-rendering: pixelated; }
-.logo-klein { display: block; height: calc(var(--px) * 18); width: calc(var(--px) * 37); image-rendering: pixelated; }
+.logo-zeile { display: block; width: calc(var(--px) * 130); max-width: 100%; height: auto; image-rendering: pixelated; }   /* bilder/logo_zeile.png 93 x 11 */
+#blatt[data-art="menue"] #blattGeld { display: none; }
 #blatt[data-art="menue"] #blattTitel { line-height: 0; }
 
 /* 31.10. (Nutzer: Menü auf dem iPhone zu lang - „Neu anfangen" abgeschnitten, Datenschutz nur nach Scrollen):
