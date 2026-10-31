@@ -1,9 +1,11 @@
 """Logo „Punsch & Lichterglanz“ als Punschstand in echten Spielpixeln (wie im Spiel, 3x5-Schrift aus
-pixel.js), transparenter Hintergrund, ganzzahlig hochgezogen. Aufruf: logo_stand.py ziel.png [skala]"""
+pixel.js), transparenter Hintergrund, ganzzahlig hochgezogen.
+Aufruf: logo_stand.py ziel.png [skala] [stand|schild]   schild = nur das Schild mit Lichterkette darunter"""
 import math, os, re, struct, sys, zlib
 
 ZIEL = sys.argv[1]
 SK = int(sys.argv[2]) if len(sys.argv) > 2 else 16
+MODUS = sys.argv[3] if len(sys.argv) > 3 else 'stand'
 
 # 3x5-Schrift direkt aus dem Spiel lesen, damit sie gleich bleibt
 js = open(os.path.join(os.path.dirname(__file__), '..', '..', 'web', 'src', 'pixel.js'), encoding='utf-8').read()
@@ -28,7 +30,7 @@ def text_pixel(s, x0, y0):
 def hx(s):
     return (int(s[1:3], 16), int(s[3:5], 16), int(s[5:7], 16))
 
-W, H = 74, 54   # mit Rand für Umriss, Schatten und Funkeln
+W, H = 74, (54 if MODUS == 'stand' else 36)   # mit Rand für Umriss, Schatten und Funkeln
 bild = [[None] * W for _ in range(H)]
 def setz(x, y, c, a=1.0):
     if not (0 <= x < W and 0 <= y < H) or a <= 0:
@@ -59,62 +61,65 @@ STAND_Y = MY + 8                             # Oberkante Stand (unter der Markis
 STAND_X0, STAND_X1 = 10, W - 10
 O = 3   # Versatz der fest gesetzten Teile gegenüber der ersten Fassung
 
-# ------------------------------------------------------------ Stand (wie im Spiel: Holz, dunkle Öffnung, Theke)
-r(STAND_X0, STAND_Y, STAND_X1 - STAND_X0, 15, '#2a1a10')                 # dunkle Öffnung
-for x in range(STAND_X0, STAND_X1):                                      # Rückwand mit Brettern
-    for y in range(STAND_Y, STAND_Y + 7):
-        setz(x, y, '#4a2c16' if (x - STAND_X0) % 6 else '#3a2210')
-r(STAND_X0 + 2, STAND_Y + 1, STAND_X1 - STAND_X0 - 4, 1, '#5a3a1e')      # Regalbrett
-# zwei Wichtel hinter der Theke
-for wx, mf in ((20 + O, '#3aa84a'), (44 + O, '#c82828')):
-    r(wx, STAND_Y + 3, 3, 1, mf); setz(wx + 1, STAND_Y + 2, mf); setz(wx + 2, STAND_Y + 1, '#ffffff')
-    r(wx, STAND_Y + 4, 3, 2, '#f2c9a0'); setz(wx, STAND_Y + 5, '#2a1a10'); setz(wx + 2, STAND_Y + 5, '#2a1a10')
-    r(wx, STAND_Y + 6, 3, 1, mf)
-r(STAND_X0 - 1, STAND_Y + 7, STAND_X1 - STAND_X0 + 2, 2, '#a8703a')     # Thekenplatte
-r(STAND_X0 - 1, STAND_Y + 7, STAND_X1 - STAND_X0 + 2, 1, '#c08a50')
-r(STAND_X0 - 1, STAND_Y + 6, STAND_X1 - STAND_X0 + 2, 1, '#f6f9fc')     # Schnee auf der Theke
-for x in range(STAND_X0, STAND_X1):                                      # Front: senkrechte Bretter
-    for y in range(STAND_Y + 9, STAND_Y + 15):
-        setz(x, y, '#8a5a2e' if (x - STAND_X0) % 5 else '#6a4222')
-    setz(x, STAND_Y + 9, '#5a3618')
-r(STAND_X0, STAND_Y + 14, STAND_X1 - STAND_X0, 1, '#5a3618')
-for mx, f in ((27 + O, '#c82828'), (33 + O, '#f4f4f4'), (39 + O, '#3a62b8')):        # dampfende Tassen auf der Theke
-    r(mx, STAND_Y + 4, 3, 3, f); setz(mx + 3, STAND_Y + 5, f); r(mx, STAND_Y + 4, 3, 1, '#7a2a40')
-    setz(mx + 1, STAND_Y + 2, '#eef2f6', 0.8); setz(mx + 2, STAND_Y + 1, '#eef2f6', 0.5)
-# Tannengirlande mit roten Schleifen an der Theke (wie Stand-Girlande im Spiel)
-for x in range(STAND_X0 - 1, STAND_X1 + 1):
-    y = STAND_Y + 9 + (1 if (x - STAND_X0) % 8 in (2, 3, 4, 5) else 0) + (1 if (x - STAND_X0) % 8 in (3, 4) else 0)
-    setz(x, y, '#1e6030' if x % 2 else '#2a7a3c'); setz(x, y + 1, '#1e6030', 0.8)
-for x in range(STAND_X0 + 3, STAND_X1, 8):
-    setz(x, STAND_Y + 9, '#d02a34'); setz(x - 1, STAND_Y + 10, '#d02a34'); setz(x + 1, STAND_Y + 10, '#d02a34')
+if MODUS == 'stand':
+    # ------------------------------------------------------------ Stand (wie im Spiel: Holz, dunkle Öffnung, Theke)
+    r(STAND_X0, STAND_Y, STAND_X1 - STAND_X0, 15, '#2a1a10')                 # dunkle Öffnung
+    for x in range(STAND_X0, STAND_X1):                                      # Rückwand mit Brettern
+        for y in range(STAND_Y, STAND_Y + 7):
+            setz(x, y, '#4a2c16' if (x - STAND_X0) % 6 else '#3a2210')
+    r(STAND_X0 + 2, STAND_Y + 1, STAND_X1 - STAND_X0 - 4, 1, '#5a3a1e')      # Regalbrett
+    # zwei Wichtel hinter der Theke
+    for wx, mf in ((20 + O, '#3aa84a'), (44 + O, '#c82828')):
+        r(wx, STAND_Y + 3, 3, 1, mf); setz(wx + 1, STAND_Y + 2, mf); setz(wx + 2, STAND_Y + 1, '#ffffff')
+        r(wx, STAND_Y + 4, 3, 2, '#f2c9a0'); setz(wx, STAND_Y + 5, '#2a1a10'); setz(wx + 2, STAND_Y + 5, '#2a1a10')
+        r(wx, STAND_Y + 6, 3, 1, mf)
+    r(STAND_X0 - 1, STAND_Y + 7, STAND_X1 - STAND_X0 + 2, 2, '#a8703a')     # Thekenplatte
+    r(STAND_X0 - 1, STAND_Y + 7, STAND_X1 - STAND_X0 + 2, 1, '#c08a50')
+    r(STAND_X0 - 1, STAND_Y + 6, STAND_X1 - STAND_X0 + 2, 1, '#f6f9fc')     # Schnee auf der Theke
+    for x in range(STAND_X0, STAND_X1):                                      # Front: senkrechte Bretter
+        for y in range(STAND_Y + 9, STAND_Y + 15):
+            setz(x, y, '#8a5a2e' if (x - STAND_X0) % 5 else '#6a4222')
+        setz(x, STAND_Y + 9, '#5a3618')
+    r(STAND_X0, STAND_Y + 14, STAND_X1 - STAND_X0, 1, '#5a3618')
+    for mx, f in ((27 + O, '#c82828'), (33 + O, '#f4f4f4'), (39 + O, '#3a62b8')):        # dampfende Tassen auf der Theke
+        r(mx, STAND_Y + 4, 3, 3, f); setz(mx + 3, STAND_Y + 5, f); r(mx, STAND_Y + 4, 3, 1, '#7a2a40')
+        setz(mx + 1, STAND_Y + 2, '#eef2f6', 0.8); setz(mx + 2, STAND_Y + 1, '#eef2f6', 0.5)
+    # Tannengirlande mit roten Schleifen an der Theke (wie Stand-Girlande im Spiel)
+    for x in range(STAND_X0 - 1, STAND_X1 + 1):
+        y = STAND_Y + 9 + (1 if (x - STAND_X0) % 8 in (2, 3, 4, 5) else 0) + (1 if (x - STAND_X0) % 8 in (3, 4) else 0)
+        setz(x, y, '#1e6030' if x % 2 else '#2a7a3c'); setz(x, y + 1, '#1e6030', 0.8)
+    for x in range(STAND_X0 + 3, STAND_X1, 8):
+        setz(x, STAND_Y + 9, '#d02a34'); setz(x - 1, STAND_Y + 10, '#d02a34'); setz(x + 1, STAND_Y + 10, '#d02a34')
 
-# ------------------------------------------------------------ Markise rot-weiß mit Bögen, Schnee
-for x in range(MX0, MX1):
-    i = (x - MX0) // 4
-    u = (x - MX0) % 4
-    unten = MY + 6 + (1 if u in (1, 2) else 0)
-    for y in range(MY, unten):
-        rot = i % 2 == 0
-        c = '#c82828' if rot else '#f4f4f4'
-        if y == MY:
-            c = '#e05050' if rot else '#ffffff'
-        elif y >= unten - 1:
-            c = '#8e1c1c' if rot else '#c8c8d0'
-        setz(x, y, c)
-    setz(x, MY - 1, '#f6f9fc')                                           # Schnee
-    if x % 5 == 0:
-        setz(x, MY - 2, '#ffffff')
-for x in range(MX0 - 1, MX1 + 1):
-    setz(x, MY - 1, '#ffffff' if x % 3 else '#dce8f8')
-# Lichterkette an der Markisenkante: Birnchen mit kleinem Schein
-FARBEN = ['#ffd84a', '#ff5a5a', '#5ad06a', '#6ab0ff']
-for i, x in enumerate(range(MX0 + 1, MX1, 3)):
-    y = MY + 8 + (i % 2)
-    f = FARBEN[i % 4]
-    setz(x, y, f)
+    # ------------------------------------------------------------ Markise rot-weiß mit Bögen, Schnee
+    for x in range(MX0, MX1):
+        i = (x - MX0) // 4
+        u = (x - MX0) % 4
+        unten = MY + 6 + (1 if u in (1, 2) else 0)
+        for y in range(MY, unten):
+            rot = i % 2 == 0
+            c = '#c82828' if rot else '#f4f4f4'
+            if y == MY:
+                c = '#e05050' if rot else '#ffffff'
+            elif y >= unten - 1:
+                c = '#8e1c1c' if rot else '#c8c8d0'
+            setz(x, y, c)
+        setz(x, MY - 1, '#f6f9fc')                                           # Schnee
+        if x % 5 == 0:
+            setz(x, MY - 2, '#ffffff')
+    for x in range(MX0 - 1, MX1 + 1):
+        setz(x, MY - 1, '#ffffff' if x % 3 else '#dce8f8')
+    # Lichterkette an der Markisenkante: Birnchen mit kleinem Schein
+    FARBEN = ['#ffd84a', '#ff5a5a', '#5ad06a', '#6ab0ff']
+    for i, x in enumerate(range(MX0 + 1, MX1, 3)):
+        y = MY + 8 + (i % 2)
+        f = FARBEN[i % 4]
+        setz(x, y, f)
+
 
 # ------------------------------------------------------------ Schild auf der Markise (wie im Spiel, nur größer)
-r(SX + 6, SY + SH, 1, 3, '#6a4222'); r(SX + SW - 7, SY + SH, 1, 3, '#6a4222')   # Pfosten
+if MODUS == 'stand':
+    r(SX + 6, SY + SH, 1, 3, '#6a4222'); r(SX + SW - 7, SY + SH, 1, 3, '#6a4222')   # Pfosten
 r(SX, SY, SW, SH, '#6a4222')                                             # Rahmen
 r(SX, SY, SW, 1, '#8a5a2e')
 r(SX + 1, SY + 1, SW - 2, SH - 2, '#3a2414')                             # dunkles Brett, damit Gold leuchtet
@@ -166,8 +171,28 @@ for (x, y) in list(aussen):
         if p not in aussen and 0 <= p[0] < W and 0 <= p[1] < H:
             bild[p[1]][p[0]] = (20, 14, 40, 0.35)
 
+def kette():
+    """Nur das Schild: Lichterkette in drei Bögen unter der Unterkante, Birnchen 1 x 2. Kommt NACH Umriss
+    und Schatten - mit Umriss wurde die Kette zu einem schwarzen Klotz."""
+    FARBEN = ['#ffd84a', '#ff5a5a', '#5ad06a', '#6ab0ff']
+    haken = [SX + 1, SX + SW // 3, SX + 2 * SW // 3, SX + SW - 2]
+    draht = []
+    for a, b in zip(haken, haken[1:]):
+        for x in range(a, b):
+            t = (x - a) / (b - a)
+            draht.append((x, SY + SH + 1 + round(4 * 4 * t * (1 - t))))
+    for (x, y) in draht:
+        bild[y][x] = (*hx('#2a3a2a'), 1.0)
+    for i, (x, y) in enumerate(draht[2::3]):
+        bild[y + 1][x] = (*hx('#5a5a5a'), 1.0)
+        for k in (2, 3):
+            bild[y + k][x] = (*hx(FARBEN[i % 4]), 1.0)
+
+if MODUS == 'schild':
+    kette()
+
 # Funkeln erst nach Umriss und Schatten - sonst bekam jeder Stern einen Kasten
-for fx, fy, gross in ((SX + SW + 3, SY + 3, True), (SX - 3, SY + 14, False), (MX1 + 1, MY + 12, False)):
+for fx, fy, gross in ((SX + SW + 3, SY + 3, True), (SX - 3, SY + 14, False)) + (((MX1 + 1, MY + 12, False),) if MODUS == 'stand' else ((SX + SW + 2, SY + SH + 6, False),)):
     setz(fx, fy, '#ffffff')
     for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
         setz(fx + dx, fy + dy, '#fff1a0', 0.9)
