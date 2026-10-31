@@ -1754,3 +1754,22 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
   outline: calc(var(--px) * 0.6) solid #7a5414;
   box-shadow: 0 0 0 calc(var(--px) * 1.2) #f4dc8a, 0 calc(var(--px) * 1.5) calc(var(--px) * 3) rgba(0, 0, 0, 0.3); }
 .album-bild small { display: block; margin-top: calc(var(--px) * 2.5); }   /* 31.10.: Platz unter dem Rahmen */
+
+/* 31.10.: Logo (Standschild mit Lichterkette, bilder/logo.png 74 x 36) - im Willkommen-Fenster 1:1 in
+   Spielpixeln, im Menükopf klein (halbe Größe) statt des Titeltexts */
+.logo-bild { display: block; margin: 0 auto calc(var(--px) * 2); width: calc(var(--px) * 74); height: calc(var(--px) * 36); image-rendering: pixelated; }
+.logo-klein { display: block; height: calc(var(--px) * 18); width: calc(var(--px) * 37); image-rendering: pixelated; }
+#blatt[data-art="menue"] #blattTitel { line-height: 0; }
+
+/* 31.10. (Nutzer: Menü auf dem iPhone zu lang - „Neu anfangen" abgeschnitten, Datenschutz nur nach Scrollen):
+   Knöpfe im Menü etwas flacher, Abstände enger */
+#blatt[data-art="menue"] .schalter .k { min-height: calc(var(--px) * 13); padding: calc(var(--px) * 1.4) calc(var(--px) * 2); }
+#blatt[data-art="menue"] .schalter { margin: calc(var(--px) * 1.8) 0; gap: calc(var(--px) * 1.6); }
+#blatt[data-art="menue"] .neustart { margin-top: calc(var(--px) * 2.6); padding-top: calc(var(--px) * 2); }
+#blatt[data-art="menue"] .neustart .k { min-height: calc(var(--px) * 12); }
+#blatt[data-art="menue"] .version { margin-top: calc(var(--px) * 1.4); }
+#blatt[data-art="menue"] .menue-statistik { margin-bottom: calc(var(--px) * 2); }
+#blatt[data-art="menue"] .menue-statistik summary { padding-top: calc(var(--px) * 2.2); padding-bottom: calc(var(--px) * 2.2); }
+
+/* 31.10.: Kinderbriefe auf Android in der Spielschrift (fett), siehe main.js */
+.android .brief, .android .brief-text, .android .album-bild small { font-family: var(--schrift); font-weight: 800; }

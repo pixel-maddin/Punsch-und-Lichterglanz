@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202610311245';
-import * as S from './spiel.js?v=202610311245';
-import * as Z from './zeit.js?v=202610311245';
-import * as T from './ton.js?v=202610311245';
-import * as LI from './lichtung.js?v=202610311245';
-import * as CB from './christbaum.js?v=202610311245';
-import * as KA from './karte.js?v=202610311245';
-import * as SB from './schlitten.js?v=202610311245';
-import * as EB from './schlittschuh.js?v=202610311245';
-import * as BS from './backstube.js?v=202610311245';
-import * as UI from './ui.js?v=202610311245';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610311245';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610311245';
-import * as Kacheln from './kacheln.js?v=202610311245';
-import * as Lernen from './lernen.js?v=202610311245';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610311245';
-import * as A from './auftraege.js?v=202610311245';
-import * as E from './erfolge.js?v=202610311245';
-import * as ZL from './ziele.js?v=202610311245';
+import * as C from './config.js?v=202610311400';
+import * as S from './spiel.js?v=202610311400';
+import * as Z from './zeit.js?v=202610311400';
+import * as T from './ton.js?v=202610311400';
+import * as LI from './lichtung.js?v=202610311400';
+import * as CB from './christbaum.js?v=202610311400';
+import * as KA from './karte.js?v=202610311400';
+import * as SB from './schlitten.js?v=202610311400';
+import * as EB from './schlittschuh.js?v=202610311400';
+import * as BS from './backstube.js?v=202610311400';
+import * as UI from './ui.js?v=202610311400';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202610311400';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202610311400';
+import * as Kacheln from './kacheln.js?v=202610311400';
+import * as Lernen from './lernen.js?v=202610311400';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202610311400';
+import * as A from './auftraege.js?v=202610311400';
+import * as E from './erfolge.js?v=202610311400';
+import * as ZL from './ziele.js?v=202610311400';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -554,6 +554,10 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 // Nur lokal, eigener Speicherplatz (S.DEMO). Baut ein geschmücktes Haus ohne
 // Blasen, Fenster und Einblendungen; die Szene wählt der Wert.
 // ---------------------------------------------------------------------------
+// 31.10. (Nutzer: Kinderbriefe auf Android „zu dünn, schlecht leserlich"): Android hat weder Comic Sans noch
+// Chalkboard und fällt auf eine dünne Schreibschrift zurück - dort nimmt styles.css die Spielschrift, fett
+if (/Android/i.test(navigator.userAgent)) document.documentElement.classList.add('android');
+
 function demo(art) {
   S.allesLoeschen();   // immer frisch - im Vorführ-Speicher können Reste von Messläufen liegen
   const st = S.st;

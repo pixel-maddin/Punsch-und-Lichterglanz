@@ -174,8 +174,13 @@ export function wetter(d = jetzt()) {
   const ph = phase(d);
   // Heiligabend: ab dem späten Nachmittag schneit es immer
   if (dt === 24 && d.getHours() >= 16) return { art: 'schnee', staerke: 0.8 };
+  // 31.10. (Nutzer: „Schmuddelwetter angesagt, aber es regnet nicht"): das Wetter der Stunde folgt der Lage
+  // des Tages aus tagesWetter() - nasskalt regnet es meistens, bei klirrender Kälte ist es klar, und an
+  // ruhigen Herbsttagen regnet es nicht mehr (Regen gibt es nur noch an Schmuddeltagen)
+  const lage = tagesWetter(d).art;
+  if (lage === 'schmuddel') return z < 0.75 ? { art: 'regen', staerke: st } : { art: 'klar', staerke: 0 };
+  if (lage === 'frost') return { art: 'klar', staerke: 0 };
   if (schnee(d) > 0) return z < 0.45 ? { art: 'schnee', staerke: st } : { art: 'klar', staerke: 0 };
-  if (ph === 'herbst') return z < 0.22 ? { art: 'regen', staerke: st } : { art: 'klar', staerke: 0 };
   return { art: 'klar', staerke: 0 };
 }
 
