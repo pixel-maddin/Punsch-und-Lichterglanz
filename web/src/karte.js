@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202611011000';
-import * as S from './spiel.js?v=202611011000';
-import * as Z from './zeit.js?v=202611011000';
-import * as FEIN from './fein.js?v=202611011000';
-import * as T from './ton.js?v=202611011000';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611011000';
+import * as C from './config.js?v=202611011100';
+import * as S from './spiel.js?v=202611011100';
+import * as Z from './zeit.js?v=202611011100';
+import * as FEIN from './fein.js?v=202611011100';
+import * as T from './ton.js?v=202611011100';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611011100';
 
 const $ = (s) => document.querySelector(s);
 
@@ -240,8 +240,15 @@ function takt(jetzt) {
     pos = { x: wanderer.von.x + (wanderer.nach.x - wanderer.von.x) * k, y: wanderer.von.y + (wanderer.nach.y - wanderer.von.y) * k };
     if (k >= 1) { const o = wanderer.ort; wanderer = null; if (handler) handler(o); }
   }
-  zeichne(t, dt);
+  // 01.11. (gemeldet: nach „Aa" keine Punkte mehr und nichts mehr antippbar - hier nicht nachstellbar):
+  // erst das nächste Bild anmelden, dann zeichnen. Wirft das Zeichnen, läuft die Karte trotzdem weiter
+  // (der Wichtel kommt an, Orte öffnen sich); der Fehler geht ins Feedback-Formular (S.lauf.kartenFehler)
   rafId = requestAnimationFrame(takt);
+  try { zeichne(t, dt); } catch (e) {
+    if (!S.lauf.kartenFehler) console.error('Karte:', e);
+    S.lauf.kartenFehler = `${e && e.message} (${S.st.karteOhneText ? 'ohne Text' : 'mit Text'})`;
+    try { c.restore(); } catch (e2) { /* egal */ }
+  }
 }
 
 // ---------------------------------------------------------------------------

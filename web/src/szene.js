@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611011000';
-import * as Z from './zeit.js?v=202611011000';
-import * as S from './spiel.js?v=202611011000';
-import { FASSADEN } from './config.js?v=202611011000';
-import * as C from './config.js?v=202611011000';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611011100';
+import * as Z from './zeit.js?v=202611011100';
+import * as S from './spiel.js?v=202611011100';
+import { FASSADEN } from './config.js?v=202611011100';
+import * as C from './config.js?v=202611011100';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -2312,6 +2312,12 @@ function saenger(c, L, fuss, t) {
  * Rodelkinder HINTER den Gästen, weil nur die Leute nochmal gemalt wurden.
  */
 function vorDenLeuten(c, L, G, GW, t, w, opts) {
+  // 01.11. (Nutzer: „die Bierbank ist hinter den Besuchern"): vor den Leuten und 2 px tiefer; ist der Stand
+  // zu, kommt das Brett danach noch einmal drüber (sonst verdeckte ein Stehtisch seinen Anfang)
+  if (S.zeigt('baenke')) {
+    baenke(c, L, GW + 2, t, w, S.variante('baenke'));
+    if (S.standZu()) zuBrett(c, 128, GW, S.winterpause() ? ['PAUSE'] : ['FROHES FEST'], w);
+  }
   if (S.zeigt('g_vorrat')) schneeballVorrat(c, 12, GW - 1);
   if (Z.schnee() > 0) eigenerSchneemann(c, SCHNEEMANN_X, GW + SCHNEEMANN_DY, S.schneemannStufe(), S.schneemannBereit(), t);
   const pause = S.winterpause();   // 29.10.: in der Winterpause ist niemand mehr unterwegs
@@ -2870,11 +2876,10 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Kopf auf halber Dachhöhe über dem Stand steht
   if (S.zeigt('strassenlaterne')) alteLaterne(e, L, 163, GW - 10, t, w, 24);
   stand(e, GW, w, t, L);
-  if (S.zeigt('baenke')) baenke(e, L, GW, t, w, S.variante('baenke'));   // bis 11.10. gar nicht gezeichnet
   if (S.zeigt('m_herzen')) lebkuchenherzen(e, GW, t);
   // Stand zu (29.10.): ein Brett vor Töpfen und Pfosten - Heiligabend „FROHES FEST“, sonst „PAUSE“.
   // Erst nach Bänken und Stehtischen, sonst verdeckte ein Stehtisch den Anfang
-  if (S.standZu()) zuBrett(e, 128, GW, S.winterpause() ? ['PAUSE'] : ['FROHES FEST'], w);
+  if (S.standZu()) zuBrett(e, 128, GW, S.winterpause() ? ['PAUSE'] : ['FROHES FEST'], w);   // (Bierbänke stehen seit 01.11. vor den Leuten, siehe vorDenLeuten)
   // Aus der Waldlichtung: Hasen und Reh vor dem Zaun, mit den Füßen gerade
   // auf dem Gehweg (der beginnt bei GW-12). Bis 11.10. bei GW-2 mitten auf
   // dem Gehweg, dann kurz bei GW-13 im Vorgarten - auf Wunsch 2 px tiefer.
