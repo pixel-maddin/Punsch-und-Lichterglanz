@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611011100';
-import * as Z from './zeit.js?v=202611011100';
-import * as S from './spiel.js?v=202611011100';
-import { FASSADEN } from './config.js?v=202611011100';
-import * as C from './config.js?v=202611011100';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611011130';
+import * as Z from './zeit.js?v=202611011130';
+import * as S from './spiel.js?v=202611011130';
+import { FASSADEN } from './config.js?v=202611011130';
+import * as C from './config.js?v=202611011130';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -2312,10 +2312,10 @@ function saenger(c, L, fuss, t) {
  * Rodelkinder HINTER den Gästen, weil nur die Leute nochmal gemalt wurden.
  */
 function vorDenLeuten(c, L, G, GW, t, w, opts) {
-  // 01.11. (Nutzer: „die Bierbank ist hinter den Besuchern"): vor den Leuten und 2 px tiefer; ist der Stand
+  // 01.11. (Nutzer: „die Bierbank ist hinter den Besuchern"): vor den Leuten und 1 px tiefer; ist der Stand
   // zu, kommt das Brett danach noch einmal drüber (sonst verdeckte ein Stehtisch seinen Anfang)
   if (S.zeigt('baenke')) {
-    baenke(c, L, GW + 2, t, w, S.variante('baenke'));
+    baenke(c, L, GW + 1, t, w, S.variante('baenke'));   // 1 px tiefer als früher (Nutzer: +2 war 1 zu viel)
     if (S.standZu()) zuBrett(c, 128, GW, S.winterpause() ? ['PAUSE'] : ['FROHES FEST'], w);
   }
   if (S.zeigt('g_vorrat')) schneeballVorrat(c, 12, GW - 1);
