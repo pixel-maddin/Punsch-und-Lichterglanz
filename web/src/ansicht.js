@@ -5,10 +5,10 @@
 // Vordergrund und dem Hausnamen im Himmel. „Als Foto" gibt den Moment an die
 // Foto-Karte weiter. Bewusst KEIN Zoom: Pixelkunst wird davon nur gröber.
 // ---------------------------------------------------------------------------
-import { zeichneWelt } from './szene.js?v=202611011400';
-import { schriftBild } from './schrift.js?v=202611011400';
-import * as Z from './zeit.js?v=202611011400';
-import * as S from './spiel.js?v=202611011400';
+import { zeichneWelt } from './szene.js?v=202611011500';
+import { schriftBild } from './schrift.js?v=202611011500';
+import * as Z from './zeit.js?v=202611011500';
+import * as S from './spiel.js?v=202611011500';
 
 const $ = (s) => document.querySelector(s);
 /** Tageszeiten zur Wahl - Stunde, Minute (null = jetzt) */
@@ -17,6 +17,9 @@ const ZEITEN = { jetzt: null, tag: [12, 0], abend: 'daemmerung', nacht: [21, 30]
 let offen = false, raf = 0, letzte = 0, zeit = 'jetzt';
 let cv = null, c = null, H = 320;
 let flocken = [];
+// 01.11. (Nutzer, Moto g 5G plus: „ruckelt sehr“): Zweige, Straße vorn, Schneewall und Vignette waren je Bild
+// ~25.000 einzelne fillRect - jetzt EIN Zwischenbild, neu nur bei anderer Größe, Helligkeit oder Schnee
+let statE = null, statKey = '', zaehler = 0;
 let beimFoto = null;   // Rückruf: Foto-Karte mit Datum öffnen (ui.js)
 
 export const istOffen = () => offen;
@@ -57,6 +60,7 @@ export function schliesse() {
 }
 
 function groesse() {
+  statKey = '';
   const px = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 2;
   H = Math.max(240, Math.round(($('#ansicht').clientHeight || 640) / px));
   cv.width = 180; cv.height = H;
@@ -77,12 +81,14 @@ function waehle(z) {
 function takt(jetzt) {
   if (!offen) return;
   raf = requestAnimationFrame(takt);   // erst anmelden - ein Zeichenfehler hält die Ansicht nicht an
-  // höchstens 30 Bilder je Sekunde wie das Spiel selbst (sonst wird das Handy warm)
-  if (jetzt - letzte < 31) return;
+  // höchstens 24 Bilder je Sekunde - ruhige Szene, langsame Flocken; Puffer für schwache Handys (Moto g ruckelte)
+  if (jetzt - letzte < 40) return;
   const dt = Math.max(0, Math.min(0.1, (jetzt - letzte) / 1000));
   letzte = jetzt;
-  const soll = Math.round(($('#ansicht').clientHeight || 0) / (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 2));
-  if (soll > 200 && soll !== H) groesse();
+  if (++zaehler % 30 === 0) {   // Größe nur ab und zu prüfen (getComputedStyle kostet)
+    const soll = Math.round(($('#ansicht').clientHeight || 0) / (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px')) || 2));
+    if (soll > 200 && soll !== H) groesse();
+  }
   try { zeichne(jetzt / 1000, dt); } catch (e) { console.warn('Ansicht', e); }
 }
 
@@ -103,11 +109,26 @@ function zeichne(t, dt) {
     if (bild.width > 172) bild = schriftBild(text, 'gold', 1);
     c.drawImage(bild, Math.round((180 - bild.width) / 2), Math.round(H * 0.25));
   }
-  zweige(w, t);
-  const rand = strasseVorn(G, w);
-  schneewall(rand, w, t);
+  const key = `${H}|${Math.round(nacht * 40)}|${w.schnee > 0}`;
+  if (key !== statKey) { statKey = key; baueStatisch(G, w, t); }
+  c.drawImage(statE.canvas, 0, 0);
+  zweigLichter(nacht, t);
   if (w.schnee > 0) grosseFlocken(dt, t, nacht);
-  vignette(nacht);
+}
+
+/** Das Zwischenbild: Zweige mit Schmuck, Straße vorn, Schneewall, Vignette (alles, was nicht animiert). */
+function baueStatisch(G, w, t) {
+  if (!statE) statE = document.createElement('canvas').getContext('2d');
+  if (statE.canvas.width !== 180 || statE.canvas.height !== H) { statE.canvas.width = 180; statE.canvas.height = H; }
+  const alt = c;
+  c = statE;
+  try {
+    c.clearRect(0, 0, 180, H);
+    zweige(w, t);
+    const rand = strasseVorn(G, w);
+    schneewall(rand, w, t);
+    vignette(w.dunkel);
+  } finally { c = alt; }
 }
 
 /** Vorn ein Schneewall mit welliger Kante - der Blick geht über ihn hinweg aufs Haus. */
@@ -201,16 +222,20 @@ function zweige(w, t) {
       kugel(40, 46, '#e0a828', 8); kugel(62, 50, '#c8303c', 10); kugel(20, 40, '#2f8a4a', 6); kugel(12, 60, '#c8303c', 5);
       stroh(28, 54, 7); stroh(70, 36, 4); zapfen(14, 22); zapfen(46, 28); zapfen(36, 38); zapfen(56, 42);
     }
-    for (const [lx, ly] of [[18, 22], [36, 30], [62, 36], [14, 44]]) {
-      const x = X(lx);
-      if (nacht > 0.15) {
-        const g = c.createRadialGradient(x + 0.5, ly + 0.5, 0, x + 0.5, ly + 0.5, 6);
-        const a = (0.55 * nacht * (0.85 + 0.15 * Math.sin(t * 3 + lx))).toFixed(3);
-        g.addColorStop(0, `rgba(255,214,130,${a})`); g.addColorStop(1, 'rgba(255,214,130,0)');
-        c.fillStyle = g; c.fillRect(x - 6, ly - 6, 13, 13);
-      }
-      c.fillStyle = nacht > 0.15 ? '#ffe6a0' : misch('#7a6a50', dunk); c.fillRect(x, ly, 1, 2);
-    }
+    if (nacht <= 0.15) for (const [lx, ly] of LICHTER) { c.fillStyle = misch('#7a6a50', dunk); c.fillRect(X(lx), ly, 1, 2); }   // tagsüber aus
+  }
+}
+const LICHTER = [[18, 22], [36, 30], [62, 36], [14, 44]];
+/** Die warmen Lichter in den Zweigen - je Bild, weil sie nachts sanft atmen (nur 8 Stück). */
+function zweigLichter(nacht, t) {
+  if (nacht <= 0.15) return;
+  for (const seite of [1, -1]) for (const [lx, ly] of LICHTER) {
+    const x = seite > 0 ? lx : 179 - lx;
+    const g = c.createRadialGradient(x + 0.5, ly + 0.5, 0, x + 0.5, ly + 0.5, 6);
+    const a = (0.55 * nacht * (0.85 + 0.15 * Math.sin(t * 3 + lx))).toFixed(3);
+    g.addColorStop(0, `rgba(255,214,130,${a})`); g.addColorStop(1, 'rgba(255,214,130,0)');
+    c.fillStyle = g; c.fillRect(x - 6, ly - 6, 13, 13);
+    c.fillStyle = '#ffe6a0'; c.fillRect(x, ly, 1, 2);
   }
 }
 
@@ -293,4 +318,11 @@ export function verdrahte(klick) {
   $('#ansichtFoto').onclick = (e) => { e.stopPropagation(); klick(); if (beimFoto) beimFoto(datum()); };
   // Tippen ins Bild blendet die Knöpfe aus und wieder ein - für den reinen Moment (und Bildschirmfotos)
   $('#ansichtCv').onclick = () => $('#ansicht').classList.toggle('ruhig');
+}
+
+/** Für Tests: n Bilder zeichnen, Millisekunden je Bild (die Ansicht muss offen sein). */
+export function messe(n = 30) {
+  const t0 = performance.now();
+  for (let i = 0; i < n; i++) zeichne(1 + i / 30, 1 / 30);
+  return (performance.now() - t0) / n;
 }
