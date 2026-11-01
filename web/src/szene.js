@@ -13,12 +13,19 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202610311645';
-import * as Z from './zeit.js?v=202610311645';
-import * as S from './spiel.js?v=202610311645';
-import { FASSADEN } from './config.js?v=202610311645';
-import * as C from './config.js?v=202610311645';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611011000';
+import * as Z from './zeit.js?v=202611011000';
+import * as S from './spiel.js?v=202611011000';
+import { FASSADEN } from './config.js?v=202611011000';
+import * as C from './config.js?v=202611011000';
 
+// 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
+// Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
+// zum Vergleich die alte Fassung.
+let optikNeu = !(typeof location !== 'undefined' && new URLSearchParams(location.search).get('optik') === 'alt');
+export function setzeOptik(an) { optikNeu = !!an; }
+let tagAus = false;   // gerade Tag mit neuer Optik: Birnchen gleich dunkel zeichnen (zeichneWelt setzt es)
+const ausFarbe = (f) => mische(f, '#34343c', 0.68);
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 const WARM = '#ffd98a';
 
@@ -788,7 +795,7 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
       r(c, mx, by - 10, 1, 10, '#6a4a2a');
       const fl = Math.floor(t * 6) % 2;
       r(c, mx - 3 + fl, by - 11, 3, 1, '#e8c030'); r(c, mx + 1 - fl, by - 11, 3, 1, '#e8c030');
-      for (const [dx, dy] of [[-5, 0], [5, 0], [-3, -3], [3, -3]]) { r(c, mx + dx, by + dy - 2, 1, 2, '#f4f0e0'); L.push({ x: mx + dx, y: by + dy - 3, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 9 + dx) }); }
+      for (const [dx, dy] of [[-5, 0], [5, 0], [-3, -3], [3, -3]]) { r(c, mx + dx, by + dy - 2, 1, 2, '#f4f0e0'); L.push({ kerze: true, x: mx + dx, y: by + dy - 3, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 9 + dx) }); }
     } else if (v === 2) {
       // Fensterkatze mit Mütze, blinzelt ab und zu
       const kx = x + 5, ky = by;
@@ -804,7 +811,7 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
       for (let i = 0; i < 7; i++) {
         const cx = bx + 1 + i * 2, hoch = Math.round(Math.sin((i / 6) * Math.PI) * 3);
         p(c, cx, by - 1 - hoch, '#6a4a2a'); p(c, cx, by - 2 - hoch, '#f4f0e0');
-        L.push({ x: cx, y: by - 3 - hoch, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 9 + i) });
+        L.push({ kerze: true, x: cx, y: by - 3 - hoch, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 9 + i) });
       }
     }
   }
@@ -816,7 +823,7 @@ function fenster(c, x, y, fw, fh, F, warm, w, L, t, wo) {
     for (let i = 0; i < 4; i++) {
       const cx = bx - 4 + i * 3;
       r(c, cx, by - 4, 1, 3, '#c82828');
-      if (i < kerzen) L.push({ x: cx, y: by - 5, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 10 + i) });
+      if (i < kerzen) L.push({ kerze: true, x: cx, y: by - 5, f: '#ffd070', halo: 3, an: 0.8 + 0.2 * Math.sin(t * 10 + i) });
     }
   }
 }
@@ -977,13 +984,14 @@ const HALO = [3, 3, 4, 5];
  */
 function birne(c, L, x, y, f, halo, an, form, i) {
   if (form && i % 2) return;
+  const fz = tagAus ? ausFarbe(f) : f;   // tagsüber gleich als dunkles Birnchen (01.11.)
   if (form === 1) {
-    p(c, x, y, ton(f, 0.55)); p(c, x - 1, y, f); p(c, x + 1, y, f); p(c, x, y - 1, f); p(c, x, y + 1, f);
-    L.push({ x, y, f, halo: halo + 1, an });
+    p(c, x, y, ton(fz, 0.55)); p(c, x - 1, y, fz); p(c, x + 1, y, fz); p(c, x, y - 1, fz); p(c, x, y + 1, fz);
+    L.push({ x, y, f, halo: halo + 1, an, aus: tagAus });
   } else if (form === 2) {
-    p(c, x, y, '#3a3a2a'); r(c, x, y + 1, 2, 2, f); p(c, x, y + 1, ton(f, 0.55));
-    L.push({ x, y: y + 1, f, halo: halo + 1, an });
-  } else { p(c, x, y, f); L.push({ x, y, f, halo, an }); }
+    p(c, x, y, '#3a3a2a'); r(c, x, y + 1, 2, 2, fz); p(c, x, y + 1, ton(fz, 0.55));
+    L.push({ x, y: y + 1, f, halo: halo + 1, an, aus: tagAus });
+  } else { p(c, x, y, fz); L.push({ x, y, f, halo, an, aus: tagAus }); }
 }
 const birnenForm = (id) => (C.VARIANTEN[id] ? S.variante(id) : 0);
 
@@ -1029,7 +1037,7 @@ function schornsteinSchmuck(c, L, x, ko, ku, t, w, stufe) {
  */
 function festbeleuchtung(c, L, wandO, dachH, gx0, gx1, go, ko, ku, t) {
   const f = '#fff2cc';
-  const lampe = (x, y) => { p(c, x, y, f); L.push({ x, y, f, halo: 2, an: 1 }); };
+  const lampe = (x, y) => { p(c, x, y, tagAus ? ausFarbe(f) : f); L.push({ x, y, f, halo: 2, an: 1, aus: tagAus }); };
   // Reihen über die Dachfläche (Gaube und Schornstein ausgespart)
   for (let d = 4; d < dachH; d += 4) {
     const y = wandO - d;
@@ -2457,7 +2465,7 @@ function lichtKarte(w, wd, G, GW, L) {
     c.fillStyle = lg; c.fillRect(0, GW - 30, wd, G - GW + 30);
   }
   // Jedes Licht hellt seine Umgebung auf - nachts voll, tagsüber kaum
-  const st = 0.15 + 0.85 * w.dunkel;
+  const st = w.lichtAus ? 0 : 0.15 + 0.85 * w.dunkel;
   for (const l of L) {
     if (l.verdeckt) continue;
     const a = l.an * st * (l.sichtbar ?? 1);
@@ -2717,6 +2725,72 @@ function nikolausSchlitten(c, sl, t, G) {
 /**
  * Zeichnet die Welt von y = 0 bis G. `opts.ohneGaeste` für die Karte.
  */
+/** Neue Optik (01.11.): Ferne in den Dunst - oben stärker, zum Vorgarten hin schwächer (Luftperspektive). */
+function dunst(e, GW, w) {
+  const tag = 1 - w.dunkel;
+  const f = mische('#2a3460', w.schnee > 0 ? '#d4e0f0' : '#c8d4e4', tag);
+  const g = e.createLinearGradient(0, GW - 110, 0, GW - 14);
+  g.addColorStop(0, hexA(f, 0.5 * tag + 0.25 * (1 - tag))); g.addColorStop(1, hexA(f, 0.08));
+  e.save(); e.globalCompositeOperation = 'source-atop'; e.fillStyle = g; e.fillRect(0, 0, e.canvas.width, GW); e.restore();
+}
+/**
+ * Neue Optik (01.11.): Lichterketten tagsüber aus - die kleinen Lichter ab Index `von` werden zu dunklen
+ * Birnchen umgefärbt (Kerzen, Fenster, große Lampen und Sterne bleiben). Aufgerufen direkt nach jeder
+ * Zeichenstufe, damit was DAVOR kommt (Stand, Gäste) nicht übermalt wird - ohne Pixel zurückzulesen
+ * (die erste Fassung las dafür jedes Bild die Ebene: 32 ms).
+ */
+function lichterAus(c, L, von) {
+  for (let i = von; i < L.length; i++) {
+    const l = L[i];
+    if (l.aus || l.rect || l.fleck || l.kerze || l.gross || l.halo > 6 || l.halo < 2 || !l.f || l.f === '#ffffff') continue;
+    p(c, Math.round(l.x), Math.round(l.y), ausFarbe(l.f));
+  }
+  return L.length;
+}
+let gartenE = null;
+function gartenAnfang(e) {
+  if (!gartenE) gartenE = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  if (gartenE.canvas.width !== e.canvas.width || gartenE.canvas.height !== e.canvas.height) { gartenE.canvas.width = e.canvas.width; gartenE.canvas.height = e.canvas.height; }
+  gartenE.clearRect(0, 0, gartenE.canvas.width, gartenE.canvas.height);
+  return gartenE;
+}
+/**
+ * Garten-Deko mit Bodenschatten (weg von der Sonne) und einer weichen Kontur auf die Welt (01.11.).
+ * Schnell gehalten: nur die Zeilen des Gartens, Masken als Byte-Felder, gezeichnet als EIN Bild
+ * (erste Fassung mit Textschlüsseln und fillRect je Pixel kostete 18 ms je Bild).
+ */
+let gkE = null;
+function gartenEnde(e, g, GW, w) {
+  const W = g.canvas.width, H = g.canvas.height;
+  const y0 = Math.max(0, GW - 72), y1 = Math.min(H, GW + 4), hh = y1 - y0;
+  const d = g.getImageData(0, y0, W, hh).data;
+  const voll = new Uint8Array(W * hh);
+  for (let i = 0; i < W * hh; i++) voll[i] = d[i * 4 + 3] > 0 ? 1 : 0;
+  const v = (x, y) => x >= 0 && x < W && y >= 0 && y < hh && voll[y * W + x] === 1;
+  const dir = w.li.sonne < 0.5 ? 1 : -1, tag = 1 - w.dunkel;
+  const art = new Uint8Array(W * hh);   // 1 Schatten, 2 leichte Kontur, 3 starke Kontur
+  const setz = (x, y, a) => { if (x >= 0 && x < W && y >= 0 && y < hh && !voll[y * W + x] && art[y * W + x] < a) art[y * W + x] = a; };
+  const fussAb = GW - 26 - y0;
+  for (let y = 0; y < hh; y++) for (let x = 0; x < W; x++) {
+    if (!voll[y * W + x]) continue;
+    if (y >= fussAb && !v(x, y + 1)) { for (let k = 0; k <= 2; k++) setz(x + k * dir, y + 1, 1); for (let k = 1; k <= 2; k++) setz(x + k * dir, y + 2, 1); }
+    setz(x + dir, y, 3); setz(x, y + 1, 3); setz(x - dir, y, 2); setz(x, y - 1, 2);
+  }
+  if (!gkE) gkE = document.createElement('canvas').getContext('2d');
+  if (gkE.canvas.width !== W || gkE.canvas.height !== hh) { gkE.canvas.width = W; gkE.canvas.height = hh; }
+  const bild = gkE.createImageData(W, hh), o = bild.data;
+  const aS = Math.round(255 * (0.18 + 0.14 * tag));
+  for (let i = 0; i < W * hh; i++) {
+    const a = art[i];
+    if (!a) continue;
+    if (a === 1) { o[i * 4] = 40; o[i * 4 + 1] = 52; o[i * 4 + 2] = 94; o[i * 4 + 3] = aS; }
+    else { o[i * 4] = 28; o[i * 4 + 1] = 24; o[i * 4 + 2] = 48; o[i * 4 + 3] = a === 3 ? 128 : 56; }
+  }
+  gkE.putImageData(bild, 0, 0);
+  e.drawImage(gkE.canvas, 0, y0);
+  e.drawImage(g.canvas, 0, 0);
+}
+
 export function zeichneWelt(c, G, t, dt, opts = {}) {
   const d = opts.datum || Z.jetzt();
   const w = weltInfo(d);
@@ -2729,7 +2803,10 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Haus und Straße stehen ein Stück über der Tresenkante; darunter
   // liegt die Fahrbahn. GW ist die Bodenlinie der Welt.
   const GW = G - STRASSE;
+  const lichtAus = optikNeu && w.dunkel < 0.05;   // Neue Optik: tagsüber sind die Lichterketten aus
+  w.lichtAus = lichtAus; tagAus = lichtAus;
   hintergrund(e, GW, w, L, t);
+  if (optikNeu) dunst(e, GW, w);
   kahlerBaum(e, GW, w, L, t);
   if (S.zeigt('m_stern')) herrnhuter(e, L, 147, GW - 85, t);
   if (S.zeigt('c_kugeln')) riesenkugeln(e, L, GW);
@@ -2756,34 +2833,38 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   const stufen = neuPruefen ? [{ bis: L.length, bild: pixel(e, G) }] : null;
   // Was an der Hauswand steht (ganz hinten im Garten), kommt zuerst - Tanne,
   // Schneefamilie, Zaun und Laternen stehen davor
-  if (S.zeigt('auf_geschenke')) geschenke(e, 37, GW - 24);   // linke Hausecke, zwischen Tanne und Schneemann
-  if (S.zeigt('auf_rodel')) rodel(e, 60, GW - 24, w);        // lehnt hinter dem Schneekind, ragt darüber
-  if (S.zeigt('tanne')) tanne(e, GW, w, t, L);
+  let lAus = lichtAus ? lichterAus(e, L, 0) : 0;
+  const g = optikNeu ? gartenAnfang(e) : e;   // Neue Optik (01.11.): Garten-Deko auf eigener Ebene (Schatten, Kontur)
+  if (S.zeigt('auf_geschenke')) geschenke(g, 37, GW - 24);   // linke Hausecke, zwischen Tanne und Schneemann
+  if (S.zeigt('auf_rodel')) rodel(g, 60, GW - 24, w);        // lehnt hinter dem Schneekind, ragt darüber
+  if (S.zeigt('tanne')) tanne(g, GW, w, t, L);
   if (S.zeigt('zuckerstangen')) {
     const zv = S.variante('zuckerstangen');
-    if (zv === 1) { lebkuchenmaennchen(e, 33, GW - 19); lebkuchenmaennchen(e, 40, GW - 20); }
-    else if (zv === 2) { riesenlolli(e, 33, GW - 19, ['#e8303a', '#f8f4f0']); riesenlolli(e, 40, GW - 20, ['#3aa84a', '#ffe060']); }
-    else { zuckerstange(e, 33, GW - 19, false); zuckerstange(e, 38, GW - 20, true); }
+    if (zv === 1) { lebkuchenmaennchen(g, 33, GW - 19); lebkuchenmaennchen(g, 40, GW - 20); }
+    else if (zv === 2) { riesenlolli(g, 33, GW - 19, ['#e8303a', '#f8f4f0']); riesenlolli(g, 40, GW - 20, ['#3aa84a', '#ffe060']); }
+    else { zuckerstange(g, 33, GW - 19, false); zuckerstange(g, 38, GW - 20, true); }
   }
   // Das Futterhaus hängt im kahlen Baum - im Vorgarten stand es den
   // Zuckerstangen im Weg (bis 11.10. das Vogelhäuschen aus Türchen 18)
-  if (S.zeigt('futterhaus')) { futterhaus(e, L, FUTTER_X, GW + FUTTER_DY, S.variante('futterhaus'), S.futterVoll(), S.hat('kal_knoedel'), t); voegel(e, GW, t, L); }
+  if (S.zeigt('futterhaus')) { futterhaus(g, L, FUTTER_X, GW + FUTTER_DY, S.variante('futterhaus'), S.futterVoll(), S.hat('kal_knoedel'), t); voegel(g, GW, t, L); }
   if (S.zeigt('schneemann')) {
     const v = S.variante('schneemann');
-    if (v === 1) schneeburg(e, 45, GW - 18);
-    else if (v === 2) liegestuhl(e, 45, GW - 18, t);
-    else schneefigur(e, 45, GW - 18, 4, 'mann');
+    if (v === 1) schneeburg(g, 45, GW - 18);
+    else if (v === 2) liegestuhl(g, 45, GW - 18, t);
+    else schneefigur(g, 45, GW - 18, 4, 'mann');
   }
-  if (S.zeigt('schneefrau')) { schneefigur(e, 55, GW - 18, 4, 'frau'); schneefrauExtra(e, 55, GW - 18, S.variante('schneefrau')); }
-  if (S.zeigt('schneekind')) { schneefigur(e, 64, GW - 18, 3, 'kind'); schneekindExtra(e, L, 64, GW - 18, S.variante('schneekind'), t); }
-  if (S.zeigt('rentier_licht')) [lichterRentier, lichterElch, lichterDino][S.variante('rentier_licht')](e, L, 101, GW - 18, t);
-  if (S.zeigt('schlitten')) [schlitten, bollerwagen, rasenmaeher][S.variante('schlitten')](e, 109, GW - 18, t, L);
-  if (S.zeigt('zaun')) zaun(e, GW, w, L, t);
-  if (S.zeigt('lichterbogen')) lichterbogen(e, L, GW, t, S.variante('lichterbogen'));
-  if (S.zeigt('laternen')) { const lf = [laterne, fackel, lavalampe][S.variante('laternen')]; lf(e, L, 69, GW - 12, t, 0); lf(e, L, 91, GW - 12, t, 1); }
-  if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(e, 28, GW - 18);
+  if (S.zeigt('schneefrau')) { schneefigur(g, 55, GW - 18, 4, 'frau'); schneefrauExtra(g, 55, GW - 18, S.variante('schneefrau')); }
+  if (S.zeigt('schneekind')) { schneefigur(g, 64, GW - 18, 3, 'kind'); schneekindExtra(g, L, 64, GW - 18, S.variante('schneekind'), t); }
+  if (S.zeigt('rentier_licht')) [lichterRentier, lichterElch, lichterDino][S.variante('rentier_licht')](g, L, 101, GW - 18, t);
+  if (S.zeigt('schlitten')) [schlitten, bollerwagen, rasenmaeher][S.variante('schlitten')](g, 109, GW - 18, t, L);
+  if (S.zeigt('zaun')) zaun(g, GW, w, L, t);
+  if (S.zeigt('lichterbogen')) lichterbogen(g, L, GW, t, S.variante('lichterbogen'));
+  if (S.zeigt('laternen')) { const lf = [laterne, fackel, lavalampe][S.variante('laternen')]; lf(g, L, 69, GW - 12, t, 0); lf(g, L, 91, GW - 12, t, 1); }
+  if (S.zeigt('auf_lebkuchenmann')) lebkuchenmann(g, 28, GW - 18);
   // Vom fahrenden Händler (09.10.)
-  if (S.zeigt('h_kugel')) schneekugel(e, L, 7, GW - 13, t, w);
+  if (S.zeigt('h_kugel')) schneekugel(g, L, 7, GW - 13, t, w);
+  if (lichtAus) lAus = lichterAus(g, L, lAus);
+  if (optikNeu) gartenEnde(e, g, GW, w);
 
   // Rechts hinter dem Stand, neben dem Baum; der Mast ist lang, damit der
   // Kopf auf halber Dachhöhe über dem Stand steht
@@ -2808,6 +2889,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Nussknacker auf demselben Pixel, Flamingo mitten im Lichter-Rentier)
   if (S.zeigt('h_flamingo')) flamingo(e, L, 119, GW - 4, t);
   if (S.zeigt('h_orgel')) drehorgel(e, 169, GW - 3, t);
+  if (lichtAus) lAus = lichterAus(e, L, lAus);   // Stand, Laterne, Bänke - vor den Gästen
   if (neuPruefen) stufen.push({ bis: L.length, bild: pixel(e, G) });
   if (!opts.ohneGaeste) strasse(e, GW, t, L);
   vorDenLeuten(e, L, G, GW, t, w, opts);
