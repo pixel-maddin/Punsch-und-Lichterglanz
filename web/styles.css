@@ -1800,3 +1800,7 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
 .ansicht-tipp { position: absolute; left: 0; right: 0; bottom: calc(var(--px) * 1); margin: 0; text-align: center; color: rgba(255, 255, 255, 0.75); font: 700 var(--t-mini) var(--schrift); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); transition: opacity 0.25s; pointer-events: none; }
 #ansicht.ruhig .ansicht-leiste, #ansicht.ruhig #ansichtFoto, #ansicht.ruhig .ansicht-tipp { opacity: 0; pointer-events: none; }
 #huelle.ansicht-offen #toast, #huelle.ansicht-offen #tipp, #huelle.ansicht-offen #zeiger { display: none; }
+#ansichtText { flex: none; width: calc(var(--px) * 15); height: calc(var(--px) * 15); border-radius: calc(var(--px) * 2); appearance: none; cursor: pointer;
+  background: linear-gradient(#36528e, #22346a); color: #fff; border: calc(var(--px) * 0.8) solid var(--ui-rand, #4a6ab0); font: 800 var(--t-betont) var(--schrift); position: relative; }
+#ansichtText.aus { text-decoration: line-through; opacity: 0.85; }
+#ansichtText::after { content: ''; position: absolute; inset: calc(var(--px) * -3); }
