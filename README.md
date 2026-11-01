@@ -358,7 +358,10 @@ die Meldung einordnen lässt - kein Name, kein Spielstand.
 
 ## Teilen
 
-**Foto** in der Leiste macht aus dem aktuellen Bild eine Weihnachtskarte
+**Foto** in der Leiste öffnet erst **Haus ansehen**: dein Haus im Vollbild, ohne Tresen
+und Gäste, mit Tannenzweigen oben und großen Schneeflocken vorn. Oben wählst du die
+Tageszeit (Jetzt, Tag, Abend, Nacht) - so siehst du deine Lichter auch mittags leuchten.
+Antippen des Bildes blendet die Knöpfe aus. **Als Foto** macht daraus eine Weihnachtskarte
 mit einem von fünf Rahmen, einem Weihnachtsgruß, Hausname und Datum, die über das Teilen-Menü des Handys verschickt
 werden kann. Ab Heiligabend gibt es zusätzlich die **Festtagskarte**
 (dunkelblau, goldener Rahmen, großer Stern). Auf ihr steht eine Zeile

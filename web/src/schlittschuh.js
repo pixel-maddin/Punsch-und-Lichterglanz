@@ -10,12 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202611011130';
-import * as Z from './zeit.js?v=202611011130';
-import * as T from './ton.js?v=202611011130';
-import * as MH from './minihud.js?v=202611011130';
-import * as L from './licht.js?v=202611011130';
-import { r, p, ton, mische } from './pixel.js?v=202611011130';
+import * as C from './config.js?v=202611011330';
+import * as Z from './zeit.js?v=202611011330';
+import * as T from './ton.js?v=202611011330';
+import * as MH from './minihud.js?v=202611011330';
+import * as L from './licht.js?v=202611011330';
+import { r, p, ton, mische } from './pixel.js?v=202611011330';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;

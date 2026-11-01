@@ -5,29 +5,30 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611011130';
-import * as S from './spiel.js?v=202611011130';
-import * as Z from './zeit.js?v=202611011130';
-import * as T from './ton.js?v=202611011130';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611011130';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611011130';
-import { zielHaus } from './fein.js?v=202611011130';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611011130';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611011130';
-import * as A from './auftraege.js?v=202611011130';
-import * as E from './erfolge.js?v=202611011130';
-import * as ZL from './ziele.js?v=202611011130';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611011130';
-import * as KA from './karte.js?v=202611011130';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611011130';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611011130';
-import * as SW from './schneeball.js?v=202611011130';
-import * as LI from './lichtung.js?v=202611011130';
-import * as CB from './christbaum.js?v=202611011130';
-import * as SB from './schlitten.js?v=202611011130';
-import * as EB from './schlittschuh.js?v=202611011130';
-import * as BS from './backstube.js?v=202611011130';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202611011130';
+import * as C from './config.js?v=202611011330';
+import * as S from './spiel.js?v=202611011330';
+import * as Z from './zeit.js?v=202611011330';
+import * as T from './ton.js?v=202611011330';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611011330';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611011330';
+import { zielHaus } from './fein.js?v=202611011330';
+import * as AN from './ansicht.js?v=202611011330';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611011330';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611011330';
+import * as A from './auftraege.js?v=202611011330';
+import * as E from './erfolge.js?v=202611011330';
+import * as ZL from './ziele.js?v=202611011330';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611011330';
+import * as KA from './karte.js?v=202611011330';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611011330';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611011330';
+import * as SW from './schneeball.js?v=202611011330';
+import * as LI from './lichtung.js?v=202611011330';
+import * as CB from './christbaum.js?v=202611011330';
+import * as SB from './schlitten.js?v=202611011330';
+import * as EB from './schlittschuh.js?v=202611011330';
+import * as BS from './backstube.js?v=202611011330';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202611011330';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -39,7 +40,7 @@ let ladenTab = 'super';
 let ladenModus = 'kaufen';  // 'kaufen' | 'haus' - Einkaufen oder Mein Haus (einstellen)
 let zeilen = [];           // Ladenzeilen zum Nachführen
 
-export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() || SB.istOffen() || SW.istOffen() || EB.istOffen() || BS.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : null); }
+export function panelOffen() { return offen || (LI.istOffen() || CB.istOffen() || SB.istOffen() || SW.istOffen() || EB.istOffen() || BS.istOffen() ? 'minispiel' : KA.istOffen() ? 'karte' : AN.istOffen() ? 'ansicht' : null); }
 
 // ---------------------------------------------------------------------------
 // Kopfzeile
@@ -848,7 +849,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611011130`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611011330`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2576,7 +2577,7 @@ export function oeffneMenue() {
   oeffneBlatt('menue', 'Punsch & Lichterglanz');
   // 31.10. (Nutzerwunsch): oben links der Schriftzug des Logos einzeilig auf einer Holzleiste (das ganze
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
-  $('#blattTitel').innerHTML = `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611011130" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611011330" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -2905,7 +2906,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611011130" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611011330" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {
@@ -3028,7 +3029,7 @@ export function zeigeZiel(modus, fertig) {
       <li>☕ Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
       <li>🛒 Kaufe mit den Sternen Lichter, Deko, Farbe und Helfer.</li>
       <li>🎄 Jeden Tag gibt es Neues zu entdecken.</li>
-      <li>📷 Mach mit „Foto“ eine Weihnachtskarte von deinem Haus.</li>
+      <li>📷 „Foto“ zeigt dein Haus im Vollbild - auch abends und nachts, mit allen Lichtern. Von dort machst du eine Weihnachtskarte.</li>
     </ul>
     <p class="klein">${start} Jeder Advent bringt eine Überraschung.</p>`,
   [{ text: 'Los geht’s!', aktion: () => { if (fertig) setTimeout(fertig, 60); } }]);
@@ -3219,7 +3220,9 @@ export async function karte(rahmenNr, ohneLeute = false, festerGruss = null) {
   const WG = 176, SK = 4;
   const welt = document.createElement('canvas');
   welt.width = 180; welt.height = WG;
-  zeichneWelt(welt.getContext('2d'), WG, performance.now() / 1000, 0, { karte: true, ohneGaeste: ohneLeute });
+  // 01.11.: aus „Haus ansehen“ heraus mit der dort gewählten Tageszeit
+  const fotoDatum = AN.istOffen() ? AN.datum() : null;
+  zeichneWelt(welt.getContext('2d'), WG, performance.now() / 1000, 0, { karte: true, ohneGaeste: ohneLeute, ...(fotoDatum ? { datum: fotoDatum } : {}) });
 
   // Ab Heiligabend ist die Festtagskarte die erste, die man sieht
   if (rahmenNr == null && S.heiligabendJetzt()) rahmenNr = 'heilig';
@@ -3314,7 +3317,9 @@ export function verdrahte() {
   $('#miniZu').onclick = () => { T.spiele('klick'); C.MINI_SPECIAL.laeuft = null; LI.schliesse(); CB.schliesse(); SB.schliesse(); SW.schliesse(); EB.schliesse(); BS.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
   $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
-  $('#btnKarte').onclick = () => { T.spiele('klick'); karte(); };
+  // 01.11.: Der Foto-Knopf öffnet erst „Haus ansehen“ (Tageszeit wählen, Moment genießen) - von dort „Als Foto“
+  $('#btnKarte').onclick = () => { T.spiele('klick'); AN.oeffne(() => karte(null, true)); };
+  AN.verdrahte(() => T.spiele('klick'));
   $('#btnMenue').onclick = () => { T.spiele('klick'); offen === 'menue' ? schliesseBlatt() : oeffneMenue(); };
   $('#blattZu').onclick = () => { T.spiele('klick'); schliesseBlatt(); };
 }
