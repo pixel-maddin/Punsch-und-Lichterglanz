@@ -11,12 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202611011500';
-import * as Z from './zeit.js?v=202611011500';
-import * as T from './ton.js?v=202611011500';
-import * as MH from './minihud.js?v=202611011500';
-import * as L from './licht.js?v=202611011500';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202611011500';
+import * as C from './config.js?v=202611011600';
+import * as Z from './zeit.js?v=202611011600';
+import * as T from './ton.js?v=202611011600';
+import * as MH from './minihud.js?v=202611011600';
+import * as L from './licht.js?v=202611011600';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202611011600';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -113,6 +113,7 @@ export function tippeAuf(x, y) {
   spiel.gefuettert++;
   spiel.arten[best.art] = (spiel.arten[best.art] || 0) + 1;   // fürs Album
   best.satt = 0;
+  best.dir = -best.dir;   // 01.11. (Nutzer): dreht um und hüpft zurück - so sieht man, welches Tier man erwischt hat
   spiel.texte.push({ x: best.x, y: best.y - 30, text: '+' + pkt, t: 0 });
   T.spiele(best.art === 'gold' || SELTENE[best.art] ? 'spezialKasse' : spiel.kette >= 3 ? 'kasse' : 'greifen');
 }
@@ -192,9 +193,9 @@ function schritt(dt) {
   for (const tier of g.tiere) {
     tier.t += dt;
     if (tier.satt >= 0) {
-      // Freut sich kurz, dann läuft es schnell davon
+      // Hüpft vor Freude langsam in die Gegenrichtung, dann schnell davon
       tier.satt += dt;
-      if (tier.satt > 0.6) tier.x += tier.dir * 120 * dt;
+      tier.x += tier.dir * (tier.satt > 0.6 ? 120 : 26) * dt;
       continue;
     }
     tier.x += tier.dir * tier.v * dt;
@@ -494,7 +495,8 @@ function zeichne(t) {
     const satt = tier.satt >= 0;
     const springt = tier.art === 'hase' || tier.art === 'gold';
     const hop = springt && !satt ? Math.abs(Math.sin(tier.t * 8 + tier.phase)) * 8 : 0;
-    const freu = satt && tier.satt < 0.6 ? Math.abs(Math.sin(tier.satt * 14)) * 5 : 0;
+    // Gefüttert: erst große Freudensprünge, auf der Flucht kleinere
+    const freu = !satt ? 0 : Math.abs(Math.sin(tier.satt * (tier.satt < 0.6 ? 14 : 11))) * (tier.satt < 0.6 ? 6 : 4);
     // Das Reh setzt im Galopp leicht auf und ab
     const galopp = satt ? 0 : tier.art === 'reh' ? Math.abs(Math.sin(tier.t * 12)) * 3
       : tier.art === 'fuchs' ? Math.abs(Math.sin(tier.t * 11)) * 2 : tier.art === 'schwein' ? Math.abs(Math.sin(tier.t * 9)) * 1.5 : 0;
@@ -503,7 +505,7 @@ function zeichne(t) {
     const sw = ({ reh: 20, schwein: 20, fuchs: 16, igel: 12 }[tier.art] || 14) - Math.round(hop);
     c.fillStyle = 'rgba(20,30,20,0.22)';
     c.fillRect(Math.round(tier.x - sw / 2), Math.round(tier.y), sw, 2);
-    zeichneTier(tier, x, y, t, hop > 3, satt, winter);
+    zeichneTier(tier, x, y, t, hop > 3 || freu > 2.5, satt, winter);
     if (satt && tier.satt < 0.9) {
       futter(tier.art, x + tier.dir * 8, y - (tier.art === 'reh' ? 24 : tier.art === 'igel' ? 12 : 16));
       herz(x - 6, y - 26 - tier.satt * 18); herz(x + 4, y - 22 - tier.satt * 24);
