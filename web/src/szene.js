@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611021800';
-import * as Z from './zeit.js?v=202611021800';
-import * as S from './spiel.js?v=202611021800';
-import { FASSADEN } from './config.js?v=202611021800';
-import * as C from './config.js?v=202611021800';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611021900';
+import * as Z from './zeit.js?v=202611021900';
+import * as S from './spiel.js?v=202611021900';
+import { FASSADEN } from './config.js?v=202611021900';
+import * as C from './config.js?v=202611021900';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -343,7 +343,7 @@ function kahlerBaum(c, G, w, L, t) {
       k++;
       if (hausVerdeckt(px, py, G)) return;   // hinter dem Haus: nicht durchs Dach leuchten
       const f = bunt ? BUNT[k % BUNT.length] : WARM;
-      birne(c, L, px, py, f, HALO[gs] || 3, lichtHell(k, t, gs), birnenForm('baum_girlande'), k);
+      birne(c, L, px, py, f, HALO[gs] || 3, lichtHell(k, t, gs, 'baum'), birnenForm('baum_girlande'), k);
     };
     const alle = gs >= 2 ? 3 : 5, astAlle = gs >= 2 ? 2 : 3;
     for (let yy = y0 - 2; yy > y0 - 76; yy -= 1) {
@@ -970,9 +970,9 @@ export function barbaraGross(c, z, t = 0) {
  * Helligkeit eines Lichts in einer Kette. Bis Stufe 2 leuchten sie RUHIG;
  * Lauflicht und Pulsieren sind die letzte Kaufstufe (Nutzerwunsch).
  */
-export function lichtHell(i, t, stufe) {
-  // 02.11.: Lauflicht im Menü abschaltbar (Einstellungen → „Lauflicht“) - dann leuchten alle Ketten ruhig
-  if (stufe >= 3 && !S.st.lauflichtAus) { const w = (Math.sin(t * 5 - i * 0.45) + 1) / 2; return 0.25 + 0.75 * w * w; }
+export function lichtHell(i, t, stufe, kette) {
+  // 02.11.: Lauflicht je Kette abschaltbar („Haus schmücken“ → Lichter, S.lauflicht) - dann leuchtet sie ruhig
+  if (stufe >= 3 && S.lauflicht(kette)) { const w = (Math.sin(t * 5 - i * 0.45) + 1) / 2; return 0.25 + 0.75 * w * w; }
   return 1;
 }
 const HALO = [3, 3, 4, 5];
@@ -1008,7 +1008,7 @@ function kette(c, L, x0, x1, y, abstand, durchhang, t, versatz, stufe = 1, art =
     if (i % dicht === 0) {
       let f = bunt ? BUNT[Math.floor(i / dicht) % BUNT.length] : WARM;
       if (show) f = BUNT[Math.floor(t * 3 + x / 12) % BUNT.length];
-      birne(c, L, x, yy + 1, f, HALO[stufe] || 3, lichtHell(i, t, stufe), birnenForm(id), Math.floor(i / dicht));
+      birne(c, L, x, yy + 1, f, HALO[stufe] || 3, lichtHell(i, t, stufe, art), birnenForm(id), Math.floor(i / dicht));
     }
   }
 }
@@ -1091,7 +1091,7 @@ function rahmenLichter(c, L, x, y, w, h, t, stufe = 1, art = 'fenster') {
   let i = 0;
   const setze = (px, py) => {
     const f = bunt ? BUNT[i % BUNT.length] : WARM;
-    birne(c, L, px, py, f, HALO[stufe] || 3, lichtHell(i, t, stufe), form, i);
+    birne(c, L, px, py, f, HALO[stufe] || 3, lichtHell(i, t, stufe, art), form, i);
     i++;
   };
   for (let xx = x; xx <= x + w; xx += schritt) { setze(xx, y); }
@@ -1243,7 +1243,7 @@ function tanne(c, G, w, t, L) {
       const breite = (12 * (1 - hy) + 1) * sk;
       const x = Math.round(cx + Math.sin(i * 1.9) * breite * 0.8);
       const f = bunt ? BUNT[i % BUNT.length] : WARM;
-      birne(c, L, x, y, f, 2, 0.75 * lichtHell(i, t, ts), birnenForm('tanne_lichter'), i);   // 44 Lichter auf engem Raum - kleiner Schein, sonst gleißt die Tanne
+      birne(c, L, x, y, f, 2, 0.75 * lichtHell(i, t, ts, 'tanne'), birnenForm('tanne_lichter'), i);   // 44 Lichter auf engem Raum - kleiner Schein, sonst gleißt die Tanne
     }
   }
   if (S.zeigt('tanne_kugeln')) {
@@ -1308,7 +1308,7 @@ function palme(c, G, w, t, L) {
     const pkt = [];
     stamm.forEach(([x, y], i) => { if (i % 3 === 1) pkt.push([x + (i % 6 < 3 ? -2 : 2), y]); });
     for (const [rx, ry] of wedel) for (let i = 2; i <= 12; i += 2 + (ts >= 2 ? 0 : 1)) pkt.push([Math.round(kx + rx * i * (ry < -0.5 ? 0.6 : 1)), Math.round(ky + ry * i * 0.6 + i * i * 0.045 * (ry < -0.5 ? 0.3 : 1)) + 1]);
-    pkt.forEach(([x, y], i) => { const f = bunt ? BUNT[i % BUNT.length] : WARM; birne(c, L, x, y, f, 2, 0.75 * lichtHell(i, t, ts), birnenForm('tanne_lichter'), i); });
+    pkt.forEach(([x, y], i) => { const f = bunt ? BUNT[i % BUNT.length] : WARM; birne(c, L, x, y, f, 2, 0.75 * lichtHell(i, t, ts, 'tanne'), birnenForm('tanne_lichter'), i); });
   }
   if (S.zeigt('tanne_kugeln')) {
     // Kokosnüsse unter der Krone - weihnachtlich bemalt
@@ -2131,7 +2131,7 @@ function stand(c, G, w, t, L) {
         const w2 = Math.round(breite * (1 - i / hoehe) / 2), y = markise - 1 - i, k = i;
         for (const x of [x0 + (x1 - x0) / 2 - w2, x0 + (x1 - x0) / 2 + w2 - 1]) {
           const f = S.bunt('stand') ? BUNT[k % BUNT.length] : WARM;
-          p(c, x, y, f); L.push({ x, y, f, halo: 3, an: lichtHell(k, t, 3) });
+          p(c, x, y, f); L.push({ x, y, f, halo: 3, an: lichtHell(k, t, 3, 'stand') });
         }
       }
       const sx = x0 + (x1 - x0) / 2, sy = markise - hoehe - 4;
@@ -2172,7 +2172,7 @@ function stand(c, G, w, t, L) {
   const sls = S.stufe('standlicht');
   if (S.zeigt('standlicht')) for (let x = x0 + 1, i = 0; x < x1; x += (sls >= 2 ? 2 : 4), i++) {
     const f = S.bunt('stand') ? BUNT[i % BUNT.length] : WARM;
-    birne(c, L, x, markise + 9, f, HALO[sls] || 3, lichtHell(i, t, sls), birnenForm('standlicht'), i);
+    birne(c, L, x, markise + 9, f, HALO[sls] || 3, lichtHell(i, t, sls, 'stand'), birnenForm('standlicht'), i);
   }
   if (S.zeigt('standlicht')) L.push({ rect: [x0 + 2, G - 34, x1 - x0 - 4, 12], f: '#ffb860', halo: 10, an: 0.35 });
   // Tresen

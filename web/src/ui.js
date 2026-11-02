@@ -5,30 +5,30 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611021800';
-import * as S from './spiel.js?v=202611021800';
-import * as Z from './zeit.js?v=202611021800';
-import * as T from './ton.js?v=202611021800';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611021800';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611021800';
-import { zielHaus } from './fein.js?v=202611021800';
-import * as AN from './ansicht.js?v=202611021800';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611021800';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611021800';
-import * as A from './auftraege.js?v=202611021800';
-import * as E from './erfolge.js?v=202611021800';
-import * as ZL from './ziele.js?v=202611021800';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611021800';
-import * as KA from './karte.js?v=202611021800';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611021800';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611021800';
-import * as SW from './schneeball.js?v=202611021800';
-import * as LI from './lichtung.js?v=202611021800';
-import * as CB from './christbaum.js?v=202611021800';
-import * as SB from './schlitten.js?v=202611021800';
-import * as EB from './schlittschuh.js?v=202611021800';
-import * as BS from './backstube.js?v=202611021800';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202611021800';
+import * as C from './config.js?v=202611021900';
+import * as S from './spiel.js?v=202611021900';
+import * as Z from './zeit.js?v=202611021900';
+import * as T from './ton.js?v=202611021900';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611021900';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611021900';
+import { zielHaus } from './fein.js?v=202611021900';
+import * as AN from './ansicht.js?v=202611021900';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611021900';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611021900';
+import * as A from './auftraege.js?v=202611021900';
+import * as E from './erfolge.js?v=202611021900';
+import * as ZL from './ziele.js?v=202611021900';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611021900';
+import * as KA from './karte.js?v=202611021900';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611021900';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611021900';
+import * as SW from './schneeball.js?v=202611021900';
+import * as LI from './lichtung.js?v=202611021900';
+import * as CB from './christbaum.js?v=202611021900';
+import * as SB from './schlitten.js?v=202611021900';
+import * as EB from './schlittschuh.js?v=202611021900';
+import * as BS from './backstube.js?v=202611021900';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202611021900';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -849,7 +849,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611021800`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611021900`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1222,7 +1222,7 @@ function baueHaus(behalteScroll) {
   const r = reiter.find((x) => x.id === hausReiter);
   if (r.id === 'geschenkt') baueGeschenkt(liste, r.gesch);
   else {
-    if (r.id === 'lichter') liste.appendChild(alleLichter());
+    if (r.id === 'lichter') { liste.appendChild(alleLichter()); if (S.LAUF_KETTEN.some(S.hatLauflicht)) liste.appendChild(alleLauflichter()); }
     if (r.anstriche.length) liste.appendChild(anstrichZeile(r.anstriche));
     for (const a of r.teile) liste.appendChild(hausKarte(a));
   }
@@ -1296,6 +1296,7 @@ function hausKarte(a) {
   const teile = [];
   if (vs && vs[aktiv].kurz !== a.name) teile.push(vs[aktiv].kurz);   // „Holzstapel · Holzstapel“ vermeiden
   if (farbe && an) teile.push(S.lichtModus(a.id) === 'bunt' ? 'Bunt' : 'Warmweiß');
+  if (farbe && an && S.hatLauflicht(a.id)) teile.push(S.lauflicht(farbe) ? 'Lauflicht' : 'Ruhig');
   else if (istLicht && a.id in C.LICHT_AB_STUFE && !farbe) teile.push('Lichter ab Stufe 2');
   const zaunFarbe = a.id === 'zaun' && S.stufe('zaun_braun') > 0;
   if (zaunFarbe) teile.push(S.st.zaunfarbe === 'braun' ? 'Braun' : 'Hell');
@@ -1311,6 +1312,9 @@ function hausKarte(a) {
     if (vs) teil(inhalt, 'Aussehen', variantenReihe(a.id));
     if (farbe) teil(inhalt, 'Farbe', punktWahl([{ wert: 'weiss', text: 'Warmweiß' }, { wert: 'bunt', text: 'Bunt' }], S.bunt(farbe) ? 'bunt' : 'weiss',
       (v) => { S.setzeLicht(a.id, v); zeigeVariante(a.id); }, { weiss: '#fff2cc', bunt: 'conic-gradient(#ff4a4a, #ffd040, #5aff6a, #4a8aff, #ff6adf, #ff4a4a)' }));
+    // 02.11. (Nutzerwunsch, erst als Schalter im Menü): Lauflicht der Stufe 3 neben der Farbe abschaltbar
+    if (farbe && S.hatLauflicht(a.id)) teil(inhalt, 'Leuchten', punktWahl([{ wert: 'lauf', text: 'Lauflicht' }, { wert: 'ruhig', text: 'Ruhig' }],
+      S.lauflicht(farbe) ? 'lauf' : 'ruhig', (v) => S.setzeLauflicht(farbe, v === 'lauf'), { lauf: 'linear-gradient(90deg, #fff2cc, #6a5a30, #fff2cc)', ruhig: '#fff2cc' }));
     if (zaunFarbe) teil(inhalt, 'Farbe', punktWahl([{ wert: 'hell', text: 'Hell' }, { wert: 'braun', text: 'Braun' }],
       S.st.zaunfarbe === 'braun' ? 'braun' : 'hell', (v) => { S.setzeZaunfarbe(v); zeigeVariante('zaun'); }, { hell: '#e2d5bb', braun: '#7a5234' }));
   } : null);
@@ -1369,6 +1373,19 @@ function alleLichter() {
     }
     T.spiele('klick'); S.speichere();
   }));
+  return z;
+}
+/** Darunter (02.11.): das Lauflicht aller Ketten auf Stufe 3 auf einmal an oder aus. */
+function alleLauflichter() {
+  const ketten = S.LAUF_KETTEN.filter(S.hatLauflicht).map((id) => S.lichtKette(id)).filter(Boolean);
+  const alle = ketten.every((k) => S.lauflicht(k)) ? 'lauf' : ketten.every((k) => !S.lauflicht(k)) ? 'ruhig' : null;
+  const z = el('div', 'zeile haus alle-lichter');
+  z.appendChild(el('div', 'txt', '<b>Alle Lauflichter</b><span>Ketten auf Stufe 3: wandernde Wellen oder ruhiges Leuchten</span>'));
+  z.appendChild(punktWahl([{ wert: 'lauf', text: 'Lauflicht' }, { wert: 'ruhig', text: 'Ruhig' }], alle, (v) => {
+    S.st.ruhig = S.st.ruhig || {};
+    for (const k of ketten) S.st.ruhig[k] = v === 'ruhig';
+    T.spiele('klick'); S.speichere();
+  }, { lauf: 'linear-gradient(90deg, #fff2cc, #6a5a30, #fff2cc)', ruhig: '#fff2cc' }));
   return z;
 }
 /** Reiter „Geschenkt": nach Herkunft, je Teil eine Zeile mit Kippschalter. */
@@ -2577,7 +2594,7 @@ export function oeffneMenue() {
   oeffneBlatt('menue', 'Punsch & Lichterglanz');
   // 31.10. (Nutzerwunsch): oben links der Schriftzug des Logos einzeilig auf einer Holzleiste (das ganze
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
-  $('#blattTitel').innerHTML = `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611021800" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611021900" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -2738,9 +2755,6 @@ function oeffneEinstellungen() {
   if (ZL.fertig()) schalter.appendChild(mk('Nächstes Ziel zeigen', S.st.zieleWeiter === true, () => { S.st.zieleWeiter = S.st.zieleWeiter !== true; S.speichere(); zielLeiste(); }));
   schalter.appendChild(mk('Geräusche', S.st.ton.fx, () => { S.st.ton.fx = !S.st.ton.fx; T.setzeFx(S.st.ton.fx); S.speichere(); }));
   // Vorschau „Morgen wartet …" abschaltbar (13.10.)
-  // Lauflicht der Lichterketten (Stufe 3) abschaltbar (02.11., Nutzerwunsch: „waabert“) - nur, wenn man eins hat
-  if (['lichter_dach', 'lichter_fenster', 'lichter_zaun', 'tanne_lichter', 'baum_girlande', 'standlicht', 'stand'].some((id) => S.stufe(id) >= 3))
-    schalter.appendChild(mk('Lauflicht', S.st.lauflichtAus !== true, () => { S.st.lauflichtAus = S.st.lauflichtAus !== true; S.speichere(); }));
   schalter.appendChild(mk('Vorschau auf morgen', S.st.vorschauAus !== true, () => { S.st.vorschauAus = S.st.vorschauAus !== true; S.speichere(); }));
   const nm = el('button', 'k k--neben', 'Haus umbenennen');
   nm.onclick = () => frageName(true);
@@ -2909,7 +2923,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611021800" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611021900" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611021800';
-import * as Z from './zeit.js?v=202611021800';
-import { neueFarben } from './pixel.js?v=202611021800';
+import * as C from './config.js?v=202611021900';
+import * as Z from './zeit.js?v=202611021900';
+import { neueFarben } from './pixel.js?v=202611021900';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -113,6 +113,8 @@ function laden() {
         stand.kalDeko.kal_knoedel = true;
         stand.besitz.futterhaus = Math.max(1, stand.besitz.futterhaus || 0);
       }
+      // 02.11.: Der Menüschalter „Lauflicht“ (ein paar Stunden live) ist jetzt die Wahl je Kette
+      if (stand.lauflichtAus) { stand.ruhig = Object.fromEntries(Object.values(C.LICHTER).filter(Boolean).map((k) => [k, true])); delete stand.lauflichtAus; }
       // Stammgäste (13.10.): Postbote Paul ist jetzt Postbotin Sophia - Besuche mitnehmen
       if (stand.stamm && stand.stamm.paul) { stand.stamm.sophia = stand.stamm.sophia || stand.stamm.paul; delete stand.stamm.paul; }
       if (!('miniStaffel' in alt)) {
@@ -274,6 +276,16 @@ export function setzeLicht(id, modus) {
   st.aus[id] = modus === 'aus';
   const k = lichtKette(id);
   if (k && modus !== 'aus') st.bunt[k] = modus === 'bunt';
+  hooks.ton('klick');
+  speichere();
+}
+/** Lauflicht (02.11.): Ketten auf Stufe 3 laufen, außer man hat sie unter „Haus schmücken“ auf ruhig gestellt. */
+export const LAUF_KETTEN = ['lichter_dach', 'lichter_fenster', 'lichter_zaun', 'tanne_lichter', 'baum_girlande', 'standlicht'];
+export const hatLauflicht = (id) => LAUF_KETTEN.includes(id) && (stufe(id) >= 3 || (id === 'standlicht' && stufe('stand') >= 3));
+export const lauflicht = (kette) => !(st.ruhig && st.ruhig[kette]);
+export function setzeLauflicht(kette, an) {
+  st.ruhig = st.ruhig || {};
+  st.ruhig[kette] = !an;
   hooks.ton('klick');
   speichere();
 }
