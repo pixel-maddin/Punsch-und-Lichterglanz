@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611022200';
-import * as Z from './zeit.js?v=202611022200';
-import * as S from './spiel.js?v=202611022200';
-import { FASSADEN } from './config.js?v=202611022200';
-import * as C from './config.js?v=202611022200';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611022300';
+import * as Z from './zeit.js?v=202611022300';
+import * as S from './spiel.js?v=202611022300';
+import { FASSADEN } from './config.js?v=202611022300';
+import * as C from './config.js?v=202611022300';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -2617,7 +2617,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [37, -28], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], f_eisenbahn: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], sp_pokal: [42, -58], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [31, -71], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [18, -26], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], f_eisenbahn: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], sp_pokal: [42, -58], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [31, -71], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -2844,9 +2844,11 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   // Schneefamilie, Zaun und Laternen stehen davor
   let lAus = lichtAus ? lichterAus(e, L, 0) : 0;
   const g = optikNeu ? gartenAnfang(e) : e;   // Neue Optik (01.11.): Garten-Deko auf eigener Ebene (Schatten, Kontur)
-  if (S.zeigt('auf_geschenke')) geschenke(g, 37, GW - 24);   // linke Hausecke, zwischen Tanne und Schneemann
   if (S.zeigt('auf_rodel')) rodel(g, 60, GW - 24, w);        // lehnt hinter dem Schneekind, ragt darüber
   if (S.zeigt('tanne')) tanne(g, GW, w, t, L);
+  // 02.11. (Deko-Test): Die Geschenke standen an der linken Hausecke (x 37) und waren zu ~90 % hinter Zuckerstangen,
+  // Lollis bzw. Schneeburg verschwunden. Jetzt liegen sie unter der Tanne (cx 18), vor dem Stamm
+  if (S.zeigt('auf_geschenke')) geschenke(g, 18, GW - 17);
   if (S.zeigt('zuckerstangen')) {
     const zv = S.variante('zuckerstangen');
     if (zv === 1) { lebkuchenmaennchen(g, 33, GW - 19); lebkuchenmaennchen(g, 40, GW - 20); }
@@ -2855,7 +2857,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   }
   // Das Futterhaus hängt im kahlen Baum - im Vorgarten stand es den
   // Zuckerstangen im Weg (bis 11.10. das Vogelhäuschen aus Türchen 18)
-  if (S.zeigt('futterhaus')) { futterhaus(g, L, FUTTER_X, GW + FUTTER_DY, S.variante('futterhaus'), S.futterVoll(), S.hat('kal_knoedel'), t); voegel(g, GW, t, L); }
+  if (S.zeigt('futterhaus')) { futterhaus(g, L, FUTTER_X, GW + FUTTER_DY, S.variante('futterhaus'), S.futterVoll(), S.zeigt('kal_knoedel'), t); voegel(g, GW, t, L); }   // 02.11.: zeigt statt hat - der Schalter wirkte nicht
   if (S.zeigt('schneemann')) {
     const v = S.variante('schneemann');
     if (v === 1) schneeburg(g, 45, GW - 18);
