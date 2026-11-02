@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611021130';
-import * as Z from './zeit.js?v=202611021130';
-import * as S from './spiel.js?v=202611021130';
-import { FASSADEN } from './config.js?v=202611021130';
-import * as C from './config.js?v=202611021130';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611021800';
+import * as Z from './zeit.js?v=202611021800';
+import * as S from './spiel.js?v=202611021800';
+import { FASSADEN } from './config.js?v=202611021800';
+import * as C from './config.js?v=202611021800';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -971,7 +971,8 @@ export function barbaraGross(c, z, t = 0) {
  * Lauflicht und Pulsieren sind die letzte Kaufstufe (Nutzerwunsch).
  */
 export function lichtHell(i, t, stufe) {
-  if (stufe >= 3) { const w = (Math.sin(t * 5 - i * 0.45) + 1) / 2; return 0.25 + 0.75 * w * w; }
+  // 02.11.: Lauflicht im Menü abschaltbar (Einstellungen → „Lauflicht“) - dann leuchten alle Ketten ruhig
+  if (stufe >= 3 && !S.st.lauflichtAus) { const w = (Math.sin(t * 5 - i * 0.45) + 1) / 2; return 0.25 + 0.75 * w * w; }
   return 1;
 }
 const HALO = [3, 3, 4, 5];
