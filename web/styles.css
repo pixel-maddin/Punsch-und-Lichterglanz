@@ -1812,3 +1812,9 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
 .k-name, .k-preis { flex-shrink: 0; }
 .kachel canvas { margin: calc(var(--px) * 0.4) 0; }
 .k-preis { margin-top: calc(var(--px) * 1); }
+/* 02.11. (Nutzerwunsch: „bei 10 Bildern muss man ewig scrollen“): Dankesbilder im Album zu zweit nebeneinander,
+   so breit, wie die Spalte hergibt (abzüglich Goldrahmen), Seitenverhältnis 4:3 aus der Leinwand */
+.album-bilder { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(var(--px) * 5) calc(var(--px) * 4); }
+.album-bild { width: 100%; }
+.album-bild canvas { width: calc(100% - var(--px) * 6); height: auto; aspect-ratio: 4 / 3; margin: 0 auto; }
+.album-bild small { font-size: calc(var(--t-mini) * 0.9); margin-top: calc(var(--px) * 2); }
