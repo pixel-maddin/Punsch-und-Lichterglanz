@@ -1804,3 +1804,11 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
   background: linear-gradient(#36528e, #22346a); color: #fff; border: calc(var(--px) * 0.8) solid var(--ui-rand, #4a6ab0); font: 800 var(--t-betont) var(--schrift); position: relative; }
 #ansichtText.aus { text-decoration: line-through; opacity: 0.85; }
 #ansichtText::after { content: ''; position: absolute; inset: calc(var(--px) * -3); }
+/* 02.11. (iPhone): Unterlängen (p, g) wurden von overflow: hidden gekappt - Zeile höher, dafür oben weniger Abstand,
+   damit die Schrift an derselben Stelle steht. Zu lange Namen verkleinert kacheln.js (passeName). */
+.k-name { line-height: 1.35; margin-top: calc(var(--px) * 0.8); }
+/* Flex staucht Elemente mit overflow: hidden - in der knapp gefüllten Kachel wurde so die Namenszeile 10 statt 14 px
+   hoch. Name und Preis behalten ihre Höhe, der Platz kommt aus den Abständen um das Bild. */
+.k-name, .k-preis { flex-shrink: 0; }
+.kachel canvas { margin: calc(var(--px) * 0.4) 0; }
+.k-preis { margin-top: calc(var(--px) * 1); }

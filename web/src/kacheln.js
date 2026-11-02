@@ -10,10 +10,10 @@
  * Alles, was die Kacheln zeigen, kommt aus dem Spielzustand (S.lauf, S.st) -
  * kein eigener Zustand. Gebaut wird nur neu, wenn sich etwas ändert.
  */
-import * as C from './config.js?v=202611011600';
-import * as S from './spiel.js?v=202611011600';
-import { iconGross, scale2x, r, p } from './pixel.js?v=202611011600';
-import { naechsterSchritt } from './tresen.js?v=202611011600';
+import * as C from './config.js?v=202611021000';
+import * as S from './spiel.js?v=202611021000';
+import { iconGross, scale2x, r, p } from './pixel.js?v=202611021000';
+import { naechsterSchritt } from './tresen.js?v=202611021000';
 
 const $ = (s) => document.querySelector(s);
 let wurzel = null;
@@ -31,8 +31,24 @@ function bauen() {
     kacheln.push({ el, cv: el.querySelector('canvas'), name: el.querySelector('.k-name'), preis: el.querySelector('.k-preis'),
       info: el.querySelector('.k-info'), zone: el.querySelector('.k-zone'), fuell: el.querySelector('.k-fuell'), marke: el.querySelector('.k-marke'), sig: '', bildSig: '' });
   }
+  // Neu einpassen, wenn sich die Breite ändert oder die Schrift fertig geladen ist (vorher misst sie die Ersatzschrift)
+  addEventListener('resize', allesEinpassen);
+  if (document.fonts) document.fonts.ready.then(allesEinpassen);
   return true;
 }
+
+/**
+ * Namen in die Kachel einpassen (02.11., gemeldet vom iPhone: „Sternenpuns…"): Ist er zu breit, wird
+ * seine Schrift so weit kleiner, bis er passt - höchstens auf 75 %, danach kürzt das „…" wie bisher.
+ * Die Größe hängt an --t-mini, wächst also mit dem Spiel mit.
+ */
+function passeName(n) {
+  n.style.fontSize = '';
+  if (!n.clientWidth || n.scrollWidth <= n.clientWidth) return;
+  const f = Math.max(0.75, Math.floor(n.clientWidth / n.scrollWidth * 100) / 100 - 0.01);
+  n.style.fontSize = `calc(var(--t-mini) * ${f})`;
+}
+function allesEinpassen() { for (const q of kacheln) passeName(q.name); }
 
 // Kleine Leinwand 20 x 20 in Spielpixeln, dann zweimal Scale2x
 const _klein = document.createElement('canvas'); _klein.width = 20; _klein.height = 20;
@@ -159,7 +175,7 @@ export function aktualisiere(t) {
   for (let k = 0; k < C.ANGEBOT_MAX; k++) {
     const q = kacheln[k], p0 = frei[k];
     if (!p0) {
-      if (q.sig !== 'frei') { q.sig = 'frei'; q.el.className = 'kachel frei'; q.name.textContent = 'Frei'; q.preis.textContent = '+'; q.info.textContent = ''; q.cv.getContext('2d').clearRect(0, 0, 20, 20); q.bildSig = ''; }
+      if (q.sig !== 'frei') { q.sig = 'frei'; q.el.className = 'kachel frei'; q.name.textContent = 'Frei'; q.name.style.fontSize = ''; q.preis.textContent = '+'; q.info.textContent = ''; q.cv.getContext('2d').clearRect(0, 0, 20, 20); q.bildSig = ''; }
       continue;
     }
     const i = C.PRODUKTE.indexOf(p0);
@@ -192,7 +208,7 @@ export function aktualisiere(t) {
     if (sig !== q.sig) {
       q.sig = sig;
       q.el.className = 'kachel ' + zustand + (gedrueckt ? ' gedrueckt' : '') + (wackelt ? ' wackelt' : '') + (tipp ? ' tipp' : '') + (S.lauf.gefuellt[p0.id] > 0 ? ' voll-neu' : '');
-      q.name.textContent = p0.name;
+      if (q.name.textContent !== p0.name) { q.name.textContent = p0.name; passeName(q.name); }
       q.preis.textContent = preis;
       q.info.textContent = info;
       q.fuell.style.width = Math.round(Math.max(0, Math.min(1, anteil)) * 100) + '%';
