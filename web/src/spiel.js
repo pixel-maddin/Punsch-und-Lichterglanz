@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611022000';
-import * as Z from './zeit.js?v=202611022000';
-import { neueFarben } from './pixel.js?v=202611022000';
+import * as C from './config.js?v=202611022100';
+import * as Z from './zeit.js?v=202611022100';
+import { neueFarben } from './pixel.js?v=202611022100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -283,6 +283,21 @@ export function setzeLicht(id, modus) {
 export const LAUF_KETTEN = ['lichter_dach', 'lichter_fenster', 'lichter_zaun', 'tanne_lichter', 'baum_girlande', 'standlicht'];
 export const hatLauflicht = (id) => LAUF_KETTEN.includes(id) && (stufe(id) >= 3 || (id === 'standlicht' && stufe('stand') >= 3));
 export const lauflicht = (kette) => !(st.ruhig && st.ruhig[kette]);
+/**
+ * Helligkeit (02.11., Nutzerwunsch): 1 Leicht (wenige Lichter), 2 Normal (doppelt so viele), 3 Hell (größerer
+ * Schein) - also das Aussehen der Kaufstufen, höchstens die gekaufte. Ohne Wahl gilt die gekaufte Stufe.
+ * Das Lauflicht hängt NICHT daran (nur an der gekauften Stufe und an „Ruhig“).
+ */
+export function lichtStufe(id) {
+  const s = stufe(id), w = st.hell && st.hell[id];
+  return w ? Math.max(1, Math.min(s, w)) : s;
+}
+export function setzeHelligkeit(id, w) {
+  st.hell = st.hell || {};
+  st.hell[id] = w;
+  hooks.ton('klick');
+  speichere();
+}
 export function setzeLauflicht(kette, an) {
   st.ruhig = st.ruhig || {};
   st.ruhig[kette] = !an;

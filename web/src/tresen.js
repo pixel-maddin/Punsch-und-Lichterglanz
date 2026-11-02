@@ -9,10 +9,10 @@
  * Symbol im Wunsch-Bläschen == Symbol auf dem Topf. Mehr Zuordnung
  * braucht es nicht, und es kommt ohne Schrift aus.
  */
-import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202611022000';
-import * as C from './config.js?v=202611022000';
-import * as S from './spiel.js?v=202611022000';
-import * as Z from './zeit.js?v=202611022000';
+import { r, p, ton, mische, icon, figurGross, wichtelGross, wichtelKlein, smiley, text, textBreite, iconGross } from './pixel.js?v=202611022100';
+import * as C from './config.js?v=202611022100';
+import * as S from './spiel.js?v=202611022100';
+import * as Z from './zeit.js?v=202611022100';
 
 const BUNT = ['#ff4a4a', '#5aff6a', '#4a8aff', '#ffd040', '#ff6adf'];
 
@@ -288,9 +288,9 @@ function gaestezone(c, y0, t, w) {
     if (x % 9 === 0) r(c, x, m0 + 8, 2, 2, '#d83a3a');
   }
   const sls = S.stufe('standlicht');
-  if (S.zeigt('standlicht')) for (let x = 4, i = 0; x < 180; x += (sls >= 2 ? 5 : 9), i++) {
+  if (S.zeigt('standlicht')) for (let x = 4, i = 0; x < 180; x += (S.lichtStufe('standlicht') >= 2 ? 5 : 9), i++) {
     const f = S.bunt('stand') ? BUNT[i % BUNT.length] : '#ffd98a';
-    const an = sls >= 3 ? 0.25 + 0.75 * ((Math.sin(t * 5 - i * 0.45) + 1) / 2) ** 2 : 1;   // ruhig bis zur letzten Stufe
+    const an = sls >= 3 && S.lauflicht('stand') ? 0.25 + 0.75 * ((Math.sin(t * 5 - i * 0.45) + 1) / 2) ** 2 : 1;   // ruhig bis zur letzten Stufe
     p(c, x, m0 + 10, '#3a3a2a'); r(c, x, m0 + 11, 1, 2, f);
     c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.25 * an;
     c.fillStyle = f; c.fillRect(x - 1, m0 + 10, 3, 4); c.restore();

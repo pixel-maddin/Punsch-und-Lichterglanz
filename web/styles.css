@@ -1821,3 +1821,7 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
   border-width: calc(var(--px) * 1.2); outline-width: calc(var(--px) * 0.3);
   box-shadow: 0 0 0 calc(var(--px) * 0.6) #f4dc8a, 0 calc(var(--px) * 1) calc(var(--px) * 2) rgba(0, 0, 0, 0.3); }
 .album-bild small { font-size: calc(var(--t-mini) * 0.9); margin-top: calc(var(--px) * 2); }
+/* 02.11.: Farbe und Leuchten in einer Reihe (zwei Paare, dazwischen etwas mehr Luft), Helligkeit darunter */
+.punktwahl-paar { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: calc(var(--px) * 3); }
+.hz-teil .punktwahl-paar .pw { padding-left: calc(var(--px) * 0.4); padding-right: calc(var(--px) * 0.4); }
+.hz-teil .punktwahl-paar .pw span { white-space: nowrap; }
