@@ -56,8 +56,8 @@ braucht.
 **Stammgäste:** Oma Hilde mit Dackel Waldi, Postbotin Sophia, Karl mit
 seinen Witzen, die kleine Lena und Förster Franz kommen jeden Tag einmal
 vorbei - zu jeder Uhrzeit, sobald du am Stand bist (jeder hat aber seine
-Lieblingszeit). Jeder erzählt Stück für Stück seine Geschichte, und zwischen
-24.12. und 6.1. bringt jeder, der dich schon kennt, ein Abschiedsgeschenk.
+Lieblingszeit). Jeder erzählt Stück für Stück seine Geschichte. Wer seine ganze
+Geschichte erzählt hat, bringt zwischen 25.12. und 6.1. ein Abschiedsgeschenk.
 
 **Bitten der Stammgäste:** Einmal am Tag hat einer der Stammgäste, die du
 schon kennst, eine Bitte an dich - fünf Kinderpunsch für Hildes Strickrunde,

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611041100';
-import * as Z from './zeit.js?v=202611041100';
-import { neueFarben } from './pixel.js?v=202611041100';
+import * as C from './config.js?v=202611041200';
+import * as Z from './zeit.js?v=202611041200';
+import { neueFarben } from './pixel.js?v=202611041200';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -898,8 +898,12 @@ export function stammBedient(g) {   // exportiert nur für Tests
   const e = st.stamm[g.typ] = st.stamm[g.typ] || { n: 0 };
   e.tag = Z.tagesSchluessel();
   const dt = Z.dezemberTag();
-  // 26.10.: vom 24.12. bis zum 6.1. (vorher nur 24.-26.12. - wer an den Feiertagen nicht spielte, bekam es nie)
-  if (dt >= 24 && dt <= 37 && e.n >= 3 && e.geschenk !== Z.saison()) {   // nur wer sich schon kennt
+  // 26.10.: bis zum 6.1. (vorher nur 24.-26.12. - wer an den Feiertagen nicht spielte, bekam es nie).
+  // 04.11. (Nutzerwunsch): erst ab dem 25.12. und erst, wenn die GANZE Geschichte erzählt und gelesen ist
+  // (vorher ab 24.12. nach 3 Besuchen - das Geschenk kam mitten in der Geschichte). Wer noch nicht alles
+  // gehört hat, hört nach Weihnachten weiter; ohne ganze Geschichte gibt es kein Geschenk.
+  const ungelesen = (st.stammNeu || []).some((f) => f.id === g.typ && !f.geschenk);
+  if (dt >= 25 && dt <= 37 && e.n >= s.saetze.length && !ungelesen && e.geschenk !== Z.saison()) {
     e.geschenk = Z.saison();
     const betrag = zehner(einnahmenProMinute() * C.STAMM_GESCHENK_MIN * dev.geld);
     if (betrag > 0) verdiene(betrag);
