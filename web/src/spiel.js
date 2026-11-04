@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611022300';
-import * as Z from './zeit.js?v=202611022300';
-import { neueFarben } from './pixel.js?v=202611022300';
+import * as C from './config.js?v=202611041000';
+import * as Z from './zeit.js?v=202611041000';
+import { neueFarben } from './pixel.js?v=202611041000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2110,9 +2110,11 @@ export function offlineAbrechnen() {
   const sv = stufe('servier');
   if (!sv) return { sek, betrag: 0, portionen: 0 };
   const rate = Math.min(1 / C.SERVIER_TAKT[sv], 1 / gastTakt());
-  // Die ersten INAKTIV_AB Sekunden arbeiten sie voll, danach nur noch ein Fünftel
-  const voll = Math.min(sek, C.INAKTIV_AB);
-  let n = (voll + (sek - voll) * offlineAnteil()) * rate;
+  // 04.11.: Von der Pause wird nur ein Teil Wichtel-Arbeit - die ersten 3 h etwas mehr (siehe OFFLINE_SATZ in config.js).
+  // Die früheren 5 Minuten mit voller Kraft am Anfang jeder Pause sind weg: ein zweiter Vorteil fürs ständige Reinschauen.
+  const anfang = Math.min(sek, C.OFFLINE_ANFANG_H * 3600);
+  const arbeit = anfang * C.OFFLINE_SATZ_ANFANG + (sek - anfang) * C.OFFLINE_SATZ;
+  let n = arbeit * offlineAnteil() * rate;
   // Ohne Nachfüll-Wichtel ist nach den vollen Töpfen Schluss
   if (!stufe('nachfuell')) {
     const vorrat = produkteFrei().filter((p) => p.art !== 'platte').reduce((a, p) => a + (st.toepfe[p.id] || 0), 0);

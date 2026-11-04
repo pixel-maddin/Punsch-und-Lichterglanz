@@ -69,9 +69,9 @@ Wichtel schauen nur zu.
 
 **Während du weg bist**, arbeiten die Wichtel weiter. Warst du nur kurz weg
 (unter einer Stunde), gibt es ihre Sterne gleich beim Zurückkommen. Länger weg,
-legen sie alles in eine Kiste, die du beim Zurückkommen öffnest. Die Kiste fasst
-höchstens 3 Stunden Arbeit - wer
-mehrmals am Tag kurz reinschaut, holt jedes Mal eine volle ab.
+legen sie alles in eine Kiste, die du beim Zurückkommen öffnest. Die Kiste füllt
+sich bis zu einen Tag lang - ob du einmal am Tag kommst oder öfter, die Wichtel
+schaffen am Tag etwa gleich viel (wer öfter reinschaut, bekommt ein paar Prozent mehr).
 
 Aufträge und Bitten, die ein Getränk verlangen, das gerade nicht in deinem
 **Angebot** steht, sagen das und haben einen Knopf „Angebot öffnen“.

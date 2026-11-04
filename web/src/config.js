@@ -164,11 +164,15 @@ export const GRUPPEN_KLEIDUNG = {
 };
 
 // Während die App zu ist, arbeiten nur die Wichtel - und nicht so gut wie du.
-// Die Kiste fasst seit 09.10. höchstens 3 Stunden (vorher 8): Wer mehrmals am
-// Tag kurz reinschaut, holt jedes Mal eine volle Kiste - wer nur einmal am Tag
-// kommt, verschenkt etwas. Das ist der Grund, öfter zu kommen.
-export const OFFLINE_MAX_H = 3;
-export const OFFLINE_ANTEIL = 0.65;  // nach INAKTIV_AB: so viel schaffen die Wichtel noch (bis 09.10.: 40 % bei 8 h Kiste, jetzt 65 % bei 3 h)
+// 04.11. (Nutzerwunsch: „wer alle 3 h reinschaut, bekommt viel mehr als wer 1-2× am Tag kommt“): Eine Pause zählt
+// bis zu OFFLINE_MAX_H (24) Stunden, aber nur ein Teil davon wird Wichtel-Arbeit - die ersten OFFLINE_ANFANG_H (3)
+// Stunden 26 Minuten je Stunde, danach 22,5. Ein ganzer Tag weg = gut 9 h Arbeit, so viel wie früher drei Besuche
+// à 3 h. Wer oft kommt, hat mehr „Anfänge“, aber nur wenig mehr: 2× am Tag +2 %, alle 3 h +9 %, stündlich +10 %
+// (gegenüber 1× am Tag). Bis 03.11. zählte jede Pause bis 3 h voll und ohne Tagesgrenze - alle 3 h reinschauen
+// brachte so bis zu 24 h Arbeit am Tag, einmal am Tag nur 3 h.
+export const OFFLINE_MAX_H = 24, OFFLINE_ANFANG_H = 3;
+export const OFFLINE_SATZ_ANFANG = 26 / 60, OFFLINE_SATZ = 22.5 / 60;   // Wichtel-Arbeit je Stunde Pause
+export const OFFLINE_ANTEIL = 0.65;  // so gut wie du schaffen die Wichtel (bis 09.10.: 40 % bei 8 h Kiste, dann 65 % bei 3 h)
 // Seit 01.10. wächst beides mit den SPIELTAGEN (gemeldet: in den ersten Tagen
 // kam nach einer Nacht eine überwältigende Kiste). Index = Spieltag ab 0 (der
 // erste Tag), danach gilt der letzte Wert. Erst an die Servier-Stufe
@@ -176,7 +180,7 @@ export const OFFLINE_ANTEIL = 0.65;  // nach INAKTIV_AB: so viel schaffen die Wi
 // und man vorher Deko kauft (gemessen: 12 Dinge fehlten am 24.12.).
 export const OFFLINE_JE_TAG = {
   anteil:  [0.15, 0.25, 0.35, 0.45, 0.50, 0.55, OFFLINE_ANTEIL],
-  stunden: [OFFLINE_MAX_H],   // 26.10.: von Anfang an 3 h (vorher 2 / 2,5 / 3) - der kleine Anteil am Anfang bremst genug
+  stunden: [OFFLINE_MAX_H],   // 26.10.: von Anfang an voll (vorher 2 / 2,5 / 3 h) - der kleine Anteil am Anfang bremst genug
 };
 export const INAKTIV_AB = 300;       // s ohne dich - bis dahin arbeiten sie voll weiter
 // 26.10. (Testbericht): Bis dahin rechneten die Wichtel erst ab einer Stunde ab - wer alle
