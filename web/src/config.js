@@ -166,12 +166,12 @@ export const GRUPPEN_KLEIDUNG = {
 // Während die App zu ist, arbeiten nur die Wichtel - und nicht so gut wie du.
 // 04.11. (Nutzerwunsch: „wer alle 3 h reinschaut, bekommt viel mehr als wer 1-2× am Tag kommt“): Eine Pause zählt
 // bis zu OFFLINE_MAX_H (24) Stunden, aber nur ein Teil davon wird Wichtel-Arbeit - die ersten OFFLINE_ANFANG_H (3)
-// Stunden 26 Minuten je Stunde, danach 22,5. Ein ganzer Tag weg = gut 9 h Arbeit, so viel wie früher drei Besuche
-// à 3 h. Wer oft kommt, hat mehr „Anfänge“, aber nur wenig mehr: 2× am Tag +2 %, alle 3 h +9 %, stündlich +10 %
-// (gegenüber 1× am Tag). Bis 03.11. zählte jede Pause bis 3 h voll und ohne Tagesgrenze - alle 3 h reinschauen
+// Stunden 17 Minuten je Stunde, danach 15. Ein ganzer Tag weg = gut 6 h Arbeit. Wer oft kommt, hat mehr „Anfänge“,
+// aber nur wenig mehr (2× am Tag +2 %, alle 3 h +9 %, stündlich +10 % gegenüber 1× am Tag). Erst 26/22,5 Minuten -
+// damit war mit 10 min am Tag schon am 20.12. alles gekauft; mit 17/15 am 22.-23.12. (saison8, siehe CLAUDE.md). Bis 03.11. zählte jede Pause bis 3 h voll und ohne Tagesgrenze - alle 3 h reinschauen
 // brachte so bis zu 24 h Arbeit am Tag, einmal am Tag nur 3 h.
 export const OFFLINE_MAX_H = 24, OFFLINE_ANFANG_H = 3;
-export const OFFLINE_SATZ_ANFANG = 26 / 60, OFFLINE_SATZ = 22.5 / 60;   // Wichtel-Arbeit je Stunde Pause
+export const OFFLINE_SATZ_ANFANG = 17 / 60, OFFLINE_SATZ = 15 / 60;   // Wichtel-Arbeit je Stunde Pause
 export const OFFLINE_ANTEIL = 0.65;  // so gut wie du schaffen die Wichtel (bis 09.10.: 40 % bei 8 h Kiste, dann 65 % bei 3 h)
 // Seit 01.10. wächst beides mit den SPIELTAGEN (gemeldet: in den ersten Tagen
 // kam nach einer Nacht eine überwältigende Kiste). Index = Spieltag ab 0 (der
