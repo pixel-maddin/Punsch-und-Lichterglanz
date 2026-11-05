@@ -88,9 +88,9 @@ const cache = new Map();
 /** Text als Canvas in der Weihnachtsschrift. Wird je (Text, Stil, k) gemerkt. */
 /** Kann die Schrift dieses Zeichen? (27.10., für den Gruß auf der Weihnachtskarte) */
 export const kannSchrift = (ch) => !!G[String(ch).toUpperCase()];
-export function schriftBild(text, stil = 'gold', k = 1) {
+export function schriftBild(text, stil = 'gold', k = 1, luft = 0) {   // luft: zusätzliche Pixel zwischen den Buchstaben (05.11.)
   text = String(text).toUpperCase();
-  const schl = `${text}|${stil}|${k}`;
+  const schl = `${text}|${stil}|${k}|${luft}`;
   const alt = cache.get(schl);
   if (alt) return kopie(alt);
   // Raster aufbauen: jede Glyphe 7 Zeilen (Umlaute 8, eine nach oben)
@@ -98,7 +98,7 @@ export function schriftBild(text, stil = 'gold', k = 1) {
   const oben = 1;                                   // Platz für Umlautpunkte
   const breiteR = glyphen.reduce((s, g) => s + g[0].length + 1, -1);
   const pad = 2, schnee = k >= 2 ? k : 1;
-  const W = breiteR * k + pad * 2, H = (7 + oben) * k + pad * 2 + 1 + schnee;
+  const W = breiteR * k + luft * Math.max(0, glyphen.length - 1) + pad * 2, H = (7 + oben) * k + pad * 2 + 1 + schnee;
   const maske = new Uint8Array(W * H);
   let gx = pad;
   for (const g of glyphen) {
@@ -107,7 +107,7 @@ export function schriftBild(text, stil = 'gold', k = 1) {
       if (g[r][c] !== '#') continue;
       for (let yy = 0; yy < k; yy++) for (let xx = 0; xx < k; xx++) maske[(y0 + r * k + yy) * W + gx + c * k + xx] = 1;
     }
-    gx += (g[0].length + 1) * k;
+    gx += (g[0].length + 1) * k + luft;
   }
   // Große Schrift einen Pixel fetter (nach rechts und unten), sonst wirken
   // die Striche bei k = 3 dünn

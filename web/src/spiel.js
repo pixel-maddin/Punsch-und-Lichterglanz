@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611051000';
-import * as Z from './zeit.js?v=202611051000';
-import { neueFarben } from './pixel.js?v=202611051000';
+import * as C from './config.js?v=202611051100';
+import * as Z from './zeit.js?v=202611051100';
+import { neueFarben } from './pixel.js?v=202611051100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -207,7 +207,8 @@ export function pruefeSaison() {
   if (st.saison < Z.saison()) {
     const hatteFortschritt = st.gesamt > 1000;
     const tipps = st.tipps;
-    st = neuerStand(st.name, st.andenken + (hatteFortschritt ? 1 : 0));
+    // Wer Silvester schon gesehen hat, hat den Stern dieses Jahres schon (andenkenSaison)
+    st = neuerStand(st.name, st.andenken + (hatteFortschritt && st.andenkenSaison !== st.saison ? 1 : 0));
     st.intro = true; st.lernen = 99; st.tipps = tipps || {};   // kennt das Spiel schon
     setzeStartTag();
     resetLauf();
@@ -2743,7 +2744,12 @@ export function silvesterJetzt(d = Z.jetzt()) {
   return (dt === 31 && d.getHours() >= C.SILVESTER_STUNDE) || (dt > 31 && dt < C.SAISON_ENDE_TAG);   // 29.10.: danach Winterpause-Fenster
 }
 export const silvesterFaellig = () => st.lernen >= 99 && !DEMO && silvesterJetzt() && st.silvester !== Z.saison();
-export function silvesterGesehen() { st.silvester = Z.saison(); speichere(); }
+export function silvesterGesehen() {
+  st.silvester = Z.saison();
+  // 05.11.: Den Andenken-Stern gibt es gleich hier (vorher erst beim nächsten Advent, versteckt in der Statistik)
+  if (st.andenkenSaison !== Z.saison() && st.gesamt > 1000) { st.andenken = (st.andenken || 0) + 1; st.andenkenSaison = Z.saison(); }
+  speichere();
+}
 /** Um Mitternacht einmal „Frohes neues Jahr!" (aus der Sekundenschleife). */
 export function neujahrJetzt() {
   const d = Z.jetzt();

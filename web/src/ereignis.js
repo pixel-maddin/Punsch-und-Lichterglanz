@@ -4,15 +4,15 @@
  *
  * Die Bilder sind 180 x 100 Pixel (seit 11.10., vorher 90 x 50).
  */
-import * as C from './config.js?v=202611051000';
-import * as S from './spiel.js?v=202611051000';
-import * as T from './ton.js?v=202611051000';
-import * as Z from './zeit.js?v=202611051000';
-import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202611051000';
-import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202611051000';
-import { schriftBild } from './schrift.js?v=202611051000';
-import { fenster, karte } from './ui.js?v=202611051000';
-import { zeichneWelt } from './szene.js?v=202611051000';
+import * as C from './config.js?v=202611051100';
+import * as S from './spiel.js?v=202611051100';
+import * as T from './ton.js?v=202611051100';
+import * as Z from './zeit.js?v=202611051100';
+import { r, p, figurKlein, neueFarben, textBreite } from './pixel.js?v=202611051100';
+import { verlauf, sterne, mond, schneeBoden, schneefall, tanne, stern, haus, laterne, kette, licht, leuchten, neueLichter, hash, BUNT, feinBreite, feinGroesse, schrift } from './fein.js?v=202611051100';
+import { schriftBild } from './schrift.js?v=202611051100';
+import { fenster, karte } from './ui.js?v=202611051100';
+import { zeichneWelt } from './szene.js?v=202611051100';
 
 // Seit 11.10. in doppelter Auflösung (180 x 100) mit den Bausteinen aus
 // fein.js - vorher 90 x 50 und im Fenster „zu grob pixelig".
@@ -502,19 +502,28 @@ export function zeigeSilvester(danach) {
     <canvas class="ereignisbild" width="${BW}" height="${BH}"></canvas>
     <p>${neu ? `Das Dorf hat ${jahr} mit einem großen Feuerwerk begrüßt` : 'Das ganze Dorf steht draußen, Raketen steigen über die Dächer'} - und dein Haus leuchtet mittendrin.</p>
     <div class="abschied"></div>
-    <p>Vielen Dank fürs Spielen! :)</p>
-    <p class="klein">Bis zum 6. Januar kommen noch Gäste, danach macht dein Stand Pause. Dein Haus bleibt so geschmückt, wie es ist, und im nächsten Advent geht es von vorne los - als Andenken an dieses Jahr bekommst du einen Stern, der im Menü bleibt.</p>`,
+    <p>Vielen Dank fürs Spielen - bis zum nächsten Jahr! :)</p>
+    <p class="klein">Bis zum 6. Januar kommen noch Gäste, danach macht dein Stand Pause. Dein Haus bleibt so geschmückt, wie es ist, und im nächsten Advent geht es von vorne los. Als Andenken an dieses Jahr bekommst du einen Stern ★ - er steht ab jetzt im Menü neben dem Logo.</p>`,
   [
     { text: 'Mein Advent', aktion: () => { setTimeout(() => zeigeRueckblick(danach), 60); } },
     { text: 'Weiter', neben: true, aktion: () => { if (danach) setTimeout(danach, 60); } },
   ]);
   BILDER.silvester(bildKontext(box));
-  // „Bis zum nächsten Jahr!" in der Weihnachtsschrift, 1:1 in Spielpixeln
-  // (dreizeilig: einzeilig wäre sie bei k = 2 doppelt so breit wie das Fenster)
-  for (const zeile of ['BIS ZUM', 'NÄCHSTEN', 'JAHR!']) {
-    const cv = schriftBild(zeile, 'gold', 2);
+  // Der Gruß in der Weihnachtsschrift, 1:1 in Spielpixeln. 05.11. (Nutzerwunsch „etwas schöner“): ab
+  // Mitternacht „Frohes neues Jahr“ mit Jahreszahl, am Abend davor „Guten Rutsch“ - vorher immer „Bis zum
+  // nächsten Jahr“ (das steht jetzt als Satz darunter). Mehr Luft zwischen den Buchstaben (bei k = 2 liefen
+  // die verdickten Striche ineinander) und Glitzer, der über der Schrift funkelt (CSS .glitzer).
+  const ab = box.querySelector('.abschied');
+  for (const zeile of neu ? ['FROHES', 'NEUES JAHR', `${jahr}!`] : ['GUTEN', 'RUTSCH!']) {
+    const cv = schriftBild(zeile, 'gold', 2, 2);
     cv.className = 'schriftbild';
     cv.style.height = `calc(var(--px) * ${cv.height})`;
-    box.querySelector('.abschied').appendChild(cv);
+    ab.appendChild(cv);
+  }
+  for (const [x, y, d] of [[8, 12, 0], [86, 6, 0.5], [30, 52, 0.9], [72, 40, 1.3], [94, 78, 0.3], [14, 82, 1.7], [52, 20, 2.1]]) {
+    const s = document.createElement('i');
+    s.className = 'glitzer';
+    s.style.left = x + '%'; s.style.top = y + '%'; s.style.animationDelay = d + 's';
+    ab.appendChild(s);
   }
 }

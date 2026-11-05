@@ -1834,3 +1834,12 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
 #miniHud .mh-label.schritt.aktiv b { color: #8a3a10; }
 @keyframes schrittAtmen { 0%, 100% { transform: translate(-50%, 0) scale(1); } 50% { transform: translate(-50%, 0) scale(1.06); } }
 #miniHud .mh-label.schild.matt { opacity: 0.45; }   /* Schalen-Namen, wenn die Reihe abgedunkelt ist */
+/* 05.11.: Silvester - Glitzer über dem Gruß, Andenken-Stern im Menükopf */
+#modal .abschied { position: relative; }
+#modal .abschied .glitzer { position: absolute; width: calc(var(--px) * 5); height: calc(var(--px) * 5); pointer-events: none; opacity: 0;
+  background: radial-gradient(circle, #fff 0 18%, transparent 20%), linear-gradient(#fff6c0, #fff6c0) center / 100% 18% no-repeat, linear-gradient(#fff6c0, #fff6c0) center / 18% 100% no-repeat;
+  animation: glitzern 2.4s ease-in-out infinite; }
+@keyframes glitzern { 0%, 70%, 100% { opacity: 0; transform: scale(0.4); } 80% { opacity: 1; transform: scale(1.1); } 90% { opacity: 0.6; transform: scale(0.8); } }
+#blatt[data-art="menue"] #blattTitel { display: flex; align-items: center; gap: calc(var(--px) * 2); }
+#blatt[data-art="menue"] #blattTitel .andenken { flex: none; color: #f0b020; font: 900 calc(var(--px) * 9) var(--schrift); line-height: 1; text-shadow: 0 0 calc(var(--px) * 2) rgba(255, 210, 80, 0.8); }
+#blatt[data-art="menue"] #blattTitel .andenken + .logo-zeile { width: calc(var(--px) * 112); }
