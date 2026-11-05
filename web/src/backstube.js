@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202611041200';
-import * as Z from './zeit.js?v=202611041200';
-import * as T from './ton.js?v=202611041200';
-import * as MH from './minihud.js?v=202611041200';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202611041200';
+import * as C from './config.js?v=202611051000';
+import * as Z from './zeit.js?v=202611051000';
+import * as T from './ton.js?v=202611051000';
+import * as MH from './minihud.js?v=202611051000';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202611051000';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -118,14 +118,19 @@ let spiel = null, rafId = 0, letzte = 0, fertig = null;
 export const istOffen = () => !!spiel;
 export const zustand = () => spiel;
 
-// Wo was steht (abhängig von H)
-const THEKE = () => Math.round(H * 0.34);
-const BLECH = () => ({ x: 104, y: Math.round(H * 0.5) });
-const OFEN = () => ({ x: 134, y: Math.round(H * 0.4), b: 42, h: Math.round(H * 0.2) });
-// 27.10. (gemeldet: Zutaten zu weit unten, Puderzucker und Guss nicht auseinanderzuhalten): beide
-// Reihen höher, unter jeder Schale ein Lebkuchen mit der Verzierung als Vorschau (VORSCHAU_DY)
-const FORM_Y = () => Math.round(H * 0.66);
-const SCHALE_Y = () => Math.round(H * 0.78);
+// Wo was steht (abhängig von H).
+// 05.11. (Nutzer: „am Anfang weiß man gar nicht, wo man hinklicken muss“): neu geordnet nach dem Ablauf
+// von oben nach unten - Kunde mit Bestellung, darunter mittig der Ofen (größer) mit breiter Anzeige,
+// darunter die Reihe der Formen und die Reihe der Schalen als Kacheln. Das große Teigbrett ist weg
+// (dort passierte nichts): ein schmaler Teigstreifen links am Ofen, rechts ein Kuchengitter zum Verzieren.
+const THEKE = () => Math.round(H * 0.28);
+const OFEN = () => { const b = 64; return { x: Math.round((W - b) / 2), y: THEKE() + 20, b, h: Math.max(54, Math.round(H * 0.2)) }; };
+const ANZEIGE = () => { const o = OFEN(); return { x: 20, y: o.y + o.h + 7, b: W - 40, h: 9 }; };
+const TEIG = () => { const o = OFEN(); return { x: 6, y: o.y + 6, b: o.x - 14, h: 20 }; };
+const BLECH = () => { const o = OFEN(); return { x: Math.round((o.x + o.b + W) / 2), y: o.y + o.h - 16 }; };   // Kuchengitter
+// 27.10.: unter jeder Schale ein Lebkuchen mit der Verzierung als Vorschau (VORSCHAU_DY)
+const FORM_Y = () => Math.round(H * 0.68);
+const SCHALE_Y = () => Math.round(H * 0.845);
 const VORSCHAU_DY = 9;   // Oberkante des Vorschau-Lebkuchens unter der Schalenmitte
 const KUNDE = () => ({ x: 150, y: THEKE() + 1 });
 const slot = (i, n) => Math.round((i + 0.5) * W / n);
@@ -134,7 +139,7 @@ const slot = (i, n) => Math.round((i + 0.5) * W / n);
  * Runde starten. `beiEnde(punkte, kunden, gebacken)` kommt nach Ablauf,
  * `gebacken` = Liste der Rezept-ids (für die Plätzchendose).
  */
-export function starte(hoehe, beiEnde, stufeNr = 1, rezeptListe) {
+export function starte(hoehe, beiEnde, stufeNr = 1, rezeptListe, uebung = false) {
   stufe = C.miniStufe('back', stufeNr);
   setzeRezepte(rezeptListe);
   H = Math.round(hoehe); fertig = beiEnde;
@@ -143,6 +148,7 @@ export function starte(hoehe, beiEnde, stufeNr = 1, rezeptListe) {
   c = cv.getContext('2d');
   c.imageSmoothingEnabled = false;
   spiel = neuesSpiel(-3);
+  spiel.uebung = uebung;   // 05.11.: allererste Runde - der erste Kunde wartet, die Zeit steht
   $('#minispiel').classList.remove('versteckt');
   MH.an(W, H);
   T.musikMinispiel(true);
@@ -180,11 +186,11 @@ function neuerKunde(g) {
   g.letzte = rz.id;
   const max = Math.max(7, 12.5 - g.kunden * 0.3) / stufe.tempo;
   const typ = wahl(['erwachsen', 'erwachsen', 'oma', 'opa', 'kind']);
-  g.kunde = { x: W + 16, phase: 'kommt', rezept: rz, geduld: max, max, fehler: false,
+  g.kunde = { x: W + 16, phase: 'kommt', rezept: rz, geduld: max, max, fehler: false, uebung: !!g.uebung && g.kunden === 0,
     figur: { typ, farben: neueFarben(typ), phase: Math.random() * 6, laeuft: true } };
   g.schritt = 'stechen'; g.ware = null;
 }
-function nimmGeduld(g, s) { if (g.kunde) g.kunde.geduld -= s; }
+function nimmGeduld(g, s) { if (g.kunde && !g.kunde.uebung) g.kunde.geduld -= s; }
 
 // ---------------------------------------------------------------------------
 // Tippen
@@ -209,21 +215,22 @@ export function tippeAuf(x, y) {
       return;
     }
     T.spiele('greifen');
-    const b = BLECH();
-    g.ware = { form, grad: 'roh', deko: null, phase: 'rutscht', t: 0, x: 40, y: Math.round(H * 0.48), vonX: 40, vonY: Math.round(H * 0.48), zuX: b.x - 4, zuY: b.y - 4, ofen: 0, gold: neuesGold() };
+    const tg = TEIG(), tx = tg.x + Math.round(tg.b / 2) - 4, ty = tg.y + 6;
+    g.ware = { form, grad: 'roh', deko: null, phase: 'rutscht', t: 0, x: tx, y: ty, vonX: tx, vonY: ty, zuX: o.x - 6, zuY: o.y + o.h - 22, ofen: 0, gold: neuesGold() };
     g.schritt = 'warten';
     return;
   }
   // 2. Ofen
-  if (x >= o.x - 4 && x <= o.x + o.b + 2 && y >= o.y - 14 && y <= o.y + o.h + 4) {
+  const an = ANZEIGE();
+  if (x >= Math.min(o.x - 4, an.x) && x <= Math.max(o.x + o.b + 2, an.x + an.b) && y >= o.y - 14 && y <= an.y + an.h + 4) {
     if (g.schritt !== 'backen' || !g.ware) { fehl(x, y); return; }
     const a = g.ware.ofen / ofenDauer();
     const [von, bis] = gold(g.ware);
     g.ware.grad = a < von ? 'blass' : a <= bis ? 'golden' : 'dunkel';
-    g.ware.phase = 'raus'; g.ware.t = 0; g.ware.vonX = o.x + 12; g.ware.vonY = o.y + o.h - 12;
-    const b = BLECH(); g.ware.zuX = b.x - 4; g.ware.zuY = b.y - 4;
+    g.ware.phase = 'raus'; g.ware.t = 0; g.ware.vonX = o.x + o.b / 2 - 9; g.ware.vonY = o.y + o.h - 30;
+    const b = BLECH(); g.ware.zuX = b.x - 9; g.ware.zuY = b.y - 9;
     g.schritt = 'warten';
-    g.texte.push({ x: o.x + 20, y: o.y - 18, text: g.ware.grad === 'golden' ? 'GOLDEN!' : g.ware.grad === 'blass' ? 'BLASS' : 'DUNKEL', farbe: g.ware.grad === 'golden' ? '#ffd040' : '#e8d8c0', t: 0 });
+    g.texte.push({ x: o.x + o.b / 2, y: o.y - 18, text: g.ware.grad === 'golden' ? 'GOLDEN!' : g.ware.grad === 'blass' ? 'BLASS' : 'DUNKEL', farbe: g.ware.grad === 'golden' ? '#ffd040' : '#e8d8c0', t: 0 });
     T.spiele(g.ware.grad === 'golden' ? 'fertig' : 'glas');
     return;
   }
@@ -282,7 +289,8 @@ function takt(jetzt) {
 
 function schritt(dt) {
   const g = spiel;
-  g.t += dt;
+  // Übungsplätzchen: Solange der erste Kunde wartet, läuft die Rundenzeit nicht
+  g.t += g.t >= 0 && g.kunde && g.kunde.uebung && g.kunde.phase !== 'geht' ? 0 : dt;
   if (g.t >= 0 && !g.aus && g.t >= C.BACK_DAUER) {
     g.aus = true;
     if (fertig) T.spiele('fertig');
@@ -296,7 +304,7 @@ function schritt(dt) {
     const ziel = KUNDE().x;
     if (k.phase === 'kommt') { k.x = Math.max(ziel, k.x - 90 * dt); if (k.x <= ziel) { k.phase = 'wartet'; k.figur.laeuft = false; } }
     else if (k.phase === 'wartet' && !g.aus) {
-      k.geduld -= dt;
+      if (!k.uebung) k.geduld -= dt;
       if (k.geduld <= 0) {
         g.texte.push({ x: k.x - 20, y: THEKE() - 30, text: 'ZU LANGSAM! -' + abzug(g, 'langsam'), farbe: '#ff7a6a', t: 0 });
         T.spiele('falsch');
@@ -317,7 +325,7 @@ function schritt(dt) {
       // Vom Teig aufs Blech, dann gleich weiter in den Ofen
       const e = glatt(0.25);
       w.x = w.vonX + (w.zuX - w.vonX) * e; w.y = w.vonY + (w.zuY - w.vonY) * e;
-      if (w.t >= 0.25) { const o = OFEN(); w.phase = 'rein'; w.t = 0; w.vonX = w.x; w.vonY = w.y; w.zuX = o.x + 12; w.zuY = o.y + o.h - 12; }
+      if (w.t >= 0.25) { const o = OFEN(); w.phase = 'rein'; w.t = 0; w.vonX = w.x; w.vonY = w.y; w.zuX = o.x + o.b / 2 - 4; w.zuY = o.y + o.h - 20; }
     } else if (w.phase === 'rein') {
       const e = glatt(0.2);
       w.x = w.vonX + (w.zuX - w.vonX) * e; w.y = w.vonY + (w.zuY - w.vonY) * e;
@@ -327,11 +335,15 @@ function schritt(dt) {
       const a = w.ofen / ofenDauer();
       const [gv, gb] = gold(w);
       w.grad = a < Math.min(0.3, gv - 0.06) ? 'roh' : a < gv ? 'blass' : a <= gb ? 'golden' : 'dunkel';
+      // „JETZT!“-Moment (05.11.): beim Eintritt in den goldenen Bereich ein leiser Klick
+      const drin = a >= gv && a <= gb;
+      if (drin && !w.imGold) T.spiele('klick');
+      w.imGold = drin;
       if (a >= 1) {
         // Verbrannt: Rauch, Plätzchen weg, nochmal ausstechen
         const o = OFEN();
-        for (let i = 0; i < 6; i++) g.rauch.push({ x: o.x + 10 + i * 4, y: o.y, t: -i * 0.06 });
-        g.texte.push({ x: o.x + 20, y: o.y - 18, text: 'VERBRANNT! -' + abzug(g, 'verbrannt'), farbe: '#ff7a6a', t: 0 });
+        for (let i = 0; i < 6; i++) g.rauch.push({ x: o.x + 14 + i * 6, y: o.y, t: -i * 0.06 });
+        g.texte.push({ x: o.x + o.b / 2, y: o.y - 18, text: 'VERBRANNT! -' + abzug(g, 'verbrannt'), farbe: '#ff7a6a', t: 0 });
         T.spiele('falsch');
         if (g.kunde) g.kunde.fehler = true;
         nimmGeduld(g, 1.5); g.kette = 1;
@@ -397,7 +409,7 @@ export function messe(takt = 0.35, treffer = 1, goldAnteil = 1, hoehe = 380, stu
         const [von, bis2] = gold(g.ware);
         zielOfen = Math.random() < goldAnteil ? von + Math.random() * (bis2 - von) : (Math.random() < 0.5 ? von - 0.12 : bis2 + 0.1);
       }
-      if (g.ware.ofen / ofenDauer() >= zielOfen) { const o = OFEN(); tippeAuf(o.x + 20, o.y + 10); zielOfen = null; bis = g.t + takt; }
+      if (g.ware.ofen / ofenDauer() >= zielOfen) { const o = OFEN(); tippeAuf(o.x + o.b / 2, o.y + 10); zielOfen = null; bis = g.t + takt; }
       continue;
     }
     if (g.t < bis) continue;
@@ -430,8 +442,8 @@ function schein(ctx, x, y, rad, rgb, a) {
   ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2); ctx.restore();
 }
 // Wo die Lichter hängen (für das Funkeln in zeichne())
-const LAMPE = { x: 92, y: 50 };   // Hängelampe über der Arbeitsfläche
-const STERN = { x: 152, y: 66 };  // Herrnhuter Stern über dem Ofen (leuchtet selbst)
+const LAMPE = { x: 92, y: 26 };   // Hängelampe (05.11.: höher - darunter steht jetzt die Bestellung)
+const STERN = { x: 166, y: 50 };  // Herrnhuter Stern (leuchtet selbst; 05.11. höher, die Wand ist niedriger)
 const KERZEN = [[16, 34], [20, 32], [25, 31], [30, 32], [34, 34]];   // Schwibbogen auf dem Fensterbrett
 let kulisse = null, kulisseSchl = '', lichtKarte = null;
 /**
@@ -492,7 +504,7 @@ function baueKulisse(nacht) {
   r(c, LAMPE.x - 5, LAMPE.y - 5, 11, 1, '#9a6e20'); r(c, LAMPE.x - 6, LAMPE.y - 4, 13, 2, '#c8962c'); r(c, LAMPE.x - 7, LAMPE.y - 2, 15, 1, '#8a5e18');
   r(c, LAMPE.x - 2, LAMPE.y - 1, 5, 2, '#fff4c0');
   // Tannenkranz mit roter Schleife an der Wand
-  const kx = 44, ky = 66;
+  const kx = 22, ky = Math.min(58, th - 32);   // 05.11.: links unter dem Fenster - rechts davon steht die Bestellung
   for (let k = 0; k < 28; k++) { const w = k / 28 * Math.PI * 2; const x = Math.round(kx + Math.cos(w) * 9), y = Math.round(ky + Math.sin(w) * 9); r(c, x - 1, y - 1, 3, 3, k % 3 ? '#2f6a2a' : '#3f8a3a'); }
   for (let k = 0; k < 28; k += 4) { const w = k / 28 * Math.PI * 2 + 0.3; p(c, Math.round(kx + Math.cos(w) * 9), Math.round(ky + Math.sin(w) * 9), '#c83030'); }
   r(c, kx - 3, ky + 8, 7, 3, '#c83030'); r(c, kx - 1, ky + 11, 1, 4, '#a82020'); r(c, kx + 1, ky + 11, 1, 3, '#a82020'); p(c, kx, ky + 9, '#e85050');
@@ -516,26 +528,17 @@ function baueKulisse(nacht) {
   r(c, 0, th + 5, W, H - th - 5, '#c08a52');
   for (let y = th + 12; y < H; y += 10) { r(c, 0, y, W, 1, '#a07040'); r(c, 0, y + 1, W, 1, '#cc9a60'); }
   for (let i = 0; i < 14; i++) p(c, Math.floor(hash(i + 40) * W), th + 6 + Math.floor(hash(i + 80) * (H - th - 6)), '#a87444');
-  // Schneidbrett mit ausgerolltem Teig
-  const ty = Math.round(H * 0.42), tb = 70, tH = Math.round(H * 0.13);
-  r(c, 3, ty - 3, tb + 6, tH + 6, '#8a5a30'); r(c, 3, ty - 3, tb + 6, 1, '#b07a44'); r(c, 3, ty + tH + 2, tb + 6, 1, '#5a3a1e');
-  r(c, 6, ty, tb, tH, '#f0dcb0'); r(c, 6, ty + tH - 1, tb, 1, '#d8bc88'); r(c, 6, ty, 1, tH, '#e4cc9c'); r(c, 7, ty, tb - 2, 1, '#faecc8');
-  for (let i = 0; i < 18; i++) p(c, 7 + Math.floor(hash(i + 7) * (tb - 2)), ty + 1 + Math.floor(hash(i + 17) * (tH - 2)), '#fbf4e4');
-  const ny = ty + tH + 5;
-  r(c, 12, ny, 42, 5, '#d8a868'); r(c, 12, ny, 42, 1, '#f0c88a'); r(c, 12, ny + 4, 42, 1, '#a87040');
-  for (const gx of [4, 55]) { r(c, gx, ny + 1, 7, 3, '#7a4c28'); r(c, gx, ny + 1, 7, 1, '#9a6434'); }
-  // Backblech mit Backpapier
+  // Schmaler Teigstreifen links am Ofen (05.11.: vorher ein großes Brett, auf dem nichts passierte)
+  const tg = TEIG();
+  r(c, tg.x - 2, tg.y - 2, tg.b + 4, tg.h + 4, '#8a5a30'); r(c, tg.x - 2, tg.y - 2, tg.b + 4, 1, '#b07a44'); r(c, tg.x - 2, tg.y + tg.h + 1, tg.b + 4, 1, '#5a3a1e');
+  r(c, tg.x, tg.y, tg.b, tg.h, '#f0dcb0'); r(c, tg.x, tg.y + tg.h - 1, tg.b, 1, '#d8bc88'); r(c, tg.x, tg.y, 1, tg.h, '#e4cc9c'); r(c, tg.x + 1, tg.y, tg.b - 2, 1, '#faecc8');
+  for (let i = 0; i < 10; i++) p(c, tg.x + 1 + Math.floor(hash(i + 7) * (tg.b - 2)), tg.y + 1 + Math.floor(hash(i + 17) * (tg.h - 2)), '#fbf4e4');
+  r(c, tg.x + 2, tg.y + tg.h + 5, tg.b - 4, 4, '#d8a868'); r(c, tg.x + 2, tg.y + tg.h + 5, tg.b - 4, 1, '#f0c88a');   // Nudelholz
+  // Kuchengitter rechts am Ofen: hier liegt das Plätzchen zum Verzieren
   const b = BLECH();
-  r(c, b.x - 16, b.y - 7, 32, 14, '#4a4e58'); r(c, b.x - 16, b.y - 7, 32, 1, '#7a7e88');
-  r(c, b.x - 14, b.y - 5, 28, 10, '#f4ecd8'); r(c, b.x - 14, b.y - 5, 28, 1, '#fffaf0');
-  // Backpapier für die Formen, Leinenläufer für die Schalen
-  const fy0 = FORM_Y() - 13;
-  r(c, 2, fy0, W - 4, 26, '#f4ecdc'); r(c, 2, fy0 + 26, W - 4, 1, 'rgba(50,25,10,0.35)'); r(c, 2, fy0, W - 4, 1, '#fffaf2');
-  for (let i = 0; i < 20; i++) p(c, 3 + Math.floor(hash(i + 300) * (W - 6)), fy0 + 1 + Math.floor(hash(i + 310) * 24), '#ffffff');
-  // Läufer reicht seit 27.10. bis unter die Vorschau-Lebkuchen und die Schilder
-  const sy0 = SCHALE_Y() - 13, sh = VORSCHAU_DY + 44;
-  r(c, 2, sy0, W - 4, sh, '#e8dcc4'); r(c, 2, sy0 + 1, W - 4, 1, '#c84040'); r(c, 2, sy0 + sh - 2, W - 4, 1, '#c84040'); r(c, 2, sy0 + sh, W - 4, 1, 'rgba(50,25,10,0.35)');
-  for (let i = 0; i < 44; i++) p(c, 3 + Math.floor(hash(i + 340) * (W - 6)), sy0 + 3 + Math.floor(hash(i + 350) * (sh - 6)), '#ddd0b6');   // Leinenstruktur
+  r(c, b.x - 14, b.y - 2, 28, 12, '#5a5e68'); r(c, b.x - 14, b.y - 2, 28, 1, '#8a8e98');
+  for (let x = b.x - 12; x < b.x + 14; x += 3) r(c, x, b.y, 1, 9, '#9aa0aa');
+  r(c, b.x - 13, b.y + 4, 26, 1, '#9aa0aa');
   c = ziel;
 
   // Lichtkarte: dämmriger Grund, helle Inseln - wird über die fertige Szene multipliziert
@@ -555,8 +558,8 @@ function baueKulisse(nacht) {
   insel(25, 22, 44, nacht ? '120,140,200' : '200,220,255', nacht ? 0.25 : 0.55);   // Fenster
   insel(25, 32, 26, '255,190,110', nacht ? 0.5 : 0.25);                       // Schwibbogen
   insel(STERN.x, STERN.y, 50, '255,200,120', nacht ? 0.55 : 0.3);            // Herrnhuter Stern
-  insel(155, H * 0.5, 60, '255,170,110', nacht ? 0.2 : 0.12);                // Ofenecke
-  for (const yy of [FORM_Y(), SCHALE_Y() + 8]) {                              // Arbeitslicht über den Tipp-Reihen
+  insel(W / 2, OFEN().y + OFEN().h / 2, 70, '255,170,110', nacht ? 0.2 : 0.12);   // um den Ofen
+  for (const yy of [FORM_Y(), SCHALE_Y() + 8]) {   // (Arbeitslicht)                              // Arbeitslicht über den Tipp-Reihen
     insel(W * 0.25, yy, 70, '255,236,200', nacht ? 0.5 : 0.25);
     insel(W * 0.75, yy, 70, '255,236,200', nacht ? 0.5 : 0.25);
   }
@@ -610,42 +613,82 @@ function ofen(t) {
   for (let k = 0; k < 3; k++) p(c, fx + 8 + k, fy + 2 + k, 'rgba(255,255,255,0.2)');
   // Griff (Chrom) unter dem Fenster
   r(c, o.x + 6, o.y + o.h - 6, o.b - 12, 2, '#d8dce4'); r(c, o.x + 6, o.y + o.h - 6, o.b - 12, 1, '#ffffff'); p(c, o.x + 6, o.y + o.h - 5, '#8a8e98'); p(c, o.x + o.b - 7, o.y + o.h - 5, '#8a8e98');
-  // Backbalken über dem Ofen (Messingrahmen): blass - golden - dunkel, Strich = jetzt
-  const bx = o.x, by = o.y - 14, bb = o.b;
-  const [von, bis] = gold(w);
-  r(c, bx - 1, by - 1, bb + 2, 6, '#b8862a'); r(c, bx - 1, by - 1, bb + 2, 1, '#e8c060');
-  r(c, bx, by, bb, 4, '#3a2a20');
-  r(c, bx, by + 1, Math.round(bb * von), 2, '#ecd09a');
-  r(c, bx + Math.round(bb * von), by, Math.round(bb * (bis - von)), 4, '#ffc040');
-  r(c, bx + Math.round(bb * bis), by + 1, bb - Math.round(bb * bis), 2, '#a8662c');
   if (drin) {
-    const a = Math.min(1, w.ofen / ofenDauer()), m = bx + Math.min(bb - 1, Math.round(bb * a));
-    r(c, m, by - 2, 1, 8, '#ffffff');
     // Im goldenen Bereich blinkt der Ofen auf - jetzt tippen!
+    const a = Math.min(1, w.ofen / ofenDauer()), [von, bis] = gold(w);
     if (a >= von && a <= bis && Math.floor(t * 8) % 2) { c.strokeStyle = '#ffe060'; c.lineWidth = 1; c.strokeRect(o.x - 1.5, o.y - 9.5, o.b + 3, o.h + 11); }
+  }
+}
+/**
+ * Die Backanzeige (05.11., gemeldet: der „gelbe Bereich“ war im schmalen Balken über dem Ofen kaum zu sehen):
+ * breit unter dem Ofen, vier Felder in den Farben des Teigs - blass, GOLD (hell, mit Glanz), dunkel und am
+ * Ende verbrannt -, darüber wandert ein Zeiger. Im goldenen Feld leuchtet der Rahmen.
+ */
+function anzeige(t) {
+  const an = ANZEIGE(), w = spiel.ware, drin = w && w.phase === 'ofen';
+  const [von, bis] = gold(w), x0 = an.x, b = an.b, y = an.y, h = an.h;
+  const X = (a) => x0 + Math.round(b * a);
+  const a = drin ? Math.min(1, w.ofen / ofenDauer()) : -1, imGold = a >= von && a <= bis;
+  r(c, x0 - 2, y - 2, b + 4, h + 4, imGold && Math.floor(t * 8) % 2 ? '#ffe060' : '#8a5e18');   // Messingrahmen
+  r(c, x0 - 1, y - 1, b + 2, h + 2, '#c8962c'); r(c, x0 - 1, y - 1, b + 2, 1, '#e8c060');
+  r(c, x0, y, X(von) - x0, h, '#ecd09a');
+  r(c, X(von), y, X(bis) - X(von), h, '#ffc232');
+  r(c, X(von), y, X(bis) - X(von), 2, '#fff0a0');
+  for (let k = X(von) + 2; k < X(bis) - 1; k += 5) p(c, k, y + 3 + (k % 3), '#fff8d0');   // Glanzpunkte
+  r(c, X(bis), y, X(0.93) - X(bis), h, '#a8662c');
+  r(c, X(0.93), y, x0 + b - X(0.93), h, '#3a2a22');
+  for (const s of [von, bis, 0.93]) r(c, X(s), y, 1, h, 'rgba(40,20,10,0.55)');   // Trennstriche
+  if (a >= 0) {
+    const m = Math.min(x0 + b - 1, X(a));
+    r(c, m - 1, y - 4, 3, 2, '#ffffff'); p(c, m, y - 2, '#ffffff');   // Zeiger: kleines Dreieck
+    r(c, m, y - 1, 1, h + 2, '#ffffff'); r(c, m + 1, y - 1, 1, h + 2, 'rgba(40,20,10,0.6)');
   }
 }
 
 function blase(k, t) {
   const kx = Math.round(k.x), th = THEKE();
-  const bw = 58, bh = 32, bx = kx - 22 - bw, by = th - 50;
+  const bw = 86, bh = 34, bx = kx - 22 - bw, by = th - 50;   // 05.11.: breiter (lange Namen wie „Tannenbäumchen“ ragten heraus)
   r(c, bx, by, bw, bh, '#fffaf0'); r(c, bx, by, bw, 1, '#ffffff'); r(c, bx, by + bh - 1, bw, 1, '#c8b898');
   r(c, bx - 1, by + 1, 1, bh - 2, '#c8b898'); r(c, bx + bw, by + 1, 1, bh - 2, '#c8b898');
   r(c, bx + bw, by + 12, 3, 3, '#fffaf0'); p(c, bx + bw + 3, by + 13, '#fffaf0');
   // Das Wunschplätzchen groß, daneben der Name
   zeichnePlaetzchen(c, bx + 3, by + 3, k.rezept.form, 'golden', k.rezept.deko, 2);
-  MH.label('wunsch', bx + 23, by + 4, k.rezept.name, 'wunsch');
+  MH.label('wunsch', bx + 23, by + 3, k.rezept.name, 'wunsch');
+  // 05.11.: der Weg dorthin als Bildchen - die Form (Umriss in ihrer Farbe), dann je Verzierung der
+  // kleine Lebkuchen wie unter der Schale. Erledigtes wird abgehakt (grün unterstrichen).
+  const weg = [{ form: k.rezept.form }, ...C.dekoListe(k.rezept.deko).map((d) => ({ deko: d }))];
+  const w = spiel.ware, fertigBis = !w ? 0 : 1 + C.dekoListe(w.deko).length;
+  let wx = bx + 23;
+  const wy = by + 16;
+  weg.forEach((s, i) => {
+    if (i) { p(c, wx, wy + 4, '#8a7a6a'); p(c, wx + 1, wy + 3, '#8a7a6a'); p(c, wx + 1, wy + 5, '#8a7a6a'); wx += 4; }
+    if (s.form) {
+      const m = MASKEN[s.form];
+      for (let yy = 0; yy < m.length; yy++) for (let xx = 0; xx < m[0].length; xx++) if (istTeig(m, xx, yy) && (!istTeig(m, xx - 1, yy) || !istTeig(m, xx + 1, yy) || !istTeig(m, xx, yy - 1) || !istTeig(m, xx, yy + 1))) p(c, wx + xx, wy + yy, FORM_FARBE[s.form] || '#8a8e98');
+    } else zeichnePlaetzchen(c, wx, wy + 1, 'quadrat', 'dunkel', s.deko, 1);
+    if (i < fertigBis) r(c, wx, wy + 9, 9, 1, '#3aa84a');
+    wx += 10;
+  });
   const anteil = Math.max(0, k.geduld / k.max);
-  r(c, bx + 3, by + bh - 6, bw - 6, 3, '#d8ccb8');
-  r(c, bx + 3, by + bh - 6, Math.round((bw - 6) * anteil), 3, anteil > 0.5 ? '#5ab04a' : anteil > 0.25 ? '#e8b030' : (Math.floor(t * 6) % 2 ? '#e84a3a' : '#ff8a6a'));
+  r(c, bx + 3, by + bh - 5, bw - 6, 3, '#d8ccb8');
+  r(c, bx + 3, by + bh - 5, Math.round((bw - 6) * anteil), 3, anteil > 0.5 ? '#5ab04a' : anteil > 0.25 ? '#e8b030' : (Math.floor(t * 6) % 2 ? '#e84a3a' : '#ff8a6a'));
 }
 
 // Ausstechformen (12.10. neu): bunt, je Form EINE Farbe als 2 Pixel breites
 // Band, oben/links eine Glanzkante, darunter ein harter Schatten aufs
 // Backpapier - kein Verlauf mehr (vorher grau, außen dunkel, innen hell).
 const FORM_FARBE = { stern: '#e8a820', mond: '#4a8ad8', herz: '#e04848', baum: '#3a9a4a', kreis: '#a060d0' };
+/** Eine Kachel unter einer Form bzw. Schale (05.11.): hell, im aktiven Schritt mit goldenem Rand, der atmet. */
+function kachel(i, n, y0, h, aktiv, t) {
+  const x = slot(i, n), bw = Math.min(40, Math.floor(W / n) - 4), x0 = x - Math.floor(bw / 2);
+  r(c, x0 + 1, y0 + h, bw, 1, 'rgba(60,30,10,0.35)');
+  r(c, x0, y0, bw, h, '#f6ecd8'); r(c, x0, y0, bw, 1, '#fffaf0');
+  const rand = aktiv ? (Math.sin(t * 5) > 0 ? '#f0b828' : '#d89a20') : '#d8c4a0';
+  r(c, x0, y0, bw, 1, rand); r(c, x0, y0 + h - 1, bw, 1, rand); r(c, x0, y0, 1, h, rand); r(c, x0 + bw - 1, y0, 1, h, rand);
+}
 function form(i, n, f, aktiv, t) {
   const x = slot(i, n), y = FORM_Y();
+  kachel(i, n, y - 14, 29, aktiv, t);
   const m = maske(f, 2), x0 = x - 9, y0 = y - Math.round(m.length / 2);
   const druck = spiel.stich && spiel.stich.form === f ? 1 : 0;
   const farbe = FORM_FARBE[f] || '#c8ccd4', hell = ton(farbe, 0.45);
@@ -664,8 +707,9 @@ function form(i, n, f, aktiv, t) {
     c.fillRect(x0 + xx, y0 + yy + druck, 1, 1);
   }
 }
-function schale(i, n, d) {
+function schale(i, n, d, aktiv, t, matt) {
   const x = slot(i, n), y = SCHALE_Y(), f = C.BACK_DEKOS[d].f;
+  kachel(i, n, y - 19, VORSCHAU_DY + 33, aktiv, t);
   r(c, x - 12, y - 4, 24, 3, f); r(c, x - 11, y - 5, 22, 1, ton(f, 0.15));
   r(c, x - 13, y - 1, 26, 2, '#f4f2ee'); r(c, x - 12, y + 1, 24, 3, '#e4e0d8'); r(c, x - 10, y + 4, 20, 2, '#cfc8bc'); r(c, x - 8, y + 6, 16, 1, '#a89e90');
   r(c, x - 12, y + 2, 24, 1, '#4a7ac8'); for (let k = -10; k <= 10; k += 4) p(c, x + k, y + 3, '#4a7ac8');   // blauer Rand wie Steingut
@@ -687,7 +731,7 @@ function schale(i, n, d) {
   const vy = y + VORSCHAU_DY;
   r(c, x - 8, vy + 2, 18, 13, 'rgba(70,40,20,0.25)');
   zeichnePlaetzchen(c, x - 9, vy, 'quadrat', 'dunkel', d, 2);
-  MH.label('schale' + i, x, vy + 16, C.BACK_DEKOS[d].kurz, 'schild');
+  MH.label('schale' + i, x, vy + 15, C.BACK_DEKOS[d].kurz, 'schild' + (matt ? ' matt' : ''));
 }
 // Kunden doppelt so groß wie auf der Straße (sonst ging er hinter der Theke
 // unter). Seit 11.10. die GROSSE Figur vom Tresen, nativ gezeichnet - vorher
@@ -709,22 +753,26 @@ function zeichne(t) {
     if (k.bekommen) zeichnePlaetzchen(c, Math.round(k.x) - 12, th - 9, k.bekommen.form, k.bekommen.grad, k.bekommen.deko, 1);
     if (k.phase === 'wartet') blase(k, t); else MH.label('wunsch', 0, 0, null);
   } else MH.label('wunsch', 0, 0, null);
-  // Ausgestochene Löcher im Teig (Deko: ein paar fertige Stellen)
-  const ty = Math.round(H * 0.42);
-  for (let i = 0; i < Math.min(8, g.gebacken.length + (g.ware ? 1 : 0)); i++) {
-    const hx = 10 + (i % 4) * 16, hy = ty + 3 + Math.floor(i / 4) * 12;
-    r(c, hx, hy, 8, 7, '#c89058'); r(c, hx, hy, 8, 1, '#a87444');
+  // Ausgestochene Löcher im Teigstreifen (ein paar fertige Stellen)
+  const tg = TEIG();
+  for (let i = 0; i < Math.min(4, g.gebacken.length + (g.ware ? 1 : 0)); i++) {
+    const hx = tg.x + 2 + (i % 2) * Math.floor(tg.b / 2), hy = tg.y + 2 + Math.floor(i / 2) * 9;
+    r(c, hx, hy, 7, 6, '#c89058'); r(c, hx, hy, 7, 1, '#a87444');
   }
   ofen(t);
-  // Formen und Schalen
-  formen.forEach((f, i) => form(i, formen.length, f, g.schritt === 'stechen', t));
-  dekos.forEach((d, i) => schale(i, dekos.length, d));
+  anzeige(t);
+  // Welcher Schritt ist dran? (05.11.) Danach richten sich Kacheln, Abdunkeln und Schilder
+  const wa = g.ware, dran = !k || k.phase !== 'wartet' ? null
+    : g.schritt === 'stechen' ? 1 : g.schritt === 'backen' || (wa && (wa.phase === 'rutscht' || wa.phase === 'rein')) ? 2
+    : g.schritt === 'verzieren' || (wa && wa.phase === 'raus') ? 3 : null;
+  formen.forEach((f, i) => form(i, formen.length, f, dran === 1, t));
+  dekos.forEach((d, i) => schale(i, dekos.length, d, dran === 3, t, dran && dran !== 3));
   // Stempel-Bewegung über dem Teig
-  if (g.stich) { const a = g.stich.t / 0.25; const sx = 36, sy = ty + 4 - Math.round(Math.sin(a * Math.PI) * 6); zeichnePlaetzchen(c, sx, sy, g.stich.form, 'roh', null, 1); }
+  if (g.stich) { const a = g.stich.t / 0.25; const sx = tg.x + Math.round(tg.b / 2) - 4, sy = tg.y + 4 - Math.round(Math.sin(a * Math.PI) * 6); zeichnePlaetzchen(c, sx, sy, g.stich.form, 'roh', null, 1); }
   // Das Plätzchen selbst (im Ofen hinter der Scheibe: nur als Schatten)
   const w = g.ware;
   if (w && w.phase !== 'ofen') zeichnePlaetzchen(c, Math.round(w.x), Math.round(w.y), w.form, w.grad, w.deko, w.phase === 'liegt' || w.phase === 'fliegt' ? 2 : 1);
-  else if (w) { const o = OFEN(); zeichnePlaetzchen(c, o.x + 12, o.y + o.h - 32, w.form, w.grad, null, 2); }   // auf dem Rost (12.10.: neuer Ofen, Fenster höher)
+  else if (w) { const o = OFEN(); zeichnePlaetzchen(c, o.x + o.b / 2 - 9, o.y + o.h - 30, w.form, w.grad, null, 2); }   // auf dem Rost
   // Rauch beim Verbrennen
   for (const s of g.rauch) if (s.t > 0) { const a = s.t / 1.2; c.fillStyle = `rgba(70,70,76,${(0.7 * (1 - a)).toFixed(2)})`; c.fillRect(Math.round(s.x + Math.sin(s.t * 6) * 2), Math.round(s.y - a * 24), 3 + Math.round(a * 3), 3 + Math.round(a * 3)); }
   // Licht (12.10.): die ganze Szene mit der Lichtkarte multiplizieren - dämmrig,
@@ -732,15 +780,22 @@ function zeichne(t) {
   c.save(); c.globalCompositeOperation = 'multiply'; c.drawImage(lichtKarte, 0, 0); c.restore();
   lichter(t, nacht);
   if (w && w.phase === 'ofen') { const o = OFEN(), fl = Math.sin(t * 9) * 0.5 + 0.5; schein(c, o.x + o.b / 2, o.y + o.h / 2 - 3, 56, '255,140,60', (nacht ? 0.42 : 0.3) + fl * 0.06); }
-  // Hinweis, was dran ist
-  // Was dran ist - direkt über der Reihe, in der man tippen muss (11.10.: oben
-  // auf dem Regal war es klein und schlecht zu lesen)
-  const was = !k || k.phase !== 'wartet' ? '' : g.schritt === 'stechen' ? 'Tippe die richtige AUSSTECHFORM' : g.schritt === 'backen' ? 'Im GELBEN Bereich rausholen!' : g.schritt === 'verzieren' ? (C.dekoListe(g.ware && g.ware.deko).length ? `Jetzt noch ${C.BACK_DEKOS[C.dekoListe(k.rezept.deko)[C.dekoListe(g.ware.deko).length]].kurz}!` : 'Tippe die richtige VERZIERUNG') : '';
-  // Beim Backen links neben dem Ofen - darüber verdeckte er Ofen und Anzeige
-  const woY = g.schritt === 'stechen' ? FORM_Y() - 24 : g.schritt === 'verzieren' ? SCHALE_Y() - 26 : OFEN().y + 6;
-  const woX = g.schritt === 'backen' ? Math.round(OFEN().x / 2) : null;
-  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.back : 'Schwierigkeit: ' + stufe.name}` : was && !g.aus ? was : null, g.t < 0 || !was ? null : woY, woX);
-  MH.label('ofen', OFEN().x + 21, OFEN().y + OFEN().h + 4, 'OFEN', 'schild');
+  // Was gerade NICHT dran ist, wird abgedunkelt (05.11.) - so sieht man ohne Lesen, wo man tippen muss
+  const o = OFEN(), an = ANZEIGE(), fy = FORM_Y(), sy = SCHALE_Y();
+  if (dran) {
+    c.fillStyle = 'rgba(30,18,10,0.42)';
+    if (dran !== 2) c.fillRect(0, o.y - 10, W, an.y + an.h + 3 - (o.y - 10));
+    if (dran !== 1) c.fillRect(0, fy - 16, W, 32);
+    if (dran !== 3) c.fillRect(0, sy - 21, W, VORSCHAU_DY + 37);
+  }
+  // Die drei Schritte als Schilder, der aktive golden (Text in styles.css: .mh-label.schritt)
+  const zweiter = dran === 3 && C.dekoListe(wa && wa.deko).length ? C.BACK_DEKOS[C.dekoListe(k.rezept.deko)[C.dekoListe(wa.deko).length]] : null;
+  const schild = (n, x, y, text) => MH.label('schritt' + n, x, y, g.t < 0 || g.aus ? null : `<b>${n}</b> ${text}`, 'schritt' + (dran === n ? ' aktiv' : ''));
+  schild(1, W / 2, fy - 22, 'AUSSTECHEN');
+  schild(2, W / 2, o.y - 21, dran === 2 ? 'BACKEN - im GOLD tippen!' : 'BACKEN');
+  schild(3, W / 2, sy - 27, zweiter ? `JETZT NOCH ${zweiter.kurz}!` : 'VERZIEREN');
+  const uebt = k && k.uebung && k.phase === 'wartet';
+  MH.hinweis(g.t < 0 ? `${stufe.special ? 'SPECIAL: ' + C.SPECIAL_TEXT.back : 'Schwierigkeit: ' + stufe.name}` : uebt && !g.aus ? 'Übungsplätzchen - die Zeit läuft erst danach' : null);
   for (const f of g.fehl) { const a = f.t / 0.3; c.fillStyle = `rgba(200,80,60,${1 - a})`; c.fillRect(Math.round(f.x - 2), Math.round(f.y), 5, 1); c.fillRect(Math.round(f.x), Math.round(f.y - 2), 1, 5); }
   for (const x of g.texte) if (!x.gezeigt) { x.gezeigt = true; MH.schwebe(x.x, x.y, x.text, x.farbe, x.text.length > 6 ? 0.8 : 1.1); }
   const rest = Math.max(0, Math.ceil(C.BACK_DAUER - Math.max(0, g.t)));
