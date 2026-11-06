@@ -1184,6 +1184,7 @@ export const WETTBEWERB = {
 // Silvester (11.10.): ab 18 Uhr am 31.12. Feuerwerk über dem Dorf, dazu der
 // Abschluss der Saison; um Mitternacht das große Feuerwerk.
 export const SILVESTER_STUNDE = 18;
+export const NEUJAHR_BIS = 22;   // 06.11.: am 1.1. steigen bis 22 Uhr noch Raketen
 
 // Feedback der Testspieler (12.10.): ein Google-Formular. `url` = der Link
 // zum Formular (…/viewform), `infoFeld` = die Kennung des Kurzantwort-Felds

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611061600';
-import * as Z from './zeit.js?v=202611061600';
-import { neueFarben } from './pixel.js?v=202611061600';
+import * as C from './config.js?v=202611061700';
+import * as Z from './zeit.js?v=202611061700';
+import { neueFarben } from './pixel.js?v=202611061700';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2769,13 +2769,14 @@ export const plakette = () => (st.wettbewerb && st.wettbewerb.saison === Z.saiso
 /** Wie viel Feuerwerk gerade am Himmel ist (0..1). */
 export function feuerwerk(d = Z.jetzt()) {
   const m = d.getMonth(), tag = d.getDate(), h = d.getHours() + d.getMinutes() / 60;
+  // 06.11. (Nutzerwunsch): am 31.12. erst ab 18 Uhr (vorher schon den ganzen Tag ein paar), dafür am 1.1.
+  // nach der Neujahrsnacht den ganzen Tag ein paar Raketen bis 22 Uhr (vorher ab 3 Uhr nichts mehr)
   if (m === 11 && tag === 31 && h >= C.SILVESTER_STUNDE) return h >= 23.75 ? 0.7 : 0.25 + (h - C.SILVESTER_STUNDE) / 6 * 0.25;
-  if (m === 11 && tag === 31) return 0.22;   // 29.10. (Easter Egg): den ganzen Silvestertag ein paar Raketen, ohne Knall
-  if (m === 0 && tag === 1 && h < 3) return h < 0.5 ? 1 : h < 1 ? 0.6 : 0.3 * (3 - h) / 2;
+  if (m === 0 && tag === 1 && h < C.NEUJAHR_BIS) return Math.max(0.22, h < 0.5 ? 1 : h < 1 ? 0.6 : h < 3 ? 0.3 * (3 - h) / 2 : 0);
   return 0;
 }
-/** Am 31.12. knallt es nicht (Nutzerwunsch: Feuerwerk den ganzen Tag, aber ohne Ton). Neujahrsnacht wie gehabt. */
-export const feuerwerkLeise = (d = Z.jetzt()) => d.getMonth() === 11 && d.getDate() === 31;
+/** Leise (ohne Knall): am Silvesterabend und am Neujahrstag ab 3 Uhr - hörbar knallt es nur in der Neujahrsnacht. */
+export const feuerwerkLeise = (d = Z.jetzt()) => (d.getMonth() === 11 && d.getDate() === 31) || (d.getMonth() === 0 && d.getDate() === 1 && d.getHours() >= 3);
 export function silvesterJetzt(d = Z.jetzt()) {
   const dt = Z.dezemberTag(d);
   return (dt === 31 && d.getHours() >= C.SILVESTER_STUNDE) || (dt > 31 && dt < C.SAISON_ENDE_TAG);   // 29.10.: danach Winterpause-Fenster
