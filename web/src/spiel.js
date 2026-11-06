@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611061200';
-import * as Z from './zeit.js?v=202611061200';
-import { neueFarben } from './pixel.js?v=202611061200';
+import * as C from './config.js?v=202611061400';
+import * as Z from './zeit.js?v=202611061400';
+import { neueFarben } from './pixel.js?v=202611061400';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -384,7 +384,15 @@ export const startzieleFertig = () => st.lernen >= 99 && (st.ziel || 0) >= ziele
 export const nachStartRuhe = () => startzieleFertig() && (lauf.startzieleT == null || lauf.t - lauf.startzieleT > C.RUHE_NACH_START);
 /** Darf ein Sonderereignis schon kommen? Nach Spieltag, siehe C.EINSTIEG. */
 export const einstieg = (was) => !!DEMO || spieltag() >= (C.EINSTIEG[was] || 0)
-  || (was === 'haendler' && spieltag() >= 1 && Z.dezemberTag() >= C.HAENDLER_SPAET_DEZ);   // 29.10.: Spätstarter
+  || (was === 'haendler' && spieltag() >= 1 && Z.dezemberTag() >= C.HAENDLER_SPAET_DEZ)   // 29.10.: Spätstarter
+  || (was === 'markt' && spieltag() < 99 && spieltag() >= marktErst(tagNr() - spieltag()));   // 06.11.: Spätstarter
+/**
+ * Nach wie vielen Tagen der erste Markt kommt: MARKT_ERST, aber höchstens bis zum 23.12. (06.11., Bugtest:
+ * Wer ab dem 20.12. anfing, sah nie einen Markt - Tag 5 fiel auf oder nach Heiligabend, dann ist keiner mehr).
+ */
+function marktErst(anker) {
+  return Math.max(1, Math.min(C.MARKT_ERST, 23 - Z.dezemberTag(new Date(anker * 86400000 + 12 * 3600000))));
+}
 /**
  * Steht ein Ort schon auf der Karte? Die Orte gehen mit der Einführung auf:
  * Zuhause und Supermarkt sofort, der Weihnachtsladen mit dem Deko-Ziel, der
@@ -1724,11 +1732,14 @@ function haendlerTakt(dt) {
   if (!h) return;
   h.t += dt;
   const tempo = 14;
+  if (h.phase === 'kommt' && standZu()) h.phase = 'geht';   // kommt gerade, als der Stand zumacht: kehrt um
   if (h.phase === 'kommt') {
     h.x = Math.min(C.HAENDLER_X, h.x + tempo * dt);
     if (h.x >= C.HAENDLER_X) { h.phase = 'steht'; h.t = 0; }
   } else if (h.phase === 'steht') {
-    if (h.t >= C.HAENDLER_BLEIBT) { h.phase = 'geht'; hooks.toast('Der Händler zieht weiter.', 'hinweis'); }
+    // 06.11. (Bugtest): Macht der Stand zu (Heiligabend 16 Uhr, Winterpause), zieht er gleich weiter -
+    // vorher blieb ein Händler, der schon da war, noch bis zu seiner Zeit stehen
+    if (h.t >= C.HAENDLER_BLEIBT || standZu()) { h.phase = 'geht'; hooks.toast('Der Händler zieht weiter.', 'hinweis'); }
   } else {
     h.x -= tempo * dt;
     if (h.x < -30) lauf.haendler = null;
@@ -1789,7 +1800,7 @@ function istMarkt(d) {
   // „nach dem 24.12. sollte der Markt nicht mehr kommen")
   if (Z.dezemberTag(new Date(d * 86400000 + 12 * 3600000)) >= 24) return false;
   const m = marktStand();
-  let k = m.anker + C.MARKT_ERST;
+  let k = m.anker + marktErst(m.anker);
   while (k < d) k += C.MARKT_ABSTAND[0] + (Z.hash(m.seed + k) < 0.5 ? 0 : C.MARKT_ABSTAND[1] - C.MARKT_ABSTAND[0]);
   return k === d;
 }
@@ -2404,6 +2415,9 @@ export function briefPruefen() {
     B.aktiv = null; B.n = Math.max(0, B.n - 1);
   }
   if (B.n >= C.BRIEF_MAX || tagNr() < B.ab) return null;
+  // 06.11. (Bugtest): ab Heiligabend keine NEUEN Wunschzettel mehr - vorher kamen sie bis zur Winterpause
+  // („Ich wünsch mir …“ am 28.12.). Ein Brief, der schon da ist, lässt sich weiter erfüllen.
+  if (Z.dezemberTag() >= 24) return null;
   const k = wunschKandidaten();
   if (!k.length) return null;
   const w = zufallGewichtet(k, (x) => x.w);

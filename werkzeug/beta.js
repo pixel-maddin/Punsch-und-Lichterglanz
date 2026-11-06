@@ -44,7 +44,9 @@ function mensch() {
     if (b) { b.click(); return 'fenster'; }
   }
   const tp = $('#tipp');
-  if (!tp.classList.contains('versteckt') && /Weiter/.test(tp.textContent) && (window.__blaseT = (window.__blaseT || 0) + 1) > 4) { window.__blaseT = 0; tp.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); return 'weiter'; }
+  // 06.11.: auf den Knopf „Weiter“ tippen - die Blase reagiert seit dem Umbau nur noch dort, ein Tipp auf die
+  // Blase selbst tut nichts (der Bot hing so ab dem 1.12. hinter dem Kalender-Hinweis, das Spiel stand still)
+  if (!tp.classList.contains('versteckt') && /Weiter/.test(tp.textContent) && (window.__blaseT = (window.__blaseT || 0) + 1) > 4) { window.__blaseT = 0; (tp.querySelector('.weiter') || tp).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); return 'weiter'; }
   const z = $('#zeiger');
   if (!z.classList.contains('versteckt') && !(S.lauf.t < (window.__sparBis || 0))) {
     const r = z.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
