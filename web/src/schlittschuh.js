@@ -10,12 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202611061400';
-import * as Z from './zeit.js?v=202611061400';
-import * as T from './ton.js?v=202611061400';
-import * as MH from './minihud.js?v=202611061400';
-import * as L from './licht.js?v=202611061400';
-import { r, p, ton, mische } from './pixel.js?v=202611061400';
+import * as C from './config.js?v=202611061500';
+import * as Z from './zeit.js?v=202611061500';
+import * as T from './ton.js?v=202611061500';
+import * as MH from './minihud.js?v=202611061500';
+import * as L from './licht.js?v=202611061500';
+import { r, p, ton, mische } from './pixel.js?v=202611061500';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -479,13 +479,18 @@ function skater(g, t, nacht) {
 function ding(d, g, t) {
   const x = Math.round(d.x - g.x), boden = BODEN();
   if (x < -30 || x > W + 30 || d.weg && d.art === 'stern') return;
+  // 06.11. (Nutzer: „1 Pixel über dem Boden“): unterste Reihe jedes Hindernisses 1 px IM Eis wie die Kufen
+  // des Läufers (die Zeile `boden` ist nur die helle Kante) - vorher endeten Stein und Holz darüber
   if (d.art === 'schneemann') {
+    const boden = BODEN() + 1;
     for (const [cy, rad] of [[boden - 4, 4], [boden - 10, 3]]) for (let yy = -rad; yy <= rad; yy++) { const w = Math.round(Math.sqrt(rad * rad - yy * yy)); r(c, x - w, cy + yy, w * 2 + 1, 1, '#ffffff'); p(c, x + w, cy + yy, '#d8e4ef'); }
     p(c, x - 1, boden - 11, '#2a2a30'); p(c, x + 1, boden - 11, '#2a2a30'); r(c, x, boden - 10, 2, 1, '#e87a2a');
     r(c, x - 2, boden - 14, 5, 1, '#2a2a30'); r(c, x - 1, boden - 16, 3, 2, '#2a2a30'); r(c, x - 3, boden - 7, 7, 1, '#c83a32');
   } else if (d.art === 'stein') {
+    const boden = BODEN() + 2;
     r(c, x - 5, boden - 4, 10, 4, '#7a7e88'); r(c, x - 4, boden - 6, 8, 2, '#9a9ea8'); r(c, x - 3, boden - 6, 6, 1, '#ffffff'); p(c, x + 4, boden - 2, '#5a5e68');
   } else if (d.art === 'holz') {
+    const boden = BODEN() + 2;
     for (let i = 0; i < 3; i++) { r(c, x - 6 + i * 4, boden - 4, 4, 4, '#8a5a32'); r(c, x - 5 + i * 4, boden - 3, 2, 2, '#c8a070'); }
     for (let i = 0; i < 2; i++) { r(c, x - 4 + i * 4, boden - 8, 4, 4, '#7a4c28'); r(c, x - 3 + i * 4, boden - 7, 2, 2, '#c8a070'); }
     r(c, x - 4, boden - 9, 8, 1, '#ffffff');
@@ -493,7 +498,8 @@ function ding(d, g, t) {
     // Eisloch: dunkles Wasser mit Bruchkante, dazu ein Warnschild davor
     r(c, x - 10, boden, 20, 4, '#1a3a5a'); r(c, x - 8, boden + 4, 16, 2, '#1a3a5a'); r(c, x - 9, boden, 18, 1, '#e6f2fa');
     p(c, x - 4, boden + 2, '#4a7aa8'); p(c, x + 3, boden + 1, '#4a7aa8');
-    r(c, x - 15, boden - 9, 1, 9, '#5a3a22'); r(c, x - 18, boden - 13, 7, 5, '#e8c030'); p(c, x - 15, boden - 12, '#c83a32'); p(c, x - 15, boden - 10, '#c83a32');
+    const sb = boden + 2;   // Warnschild: Pfosten 1 px im Eis
+    r(c, x - 15, sb - 9, 1, 9, '#5a3a22'); r(c, x - 18, sb - 13, 7, 5, '#e8c030'); p(c, x - 15, sb - 12, '#c83a32'); p(c, x - 15, sb - 10, '#c83a32');
   } else if (d.art === 'stern' && !d.weg) {
     const yy = boden - Math.round(d.hoehe) + Math.round(Math.sin(t * 4 + d.x) * 1.5), f = Math.floor(t * 6 + d.x) % 3 ? '#ffe060' : '#fff6c8';
     if (d.gross) {
