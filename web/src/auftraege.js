@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202611061500';
-import * as S from './spiel.js?v=202611061500';
-import * as Z from './zeit.js?v=202611061500';
+import * as C from './config.js?v=202611061600';
+import * as S from './spiel.js?v=202611061600';
+import * as Z from './zeit.js?v=202611061600';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -97,7 +97,8 @@ const karteDa = () => !!(S.st.tipps && S.st.tipps.karte_mehr);
 function bitteGeht(d) {
   if (d.art === 'getraenk') return S.hat(d.p) && S.aufKarte(d.p);   // 30.10.: nur, was gerade im Angebot steht (sonst bestellt es niemand)
   if (d.art === 'backen') return karteDa() && S.miniOffen('back');
-  if (d.art === 'mini') return karteDa() && S.miniOffen(d.spiel);
+  // 06.11. (Nutzerwunsch): ab Heiligabend keine Bitte mehr zum Christbaumverkauf - er macht nach dem 26.12. zu
+  if (d.art === 'mini') return karteDa() && S.miniOffen(d.spiel) && !(d.spiel === 'baum' && Z.dezemberTag() >= 24);
   if (d.art === 'futter') return S.hat('futterhaus');
   if (d.art === 'santa') return karteDa() && S.einstieg('santa');
   if (d.art === 'gold') return S.aufsicht();
@@ -143,7 +144,10 @@ export function bitte() {
   // Handgriffe macht, hätte nie wieder eine Bitte bekommen). Nach
   // BITTE_TAGE kommt ein anderer dran; diese Bitte kehrt später zurück.
   const liegtZuLange = alt && !alt.abgeholt && alt.ab && jetzt - alt.ab > C.BITTE_TAGE * 86400000 && !bitteFertig(alt);
-  if (alt && !liegtZuLange && (!alt.abgeholt || alt.tag === tag)) return alt;
+  // 06.11.: Eine offene Christbaum-Bitte fällt ab Heiligabend weg (der Christbaumverkauf macht nach dem 26.12. zu)
+  const altD = alt && bitteDef(alt);
+  const baumWeg = alt && !alt.abgeholt && !bitteFertig(alt) && altD && altD.art === 'mini' && altD.spiel === 'baum' && Z.dezemberTag() >= 24;
+  if (alt && !liegtZuLange && !baumWeg && (!alt.abgeholt || alt.tag === tag)) return alt;
   const stand = S.st.bittenStand = S.st.bittenStand || {};
   const zuletzt = S.st.bitteZuletzt = S.st.bitteZuletzt || {};
   const wer = Object.keys(C.STAMM_BITTEN).filter((id) => {

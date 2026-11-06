@@ -5,30 +5,30 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611061500';
-import * as S from './spiel.js?v=202611061500';
-import * as Z from './zeit.js?v=202611061500';
-import * as T from './ton.js?v=202611061500';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611061500';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611061500';
-import { zielHaus } from './fein.js?v=202611061500';
-import * as AN from './ansicht.js?v=202611061500';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611061500';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611061500';
-import * as A from './auftraege.js?v=202611061500';
-import * as E from './erfolge.js?v=202611061500';
-import * as ZL from './ziele.js?v=202611061500';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611061500';
-import * as KA from './karte.js?v=202611061500';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611061500';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611061500';
-import * as SW from './schneeball.js?v=202611061500';
-import * as LI from './lichtung.js?v=202611061500';
-import * as CB from './christbaum.js?v=202611061500';
-import * as SB from './schlitten.js?v=202611061500';
-import * as EB from './schlittschuh.js?v=202611061500';
-import * as BS from './backstube.js?v=202611061500';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202611061500';
+import * as C from './config.js?v=202611061600';
+import * as S from './spiel.js?v=202611061600';
+import * as Z from './zeit.js?v=202611061600';
+import * as T from './ton.js?v=202611061600';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611061600';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611061600';
+import { zielHaus } from './fein.js?v=202611061600';
+import * as AN from './ansicht.js?v=202611061600';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611061600';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611061600';
+import * as A from './auftraege.js?v=202611061600';
+import * as E from './erfolge.js?v=202611061600';
+import * as ZL from './ziele.js?v=202611061600';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611061600';
+import * as KA from './karte.js?v=202611061600';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611061600';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611061600';
+import * as SW from './schneeball.js?v=202611061600';
+import * as LI from './lichtung.js?v=202611061600';
+import * as CB from './christbaum.js?v=202611061600';
+import * as SB from './schlitten.js?v=202611061600';
+import * as EB from './schlittschuh.js?v=202611061600';
+import * as BS from './backstube.js?v=202611061600';
+import { alleSymbole, zeichneSymbol } from './symbole.js?v=202611061600';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -571,7 +571,7 @@ function zeigeBaumspiel() {
   const ware = S.baumschule().ware.length;
   miniFenster('Christbaumverkauf', {
     dauer: C.BAUM_DAUER, deko: C.BAUM_DEKO.find((d) => !S.st.kalDeko[d.id]),
-    zusatz: ware ? `<p class="bonus">${ware} eigene ${ware === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft gibt es dreifache Punkte!</p>` : '',
+    zusatz: (ware ? `<p class="bonus">${ware} eigene ${ware === 1 ? 'Baum steht' : 'Bäume stehen'} golden im Feld - verkauft gibt es dreifache Punkte!</p>` : '') + baumHinweis(),
     schritte: [
       'Die <b>Sprechblase</b> zeigt, welche Größe und Sorte der Kunde will.',
       'Baum antippen, <b>3× sägen</b>, <b>3× aufs Netz</b>, dann <b>aufs Auto</b>.',
@@ -603,9 +603,15 @@ function baeumchen(cv, art) {
   if (art === 'fichte') { p(c, 3, 8, '#8a5a2a'); p(c, 7, 10, '#8a5a2a'); }
 }
 const SORTE_KURZ = { nordmann: 'Nordmann', blau: 'Blaufichte', fichte: 'Fichte' };
+/** Ab Heiligabend (06.11.): Christbaumverkauf und Baumschule haben nur noch bis zum 26.12. offen. */
+function baumHinweis() {
+  const n = S.baumNochTage();
+  return n ? `<p class="mini-ziel">${n === 1 ? 'Heute ist der letzte Tag' : `Nur noch ${n} Tage offen`} - nach dem ${C.BAUM_LETZTER_TAG}. Dezember macht der Christbaumverkauf mit der Baumschule zu.</p>` : '';
+}
 export function zeigeBaumschule() {
   const box = fenster('Baumschule', `
     <canvas class="futter-szene baumschule-szene" width="${BS_W}" height="${BS_H}"></canvas>
+    ${baumHinweis()}
     ${erklaerung('baumschule', `<ol class="mini-anleitung">
       <li><b>Pflanze</b> eine Tanne in ein freies Beet.</li>
       <li>Ab dem nächsten Tag einmal täglich <b>gießen</b> und <b>düngen</b>: Ohne Pflege dauert es ${Math.round(1 / C.BAUMSCHULE_JE_TAG)} Tage, mit Gießen 3, mit beidem 2. Nichts verdorrt.</li>
@@ -849,7 +855,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611061500`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611061600`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2612,7 +2618,7 @@ export function oeffneMenue() {
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
   // 05.11.: daneben die Andenken-Sterne (einer je Jahr, das man bis Silvester gespielt hat)
   const an = S.st.andenken || 0;
-  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611061500" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611061600" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -2941,7 +2947,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611061500" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611061600" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {

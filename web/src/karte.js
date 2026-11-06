@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202611061500';
-import * as S from './spiel.js?v=202611061500';
-import * as Z from './zeit.js?v=202611061500';
-import * as FEIN from './fein.js?v=202611061500';
-import * as T from './ton.js?v=202611061500';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611061500';
+import * as C from './config.js?v=202611061600';
+import * as S from './spiel.js?v=202611061600';
+import * as Z from './zeit.js?v=202611061600';
+import * as FEIN from './fein.js?v=202611061600';
+import * as T from './ton.js?v=202611061600';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611061600';
 
 const $ = (s) => document.querySelector(s);
 
@@ -165,14 +165,14 @@ function baueSchilder(hervor) {
     }
     // Winterpause (29.10.): Minispiele, Markt, Wichtelwald und Baumschule tragen „Winterpause“ und sagen kurz Bescheid
     if (S.ortPause(o)) {
-      const abend = S.heiligabendZu();
-      const zu = () => { T.spiele('klick'); S.hooks.toast(abend ? `Heute ist Heiligabend - ${o.name} hat zu. Morgen ist wieder alles offen!` : `${o.name}: Pause - im nächsten Advent wieder offen!`, 'hinweis'); };
+      const abend = S.heiligabendZu(), nachWeih = !abend && !S.winterpause() && S.baumZu();   // 06.11.: Bäume nach dem 26.12.
+      const zu = () => { T.spiele('klick'); S.hooks.toast(abend ? `Heute ist Heiligabend - ${o.name} hat zu. Morgen ist wieder alles offen!` : nachWeih ? `${o.name} hat nach Weihnachten zu - im nächsten Advent wieder offen!` : `${o.name}: Pause - im nächsten Advent wieder offen!`, 'hinweis'); };
       const b = document.createElement('button');
       b.className = 'ort pause';
       const [sdx, sdy] = o.schild || [0, 0];
       b.style.left = `calc(var(--px) * ${o.x + sdx})`;
       b.style.top = `calc(var(--px) * ${yPx(o) + 9 + sdy + vers()})`;
-      b.innerHTML = `${o.name}<small>${abend ? 'morgen wieder' : 'Pause'}</small>`;
+      b.innerHTML = `${o.name}<small>${abend ? 'morgen wieder' : nachWeih ? 'nächstes Jahr wieder' : 'Pause'}</small>`;
       b.onclick = zu;
       box.appendChild(b);
       const f = document.createElement('button');
@@ -194,6 +194,9 @@ function baueSchilder(hervor) {
     const nieGespielt = o.spiel && !S.miniRekord(o.spiel);
     // Special des Tages (24.10.): Schild glänzt golden
     if (o.spiel && S.specialHeute() === o.spiel) { unter = 'Special heute!'; b.classList.add('special'); }
+    // 06.11.: Christbaumverkauf und Baumschule ab Heiligabend: wie lange sie noch offen haben
+    const baumTage = C.BAUM_ORTE.includes(o.id) ? S.baumNochTage() : null;
+    if (baumTage) { unter = baumTage === 1 ? 'heute letzter Tag!' : `noch ${baumTage} Tage offen`; b.classList.add('markt-heute'); }
     if (o.markt) {
       const m = S.marktInfo();
       unter = m.heute ? 'heute Weihnachtsmarkt!' : m.inTagen == null ? 'nächstes Jahr wieder' : m.inTagen === 1 ? 'Markt morgen' : `Markt in ${m.inTagen} Tagen`;

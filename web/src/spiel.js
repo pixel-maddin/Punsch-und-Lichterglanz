@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611061500';
-import * as Z from './zeit.js?v=202611061500';
-import { neueFarben } from './pixel.js?v=202611061500';
+import * as C from './config.js?v=202611061600';
+import * as Z from './zeit.js?v=202611061600';
+import { neueFarben } from './pixel.js?v=202611061600';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1937,7 +1937,7 @@ export function miniErgebnis(name, punkte) {
 let specialMerk = { schluessel: '', name: null };
 export function specialHeute() {
   if (st.lernen < 99 || !(st.tipps && st.tipps.karte_mehr)) return null;
-  const offen = Object.keys(C.MINISPIELE).filter(miniOffen);
+  const offen = Object.keys(C.MINISPIELE).filter((n) => miniOffen(n) && !(n === 'baum' && baumZu()));   // 06.11.: kein Special im geschlossenen Christbaumverkauf
   const heute = tagNr(), schluessel = heute + ':' + offen.join(',');
   if (specialMerk.schluessel === schluessel) return specialMerk.name;
   let name = null;
@@ -2309,7 +2309,15 @@ export function pruefeEchtesFest() {
 export const heiligabendZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE;
 export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);
 /** Hat dieser Ort der Karte gerade zu? Pause: alles außer PAUSE_ORTE. Heiligabend ab 16 Uhr: alles außer Zuhause (29.10.). */
-export const ortPause = (o) => (winterpause() && !C.PAUSE_ORTE.includes(o.id)) || (heiligabendZu() && o.id !== 'haus');
+export const ortPause = (o) => (winterpause() && !C.PAUSE_ORTE.includes(o.id)) || (heiligabendZu() && o.id !== 'haus')
+  || (baumZu() && C.BAUM_ORTE.includes(o.id));
+/** Christbaumverkauf und Baumschule haben zu: nach dem 26.12. (06.11.). */
+export const baumZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) > C.BAUM_LETZTER_TAG;
+/** Ab Heiligabend: wie viele Tage Christbaumverkauf und Baumschule noch offen haben (24.12. → 3, 26.12. → 1), sonst null. */
+export function baumNochTage(d = Z.jetzt()) {
+  const dt = Z.dezemberTag(d);
+  return !DEMO && dt >= 24 && dt <= C.BAUM_LETZTER_TAG ? C.BAUM_LETZTER_TAG - dt + 1 : null;
+}
 export const zuText = () => winterpause()
   ? 'Pause - dein Stand hat bis zum nächsten Advent zu. Schmücken und einkaufen geht weiter!'
   : 'Heute ist Heiligabend - dein Stand hat zu. Ab morgen kommen wieder Gäste!';

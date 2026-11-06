@@ -764,6 +764,10 @@ export const WEIHNACHT_MORGEN = 6;    // ab dann am 24.12. das Fenster „Frohe 
 // hat der Stand zu - keine Gäste, Aufträge, Minispiele, kein Markt. Schmücken und einkaufen geht.
 export const SAISON_ENDE_TAG = 38;
 export const PAUSE_ORTE = ['haus', 'super', 'dorf', 'bau'];   // diese Orte der Karte bleiben offen
+// Christbaumverkauf und Baumschule (06.11., Nutzerwunsch): nur bis zu diesem Dezembertag offen, danach braucht
+// keiner mehr einen Baum. Ab dem 24.12. sagen ihre Schilder, wie lange noch.
+export const BAUM_LETZTER_TAG = 26;
+export const BAUM_ORTE = ['baeume', 'baumschule'];
 
 // ---------------------------------------------------------------------------
 // Varianten je Deko-Platz (09.10., Nutzerwunsch: „jedes Haus sieht gleich aus,
@@ -1171,7 +1175,7 @@ export const WETTBEWERB = {
   plaetze: [ { name: 'Gold', ab: 630, f: '#f0c040' }, { name: 'Silber', ab: 500, f: '#d8dce4' }, { name: 'Bronze', ab: 380, f: '#d08a4a' } ],
   lohn: [30, 20, 12, 6],     // Gold, Silber, Bronze, Urkunde
   lohnMin: 2000,
-  abSpieltag: 4,
+  abSpieltag: 0,   // 06.11.: vorher 4 - wer nach dem 19.12. anfing, bekam keine Jury (Nutzer: auch dann eine)
   tag: 23,   // 27.10. (Nutzerwunsch): Die Jury kommt am 23.12. (vorher am 4. Advent). Schwellen unverändert -
              // gemessen waren sie am 20.12., drei Tage mehr Deko machen es also etwas leichter
 
