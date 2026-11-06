@@ -16,11 +16,11 @@
  * Gleiches Gerüst wie christbaum.js: eigenes Canvas (#miniCv), 180 Pixel
  * breit, Kulisse als Zwischenbild, Schrift über minihud.js.
  */
-import * as C from './config.js?v=202611051130';
-import * as Z from './zeit.js?v=202611051130';
-import * as T from './ton.js?v=202611051130';
-import * as MH from './minihud.js?v=202611051130';
-import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202611051130';
+import * as C from './config.js?v=202611061000';
+import * as Z from './zeit.js?v=202611061000';
+import * as T from './ton.js?v=202611061000';
+import * as MH from './minihud.js?v=202611061000';
+import { r, p, ton, figurGross, neueFarben } from './pixel.js?v=202611061000';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -177,7 +177,7 @@ const wahl = (l) => l[Math.floor(Math.random() * l.length)];
 
 function neuesSpiel(t0) {
   return { t: t0, punkte: 0, kette: 1, kunden: 0, kunde: null, kundeAb: 0.3, ware: null, schritt: 'stechen',
-    texte: [], fehl: [], rauch: [], aus: false, gebacken: [], stich: null, letzteForm: null };
+    texte: [], fehl: [], rauch: [], staub: [], aus: false, gebacken: [], stich: null, letzteForm: null };
 }
 function neuerKunde(g) {
   // Nicht zweimal hintereinander dasselbe, sonst wird es langweilig
@@ -207,6 +207,7 @@ export function tippeAuf(x, y) {
     const i = Math.max(0, Math.min(formen.length - 1, Math.floor(x / (W / formen.length))));
     const form = formen[i];
     g.stich = { form, t: 0 };
+    { const tg = TEIG(); for (let i = 0; i < 7; i++) g.staub.push({ x: tg.x + tg.b / 2 - 4 + Math.random() * 10, y: tg.y + 6 + Math.random() * 6, vx: (Math.random() - 0.5) * 14, t: -Math.random() * 0.1 }); }
     if (form !== k.rezept.form) {
       k.fehler = true; nimmGeduld(g, 2); g.kette = 1;
       const minus = abzug(g, 'falsch');
@@ -337,7 +338,7 @@ function schritt(dt) {
       w.grad = a < Math.min(0.3, gv - 0.06) ? 'roh' : a < gv ? 'blass' : a <= gb ? 'golden' : 'dunkel';
       // „JETZT!“-Moment (05.11.): beim Eintritt in den goldenen Bereich ein leiser Klick
       const drin = a >= gv && a <= gb;
-      if (drin && !w.imGold) T.spiele('klick');
+      if (drin && !w.imGold) T.spiele('piep');   // 06.11.: leises Piepen (vorher ein Klick)
       w.imGold = drin;
       if (a >= 1) {
         // Verbrannt: Rauch, Plätzchen weg, nochmal ausstechen
@@ -370,6 +371,8 @@ function schritt(dt) {
   }
   for (const s of g.rauch) s.t += dt;
   g.rauch = g.rauch.filter((s) => s.t < 1.2);
+  for (const s of g.staub) s.t += dt;
+  g.staub = g.staub.filter((s) => s.t < 0.8);
   for (const x of g.texte) x.t += dt;
   g.texte = g.texte.filter((x) => x.t < 1);
   for (const x of g.fehl) x.t += dt;
@@ -524,10 +527,27 @@ function baueKulisse(nacht) {
   }
   // Theke vorn
   r(c, 0, th, W, 5, '#9a6434'); r(c, 0, th, W, 1, '#c8905a'); r(c, 0, th + 4, W, 1, '#5a3a1e');
-  // Arbeitstisch: ruhige Dielen
-  r(c, 0, th + 5, W, H - th - 5, '#c08a52');
-  for (let y = th + 12; y < H; y += 10) { r(c, 0, y, W, 1, '#a07040'); r(c, 0, y + 1, W, 1, '#cc9a60'); }
-  for (let i = 0; i < 14; i++) p(c, Math.floor(hash(i + 40) * W), th + 6 + Math.floor(hash(i + 80) * (H - th - 6)), '#a87444');
+  // Arbeitsplatte (06.11., Nutzer: „noch zu simpel“): Bohlen in drei Holztönen mit Maserung, versetzten
+  // Stößen und ein paar Astlöchern - vorher glatte Dielen in einer Farbe
+  const BOHLE = ['#c08a52', '#b8824a', '#c8945a'];
+  for (let y = th + 5, n = 0; y < H; y += 10, n++) {
+    const hb = Math.min(10, H - y);
+    r(c, 0, y, W, hb, BOHLE[n % 3]);
+    r(c, 0, y, W, 1, '#d8a468'); if (hb > 1) r(c, 0, y + hb - 1, W, 1, '#8a5a30');
+    const stoss = Math.floor(hash(n + 70) * 120) + 30;   // Stoß zweier Bretter
+    r(c, stoss, y, 1, hb, '#7a4c28'); r(c, stoss + 1, y + 1, 1, hb - 2, '#d0a066');
+    for (let k = 0; k < 7; k++) {   // Maserung: dünne, etwas dunklere Striche
+      const gx = Math.floor(hash(n * 13 + k) * W), gy = y + 2 + Math.floor(hash(n * 17 + k + 3) * (hb - 4)), gl = 8 + Math.floor(hash(n * 7 + k) * 26);
+      r(c, gx, gy, gl, 1, ton(BOHLE[n % 3], -0.08));
+    }
+    if (hash(n + 90) < 0.45) { const ax = Math.floor(hash(n + 91) * (W - 6)), ay = y + 3; r(c, ax, ay, 4, 2, '#8a5a32'); p(c, ax + 1, ay, '#6a4222'); p(c, ax - 1, ay + 1, ton(BOHLE[n % 3], -0.08)); p(c, ax + 4, ay + 1, ton(BOHLE[n % 3], -0.08)); }
+  }
+  // Keksdose aus Glas auf der Theke, links (06.11.)
+  { const dx = 5, dy = th - 13;
+    r(c, dx, dy + 2, 12, 11, '#dfe8ee'); r(c, dx + 1, dy + 3, 10, 9, '#c8d8e2');
+    for (const [kx, ky, f] of [[2, 7, '#d89a48'], [6, 8, '#b8743a'], [4, 4, '#e8b060'], [8, 5, '#d89a48']]) { r(c, dx + kx, dy + ky, 3, 2, f); p(c, dx + kx, dy + ky, ton(f, 0.25)); }
+    r(c, dx + 1, dy + 3, 1, 8, 'rgba(255,255,255,0.55)');
+    r(c, dx - 1, dy, 14, 3, '#c83a32'); r(c, dx - 1, dy, 14, 1, '#e8605a'); r(c, dx + 4, dy - 2, 4, 2, '#a82a24'); }
   // Schmaler Teigstreifen links am Ofen (05.11.: vorher ein großes Brett, auf dem nichts passierte)
   const tg = TEIG();
   r(c, tg.x - 2, tg.y - 2, tg.b + 4, tg.h + 4, '#8a5a30'); r(c, tg.x - 2, tg.y - 2, tg.b + 4, 1, '#b07a44'); r(c, tg.x - 2, tg.y + tg.h + 1, tg.b + 4, 1, '#5a3a1e');
@@ -539,6 +559,19 @@ function baueKulisse(nacht) {
   r(c, b.x - 14, b.y - 2, 28, 12, '#5a5e68'); r(c, b.x - 14, b.y - 2, 28, 1, '#8a8e98');
   for (let x = b.x - 12; x < b.x + 14; x += 3) r(c, x, b.y, 1, 9, '#9aa0aa');
   r(c, b.x - 13, b.y + 4, 26, 1, '#9aa0aa');
+  // Unter den Formen ein helles Backbrett, unter den Schalen ein rot-weiß kariertes Geschirrtuch (06.11.)
+  const fy0 = FORM_Y() - 18;
+  r(c, 1, fy0 + 2, W - 2, 37, 'rgba(60,30,10,0.3)');
+  r(c, 0, fy0, W, 36, '#7a4c28'); r(c, 1, fy0 + 1, W - 2, 34, '#dcae72'); r(c, 1, fy0 + 1, W - 2, 1, '#f0c88a');
+  for (let k = 0; k < 16; k++) r(c, 2 + Math.floor(hash(k + 600) * (W - 30)), fy0 + 3 + Math.floor(hash(k + 610) * 30), 10 + Math.floor(hash(k + 620) * 18), 1, '#cc9c62');
+  const sy0 = SCHALE_Y() - 23, sh = VORSCHAU_DY + 41;
+  r(c, 1, sy0 + 2, W - 2, sh, 'rgba(60,30,10,0.3)');
+  for (let y = 0; y < sh; y++) for (let x = 0; x < W; x += 1) {
+    const a = Math.floor(x / 4) % 2, bb = Math.floor(y / 4) % 2;
+    p(c, x, sy0 + y, a && bb ? '#c8483c' : a || bb ? '#e4a092' : '#f6efe6');
+  }
+  r(c, 0, sy0, W, 1, '#fff8f0');
+  for (let x = 1; x < W; x += 2) p(c, x, sy0 + sh, '#e4a092');   // Fransen
   c = ziel;
 
   // Lichtkarte: dämmriger Grund, helle Inseln - wird über die fertige Szene multipliziert
@@ -590,6 +623,8 @@ function ofen(t) {
   const nacht = Z.licht().hell < 0.5;
   // Gehäuse: Retro-Emaille, Chromleiste, Füße
   const em = '#efe4cc', emD = '#c8b898', emH = '#fff8e8';
+  // Schatten auf der Arbeitsplatte (06.11.)
+  for (let k = 0; k < 4; k++) { c.fillStyle = `rgba(40,20,10,${(0.3 - k * 0.06).toFixed(2)})`; c.fillRect(o.x - 3 + k * 2, o.y + o.h + 1 + k, o.b + 6 - k * 4, 1); }
   r(c, o.x + 2, o.y + o.h, 4, 3, '#3a3036'); r(c, o.x + o.b - 6, o.y + o.h, 4, 3, '#3a3036');   // Füße
   r(c, o.x, o.y - 8, o.b, o.h + 8, em);
   r(c, o.x, o.y - 8, 1, o.h + 8, emH); r(c, o.x + o.b - 1, o.y - 8, 1, o.h + 8, emD); r(c, o.x, o.y + o.h - 1, o.b, 1, emD);
@@ -611,6 +646,11 @@ function ofen(t) {
   r(c, fx, fy + fh - 7, fb, 1, '#8a8a92');   // Rost
   for (let k = 0; k < 4; k++) p(c, fx + 3 + k, fy + 2 + k, 'rgba(255,255,255,0.35)');   // Spiegelung
   for (let k = 0; k < 3; k++) p(c, fx + 8 + k, fy + 2 + k, 'rgba(255,255,255,0.2)');
+  // Ofenhandschuh am Haken rechts (06.11.), rot-weiß kariert
+  { const hx = o.x + o.b, hy = o.y - 4;
+    r(c, hx, hy, 2, 1, '#8a8e98'); p(c, hx + 2, hy + 1, '#8a8e98');
+    for (let yy = 0; yy < 9; yy++) for (let xx = 0; xx < 5; xx++) if (!(yy < 2 && xx === 4) && !(yy > 6 && xx === 0)) p(c, hx + 1 + xx, hy + 2 + yy, (xx + (yy >> 1)) % 2 ? '#c83a32' : '#f4ece0');
+    r(c, hx + 1, hy + 10, 5, 1, '#8a2a24'); }
   // Griff (Chrom) unter dem Fenster
   r(c, o.x + 6, o.y + o.h - 6, o.b - 12, 2, '#d8dce4'); r(c, o.x + 6, o.y + o.h - 6, o.b - 12, 1, '#ffffff'); p(c, o.x + 6, o.y + o.h - 5, '#8a8e98'); p(c, o.x + o.b - 7, o.y + o.h - 5, '#8a8e98');
   if (drin) {
@@ -638,6 +678,11 @@ function anzeige(t) {
   r(c, X(bis), y, X(0.93) - X(bis), h, '#a8662c');
   r(c, X(0.93), y, x0 + b - X(0.93), h, '#3a2a22');
   for (const s of [von, bis, 0.93]) r(c, X(s), y, 1, h, 'rgba(40,20,10,0.55)');   // Trennstriche
+  // Kleine Symbole (06.11.): ein Funkelstern mitten im Gold, ein Rauchwölkchen im Verbrannten
+  const gm = Math.round((X(von) + X(bis)) / 2), my = y + Math.floor(h / 2);
+  p(c, gm, my - 2, '#ffffff'); p(c, gm, my + 2, '#ffffff'); r(c, gm - 2, my, 5, 1, '#ffffff'); r(c, gm - 1, my - 1, 3, 3, '#fff6c0'); p(c, gm, my, '#ffffff');
+  const vm = Math.round((X(0.93) + x0 + b) / 2);
+  p(c, vm - 1, my + 1, '#8a8a92'); p(c, vm, my, '#a8a8b0'); p(c, vm + 1, my - 1, '#8a8a92'); p(c, vm, my - 2, '#6a6a72');
   if (a >= 0) {
     const m = Math.min(x0 + b - 1, X(a));
     r(c, m - 1, y - 4, 3, 2, '#ffffff'); p(c, m, y - 2, '#ffffff');   // Zeiger: kleines Dreieck
@@ -681,10 +726,14 @@ const FORM_FARBE = { stern: '#e8a820', mond: '#4a8ad8', herz: '#e04848', baum: '
 /** Eine Kachel unter einer Form bzw. Schale (05.11.): hell, im aktiven Schritt mit goldenem Rand, der atmet. */
 function kachel(i, n, y0, h, aktiv, t) {
   const x = slot(i, n), bw = Math.min(40, Math.floor(W / n) - 4), x0 = x - Math.floor(bw / 2);
-  r(c, x0 + 1, y0 + h, bw, 1, 'rgba(60,30,10,0.35)');
-  r(c, x0, y0, bw, h, '#f6ecd8'); r(c, x0, y0, bw, 1, '#fffaf0');
-  const rand = aktiv ? (Math.sin(t * 5) > 0 ? '#f0b828' : '#d89a20') : '#d8c4a0';
-  r(c, x0, y0, bw, 1, rand); r(c, x0, y0 + h - 1, bw, 1, rand); r(c, x0, y0, 1, h, rand); r(c, x0 + bw - 1, y0, 1, h, rand);
+  // 06.11.: runde Ecken, Licht oben links, Schatten unten rechts - vorher ein flaches Rechteck
+  const rund = (f, dx, dy, w, hh) => { r(c, dx + 1, dy, w - 2, hh, f); r(c, dx, dy + 1, w, hh - 2, f); };
+  rund('rgba(60,30,10,0.32)', x0 + 1, y0 + 2, bw, h);
+  if (aktiv) rund(Math.sin(t * 5) > 0 ? '#ffd24a' : '#e8a820', x0 - 1, y0 - 1, bw + 2, h + 2);   // goldener Rand, atmet
+  rund('#c8a878', x0, y0, bw, h);
+  rund('#f8efdc', x0 + 1, y0 + 1, bw - 2, h - 2);
+  r(c, x0 + 2, y0 + 1, bw - 4, 1, '#fffcf4'); r(c, x0 + 1, y0 + 2, 1, h - 4, '#fffcf4');
+  r(c, x0 + 2, y0 + h - 2, bw - 4, 1, '#e4d4b4'); r(c, x0 + bw - 2, y0 + 2, 1, h - 4, '#e4d4b4');
 }
 function form(i, n, f, aktiv, t) {
   const x = slot(i, n), y = FORM_Y();
@@ -767,6 +816,14 @@ function zeichne(t) {
     : g.schritt === 'verzieren' || (wa && wa.phase === 'raus') ? 3 : null;
   formen.forEach((f, i) => form(i, formen.length, f, dran === 1, t));
   dekos.forEach((d, i) => schale(i, dekos.length, d, dran === 3, t, dran && dran !== 3));
+  // Dampf über dem Ofen, solange gebacken wird (06.11.)
+  if (wa && wa.phase === 'ofen') for (let k = 0; k < 4; k++) {
+    const ph = (t * 0.7 + k / 4) % 1, o2 = OFEN();
+    const dx = Math.round(o2.x + o2.b / 2 - 10 + k * 7 + Math.sin(t * 2 + k) * 2), dy = Math.round(o2.y - 10 - ph * 16);
+    c.fillStyle = `rgba(255,250,240,${(0.38 * (1 - ph)).toFixed(2)})`; c.fillRect(dx, dy, 3 + Math.round(ph * 2), 2);
+  }
+  // Mehlstaub, der beim Ausstechen vom Teig aufsteigt
+  for (const s of g.staub) { const a = s.t / 0.8; c.fillStyle = `rgba(255,252,244,${(0.8 * (1 - a)).toFixed(2)})`; c.fillRect(Math.round(s.x + s.vx * s.t), Math.round(s.y - s.t * 10), 1, 1); }
   // Stempel-Bewegung über dem Teig
   if (g.stich) { const a = g.stich.t / 0.25; const sx = tg.x + Math.round(tg.b / 2) - 4, sy = tg.y + 4 - Math.round(Math.sin(a * Math.PI) * 6); zeichnePlaetzchen(c, sx, sy, g.stich.form, 'roh', null, 1); }
   // Das Plätzchen selbst (im Ofen hinter der Scheibe: nur als Schatten)

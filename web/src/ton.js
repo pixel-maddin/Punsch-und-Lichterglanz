@@ -20,12 +20,12 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-import * as Z from './zeit.js?v=202611051130';
+import * as Z from './zeit.js?v=202611061000';
 
 let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
-const url = (id) => `audio/${id}.m4a?v=202611051130`;
+const url = (id) => `audio/${id}.m4a?v=202611061000`;
 const HAUS = ['musik-haus', 'haus-jazz'];
 const XMAS = 'xmas';
 const KARTE_ALT = 'musik-karte';
@@ -237,6 +237,8 @@ export function spiele(name) {
     case 'spezial': [784, 988, 1175, 1568].forEach((f, i) => glocke(f, i * 0.09, 0.09)); break;
     case 'tuer': rauschen(0.12, 2500, 3, 0.1); [880, 1109, 1319, 1760].forEach((f, i) => glocke(f, 0.1 + i * 0.08, 0.1)); break;
     case 'klick': ton(800, 0.03, 'square', 0.06); break;
+    // Backstube (06.11.): der Ofen piepst leise, wenn das Plätzchen raus kann - zweimal kurz wie ein Timer
+    case 'piep': ton(1760, 0.06, 'sine', 0.05); ton(1760, 0.06, 'sine', 0.05, 0.11); break;
     // Silvester: dumpfer Knall, dann leises Knistern (bewusst leise - es knallt oft)
     case 'feuerwerk': rauschen(0.35, 160, 0.8, 0.12, 0, 60); for (let i = 0; i < 5; i++) rauschen(0.05, 3500 + Math.random() * 2500, 2, 0.025, 0.12 + i * 0.07 + Math.random() * 0.05); break;
     // Futter ins Futterhaus: Körner rieseln
