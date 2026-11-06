@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611061000';
-import * as Z from './zeit.js?v=202611061000';
-import { neueFarben } from './pixel.js?v=202611061000';
+import * as C from './config.js?v=202611061100';
+import * as Z from './zeit.js?v=202611061100';
+import { neueFarben } from './pixel.js?v=202611061100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -236,9 +236,8 @@ function resetLauf() {
     stossMult: 2, ansturm: false, ansturmT: 0,   // Tagesansturm: Trinkgeld ×3, nur für dich
     wackel: {},                     // kurzes Wackeln je Topf/Gast bei Fehlern
     chefT: 0,                       // s seit dem letzten Tippen am Stand (Start zählt als da)
-    grossAb: C.GROSS_ERST,          // frühestens dann die nächste Großbestellung
     gefuellt: {},                   // Nachfüll-Wichtel ist gerade fertig (Abgang)
-    schlitten: null, schlittenAb: C.SCHLITTEN_ERST,   // der Nikolaus am Himmel
+    schlitten: null,                // der Nikolaus am Himmel (wann er kommt: st.tagUhr, seit 06.11.)
     haendler: null, haendlerT: 0,   // der fahrende Händler (haendlerT = s am Stand)
     haendlerAb: C.HAENDLER_ERST[0] + Math.random() * (C.HAENDLER_ERST[1] - C.HAENDLER_ERST[0]),
     sonderSeit: null,               // seit wann besondere Gäste kommen dürften (sonderBereit)
@@ -404,7 +403,11 @@ export const offlineAnteil = () => nachTag(C.OFFLINE_JE_TAG.anteil);
 export const offlineStunden = () => nachTag(C.OFFLINE_JE_TAG.stunden);
 /** Gilt der Chef-Bonus schon? Erst ab dem Hinweis „Du bist der Chef!“ (13.10.) - vorher gibt es ihn noch nicht. */
 export const chefBonus = () => !!(st.chefBonus || (st.tipps && st.tipps.chef));
-export const wichtelTempo = () => chefAktiv() ? (chefBonus() ? C.CHEF_TEMPO : 1) : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() : 1;
+// 06.11.: Wer die App offen lässt und nicht tippt, bekommt danach dasselbe wie bei geschlossener App
+// (Wichtel-Arbeit je Stunde wie in offlineAbrechnen). Vorher arbeiteten sie dann mit vollen 65 % ohne
+// Deckel weiter - 8 h offen brachten fast das Vierfache von 8 h geschlossen.
+const ruheSatz = () => (lauf.chefT < C.INAKTIV_AB + C.OFFLINE_ANFANG_H * 3600 ? C.OFFLINE_SATZ_ANFANG : C.OFFLINE_SATZ);
+export const wichtelTempo = () => chefAktiv() ? (chefBonus() ? C.CHEF_TEMPO : 1) : lauf.chefT >= C.INAKTIV_AB ? offlineAnteil() * ruheSatz() : 1;
 /**
  * Spül- und Nachfüll-Wichtel (13.10.): solange die App offen ist, nie langsamer
  * als normal - gemeldet zweimal „Wichtel füllen nicht mehr nach": Nach 5 Minuten
@@ -1414,9 +1417,21 @@ function zaehleBedient(g, auto, faktor, schwungVorher) {
 // ---------------------------------------------------------------------------
 // Takt
 // ---------------------------------------------------------------------------
+/**
+ * Spielzeit des heutigen Tages (06.11.): Nikolaus und Großbestellung zählen über den ganzen Tag, nicht je
+ * Sitzung. Vorher fing jedes Neuladen frisch an (Nikolaus schon nach 2 min) - wer oft kurz reinschaute,
+ * fing deutlich mehr Nikoläuse als wer zweimal länger spielte.
+ */
+function tagUhr() {
+  const tg = tagNr();
+  if (!st.tagUhr || st.tagUhr.tag !== tg) st.tagUhr = { tag: tg, t: 0, schlittenAb: C.SCHLITTEN_ERST, grossAb: C.GROSS_ERST };
+  return st.tagUhr;
+}
 export function update(dt) {
   lauf.t += dt;
   lauf.chefT += dt;
+  const tu = tagUhr();
+  tu.t += dt;
   if (st.zimt > 0) st.zimt = Math.max(0, st.zimt - dt);   // Zimtstern zählt nur, solange gespielt wird (26.10.)
   const G = lauf.gaeste;
   const wt = dt * wichtelTempo();   // Wichtel-Zeit: schneller, wenn du da bist
@@ -1424,10 +1439,10 @@ export function update(dt) {
 
   // Großbestellung: nur wenn du da bist und der Stand zwei Plätze hat -
   // sonst blockiert sie den einzigen Platz
-  if (lauf.t >= lauf.grossAb && chefAktiv() && nachStartRuhe() && lauf.stossRest === 0 && lauf.t > lauf.stossBis && st.stats.bedient >= C.GROSS_AB_BEDIENT
+  if (tu.t >= tu.grossAb && chefAktiv() && nachStartRuhe() && lauf.stossRest === 0 && lauf.t > lauf.stossBis && st.stats.bedient >= C.GROSS_AB_BEDIENT
       && tresenPlaetze() >= 2 && lauf.stossRest === 0 && wartende().length < C.SCHLANGE_MAX
       && !G.some((g) => g.gross && !g.gehen)) {
-    lauf.grossAb = lauf.t + C.GROSS_PAUSE * (0.8 + Math.random() * 0.4);
+    tu.grossAb = tu.t + C.GROSS_PAUSE * (0.8 + Math.random() * 0.4);
     const frei = produkteFrei().filter((p) => p.art !== 'platte');
     const p = frei[Math.floor(Math.random() * frei.length)];
     const n = 3 + 2 * handMax();
@@ -1650,9 +1665,9 @@ export function update(dt) {
   }
 
   // Der Nikolaus fliegt vorbei
-  if (!lauf.schlitten && lauf.t >= lauf.schlittenAb && st.lernen >= 99 && einstieg('schlitten') && !winterpause()) {
+  if (!lauf.schlitten && tu.t >= tu.schlittenAb && st.lernen >= 99 && einstieg('schlitten') && !winterpause()) {
     lauf.schlitten = { t: 0, dauer: C.SCHLITTEN_DAUER, y: 0.12 + Math.random() * 0.3, gefangen: null };
-    lauf.schlittenAb = lauf.t + C.SCHLITTEN_PAUSE[0] + Math.random() * (C.SCHLITTEN_PAUSE[1] - C.SCHLITTEN_PAUSE[0]);
+    tu.schlittenAb = tu.t + C.SCHLITTEN_PAUSE[0] + Math.random() * (C.SCHLITTEN_PAUSE[1] - C.SCHLITTEN_PAUSE[0]);
     hooks.ton('glocken');
   }
   haendlerTakt(dt);
