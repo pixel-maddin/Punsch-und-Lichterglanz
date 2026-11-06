@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202611061100';
-import * as S from './spiel.js?v=202611061100';
-import * as Z from './zeit.js?v=202611061100';
-import * as FEIN from './fein.js?v=202611061100';
-import * as T from './ton.js?v=202611061100';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611061100';
+import * as C from './config.js?v=202611061200';
+import * as S from './spiel.js?v=202611061200';
+import * as Z from './zeit.js?v=202611061200';
+import * as FEIN from './fein.js?v=202611061200';
+import * as T from './ton.js?v=202611061200';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611061200';
 
 const $ = (s) => document.querySelector(s);
 
@@ -520,6 +520,36 @@ function baueGrund(winter) {
     else if (!winter && k < 0.92) { p(c, x, y, '#e8d870'); p(c, x + 2, y + 1, '#d87a5a'); }
     else if (winter) schneemannKlein(x, y);
   }
+  // 6b. Kleine Szenen abseits der Wege (06.11., Nutzer: „mir fehlen ein paar kleine Details“): wenige,
+  // gezielt gesetzte Grüppchen statt mehr Zufalls-Pixel - die Karte war schon einmal „zu unruhig“.
+  // Sie halten Abstand zu Wegen, Orten, Schildern, Wald, Bäumen, den Santa-Verstecken und zueinander.
+  const platz = [];
+  const passt = (x, y, bw, bh) => {
+    for (let yy = y - bh; yy <= y + 2; yy++) for (let xx = x - bw; xx <= x + bw; xx++) if (!frei(xx, yy) || istWald(xx, yy)) return false;
+    return platz.every((s) => Math.hypot(s.x - x, s.y - y) > 18) && baeume.every((b) => Math.hypot(b.x - x, b.y - y) > 8)
+      && VERSTECKE.every((v) => Math.hypot(v.x - x, yPx(v) - y) > 12);
+  };
+  const nebenWeg = (x, y) => alle.some((pts) => pts.some((s) => { const d = Math.hypot(s.x - x, s.y - y); return d > 5 && d < 9; }));
+  const suche = (n, bw, bh, zeichner, saat, nurAmWeg = false) => {
+    for (let i = 0, k = 0; i < 600 && k < n; i++) {
+      const x = 8 + Math.round(hash(saat + i * 1.37) * (C.B - 16)), y = Math.round(H * (0.2 + hash(saat + i * 2.31 + 50) * 0.62));
+      if (!passt(x, y, bw, bh) || (nurAmWeg && !nebenWeg(x, y))) continue;
+      zeichner(x, y, P, winter);
+      platz.push({ x, y }); markiere(x - bw, y - bh, bw * 2 + 1, bh + 3); k++;
+    }
+  };
+  suche(6, 6, 6, buschGruppe, 1300);
+  suche(5, 5, 5, moosFels, 1700);
+  suche(1, 4, 10, wegSchild, 2100, true);
+  suche(2, 4, 6, baumstumpf, 2500);
+  suche(1, 3, 8, steinmann, 2900);
+  futterplatz = null;
+  suche(1, 6, 13, (x, y) => { vogelhaus(x, y, winter); futterplatz = { x, y }; }, 3300);
+  // Eine Bank am Weiher
+  for (let i = 0; i < 16; i++) {
+    const a = i / 16 * Math.PI * 2, x = Math.round(w.x + Math.cos(a) * 25), y = Math.round(w.y + Math.sin(a) * 12 + 4);
+    if (passt(x, y, 5, 5)) { bank(x, y, winter); platz.push({ x, y }); markiere(x - 5, y - 5, 11, 8); break; }
+  }
   baeume.sort((a, b) => a.y - b.y);
   for (const b of baeume) (b.laub ? laubbaum : tanne)(b.x, b.y, b.g, P);
 
@@ -630,6 +660,70 @@ function busch(x, y, P, winter) {
 function fels(x, y, P, winter) {
   r(c, x - 2, y - 1, 4, 2, P.fels); r(c, x - 1, y - 2, 2, 1, P.fels2); p(c, x + 1, y, ton(P.fels, -0.25));
   if (winter) r(c, x - 1, y - 2, 2, 1, '#ffffff');
+}
+// --- Kleine Szenen (06.11.) - (x, y) ist der Fuß ---------------------------------------------
+/** Zwei bis drei Büsche zusammen, verschieden groß, mit Beeren; im Winter mit Schnee obendrauf. */
+function buschGruppe(x, y, P, winter) {
+  const dunkel = ton(P.busch, -0.22), hell = ton(P.busch, 0.22);
+  const einer = (bx, by, b, h) => {
+    schattenOval(bx, by + 1, b * 2 + 2);
+    for (let k = 0; k < h; k++) { const ww = Math.round(b * Math.sqrt(1 - Math.pow((h - 1 - k) / h, 2))); r(c, bx - ww, by - h + k + 1, ww * 2 + 1, 1, k > h * 0.6 ? dunkel : P.busch); }
+    r(c, bx - Math.max(1, b - 2), by - h + 1, Math.max(1, b - 1), 1, hell); p(c, bx - b + 1, by - h + 2, hell);
+    if (winter) { r(c, bx - b + 1, by - h + 1, b * 2 - 1, 1, '#ffffff'); p(c, bx - b + 2, by - h, '#ffffff'); }
+  };
+  einer(x - 3, y, 3, 4); einer(x + 3, y + 1, 4, 5); if (hash(x * 3 + y) < 0.6) einer(x, y + 2, 2, 3);
+  for (let k = 0; k < 4; k++) p(c, x - 4 + Math.floor(hash(x + k * 7) * 9), y - 3 + Math.floor(hash(y + k * 5) * 3), winter ? '#d8303a' : (k % 2 ? '#d83a3a' : '#e8e0f0'));
+}
+/** Ein Felsbrocken mit Moos - im Winter liegt Schnee oben, das Moos sieht man an der Seite. */
+function moosFels(x, y, P, winter) {
+  schattenOval(x, y + 1, 9);
+  r(c, x - 3, y - 3, 7, 4, P.fels); r(c, x - 2, y - 4, 5, 1, P.fels); r(c, x - 4, y - 2, 9, 2, P.fels);
+  r(c, x - 2, y - 4, 3, 1, P.fels2); p(c, x - 3, y - 3, P.fels2); r(c, x - 4, y - 1, 9, 1, ton(P.fels, -0.22));
+  const moos = winter ? '#4a7a4a' : '#5a9a3a', moos2 = winter ? '#3a6a3e' : '#7ab848';
+  if (winter) { r(c, x - 2, y - 5, 5, 1, '#ffffff'); r(c, x - 3, y - 4, 7, 1, '#f0f4f8'); r(c, x - 4, y - 2, 2, 2, moos); p(c, x - 4, y - 1, moos2); }
+  else { r(c, x - 2, y - 4, 4, 1, moos2); r(c, x - 3, y - 3, 3, 1, moos); p(c, x + 1, y - 3, moos); p(c, x - 4, y - 2, moos); }
+  r(c, x + 5, y - 1, 2, 2, P.fels); p(c, x + 5, y - 1, P.fels2);   // ein kleiner Kiesel daneben
+}
+/** Ein Holzschild mit Pfeil am Wegrand. */
+function wegSchild(x, y, P, winter) {
+  schattenOval(x, y + 1, 5);
+  r(c, x, y - 8, 1, 9, '#5a3a22');
+  r(c, x - 4, y - 9, 9, 4, '#a8763e'); r(c, x - 4, y - 9, 9, 1, '#c8965a'); r(c, x - 4, y - 6, 9, 1, '#7a4e28');
+  r(c, x - 2, y - 7, 4, 1, '#f4ecd8'); p(c, x + 1, y - 8, '#f4ecd8'); p(c, x + 2, y - 7, '#f4ecd8'); p(c, x + 1, y - 6, '#f4ecd8');   // Pfeil
+  if (winter) r(c, x - 4, y - 10, 9, 1, '#ffffff');
+}
+/** Ein Baumstumpf mit Jahresringen und einem Pilz - im Winter mit Schneehaube. */
+function baumstumpf(x, y, P, winter) {
+  schattenOval(x, y + 1, 8);
+  r(c, x - 3, y - 3, 6, 4, '#7a5030'); r(c, x - 3, y - 3, 1, 4, '#5a3a22'); r(c, x + 2, y - 3, 1, 4, '#9a6a40');
+  r(c, x - 3, y - 4, 6, 1, winter ? '#ffffff' : '#c8a070'); if (!winter) { p(c, x - 1, y - 4, '#8a5a30'); p(c, x, y - 4, '#a87a48'); }
+  if (winter) { r(c, x - 2, y - 5, 4, 1, '#ffffff'); return; }
+  r(c, x + 4, y - 1, 1, 2, '#f4ecd8'); r(c, x + 3, y - 3, 3, 2, '#d8303a'); p(c, x + 3, y - 3, '#ffffff'); p(c, x + 5, y - 2, '#ffffff');   // Fliegenpilz
+}
+/** Ein Steinmännchen: drei aufeinandergestapelte Steine. */
+function steinmann(x, y, P, winter) {
+  schattenOval(x, y + 1, 6);
+  r(c, x - 2, y - 2, 5, 2, P.fels); r(c, x - 2, y - 2, 5, 1, P.fels2);
+  r(c, x - 1, y - 4, 3, 2, ton(P.fels, -0.1)); p(c, x - 1, y - 4, P.fels2);
+  r(c, x, y - 6, 2, 2, P.fels); p(c, x, y - 6, P.fels2);
+  if (winter) { r(c, x, y - 7, 2, 1, '#ffffff'); p(c, x - 1, y - 4, '#ffffff'); }
+}
+/** Ein Vogelhäuschen auf einem Pfahl (die Vögel daran picken je Bild, siehe vogelhausVoegel). */
+function vogelhaus(x, y, winter) {
+  schattenOval(x, y + 1, 5);
+  r(c, x, y - 8, 1, 9, '#5a3a22');
+  r(c, x - 3, y - 11, 7, 3, '#a8763e'); r(c, x - 2, y - 10, 5, 1, '#5a3a22');   // Häuschen mit Futteröffnung
+  r(c, x - 4, y - 12, 9, 1, '#8a3a2a'); r(c, x - 3, y - 13, 7, 1, '#a8483a'); r(c, x - 1, y - 14, 3, 1, '#a8483a');   // Dach
+  if (winter) { r(c, x - 3, y - 14, 7, 1, '#ffffff'); p(c, x, y - 15, '#ffffff'); }
+  p(c, x - 1, y - 9, '#e8d070'); p(c, x + 1, y - 9, '#d8b858');   // Körner
+}
+/** Eine Holzbank (am Weiher). */
+function bank(x, y, winter) {
+  schattenOval(x, y + 1, 10);
+  r(c, x - 4, y - 3, 9, 1, '#a8763e'); r(c, x - 4, y - 2, 9, 1, '#7a4e28');   // Sitz
+  r(c, x - 4, y - 6, 9, 1, '#a8763e'); r(c, x - 4, y - 5, 1, 2, '#7a4e28'); r(c, x + 4, y - 5, 1, 2, '#7a4e28');   // Lehne
+  p(c, x - 3, y - 1, '#5a3a22'); p(c, x - 3, y, '#5a3a22'); p(c, x + 3, y - 1, '#5a3a22'); p(c, x + 3, y, '#5a3a22');
+  if (winter) { r(c, x - 4, y - 4, 9, 1, '#ffffff'); r(c, x - 4, y - 7, 9, 1, '#ffffff'); }
 }
 function schneemannKlein(x, y) {
   r(c, x - 1, y - 2, 3, 2, '#ffffff'); p(c, x, y - 3, '#ffffff'); p(c, x, y - 4, '#2a2a30'); p(c, x + 1, y - 3, '#e87a2a');
@@ -1079,12 +1173,11 @@ function zeichne(t, dt) {
   const cb = ort('baeume'), cy = yPx(cb);
   if (S.ortOffen(cb)) for (let i = 0; i < 5; i++) if ((Math.floor(t * 2) + i) % 2) p(c, cb.x + 9 + i * 2, cy - 11, ['#ff5a5a', '#ffe060', '#5ad0ff'][i % 3]);
 
-  // Vögel ziehen vorbei (nur ohne Schnee, tagsüber)
+  // Vögel (06.11., vorher drei Pixel, nur im Herbst): tagsüber ab und zu ein kleiner Schwarm, am
+  // Vogelhäuschen picken zwei - im Winter Krähen und Rotkehlchen, sonst Spatzen und Meisen
   const li = Z.licht();
-  if (!winter && li.hell > 0.5) {
-    const vx = ((t * 9) % 260) - 40, vy = 0.3 * H + Math.sin(t * 0.4) * 6;
-    for (let i = 0; i < 3; i++) { const xx = vx - i * 5, yy = vy + i * 2 + ((Math.floor(t * 5) + i) % 2); p(c, xx, yy, '#2a3a2a'); p(c, xx - 1, yy - 1, '#2a3a2a'); p(c, xx + 1, yy - 1, '#2a3a2a'); }
-  }
+  vogelSchwarm(t, dt, li, winter);
+  vogelhausVoegel(t, li, winter);
 
   if (santa) zeichneSanta(t, dt, winter);
 
@@ -1161,7 +1254,73 @@ function zeichne(t, dt) {
     }
   }
   specialGlitzer(t, zu);
+  eulenFlug(t, dt, li);   // nach dem Abdunkeln - sonst sähe man sie nachts nicht
   c.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Vögel (06.11.)
+// ---------------------------------------------------------------------------
+let schwarm = null, schwarmAb = 6, eule = null, euleAb = 20, futterplatz = null;
+/** Ein Vogel im Flug, 5 Pixel breit: Flügel oben (V) oder unten (^). */
+function flieger(x, y, oben, f) {
+  p(c, x, y, f); p(c, x - 1, y, f); p(c, x + 1, y, f);
+  p(c, x - 2, y + (oben ? -1 : 1), f); p(c, x + 2, y + (oben ? -1 : 1), f);
+}
+function vogelSchwarm(t, dt, li, winter) {
+  if (li.hell < 0.35) { schwarm = null; return; }
+  if (!schwarm) {
+    schwarmAb -= dt;
+    if (schwarmAb > 0) return;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    schwarm = { x: dir > 0 ? -12 : C.B + 12, y: H * (0.16 + Math.random() * 0.45), dir, n: 2 + Math.floor(Math.random() * 3), ph: Math.random() * 6, v: 20 + Math.random() * 10 };
+    schwarmAb = 20 + Math.random() * 20;
+  }
+  const s = schwarm;
+  s.x += s.dir * s.v * dt;
+  if (s.x < -30 || s.x > C.B + 30) { schwarm = null; return; }
+  const f = winter ? '#26262c' : '#3a3428';
+  for (let i = 0; i < s.n; i++) {
+    const reihe = Math.ceil(i / 2), seite = i % 2 ? 1 : -1;
+    const bx = Math.round(s.x - s.dir * reihe * 6), by = Math.round(s.y + seite * reihe * 3 + Math.sin(t * 2 + i + s.ph) * 1.2);
+    flieger(bx, by, Math.floor(t * 7 + i * 1.7) % 2 === 0, f);
+  }
+}
+/** Zwei Vögel am Vogelhäuschen: picken (Kopf runter), ab und zu hüpft einer; zieht ein Schwarm vorbei, fliegen sie kurz auf. */
+function vogelhausVoegel(t, li, winter) {
+  const fp = futterplatz;
+  if (!fp || li.hell < 0.3) return;
+  const auf = schwarm && Math.abs(schwarm.x - fp.x) < 22;
+  const koerper = winter ? '#8a6a48' : '#e8c840', kopf = winter ? '#7a5a3a' : '#3a6ab8', brust = winter ? '#d8583a' : '#f0e070';
+  [[-5, 0.0], [4, 1.9]].forEach(([dx, ph], i) => {
+    const hops = Math.floor(t / 4 + ph) % 3 === 0 ? Math.abs(Math.sin(t * 6 + ph)) * 2 : 0;
+    const x = fp.x + dx + (i ? -1 : 1) * Math.round(Math.sin(t * 0.3 + ph)), y = fp.y + 1 - Math.round(hops) - (auf ? 7 + i * 2 : 0);
+    if (auf) { flieger(x, y, Math.floor(t * 9 + i) % 2 === 0, koerper); return; }
+    const pickt = Math.floor(t * 1.6 + ph) % 2 === 0;
+    const blick = i ? -1 : 1;
+    r(c, x - 1, y - 2, 3, 2, koerper); p(c, x - 1 * blick, y - 1, brust);
+    p(c, x + blick * 2, y - (pickt ? 1 : 3), kopf); if (!pickt) p(c, x + blick * 2, y - 2, kopf);
+    p(c, x - blick * 2, y - 2, ton(koerper, -0.25));   // Schwanz
+  });
+}
+/** Nachts zieht ab und zu eine Eule langsam vorbei, mit leuchtenden Augen. */
+function eulenFlug(t, dt, li) {
+  if (li.hell > 0.3) { eule = null; return; }
+  if (!eule) {
+    euleAb -= dt;
+    if (euleAb > 0) return;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    eule = { x: dir > 0 ? -10 : C.B + 10, y: H * (0.2 + Math.random() * 0.4), dir };
+    euleAb = 40 + Math.random() * 40;
+  }
+  eule.x += eule.dir * 14 * dt;
+  if (eule.x < -20 || eule.x > C.B + 20) { eule = null; return; }
+  const x = Math.round(eule.x), y = Math.round(eule.y + Math.sin(t * 1.5) * 2), oben = Math.floor(t * 3) % 2 === 0;
+  const f = '#5a4a3e', f2 = '#7a6450';
+  r(c, x - 1, y - 1, 3, 3, f2); p(c, x, y + 1, f);
+  r(c, x - 4, y + (oben ? -1 : 0), 3, 1, f); r(c, x + 2, y + (oben ? -1 : 0), 3, 1, f);
+  p(c, x - 4, y + (oben ? -2 : 1), f); p(c, x + 4, y + (oben ? -2 : 1), f);
+  if (Math.floor(t * 0.7) % 5) { p(c, x - 1, y - 1, '#ffd860'); p(c, x + 1, y - 1, '#ffd860'); }
 }
 
 /**
