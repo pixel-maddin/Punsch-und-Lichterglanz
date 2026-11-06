@@ -181,6 +181,8 @@ Sie wachsen von selbst in 6 Tagen, wer jeden Tag gießt, braucht 3, mit Gießen 
 Düngen 2. Gießen und Düngen gehen ab dem Tag nach dem Pflanzen, nichts verdorrt.
 Fertige Bäume erntet man - im Christbaumverkauf stehen sie dann golden im Feld
 und bringen ×3 Punkte. Manchmal versteckt sich ein Eichhörnchen in einem Baum.
+Christbaumverkauf und Baumschule haben bis zum 26. Dezember offen - ab Heiligabend
+steht auf ihren Schildern, wie lange noch; danach braucht keiner mehr einen Baum.
 
 **Schlittenberg (Minispiel):** Im Wok den Berg hinunter! Daumen aufs Bild
 legen und seitlich ziehen - der Wok folgt. Tannen, Steinen, Schneemännern und
