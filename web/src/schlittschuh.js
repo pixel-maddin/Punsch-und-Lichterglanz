@@ -10,12 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202611061700';
-import * as Z from './zeit.js?v=202611061700';
-import * as T from './ton.js?v=202611061700';
-import * as MH from './minihud.js?v=202611061700';
-import * as L from './licht.js?v=202611061700';
-import { r, p, ton, mische } from './pixel.js?v=202611061700';
+import * as C from './config.js?v=202611071000';
+import * as Z from './zeit.js?v=202611071000';
+import * as T from './ton.js?v=202611071000';
+import * as MH from './minihud.js?v=202611071000';
+import * as L from './licht.js?v=202611071000';
+import { r, p, ton, mische } from './pixel.js?v=202611071000';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -120,6 +120,7 @@ function takt(jetzt) {
   if (!spiel) return;
   const dt = Math.min(0.05, (jetzt - letzte) / 1000);
   letzte = jetzt;
+  if (MH.pausiert()) { rafId = requestAnimationFrame(takt); return; }   // Pause (07.11.): nichts rechnen, Bild bleibt stehen
   schritt(dt);
   if (!spiel) return;
   zeichne(jetzt / 1000);
@@ -387,15 +388,10 @@ function eis(g, nacht) {
     const y = boden + 4 + Math.floor(hash(n + 5) * (H - boden - 8));
     r(c, x, y, 6 + Math.floor(hash(n + 7) * 10), 1, nacht ? '#6a7cb0' : '#e6f2fa');
   }
-  // 11.10. mehr Detail: Spiegelung der Lichterkette, geschwungene Kufenspuren,
-  // Glitzerpunkte - und im Vordergrund ein Schneewall mit Laternen, der
-  // schneller vorbeizieht als die Bahn (Tiefe)
+  // 11.10. mehr Detail: geschwungene Kufenspuren, Glitzerpunkte - und im Vordergrund ein Schneewall mit
+  // Laternen, der schneller vorbeizieht als die Bahn (Tiefe). Die bunte Spiegelung der Lichterkette direkt
+  // unter der Eiskante ist seit 07.11. weg (Nutzer: „irritiert nur“ - sie sah aus wie Sterne auf dem Eis).
   const t = performance.now() / 1000;
-  for (let x = -6; x < W + 6; x += 6) {
-    const xx = Math.round(x - (g.x * 0.7) % 6), k = Math.floor((x + g.x * 0.7) / 6);
-    const f = ['#ff8a8a', '#fff0a0', '#9ae0ff', '#a8f0a8'][((k % 4) + 4) % 4];
-    if ((Math.floor(t * 2) + k) % 3) { p(c, xx, boden + 3 + (k % 2), f); if (nacht) p(c, xx, boden + 5 + (k % 2), ton(f, -0.3)); }
-  }
   for (let i = 0; i < 6; i++) {
     const n = Math.floor(g.x / 70) + i - 1, x0 = Math.round(n * 70 - g.x + hash(n + 11) * 30);
     const y0 = boden + 10 + Math.floor(hash(n + 12) * (H - boden - 24)), lang = 22 + Math.floor(hash(n + 13) * 20);
@@ -502,12 +498,17 @@ function ding(d, g, t) {
     r(c, x - 15, sb - 9, 1, 9, '#5a3a22'); r(c, x - 18, sb - 13, 7, 5, '#e8c030'); p(c, x - 15, sb - 12, '#c83a32'); p(c, x - 15, sb - 10, '#c83a32');
   } else if (d.art === 'stern' && !d.weg) {
     const yy = boden - Math.round(d.hoehe) + Math.round(Math.sin(t * 4 + d.x) * 1.5), f = Math.floor(t * 6 + d.x) % 3 ? '#ffe060' : '#fff6c8';
-    if (d.gross) {
-      c.fillStyle = 'rgba(255,220,100,0.25)'; c.fillRect(x - 6, yy - 6, 13, 13);
-      r(c, x - 2, yy - 2, 5, 5, f); r(c, x - 1, yy - 5, 3, 3, f); r(c, x - 1, yy + 3, 3, 3, f); r(c, x - 5, yy - 1, 3, 3, f); r(c, x + 3, yy - 1, 3, 3, f); p(c, x - 1, yy - 1, '#ffffff');
-    } else {
-      r(c, x - 1, yy - 1, 3, 3, f); p(c, x, yy - 3, f); p(c, x, yy + 3, f); p(c, x - 3, yy, f); p(c, x + 3, yy, f);
-    }
+    // 07.11. (gemeldet: „am Tag sieht man die Sterne nicht so gut“): erst ein weicher Schatten nach unten
+    // rechts, dann eine dunkle Kontur rundherum, darüber der Stern - so steht er auch vor hellem Himmel
+    const form = (dx, dy, farbe) => {
+      if (d.gross) { r(c, x - 2 + dx, yy - 2 + dy, 5, 5, farbe); r(c, x - 1 + dx, yy - 5 + dy, 3, 3, farbe); r(c, x - 1 + dx, yy + 3 + dy, 3, 3, farbe); r(c, x - 5 + dx, yy - 1 + dy, 3, 3, farbe); r(c, x + 3 + dx, yy - 1 + dy, 3, 3, farbe); }
+      else { r(c, x - 1 + dx, yy - 1 + dy, 3, 3, farbe); p(c, x + dx, yy - 3 + dy, farbe); p(c, x + dx, yy + 3 + dy, farbe); p(c, x - 3 + dx, yy + dy, farbe); p(c, x + 3 + dx, yy + dy, farbe); }
+    };
+    if (d.gross) { c.fillStyle = 'rgba(255,220,100,0.25)'; c.fillRect(x - 6, yy - 6, 13, 13); }
+    form(2, 2, 'rgba(40,50,80,0.3)');
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) form(dx, dy, '#a8641a');
+    form(0, 0, f);
+    p(c, x - (d.gross ? 1 : 0), yy - 1, '#ffffff');
   }
 }
 

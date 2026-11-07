@@ -11,8 +11,9 @@
  * Fläche umgerechnet, damit sie bei jeder Bildschirmgröße sitzen.
  * Solange kein Minispiel offen ist (z. B. im Messweg), tut alles nichts.
  */
-import { zeichneSymbol } from './symbole.js?v=202611061700';
-import { schriftBild, stilFuer } from './schrift.js?v=202611061700';
+import { zeichneSymbol } from './symbole.js?v=202611071000';
+import * as T from './ton.js?v=202611071000';
+import { schriftBild, stilFuer } from './schrift.js?v=202611071000';
 
 /**
  * Text in der Weihnachtsschrift (schrift.js) in ein Element setzen. Ein
@@ -40,6 +41,7 @@ let letzterKopf = '';
 /** Beim Start eines Minispiels: Ebene aufbauen (einmal) und leeren. */
 export function an(breite, hoehe) {
   W = breite; H = hoehe; aktiv = true; letzterKopf = '';
+  setzePause(false);
   const ms = $('#minispiel');
   if (!box) {
     box = document.createElement('div'); box.id = 'miniHud';
@@ -59,7 +61,20 @@ export function an(breite, hoehe) {
   mitte(null); hinweis(null);
   box.classList.remove('versteckt');
 }
-export function aus() { aktiv = false; if (box) box.classList.add('versteckt'); }
+export function aus() { aktiv = false; setzePause(false); if (box) box.classList.add('versteckt'); }
+
+// Pause (07.11., Nutzerwunsch): Jedes Minispiel fragt in seiner Bildschleife MH.pausiert() und rechnet dann
+// nicht weiter - Zeit, Tiere und Kunden stehen. Das Pausenfeld liegt über dem Bild und fängt alle Tipps ab.
+let pause = false;
+export const pausiert = () => pause;
+export function setzePause(an) {
+  const neu = !!an && aktiv;
+  if (neu === pause) return;
+  pause = neu;
+  const feld = $('#miniPauseFeld');
+  if (feld) feld.classList.toggle('versteckt', !pause);
+  T.musikPause(pause);
+}
 
 const px = (x) => `${(x / W * 100).toFixed(2)}%`;
 const py = (y) => `${(y / H * 100).toFixed(2)}%`;

@@ -24,12 +24,12 @@
  * Drehung, das Auto federt ein, ein Gurt schnappt zu.
  * Dazu eigene Bäume aus der Baumschule (`eigen`): golden markiert, ×3 Punkte.
  */
-import * as C from './config.js?v=202611061700';
-import * as Z from './zeit.js?v=202611061700';
-import * as T from './ton.js?v=202611061700';
-import * as MH from './minihud.js?v=202611061700';
-import * as L from './licht.js?v=202611061700';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202611061700';
+import * as C from './config.js?v=202611071000';
+import * as Z from './zeit.js?v=202611071000';
+import * as T from './ton.js?v=202611071000';
+import * as MH from './minihud.js?v=202611071000';
+import * as L from './licht.js?v=202611071000';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202611071000';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -201,6 +201,7 @@ function takt(jetzt) {
   if (!spiel) return;
   const dt = Math.min(0.05, (jetzt - letzte) / 1000);
   letzte = jetzt;
+  if (MH.pausiert()) { rafId = requestAnimationFrame(takt); return; }   // Pause (07.11.): nichts rechnen, Bild bleibt stehen
   schritt(dt);
   if (!spiel) return;
   zeichne(jetzt / 1000);

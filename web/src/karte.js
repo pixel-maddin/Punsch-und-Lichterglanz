@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202611061700';
-import * as S from './spiel.js?v=202611061700';
-import * as Z from './zeit.js?v=202611061700';
-import * as FEIN from './fein.js?v=202611061700';
-import * as T from './ton.js?v=202611061700';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611061700';
+import * as C from './config.js?v=202611071000';
+import * as S from './spiel.js?v=202611071000';
+import * as Z from './zeit.js?v=202611071000';
+import * as FEIN from './fein.js?v=202611071000';
+import * as T from './ton.js?v=202611071000';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611071000';
 
 const $ = (s) => document.querySelector(s);
 
@@ -165,8 +165,10 @@ function baueSchilder(hervor) {
     }
     // Winterpause (29.10.): Minispiele, Markt, Wichtelwald und Baumschule tragen „Winterpause“ und sagen kurz Bescheid
     if (S.ortPause(o)) {
-      const abend = S.heiligabendZu(), nachWeih = !abend && !S.winterpause() && S.baumZu();   // 06.11.: Bäume nach dem 26.12.
-      const zu = () => { T.spiele('klick'); S.hooks.toast(abend ? `Heute ist Heiligabend - ${o.name} hat zu. Morgen ist wieder alles offen!` : nachWeih ? `${o.name} hat nach Weihnachten zu - im nächsten Advent wieder offen!` : `${o.name}: Pause - im nächsten Advent wieder offen!`, 'hinweis'); };
+      // Außer Heiligabend und Winterpause haben nach Weihnachten zu: Christbaumverkauf und Baumschule (06.11.),
+      // der Festplatz (07.11., kein Markt mehr)
+      const abend = S.heiligabendZu() && !o.markt, nachWeih = !abend && !S.winterpause();   // der Markt kommt auch nach Heiligabend nicht wieder
+      const zu = () => { T.spiele('klick'); S.hooks.toast(abend ? `Heute ist Heiligabend - ${o.name} hat zu. Morgen ist wieder alles offen!` : nachWeih && o.markt ? 'Der Weihnachtsmarkt ist für dieses Jahr vorbei - im nächsten Advent wieder!' : nachWeih ? `${o.name} hat nach Weihnachten zu - im nächsten Advent wieder offen!` : `${o.name}: Pause - im nächsten Advent wieder offen!`, 'hinweis'); };
       const b = document.createElement('button');
       b.className = 'ort pause';
       const [sdx, sdy] = o.schild || [0, 0];

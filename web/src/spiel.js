@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611061700';
-import * as Z from './zeit.js?v=202611061700';
-import { neueFarben } from './pixel.js?v=202611061700';
+import * as C from './config.js?v=202611071000';
+import * as Z from './zeit.js?v=202611071000';
+import { neueFarben } from './pixel.js?v=202611071000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2310,7 +2310,10 @@ export const heiligabendZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) === 24
 export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);
 /** Hat dieser Ort der Karte gerade zu? Pause: alles außer PAUSE_ORTE. Heiligabend ab 16 Uhr: alles außer Zuhause (29.10.). */
 export const ortPause = (o) => (winterpause() && !C.PAUSE_ORTE.includes(o.id)) || (heiligabendZu() && o.id !== 'haus')
-  || (baumZu() && C.BAUM_ORTE.includes(o.id));
+  || (baumZu() && C.BAUM_ORTE.includes(o.id))
+  || (o.id === 'festplatz' && marktVorbei());   // 07.11.: ab Heiligabend kommt kein Markt mehr - ausgegraut
+/** Für dieses Jahr kein Weihnachtsmarkt mehr (ab dem 24.12., siehe istMarkt). */
+export const marktVorbei = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) >= 24;
 /** Christbaumverkauf und Baumschule haben zu: nach dem 26.12. (06.11.). */
 export const baumZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) > C.BAUM_LETZTER_TAG;
 /** Ab Heiligabend: wie viele Tage Christbaumverkauf und Baumschule noch offen haben (24.12. → 3, 26.12. → 1), sonst null. */

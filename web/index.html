@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-  <link rel="stylesheet" href="styles.css?v=202611061700">
+  <link rel="stylesheet" href="styles.css?v=202611071000">
 </head>
 <body>
   <div id="buehne">
@@ -48,7 +48,9 @@
       <!-- Minispiele (lichtung.js): eigenes Vollbild über allem -->
       <section id="minispiel" class="versteckt">
         <canvas id="miniCv" width="180" height="320"></canvas>
+        <button id="miniPause" aria-label="Minispiel anhalten"><i></i><i></i></button>
         <button id="miniZu" aria-label="Minispiel beenden">✕</button>
+        <div id="miniPauseFeld" class="versteckt"><b>Pause</b><button id="miniWeiter">Weiter ▸</button></div>
       </section>
 
       <!-- „Haus ansehen“ (ansicht.js): das Haus als Vollbild-Moment, Tageszeit wählbar -->
@@ -87,6 +89,6 @@
     </div>
     <div id="quer"><div>📱<br><b>Bitte hochkant halten</b><br><small>Das Spiel ist fürs Hochformat gemacht.</small></div></div>
   </div>
-  <script type="module" src="src/main.js?v=202611061700"></script>
+  <script type="module" src="src/main.js?v=202611071000"></script>
 </body>
 </html>
