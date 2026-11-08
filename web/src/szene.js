@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611071000';
-import * as Z from './zeit.js?v=202611071000';
-import * as S from './spiel.js?v=202611071000';
-import { FASSADEN } from './config.js?v=202611071000';
-import * as C from './config.js?v=202611071000';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611081000';
+import * as Z from './zeit.js?v=202611081000';
+import * as S from './spiel.js?v=202611081000';
+import { FASSADEN } from './config.js?v=202611081000';
+import * as C from './config.js?v=202611081000';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -624,7 +624,6 @@ function haus(c, G, w, t, L) {
   if (S.zeigt('l_eich')) dachEichhorn(c, 41, wandO - 10, t);
   if (S.zeigt('g_fahne')) siegerfahne(c, 34, wandO + 2, t);   // linke Hausecke an der Traufe
   if (w.schnee > 0) schneekatze(c, KATZE_X, wandO + KATZE_DY, S.schneekatzeStufe(), S.schneekatzeBereit(), t);
-  if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershow(c, L, wandO, wandU, t);
 }
 
 /**
@@ -1117,39 +1116,32 @@ function nikolausDach(c, x, y, t) {
   r(c, x - 7, y - 4, 4, 5, '#8a6a3a');
 }
 
-function lichtershow(c, L, wo, wu, t) {
-  // Schneeflocken wandern über die Fassade wie aus einem Lichtprojektor. 07.11. (gemeldet: „sehe sie gar
-  // nicht so richtig“): 14 statt 9, größer (Stern mit Spitzen), heller, in wechselnden Farben
-  const FARBE = ['#ffffff', '#bfe4ff', '#e0c8ff'];
-  for (let i = 0; i < 14; i++) {
-    const x = Math.round(HX0 + 4 + ((i * 13 + t * 6) % 76)), y = Math.round(wo + 4 + ((i * 7 + t * 4) % (wu - wo - 8)));
-    const f = FARBE[(i + Math.floor(t / 3)) % FARBE.length];
-    p(c, x, y, f); p(c, x - 1, y, f); p(c, x + 1, y, f); p(c, x, y - 1, f); p(c, x, y + 1, f);
-    if (i % 2 === 0) { p(c, x - 2, y, f); p(c, x + 2, y, f); p(c, x, y - 2, f); p(c, x, y + 2, f); p(c, x - 1, y - 1, f); p(c, x + 1, y + 1, f); p(c, x + 1, y - 1, f); p(c, x - 1, y + 1, f); }
-    L.push({ x, y, f, halo: i % 2 ? 4 : 6, an: 0.85 });
-  }
-}
 /**
- * Die Lichtershow am Himmel (07.11., Nutzer: „ich habe sie irgendwie am Himmel erwartet“): drei farbige
- * Scheinwerfer hinter dem Haus schwenken langsam durch den Nachthimmel. Gemalt direkt nach dem Himmel,
- * also hinter Haus, Bäumen und Stand.
+ * Die Große Lichtershow (08.11., Nutzerwunsch - erst Scheinwerfer am Himmel, „das ist doch zu viel“):
+ * winzige, funkelnde Schneeflocken und Lichtpunkte, die über Himmel und Fassade schweben, langsam
+ * aufsteigen und dabei sanft hin und her treiben. Tag UND Nacht (nachts mit einem kleinen Schein).
+ * Gemalt ganz oben auf dem fertigen Bild, damit sie vor dem Haus in der Luft liegen. Dazu wechseln alle
+ * Lichterketten ihre Farben (`show` in kette()).
  */
-function lichtershowHimmel(c, GW, w, t) {
-  const st = Math.min(1, (w.dunkel - 0.3) / 0.4);   // blendet in der Dämmerung ein
-  const STRAHL = [[54, '255,120,200', 0], [90, '120,230,255', 2.1], [126, '255,210,110', 4.2]];
-  c.save();
-  c.globalCompositeOperation = 'lighter';
-  for (const [x0, rgb, ph] of STRAHL) {
-    const y0 = GW - 70, a = Math.sin(t * 0.35 + ph) * 0.55, len = 150;
-    const xs = x0 + Math.sin(a) * len, ys = y0 - Math.cos(a) * len, breit = 14;
-    const nx = Math.cos(a) * breit, ny = Math.sin(a) * breit;
-    const g = c.createLinearGradient(x0, y0, xs, ys);
-    g.addColorStop(0, `rgba(${rgb},${(0.34 * st).toFixed(3)})`);
-    g.addColorStop(1, `rgba(${rgb},0)`);
-    c.fillStyle = g;
-    c.beginPath(); c.moveTo(x0 - 1, y0); c.lineTo(x0 + 1, y0); c.lineTo(xs + nx, ys + ny); c.lineTo(xs - nx, ys - ny); c.closePath(); c.fill();
+const FUNKEL_FARBEN = ['#ffffff', '#fff2b0', '#cfe8ff', '#ffd0ec'];
+function lichtershowFunkeln(c, GW, w, t) {
+  const oben = 6, unten = GW - 22, hoehe = unten - oben, nacht = w.dunkel;
+  for (let i = 0; i < 70; i++) {
+    const h1 = Z.hash(i * 7.3 + 3.1), h2 = Z.hash(i * 13.7 + 5.9), h3 = Z.hash(i * 31.7 + 2.3);
+    const v = 2.5 + h2 * 3;                                    // Steigen in Pixeln je Sekunde
+    const y = Math.round(unten - ((h1 * hoehe + t * v) % hoehe));
+    const x = Math.round(12 + h3 * 156 + Math.sin(t * (0.4 + h1 * 0.5) + i) * 5);
+    const funkel = Math.sin(t * (2 + h2 * 3) + i * 1.7);       // -1..1: wann es aufblitzt
+    if (funkel < -0.55) continue;                              // kurz aus - das macht das Funkeln
+    const f = FUNKEL_FARBEN[i % FUNKEL_FARBEN.length];
+    if (nacht > 0.3) {                                         // nachts ein feines Leuchten (Kreuz, kein Kästchen)
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.28 * nacht; c.fillStyle = f;
+      c.fillRect(x - 1, y, 3, 1); c.fillRect(x, y - 1, 1, 3); c.restore();
+    }
+    p(c, x, y, f);
+    if (funkel > 0.7) { p(c, x - 1, y, f); p(c, x + 1, y, f); p(c, x, y - 1, f); p(c, x, y + 1, f); }   // Aufblitzen als kleines Kreuz
+    else if (i % 3 === 0) p(c, x + 1, y, ton(f, -0.15));
   }
-  c.restore();
 }
 
 // ---------------------------------------------------------------------------
@@ -2832,7 +2824,6 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   himmel(c, G, w, t);
   if (S.zeigt('h_polar') && w.dunkel > 0.25) polarlicht(c, G, w, t);
   if (S.zeigt('e_schnuppen') && w.dunkel > 0.3) sternschnuppen(c, G, t);
-  if (S.zeigt('lichtershow') && w.dunkel > 0.3) lichtershowHimmel(c, G - STRASSE, w, t);   // 07.11.: Scheinwerfer am Himmel
 
   const e = ebeneFuer(c.canvas.width, c.canvas.height);
   // Haus und Straße stehen ein Stück über der Tresenkante; darunter
@@ -2950,6 +2941,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   c.drawImage(ebene, 0, 0, 180, G, 0, 0, 180, G);
   if (S.zeigt('kal_goldstern')) goldstern(c, L, t, GW);
   lichter(c, L, Math.max(w.dunkel, 0.0));
+  if (S.zeigt('lichtershow')) lichtershowFunkeln(c, GW, w, t);   // 08.11.: funkelnde Partikel in der Luft, auch tagsüber
   if (!opts.karte) zeichneGeist(c, GW);   // ausgeschaltetes Teil blendet aus (vor Wetter und Funkeln)
   const fw = opts.karte ? 0 : S.feuerwerk(d);
   if (!opts.karte && (fw > 0 || fwRaketen.length || fwFunken.length)) feuerwerk(c, GW, fw, dt);

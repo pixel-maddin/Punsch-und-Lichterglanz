@@ -447,7 +447,7 @@ export const ARTIKEL = [
   { id: 'schornstein',    tab: 'markt', gruppe: 'Am Haus', name: 'Schornstein-Schmuck',  kosten: [50000, 180000], stimmung: 6, text: 'Stufe 1: Tannengrün mit Schleife um den Schornstein. Stufe 2: Lichter dazu.' },
   { id: 'eiszapfen',      tab: 'markt', gruppe: 'Am Haus', name: 'Eiszapfen-Lichter',    kosten: 86000,  stimmung: 10, text: 'Funkeln wie echte Eiszapfen.' },
   { id: 'dach_nikolaus',  tab: 'markt', gruppe: 'Am Haus', name: 'Nikolaus auf dem Dach',kosten: 750000, stimmung: 26, text: 'Er winkt vom Schornstein.' },
-  { id: 'lichtershow',    tab: 'markt', gruppe: 'Am Haus', name: 'Große Lichtershow',    kosten: 1450000, stimmung: 40, luxus: true, text: 'Abends schwenken Scheinwerfer über den Himmel, Schneeflocken tanzen über die Fassade, und alle Lichterketten wechseln ihre Farben.' },
+  { id: 'lichtershow',    tab: 'markt', gruppe: 'Am Haus', name: 'Große Lichtershow',    kosten: 1450000, stimmung: 40, luxus: true, text: 'Funkelnde Schneeflocken schweben über Haus und Himmel, und alle Lichterketten wechseln ihre Farben.' },
   // Das Teuerste im Spiel: das ganze Dach in warmweißen Lichtern - wie bei „Schöne Bescherung"
   { id: 'festbeleuchtung', tab: 'markt', gruppe: 'Am Haus', name: 'Festbeleuchtung',    kosten: 1900000, stimmung: 45, luxus: true, text: 'Das GANZE Dach voller warmweißer Lichter, dicht an dicht. Man sieht es bis ins Nachbardorf.', braucht: 'lichter_dach' },
   // --- Weihnachtsmarkt: Garten ---
