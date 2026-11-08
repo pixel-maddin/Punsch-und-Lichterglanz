@@ -13,12 +13,12 @@
  * Aufbau wie lichtung.js: eigenes Canvas #miniCv, 180 Pixel breit, Kopfzeile
  * und Texte über minihud.js, Licht über licht.js.
  */
-import * as C from './config.js?v=202611081000';
-import * as Z from './zeit.js?v=202611081000';
-import * as T from './ton.js?v=202611081000';
-import * as MH from './minihud.js?v=202611081000';
-import * as L from './licht.js?v=202611081000';
-import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202611081000';
+import * as C from './config.js?v=202611081100';
+import * as Z from './zeit.js?v=202611081100';
+import * as T from './ton.js?v=202611081100';
+import * as MH from './minihud.js?v=202611081100';
+import * as L from './licht.js?v=202611081100';
+import { r, p, ton, figurGross, wichtelGross } from './pixel.js?v=202611081100';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -316,8 +316,16 @@ function baueKulisse(stufeLicht) {
   const k = kulisse.getContext('2d');
   const himmel = stufeLicht === 2 ? ['#8fb8d8', '#a8c8e4', '#c4dcee'] : stufeLicht === 1 ? ['#40407e', '#8a6a90', '#e8a07a'] : ['#141c44', '#1e2a58', '#2e3c70'];
   const hz = Math.round(H * 0.24);
-  for (let y = 0; y < hz; y++) r(k, 0, y, W, 1, himmel[Math.min(2, Math.floor(y / hz * 3))]);
+  // 08.11. (Betatest „mehr Detail“, Optik wie die anderen Minispiele): Himmel als weicher Verlauf statt drei
+  // harter Bänder, Wolken am Tag, Zaun am Wiesenrand, Schneemann, Schlitten und Fußspuren
+  const hex = (s) => [1, 3, 5].map((i) => parseInt(s.slice(i, i + 2), 16));
+  const mix = (a, b, f) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * f)).join(',')})`; };
+  for (let y = 0; y < hz; y++) { const f = y / hz * 2; r(k, 0, y, W, 1, f < 1 ? mix(himmel[0], himmel[1], f) : mix(himmel[1], himmel[2], f - 1)); }
   if (stufeLicht === 0) for (let i = 0; i < 24; i++) p(k, Math.floor(hash(i * 7) * W), Math.floor(hash(i * 11) * hz * 0.8), '#ffffff');
+  if (stufeLicht === 2) for (const [wx, wy, ww] of [[18, 0.07, 24], [104, 0.04, 32], [150, 0.13, 18]]) {
+    const yy = Math.round(H * wy);
+    for (let i = 0; i < ww; i++) { const hh = Math.round(Math.sin(i / ww * Math.PI) * 3); r(k, wx + i, yy - hh, 1, hh + 2, i < ww / 2 ? '#f4f8fc' : '#e2ecf6'); }
+  }
   // Ferne Hügel und eine Tannenreihe
   for (let x = 0; x < W; x++) { const h = 8 + Math.round(Math.sin(x / 21) * 3 + Math.sin(x / 7.7) * 1.5); r(k, x, hz - h, 1, h, '#c8d4e2'); }
   for (let x = -4; x < W + 4; x += 6) {
@@ -328,11 +336,38 @@ function baueKulisse(stufeLicht) {
   // Schneewiese: sanfte Wellen, nach vorn heller
   for (let y = hz; y < H; y++) {
     const a = (y - hz) / (H - hz);
-    r(k, 0, y, W, 1, a < 0.25 ? '#dce6f0' : a < 0.6 ? '#e6eef6' : '#eef4f9');
+    r(k, 0, y, W, 1, a < 0.5 ? mix('#d8e2ee', '#e8eff6', a * 2) : mix('#e8eff6', '#f0f5fa', (a - 0.5) * 2));
   }
+  for (let i = 0; i < 90; i++) {   // ein paar Schneewehen wie auf der Lichtung (nur vereinzelt - dichter las es sich als Streifen)
+    const x = Math.floor(hash(i * 5 + 1) * W), y = hz + 12 + Math.floor(hash(i * 9 + 2) * (H - hz - 14));
+    r(k, x, y, 4, 1, '#ffffff'); r(k, x + 1, y - 1, 2, 1, '#ffffff'); p(k, x + 1, y + 1, '#d4dfeb');
+  }
+  // Zaun am Wiesenrand, halb im Schnee
+  for (let x = 2; x < W; x += 7) { r(k, x, hz + 1, 2, 7, '#8a6a4a'); p(k, x, hz, '#ffffff'); p(k, x + 1, hz, '#ffffff'); }
+  r(k, 0, hz + 3, W, 1, '#9a7a54'); r(k, 0, hz + 6, W, 1, '#7a5a3a'); r(k, 0, hz + 7, W, 2, '#e4ecf4');
   for (let i = 0; i < 70; i++) { const x = Math.floor(hash(i * 13) * W), y = hz + 4 + Math.floor(hash(i * 17) * (H - hz - 4)); p(k, x, y, '#cad6e4'); p(k, x + 1, y, '#d6e0ea'); }
   // Spuren vom Herumtollen
   for (let x = 0; x < W; x += 3) { const y = Math.round(H * 0.56 + Math.sin(x / 17) * 6); p(k, x, y, '#c4d0de'); p(k, x + 1, y + 1, '#c4d0de'); }
+  // Schneemann links, Holzschlitten rechts - am Rand, weit weg von den Wällen
+  { const sx = 12, sy = Math.round(H * 0.79);   // zwischen zweiter und dritter Wallreihe
+    r(k, sx - 7, sy, 15, 2, '#c8d4e2');
+    for (const [cy, rad] of [[sy - 5, 6], [sy - 14, 4.5], [sy - 21, 3.5]]) for (let yy = -Math.floor(rad); yy <= rad; yy++) { const w = Math.round(Math.sqrt(rad * rad - yy * yy)); r(k, sx - w, cy + yy, w * 2 + 1, 1, '#ffffff'); p(k, sx + w, cy + yy, '#c4d2e2'); }
+    p(k, sx - 1, sy - 22, '#2a2a3a'); p(k, sx + 1, sy - 22, '#2a2a3a'); r(k, sx + 1, sy - 20, 3, 1, '#e8801a');
+    r(k, sx - 4, sy - 26, 9, 1, '#2a2a3a'); r(k, sx - 3, sy - 30, 7, 4, '#2a2a3a'); r(k, sx - 3, sy - 27, 7, 1, '#c83a3a');
+    r(k, sx - 4, sy - 17, 9, 2, '#3a74c8'); r(k, sx + 3, sy - 15, 2, 4, '#3a74c8');
+    for (const yy of [sy - 13, sy - 10, sy - 7]) p(k, sx, yy, '#2a2a3a');
+    for (let i = 0; i < 6; i++) p(k, sx - 5 - i, sy - 14 - Math.round(i * 0.6), '#6a4428');
+  }
+  { const bx = W - 26, by = Math.round(H * 0.74);
+    r(k, bx - 1, by + 2, 22, 2, '#c8d4e2');
+    r(k, bx, by, 20, 1, '#5a3a22'); p(k, bx - 1, by - 1, '#5a3a22'); p(k, bx - 2, by - 2, '#5a3a22');
+    r(k, bx + 1, by - 3, 18, 2, '#c8784a'); r(k, bx + 1, by - 3, 18, 1, '#e0985a'); r(k, bx + 3, by - 1, 1, 1, '#5a3a22'); r(k, bx + 15, by - 1, 1, 1, '#5a3a22');
+    for (const [dx, dy] of [[5, -5], [8, -5], [11, -5], [6, -7], [9, -7]]) { r(k, bx + dx, by + dy, 3, 2, '#ffffff'); p(k, bx + dx, by + dy + 1, '#c8d4e2'); }   // Ladung Schneebälle
+  }
+  for (let i = 0; i < 12; i++) {   // Fußspuren quer über die Wiese vorn
+    const x = 30 + i * 11, y = Math.round(H * 0.93 - Math.sin(i / 2) * 6 + (i % 2) * 3);
+    r(k, x, y, 2, 1, '#c4d0de'); p(k, x, y + 1, '#d0dae6');
+  }
   // Am Rand zwei Tannen
   for (const [tx, h] of [[6, 46], [W - 6, 52]]) {
     const ty = Math.round(H * 0.38);

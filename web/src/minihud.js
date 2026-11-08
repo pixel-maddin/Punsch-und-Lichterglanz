@@ -11,9 +11,9 @@
  * Fläche umgerechnet, damit sie bei jeder Bildschirmgröße sitzen.
  * Solange kein Minispiel offen ist (z. B. im Messweg), tut alles nichts.
  */
-import { zeichneSymbol } from './symbole.js?v=202611081000';
-import * as T from './ton.js?v=202611081000';
-import { schriftBild, stilFuer } from './schrift.js?v=202611081000';
+import { zeichneSymbol } from './symbole.js?v=202611081100';
+import * as T from './ton.js?v=202611081100';
+import { schriftBild, stilFuer } from './schrift.js?v=202611081100';
 
 /**
  * Text in der Weihnachtsschrift (schrift.js) in ein Element setzen. Ein
@@ -42,6 +42,7 @@ let letzterKopf = '';
 export function an(breite, hoehe) {
   W = breite; H = hoehe; aktiv = true; letzterKopf = '';
   setzePause(false);
+  document.dispatchEvent(new Event('minispiel-an'));   // 08.11.: laufende Einblendung zurückstellen (ui.js)
   const ms = $('#minispiel');
   if (!box) {
     box = document.createElement('div'); box.id = 'miniHud';

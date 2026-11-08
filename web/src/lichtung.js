@@ -11,12 +11,12 @@
  * gröber aus als der Rest, gemeldet 09.10.) Die Tiere sind deshalb echte
  * Sprites mit doppelt so vielen Pixeln, nicht hochgezogene kleine.
  */
-import * as C from './config.js?v=202611081000';
-import * as Z from './zeit.js?v=202611081000';
-import * as T from './ton.js?v=202611081000';
-import * as MH from './minihud.js?v=202611081000';
-import * as L from './licht.js?v=202611081000';
-import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202611081000';
+import * as C from './config.js?v=202611081100';
+import * as Z from './zeit.js?v=202611081100';
+import * as T from './ton.js?v=202611081100';
+import * as MH from './minihud.js?v=202611081100';
+import * as L from './licht.js?v=202611081100';
+import { r, p, ton, text as pixText, textBreite } from './pixel.js?v=202611081100';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -306,6 +306,51 @@ function baueKulisse(winter) {
     kreis(x, y - 4, 5, P.busch); kreis(x - 2, y - 6, 3, ton(P.busch, 0.15));
     if (winter) { r(c, x - 3, y - 9, 6, 1, '#ffffff'); r(c, x - 4, y - 8, 3, 1, '#ffffff'); }
     else { p(c, x + 2, y - 3, '#c83a3a'); p(c, x - 1, y - 2, '#c83a3a'); p(c, x + 3, y - 6, '#c83a3a'); }
+  }
+
+  // 08.11. (Nutzer: „bei den Minispielen mehr ins Detail“): Die Lichtung war zwischen Raufe und Rand leer.
+  // Dazu kommen ein Hochsitz am Waldrand, ein liegender Stamm, junge Tannen, ein Weiher und Tierspuren.
+  const hochsitz = (x, y) => {
+    for (const dx of [-6, 5]) { r(c, x + dx, y - 22, 2, 22, '#6a4428'); p(c, x + dx, y - 22, '#8a5a32'); }
+    for (let i = 0; i < 5; i++) r(c, x - 5, y - 4 - i * 4, 10, 1, '#7a5030');   // Leiter
+    r(c, x - 8, y - 23, 17, 2, '#7a5030');                                       // Boden der Kanzel
+    r(c, x - 7, y - 31, 15, 8, '#8a5a32'); r(c, x - 7, y - 31, 15, 1, '#a8763e'); r(c, x - 4, y - 29, 9, 3, '#2a2020');
+    for (let i = 0; i < 4; i++) r(c, x - 9 + i, y - 32 - i, 19 - i * 2, 1, '#5a3a22');   // Dach
+    if (winter) { r(c, x - 8, y - 33, 17, 1, '#ffffff'); r(c, x - 6, y - 35, 13, 1, '#ffffff'); r(c, x - 8, y - 22, 17, 1, '#ffffff'); }
+  };
+  hochsitz(Math.round(W * 0.76), rand + 10);
+  const stamm = (x, y) => {
+    r(c, x - 13, y + 1, 28, 2, 'rgba(0,0,0,0.1)');
+    r(c, x - 13, y - 5, 26, 6, '#7a5236'); r(c, x - 13, y - 5, 26, 1, '#9a6e4a'); r(c, x - 13, y, 26, 1, '#5a3a24');
+    for (let i = 0; i < 26; i += 5) p(c, x - 12 + i + (i % 2), y - 3, '#5a3a24');
+    r(c, x + 12, y - 5, 3, 6, '#c8a070'); p(c, x + 13, y - 3, '#8a6040');                                   // Schnittfläche
+    r(c, x - 6, y - 8, 1, 3, '#6a4630'); r(c, x - 8, y - 9, 3, 1, '#6a4630');                              // Aststummel
+    if (winter) { r(c, x - 13, y - 6, 26, 1, '#ffffff'); r(c, x - 10, y - 7, 18, 1, '#ffffff'); }
+    else { p(c, x - 2, y - 6, '#4e8a42'); p(c, x - 1, y - 6, '#5e9a52'); p(c, x + 5, y - 6, '#4e8a42'); }
+  };
+  stamm(Math.round(W * 0.27), Math.round(H * 0.67));
+  for (const [fx, fy, k] of [[0.06, 0.82, 1.9], [0.93, 0.6, 1.6], [0.36, 0.4, 1.3], [0.97, 0.9, 2.1]])
+    baum(Math.round(W * fx), Math.round(H * fy), k, P.nadel[1], P.nadel[2], P.nadel[0], winter);
+  // Kleiner Weiher: im Winter zugefroren mit Glanz, sonst Wasser mit Schilf
+  { const wx = Math.round(W * 0.42), wy = Math.round(H * 0.9);   // neben dem Pfad, nicht darauf
+    c.fillStyle = winter ? '#a8c4dc' : '#3a6a8a';
+    for (let y = -4; y <= 4; y++) { const w = Math.round(Math.sqrt(1 - (y / 4.6) ** 2) * 13); c.fillRect(wx - w, wy + y, w * 2 + 1, 1); }
+    c.fillStyle = winter ? '#cfe0ee' : '#5a8aaa';
+    for (let y = -3; y <= 3; y++) { const w = Math.round(Math.sqrt(1 - (y / 3.6) ** 2) * 11); c.fillRect(wx - w, wy + y, w * 2 + 1, 1); }
+    r(c, wx - 6, wy - 1, 5, 1, '#ffffff'); r(c, wx + 2, wy + 1, 3, 1, winter ? '#ffffff' : '#8ab8d8');
+    if (!winter) for (const dx of [-14, -12, 12, 14]) { r(c, dx > 0 ? wx + dx : wx + dx, wy - 6, 1, 5, '#5a7a3a'); r(c, wx + dx, wy - 7, 1, 2, '#7a5a3a'); }
+  }
+  // Spuren im Schnee: Hasen (zwei lange, zwei kurze Abdrücke) und ein Reh (Paare), quer über die freie Fläche
+  if (winter) {
+    const spur = '#b8c8da';
+    for (let i = 0; i < 9; i++) {
+      const x = Math.round(W * 0.08 + i * 9), y = Math.round(H * 0.47 + Math.sin(i * 0.9) * 5 + i * 1.5);
+      r(c, x, y, 2, 1, spur); r(c, x, y + 2, 2, 1, spur); p(c, x + 3, y + 1, spur); p(c, x - 2, y + 1, spur);
+    }
+    for (let i = 0; i < 8; i++) {
+      const x = Math.round(W * 0.56 + i * 7), y = Math.round(H * 0.95 - i * 4.5 + Math.sin(i) * 2);
+      p(c, x, y, spur); p(c, x + 1, y, spur); p(c, x + 3, y - 2, spur); p(c, x + 4, y - 2, spur);
+    }
   }
 
   // Die Futterraufe in der Mitte: Pfosten, Gitter, Heu, Dach, Salzleckstein, Laterne

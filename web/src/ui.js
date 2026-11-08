@@ -5,31 +5,31 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611081000';
-import * as S from './spiel.js?v=202611081000';
-import * as Z from './zeit.js?v=202611081000';
-import * as T from './ton.js?v=202611081000';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611081000';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611081000';
-import { zielHaus } from './fein.js?v=202611081000';
-import * as AN from './ansicht.js?v=202611081000';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611081000';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611081000';
-import * as A from './auftraege.js?v=202611081000';
-import * as E from './erfolge.js?v=202611081000';
-import * as ZL from './ziele.js?v=202611081000';
-import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611081000';
-import * as KA from './karte.js?v=202611081000';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611081000';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611081000';
-import * as SW from './schneeball.js?v=202611081000';
-import * as LI from './lichtung.js?v=202611081000';
-import * as MH from './minihud.js?v=202611081000';
-import * as CB from './christbaum.js?v=202611081000';
-import * as SB from './schlitten.js?v=202611081000';
-import * as EB from './schlittschuh.js?v=202611081000';
-import * as BS from './backstube.js?v=202611081000';
-import { alleSymbole, zeichneSymbol } from './symbole.js?v=202611081000';
+import * as C from './config.js?v=202611081100';
+import * as S from './spiel.js?v=202611081100';
+import * as Z from './zeit.js?v=202611081100';
+import * as T from './ton.js?v=202611081100';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611081100';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611081100';
+import { zielHaus } from './fein.js?v=202611081100';
+import * as AN from './ansicht.js?v=202611081100';
+import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611081100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611081100';
+import * as A from './auftraege.js?v=202611081100';
+import * as E from './erfolge.js?v=202611081100';
+import * as ZL from './ziele.js?v=202611081100';
+import { zeichneWand, sockeBei, socke, GESCHENK, W as WAND_W, H as WAND_H } from './wand.js?v=202611081100';
+import * as KA from './karte.js?v=202611081100';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611081100';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611081100';
+import * as SW from './schneeball.js?v=202611081100';
+import * as LI from './lichtung.js?v=202611081100';
+import * as MH from './minihud.js?v=202611081100';
+import * as CB from './christbaum.js?v=202611081100';
+import * as SB from './schlitten.js?v=202611081100';
+import * as EB from './schlittschuh.js?v=202611081100';
+import * as BS from './backstube.js?v=202611081100';
+import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611081100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -243,6 +243,14 @@ function toastZurueckstellen() {
   aktuellerToast = null;
   toastT = setTimeout(naechsterToast, 400);
 }
+// Startet ein Minispiel, während eine Einblendung läuft: sie geht zurück in die Warteschlange (minihud.js meldet das)
+document.addEventListener('minispiel-an', () => {
+  const n = aktuellerToast, e = $('#toast');
+  if (!n || !e.classList.contains('zeigen')) return;
+  clearTimeout(toastT); e.classList.remove('zeigen');
+  if (performance.now() - toastSeit < 1000) toastWarteschlange.unshift(n); else if (n[2]) n[2].gezeigt = false;
+  aktuellerToast = null; toastT = setTimeout(naechsterToast, 400);
+});
 /** Fenster mit dem Verlauf. Öffnen heißt: alles gelesen. */
 function zeigeNachrichten() {
   const liste = nachrichten.slice().reverse();
@@ -271,7 +279,10 @@ function naechsterToast() {
   // 29.10. (gemeldet: beim Fenster „Frohe Weihnachten!“ ploppten dahinter Einblendungen auf):
   // Solange ein Fenster offen ist, warten sie. Kurze Rückmeldungen ('hinweis', etwa „reicht noch
   // nicht“ beim Händler) gehören zum Fenster und kommen sofort.
-  if (toastWarteschlange.length && fensterOffen() && toastWarteschlange[0][1] !== 'hinweis') {
+  // 08.11. (Betatest: „Ein Brief steckt im Briefkasten“ lag in der Waldlichtung über dem Spielhinweis):
+  // Während ein Minispiel läuft, warten ALLE Einblendungen - erst Start- und Ergebnisfenster lassen sie durch
+  const imSpiel = panelOffen() === 'minispiel' && !fensterOffen();
+  if (toastWarteschlange.length && (imSpiel || (fensterOffen() && toastWarteschlange[0][1] !== 'hinweis'))) {
     $('#toast').classList.remove('zeigen');
     toastT = setTimeout(naechsterToast, 400);
     return;
@@ -858,7 +869,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611081000`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611081100`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1495,8 +1506,8 @@ export function aktualisiereLaden() {
     z.classList.toggle('gesperrt', !!s.grund);
     let html, an = true, cls = 'k k--kauf';
     // Gekauftes zeigt nur noch den Haken - eingestellt wird unter „Mein Haus"
-    if (s.fertig) { html = '<span class="haken">✓</span>'; an = false; cls = 'k k--fertig'; } else if (s.versteckt) { html = '<span class="schloss">🔒</span>'; an = false; cls = 'k k--zu'; }
-    else if (s.grund) { html = `🔒`; an = false; cls = 'k k--zu'; }
+    if (s.fertig) { html = '<span class="haken">✓</span>'; an = false; cls = 'k k--fertig'; } else if (s.versteckt) { html = `<span class="schloss">${sym('schloss')}</span>`; an = false; cls = 'k k--zu'; }
+    else if (s.grund) { html = sym('schloss'); an = false; cls = 'k k--zu'; }
     else {
       const stufe = s.max > 1 ? `<small>Stufe ${s.stufe + 1}/${s.max}</small>` : '';
       // Die Zeitangabe "wann kann ich es kaufen" (17.10.) ist am 18.10. wieder raus (Nutzerwunsch)
@@ -2157,7 +2168,7 @@ export function oeffneAuftraege(reiter) {
           T.spiele('kauf');
           oeffneAuftraege('heute');
           if (e.deko) {
-            fenster('Sammelstück!', `<div class="gross-ico">🎁</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p><p class="klein">Gibt es nur für schwere Aufträge.</p>`, [{ text: 'Ansehen', aktion: () => { schliesseBlatt(); const o = ortVon(e.deko.id); if (o) funkeln(o.x, o.y); } }]);
+            fenster('Sammelstück!', `<div class="gross-ico">${sym('geschenk')}</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p><p class="klein">Gibt es nur für schwere Aufträge.</p>`, [{ text: 'Ansehen', aktion: () => { schliesseBlatt(); const o = ortVon(e.deko.id); if (o) funkeln(o.x, o.y); } }]);
           } else toast(`+${S.formatGeld(e.lohn)} für den Auftrag!`, 'gut');
         };
         z.appendChild(k);
@@ -2499,14 +2510,14 @@ export function oeffneKalender() {
     // Bis dahin jeden Tag ein Vorfreude-Päckchen (spiel.js)
     const vf = el('button', 'vorfreude' + (S.vorfreudeBereit() ? ' bereit' : ''));
     vf.innerHTML = S.vorfreudeBereit()
-      ? '<span class="vf-ico">🎁</span><b>Vorfreude-Päckchen</b><small>Heute für dich - antippen!</small>'
-      : `<span class="vf-ico">🎁</span><b>Vorfreude-Päckchen</b><small>${S.spieltag() < 1 ? 'Ab morgen wartet hier jeden Tag eins - bis die Türchen aufgehen.' : 'Heute schon geöffnet. Morgen wartet das nächste!'}</small>`;
+      ? `<span class="vf-ico">${sym('geschenk')}</span><b>Vorfreude-Päckchen</b><small>Heute für dich - antippen!</small>`
+      : `<span class="vf-ico">${sym('geschenk')}</span><b>Vorfreude-Päckchen</b><small>${S.spieltag() < 1 ? 'Ab morgen wartet hier jeden Tag eins - bis die Türchen aufgehen.' : 'Heute schon geöffnet. Morgen wartet das nächste!'}</small>`;
     vf.onclick = () => {
       const betrag = S.oeffneVorfreude();
       if (!betrag) { T.spiele('falsch'); toast(S.spieltag() < 1 ? 'Das erste Päckchen gibt es morgen.' : 'Das nächste Päckchen gibt es morgen.', 'hinweis'); return; }
       T.spiele('tuer');
       oeffneKalender();
-      fenster('Vorfreude!', `<div class="gross-ico">🎁</div><p>Im Päckchen stecken</p><p class="summe">${S.formatGeld(betrag)}</p><p class="klein">Bis zum 1. Dezember gibt es jeden Tag eins.</p>`);
+      fenster('Vorfreude!', `<div class="gross-ico">${sym('geschenk')}</div><p>Im Päckchen stecken</p><p class="summe">${S.formatGeld(betrag)}</p><p class="klein">Bis zum 1. Dezember gibt es jeden Tag eins.</p>`);
     };
     liste.appendChild(vf);
   }
@@ -2542,8 +2553,8 @@ export function oeffneKalender() {
       const e = S.oeffneTuer(n);
       T.spiele('tuer');
       oeffneKalender();
-      if (e.deko) fenster(`Türchen ${n}`, `<div class="gross-ico">🎁</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p>${knoedelHinweis(e.deko.id)}<p class="klein">Gibt es nur hier im Kalender.</p>`);
-      else fenster(`Türchen ${n}`, `<div class="gross-ico">⭐</div><p>Ein Umschlag mit</p><p class="summe">${S.formatGeld(e.betrag)}</p>`);
+      if (e.deko) fenster(`Türchen ${n}`, `<div class="gross-ico">${sym('geschenk')}</div><p><b>${e.deko.name}</b></p><p>${e.deko.text}</p><p class="bonus">♥ +${e.deko.stimmung} Stimmung</p>${knoedelHinweis(e.deko.id)}<p class="klein">Gibt es nur hier im Kalender.</p>`);
+      else fenster(`Türchen ${n}`, `<div class="gross-ico">${sym('umschlag')}</div><p>Ein Umschlag mit</p><p class="summe">${S.formatGeld(e.betrag)}</p>`);
     };
     raster.appendChild(b);
   }
@@ -2624,7 +2635,7 @@ export function oeffneMenue() {
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
   // 05.11.: daneben die Andenken-Sterne (einer je Jahr, das man bis Silvester gespielt hat)
   const an = S.st.andenken || 0;
-  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611081000" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611081100" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -2755,7 +2766,7 @@ function sterneJetzt() {
 function musikRegler() {
   const regler = el('div', 'regler');
   const stufe = () => S.st.ton.musik;
-  regler.innerHTML = `<span class="rname">🎵 Musik</span>
+  regler.innerHTML = `<span class="rname">${sym('note')} Musik</span>
     <button class="k k--neben rk" data-d="-1">−</button>
     <input type="range" min="0" max="5" step="1" value="${stufe()}">
     <button class="k k--neben rk" data-d="1">+</button>
@@ -2877,7 +2888,7 @@ function standLaden() {
     if (info.fehler) { fenster('Das klappt nicht', `<p>${info.fehler}</p>`); return; }
     const wann = info.gesichert ? new Date(info.gesichert).toLocaleString('de-DE', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : null;
     fenster('Spielstand laden?', `
-      <div class="gross-ico">📂</div>
+      <div class="gross-ico">${sym('ordner')}</div>
       <p><b>${info.name ? esc(info.name) : 'Dein Haus'}</b>${wann ? `, gesichert am ${wann}` : ''}</p>
       <p class="klein">Insgesamt ${S.formatGeld(info.gesamt)} verdient.</p>
       <p><b>Dein jetziger Spielstand auf diesem Gerät wird ersetzt.</b></p>`, [
@@ -2891,7 +2902,7 @@ function standLaden() {
 /** Rückfrage vor dem Löschen - der Spielstand ist danach weg. */
 function frageNeustart() {
   fenster('Neu anfangen?', `
-    <div class="gross-ico">⚠️</div>
+    <div class="gross-ico">${sym('warnung')}</div>
     <p><b>Dein Spielstand wird komplett gelöscht.</b></p>
     <p>Sterne, Deko, Anstrich, Zutaten, Wichtel, Kalendertürchen und Sammelstücke sind danach weg. Das lässt sich nicht rückgängig machen.</p>`, [
     { text: 'Ja, alles löschen', aktion: () => { S.allesLoeschen(); schliesseBlatt(); location.reload(); } },
@@ -2953,7 +2964,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611081000" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611081100" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {
@@ -2985,12 +2996,12 @@ export function waehleModus(fertig) {
   const m = heute.getMonth(), echtEmpf = (m === 10 && heute.getDate() >= 24) || m === 11;
   const marke = ' <i class="empf">Empfohlen</i>';
   const klassisch = `<button class="modus${echtEmpf ? ' empfohlen' : ''}" data-m="echt">
-      <b>🕯️ ${MODUS_NAME.echt}${echtEmpf ? marke : ''}</b>
+      <b>${sym('kerze')} ${MODUS_NAME.echt}${echtEmpf ? marke : ''}</b>
       <span>Das Spiel läuft mit dem echten Datum (heute ist der ${datum}). ${wann ? `Das erste Türchen gibt es am 1. Dezember - also ${wann}.` : m === 11 ? 'Du steigst mitten im Advent ein.' : 'Die Adventszeit ist gerade vorbei - sie kommt erst im Dezember wieder.'}</span>
     </button>`;
   const individuell = `<button class="modus${echtEmpf ? '' : ' empfohlen'}" data-m="eigen">
-      <b>🎄 ${MODUS_NAME.eigen}${echtEmpf ? '' : marke}</b>
-      <span>Das Spiel beginnt am 24. November - egal, wann du anfängst. Nach einer Woche geht das erste Türchen auf, und du erlebst den ganzen Advent. Ist er vor dem echten vorbei, feierst du Weihnachten danach mit dem echten Kalender noch einmal.</span>
+      <b>${sym('tanne')} ${MODUS_NAME.eigen}${echtEmpf ? '' : marke}</b>
+      <span>Das Spiel beginnt am 24. November - egal, wann du anfängst. Nach einer Woche geht das erste Türchen auf, und du erlebst den ganzen Advent. Ist dein Advent vor dem echten vorbei, feierst du Weihnachten danach mit dem echten Kalender einfach noch einmal.</span>
     </button>`;
   const box = fenster('Wann beginnt dein Advent?', `
     ${echtEmpf ? klassisch + individuell : individuell + klassisch}
@@ -3074,10 +3085,10 @@ export function zeigeZiel(modus, fertig) {
     <canvas class="ziel-haus" width="72" height="62"></canvas>
     <p><b>Mach dein Haus bis Heiligabend zum schönsten im Dorf!</b></p>
     <ul class="ziel">
-      <li>☕ Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
-      <li>🛒 Kaufe mit den Sternen Lichter, Deko, Farbe und Helfer.</li>
-      <li>🎄 Jeden Tag gibt es Neues zu entdecken.</li>
-      <li>📷 „Foto“ zeigt dein Haus im Vollbild - auch abends und nachts, mit allen Lichtern. Von dort machst du eine Weihnachtskarte.</li>
+      <li>${sym('becher')} Verkaufe am Punschstand vor dem Haus warme Getränke.</li>
+      <li>${sym('laden')} Kaufe mit den Sternen Lichter, Deko, Farbe und Helfer.</li>
+      <li>${sym('tanne')} Jeden Tag gibt es Neues zu entdecken.</li>
+      <li>${sym('karte')} „Foto“ zeigt dein Haus im Vollbild - auch abends und nachts, mit allen Lichtern. Von dort machst du eine Weihnachtskarte.</li>
     </ul>
     <p class="klein">${start} Jeder Advent bringt eine Überraschung.</p>`,
   [{ text: 'Los geht’s!', aktion: () => { if (fertig) setTimeout(fertig, 60); } }]);

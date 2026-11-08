@@ -10,12 +10,12 @@
  * #minispiel, 180 Pixel breit. Die Strecke läuft von unten nach oben durchs
  * Bild, der Wok steht im oberen Drittel, damit man sieht, was kommt.
  */
-import * as C from './config.js?v=202611081000';
-import * as Z from './zeit.js?v=202611081000';
-import * as T from './ton.js?v=202611081000';
-import * as MH from './minihud.js?v=202611081000';
-import * as L from './licht.js?v=202611081000';
-import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202611081000';
+import * as C from './config.js?v=202611081100';
+import * as Z from './zeit.js?v=202611081100';
+import * as T from './ton.js?v=202611081100';
+import * as MH from './minihud.js?v=202611081100';
+import * as L from './licht.js?v=202611081100';
+import { r, p, ton, text as pixText, textBreite, wichtelKlein } from './pixel.js?v=202611081100';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -347,6 +347,29 @@ function zeichne(t) {
   for (let wyr = von; wyr < g.dist - wy + H + 32; wyr += 16) {
     const yy = Math.round(welt(wyr));
     for (const [x0, s] of [[4, 0], [W - 5, 1]]) tanne(x0 + Math.round((hash(wyr + s) - 0.5) * 4), yy, 12 + Math.floor(hash(wyr * 3 + s) * 6));
+  }
+  // 08.11. (Nutzer: „mehr ins Detail“): Am Rand stehen Zuschauer, die winken, ab und zu eine Hütte mit
+  // Rauch und ein Stapel Schlitten - alles im Baumstreifen, nie auf der Piste
+  for (let wr = Math.floor((g.dist - wy) / 150) * 150; wr < g.dist - wy + H + 150; wr += 150) {
+    const yy = Math.round(welt(wr)) + 40, n = wr / 150, links = n % 2 === 0;
+    if (n % 4 === 3) {   // Hütte
+      const hx = links ? 1 : W - 15;
+      r(c, hx, yy - 9, 14, 9, '#8a5a32'); r(c, hx, yy - 9, 14, 1, '#a8763e'); r(c, hx + 2, yy - 6, 3, 3, '#ffd070'); r(c, hx + 8, yy - 7, 4, 7, '#4a2e1a');
+      for (let i = 0; i < 4; i++) r(c, hx - 1 + i, yy - 10 - i, 16 - i * 2, 1, i < 2 ? '#ffffff' : '#f0f4f8');
+      r(c, hx + (links ? 10 : 2), yy - 15, 2, 4, '#6a6a72');
+      for (let k = 0; k < 3; k++) p(c, hx + (links ? 11 : 3) + Math.round(Math.sin(t * 2 + k) * 1), yy - 17 - k * 2, '#d8e0ea');
+      continue;
+    }
+    const jacken = ['#c83a3a', '#3a74c8', '#e8a030', '#5aa04a', '#a05ac0'];
+    for (let k = 0; k < 2; k++) {
+      const fx = links ? 3 + k * 5 : W - 8 - k * 5, fy = yy + k * 2, f = jacken[(n * 2 + k + 50) % 5];
+      const wink = Math.sin(t * 6 + n + k) > 0;
+      r(c, fx, fy - 8, 3, 3, '#f0c090'); r(c, fx, fy - 9, 3, 1, jacken[(n + k + 52) % 5]);   // Kopf mit Mütze
+      r(c, fx - 1, fy - 5, 5, 4, f); r(c, fx, fy - 1, 1, 1, '#2a2a3a'); r(c, fx + 2, fy - 1, 1, 1, '#2a2a3a');
+      const arm = links ? fx + 4 : fx - 2;
+      r(c, arm, fy - (wink ? 8 : 7), 1, 3, f);   // winkender Arm zur Piste hin
+    }
+    if (n % 3 === 1) { const sx = links ? 2 : W - 12; r(c, sx, yy + 3, 10, 1, '#5a3a22'); r(c, sx + 1, yy + 1, 8, 2, '#c8884a'); }   // Schlitten im Schnee
   }
   // Laternen am Pistenrand (12.10., Nutzerwunsch „mehr Licht"): abwechselnd
   // links und rechts, an die Strecke gebunden; ihr Licht kommt in die Lichtkarte

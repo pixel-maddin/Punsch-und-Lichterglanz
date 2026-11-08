@@ -24,12 +24,12 @@
  * Drehung, das Auto federt ein, ein Gurt schnappt zu.
  * Dazu eigene Bäume aus der Baumschule (`eigen`): golden markiert, ×3 Punkte.
  */
-import * as C from './config.js?v=202611081000';
-import * as Z from './zeit.js?v=202611081000';
-import * as T from './ton.js?v=202611081000';
-import * as MH from './minihud.js?v=202611081000';
-import * as L from './licht.js?v=202611081000';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202611081000';
+import * as C from './config.js?v=202611081100';
+import * as Z from './zeit.js?v=202611081100';
+import * as T from './ton.js?v=202611081100';
+import * as MH from './minihud.js?v=202611081100';
+import * as L from './licht.js?v=202611081100';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202611081100';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -522,6 +522,40 @@ function baueKulisse(winter) {
   r(c, lx, ly - 22, 1, 22, '#2a2a34'); r(c, lx - 2, ly - 27, 5, 5, '#2a2a34'); r(c, lx - 1, ly - 26, 3, 3, '#ffe090'); p(c, lx, ly - 29, '#3a3a44');
   c.fillStyle = 'rgba(255,220,140,0.12)'; c.fillRect(lx - 8, ly - 30, 17, 12);
   for (let i = 0; i < 3; i++) setze(c, gedreht(baumBild(['nordmann', 'blau', 'fichte'][i % 3], 0, winter, true), 90), 4 + i * 2, pp + 8 + i * 4);
+  // 08.11. (Nutzer: „mehr ins Detail“): Preistafel mit den drei Sorten rechts oben (hilft auch beim
+  // Unterscheiden), ein Feuerkorb am Parkplatz, ein Holzschlitten mit Bäumchen und ein Schneeschieber
+  { const tx = W - 34, ty = oben + 4;
+    r(c, tx + 3, ty + 14, 1, 9, '#5a3a22'); r(c, tx + 24, ty + 14, 1, 9, '#5a3a22');
+    r(c, tx, ty - 1, 28, 16, '#5a3a22'); r(c, tx + 1, ty, 26, 14, '#2e3a2e');
+    if (winter) r(c, tx, ty - 2, 28, 1, '#ffffff');
+    const farbe = { nordmann: '#1e5a32', blau: '#6a9ab0', fichte: '#5aa040' };
+    ['nordmann', 'blau', 'fichte'].forEach((s, i) => {
+      const x = tx + 4 + i * 8, y = ty + 9;
+      for (let k = 0; k < 5; k++) r(c, x + 2 - Math.floor(k / 2), y - 5 + k, 1 + Math.floor(k / 2) * 2, 1, farbe[s]);
+      p(c, x + 2, y, '#6a4428');
+      r(c, x + 1, y + 2, 3, 1, '#f0e8d0');   // Preis als Kreidestrich
+    });
+  }
+  { const fx = W - 16, fy = H - 6;   // Feuerkorb (rechts unten - in der Mitte lag die Wunschblase darüber)
+    r(c, fx - 6, fy + 1, 13, 2, 'rgba(0,0,0,0.12)');
+    r(c, fx - 1, fy - 2, 1, 3, '#2a2a30'); r(c, fx + 2, fy - 2, 1, 3, '#2a2a30');
+    r(c, fx - 4, fy - 8, 9, 6, '#3a3a42'); for (let x = fx - 3; x < fx + 5; x += 2) r(c, x, fy - 7, 1, 4, '#c86a2a');
+    r(c, fx - 4, fy - 8, 9, 1, '#5a5a62');
+    r(c, fx - 3, fy - 11, 7, 3, '#e8802a'); r(c, fx - 2, fy - 13, 5, 2, '#f8c040'); p(c, fx, fy - 15, '#fff0a0'); p(c, fx + 2, fy - 14, '#f8c040');
+    c.fillStyle = 'rgba(255,170,80,0.14)'; c.fillRect(fx - 9, fy - 18, 19, 14);
+    for (const [dx, dy] of [[-8, 0], [8, 1]]) { r(c, fx + dx - 2, fy + dy - 2, 5, 2, '#7a4a28'); r(c, fx + dx - 2, fy + dy - 3, 5, 1, '#a8784a'); if (winter) r(c, fx + dx - 2, fy + dy - 4, 5, 1, '#ffffff'); }   // Sitzklötze
+  }
+  { const sx = 10, sy = H - 7;   // Holzschlitten mit kleinem Baum
+    r(c, sx, sy, 22, 1, '#5a3a22'); p(c, sx - 1, sy - 1, '#5a3a22'); p(c, sx - 2, sy - 2, '#5a3a22');
+    r(c, sx + 2, sy - 3, 18, 2, '#a8683a'); r(c, sx + 2, sy - 3, 18, 1, '#c8884a');
+    for (const dx of [4, 16]) r(c, sx + dx, sy - 1, 1, 1, '#5a3a22');
+    setze(c, gedreht(baumBild('fichte', 0, winter, true), 90), sx + 4, sy - 5);
+    r(c, sx - 3, sy - 3, 1, 1, '#5a3a22'); r(c, sx - 8, sy - 4, 6, 1, '#c8a070');   // Zugseil
+  }
+  { const bx = 68, by = H - 5;   // Schneeschieber im Wall
+    r(c, bx, by - 14, 1, 12, '#8a5a32'); r(c, bx - 1, by - 15, 3, 1, '#5a3a22');
+    r(c, bx - 4, by - 3, 9, 3, '#c83a32'); r(c, bx - 4, by - 3, 9, 1, '#e85a4a');
+  }
   c = ziel;
 }
 
@@ -674,8 +708,13 @@ function zeichne(t) {
   L.beleuchte(c, W, H, {
     himmel: oben - 8, vignette: 0.3, grundNacht: [112, 122, 170],
     inseln: [{ x: 10, y: oben - 4, r: 30, a: 0.9 }, { x: W - 6, y: py - 20, r: 50, a: 0.9 }, { x: W / 2, y: oben - 3, r: 70, rgb: '255,210,150', a: 0.35 },
-      { x: W / 2, y: H * 0.47, r: 110, rgb: '255,226,180', a: 0.55 }],   // Arbeitslicht über dem Baumfeld: die Sorten müssen erkennbar bleiben
+      { x: W / 2, y: H * 0.47, r: 110, rgb: '255,226,180', a: 0.55 },   // Arbeitslicht über dem Baumfeld: die Sorten müssen erkennbar bleiben
+      { x: W - 16, y: H - 16, r: 26, rgb: '255,170,90', a: 0.8 }],     // Feuerkorb (08.11.)
   });
+  // Die Glut im Feuerkorb flackert und leuchtet (nach dem Licht, sonst dunkelt sie mit ab)
+  { const fx = W - 16, fy = H - 6, fl = Math.sin(t * 9) * 0.5 + Math.sin(t * 5.3) * 0.5;
+    r(c, fx - 3, fy - 11, 7, 3, '#e8802a'); r(c, fx - 2, fy - 13 - (fl > 0.3 ? 1 : 0), 5, 2, '#f8c040'); p(c, fx + Math.round(fl), fy - 15, '#fff0a0');
+    L.schein(c, fx, fy - 11, 10, '255,170,80', 0.3 + 0.25 * nachts + 0.06 * fl); }
   // Die Wunschblase liegt ÜBER dem Licht - sie muss immer lesbar sein
   if (a && a.phase !== 'faehrt') blase(a, PARKPLATZ(), t);
   r(c, 7, oben - 7, 6, 6, nachts > 0.3 ? '#ffe28a' : '#f8d878'); L.schein(c, 10, oben - 4, 9, '255,210,120', 0.5 * nachts);

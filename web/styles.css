@@ -1859,3 +1859,14 @@ canvas.dankesbild, .album-bild canvas { box-sizing: content-box; border: calc(va
   padding: calc(var(--px) * 3.5) calc(var(--px) * 10); border-radius: calc(var(--px) * 3);
   background: linear-gradient(#5ab04a, #3a8a3a); border: calc(var(--px) * 0.8) solid #2a6a2a; box-shadow: 0 calc(var(--px) * 1) 0 #1e4a1e; }
 #miniWeiter:active { transform: scale(0.95); }
+/* 08.11.: Pixelsymbole statt Emojis in Fenstern und Listen (symbolHtml in symbole.js) - je 1 Symbolpixel = 1 Spielpixel */
+img.psym { display: inline-block; image-rendering: pixelated; vertical-align: middle; }
+#modal .gross-ico img.psym { margin: calc(var(--px) * 2) auto calc(var(--px) * 1); }
+ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(var(--px) * -1); }
+.modus b img.psym { margin-right: calc(var(--px) * 1); vertical-align: calc(var(--px) * -1); }
+.vorfreude .vf-ico img.psym { display: block; }
+.rname img.psym { vertical-align: calc(var(--px) * -0.5); }
+/* 08.11. (Betatest): Die Erfolgswand ist mit Rahmen 161,6 Spielpixel breit, der Inhalt auf einem 375er-Handy
+   nur ~158 - sie ragte über und das Blatt ließ sich seitlich schieben. Jetzt mittig in den Innenabstand hinein. */
+.wand { margin-left: calc(50% - var(--px) * 80.8); margin-right: 0; }   /* halbe Breite samt Rahmen */
+#blatt[data-art="auftraege"] #blattInhalt { overflow-x: hidden; }

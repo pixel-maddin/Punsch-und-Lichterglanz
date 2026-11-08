@@ -10,12 +10,12 @@
  * Gerüst wie die anderen Minispiele: Vollbild-Canvas #minispiel, 180 breit,
  * Schrift über minihud.js, Musik ruht, drei Schwierigkeiten.
  */
-import * as C from './config.js?v=202611081000';
-import * as Z from './zeit.js?v=202611081000';
-import * as T from './ton.js?v=202611081000';
-import * as MH from './minihud.js?v=202611081000';
-import * as L from './licht.js?v=202611081000';
-import { r, p, ton, mische } from './pixel.js?v=202611081000';
+import * as C from './config.js?v=202611081100';
+import * as Z from './zeit.js?v=202611081100';
+import * as T from './ton.js?v=202611081100';
+import * as MH from './minihud.js?v=202611081100';
+import * as L from './licht.js?v=202611081100';
+import { r, p, ton, mische } from './pixel.js?v=202611081100';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -383,6 +383,32 @@ function eis(g, nacht) {
     r(c, 0, y, W, 1, nacht ? (k < 0.3 ? '#5a6a9a' : '#4a5888') : (k < 0.3 ? '#cfe6f6' : '#b6d6ee'));
   }
   r(c, 0, boden, W, 1, nacht ? '#8a9ad0' : '#ffffff');
+  // 08.11. (Nutzer: „mehr ins Detail“): Die Tannen am Ufer spiegeln sich blass und gestaucht im Eis,
+  // und im Eis sind Luftblasen und eingefrorene Blätter - beides zieht mit der Bahn mit
+  const spiegel = (faktor, hoch, abstand, gr, farbe) => {
+    const vers = (g.x * faktor) % abstand;
+    c.fillStyle = farbe;
+    for (let k = -1; k < W / abstand + 2; k++) {
+      const n = Math.floor(g.x * faktor / abstand) + k;
+      const x = Math.round(k * abstand - vers + hash(n) * abstand * 0.5);
+      const h = Math.round(gr * (0.7 + hash(n + 3) * 0.6)), fuss = boden + 2 + Math.round((hoch - 14) * 0.5);
+      for (let i = 0; i < h; i += 2) { const w = Math.round((i + 1) / h * h * 0.35); c.fillRect(x - w, fuss + Math.round((h - i) * 0.5), w * 2 + 1, 1); }
+    }
+  };
+  spiegel(0.15, 22, 14, 16, nacht ? 'rgba(20,30,60,0.16)' : 'rgba(70,110,110,0.12)');
+  spiegel(0.35, 14, 22, 22, nacht ? 'rgba(15,40,40,0.2)' : 'rgba(40,90,70,0.14)');
+  for (let i = 0; i < 12; i++) {
+    const n = Math.floor(g.x / 36) + i - 2, x = Math.round(n * 36 - g.x + hash(n + 21) * 26);
+    const y = boden + 14 + Math.floor(hash(n + 22) * (H - boden - 34));
+    if (hash(n + 23) < 0.55) {   // Luftblasen: drei Kringel
+      const f = nacht ? '#8a9ad0' : '#f4faff';
+      r(c, x - 1, y - 2, 3, 1, f); r(c, x - 1, y + 2, 3, 1, f); r(c, x - 2, y - 1, 1, 3, f); r(c, x + 2, y - 1, 1, 3, f); p(c, x - 1, y - 1, '#ffffff');
+      for (const [dx, dy] of [[4, 2], [2, 5]]) { p(c, x + dx, y + dy - 1, f); p(c, x + dx - 1, y + dy, f); p(c, x + dx + 1, y + dy, f); p(c, x + dx, y + dy + 1, f); }
+    } else {                     // eingefrorenes Blatt
+      const f = nacht ? '#6a5a6a' : ['#c08040', '#b0603a', '#c8a050'][n & 1 ? 0 : (n % 3 + 3) % 3];
+      r(c, x, y, 3, 2, f); p(c, x + 3, y, f); p(c, x - 1, y + 1, nacht ? '#5a4a5a' : '#8a5a30'); p(c, x + 1, y - 1, f);
+    }
+  }
   for (let i = 0; i < 26; i++) {
     const n = Math.floor(g.x / 40) + i - 4, x = Math.round(n * 40 - g.x + hash(n) * 40) % (W + 80);
     const y = boden + 4 + Math.floor(hash(n + 5) * (H - boden - 8));
