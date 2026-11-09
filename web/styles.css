@@ -1870,3 +1870,5 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
    nur ~158 - sie ragte über und das Blatt ließ sich seitlich schieben. Jetzt mittig in den Innenabstand hinein. */
 .wand { margin-left: calc(50% - var(--px) * 80.8); margin-right: 0; }   /* halbe Breite samt Rahmen */
 #blatt[data-art="auftraege"] #blattInhalt { overflow-x: hidden; }
+/* 09.11.: Füllstand der Wichtel-Kiste */
+#modal .kiste-balken { width: 70%; margin: calc(var(--px) * 1) auto calc(var(--px) * 3); height: calc(var(--px) * 4); }

@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611081100';
-import * as Z from './zeit.js?v=202611081100';
-import { neueFarben } from './pixel.js?v=202611081100';
+import * as C from './config.js?v=202611091000';
+import * as Z from './zeit.js?v=202611091000';
+import { neueFarben } from './pixel.js?v=202611091000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2100,10 +2100,26 @@ export function durchschnittsPreis() {
 /** Die Kiste öffnen: alles, was die Wichtel verdient haben. Gibt den Betrag zurück. */
 export function oeffneKiste() {
   const b = zehner(st.kiste || 0);
-  st.kiste = 0; st.kisteGaeste = 0;
+  st.kiste = 0; st.kisteGaeste = 0; st.kisteArbeit = 0;
   if (b > 0) verdiene(b);
   speichere();
   return b;
+}
+
+/**
+ * Wie voll ist die Kiste? (09.11., Nutzerwunsch: keine Stunden mehr zeigen, nur den Füllstand)
+ * Anteil der Wichtel-Arbeit an dem, was in einen ganzen Tag Pause passt (OFFLINE_MAX_H), in Zehnteln:
+ * 0,1 … 1. Randvoll (1) nur, wenn wirklich nichts mehr hineinging - sonst höchstens 0,9.
+ * Alte Stände ohne `kisteArbeit` rechnen aus der letzten Pause (`sek`).
+ */
+export function kisteFuellung(sek = 0) {
+  const voll = Math.min(C.OFFLINE_MAX_H, C.OFFLINE_ANFANG_H) * 3600 * C.OFFLINE_SATZ_ANFANG
+    + Math.max(0, C.OFFLINE_MAX_H - C.OFFLINE_ANFANG_H) * 3600 * C.OFFLINE_SATZ;
+  let arbeit = st.kisteArbeit;
+  if (!(arbeit > 0)) { const a = Math.min(sek, C.OFFLINE_ANFANG_H * 3600); arbeit = a * C.OFFLINE_SATZ_ANFANG + Math.max(0, sek - a) * C.OFFLINE_SATZ; }
+  const f = arbeit / voll;
+  if (f >= 0.999) return 1;
+  return Math.max(1, Math.min(9, Math.round(f * 10))) / 10;
 }
 
 /**
@@ -2158,7 +2174,7 @@ export function offlineAbrechnen() {
   // bleibt gespeichert, falls man die App vorher wieder zumacht.
   if (betrag > 0) {
     if (sek < C.OFFLINE_FENSTER) verdiene(betrag);
-    else { st.kiste = (st.kiste || 0) + betrag; st.kisteGaeste = (st.kisteGaeste || 0) + n; }
+    else { st.kiste = (st.kiste || 0) + betrag; st.kisteGaeste = (st.kisteGaeste || 0) + n; st.kisteArbeit = (st.kisteArbeit || 0) + arbeit; }
   }
   st.stats.bedient += n;
   return { sek, betrag, portionen: n };

@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611081100';
-import * as S from './spiel.js?v=202611081100';
-import * as A from './auftraege.js?v=202611081100';
-import * as E from './erfolge.js?v=202611081100';
-import * as Z from './ziele.js?v=202611081100';
-import * as ZE from './zeit.js?v=202611081100';
-import * as KA from './karte.js?v=202611081100';
-import { zellePos } from './tresen.js?v=202611081100';
+import * as C from './config.js?v=202611091000';
+import * as S from './spiel.js?v=202611091000';
+import * as A from './auftraege.js?v=202611091000';
+import * as E from './erfolge.js?v=202611091000';
+import * as Z from './ziele.js?v=202611091000';
+import * as ZE from './zeit.js?v=202611091000';
+import * as KA from './karte.js?v=202611091000';
+import { zellePos } from './tresen.js?v=202611091000';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -213,7 +213,7 @@ const HINWEISE = [
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
   { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
     // 26.10.: kürzer, und passend zur neuen Abrechnung (kurze Pausen direkt, ab einer Stunde die Kiste)
-    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn die App zu ist: Kommst du bald zurück, gibt es ihre Sterne gleich - nach mehr als einer Stunde wartet eine Kiste, die sich bis zu einen Tag lang füllt. Und: Was DU selbst servierst, bringt doppelt so viele Sterne.`,
+    text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn die App zu ist: Kommst du bald zurück, gibt es ihre Sterne gleich - warst du länger weg, wartet eine Kiste auf dich, die sich nach und nach füllt. Und: Was DU selbst servierst, bringt doppelt so viele Sterne.`,
     ziel: null, dauer: 12 },
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
