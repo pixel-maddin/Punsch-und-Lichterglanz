@@ -171,7 +171,8 @@ export const GRUPPEN_KLEIDUNG = {
 // damit war mit 10 min am Tag schon am 20.12. alles gekauft; mit 17/15 am 22.-23.12. (saison8, siehe CLAUDE.md). Bis 03.11. zählte jede Pause bis 3 h voll und ohne Tagesgrenze - alle 3 h reinschauen
 // brachte so bis zu 24 h Arbeit am Tag, einmal am Tag nur 3 h.
 export const OFFLINE_MAX_H = 24, OFFLINE_ANFANG_H = 3;
-export const OFFLINE_SATZ_ANFANG = 17 / 60, OFFLINE_SATZ = 15 / 60;   // Wichtel-Arbeit je Stunde Pause
+// 09.11. (Nutzer: „insgesamt 20 % weniger“): 17/15 → 13,6/12 Minuten je Stunde Pause (ein Tag weg = knapp 5 h Arbeit)
+export const OFFLINE_SATZ_ANFANG = 13.6 / 60, OFFLINE_SATZ = 12 / 60;   // Wichtel-Arbeit je Stunde Pause
 export const OFFLINE_ANTEIL = 0.65;  // so gut wie du schaffen die Wichtel (bis 09.10.: 40 % bei 8 h Kiste, dann 65 % bei 3 h)
 // Seit 01.10. wächst beides mit den SPIELTAGEN (gemeldet: in den ersten Tagen
 // kam nach einer Nacht eine überwältigende Kiste). Index = Spieltag ab 0 (der
