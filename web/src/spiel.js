@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611091100';
-import * as Z from './zeit.js?v=202611091100';
-import { neueFarben } from './pixel.js?v=202611091100';
+import * as C from './config.js?v=202611101000';
+import * as Z from './zeit.js?v=202611101000';
+import { neueFarben } from './pixel.js?v=202611101000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -307,6 +307,43 @@ export function setzeLauflicht(kette, an) {
 export function setzeDeko(id, an) {
   st.aus = st.aus || {};
   st.aus[id] = !an;
+  hooks.ton('klick');
+  speichere();
+}
+/*
+ * Stil-Vorlagen in „Haus schmücken" (10.11., Feedback: „wenn man alles gekauft hat, ist das Haus
+ * recht überladen"). Die Herzen zählen weiter alles, was man BESITZT (stimmung() liest st.aus nicht) -
+ * wegräumen kostet also nichts. Eine Vorlage schaltet in EINEM Tipp alles nach C.STIL an/aus.
+ * Welche gerade gilt, wird nicht gespeichert, sondern verglichen: Wer danach selbst etwas umstellt
+ * oder Neues kauft (geht immer an), ist bei „Eigene". Die eigene Auswahl wird gemerkt, sobald man
+ * von ihr auf eine Vorlage wechselt, und lässt sich so zurückholen.
+ */
+export const istTrophae = (id) => C.TROPHAEEN.includes(id);
+const geschenktListen = () => [...Object.values(C.KALENDER_DEKO), ...C.AUFTRAG_DEKO, ...C.HAENDLER_DEKO, ...C.MARKT_DEKO,
+  ...C.LICHTUNG_DEKO, ...C.BAUM_DEKO, ...C.BERG_DEKO, ...C.EIS_DEKO, ...C.SCHNEE_DEKO, ...C.SPECIAL_DEKO, ...C.FINALE_DEKO];
+/** Alles, was man besitzt und am Haus ein- und ausschalten kann (ohne Anstrich, Zaunfarbe und Trophäen). */
+export function stilTeile() {
+  const ids = C.ARTIKEL.filter((a) => istDeko(a) && stufe(a.id) > 0).map((a) => a.id);
+  for (const d of geschenktListen()) if (st.kalDeko[d.id] && !istTrophae(d.id)) ids.push(d.id);
+  return ids;
+}
+const stilStufe = (id) => C.STIL[id] || 3;
+const STIL_NR = { alles: 3, gemuetlich: 2, schlicht: 1 };   // Reihenfolge: decken sich zwei, gilt die größere
+const istAus = (id) => !!(st.aus && st.aus[id]);
+/** 'alles' | 'gemuetlich' | 'schlicht' | 'eigene' */
+export function stilAktuell() {
+  const ids = stilTeile();
+  for (const [name, nr] of Object.entries(STIL_NR)) if (ids.every((id) => istAus(id) === stilStufe(id) > nr)) return name;
+  return 'eigene';
+}
+export function stilSichtbar() { const ids = stilTeile(); return { an: ids.filter((id) => !istAus(id)).length, alle: ids.length }; }
+export const stilEigeneDa = () => !!st.stilEigene;
+export function setzeStil(name) {
+  st.aus = st.aus || {};
+  const ids = stilTeile();
+  if (stilAktuell() === 'eigene') st.stilEigene = Object.fromEntries(ids.map((id) => [id, istAus(id)]));
+  if (name === 'eigene') { const e = st.stilEigene || {}; for (const id of ids) if (id in e) st.aus[id] = e[id]; }
+  else for (const id of ids) st.aus[id] = stilStufe(id) > STIL_NR[name];
   hooks.ton('klick');
   speichere();
 }
@@ -2779,7 +2816,7 @@ export function wettbewerbAuswerten() {
   speichere();
   return st.wettbewerb;
 }
-/** Plakette am Haus: Platz dieser Saison oder null. */
+/** Plakette im Kaminzimmer (Erfolgswand): Platz dieser Saison oder null. */
 export const plakette = () => (st.wettbewerb && st.wettbewerb.saison === Z.saison() && st.wettbewerb.platz < C.WETTBEWERB.plaetze.length ? st.wettbewerb.platz : null);
 
 // ---------------------------------------------------------------------------

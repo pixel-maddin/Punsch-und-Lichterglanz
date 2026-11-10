@@ -918,14 +918,14 @@ export const BERG_ZIEL = 400;     // Punkte fürs Ankommen …
 export const BERG_JE_S = 40;      // … plus so viele je Sekunde, die noch übrig war
 export const BERG_DEKO = [
   { id: 's_kinder', name: 'Rodelkinder',          ab: 1000,  stimmung: 5, text: 'Zwei Kinder ziehen ihren Schlitten am Haus vorbei.' },
-  { id: 's_wok',    name: 'Wok an der Hauswand',  ab: 1550, stimmung: 5, text: 'Dein Rodel-Wok hängt als Trophäe neben dem Fenster.' },
+  { id: 's_wok',    name: 'Wok als Trophäe',      ab: 1550, stimmung: 5, text: 'Dein Rodel-Wok hängt im Kaminzimmer an der Wand.' },
   { id: 's_hang',   name: 'Rodelhang am Horizont', ab: 1900, stimmung: 7, text: 'Hinter dem Stand ein Hügel, auf dem winzige Rodler hinunterflitzen.' },
 ];
 // Minispiel Eisbahn (10.10.): Schlittschuh-Läufer, springen und Tricks.
 export const EIS_DAUER = 45;
 export const EIS_STERN = 15;
 export const EIS_DEKO = [
-  { id: 'e_schlittschuhe', name: 'Schlittschuhe am Nagel', ab: 700,  stimmung: 5, text: 'Ein Paar Schlittschuhe hängt neben der Haustür.' },
+  { id: 'e_schlittschuhe', name: 'Schlittschuhe am Nagel', ab: 700,  stimmung: 5, text: 'Ein Paar Schlittschuhe hängt im Kaminzimmer am Nagel.' },
   { id: 'e_pinguin',       name: 'Pinguin',                ab: 1400, stimmung: 5, text: 'Ein kleiner Pinguin mit Mütze steht auf dem Gehweg.' },
   { id: 'e_schnuppen',     name: 'Sternschnuppen',         ab: 2400, stimmung: 7, text: 'Nachts ziehen Sternschnuppen über dein Haus.' },
 ];
@@ -935,7 +935,7 @@ export const SCHNEE_DAUER = 40;
 export const SCHNEE_DEKO = [
   { id: 'g_vorrat',  name: 'Schneeballvorrat',     ab: 700,  stimmung: 5, text: 'Ein Berg Schneebälle liegt griffbereit am Gehweg.' },
   { id: 'g_lauscher', name: 'Neugieriger Grummel', ab: 1400, stimmung: 5, text: 'Ein kleiner Grummel lugt hinter dem alten Baum hervor - ganz friedlich.' },
-  { id: 'g_fahne',   name: 'Siegerfahne',          ab: 2400, stimmung: 7, text: 'Auf dem Stand weht die Fahne der Schneeballschlacht.' },
+  { id: 'g_fahne',   name: 'Siegerfahne',          ab: 2400, stimmung: 7, text: 'Die Fahne der Schneeballschlacht lehnt im Kaminzimmer in der Ecke.' },
 ];
 // Minispiel Backstube (10.10.): Plätzchen nach Rezept - ausstechen, backen
 // (im goldenen Bereich aus dem Ofen holen), verzieren. Statt Deko fürs Haus
@@ -1085,8 +1085,33 @@ export const FINALE_DEKO = [
 ];
 export const SPECIAL_DEKO_AB = 5;
 export const SPECIAL_DEKO = [
-  { id: 'sp_pokal', name: 'Goldener Pokal', stimmung: 7, text: 'Für fünf geschaffte Minispiel-Specials: ein goldener Pokal am Haus.' },
+  { id: 'sp_pokal', name: 'Goldener Pokal', stimmung: 7, text: 'Für fünf geschaffte Minispiel-Specials: ein goldener Pokal auf dem Kaminsims.' },
 ];
+
+// 10.11. (Feedback: „am Ende ist das Haus recht überladen"): Trophäen hängen im Kaminzimmer der
+// Erfolgswand statt am Haus (wand.js). Herzen bleiben gleich. Die Jury-Plakette hängt dort auch.
+export const TROPHAEEN = ['s_wok', 'e_schlittschuhe', 'g_fahne', 'sp_pokal'];
+
+// Stil-Vorlagen in „Haus schmücken" (10.11.): 1 = schon bei „Schlicht", 2 = ab „Gemütlich",
+// was hier fehlt, steht nur bei „Alles". Die Herzen zählen weiter alles, was man BESITZT.
+export const STIL = {
+  // Am Haus
+  kranz: 1, tuer: 1, zaun: 1, kamin: 1, lichter_dach: 1, fensterstern: 1, schwibbogen: 1, strassenlaterne: 1,
+  zaun_girlande: 2, holz: 2, tuerbogenkranz: 2, nussknacker: 2, lichter_fenster: 2, lichter_zaun: 2,
+  schornstein: 2, eiszapfen: 2, laternen: 2, dach_nikolaus: 2,
+  // Im Garten
+  tanne: 1, tanne_lichter: 1, tanne_kugeln: 1, tanne_stern: 1, schneemann: 1,
+  baum_girlande: 2, futterhaus: 2, schneefrau: 2, schneekind: 2, schlitten: 2, lichterbogen: 2,
+  // Am Stand
+  girlande: 1, standlicht: 1, schild: 1, heizpilz: 2, baenke: 2, musik: 2,
+  // Geschenkt
+  kal_kranz: 1, kal_goldstern: 1, kal_mistel: 2, kal_stiefel: 2, kal_knoedel: 2,
+  auf_geschenke: 2, auf_engel: 2, m_stern: 2, m_fenster: 2, m_herzen: 2, m_rad: 2, m_kutsche: 2,
+  c_kugeln: 2, c_wald: 2, s_hang: 2, e_schnuppen: 2, l_reh: 2, h_polar: 2, f_eisenbahn: 2,
+};
+export const STIL_AB = 12;          // so viele Teile besitzen, dann erscheinen die Vorlagen
+export const VOLL_HINWEIS_AB = 32;  // so viele sichtbar: einmal der Hinweis „Zu voll? Wegräumen geht"
+
 
 
 // Minispiele kommen nach und nach (10.10., Nutzerwunsch: „sonst zu überladen

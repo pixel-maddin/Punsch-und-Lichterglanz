@@ -1872,3 +1872,9 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
 #blatt[data-art="auftraege"] #blattInhalt { overflow-x: hidden; }
 /* 09.11.: Füllstand der Wichtel-Kiste */
 #modal .kiste-balken { width: 70%; margin: calc(var(--px) * 1) auto calc(var(--px) * 3); height: calc(var(--px) * 4); }
+
+/* 10.11.: Stil-Vorlagen oben in „Haus schmücken" (Schlicht / Gemütlich / Alles / Eigene) */
+.zeile.haus.stil-wahl { flex-direction: column; align-items: stretch; gap: calc(var(--px) * 2); }
+.stil-wahl .punktwahl { display: grid; gap: calc(var(--px) * 1.5); }
+.stil-wahl .pw { min-width: 0; justify-content: center; }
+.stil-wahl .pw span { white-space: nowrap; }

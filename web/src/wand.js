@@ -9,7 +9,7 @@
  *
  * Nicht erreichte Socken sind dunkle Schattenrisse.
  */
-import { r, p } from './pixel.js?v=202611091100';
+import { r, p } from './pixel.js?v=202611101000';
 
 export const W = 160, H = 150;
 const REIHEN = [11, 38, 65];            // y der drei Schnüre
@@ -90,7 +90,7 @@ function shade(hex) {
  * n = erreichte Socken, hat(i) = Socke i erreicht?, t = Zeit (Feuer),
  * neu(i) = gerade neu (funkelt).
  */
-export function zeichneWand(c, n, hat, t, neu, finale = false) {
+export function zeichneWand(c, n, hat, t, neu, finale = false, tro = {}) {
   c.clearRect(0, 0, W, H);
   wandHolz(c);
   boden(c, n);
@@ -100,6 +100,7 @@ export function zeichneWand(c, n, hat, t, neu, finale = false) {
   if (n >= 8) kranz(c);
   sims(c, n);
   if (n >= 24) geschenke(c);
+  trophaeen(c, tro, t);
 
   // Je weniger erreicht, desto dunkler und kälter der Raum
   const dunkel = 0.42 * (1 - Math.min(n, 20) / 20);
@@ -117,6 +118,73 @@ export function zeichneWand(c, n, hat, t, neu, finale = false) {
     if (neu(i) && Math.sin(t * 6 + i) > 0) { p(c, s.x + 5, s.y + 3, '#fff6b0'); p(c, s.x + 6, s.y + 2, '#ffd84a'); p(c, s.x + 4, s.y + 2, '#ffd84a'); p(c, s.x + 5, s.y + 1, '#ffd84a'); }
   }
   if (finale) goldGeschenk(c, t);
+  trophaeenFunkeln(c, tro, t);
+}
+
+/*
+ * Trophäen im Kaminzimmer (10.11., Feedback: „am Ende ist das Haus recht überladen"). Vorher hingen
+ * Wok, Schlittschuhe, Siegerfahne, Pokal und die Jury-Plakette klein an der Hauswand; hier sind sie
+ * größer und haben Platz: linke Wand über dem Holzstapel, der Pokal auf dem Sims rechts vom Kranz.
+ * tro = { s_wok, e_schlittschuhe, g_fahne, sp_pokal: true/false, plakette: Farbe oder null }.
+ * TROPHAE_FLAECHEN sind die Tippflächen (ui.js zeigt dann Name und Herkunft).
+ */
+export const TROPHAE_FLAECHEN = {
+  g_fahne: [1, 86, 16, 52], plakette: [18, 84, 14, 16], s_wok: [33, 84, 13, 14], e_schlittschuhe: [18, 101, 14, 15], sp_pokal: [87, 85, 9, 11],
+};
+export function trophaeBei(x, y, tro) {
+  for (const [id, [fx, fy, fw, fh]] of Object.entries(TROPHAE_FLAECHEN)) if (tro[id] && x >= fx && x < fx + fw && y >= fy && y < fy + fh) return id;
+  return null;
+}
+const nagel = (c, x, y) => { p(c, x, y, '#8a8070'); p(c, x, y + 1, '#4a3a2a'); };
+function trophaeen(c, tro, t) {
+  if (tro.g_fahne) {   // lehnt in der Ecke: Stange vom Boden, Tuch weht leicht
+    r(c, 4, 87, 1, 52, '#7a5230'); r(c, 5, 87, 1, 52, '#5a3a20'); r(c, 3, 85, 3, 2, '#e8c030'); p(c, 4, 84, '#fff0a0');
+    const wehen = Math.floor(t * 2.5) % 2;
+    for (let i = 0; i < 11; i++) {
+      const dy = ((i + wehen) % 4 === 0) ? 1 : 0;
+      r(c, 6 + i, 88 + dy, 1, 8, i % 2 ? '#3a8a3a' : '#2f7a30');
+      p(c, 6 + i, 95 + dy, '#245c26');
+    }
+    // Schneeball als Wappen
+    r(c, 9, 90, 4, 4, '#ffffff'); r(c, 10, 89, 2, 6, '#ffffff'); r(c, 8, 91, 6, 2, '#ffffff'); p(c, 12, 93, '#c8d4e4'); p(c, 11, 94, '#c8d4e4');
+  }
+  if (tro.plakette) {   // gerahmt: Holzrahmen, Leinen, Rosette in Platzfarbe mit zwei Bändern
+    const f = tro.plakette;
+    nagel(c, 25, 84);
+    r(c, 19, 86, 13, 13, '#4a2c16'); r(c, 20, 87, 11, 11, '#a8743f'); r(c, 21, 88, 9, 9, '#f4ecd8'); r(c, 21, 88, 9, 1, '#e0d4b8');
+    r(c, 23, 93, 2, 4, '#c83030'); r(c, 26, 93, 2, 4, '#c83030'); p(c, 23, 96, '#a82020'); p(c, 27, 96, '#a82020');
+    r(c, 23, 89, 5, 5, f); r(c, 22, 90, 7, 3, f); r(c, 24, 88, 3, 7, f); p(c, 24, 90, '#ffffff'); p(c, 26, 92, 'rgba(0,0,0,0.25)');
+  }
+  if (tro.s_wok) {   // hängt am Nagel, Stiel nach rechts oben, goldenes Schild darunter
+    nagel(c, 43, 84);
+    r(c, 40, 86, 3, 1, '#a8703a'); r(c, 42, 85, 2, 1, '#c08850'); r(c, 38, 87, 3, 1, '#8a5a32');
+    const reihen = [[34, 12, '#e4e8ee'], [34, 12, '#a8aeb8'], [35, 10, '#949aa4'], [35, 10, '#868c96'], [36, 8, '#767c86'], [37, 6, '#666c76'], [38, 4, '#585e68']];
+    reihen.forEach(([x, w, f], i) => r(c, x, 88 + i, w, 1, f));
+    p(c, 36, 89, '#f4f6fa'); p(c, 37, 90, '#d8dce4'); p(c, 38, 91, '#c0c6ce');   // Glanz
+    r(c, 37, 96, 6, 2, '#e8c030'); p(c, 37, 96, '#fff0a0'); p(c, 42, 97, '#b8901e');
+  }
+  if (tro.e_schlittschuhe) {   // ein Paar am Nagel, Schnürsenkel zusammengeknotet
+    nagel(c, 25, 101);
+    r(c, 22, 103, 1, 2, '#c83a32'); r(c, 28, 103, 1, 2, '#c83a32'); r(c, 23, 102, 5, 1, '#c83a32');
+    for (const bx of [19, 26]) {
+      r(c, bx, 105, 5, 6, '#f4f0e8'); r(c, bx, 105, 1, 6, '#ffffff'); r(c, bx + 4, 106, 1, 5, '#d8d0c0');
+      r(c, bx, 111, 6, 1, '#3a2a1a');
+      r(c, bx - 1, 112, 7, 1, '#c8ccd8'); p(c, bx - 1, 111, '#c8ccd8'); p(c, bx, 112, '#ffffff');
+    }
+  }
+  if (tro.sp_pokal) {   // auf dem Sims rechts vom Kranz
+    const x = 91, y = 86, g1 = '#ffd84a', g2 = '#e8a820', g3 = '#a86a10';
+    r(c, x - 2, y, 5, 1, g2); r(c, x - 2, y + 1, 5, 3, g1); r(c, x - 1, y + 4, 3, 1, g2);
+    p(c, x + 2, y + 1, g3); p(c, x + 2, y + 2, g3); p(c, x + 1, y + 3, g3);
+    r(c, x - 3, y + 1, 1, 2, g2); r(c, x + 3, y + 1, 1, 2, g3);   // Henkel (schmal: links der Kranz, rechts der Nussknacker)
+    r(c, x, y + 5, 1, 3, g2); r(c, x - 2, y + 8, 5, 1, g1); r(c, x - 2, y + 9, 5, 1, g3);
+    p(c, x - 1, y + 1, '#ffffff'); p(c, x, y + 2, '#c83030');
+  }
+}
+/** Nach dem Abdunkeln: Pokal und Plakette blitzen ab und zu auf. */
+function trophaeenFunkeln(c, tro, t) {
+  if (tro.sp_pokal && Math.floor(t * 2) % 6 === 2) { p(c, 90, 87, '#ffffff'); p(c, 89, 87, '#fff2b0'); p(c, 90, 86, '#fff2b0'); }
+  if (tro.plakette && Math.floor(t * 2) % 5 === 0) { p(c, 24, 90, '#ffffff'); p(c, 23, 90, '#fff6c0'); p(c, 24, 89, '#fff6c0'); }
 }
 
 /**

@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611091100';
-import * as Z from './zeit.js?v=202611091100';
-import * as S from './spiel.js?v=202611091100';
-import { FASSADEN } from './config.js?v=202611091100';
-import * as C from './config.js?v=202611091100';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611101000';
+import * as Z from './zeit.js?v=202611101000';
+import * as S from './spiel.js?v=202611101000';
+import { FASSADEN } from './config.js?v=202611101000';
+import * as C from './config.js?v=202611101000';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -622,7 +622,7 @@ function haus(c, G, w, t, L) {
   if (S.zeigt('auf_engel')) engel(c, L, 60, wandO - 28, t);
   if (S.zeigt('h_hahn')) wetterhahn(c, 52, wandO - 28, t);
   if (S.zeigt('l_eich')) dachEichhorn(c, 41, wandO - 10, t);
-  if (S.zeigt('g_fahne')) siegerfahne(c, 34, wandO + 2, t);   // linke Hausecke an der Traufe
+  // g_fahne hängt seit 10.11. im Kaminzimmer der Erfolgswand (wand.js), wie Wok, Schlittschuhe, Pokal und Plakette
   if (w.schnee > 0) schneekatze(c, KATZE_X, wandO + KATZE_DY, S.schneekatzeStufe(), S.schneekatzeBereit(), t);
 }
 
@@ -1224,17 +1224,6 @@ function grummelLauscher(c, G, t) {
   p(c, x + 1, y + 1, '#f0e040'); p(c, x + 1, y + 2, '#1a1a1a'); r(c, x + 1, y + 3, 2, 1, '#2a4a14');
   r(c, x, y - 2, 5, 2, '#c82828'); p(c, x - 1, y - 1, '#c82828'); p(c, x - 2, y, '#ffffff');
   r(c, x + 3, y + 6, 2, 2, '#5a9a30');   // Hand an der Ecke
-}
-/**
- * Grüne Siegerfahne mit Schneeball (18.10.: an der linken Hausecke, Fahne weht nach
- * links - vorher am Stand und dort vor dem Futterhaus). x = Stange, fuss = unten.
- */
-function siegerfahne(c, x, fuss, t) {
-  const hoch = 14;   // 19.10.: kleiner und kürzer (Stange 22 → 14, Tuch 8x5 → 6x4)
-  r(c, x, fuss - hoch, 1, hoch + 1, '#7a5230'); p(c, x, fuss - hoch - 1, '#e8c030');
-  const wehen = Math.floor(t * 3) % 2;
-  for (let i = 0; i < 6; i++) r(c, x - 1 - i, fuss - hoch + ((i + wehen) % 3 === 0 ? 1 : 0), 1, 4, i % 2 ? '#3a8a3a' : '#2f7a30');
-  r(c, x - 4, fuss - hoch + 1, 2, 2, '#ffffff');
 }
 
 function tanne(c, G, w, t, L) {
@@ -1854,22 +1843,6 @@ function rodelhang(c, hz, t, schnee) {
     p(c, x, y, ['#c83a32', '#3a6ab8', '#2f8a3a'][k]); p(c, x, y - 1, '#f2c9a0');
   }
 }
-/** Der Rodel-Wok als Trophäe an der Hauswand rechts neben dem Fenster. */
-function wandWok(c, x, y) {
-  // Der Rodel-Wok als Trophäe (11.10. neu gezeichnet: vorher ein fast
-  // schwarzer runder Klecks, nachts nur „schwarze Pixel"). Von vorn, leicht
-  // schräg hängend: heller Rand, Stahl mit Glanz, Holzstiel nach rechts oben
-  // am Nagel, darunter ein kleines goldenes Schild.
-  p(c, x + 6, y - 6, '#3a3a40'); p(c, x + 5, y - 5, '#8a7a5a');   // Nagel und Schlaufe
-  r(c, x + 2, y - 4, 2, 1, '#8a5a32'); r(c, x + 4, y - 5, 2, 1, '#a8703a');   // Holzstiel
-  r(c, x - 5, y - 3, 10, 1, '#dfe3ea');                     // Rand
-  r(c, x - 5, y - 2, 10, 1, '#9aa0aa');
-  r(c, x - 4, y - 1, 8, 1, '#868c96');
-  r(c, x - 3, y, 6, 1, '#727882');
-  r(c, x - 2, y + 1, 4, 1, '#5e646e');
-  p(c, x - 3, y - 2, '#eef2f6'); p(c, x - 2, y - 1, '#c8ccd4'); p(c, x - 1, y, '#a8aeb8');   // Glanz
-  r(c, x - 2, y + 3, 4, 2, '#e8c030'); p(c, x - 2, y + 3, '#fff0a0'); p(c, x + 1, y + 4, '#b8901e');   // Schild
-}
 /** Zwei Kinder ziehen einen Schlitten über den Gehweg (alle 50 s). */
 function rodelkinder(c, G, t, w) {
   const phase = (t + 30) % 50;
@@ -1892,12 +1865,6 @@ function rodelkinder(c, G, t, w) {
 // ---------------------------------------------------------------------------
 // Von der Eisbahn (10.10.)
 // ---------------------------------------------------------------------------
-/** Ein Paar Schlittschuhe am Nagel neben der Haustür. */
-function wandSchlittschuhe(c, x, y) {
-  p(c, x + 2, y - 1, '#3a3a40');
-  r(c, x + 1, y, 1, 2, '#c83a32'); r(c, x + 3, y, 1, 2, '#c83a32');                       // Schnürsenkel
-  for (const bx of [x - 1, x + 3]) { r(c, bx, y + 2, 3, 4, '#f4f0e8'); r(c, bx, y + 6, 4, 1, '#3a2a1a'); r(c, bx - 1, y + 7, 5, 1, '#c8ccd8'); }
-}
 /** Kleiner Pinguin mit Mütze auf dem Gehweg, wackelt ab und zu. */
 function pinguin(c, x, fuss, t) {
   const w = Math.floor(t * 1.5) % 4 === 0 ? (Math.floor(t * 8) % 2 ? 1 : -1) : 0;
@@ -2634,7 +2601,7 @@ const ORTE = {
   girlande: [152, -37], zuckerstangen: [36, -28], standlicht: [152, -35], schild: [152, -54],
   musik: [134, -28], heizpilz: [127, -30], baenke: [152, -20], stand: [152, -50],
   strassenlaterne: [163, -70], zaun_girlande: [60, -17], schornstein: [102, -80], festbeleuchtung: [80, -80], holz: [117, -30], tuer: [80, -34], zaun: [60, -16], kamin: [56, -50],
-  laternen: [80, -24], auf_geschenke: [18, -26], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], f_eisenbahn: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_wok: [117, -52], s_hang: [168, -70], e_schlittschuhe: [70, -54], sp_pokal: [42, -58], g_vorrat: [12, -4], g_lauscher: [36, -44], g_fahne: [31, -71], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
+  laternen: [80, -24], auf_geschenke: [18, -26], auf_lebkuchenmann: [28, -26], auf_rodel: [62, -32], auf_engel: [60, -98], h_kugel: [7, -24], h_flamingo: [119, -16], h_orgel: [169, -12], h_hahn: [52, -110], l_hasen: [56, -21], l_eich: [42, -82], l_reh: [22, -25], h_polar: [90, -120], m_rad: [22, -62], m_stern: [147, -77], m_fenster: [80, -52], m_herzen: [152, -34], m_kutsche: [90, 4], f_eisenbahn: [90, 4], c_kugeln: [128, -90], c_dachbaum: [92, -100], c_wald: [170, -60], s_kinder: [60, -10], s_hang: [168, -70], g_vorrat: [12, -4], g_lauscher: [36, -44], e_pinguin: [97, -8], e_schnuppen: [100, -130], farbe_weiss: [80, -50], farbe_rot: [80, -50], farbe_lebkuchen: [80, -50], farbe_eis: [80, -50], farbe_chalet: [80, -50],
 };
 export function ortVon(id) { const o = ORTE[id]; return o ? { x: o[0], y: o[1] } : null; }
 const funken = [];
@@ -2844,8 +2811,6 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   briefkasten(e, 86, GW - 40, t, L);
   if (S.zeigt('m_fenster')) fensterbilder(e, GW);
   if (S.zeigt('c_dachbaum')) dachbaum(e, L, 92, GW - 94, t, w);
-  if (S.zeigt('s_wok')) wandWok(e, 118, GW - 52);
-  if (S.zeigt('e_schlittschuhe')) wandSchlittschuhe(e, 70, GW - 58);
   // Verdeckung: Alle Lichter werden erst am Ende über das Bild gemalt. Was
   // danach DAVOR gezeichnet wird (Tanne vor der Kirche, Leute vor dem Zaun),
   // würde sonst von ihnen durchleuchtet. Deshalb ein Schnappschuss nach jeder
@@ -2908,9 +2873,6 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   if (S.zeigt('l_hasen')) hasenfamilie(e, 50, GW - 11, t);
   if (S.zeigt('l_reh')) gartenReh(e, 22, GW - 11, t);
   if (S.zeigt('e_pinguin')) pinguin(e, 97, GW - 1, t);
-  const pl = S.plakette();
-  if (pl != null) plakette(e, L, 116, GW - 62, pl, t);
-  if (S.zeigt('sp_pokal')) pokal(e, L, 42, GW - 62, t);   // fünf Minispiel-Specials (24.10.), links gegenüber der Plakette
   // Vor dem Stand (sonst verdeckt er sie): Flamingo vor dem Schlitten, Drehorgel rechts.
   // Garten rechts der Tür (09.10. neu verteilt, vorher standen Laterne und
   // Nussknacker auf demselben Pixel, Flamingo mitten im Lichter-Rentier)
@@ -3400,30 +3362,8 @@ function schneekatze(c, x, fuss, stufe, bereit, t) {
   if (bereit) funkelnBauen(c, x + 3, fuss - 8 - (stufe >= 2 ? stufe : 0), t);
 }
 
-// ---------------------------------------------------------------------------
-// Plakette „Schönstes Haus" (11.10.): an der Hauswand rechts
-// ---------------------------------------------------------------------------
-function plakette(c, L, x, y, platz, t) {
-  const f = C.WETTBEWERB.plaetze[platz].f;
-  r(c, x - 1, y + 5, 1, 3, '#c83030'); r(c, x + 2, y + 5, 1, 3, '#c83030'); p(c, x - 1, y + 8, '#a82020'); p(c, x + 2, y + 8, '#a82020');   // Bänder
-  r(c, x - 1, y, 4, 5, f); r(c, x - 2, y + 1, 6, 3, f); p(c, x, y + 1, '#ffffff'); p(c, x + 1, y + 2, ton(f, -0.3));
-  if (Math.floor(t * 2) % 5 === 0) L.push({ x, y: y + 1, f: '#ffffff', halo: 2, an: 0.5 });
-}
-
-/** Goldener Pokal auf einem Wandbrett (Minispiel-Special, 24.10.); y = Oberkante. */
-function pokal(c, L, x, y, t) {
-  const g1 = '#ffd84a', g2 = '#e8a820', g3 = '#a86a10';
-  r(c, x - 3, y, 7, 1, g2); r(c, x - 3, y + 1, 7, 3, g1);          // Schale
-  r(c, x - 2, y + 4, 5, 1, g2); p(c, x + 3, y + 1, g3); p(c, x + 3, y + 2, g3); p(c, x + 2, y + 3, g3);
-  p(c, x - 4, y + 1, g2); p(c, x - 5, y + 2, g2); p(c, x - 4, y + 3, g2);   // Henkel
-  p(c, x + 4, y + 1, g3); p(c, x + 5, y + 2, g3); p(c, x + 4, y + 3, g3);
-  r(c, x, y + 5, 1, 2, g2); r(c, x - 2, y + 7, 5, 1, g1); r(c, x - 2, y + 8, 5, 1, g3);   // Fuß
-  p(c, x - 2, y + 1, '#ffffff'); p(c, x - 1, y + 2, '#fff2b0');                          // Glanz
-  p(c, x, y + 2, '#c83030');                                                             // roter Stein
-  r(c, x - 5, y + 9, 11, 1, '#7a5230'); r(c, x - 5, y + 10, 11, 1, '#4a3018');          // Wandbrett
-  p(c, x - 4, y + 11, '#4a3018'); p(c, x + 4, y + 11, '#4a3018');
-  if (Math.floor(t * 2) % 6 === 2) L.push({ x: x - 2, y: y + 1, f: '#ffffff', halo: 2, an: 0.6 });   // funkelt ab und zu
-}
+// Plakette „Schönstes Haus", Pokal, Wok, Schlittschuhe und Siegerfahne hingen bis 10.11. hier am Haus -
+// jetzt im Kaminzimmer der Erfolgswand (wand.js, trophaeen()).
 
 // ---------------------------------------------------------------------------
 // Feuerwerk an Silvester (11.10.): Raketen steigen, platzen, Funken fallen

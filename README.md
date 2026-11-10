@@ -86,6 +86,11 @@ Dach warten Rentiere oder ein steckengebliebener Nikolaus, am Stand spielt
 eine Blaskapelle oder der Elvis-Wichtel. Die dritte Variante zeigt sich erst,
 wenn man die zweite hat. Jede zusätzliche bringt ♥ +2.
 
+Ganz oben wählt man mit einem Tipp, wie viel zu sehen sein soll: **Schlicht**,
+**Gemütlich** oder **Alles** (wer selbst umgestellt hat, findet seine Auswahl
+unter **Eigene** wieder). Weggeräumtes zählt weiter mit: Die ♥ Stimmung - und
+damit die Jury am 23. Dezember - rechnet alles, was man besitzt.
+
 **Der fahrende Händler** kommt ab dem sechsten Spieltag (wer erst ab Mitte Dezember
 spielt, ab dem zweiten) bis zu zweimal am Tag mit seinem Karren vorbei
 (links vor dem Haus antippen). Er hat Deko, die es nur bei ihm gibt -
@@ -138,7 +143,9 @@ bringt ein Sammelstück, das es nur dort gibt. Eilige Gäste (orange Blase)
 warten kürzer, zahlen aber doppelt.
 
 Im zweiten Reiter hängt die **Erfolgswand**: 24 Socken über dem Kamin, eine
-je Erfolg. Mit jeder Socke wird das Wohnzimmer weihnachtlicher.
+je Erfolg. Mit jeder Socke wird das Wohnzimmer weihnachtlicher. Hier hängen
+auch die Trophäen: Wok, Schlittschuhe, Siegerfahne, der goldene Pokal und die
+Plakette der Jury - antippen zeigt, wofür es sie gab.
 
 Wer **wirklich alles** gekauft und voll ausgebaut hat (auch die ✦ Extras), findet
 vor dem Kamin ein goldenes Geschenk. Darin steckt das letzte Stück fürs Haus:
@@ -189,7 +196,7 @@ steht auf ihren Schildern, wie lange noch; danach braucht keiner mehr einen Baum
 legen und seitlich ziehen - der Wok folgt. Tannen, Steinen, Schneemännern und
 Holzstapeln ausweichen, Sterne einsammeln - große Sterne zählen doppelt. Je
 schneller du im Ziel bist, desto mehr Punkte. Ab 1.000, 1.550 und 1.900 Punkten
-Rekord: Rodelkinder auf dem Gehweg, dein Wok als Trophäe an der Hauswand und
+Rekord: Rodelkinder auf dem Gehweg, dein Wok als Trophäe im Kaminzimmer und
 ein Rodelhang am Horizont.
 
 In den Minispielen läuft eigene Musik (eins von zwei Stücken, zufällig). Jedes Minispiel hat drei Schwierigkeiten: Leicht (Punkte ×0,7),
@@ -199,7 +206,7 @@ Normal und Schwer (Punkte ×1,4) - der Rekord gilt für alle.
 auf der Karte. Dort gibt es an diesem Tag **doppelte Sterne**, dafür ist es
 schwerer: etwas schneller und mit einem eigenen Dreh (mehr Rehe, ungeduldige
 Kunden, schmaler goldener Bereich, mehr Hindernisse oder mehr Wichtel). Nach
-fünf geschafften Specials hängt ein goldener Pokal am Haus.
+fünf geschafften Specials steht ein goldener Pokal auf dem Kaminsims.
 
 **Eisbahn (Minispiel, am Weiher):** Schlittschuhlaufen! Tippen lässt den
 Wichtel springen - über Schneemänner, Steine, Holzstapel und Eislöcher. In der
@@ -209,7 +216,7 @@ doppelten Punkten - aber wer landet, bevor der Trick fertig ist, fällt hin.
 Sterne hängen über den Hindernissen und auch zwischen ihnen auf der Bahn -
 manchmal als Bogen aus drei Sternen, den man mit einem genau getimten Sprung
 ganz einsammelt.
-Ab 700, 1.400 und 2.400 Punkten Rekord: Schlittschuhe neben der Haustür, ein
+Ab 700, 1.400 und 2.400 Punkten Rekord: Schlittschuhe im Kaminzimmer, ein
 Pinguin auf dem Gehweg und Sternschnuppen am Nachthimmel.
 
 **Weihnachtsmann:** Ab und zu versteckt er sich irgendwo auf der Karte und
@@ -318,7 +325,7 @@ und Heiligabend und Silvester werden zum echten Datum noch einmal gefeiert.
   Rückblick gibt es danach auch im Menü.
 - **Das schönste Haus im Dorf:** Ab dem 3. Advent wird es angekündigt, am
   23. Dezember kommt die Jury. Je nach Stimmung gibt es Gold, Silber oder
-  Bronze (oder eine Urkunde), Sterne und eine Plakette an der Hauswand.
+  Bronze (oder eine Urkunde), Sterne und eine Plakette fürs Kaminzimmer.
   Wer erst seit ein paar Tagen spielt, ist noch nicht dabei.
 - **Silvester:** Schon den ganzen Tag steigen leise ein paar Raketen über
   dem Dorf, ab 18 Uhr immer mehr, um Mitternacht das große Feuerwerk. Einmal
