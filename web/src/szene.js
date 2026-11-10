@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611101000';
-import * as Z from './zeit.js?v=202611101000';
-import * as S from './spiel.js?v=202611101000';
-import { FASSADEN } from './config.js?v=202611101000';
-import * as C from './config.js?v=202611101000';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611101100';
+import * as Z from './zeit.js?v=202611101100';
+import * as S from './spiel.js?v=202611101100';
+import { FASSADEN } from './config.js?v=202611101100';
+import * as C from './config.js?v=202611101100';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt

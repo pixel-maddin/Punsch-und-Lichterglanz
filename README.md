@@ -151,6 +151,10 @@ Wer **wirklich alles** gekauft und voll ausgebaut hat (auch die ✦ Extras), fin
 vor dem Kamin ein goldenes Geschenk. Darin steckt das letzte Stück fürs Haus:
 die **Weihnachtseisenbahn**, die ab und zu vor dem Haus vorbeituckert.
 
+Und wer wirklich **alles** sammelt - jede Variante, jede Deko aus Kalender,
+Aufträgen, Minispielen, vom Händler und vom Markt und jedes Rezept - bekommt
+zum Schluss den **Mini-Stern**, der im Kaminzimmer über dem Baum hängt.
+
 ## Die Karte
 
 Der Knopf **Karte** unten links öffnet eine Übersichtskarte der Gegend, mit

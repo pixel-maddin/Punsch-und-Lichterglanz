@@ -9,7 +9,7 @@
  *
  * Nicht erreichte Socken sind dunkle Schattenrisse.
  */
-import { r, p } from './pixel.js?v=202611101000';
+import { r, p } from './pixel.js?v=202611101100';
 
 export const W = 160, H = 150;
 const REIHEN = [11, 38, 65];            // y der drei Schnüre
@@ -129,7 +129,7 @@ export function zeichneWand(c, n, hat, t, neu, finale = false, tro = {}) {
  * TROPHAE_FLAECHEN sind die Tippflächen (ui.js zeigt dann Name und Herkunft).
  */
 export const TROPHAE_FLAECHEN = {
-  g_fahne: [1, 86, 16, 52], plakette: [18, 84, 14, 16], s_wok: [33, 84, 13, 14], e_schlittschuhe: [18, 101, 14, 15], sp_pokal: [87, 85, 9, 11],
+  g_fahne: [1, 86, 16, 52], plakette: [18, 84, 14, 16], ministern: [113, 81, 15, 16], s_wok: [33, 84, 13, 14], e_schlittschuhe: [18, 101, 14, 15], sp_pokal: [87, 85, 9, 11],
 };
 export function trophaeBei(x, y, tro) {
   for (const [id, [fx, fy, fw, fh]] of Object.entries(TROPHAE_FLAECHEN)) if (tro[id] && x >= fx && x < fx + fw && y >= fy && y < fy + fh) return id;
@@ -172,6 +172,13 @@ function trophaeen(c, tro, t) {
       r(c, bx - 1, 112, 7, 1, '#c8ccd8'); p(c, bx - 1, 111, '#c8ccd8'); p(c, bx, 112, '#ffffff');
     }
   }
+  if (tro.ministern) {   // 10.11.: der Mini-Stern für wirklich alles - an einem roten Band, rechte Wand über dem Baum
+    nagel(c, 120, 81);
+    r(c, 120, 83, 1, 3, '#c83030');
+    const STERN = ['....#....', '....#....', '...###...', '#########', '.#######.', '..#####..', '..##.##..', '.##...##.', '.#.....#.'];
+    STERN.forEach((z, y) => { for (let x = 0; x < 9; x++) if (z[x] === '#') p(c, 116 + x, 86 + y, x + y > 9 ? '#e8a820' : '#ffd84a'); });
+    p(c, 119, 89, '#fff6c0'); p(c, 120, 88, '#fff6c0'); p(c, 118, 90, '#fff6c0');   // Glanz
+  }
   if (tro.sp_pokal) {   // auf dem Sims rechts vom Kranz
     const x = 91, y = 86, g1 = '#ffd84a', g2 = '#e8a820', g3 = '#a86a10';
     r(c, x - 2, y, 5, 1, g2); r(c, x - 2, y + 1, 5, 3, g1); r(c, x - 1, y + 4, 3, 1, g2);
@@ -183,6 +190,13 @@ function trophaeen(c, tro, t) {
 }
 /** Nach dem Abdunkeln: Pokal und Plakette blitzen ab und zu auf. */
 function trophaeenFunkeln(c, tro, t) {
+  if (tro.ministern) {   // leuchtet sanft, funkelt reihum an den Spitzen
+    const g = c.createRadialGradient(120.5, 90, 1, 120.5, 90, 11);
+    g.addColorStop(0, `rgba(255, 225, 120, ${0.32 + 0.08 * Math.sin(t * 2.2)})`); g.addColorStop(1, 'rgba(255, 225, 120, 0)');
+    c.fillStyle = g; c.fillRect(108, 78, 26, 24);
+    const spitze = [[120, 86], [116, 89], [124, 89], [117, 94], [123, 94]][Math.floor(t * 1.5) % 5];
+    p(c, spitze[0], spitze[1], '#ffffff');
+  }
   if (tro.sp_pokal && Math.floor(t * 2) % 6 === 2) { p(c, 90, 87, '#ffffff'); p(c, 89, 87, '#fff2b0'); p(c, 90, 86, '#fff2b0'); }
   if (tro.plakette && Math.floor(t * 2) % 5 === 0) { p(c, 24, 90, '#ffffff'); p(c, 23, 90, '#fff6c0'); p(c, 24, 89, '#fff6c0'); }
 }

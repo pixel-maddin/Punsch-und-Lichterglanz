@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611101000';
-import * as Z from './zeit.js?v=202611101000';
-import { neueFarben } from './pixel.js?v=202611101000';
+import * as C from './config.js?v=202611101100';
+import * as Z from './zeit.js?v=202611101100';
+import { neueFarben } from './pixel.js?v=202611101100';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -662,6 +662,32 @@ export function finaleOeffnen() {
   lauf.zugJetzt = true;   // die Eisenbahn fährt gleich einmal vorbei (szene.js)
   speichere();
   return C.FINALE_DEKO[0];
+}
+
+/*
+ * Der Mini-Stern (10.11., Nutzerwunsch: „wenn man wirklich alles gekauft und freigeschaltet hat"):
+ * alle Artikel voll ausgebaut (= das Finale), JEDE Variante, jede geschenkte Deko (Kalender,
+ * Aufträge, Händler, Markt, Minispiele, Pokal, Eisenbahn) und alle Rezepte aus Backstube und vom
+ * Markt. Dann hängt ein kleiner goldener Stern im Kaminzimmer (wand.js). st.ministern = Zeitpunkt.
+ * Socken zählen nicht - die sind Erfolge, nichts zum Kaufen oder Freischalten.
+ */
+export function allesWirklich() {
+  let fehlt = 0, gesamt = 0;
+  const zaehle = (ok) => { gesamt++; if (!ok) fehlt++; };
+  for (const a of C.ARTIKEL) zaehle(status(a).fertig);
+  for (const [pl, vs] of Object.entries(C.VARIANTEN)) for (let i = 1; i < vs.length; i++) zaehle(hatVariante(pl, i));
+  for (const d of geschenktListen()) zaehle(!!st.kalDeko[d.id]);
+  for (const r of C.BACK_REZEPTE) zaehle(miniRekord('back') >= r.ab);
+  for (const r of C.MARKT_REZEPTE) zaehle(rezeptStufe(r.id) > 0);
+  return { fehlt, gesamt };
+}
+// erst nach dem Finale prüfen (billig), dann alles
+export const ministernBereit = () => !st.ministern && !!st.finale && allesWirklich().fehlt === 0;
+export function ministernNehmen() {
+  if (!ministernBereit()) return false;
+  st.ministern = Date.now();
+  speichere();
+  return true;
 }
 
 export function status(a) {

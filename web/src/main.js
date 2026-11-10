@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611101000';
-import * as S from './spiel.js?v=202611101000';
-import * as Z from './zeit.js?v=202611101000';
-import * as T from './ton.js?v=202611101000';
-import * as LI from './lichtung.js?v=202611101000';
-import * as CB from './christbaum.js?v=202611101000';
-import * as KA from './karte.js?v=202611101000';
-import * as SB from './schlitten.js?v=202611101000';
-import * as EB from './schlittschuh.js?v=202611101000';
-import * as BS from './backstube.js?v=202611101000';
-import * as UI from './ui.js?v=202611101000';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611101000';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611101000';
-import * as Kacheln from './kacheln.js?v=202611101000';
-import * as Lernen from './lernen.js?v=202611101000';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611101000';
-import * as A from './auftraege.js?v=202611101000';
-import * as E from './erfolge.js?v=202611101000';
-import * as ZL from './ziele.js?v=202611101000';
+import * as C from './config.js?v=202611101100';
+import * as S from './spiel.js?v=202611101100';
+import * as Z from './zeit.js?v=202611101100';
+import * as T from './ton.js?v=202611101100';
+import * as LI from './lichtung.js?v=202611101100';
+import * as CB from './christbaum.js?v=202611101100';
+import * as KA from './karte.js?v=202611101100';
+import * as SB from './schlitten.js?v=202611101100';
+import * as EB from './schlittschuh.js?v=202611101100';
+import * as BS from './backstube.js?v=202611101100';
+import * as UI from './ui.js?v=202611101100';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611101100';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611101100';
+import * as Kacheln from './kacheln.js?v=202611101100';
+import * as Lernen from './lernen.js?v=202611101100';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611101100';
+import * as A from './auftraege.js?v=202611101100';
+import * as E from './erfolge.js?v=202611101100';
+import * as ZL from './ziele.js?v=202611101100';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -487,6 +487,8 @@ setInterval(() => {
     S.st.vollHinweis = true; S.speichere();
     UI.toast('Dein Haus wird schön voll! Tipp aufs Haus: Unter „Haus schmücken" kannst du Teile wegräumen oder „Gemütlich" wählen - deine ♥ bleiben.', 'hinweis');
   }
+  // Der Mini-Stern (10.11.): wirklich alles gekauft und freigeschaltet - einmal, nie über etwas anderem
+  if (S.ministernBereit() && !UI.fensterOffen() && !UI.panelOffen() && !Lernen.pausiert()) { S.ministernNehmen(); UI.zeigeMinistern(); }
   if (S.neujahrJetzt()) { T.spiele('feuerwerk'); UI.toast(`Frohes neues Jahr ${Z.jetzt().getFullYear()}!`, 'spezial'); }
   const ziel = ZL.pruefe();
   if (ziel) {
