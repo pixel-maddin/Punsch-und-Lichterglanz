@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611101100';
-import * as S from './spiel.js?v=202611101100';
-import * as Z from './zeit.js?v=202611101100';
-import * as T from './ton.js?v=202611101100';
-import * as LI from './lichtung.js?v=202611101100';
-import * as CB from './christbaum.js?v=202611101100';
-import * as KA from './karte.js?v=202611101100';
-import * as SB from './schlitten.js?v=202611101100';
-import * as EB from './schlittschuh.js?v=202611101100';
-import * as BS from './backstube.js?v=202611101100';
-import * as UI from './ui.js?v=202611101100';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611101100';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611101100';
-import * as Kacheln from './kacheln.js?v=202611101100';
-import * as Lernen from './lernen.js?v=202611101100';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611101100';
-import * as A from './auftraege.js?v=202611101100';
-import * as E from './erfolge.js?v=202611101100';
-import * as ZL from './ziele.js?v=202611101100';
+import * as C from './config.js?v=202611101200';
+import * as S from './spiel.js?v=202611101200';
+import * as Z from './zeit.js?v=202611101200';
+import * as T from './ton.js?v=202611101200';
+import * as LI from './lichtung.js?v=202611101200';
+import * as CB from './christbaum.js?v=202611101200';
+import * as KA from './karte.js?v=202611101200';
+import * as SB from './schlitten.js?v=202611101200';
+import * as EB from './schlittschuh.js?v=202611101200';
+import * as BS from './backstube.js?v=202611101200';
+import * as UI from './ui.js?v=202611101200';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611101200';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611101200';
+import * as Kacheln from './kacheln.js?v=202611101200';
+import * as Lernen from './lernen.js?v=202611101200';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611101200';
+import * as A from './auftraege.js?v=202611101200';
+import * as E from './erfolge.js?v=202611101200';
+import * as ZL from './ziele.js?v=202611101200';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -370,7 +370,9 @@ function frame(jetzt) {
   const steht = UI.fensterOffen() || !!UI.panelOffen() || querFormat.matches || Lernen.pausiert();
   // Pause heißt ALLES steht, auch Schnee, Funken und Gehbewegungen: Die hängen
   // an der Zeichen-Uhr tSek, die lief vorher weiter (gemeldet 30.09.)
-  if (steht) dt = 0;
+  // 10.11.: solange der Laden für einen Kauf oder Stilwechsel kurz zur Seite tritt, läuft die
+  // ZEICHEN-Uhr weiter (Schnee, Lichter) - sonst wirkt das Bild eingefroren. Das Spiel selbst steht.
+  if (steht && !UI.zeigtKauf()) dt = 0;
   tSek += dt;
   // Hinter einer Hinweisblase wird das Bild blasser - man sieht, dass Pause ist
   huelleEl.classList.toggle('pausiert', Lernen.pausiert());

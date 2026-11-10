@@ -5,31 +5,31 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611101100';
-import * as S from './spiel.js?v=202611101100';
-import * as Z from './zeit.js?v=202611101100';
-import * as T from './ton.js?v=202611101100';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611101100';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611101100';
-import { zielHaus } from './fein.js?v=202611101100';
-import * as AN from './ansicht.js?v=202611101100';
-import { zeichneWelt, ortVon, funkeln, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611101100';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611101100';
-import * as A from './auftraege.js?v=202611101100';
-import * as E from './erfolge.js?v=202611101100';
-import * as ZL from './ziele.js?v=202611101100';
-import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611101100';
-import * as KA from './karte.js?v=202611101100';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611101100';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611101100';
-import * as SW from './schneeball.js?v=202611101100';
-import * as LI from './lichtung.js?v=202611101100';
-import * as MH from './minihud.js?v=202611101100';
-import * as CB from './christbaum.js?v=202611101100';
-import * as SB from './schlitten.js?v=202611101100';
-import * as EB from './schlittschuh.js?v=202611101100';
-import * as BS from './backstube.js?v=202611101100';
-import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611101100';
+import * as C from './config.js?v=202611101200';
+import * as S from './spiel.js?v=202611101200';
+import * as Z from './zeit.js?v=202611101200';
+import * as T from './ton.js?v=202611101200';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611101200';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611101200';
+import { zielHaus } from './fein.js?v=202611101200';
+import * as AN from './ansicht.js?v=202611101200';
+import { zeichneWelt, ortVon, funkeln, glitzern, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611101200';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611101200';
+import * as A from './auftraege.js?v=202611101200';
+import * as E from './erfolge.js?v=202611101200';
+import * as ZL from './ziele.js?v=202611101200';
+import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611101200';
+import * as KA from './karte.js?v=202611101200';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611101200';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611101200';
+import * as SW from './schneeball.js?v=202611101200';
+import * as LI from './lichtung.js?v=202611101200';
+import * as MH from './minihud.js?v=202611101200';
+import * as CB from './christbaum.js?v=202611101200';
+import * as SB from './schlitten.js?v=202611101200';
+import * as EB from './schlittschuh.js?v=202611101200';
+import * as BS from './backstube.js?v=202611101200';
+import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611101200';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -870,7 +870,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611101100`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611101200`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -1269,12 +1269,19 @@ function stilKasten() {
   const werte = STIL_WAHL.filter((v) => v.wert !== 'eigene' || akt === 'eigene' || S.stilEigeneDa());
   const wahl = punktWahl(werte, akt, (v) => {
     if (v === akt) return;
+    const vorher = Object.fromEntries(S.stilTeile().map((id) => [id, S.zeigt(id)]));
     S.setzeStil(v);
+    // Was sich geändert hat, glitzert (10.11.: vorher stand das Bild nur still da - „hängt das Spiel?"),
+    // nacheinander von links nach rechts; der Name der Wahl steigt über dem Haus auf
+    const orte = Object.keys(vorher).filter((id) => vorher[id] !== S.zeigt(id)).map(ortVon).filter(Boolean).sort((a, b) => a.x - b.x);
+    orte.forEach((o, i) => glitzern(o.x, o.y, Math.round(i / Math.max(1, orte.length - 1) * 700)));
+    funkeln(80, -64, STIL_WAHL.find((x) => x.wert === v).text.toUpperCase());
+    T.spiele('spezial');
     // kurz zur Seite, damit man das Haus sieht (wie nach einem Kauf)
     const b = $('#blatt');
     b.classList.add('kurz-weg');
     clearTimeout(kaufZeigenT);
-    kaufZeigenT = setTimeout(() => b.classList.remove('kurz-weg'), 2000);
+    kaufZeigenT = setTimeout(() => b.classList.remove('kurz-weg'), 2600);
   }, STIL_PUNKT);
   wahl.style.gridTemplateColumns = `repeat(${werte.length}, minmax(0, 1fr))`;
   z.appendChild(wahl);
@@ -2701,7 +2708,7 @@ export function oeffneMenue() {
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
   // 05.11.: daneben die Andenken-Sterne (einer je Jahr, das man bis Silvester gespielt hat)
   const an = S.st.andenken || 0;
-  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611101100" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611101200" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -3030,7 +3037,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611101100" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611101200" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {

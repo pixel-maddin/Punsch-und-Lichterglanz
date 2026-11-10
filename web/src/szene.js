@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611101100';
-import * as Z from './zeit.js?v=202611101100';
-import * as S from './spiel.js?v=202611101100';
-import { FASSADEN } from './config.js?v=202611101100';
-import * as C from './config.js?v=202611101100';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611101200';
+import * as Z from './zeit.js?v=202611101200';
+import * as S from './spiel.js?v=202611101200';
+import { FASSADEN } from './config.js?v=202611101200';
+import * as C from './config.js?v=202611101200';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -2671,6 +2671,29 @@ function zeichneFunkeln(c, GW) {
   }
 }
 
+/*
+ * Glitzer (10.11., gemeldet: beim Umstellen auf Schlicht/Gemütlich/Alles „hat man das Gefühl, das
+ * Spiel ist hängen geblieben"): an jedem Teil, das dabei an- oder ausgeht, ein paar kleine
+ * Funkelsterne, leicht versetzt nacheinander. Läuft auf der echten Uhr wie funkeln().
+ */
+const glitzer = [];
+export function glitzern(x, y, verzug = 0) {
+  const t0 = performance.now() + verzug;
+  for (let k = 0; k < 5; k++) glitzer.push({ x: x + Math.random() * 14 - 7, y: y + Math.random() * 12 - 8, t0: t0 + Math.random() * 350, d: 650 + Math.random() * 500 });
+}
+function zeichneGlitzer(c, GW) {
+  const jetzt = performance.now();
+  for (let i = glitzer.length - 1; i >= 0; i--) {
+    const g = glitzer[i], a = (jetzt - g.t0) / g.d;
+    if (a < 0) continue;
+    if (a >= 1) { glitzer.splice(i, 1); continue; }
+    const x = Math.round(g.x), y = Math.round(GW + g.y - a * 4), s = Math.sin(a * Math.PI);   // geht auf und wieder zu
+    p(c, x, y, '#ffffff');
+    if (s > 0.35) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) p(c, x + dx, y + dy, '#ffe27a');
+    if (s > 0.8) for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2]]) p(c, x + dx, y + dy, '#fff6c8');
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Der Nikolaus fliegt vorbei (selten). Antippen schenkt Sterne.
 // ---------------------------------------------------------------------------
@@ -2908,7 +2931,7 @@ export function zeichneWelt(c, G, t, dt, opts = {}) {
   const fw = opts.karte ? 0 : S.feuerwerk(d);
   if (!opts.karte && (fw > 0 || fwRaketen.length || fwFunken.length)) feuerwerk(c, GW, fw, dt);
   wetter(c, G, w, t, dt);
-  if (!opts.karte) zeichneFunkeln(c, GW);
+  if (!opts.karte) { zeichneGlitzer(c, GW); zeichneFunkeln(c, GW); }
   if (!opts.karte && S.lauf.schlitten) nikolausSchlitten(c, S.lauf.schlitten, t, G);
 
   // Fliegende Beträge über den Köpfen
