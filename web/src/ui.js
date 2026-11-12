@@ -5,31 +5,31 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611121000';
-import * as S from './spiel.js?v=202611121000';
-import * as Z from './zeit.js?v=202611121000';
-import * as T from './ton.js?v=202611121000';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611121000';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611121000';
-import { zielHaus } from './fein.js?v=202611121000';
-import * as AN from './ansicht.js?v=202611121000';
-import { zeichneWelt, ortVon, funkeln, glitzern, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611121000';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611121000';
-import * as A from './auftraege.js?v=202611121000';
-import * as E from './erfolge.js?v=202611121000';
-import * as ZL from './ziele.js?v=202611121000';
-import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611121000';
-import * as KA from './karte.js?v=202611121000';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611121000';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611121000';
-import * as SW from './schneeball.js?v=202611121000';
-import * as LI from './lichtung.js?v=202611121000';
-import * as MH from './minihud.js?v=202611121000';
-import * as CB from './christbaum.js?v=202611121000';
-import * as SB from './schlitten.js?v=202611121000';
-import * as EB from './schlittschuh.js?v=202611121000';
-import * as BS from './backstube.js?v=202611121000';
-import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611121000';
+import * as C from './config.js?v=202611121100';
+import * as S from './spiel.js?v=202611121100';
+import * as Z from './zeit.js?v=202611121100';
+import * as T from './ton.js?v=202611121100';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611121100';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611121100';
+import { zielHaus } from './fein.js?v=202611121100';
+import * as AN from './ansicht.js?v=202611121100';
+import { zeichneWelt, ortVon, funkeln, glitzern, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611121100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611121100';
+import * as A from './auftraege.js?v=202611121100';
+import * as E from './erfolge.js?v=202611121100';
+import * as ZL from './ziele.js?v=202611121100';
+import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611121100';
+import * as KA from './karte.js?v=202611121100';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611121100';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611121100';
+import * as SW from './schneeball.js?v=202611121100';
+import * as LI from './lichtung.js?v=202611121100';
+import * as MH from './minihud.js?v=202611121100';
+import * as CB from './christbaum.js?v=202611121100';
+import * as SB from './schlitten.js?v=202611121100';
+import * as EB from './schlittschuh.js?v=202611121100';
+import * as BS from './backstube.js?v=202611121100';
+import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611121100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -870,7 +870,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611121000`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611121100`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2708,7 +2708,7 @@ export function oeffneMenue() {
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
   // 05.11.: daneben die Andenken-Sterne (einer je Jahr, das man bis Silvester gespielt hat)
   const an = S.st.andenken || 0;
-  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611121000" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611121100" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -3037,7 +3037,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611121000" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611121100" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {
@@ -3066,11 +3066,17 @@ export function waehleModus(fertig) {
   const wann = bis > 1 ? `in ${bis} Tagen` : bis === 1 ? 'morgen' : null;
   // Empfohlen (28.10., Nutzerwunsch): vom 24. November bis Ende Dezember der echte Kalender - dann ist
   // ohnehin Advent bzw. gleich so weit. Sonst der eigene Advent (Betatest 2). Die Empfehlung steht oben.
-  const m = heute.getMonth(), echtEmpf = (m === 10 && heute.getDate() >= 24) || m === 11;
+  // 12.11. (Datumsprüfung): ab Heiligabend nicht mehr - dann ist der Advent im echten Kalender vorbei,
+  // die Jury war schon da, und bis zur Winterpause am 7.1. bleiben höchstens zwei Wochen
+  const dt = Z.dezemberTag(heute), restTage = C.SAISON_ENDE_TAG - dt;
+  const m = heute.getMonth(), echtEmpf = (m === 10 && heute.getDate() >= 24) || (dt >= 1 && dt < 24);
   const marke = ' <i class="empf">Empfohlen</i>';
+  const lage = wann ? `Das erste Türchen gibt es am 1. Dezember - also ${wann}.`
+    : dt < 24 ? 'Du steigst mitten im Advent ein.'
+    : `${dt === 24 ? 'Heute ist schon Heiligabend' : 'Weihnachten ist schon vorbei'}, und dein Stand hat nur noch ${restTage === 1 ? 'heute' : `${restTage} Tage`} offen - ab dem 7. Januar ist Winterpause.`;
   const klassisch = `<button class="modus${echtEmpf ? ' empfohlen' : ''}" data-m="echt">
       <b>${sym('kerze')} ${MODUS_NAME.echt}${echtEmpf ? marke : ''}</b>
-      <span>Das Spiel läuft mit dem echten Datum (heute ist der ${datum}). ${wann ? `Das erste Türchen gibt es am 1. Dezember - also ${wann}.` : m === 11 ? 'Du steigst mitten im Advent ein.' : 'Die Adventszeit ist gerade vorbei - sie kommt erst im Dezember wieder.'}</span>
+      <span>Das Spiel läuft mit dem echten Datum (heute ist der ${datum}). ${lage}</span>
     </button>`;
   const individuell = `<button class="modus${echtEmpf ? '' : ' empfohlen'}" data-m="eigen">
       <b>${sym('tanne')} ${MODUS_NAME.eigen}${echtEmpf ? '' : marke}</b>
@@ -3086,8 +3092,11 @@ export function waehleModus(fertig) {
   for (const b of box.querySelectorAll('.modus')) b.onclick = () => {
     if (performance.now() < ab) return;
     T.spiele('klick');
-    if (b.dataset.m === 'echt' && bis > 7) {
-      fenster('Echter Kalender?', `<p>Dann kommen das erste Türchen und der Schnee erst am echten 1. Dezember - in <b>${bis} Tagen</b>.</p><p class="klein">Mit „${MODUS_NAME.eigen}“ geht es schon in einer Woche los.</p>`,
+    if (b.dataset.m === 'echt' && (bis > 7 || dt >= 24)) {
+      const warum = dt >= 24
+        ? `<p>Dann ist ${dt === 24 ? 'heute schon Heiligabend' : 'Weihnachten schon vorbei'}, und ab dem 7. Januar macht dein Stand Winterpause - du hättest nur noch <b>${restTage === 1 ? 'heute' : `${restTage} Tage`}</b>.</p><p class="klein">Mit „${MODUS_NAME.eigen}“ erlebst du den ganzen Advent ab dem 24. November.</p>`
+        : `<p>Dann kommen das erste Türchen und der Schnee erst am echten 1. Dezember - in <b>${bis} Tagen</b>.</p><p class="klein">Mit „${MODUS_NAME.eigen}“ geht es schon in einer Woche los.</p>`;
+      fenster('Echter Kalender?', warum,
         [{ text: 'Lieber eigener Advent', neben: true, aktion: () => { setTimeout(() => fertig('eigen'), 50); } },
           { text: 'Ja, echter Kalender', aktion: () => { setTimeout(() => fertig('echt'), 50); } }]);
       return;
