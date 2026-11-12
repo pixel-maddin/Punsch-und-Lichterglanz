@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611101200';
-import * as Z from './zeit.js?v=202611101200';
-import { neueFarben } from './pixel.js?v=202611101200';
+import * as C from './config.js?v=202611121000';
+import * as Z from './zeit.js?v=202611121000';
+import { neueFarben } from './pixel.js?v=202611121000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -120,6 +120,18 @@ function laden() {
       if (!('miniStaffel' in alt)) {
         stand.miniStaffel = true;
         if (alt.tipps && alt.tipps.karte_mehr) stand.miniAlle = true;
+      }
+      // 12.11.: Wer schon in den echten Kalender gewechselt war („Weihnachten kommt noch einmal", gibt es
+      // nicht mehr), kommt zurück in den eigenen Advent - und zwar auf den 7.1., also in die Winterpause.
+      // Heiligabend, Silvester und Weihnachtsmorgen hat er schon gesehen, die kommen nicht noch einmal.
+      if (stand.echtesFest && stand.echtesFest === stand.saison && stand.modus === 'echt' && !stand.echtesZurueck) {
+        stand.echtesZurueck = true;
+        const heute = new Date(); heute.setHours(12, 0, 0, 0);
+        const v = Math.round((new Date(stand.saison + 1, 0, 7, 12) - heute) / 86400000);
+        if (v > 0) {
+          stand.modus = 'eigen'; stand.versatzTage = v;
+          stand.weihnachtMorgen = stand.heiligabend = stand.silvester = stand.saison;
+        }
       }
       return stand;
     }
@@ -2365,25 +2377,9 @@ export function heiligabendAbend(d = Z.jetzt()) {
 // bis 6.1. ganz normal. Ab 7.1. Winterpause bis zur neuen Saison: nur schmücken und einkaufen.
 // ---------------------------------------------------------------------------
 export const winterpause = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) >= C.SAISON_ENDE_TAG;
-/**
- * Das echte Fest anhängen (30.10., Testbericht + Nutzerwahl): Wer den eigenen Advent früh begonnen hat
- * (Versatz > 0), ist mit ihm fertig, bevor der echte vorbei ist - und hätte im echten Dezember Pause.
- * Dann wechselt das Spiel in den echten Kalender: Stand offen bis zum echten 6.1., Weihnachtsmorgen,
- * Heiligabend, Silvester und das Pause-Fenster kommen zum echten Datum noch einmal. Türchen, Advente,
- * Jury und Geschenke bleiben, wie man sie erlebt hat. true = gerade gewechselt (main.js zeigt das Fenster).
- */
-export function pruefeEchtesFest() {
-  const v = st.modus === 'eigen' ? st.versatzTage || 0 : 0;
-  if (v <= 0 || DEMO || !st.intro) return false;
-  const echt = Z.echtJetzt(), eigen = new Date(echt);
-  eigen.setDate(eigen.getDate() + v);
-  if (Z.dezemberTag(eigen) < C.SAISON_ENDE_TAG) return false;                    // eigener Advent läuft noch
-  if (Z.saison(echt) !== st.saison || Z.dezemberTag(echt) >= C.SAISON_ENDE_TAG) return false;   // echter auch schon vorbei
-  st.modus = 'echt'; st.versatzTage = 0; st.echtesFest = st.saison;
-  st.weihnachtMorgen = null; st.heiligabend = null; st.silvester = null; st.winterpause = null; st.pauseAnsage = null;
-  speichere();
-  return true;
-}
+// 30.10. bis 12.11. gab es hier pruefeEchtesFest(): Wer den eigenen Advent vor dem echten beendet hatte,
+// wechselte in den echten Kalender und feierte noch einmal. Auf Nutzerwunsch wieder raus - nach dem eigenen
+// 6.1. ist Winterpause. st.echtesFest wird nur noch für alte Spielstände gelesen (Barbarazweig).
 /** Heiligabend ab 16 Uhr bis Mitternacht: keine Gäste mehr. */
 export const heiligabendZu = (d = Z.jetzt()) => !DEMO && Z.dezemberTag(d) === 24 && d.getHours() >= C.HEILIGABEND_STUNDE;
 export const standZu = (d = Z.jetzt()) => winterpause(d) || heiligabendZu(d);

@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611101200';
-import * as S from './spiel.js?v=202611101200';
-import * as Z from './zeit.js?v=202611101200';
-import * as T from './ton.js?v=202611101200';
-import * as LI from './lichtung.js?v=202611101200';
-import * as CB from './christbaum.js?v=202611101200';
-import * as KA from './karte.js?v=202611101200';
-import * as SB from './schlitten.js?v=202611101200';
-import * as EB from './schlittschuh.js?v=202611101200';
-import * as BS from './backstube.js?v=202611101200';
-import * as UI from './ui.js?v=202611101200';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611101200';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611101200';
-import * as Kacheln from './kacheln.js?v=202611101200';
-import * as Lernen from './lernen.js?v=202611101200';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611101200';
-import * as A from './auftraege.js?v=202611101200';
-import * as E from './erfolge.js?v=202611101200';
-import * as ZL from './ziele.js?v=202611101200';
+import * as C from './config.js?v=202611121000';
+import * as S from './spiel.js?v=202611121000';
+import * as Z from './zeit.js?v=202611121000';
+import * as T from './ton.js?v=202611121000';
+import * as LI from './lichtung.js?v=202611121000';
+import * as CB from './christbaum.js?v=202611121000';
+import * as KA from './karte.js?v=202611121000';
+import * as SB from './schlitten.js?v=202611121000';
+import * as EB from './schlittschuh.js?v=202611121000';
+import * as BS from './backstube.js?v=202611121000';
+import * as UI from './ui.js?v=202611121000';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611121000';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611121000';
+import * as Kacheln from './kacheln.js?v=202611121000';
+import * as Lernen from './lernen.js?v=202611121000';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611121000';
+import * as A from './auftraege.js?v=202611121000';
+import * as E from './erfolge.js?v=202611121000';
+import * as ZL from './ziele.js?v=202611121000';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -241,14 +241,10 @@ T.setzeMusik(S.st.ton.musik);
 let abendErinnert = 0;
 function ankommen(erstesMal) {
   const neueSaison = S.pruefeSaison();
-  // 30.10.: Eigener Advent vorbei, echter noch nicht - weiter im echten Kalender (vor allen anderen Fenstern)
-  const echtesFest = S.pruefeEchtesFest();
-  if (echtesFest) Z.setzeVersatzTage(S.dev.tage);
+  // 12.11. (Nutzerwunsch): Kein Wechsel mehr in den echten Kalender, wenn der eigene Advent vorbei ist -
+  // ab dem eigenen 7.1. ist Winterpause wie im echten Kalender (vorher 30.10.: „Weihnachten kommt noch einmal")
   const off = S.offlineAbrechnen();
   const meldungen = [];
-  if (echtesFest) meldungen.push(['Weihnachten kommt noch einmal!', `<p>Dein eigener Advent ist vorbei - aber draußen ist die Adventszeit noch in vollem Gange.</p>
-    <p>Ab jetzt läuft dein Spiel mit dem <b>echten Kalender</b> weiter: Dein Stand hat bis zum 6. Januar offen, und Heiligabend und Silvester feierst du zum echten Datum noch einmal. 😊</p>
-    <p class="klein">Türchen, Advente, Jury und Geschenke bleiben, wie du sie erlebt hast.</p>`]);
   // 29.10.: Heiligabend-Morgen und Winterpause zuerst - das ist DER Moment beim Öffnen
   if (S.weihnachtMorgenFaellig()) meldungen.push(['weihnachtMorgen']);
   if (S.winterpauseFaellig()) meldungen.push(['winterpause']);
