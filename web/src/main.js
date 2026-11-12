@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611121100';
-import * as S from './spiel.js?v=202611121100';
-import * as Z from './zeit.js?v=202611121100';
-import * as T from './ton.js?v=202611121100';
-import * as LI from './lichtung.js?v=202611121100';
-import * as CB from './christbaum.js?v=202611121100';
-import * as KA from './karte.js?v=202611121100';
-import * as SB from './schlitten.js?v=202611121100';
-import * as EB from './schlittschuh.js?v=202611121100';
-import * as BS from './backstube.js?v=202611121100';
-import * as UI from './ui.js?v=202611121100';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611121100';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611121100';
-import * as Kacheln from './kacheln.js?v=202611121100';
-import * as Lernen from './lernen.js?v=202611121100';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611121100';
-import * as A from './auftraege.js?v=202611121100';
-import * as E from './erfolge.js?v=202611121100';
-import * as ZL from './ziele.js?v=202611121100';
+import * as C from './config.js?v=202611121200';
+import * as S from './spiel.js?v=202611121200';
+import * as Z from './zeit.js?v=202611121200';
+import * as T from './ton.js?v=202611121200';
+import * as LI from './lichtung.js?v=202611121200';
+import * as CB from './christbaum.js?v=202611121200';
+import * as KA from './karte.js?v=202611121200';
+import * as SB from './schlitten.js?v=202611121200';
+import * as EB from './schlittschuh.js?v=202611121200';
+import * as BS from './backstube.js?v=202611121200';
+import * as UI from './ui.js?v=202611121200';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611121200';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611121200';
+import * as Kacheln from './kacheln.js?v=202611121200';
+import * as Lernen from './lernen.js?v=202611121200';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611121200';
+import * as A from './auftraege.js?v=202611121200';
+import * as E from './erfolge.js?v=202611121200';
+import * as ZL from './ziele.js?v=202611121200';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -248,7 +248,8 @@ function ankommen(erstesMal) {
   // 29.10.: Heiligabend-Morgen und Winterpause zuerst - das ist DER Moment beim Öffnen
   if (S.weihnachtMorgenFaellig()) meldungen.push(['weihnachtMorgen']);
   if (S.winterpauseFaellig()) meldungen.push(['winterpause']);
-  if (neueSaison) meldungen.push(['Eine neue Adventszeit!', `<p>Das Haus ist wieder kahl und grau - Zeit, es erneut herzurichten.</p>${S.st.andenken ? `<p class="bonus">★ ${S.st.andenken} Andenken - ein Stern für jedes Jahr, in dem du dein Haus geschmückt hast</p>` : ''}`]);
+  // 12.11.: Zur neuen Saison wählt man wieder, wann der Advent beginnt (auch wenn man vorher zugemacht hat)
+  if (neueSaison || S.st.modusWahl) meldungen.push(['neueSaison']);
   // 26.10.: Nach mindestens 10 Minuten weg ist es ein neuer Besuch - wieder Platz für Vorstellungen
   if (off && off.sek >= C.OFFLINE_MELDUNG) Lernen.neuerBesuch();
   if (off && off.betrag > 0 && off.sek >= C.OFFLINE_MELDUNG && off.sek < C.OFFLINE_FENSTER) {
@@ -343,12 +344,27 @@ function zeigeNaechste(kette) {
   else if (m[0] === 'wettbewerb') { if (S.wettbewerbFaellig()) zeigeWettbewerb(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'juryAnsage') { if (S.juryAnsageFaellig()) zeigeJuryAnsage(weiter); else zeigeNaechste(kette); }
   else if (m[0] === 'silvester') { if (S.silvesterFaellig()) zeigeSilvester(weiter); else zeigeNaechste(kette); }
+  else if (m[0] === 'neueSaison') { if (S.st.modusWahl) zeigeNeueSaison(); else zeigeNaechste(kette); }
   else if (m[0] === 'schnee') zeigeErsterSchnee(weiter);
   // Kiste nur, wenn noch etwas drin ist: Ankommen läuft beim Laden und beim
   // Sichtbarwerden der Seite, die ungeöffnete Kiste stand dann zweimal in der Schlange
   else if (m[0] === 'kiste') { if (S.st.kiste > 0) UI.zeigeKiste(m[1], weiter); else zeigeNaechste(kette); }
   else UI.fenster(m[0], m[1], [{ text: 'Weiter', aktion: weiter }]);
   fensterTakt();   // gleich mitzählen, nicht erst im nächsten Bild
+}
+
+/**
+ * Eine neue Adventszeit (12.11.): das Fenster, dann wieder die Wahl „Eigener Advent / Echter Kalender",
+ * dann „Dein Ziel" mit dem Startdatum. Danach noch einmal ankommen - mit dem neuen Kalender gelten
+ * Vorfreude, Schnee usw. anders als vor der Wahl. Der Rest der alten Warteschlange fällt weg.
+ */
+function zeigeNeueSaison() {
+  warteschlange.length = 0;
+  UI.fenster('Eine neue Adventszeit!', `<p>Das Haus ist wieder kahl und grau - Zeit, es erneut herzurichten.</p>${S.st.andenken ? `<p class="bonus">★ ${S.st.andenken} Andenken - ein Stern für jedes Jahr, in dem du dein Haus geschmückt hast</p>` : ''}`,
+    [{ text: 'Weiter', aktion: () => setTimeout(() => UI.waehleModus((modus) => {
+      S.waehleModusNeu(modus);
+      UI.zeigeZiel(modus, () => setTimeout(() => ankommen(false), 100));
+    }), 60) }]);
 }
 
 // ---------------------------------------------------------------------------

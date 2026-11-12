@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611121100';
-import * as Z from './zeit.js?v=202611121100';
-import { neueFarben } from './pixel.js?v=202611121100';
+import * as C from './config.js?v=202611121200';
+import * as Z from './zeit.js?v=202611121200';
+import { neueFarben } from './pixel.js?v=202611121200';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -216,18 +216,48 @@ export function allesLoeschen() {
 
 /** Neue Adventszeit? Dann frisch anfangen, mit Namen und einem Andenken. */
 export function pruefeSaison() {
+  // 12.11. (Datumsprüfung): Beim eigenen Advent läuft der Kalender verschoben. Die neue Saison beginnt
+  // trotzdem erst mit dem ECHTEN 1. September - und erst, wenn der eigene Advent vorbei ist. Vorher
+  // sprang ein Spieler mit Versatz +56 schon Anfang Juli in die neue Saison, beim nächsten Laden zurück
+  // in die alte (Uhr wieder echt) und ab September ohne Wahl in den echten Kalender.
+  if (st.modus === 'eigen' && st.versatzTage) {
+    const eigenVorbei = Z.dezemberTag() >= C.SAISON_ENDE_TAG || Z.saison() > st.saison;
+    if (Z.saison(Z.echtJetzt()) <= st.saison || !eigenVorbei) { eigenePauseHalten(); return false; }
+    Z.setzeVersatzTage(dev.tage);   // die neue Saison fängt im echten Kalender an - gewählt wird gleich neu
+  }
   if (st.saison < Z.saison()) {
     const hatteFortschritt = st.gesamt > 1000;
     const tipps = st.tipps;
     // Wer Silvester schon gesehen hat, hat den Stern dieses Jahres schon (andenkenSaison)
     st = neuerStand(st.name, st.andenken + (hatteFortschritt && st.andenkenSaison !== st.saison ? 1 : 0));
     st.intro = true; st.lernen = 99; st.tipps = tipps || {};   // kennt das Spiel schon
+    st.modusWahl = true;   // 12.11.: jedes Jahr neu wählen, wann der Advent beginnt (main.js, Fenster „neueSaison")
     setzeStartTag();
     resetLauf();
     speichere();
     return true;
   }
   return false;
+}
+/**
+ * Eigener Advent mit Versatz > 0: Der verschobene Kalender erreicht den September vor dem echten. Bis
+ * dahin bleibt Winterpause - die Spieluhr wird dafür auf den 31. August der Saison festgehalten
+ * (Uhrzeit echt). Wird bei jedem Ankommen neu gerechnet, st.versatzTage bleibt unverändert.
+ */
+function eigenePauseHalten() {
+  if (Z.saison() <= st.saison) return;
+  const heute = new Date(Z.echtJetzt()); heute.setHours(12, 0, 0, 0);
+  Z.setzeVersatzTage(Math.round((new Date(st.saison + 1, 7, 31, 12) - heute) / 86400000));
+}
+/** Nach der Wahl zur neuen Saison (main.js): Modus setzen, Kalender verschieben, ab heute zählen. */
+export function waehleModusNeu(modus) {
+  st.modus = modus;
+  st.versatzTage = modus === 'eigen' ? Z.versatzFuerEigenenStart() : 0;
+  Z.setzeVersatzTage(st.versatzTage + dev.tage);
+  st.saison = Z.saison();
+  st.modusWahl = false;
+  setzeStartTag();
+  speichere();
 }
 
 // ---------------------------------------------------------------------------

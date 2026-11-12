@@ -353,8 +353,10 @@ der Stand Winterpause bis zum nächsten Advent - auch wenn draußen noch Advent 
 - **Der erste Schnee** ist ein eigener Moment: Die Musik hält inne, das Bild
   beschlägt an den Rändern, eine große Flocke schwebt herab, dann kommt
   das Bild vom verschneiten Dorf.
-- Ab September beginnt eine neue Adventszeit - das Haus fängt wieder kahl
-  an, ein Andenken bleibt.
+- Ab dem (echten) 1. September beginnt eine neue Adventszeit - das Haus fängt
+  wieder kahl an, ein Andenken bleibt, und man wählt neu: eigener Advent oder
+  echter Kalender. Läuft der eigene Advent dann noch, kommt die neue Saison
+  erst danach.
 
 ## Als App speichern
 
