@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611151000';
-import * as S from './spiel.js?v=202611151000';
-import * as Z from './zeit.js?v=202611151000';
-import * as T from './ton.js?v=202611151000';
-import * as LI from './lichtung.js?v=202611151000';
-import * as CB from './christbaum.js?v=202611151000';
-import * as KA from './karte.js?v=202611151000';
-import * as SB from './schlitten.js?v=202611151000';
-import * as EB from './schlittschuh.js?v=202611151000';
-import * as BS from './backstube.js?v=202611151000';
-import * as UI from './ui.js?v=202611151000';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611151000';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611151000';
-import * as Kacheln from './kacheln.js?v=202611151000';
-import * as Lernen from './lernen.js?v=202611151000';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611151000';
-import * as A from './auftraege.js?v=202611151000';
-import * as E from './erfolge.js?v=202611151000';
-import * as ZL from './ziele.js?v=202611151000';
+import * as C from './config.js?v=202611151200';
+import * as S from './spiel.js?v=202611151200';
+import * as Z from './zeit.js?v=202611151200';
+import * as T from './ton.js?v=202611151200';
+import * as LI from './lichtung.js?v=202611151200';
+import * as CB from './christbaum.js?v=202611151200';
+import * as KA from './karte.js?v=202611151200';
+import * as SB from './schlitten.js?v=202611151200';
+import * as EB from './schlittschuh.js?v=202611151200';
+import * as BS from './backstube.js?v=202611151200';
+import * as UI from './ui.js?v=202611151200';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611151200';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611151200';
+import * as Kacheln from './kacheln.js?v=202611151200';
+import * as Lernen from './lernen.js?v=202611151200';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611151200';
+import * as A from './auftraege.js?v=202611151200';
+import * as E from './erfolge.js?v=202611151200';
+import * as ZL from './ziele.js?v=202611151200';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -435,7 +435,10 @@ window.addEventListener('pagehide', () => S.speichere());
 let neuGesammelt = [], neuZuletzt = 0, sockenSammel = [], sockenZuletzt = 0;
 // Neuer Tag / Schnee während die App offen ist: jede Minute nachsehen
 let letzterTag = Z.tagesSchluessel();
-setInterval(() => {
+// 15.11.: als benannte Funktion, damit Testläufe im verborgenen Fenster sie über __spiel.sekunde() anstoßen
+// können (dort drosselt der Browser setInterval auf einmal je Minute)
+setInterval(sekundenTakt, 1000);
+function sekundenTakt() {
   const k = Z.tagesSchluessel();
   if (k !== letzterTag) { letzterTag = k; ankommen(false); }
   // Heiligabend bricht an, während man spielt: warten, bis nichts offen ist
@@ -538,7 +541,7 @@ setInterval(() => {
   }
   UI.neuMarke();
   UI.aktualisiereLaden();
-}, 1000);
+}
 
 // ---------------------------------------------------------------------------
 // Start
@@ -727,6 +730,7 @@ if (S.ENTWICKLUNG) window.__spiel = {
   update: (dt) => S.update(dt),
   // Ein Bild der echten Schleife (Tests im verborgenen Fenster: rAF ersetzen und hiermit anstoßen)
   bildschleife: (t) => frame(t),
+  sekunde: () => sekundenTakt(),   // der Sekundentakt von Hand (15.11., Testläufe im verborgenen Fenster)
   // Ein Bild von Hand zeichnen - im verborgenen Vorschaufenster steht
   // requestAnimationFrame still, der Screenshot zeigt sonst ein altes Bild.
   bild() { c.clearRect(0, 0, C.B, H); const w = zeichneWelt(c, G, tSek, 0); zeichneTresen(c, G, tSek, w); Kacheln.aktualisiere(tSek); },

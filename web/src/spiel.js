@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611151000';
-import * as Z from './zeit.js?v=202611151000';
-import { neueFarben } from './pixel.js?v=202611151000';
+import * as C from './config.js?v=202611151200';
+import * as Z from './zeit.js?v=202611151200';
+import { neueFarben } from './pixel.js?v=202611151200';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1552,7 +1552,7 @@ export function update(dt) {
 
   // Großbestellung: nur wenn du da bist und der Stand zwei Plätze hat -
   // sonst blockiert sie den einzigen Platz
-  if (tu.t >= tu.grossAb && chefAktiv() && nachStartRuhe() && lauf.stossRest === 0 && lauf.t > lauf.stossBis && st.stats.bedient >= C.GROSS_AB_BEDIENT
+  if (tu.t >= tu.grossAb && chefAktiv() && nachStartRuhe() && !standZu() && lauf.stossRest === 0 && lauf.t > lauf.stossBis && st.stats.bedient >= C.GROSS_AB_BEDIENT
       && tresenPlaetze() >= 2 && lauf.stossRest === 0 && wartende().length < C.SCHLANGE_MAX
       && !G.some((g) => g.gross && !g.gehen)) {
     tu.grossAb = tu.t + C.GROSS_PAUSE * (0.8 + Math.random() * 0.4);
@@ -1567,7 +1567,8 @@ export function update(dt) {
 
   // Stoßzeit: wer länger spielt, bekommt Besuch
   lauf.aktivT += dt;
-  if (lauf.aktivT >= C.STOSS_NACH && lauf.stossRest === 0 && lauf.t > lauf.stossBis && produkteFrei().length >= 2 && nachStartRuhe()
+  // 15.11. (Saisontest): nicht bei geschlossenem Stand - in der Winterpause kam „Der Kegelclub kommt vorbei!"
+  if (lauf.aktivT >= C.STOSS_NACH && lauf.stossRest === 0 && lauf.t > lauf.stossBis && produkteFrei().length >= 2 && nachStartRuhe() && !standZu()
       && !lauf.gaeste.some((g) => g.gross && !g.gehen)) {   // nie zusammen mit einer Großbestellung (11.10.)
     lauf.aktivT = 0;
     lauf.stossRest = C.STOSS_GAESTE;
@@ -1682,6 +1683,9 @@ export function update(dt) {
   }
   lauf.gaeste = G.filter((g) => !(g.gehen && g.x >= ENDE_X));
 
+  // 15.11. (Saisontest): Macht der Stand zu (Heiligabend 16 Uhr, Winterpause), wird das Tablett abgeräumt -
+  // sonst zog am 7.1. ein Teebeutel vom Vortag weiter und meldete „der Tee ist bitter geworden"
+  if (lauf.hand.length && standZu()) lauf.hand.length = 0;
   // Zubereitung auf dem Tablett
   for (const h of lauf.hand) {
     if (h.rest > 0) { h.rest -= dt; if (h.rest <= 0) hooks.ton('fertig'); }

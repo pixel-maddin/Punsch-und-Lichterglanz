@@ -94,6 +94,14 @@ function kaufen() {
   if (!S.startzieleFertig()) return;   // vorher führt die Einführung
   for (let k = 0; k < 10; k++) { let best = null, bk = Infinity; for (const a of C.ARTIKEL) { const s = S.status(a); if (s.versteckt || s.fertig || s.grund || !s.leisten) continue; if (s.kosten < bk) { bk = s.kosten; best = a.id; } } if (!best || !S.kaufe(best)) break; log('kauf', S.artikelName(best)); }
 }
+// 15.11.: Im verborgenen Fenster drosselt der Browser setTimeout/setInterval (ab 5 min auf einmal je Minute).
+// Darum: Weiterreichen über MessageChannel (wird nicht gedrosselt), warten als Schleife darüber, und den
+// Sekundentakt des Spiels von Hand über __spiel.sekunde() je Spielsekunde.
+const kanal = new MessageChannel(), wartend = [];
+kanal.port1.onmessage = () => { const f = wartend.shift(); if (f) f(); };
+const weiterreichen = () => new Promise((r) => { wartend.push(r); kanal.port2.postMessage(0); });
+const warte = async (ms) => { const bis = performance.now() + ms; while (performance.now() < bis) await weiterreichen(); };
+const takt = () => { try { __spiel.sekunde && __spiel.sekunde(); } catch (e) { log('FEHLER', 'takt ' + e.message); } };
 /** Eine Sitzung von `sek` Spielsekunden. */
 window.__sitzung = async (sek, extra = {}) => {
   let acc = 0, a2 = 0;
@@ -101,17 +109,17 @@ window.__sitzung = async (sek, extra = {}) => {
     schritt(100); acc += 0.1; a2 += 0.1;
     if (acc >= 0.4) { acc = 0; const was = mensch(); if (!was && S.st.lernen >= 0) bedienen(); }
     if (a2 >= 5) { a2 = 0; kaufen(); }
-    if ((t * 10 | 0) % 50 === 0) await new Promise((r) => setTimeout(r, 0));   // Sekundenschleife der Seite laufen lassen
+    if ((t * 10 | 0) % 10 === 0) { takt(); await weiterreichen(); }   // Sekundentakt der Seite
   }
 };
 /** Ein Besuch: Uhr stellen, ankommen lassen, spielen. */
 window.__besuch = async (datum, sek, extra = {}) => {
   S.st.zuletzt = Date.now() - 3 * 3600 * 1000;
   __spiel.datum(datum);
-  await new Promise((r) => setTimeout(r, 1300));   // Sekundenschleife merkt den neuen Tag -> ankommen()
+  takt(); await warte(300);   // Sekundentakt merkt den neuen Tag -> ankommen()
   await __sitzung(4);
   // Fenster beim Ankommen (Kiste, Ereignisse) haben Animationen in Echtzeit: warten, bis alles zu ist
-  for (let i = 0; i < 40 && (__spiel.UI.fensterOffen() || __spiel.UI.panelOffen()); i++) { mensch(); schritt(100); await new Promise((r) => setTimeout(r, 350)); }
+  for (let i = 0; i < 40 && (__spiel.UI.fensterOffen() || __spiel.UI.panelOffen()); i++) { mensch(); schritt(100); takt(); await warte(350); }
   if (__spiel.UI.fensterOffen()) log('TEST', 'Fenster bleibt offen: ' + ($('#modal h2')?.textContent || ''));
   if (extra.futter && S.hat('futterhaus')) { __tippeWelt(132, __GW() - 56); log('tipp', 'Futterhaus'); }
   // Schneemann bei SCHNEEMANN_X 27 (17.10.: vorher 66)
