@@ -245,6 +245,7 @@ export const STAMMGAESTE = {
     'Ich hab mich beim Stricken verzählt: Eine Socke hat sechs Streifen, die andere sieben. Das wird schon niemand merken, oder?',
     'Der Schal für Jonas ist fertig gestrickt - über drei Meter lang. Ich konnte einfach nicht aufhören.',
     'Nur noch ein paar Mal schlafen, dann ist Weihnachten. Ich bin aufgeregter als mein Hund Waldi.'],
+    vorFest: [3, 7],   // 15.11.: ab Heiligabend übersprungen (Jonas „kommt zu Weihnachten", „nur noch ein paar Mal schlafen")
     immer: ['Wie immer, Kindchen.', 'Mein Hund Waldi lässt grüßen.', 'Masche für Masche, so wird\'s was.'],
     geschenk: 'Oma Hilde schenkt dir die rot-grünen Socken - sechs und sieben Streifen. Die waren für dich!' },
   // Postbotin Sophia: Klatsch und Tratsch aus dem Dorf
@@ -258,6 +259,7 @@ export const STAMMGAESTE = {
     'Schon gehört? Beim Krippenspiel ist das Schaf krank geworden. Jetzt muss der Pfarrer einspringen.',
     'Im Briefkasten lag ein Brief an den Weihnachtsmann. Absender: Lena. Mit ganz vielen Briefmarken.',
     'Am 24. trag ich die letzten Pakete aus. Ein paar kommen von sehr weit her ... was da wohl alles drin ist?'],
+    vorFest: [5, 6, 7],   // Krippenspiel, Brief an den Weihnachtsmann, „Am 24. trag ich …"
     immer: ['Kurze Pause, dann weiter.', 'Das hast du nicht von mir.', 'Im Dorf reden alle über deinen Stand. Nur Gutes natürlich!'],
     geschenk: 'Sophia bringt dir ein Päckchen - von allen im Dorf, für den schönsten Stand!' },
   // Karl: gemütlicher Kerl Mitte 50, weihnachtliche Flachwitze
@@ -282,6 +284,7 @@ export const STAMMGAESTE = {
     'Den Schlitten hab ich auch durchgestrichen. Ich glaube, ich habe eine bessere Idee.',
     'Ich hab einen neuen Wunschzettel geschrieben. Da steht nur noch eine Sache drauf.',
     'Ich wünsch mir, dass alle zu Weihnachten nach Hause kommen. Die ganze Familie. Sophia bringt den Brief ganz schnell weg, hat sie gesagt.'],
+    vorFest: [1, 2, 5, 6, 7],   // der Wunschzettel - nach Weihnachten zählt nur noch, dass alle da sind (Geschenk)
     immer: ['Mit extra Sahne, bitte!', 'Ich hab mein Taschengeld gespart!', 'Schneit\'s morgen? Bitte sag ja!'],
     geschenk: 'Lena strahlt: „Sie sind alle da! Papa, Tante, Oma und Opa!“ Sie schenkt dir ein gemaltes Bild - die ganze Familie vor deinem Stand.' },
   // Förster Franz: Fun Facts aus dem Wald
@@ -294,6 +297,7 @@ export const STAMMGAESTE = {
     'Tannenzapfen findest du nie am Boden. Die zerfallen oben am Baum. Was unten liegt, sind Fichtenzapfen.',
     'Das Rotkehlchen singt auch im Winter - manchmal sogar nachts, unter Laternen.',
     'An Heiligabend bring ich den Rehen noch Heu in den Wald. Das ist für mich eine schöne Tradition.'],
+    vorFest: [7],   // „An Heiligabend bring ich den Rehen noch Heu …"
     immer: ['Das Wärmste, was du hast.', 'Kalte Finger heute.', 'Morgen erzähl ich dir mehr vom Wald.'],
     geschenk: 'Franz schenkt dir einen schönen Fichtenzapfen. „Kein Tannenzapfen - die gibt\'s am Boden ja nicht!“' },
 };

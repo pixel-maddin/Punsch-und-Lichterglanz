@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611151200';
-import * as Z from './zeit.js?v=202611151200';
-import { neueFarben } from './pixel.js?v=202611151200';
+import * as C from './config.js?v=202611151300';
+import * as Z from './zeit.js?v=202611151300';
+import { neueFarben } from './pixel.js?v=202611151300';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1019,6 +1019,9 @@ export function stammBedient(g) {   // exportiert nur für Tests
   // 04.11. (Nutzerwunsch): erst ab dem 25.12. und erst, wenn die GANZE Geschichte erzählt und gelesen ist
   // (vorher ab 24.12. nach 3 Besuchen - das Geschenk kam mitten in der Geschichte). Wer noch nicht alles
   // gehört hat, hört nach Weihnachten weiter; ohne ganze Geschichte gibt es kein Geschenk.
+  // 15.11. (Nutzerwahl nach dem Saisontest): Ab Heiligabend fallen Sätze weg, die vor dem Fest spielen
+  // (`vorFest` in C.STAMMGAESTE) - vorher sagte Hilde am 31.12. „Nur noch ein paar Mal schlafen …"
+  if (dt >= 24 && s.vorFest) while (e.n < s.saetze.length && s.vorFest.includes(e.n)) e.n++;
   const ungelesen = (st.stammNeu || []).some((f) => f.id === g.typ && !f.geschenk);
   if (dt >= 25 && dt <= 37 && e.n >= s.saetze.length && !ungelesen && e.geschenk !== Z.saison()) {
     e.geschenk = Z.saison();
