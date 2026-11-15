@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611121200';
-import * as Z from './zeit.js?v=202611121200';
-import { neueFarben } from './pixel.js?v=202611121200';
+import * as C from './config.js?v=202611151000';
+import * as Z from './zeit.js?v=202611151000';
+import { neueFarben } from './pixel.js?v=202611151000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -2545,7 +2545,9 @@ export function briefPruefen() {
   return 'neu';
 }
 /** Liegt etwas im Briefkasten (Fahne oben)? */
-export const briefDa = () => !!(st.briefe && st.briefe.aktiv && st.briefe.aktiv.offen);
+// 15.11. (gemeldet): in der Winterpause kein Wunschzettel mehr im Briefkasten - nur ein Dankeschön für einen
+// schon erfüllten Wunsch kommt noch an (das ist ein Geschenk, keine Aufgabe)
+export const briefDa = () => !!(st.briefe && st.briefe.aktiv && st.briefe.aktiv.offen && (!winterpause() || st.briefe.aktiv.dank));
 /** Den Brief gelesen: Fahne runter. */
 export function briefGelesen() { if (st.briefe && st.briefe.aktiv) { st.briefe.aktiv.offen = false; speichere(); } }
 /** Dankesbild abholen: Sterne, Bild ins Album, morgen kommt vielleicht der nächste Brief. */

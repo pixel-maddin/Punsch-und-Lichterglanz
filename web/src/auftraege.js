@@ -12,9 +12,9 @@
  * Advent mehr (C.AUFTRAG_LOHN_MIN). Der schwere Auftrag bringt dazu ein Sammelstück, das
  * es nur hier gibt (C.AUFTRAG_DEKO), solange noch eins fehlt.
  */
-import * as C from './config.js?v=202611121200';
-import * as S from './spiel.js?v=202611121200';
-import * as Z from './zeit.js?v=202611121200';
+import * as C from './config.js?v=202611151000';
+import * as S from './spiel.js?v=202611151000';
+import * as Z from './zeit.js?v=202611151000';
 
 // Welche Aufträge es gibt. `geht()` sagt, ob er heute möglich ist.
 const TYPEN = {
@@ -80,7 +80,7 @@ export function heute() {
 export function text(a) { return TYPEN[a.typ].text(a.ziel, a.param); }
 export function fertig(a) { return a.stand >= a.ziel; }
 export function abholbar() {
-  if (S.st.lernen < 99) return 0;
+  if (S.st.lernen < 99 || S.winterpause()) return 0;   // 15.11.: in der Pause gibt es nichts abzuholen (Liste ist leer)
   const b = bitte();
   const brief = S.st.briefe && S.st.briefe.aktiv;   // Dankeschön im Briefkasten zählt mit (22.10.)
   return heute().filter((a) => fertig(a) && !a.abgeholt).length + (b && bitteFertig(b) && !b.abgeholt ? 1 : 0) + (brief && brief.dank ? 1 : 0);
@@ -135,7 +135,9 @@ export function bitteAufgabe(b) {
  * der am längsten keine hatte und dessen nächste Bitte schon geht.
  */
 export function bitte() {
-  if (S.st.lernen < 99 || !S.startzieleFertig()) return null;
+  // 15.11. (gemeldet): in der Winterpause keine Bitten mehr - vorher kam jeden Tag eine neue, obwohl man
+  // nichts mehr tun konnte und die Aufträge leer waren
+  if (S.st.lernen < 99 || !S.startzieleFertig() || S.winterpause()) return null;
   const tag = Z.tagesSchluessel(), jetzt = Z.jetzt().getTime();
   const alt = S.st.bitte;
   if (alt && !alt.ab) alt.ab = jetzt;   // Bitten aus der ersten Fassung (ohne Startzeit): ab jetzt zählen
