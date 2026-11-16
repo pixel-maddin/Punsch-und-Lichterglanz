@@ -676,16 +676,15 @@ p.klein { color: var(--text3); font-size: var(--t-klein); }
 
 /* Handy quer: Das Spiel wäre dann winzig. Hinweis statt Spielfeld. */
 #quer { display: none; }
-@media (orientation: landscape) and (max-height: 500px) {
-  #quer {
-    display: flex; position: fixed; inset: 0; z-index: 50;
-    align-items: center; justify-content: center; text-align: center;
-    background: #120c22; color: var(--papier); font-size: 18px; line-height: 1.5;
-  }
-  #quer div { font-size: 40px; }
-  #quer b { font-size: 20px; }
-  #quer small { font-size: 14px; opacity: 0.7; }
+/* 16.11.: per Klasse aus main.js (pruefeQuer) - die Media-Query sprang an, wenn die Tastatur das Fenster flach machte */
+.quer #quer {
+  display: flex; position: fixed; inset: 0; z-index: 50;
+  align-items: center; justify-content: center; text-align: center;
+  background: #120c22; color: var(--papier); font-size: 18px; line-height: 1.5;
 }
+.quer #quer div { font-size: 40px; }
+.quer #quer b { font-size: 20px; }
+.quer #quer small { font-size: 14px; opacity: 0.7; }
 
 /* Neustart im Menü: abgesetzt vom Rest */
 .neustart { margin-top: calc(var(--px) * 8); padding-top: calc(var(--px) * 5); border-top: calc(var(--px) * 0.6) dashed rgba(106, 74, 58, 0.4); justify-content: center; }

@@ -5,31 +5,31 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611151300';
-import * as S from './spiel.js?v=202611151300';
-import * as Z from './zeit.js?v=202611151300';
-import * as T from './ton.js?v=202611151300';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611151300';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611151300';
-import { zielHaus } from './fein.js?v=202611151300';
-import * as AN from './ansicht.js?v=202611151300';
-import { zeichneWelt, ortVon, funkeln, glitzern, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611151300';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611151300';
-import * as A from './auftraege.js?v=202611151300';
-import * as E from './erfolge.js?v=202611151300';
-import * as ZL from './ziele.js?v=202611151300';
-import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611151300';
-import * as KA from './karte.js?v=202611151300';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611151300';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611151300';
-import * as SW from './schneeball.js?v=202611151300';
-import * as LI from './lichtung.js?v=202611151300';
-import * as MH from './minihud.js?v=202611151300';
-import * as CB from './christbaum.js?v=202611151300';
-import * as SB from './schlitten.js?v=202611151300';
-import * as EB from './schlittschuh.js?v=202611151300';
-import * as BS from './backstube.js?v=202611151300';
-import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611151300';
+import * as C from './config.js?v=202611161100';
+import * as S from './spiel.js?v=202611161100';
+import * as Z from './zeit.js?v=202611161100';
+import * as T from './ton.js?v=202611161100';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611161100';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611161100';
+import { zielHaus } from './fein.js?v=202611161100';
+import * as AN from './ansicht.js?v=202611161100';
+import { zeichneWelt, ortVon, funkeln, glitzern, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611161100';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611161100';
+import * as A from './auftraege.js?v=202611161100';
+import * as E from './erfolge.js?v=202611161100';
+import * as ZL from './ziele.js?v=202611161100';
+import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611161100';
+import * as KA from './karte.js?v=202611161100';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611161100';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611161100';
+import * as SW from './schneeball.js?v=202611161100';
+import * as LI from './lichtung.js?v=202611161100';
+import * as MH from './minihud.js?v=202611161100';
+import * as CB from './christbaum.js?v=202611161100';
+import * as SB from './schlitten.js?v=202611161100';
+import * as EB from './schlittschuh.js?v=202611161100';
+import * as BS from './backstube.js?v=202611161100';
+import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611161100';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -870,7 +870,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611151300`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611161100`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -2645,24 +2645,59 @@ let titelTipps = 0;
  * löscht Safari die Daten einer Seite, die 7 Tage nicht geöffnet wurde - als
  * App gilt das nicht. iPadOS meldet sich als Mac, verrät sich aber über Touch.
  */
-export function iosImBrowser() {
+/**
+ * Wo läuft das Spiel? (16.11., gemeldet: in Chrome auf dem iPhone kam die Safari-Anleitung)
+ * plattform 'ios' | 'android' | null, browser 'safari' | 'chrome' | 'firefox' | 'edge' | 'samsung' | 'andere',
+ * app = schon vom Home-Bildschirm gestartet. Auf dem iPhone laufen alle Browser mit WebKit - die Daten einer
+ * Seite können dort nach 7 Tagen ohne Besuch verschwinden, darum kommt der Tipp dort von selbst.
+ */
+export function installLage() {
   const ua = navigator.userAgent;
   const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  const app = navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches);
-  return ios && !app;
+  const android = /Android/.test(ua);
+  const app = navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui)').matches);
+  const browser = /SamsungBrowser/.test(ua) ? 'samsung' : /EdgiOS|EdgA|Edg\//.test(ua) ? 'edge' : /FxiOS|Firefox/.test(ua) ? 'firefox'
+    : /CriOS|Chrome/.test(ua) ? 'chrome' : /Safari/.test(ua) ? 'safari' : 'andere';
+  return { plattform: ios ? 'ios' : android ? 'android' : null, browser, app };
 }
+export function iosImBrowser() { const l = installLage(); return l.plattform === 'ios' && !l.app; }
+/** Lohnt sich die Anleitung hier? (Handy im Browser) */
+export const installMoeglich = () => { const l = installLage(); return !!l.plattform && !l.app; };
+// Android/Chrome bietet das Installieren selbst an - dann gibt es im Tipp einen Knopf dafür
+let installAngebot = null;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installAngebot = e; });
+window.addEventListener('appinstalled', () => { installAngebot = null; });
+const TEILEN = '<span class="teilen-zeichen" aria-hidden="true"></span>';
+function installSchritte(l) {
+  if (l.plattform === 'ios') {
+    if (l.browser === 'safari') return [`Auf <b>Teilen</b> tippen ${TEILEN} (unten in der Leiste oder im <b>···</b>-Menü)`, '<b>„Zum Home-Bildschirm“</b> wählen (evtl. etwas nach unten scrollen)', 'Oben rechts auf <b>Hinzufügen</b>'];
+    if (l.browser === 'chrome') return [`Oben in der Adressleiste rechts auf <b>Teilen</b> tippen ${TEILEN} (oder im Menü <b>···</b> auf „Teilen“)`, '<b>„Zum Home-Bildschirm“</b> wählen (evtl. etwas nach unten scrollen)', 'Oben rechts auf <b>Hinzufügen</b>'];
+    if (l.browser === 'firefox') return ['Unten rechts auf das Menü <b>☰</b> tippen', `<b>„Teilen“</b> wählen ${TEILEN}`, '<b>„Zum Home-Bildschirm“</b> wählen, dann <b>Hinzufügen</b>'];
+    return [`Im Browser auf <b>Teilen</b> tippen ${TEILEN}`, '<b>„Zum Home-Bildschirm“</b> wählen', 'Auf <b>Hinzufügen</b> tippen'];
+  }
+  if (l.browser === 'samsung') return ['Unten rechts auf das Menü <b>☰</b> tippen', '<b>„Seite hinzufügen zu“</b> wählen', '<b>„Startbildschirm“</b> wählen und bestätigen'];
+  if (l.browser === 'firefox') return ['Auf das Menü <b>⋮</b> tippen (oben oder unten rechts)', '<b>„Zum Startbildschirm hinzufügen“</b> bzw. <b>„Installieren“</b> wählen', 'Mit <b>Hinzufügen</b> bestätigen'];
+  return ['Oben rechts auf das Menü <b>⋮</b> tippen', '<b>„App installieren“</b> bzw. <b>„Zum Startbildschirm hinzufügen“</b> wählen', 'Mit <b>Installieren</b> bestätigen'];
+}
+const BROWSER_NAME = { safari: 'Safari', chrome: 'Chrome', firefox: 'Firefox', edge: 'Edge', samsung: 'Samsung Internet', andere: 'deinem Browser' };
 export function zeigeInstallTipp() {
   S.st.installTipp = Date.now(); S.speichere();
+  const l = installLage(), ios = l.plattform === 'ios';
+  // Falls der Menüpunkt fehlt: auf dem iPhone geht es immer in Safari (ältere iOS-Versionen können es nur dort)
+  const ersatz = ios && l.browser !== 'safari' ? '<p class="klein">Findest du „Zum Home-Bildschirm“ nicht? Dann öffne die Seite in <b>Safari</b> und mach es dort.</p>' : '';
+  const knoepfe = installAngebot
+    ? [{ text: 'Später', neben: true }, { text: 'Jetzt installieren', aktion: () => { const a = installAngebot; installAngebot = null; a.prompt(); } }]
+    : [{ text: 'Alles klar' }];
   fenster('Tipp: Als App speichern', `
-    <p>Leg das Spiel auf deinen Home-Bildschirm - dann startet es wie eine App, im Vollbild, auch ohne Internet.</p>
-    <ol class="anleitung">
-      <li>In Safari auf <b>Teilen</b> tippen <span class="teilen-zeichen" aria-hidden="true"></span> (unten in der Leiste oder im <b>···</b>-Menü)</li>
-      <li><b>„Zum Home-Bildschirm“</b> wählen (evtl. etwas nach unten scrollen)</li>
-      <li>Oben rechts auf <b>Hinzufügen</b></li>
-    </ol>
-    <p class="klein">Warum? Safari löscht die Daten einer Webseite, die 7 Tage lang nicht geöffnet wurde - auch deinen Spielstand. Als App auf dem Home-Bildschirm passiert das nicht. Danach startest du das Spiel nur noch über das neue Symbol.</p>
-    <p class="hinweis-kasten"><b>Wichtig:</b> Die App fängt mit einem eigenen Spielstand an - dein Fortschritt hier im Browser kommt nicht mit. Am besten wechselst du gleich jetzt. Schon weiter? Dann im Menü „Spielstand sichern“ und in der App „Spielstand laden“.</p>`,
-  [{ text: 'Alles klar' }]);
+    <p>Leg das Spiel auf deinen ${ios ? 'Home-Bildschirm' : 'Startbildschirm'} - dann startet es wie eine App, im Vollbild, auch ohne Internet.</p>
+    ${installAngebot ? '<p>Tippe einfach auf <b>Jetzt installieren</b>. Oder so:</p>' : `<p class="klein">So geht es in ${BROWSER_NAME[l.browser]}:</p>`}
+    <ol class="anleitung">${installSchritte(l).map((s) => `<li>${s}</li>`).join('')}</ol>
+    ${ersatz}
+    ${ios
+    ? `<p class="klein">Warum? Auf dem iPhone kann der Browser die Daten einer Webseite löschen, die 7 Tage lang nicht geöffnet wurde - auch deinen Spielstand. Als App auf dem Home-Bildschirm passiert das nicht. Danach startest du das Spiel nur noch über das neue Symbol.</p>
+    <p class="hinweis-kasten"><b>Wichtig:</b> Die App fängt mit einem eigenen Spielstand an - dein Fortschritt hier im Browser kommt nicht mit. Am besten wechselst du gleich jetzt. Schon weiter? Dann im Menü „Spielstand sichern“ und in der App „Spielstand laden“.</p>`
+    : '<p class="klein">Dein Spielstand bleibt dabei erhalten. Danach startest du das Spiel am besten über das neue Symbol.</p>'}`,
+  knoepfe);
 }
 
 /** Was das Feedback-Formular über die Lage erfährt: keine Namen, kein Spielstand. */
@@ -2708,7 +2743,7 @@ export function oeffneMenue() {
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
   // 05.11.: daneben die Andenken-Sterne (einer je Jahr, das man bis Silvester gespielt hat)
   const an = S.st.andenken || 0;
-  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611151300" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611161100" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -2756,8 +2791,8 @@ export function oeffneMenue() {
     ]);
   };
   zeile.appendChild(neu);
-  // iPhone im Browser: die Anleitung zum Home-Bildschirm jederzeit wieder (12.10.)
-  if (iosImBrowser()) {
+  // Handy im Browser: die Anleitung zum Home-Bildschirm jederzeit wieder (12.10.; 16.11. auch Android)
+  if (installMoeglich()) {
     const ins = el('button', 'k k--neben', 'Als App speichern');
     ins.onclick = () => zeigeInstallTipp();
     zeile.appendChild(ins);
@@ -3037,7 +3072,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611151300" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611161100" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {

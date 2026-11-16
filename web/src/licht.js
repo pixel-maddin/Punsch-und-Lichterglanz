@@ -17,7 +17,7 @@
  * `schatten()` ist ein weicher Bodenschatten unter Dingen; er fällt weg von
  * der Sonne (`schattenRichtung()`).
  */
-import * as Z from './zeit.js?v=202611151300';
+import * as Z from './zeit.js?v=202611161100';
 
 const karte = typeof document !== 'undefined' ? document.createElement('canvas') : null;
 const lk = karte ? karte.getContext('2d') : null;

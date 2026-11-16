@@ -4,32 +4,47 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611151300';
-import * as S from './spiel.js?v=202611151300';
-import * as Z from './zeit.js?v=202611151300';
-import * as T from './ton.js?v=202611151300';
-import * as LI from './lichtung.js?v=202611151300';
-import * as CB from './christbaum.js?v=202611151300';
-import * as KA from './karte.js?v=202611151300';
-import * as SB from './schlitten.js?v=202611151300';
-import * as EB from './schlittschuh.js?v=202611151300';
-import * as BS from './backstube.js?v=202611151300';
-import * as UI from './ui.js?v=202611151300';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611151300';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611151300';
-import * as Kacheln from './kacheln.js?v=202611151300';
-import * as Lernen from './lernen.js?v=202611151300';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611151300';
-import * as A from './auftraege.js?v=202611151300';
-import * as E from './erfolge.js?v=202611151300';
-import * as ZL from './ziele.js?v=202611151300';
+import * as C from './config.js?v=202611161100';
+import * as S from './spiel.js?v=202611161100';
+import * as Z from './zeit.js?v=202611161100';
+import * as T from './ton.js?v=202611161100';
+import * as LI from './lichtung.js?v=202611161100';
+import * as CB from './christbaum.js?v=202611161100';
+import * as KA from './karte.js?v=202611161100';
+import * as SB from './schlitten.js?v=202611161100';
+import * as EB from './schlittschuh.js?v=202611161100';
+import * as BS from './backstube.js?v=202611161100';
+import * as UI from './ui.js?v=202611161100';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611161100';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611161100';
+import * as Kacheln from './kacheln.js?v=202611161100';
+import * as Lernen from './lernen.js?v=202611161100';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611161100';
+import * as A from './auftraege.js?v=202611161100';
+import * as E from './erfolge.js?v=202611161100';
+import * as ZL from './ziele.js?v=202611161100';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
 const buehne = document.getElementById('buehne');
 const pauseZeichen = document.getElementById('pause');
-// Handy quer: Hinweis „bitte hochkant" (CSS) - und das Spiel steht so lange
-const querFormat = window.matchMedia('(orientation: landscape) and (max-height: 500px)');
+// Handy quer: Hinweis „bitte hochkant" - und das Spiel steht so lange.
+// 16.11. (gemeldet: Chrome zeigte „Bitte hochkant halten", sobald beim Hausnamen die Tastatur aufging):
+// Vorher per CSS über die FENSTERgröße - die Tastatur macht das Fenster flach, und es galt als quer.
+// Jetzt zählt die Lage des BILDSCHIRMS, und solange ein Eingabefeld den Fokus hat, nie.
+const querFormat = { matches: false };
+function pruefeQuer() {
+  const ae = document.activeElement;
+  const tippt = !!ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
+  const typ = screen.orientation && screen.orientation.type;
+  const quer = typ ? typ.startsWith('landscape') : window.matchMedia('(orientation: landscape)').matches;
+  // Handy = kurze Bildschirmseite höchstens 500 px (vorher: Fensterhöhe höchstens 500 px)
+  const neu = !tippt && quer && Math.min(screen.width, screen.height) <= 500;
+  if (neu !== querFormat.matches) { querFormat.matches = neu; document.documentElement.classList.toggle('quer', neu); }
+}
+pruefeQuer();
+for (const ev of ['resize', 'orientationchange', 'focusin', 'focusout']) window.addEventListener(ev, () => setTimeout(pruefeQuer, 50));
+if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener('change', () => setTimeout(pruefeQuer, 50));
 const stimmungFeld = document.getElementById('stimmung');
 let H = 320, G = 166;
 
@@ -379,6 +394,7 @@ function frame(jetzt) {
   // Während Laden, Kalender, ein Fenster oder eine Hinweisblase offen ist, steht
   // der Stand still - sonst liefen einem beim Stöbern die Gäste davon.
   fensterTakt();
+  pruefeQuer();   // 16.11.: auch je Bild - focusin kommt nicht überall zuverlässig an
   const steht = UI.fensterOffen() || !!UI.panelOffen() || querFormat.matches || Lernen.pausiert();
   // Pause heißt ALLES steht, auch Schnee, Funken und Gehbewegungen: Die hängen
   // an der Zeichen-Uhr tSek, die lief vorher weiter (gemeldet 30.09.)
