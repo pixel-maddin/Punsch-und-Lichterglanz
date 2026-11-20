@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611201400';
-import * as S from './spiel.js?v=202611201400';
-import * as A from './auftraege.js?v=202611201400';
-import * as E from './erfolge.js?v=202611201400';
-import * as Z from './ziele.js?v=202611201400';
-import * as ZE from './zeit.js?v=202611201400';
-import * as KA from './karte.js?v=202611201400';
-import { zellePos } from './tresen.js?v=202611201400';
+import * as C from './config.js?v=202611201500';
+import * as S from './spiel.js?v=202611201500';
+import * as A from './auftraege.js?v=202611201500';
+import * as E from './erfolge.js?v=202611201500';
+import * as Z from './ziele.js?v=202611201500';
+import * as ZE from './zeit.js?v=202611201500';
+import * as KA from './karte.js?v=202611201500';
+import { zellePos } from './tresen.js?v=202611201500';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -167,7 +167,7 @@ const HINWEISE = [
     ziel: ausgussZiel, fertig: () => S.lauf.hand.length < S.handMax() },
   // Führungen: erstes neues Getränk, erste Deko - bis zur richtigen Zeile im Laden
   { id: 'laden', sofort: true, wann: () => zielDran('getraenk', 'kinderpunsch'),
-    info: () => (S.hat('kinderpunsch') ? 'Neues Getränk: Kinderpunsch! Gut gemacht.' : 'Neues Getränk! Du hast genug Sterne für Kinderpunsch.') + ' Bis zu fünf Sorten passen in dein Angebot, und jede neue ist etwas teurer als die davor. Und Kinderpunsch lockt auch Kinder an deinen Stand.',
+    info: () => (S.hat('kinderpunsch') ? 'Neues Getränk: Kinderpunsch! Gut gemacht.' : 'Neues Getränk! Du hast genug Sterne für Kinderpunsch.') + ' Bis zu fünf Sorten passen in dein Angebot, und jede neue ist etwas teurer als die davor. Und mit neuen Getränken kommen auch neue Gäste an deinen Stand.',
     text: () => 'Tippe auf KARTE - im Supermarkt gibt es Kinderpunsch.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
   { id: 'laden_danach', ruhig: true, sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,

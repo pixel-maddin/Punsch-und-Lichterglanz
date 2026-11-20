@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611201400';
-import * as Z from './zeit.js?v=202611201400';
-import { neueFarben } from './pixel.js?v=202611201400';
+import * as C from './config.js?v=202611201500';
+import * as Z from './zeit.js?v=202611201500';
+import { neueFarben } from './pixel.js?v=202611201500';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -1917,7 +1917,10 @@ function istMarkt(d) {
   return k === d;
 }
 /** Erst nach der Einführung - davor gibt es keinen Markt und keine Ansage. */
-export const marktHeute = () => st.lernen >= 99 && einstieg('markt') && istMarkt(tagNr());
+// 20.11. (gemeldet am 28.11. in der Einführung: Leiste „MARKTTAG · Weihnachtsmarkt auf dem Festplatz“, der Festplatz
+// war aber noch gar nicht auf der Karte): Markt erst, wenn der Festplatz freigeschaltet ist
+export const festplatzOffen = () => ortOffen({ id: 'festplatz' });
+export const marktHeute = () => st.lernen >= 99 && einstieg('markt') && festplatzOffen() && istMarkt(tagNr());
 /** { heute, inTagen, datum } des nächsten Markts. */
 export function marktInfo() {
   const heute = tagNr();
@@ -2528,6 +2531,11 @@ export function briefErfuellt(b) {
  */
 export function briefPruefen() {
   if (st.lernen < 99 || spieltag() < C.BRIEF_AB_TAG || winterpause()) return null;
+  // 20.11. (gemeldet: Brief schon während der Einführung): erst ab dem Tag NACH dem Tag, an dem die
+  // Startziele fertig wurden. `st.einfuehrungTag` merkt sich diesen Tag beim ersten Blick danach.
+  if (!startzieleFertig()) return null;
+  if (st.einfuehrungTag == null) { st.einfuehrungTag = tagNr(); speichere(); }
+  if (tagNr() <= st.einfuehrungTag) return null;
   const B = briefe();
   if (B.aktiv) {
     if (!B.aktiv.dank && briefErfuellt(B.aktiv)) { B.aktiv.dank = true; B.aktiv.offen = true; speichere(); return 'dank'; }

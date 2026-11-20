@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202611201400';
-import * as S from './spiel.js?v=202611201400';
-import * as Z from './zeit.js?v=202611201400';
-import * as FEIN from './fein.js?v=202611201400';
-import * as T from './ton.js?v=202611201400';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611201400';
+import * as C from './config.js?v=202611201500';
+import * as S from './spiel.js?v=202611201500';
+import * as Z from './zeit.js?v=202611201500';
+import * as FEIN from './fein.js?v=202611201500';
+import * as T from './ton.js?v=202611201500';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611201500';
 
 const $ = (s) => document.querySelector(s);
 
@@ -96,6 +96,7 @@ export function oeffne(hoehe, beiAnkunft, hervor) {
   baueSchilder(hervor);
   el.classList.toggle('ohne-text', !!S.st.karteOhneText);
   el.classList.remove('versteckt');
+  document.getElementById('huelle')?.classList.add('karte-offen');   // 20.11.: Einblendungen bündig mit Aa und ✕
   offen = true;
   S.lauf.karteOffen = true;
   T.musikKarte(true);         // auf der Karte läuft das Kartenstück (11.10.)   // für den Hinweis „Auf der Karte gibt es noch mehr"
@@ -109,6 +110,7 @@ export function schliesse() {
   S.lauf.karteOffen = false;
   T.musikKarte(false);
   $('#landkarte').classList.add('versteckt');
+  document.getElementById('huelle')?.classList.remove('karte-offen');
   cancelAnimationFrame(rafId);
 }
 

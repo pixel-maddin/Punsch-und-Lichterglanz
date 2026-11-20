@@ -1877,3 +1877,6 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
 .stil-wahl .punktwahl { display: grid; gap: calc(var(--px) * 1.5); }
 .stil-wahl .pw { min-width: 0; justify-content: center; }
 .stil-wahl .pw span { white-space: nowrap; }
+
+/* 20.11.: Auf der Karte stehen die Einblendungen oben bündig mit den Knöpfen „Aa“ und ✕ (top 21) */
+#huelle.karte-offen:not(.blatt-offen) #toast { top: calc(var(--px) * 21); }
