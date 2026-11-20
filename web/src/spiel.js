@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611201500';
-import * as Z from './zeit.js?v=202611201500';
-import { neueFarben } from './pixel.js?v=202611201500';
+import * as C from './config.js?v=202611201600';
+import * as Z from './zeit.js?v=202611201600';
+import { neueFarben } from './pixel.js?v=202611201600';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -774,7 +774,8 @@ export function kaufe(id) {
   if (a.wahl === 'lichtfarbe') { st.bunt = st.bunt || {}; st.bunt[a.kette] = true; }
   if (a.wahl === 'zaunfarbe') st.zaunfarbe = 'braun';
   if (id === 'musik') hooks.musik();
-  if (id === 'futterhaus') setTimeout(() => hooks.toast('Tipp das Futterhaus im alten Baum an, um es zu füllen und die Vögel zu beobachten.', 'spezial'), 1200);
+  // 20.11.: der Tipp kommt erst 3 Minuten nach dem Kauf und nur, wenn man es bis dahin nicht selbst gefüllt hat (main.js)
+  if (id === 'futterhaus') { st.futterTippAb = Date.now() + 180000; speichere(); }
   hooks.ton('kauf');
   hooks.geld();
   speichere();
@@ -974,7 +975,10 @@ export function neuerGast(typ, gross) {
   lauf.gaeste.push(g);
   if (def.spezial) {
     st.stats.spezial++;
-    hooks.toast(`${def.name} kommt vorbei!`, 'spezial');
+    // 20.11. (Erstspieler-Test: ~12 solche Einblendungen in 14 min): nur beim ersten Mal je Art - danach erkennt
+    // man sie am Aussehen. Der Ton bleibt.
+    st.vorbeiGesehen = st.vorbeiGesehen || {};
+    if (!st.vorbeiGesehen[typ]) { st.vorbeiGesehen[typ] = true; hooks.toast(`${def.name} kommt vorbei!`, 'spezial'); }
     hooks.ton('spezial');
   }
   return g;
@@ -996,10 +1000,17 @@ function stammFaellig() {
   const h = Z.jetzt().getHours(), heute = Z.tagesSchluessel();
   // Wer heute noch nicht bedient wurde und nicht schon da steht - zu jeder
   // Uhrzeit (17.10.). Zur Lieblingszeit (von-bis) kommt man lieber.
-  const dran = Object.entries(C.STAMMGAESTE).filter(([id]) => (st.stamm || {})[id]?.tag !== heute && !lauf.gaeste.some((g) => g.typ === id));
+  // 20.11. (Erstspieler-Test: alle fünf stellten sich in der ersten Runde vor): Neue lernt man erst ab dem
+  // zweiten Spieltag kennen, höchstens einen je Tag (`st.stammNeu1` = { tag, id })
+  const neuHeute = st.stammNeu1 && st.stammNeu1.tag === heute ? st.stammNeu1.id : null;
+  const kennt = (id) => !!(st.stamm || {})[id];
+  const dran = Object.entries(C.STAMMGAESTE).filter(([id]) => (st.stamm || {})[id]?.tag !== heute && !lauf.gaeste.some((g) => g.typ === id)
+    && (kennt(id) || (spieltag() >= 1 && (!neuHeute || neuHeute === id))));
   if (!dran.length || Math.random() >= C.STAMM_CHANCE) return null;
   lauf.stammAb = lauf.t + C.STAMM_PAUSE;
-  return zufallGewichtet(dran, ([, s]) => (h >= s.von && h < s.bis ? C.STAMM_LIEBLING : 1))[0];
+  const wahl = zufallGewichtet(dran, ([, s]) => (h >= s.von && h < s.bis ? C.STAMM_LIEBLING : 1))[0];
+  if (!kennt(wahl)) st.stammNeu1 = { tag: heute, id: wahl };
+  return wahl;
 }
 /** Begrüßung passend zur Uhrzeit (17.10.) - ersetzt {gruss} im ersten Satz. */
 export function mitGruss(id, satz) {

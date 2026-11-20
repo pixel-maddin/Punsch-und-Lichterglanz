@@ -4,25 +4,25 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611201500';
-import * as S from './spiel.js?v=202611201500';
-import * as Z from './zeit.js?v=202611201500';
-import * as T from './ton.js?v=202611201500';
-import * as LI from './lichtung.js?v=202611201500';
-import * as CB from './christbaum.js?v=202611201500';
-import * as KA from './karte.js?v=202611201500';
-import * as SB from './schlitten.js?v=202611201500';
-import * as EB from './schlittschuh.js?v=202611201500';
-import * as BS from './backstube.js?v=202611201500';
-import * as UI from './ui.js?v=202611201500';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611201500';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611201500';
-import * as Kacheln from './kacheln.js?v=202611201500';
-import * as Lernen from './lernen.js?v=202611201500';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611201500';
-import * as A from './auftraege.js?v=202611201500';
-import * as E from './erfolge.js?v=202611201500';
-import * as ZL from './ziele.js?v=202611201500';
+import * as C from './config.js?v=202611201600';
+import * as S from './spiel.js?v=202611201600';
+import * as Z from './zeit.js?v=202611201600';
+import * as T from './ton.js?v=202611201600';
+import * as LI from './lichtung.js?v=202611201600';
+import * as CB from './christbaum.js?v=202611201600';
+import * as KA from './karte.js?v=202611201600';
+import * as SB from './schlitten.js?v=202611201600';
+import * as EB from './schlittschuh.js?v=202611201600';
+import * as BS from './backstube.js?v=202611201600';
+import * as UI from './ui.js?v=202611201600';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611201600';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611201600';
+import * as Kacheln from './kacheln.js?v=202611201600';
+import * as Lernen from './lernen.js?v=202611201600';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611201600';
+import * as A from './auftraege.js?v=202611201600';
+import * as E from './erfolge.js?v=202611201600';
+import * as ZL from './ziele.js?v=202611201600';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -550,7 +550,13 @@ function sekundenTakt() {
   }
   // 30.10. (Testbericht: vier Socken-Einblendungen in zwei Minuten): gesammelt, höchstens eine je 90 s
   if (erfolge.length && S.startzieleFertig()) { sockenSammel.push(...erfolge); S.speichere(); }   // Socken zählen immer, gemeldet erst nach den Startzielen
-  if (sockenSammel.length && Date.now() - sockenZuletzt > 90000 && !UI.fensterOffen()) {
+  // Futterhaus-Tipp (20.11.): 3 Minuten nach dem Kauf, nur wenn noch nie gefüllt
+  if (S.st.futterTippAb && Date.now() > S.st.futterTippAb && !UI.fensterOffen() && !UI.panelOffen()) {
+    if (!S.st.futterBis) UI.toast('Tipp das Futterhaus im alten Baum an, um es zu füllen und die Vögel zu beobachten.', 'spezial');
+    S.st.futterTippAb = null; S.speichere();
+  }
+  // 20.11.: am ersten Spieltag Socken 5 Minuten lang sammeln (sonst 90 s) - im Einstieg ist schon genug los
+  if (sockenSammel.length && Date.now() - sockenZuletzt > (S.spieltag() < 1 ? 300000 : 90000) && !UI.fensterOffen()) {
     T.spiele('spezial');
     UI.toast(sockenSammel.length === 1 ? `Neue Socke an der Erfolgswand: ${sockenSammel[0].name}!` : `${sockenSammel.length} neue Socken an der Erfolgswand: ${sockenSammel.map((e) => e.name).join(', ')}!`, 'neu');
     sockenSammel = []; sockenZuletzt = Date.now();

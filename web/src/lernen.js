@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611201500';
-import * as S from './spiel.js?v=202611201500';
-import * as A from './auftraege.js?v=202611201500';
-import * as E from './erfolge.js?v=202611201500';
-import * as Z from './ziele.js?v=202611201500';
-import * as ZE from './zeit.js?v=202611201500';
-import * as KA from './karte.js?v=202611201500';
-import { zellePos } from './tresen.js?v=202611201500';
+import * as C from './config.js?v=202611201600';
+import * as S from './spiel.js?v=202611201600';
+import * as A from './auftraege.js?v=202611201600';
+import * as E from './erfolge.js?v=202611201600';
+import * as Z from './ziele.js?v=202611201600';
+import * as ZE from './zeit.js?v=202611201600';
+import * as KA from './karte.js?v=202611201600';
+import { zellePos } from './tresen.js?v=202611201600';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -155,6 +155,13 @@ function einfuehrung() {
 // ---------------------------------------------------------------------------
 // Einzelne Hinweise, je einer einmal
 // ---------------------------------------------------------------------------
+/** Minispiele und Markt (Teil der Blase `baumarkt`, früher eigene Blase `karte_mehr`). Nennt nur, was offen ist. */
+function karteMehrText() {
+  const offen = KA.ORTE.filter((o) => o.spiel && S.miniOffen(o.spiel)).map((o) => o.name);
+  const alle = offen.length === Object.keys(C.MINISPIELE).length;
+  const liste = offen.length > 1 ? `${offen.slice(0, -1).join(', ')} und ${offen.at(-1)}` : offen[0];
+  return `Dazu ${offen.length > 1 ? 'MINISPIELE' : 'ein MINISPIEL'} - ${liste}. ${offen.length > 1 ? 'Sie bringen' : 'Es bringt'} Sterne und besondere Deko fürs Haus.${alle ? '' : ' Alle paar Tage kommt ein neues dazu.'} Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.`;
+}
 const HINWEISE = [
   { id: 'leer', ruhig: true, sofort: true, wann: () => !S.stufe('nachfuell') && leererTopf() >= 0,
     text: () => `Leer! Tippe das Getränk unten ${C.NACHFUELL_TIPPS}-mal an, dann ist es wieder voll.`,
@@ -201,17 +208,17 @@ const HINWEISE = [
     info: () => (S.hat('spuel') ? 'Gut gemacht - der SPÜL-WICHTEL ist schon da! Wichtel nehmen dir am Stand Arbeit ab: Er stellt dir laufend saubere Gläser aufs Tablett - dann musst du nicht jedes Mal auf die Gläser tippen.' : 'Zeit für Hilfe! Wichtel nehmen dir am Stand Arbeit ab. Der erste ist der SPÜL-WICHTEL: Er stellt dir laufend saubere Gläser aufs Tablett - dann musst du nicht jedes Mal auf die Gläser tippen.'),
     text: () => 'Tippe auf KARTE - im Wichtelwald wartet er schon.',
     ziel: ladenZiel, fertig: () => S.hat('spuel'), laden: { tab: 'wichtel', id: 'spuel' }, lang: true },
-  { id: 'w_nachfuell', sofort: true, wann: () => zielDran('nachfuell', 'nachfuell'),
-    info: () => (S.hat('nachfuell') ? 'Den NACHFÜLL-WICHTEL hast du auch schon: Er füllt leere Getränke unten von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.' : 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Töpfe von selbst wieder auf. Kein Antippen mehr, wenn der Sternenpunsch ausgeht.'),
-    text: () => 'Tippe auf KARTE - im Wichtelwald findest du ihn.',
-    ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, lang: true },
-  { id: 'w_servier', sofort: true, wann: () => zielDran('servier', 'servier'),
-    // 26.10.: das „auch wenn du nicht da bist" erklärt `wichtel_weg` gleich danach - hier nicht doppelt
-    info: () => (S.hat('servier') ? 'Und der wichtigste Helfer ist auch schon da: Der SERVIER-WICHTEL bedient Gäste ganz allein.' : 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Zusammen mit Spül- und Nachfüll-Wichtel läuft dein Stand dann von selbst.'),
-    text: () => 'Tippe auf KARTE - im Wichtelwald wartet der Servier-Wichtel.',
-    ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, lang: true },
+  // 20.11. (Erstspieler-Test: fünf lange Blasen in 45 s rund um die Wichtel): Nachfüll- und Servier-Wichtel
+  // sind ruhige Zeiger ohne Pause - was sie tun, steht im Satz und an der Ladenzeile. Wer sie schon hat,
+  // bekommt keinen. „Alle drei Wichtel" kommt danach mit normaler Pause statt sofort.
+  { id: 'w_nachfuell', ruhig: true, sofort: true, wann: () => zielDran('nachfuell', 'nachfuell') && !S.hat('nachfuell'),
+    text: () => 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Getränke von selbst auf. Tippe auf KARTE - er wartet im Wichtelwald.',
+    ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, dauer: 16 },
+  { id: 'w_servier', ruhig: true, sofort: true, wann: () => zielDran('servier', 'servier') && !S.hat('servier'),
+    text: () => 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Tippe auf KARTE - im Wichtelwald wartet er.',
+    ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, dauer: 16 },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
-  { id: 'wichtel_weg', sofort: true, wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
+  { id: 'wichtel_weg', wann: () => ['spuel', 'nachfuell', 'servier'].every((w) => S.hat(w)),
     // 26.10.: kürzer, und passend zur neuen Abrechnung (kurze Pausen direkt, ab einer Stunde die Kiste)
     text: () => `Alle drei Wichtel sind da! Sie arbeiten auch weiter, wenn die App zu ist: Kommst du bald zurück, gibt es ihre Sterne gleich - warst du länger weg, wartet eine Kiste auf dich, die sich nach und nach füllt. Und: Was DU selbst servierst, bringt doppelt so viele Sterne.`,
     ziel: null, dauer: 12 },
@@ -229,18 +236,14 @@ const HINWEISE = [
   // trotzdem schon offen (ortOffen), nur die Vorstellung wartet.
   // 26.10.: nach der Frage „Wie geht es weiter?" (die sagt jetzt, was die Blase `ziele_fertig` sagte)
   { id: 'baumarkt', wann: () => !!S.st.tipps.wichtel_weg && Z.fertig() && (S.st.zieleWeiter != null || !!S.st.tipps.ziele_fertig),
-    info: () => 'Neu auf der Karte: der BAUMARKT! Dort gibt es größere Töpfe, einen längeren Tresen für mehr Gäste, ein Tablett für mehr Gläser - und neue Farbe für dein Haus.',
-    text: () => 'Tippe auf KARTE - der Baumarkt ist jetzt offen.',
+    // 20.11.: zusammen mit `karte_mehr` (Minispiele, Markt) - vorher zwei Blasen mit je einem Zeiger auf die Karte
+    info: () => `Neu auf der Karte: der BAUMARKT mit größeren Töpfen, einem längeren Tresen und neuer Farbe fürs Haus. ${karteMehrText()}`,
+    text: () => 'Tippe auf KARTE und schau dich um.',
     // 13.10.: ohne `lang` - wer nicht hingeht, hatte den Zeiger sonst für immer über dem Stand
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen, laden: { tab: 'baumarkt' } },
+  // Alte Stände, die den Baumarkt schon kannten: weiter einzeln (seit 20.11. steht der Text sonst in `baumarkt`)
   { id: 'karte_mehr', wann: () => !!S.st.tipps.wichtel_weg && !!S.st.tipps.baumarkt,
-    // Nennt nur, was schon offen ist (10.10.: Minispiele kommen nach und nach)
-    info: () => {
-      const offen = KA.ORTE.filter((o) => o.spiel && S.miniOffen(o.spiel)).map((o) => o.name);
-      const alle = offen.length === Object.keys(C.MINISPIELE).length;
-      const liste = offen.length > 1 ? `${offen.slice(0, -1).join(', ')} und ${offen.at(-1)}` : offen[0];
-      return `Auf der Karte gibt es noch mehr zu entdecken: ${offen.length > 1 ? 'MINISPIELE' : 'ein MINISPIEL'} - ${liste}. ${offen.length > 1 ? 'Sie bringen' : 'Es bringt'} Sterne und besondere Deko fürs Haus.${alle ? '' : ' Alle paar Tage kommt ein neues dazu.'} Und alle paar Tage ist WEIHNACHTSMARKT auf dem Festplatz.`;
-    },
+    info: () => `Auf der Karte gibt es noch mehr zu entdecken. ${karteMehrText()}`,
     text: () => 'Tippe auf KARTE und schau dich um.',
     ziel: ladenZiel, fertig: () => !!S.lauf.karteOffen },
   // 26.10.: `herz_ziel` (steht jetzt in `deko_danach`) und `ziele_fertig` (steht jetzt im Fenster
@@ -413,7 +416,7 @@ function hinweise(dt) {
     if (h.id === 'chef') { st.chefBonus = true; S.speichere(); }   // der Bonus gilt, sobald er erklärt wird
     // 26.10. (gemeldet): Festplatz und Minispiele gehen auf, sobald der Hinweis sie NENNT - vorher erst,
     // wenn er erledigt war (= Karte geöffnet). Wer ihm folgte, sah zuerst nur gesperrte „?"-Schilder.
-    if (h.id === 'karte_mehr') { st.karteMehrGezeigt = true; S.speichere(); }
+    if (h.id === 'karte_mehr' || h.id === 'baumarkt') { st.karteMehrGezeigt = true; if (h.id === 'baumarkt') st.tipps.karte_mehr = true; S.speichere(); }
     // Verwandte Hinweise gelten mit als erklärt (Aufträge kam sonst doppelt)
     for (const id of h.ersetzt || []) st.tipps[id] = true;
     return hinweise(0);

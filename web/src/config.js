@@ -1145,7 +1145,7 @@ export const MINI_ALLE_DEZ = 14;
 export const EINSTIEG = { sonder: 0, ansturm: 1, haendler: 5, wetter: 1, schlitten: 2, santa: 3, markt: 4 };
 export const HAENDLER_SPAET_DEZ = 14;
 export const VORSCHAU_NACH = 480;   // s in der Sitzung, bis „Morgen wartet …“ kommt (einmal am Tag)
-export const RUHE_NACH_START = 120;   // s nach dem letzten Startziel ohne Großbestellung, Gruppe, Ansturm, Sondergast
+export const RUHE_NACH_START = 300;   // 20.11.: vorher 120 (Erstspieler-Test: ~20 Meldungen in 5 min). s nach dem letzten Startziel ohne Großbestellung, Gruppe, Ansturm, Sondergast
 
 // ---------------------------------------------------------------------------
 // 21.10.: `abTag` = ab dem wievielten Tag nach dem ersten Füllen eine Art kommt (am
