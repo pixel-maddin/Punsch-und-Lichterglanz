@@ -2,10 +2,11 @@
  * ton.js - Geräusche (synthetisiert) und die Musik.
  *
  * MUSIK (seit 27.10., Stücke seit 20.11. neu von Suno): drei Szenen mit je einer Wiedergabeliste, dazu ein Jingle.
- *   haus  - `haus-swing` und `haus-walzer` im Wechsel, ab dem 2. Advent auch `haus-dezember` (kommt beim
- *           ersten Mal in der Sitzung zuerst). 24.-26.12. abwechselnd `xmas` und eins davon.
- *   karte - `karte-dorf` und `karte-werkstatt` im Wechsel.
- *   mini  - `mini-winter`/`mini-cozy`, im Wechsel je Minispiel, in Schleife.
+ *   haus  - `haus-swing`, `haus-walzer`, `haus-jazz`, `musik-haus` zufällig ohne direkte Wiederholung, ab dem
+ *           2. Advent auch `haus-dezember` (kommt beim ersten Mal in der Sitzung zuerst). 24.-26.12. abwechselnd
+ *           `xmas` und eins davon.
+ *   karte - `karte-dorf`, `karte-werkstatt`, `musik-karte`, `karte-1..3` (20.11.: die alten wieder dazu).
+ *   mini  - `mini-winter`, `mini-cozy`, `mini-1`, `mini-2`, je Minispiel ein anderes, in Schleife.
  *   jingle - 16 s bei großen Ereignisfenstern (`jingle()`), die Musik wird solange leiser.
  * Herkunft und Künstler: `C.MUSIK_CREDITS` (Fenster „Credits" in den Einstellungen).
  * Jede Szene hat EIN Audio-Element (die Quelle wechselt am Stückende) und läuft beim nächsten Mal
@@ -19,18 +20,18 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-import * as Z from './zeit.js?v=202611201000';
+import * as Z from './zeit.js?v=202611201100';
 
 let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
-const url = (id) => `audio/${id}.m4a?v=202611201000`;
-const HAUS = ['haus-swing', 'haus-walzer'];
+const url = (id) => `audio/${id}.m4a?v=202611201100`;
+const HAUS = ['haus-swing', 'haus-walzer', 'haus-jazz', 'musik-haus'];   // 20.11.: die alten zwei wieder dazu
 const HAUS_DEZEMBER = 'haus-dezember';   // 20.11. (Nutzerwunsch): erst ab dem 2. Advent
 const HAUS_DEZEMBER_AB = 2;
 const XMAS = 'xmas';
-const KARTE = ['karte-dorf', 'karte-werkstatt'];
-const MINI = ['mini-winter', 'mini-cozy'];
+const KARTE = ['karte-dorf', 'karte-werkstatt', 'musik-karte', 'karte-1', 'karte-2', 'karte-3'];
+const MINI = ['mini-winter', 'mini-cozy', 'mini-1', 'mini-2'];
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
 const DUCK = 0.15;        // so laut bleibt die Musik unter dem Jingle
 const spuren = {};        // szene -> { el, gain, stueck }
@@ -55,7 +56,7 @@ function naechstes(name, jetzt) {
     return zufall(l, jetzt);
   }
   if (name === 'karte') return zufall(KARTE, jetzt);
-  // Minispiele: die beiden Stücke im Wechsel (20.11.; vorher zufällig, oft zweimal dasselbe)
+  // Minispiele: nie zweimal hintereinander dasselbe (20.11.)
   miniZuletzt = zufall(MINI, miniZuletzt);
   return miniZuletzt;
 }
