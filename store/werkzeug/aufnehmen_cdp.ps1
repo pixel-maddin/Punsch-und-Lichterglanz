@@ -1,4 +1,5 @@
-param([string]$Ziel, [string]$Url, [int]$Breite = 540, [int]$Hoehe = 960, [int]$Warten = 8)
+param([string]$Ziel, [string]$Url, [int]$Breite = 540, [int]$Hoehe = 960, [int]$Warten = 8, [string]$Js = '')
+# -Js: JavaScript, das kurz vor dem Foto läuft (20.11., z. B. Einblendungen ausblenden)
 # Headless-Chrome in ECHTER Zeit laufen lassen und dann per DevTools-Protokoll ein Bildschirmfoto holen
 # (--virtual-time-budget brachte das Spiel zum Absturz bzw. ließ die Gäste halb durchsichtig).
 $profil = Join-Path (Split-Path $Ziel) ("profil_" + [IO.Path]::GetFileNameWithoutExtension($Ziel))
@@ -26,6 +27,7 @@ function Schicke([int]$id, [string]$methode, [string]$param) {
 $null = Schicke 1 'Emulation.setDeviceMetricsOverride' "{`"width`":$Breite,`"height`":$Hoehe,`"deviceScaleFactor`":2,`"mobile`":true}"
 $null = Schicke 2 'Page.reload' '{}'
 Start-Sleep -Seconds $Warten
+if ($Js) { $esc = $Js.Replace('\', '\\').Replace('"', '\"'); $null = Schicke 4 'Runtime.evaluate' "{`"expression`":`"$esc`"}"; Start-Sleep -Milliseconds 400 }
 $antwort = (Schicke 3 'Page.captureScreenshot' '{"format":"png"}') | ConvertFrom-Json
 [IO.File]::WriteAllBytes($Ziel, [Convert]::FromBase64String($antwort.result.data))
 $c.Dispose()

@@ -1,0 +1,75 @@
+<!doctype html>
+<!--
+  Instagram-Beiträge 4:5 (20.11.): mit aufnehmen_cdp.ps1 bei 540 x 675 (x2 = 1080 x 1350) aufnehmen,
+  Motiv über ?art=teaser|start|minispiele|erleben. Bilder kommen aus ../instagram/.
+-->
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=540, initial-scale=1">
+<style>
+  @font-face { font-family: "Nunito"; src: url("../../web/fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; }
+  html, body { margin: 0; width: 540px; height: 675px; overflow: hidden; background: #141a3e; font-family: "Nunito", sans-serif; }
+  .voll { position: absolute; inset: 0; background-size: cover; background-position: center bottom; image-rendering: pixelated; }
+  .logo { position: absolute; left: 50%; transform: translateX(-50%); image-rendering: pixelated; filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45)); }
+  .gross { position: absolute; left: 0; right: 0; text-align: center; color: #ffe27a; font-weight: 900;
+    text-shadow: 0 3px 0 #6b1f18, 0 0 22px rgba(255, 200, 100, 0.55); letter-spacing: 0.5px; }
+  .klein { position: absolute; left: 0; right: 0; text-align: center; color: #fff4dc; font-weight: 800;
+    text-shadow: 0 2px 0 #1a1030, 0 0 10px rgba(20, 16, 48, 0.8); }
+  .pille { display: inline-block; padding: 6px 16px; border-radius: 999px; background: rgba(20, 16, 48, 0.72); border: 2px solid #ffd76a; }
+  .handys { position: absolute; left: 0; right: 0; display: flex; justify-content: center; gap: 14px; }
+  .handy { width: 150px; height: 267px; border-radius: 16px; border: 5px solid #2a2440; background-size: cover; background-position: center;
+    image-rendering: pixelated; box-shadow: 0 10px 24px rgba(0,0,0,0.5); }
+  .handy:nth-child(1) { transform: rotate(-5deg) translateY(10px); }
+  .handy:nth-child(3) { transform: rotate(5deg) translateY(10px); }
+  .unter { position: absolute; left: 0; right: 0; text-align: center; color: #fff4dc; font-weight: 700; font-size: 15px; }
+  .unter span { display: inline-block; width: 150px; margin: 0 7px; }
+  .schnee { position: absolute; inset: 0; background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff 50%, transparent 51%), radial-gradient(2px 2px at 120px 80px, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 200px 150px, #fff 50%, transparent 51%), radial-gradient(2px 2px at 330px 40px, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 420px 120px, #fff 50%, transparent 51%), radial-gradient(2px 2px at 500px 60px, #fff 50%, transparent 51%);
+    background-size: 540px 200px; opacity: 0.55; }
+</style></head>
+<body>
+<script>
+  const art = new URLSearchParams(location.search).get('art') || 'teaser';
+  const B = (n) => `../instagram/${n}`;
+  const html = {
+    teaser: `
+      <div class="voll" style="background-image:url(${B('1_haus_nacht.png')})"></div>
+      <img class="logo" src="${B('logo_punsch_lichterglanz_gross.png')}" style="top:24px;width:380px">
+      <div class="klein" style="top:196px;font-size:18px">Dein gemütliches Weihnachtsspiel fürs Handy</div>
+      <div class="gross" style="top:228px;font-size:42px">Ab 24. November</div>
+      <div class="klein" style="top:290px;font-size:15px"><span class="pille">Punschstand · Adventskalender · Minispiele</span></div>`,
+    start: `
+      <div class="voll" style="background-image:url(${B('2_nachher.png')})"></div>
+      <img class="logo" src="${B('logo_punsch_lichterglanz_gross.png')}" style="top:24px;width:380px">
+      <div class="gross" style="top:196px;font-size:40px">Jetzt spielen!</div>
+      <div class="klein" style="top:254px;font-size:15px"><span class="pille">pixel-maddin.github.io/Punsch-und-Lichterglanz</span></div>
+      <div class="klein" style="top:296px;font-size:14px">Kostenlos · ohne Werbung · ohne Anmeldung</div>`,
+    minispiele: `
+      <div class="voll" style="background:linear-gradient(#1c2350, #2d2a5a 60%, #3a2440)"></div><div class="schnee"></div>
+      <div class="gross" style="top:40px;font-size:40px">Sechs Minispiele</div>
+      <div class="klein" style="top:100px;font-size:18px">Tiere füttern, Bäume verkaufen, Schlittschuh laufen …</div>
+      <div class="handys" style="top:170px">
+        <div class="handy" style="background-image:url(${B('7_minispiel_waldlichtung.png')})"></div>
+        <div class="handy" style="background-image:url(${B('8_minispiel_christbaum.png')})"></div>
+        <div class="handy" style="background-image:url(${B('9_minispiel_eisbahn.png')})"></div>
+      </div>
+      <div class="unter" style="top:470px"><span>Waldlichtung</span><span>Christbaumverkauf</span><span>Eisbahn</span></div>
+      <div class="klein" style="top:540px;font-size:17px">Dazu Backstube, Schlittenberg und Schneeballschlacht -<br>jedes bringt Deko für dein Haus.</div>
+      <img class="logo" src="${B('logo_punsch_lichterglanz_gross.png')}" style="top:606px;width:150px">`,
+    erleben: `
+      <div class="voll" style="background:linear-gradient(#1c2350, #2d2a5a 60%, #3a2440)"></div><div class="schnee"></div>
+      <div class="gross" style="top:40px;font-size:38px">Was dich erwartet</div>
+      <div class="klein" style="top:98px;font-size:18px">Jeden Tag ein bisschen mehr Weihnachten</div>
+      <div class="handys" style="top:170px">
+        <div class="handy" style="background-image:url(${B('14_karte_abend.png')})"></div>
+        <div class="handy" style="background-image:url(${B('4_stand_abend_4dez.png')})"></div>
+        <div class="handy" style="background-image:url(${B('12_kaminzimmer.png')})"></div>
+      </div>
+      <div class="unter" style="top:470px"><span>Ein ganzes Dorf</span><span>Dein Punschstand</span><span>Socken &amp; Trophäen</span></div>
+      <div class="klein" style="top:540px;font-size:17px">Adventskalender, Weihnachtsmarkt, Stammgäste<br>und am 23.12. die Jury: Wer hat das schönste Haus?</div>
+      <img class="logo" src="${B('logo_punsch_lichterglanz_gross.png')}" style="top:606px;width:150px">`,
+  };
+  document.body.insertAdjacentHTML('beforeend', html[art] || html.teaser);
+</script>
+</body></html>
