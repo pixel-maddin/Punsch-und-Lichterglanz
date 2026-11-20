@@ -405,7 +405,8 @@ alte Dateien.
 - **Am Haus** vier Stücke im Wechsel, ab dem 2. Advent ein fünftes (es läuft
   beim ersten Mal zuerst); vom 24. (ab 6 Uhr, mit dem Weihnachtsfenster) bis
   26. Dezember kommt im Wechsel ein Weihnachtsstück dazu.
-- **Auf der Karte** sechs Stücke im Wechsel.
+- **Auf der Karte** bis zum 1. Advent drei Stücke, danach mit jedem Advent
+  (1. bis 3.) ein neues - das neue läuft beim ersten Öffnen zuerst.
 - **In den Minispielen** vier Stücke, nie zweimal hintereinander dasselbe.
 - **Bei großen Ereignissen** (Advent, erster Schnee, Jury, Heiligabend,
   Silvester, Finale) ein kurzer Jingle, die Musik wird solange leiser.

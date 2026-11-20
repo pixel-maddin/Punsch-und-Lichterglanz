@@ -5,7 +5,8 @@
  *   haus  - `haus-swing`, `haus-walzer`, `haus-jazz`, `musik-haus` zufällig ohne direkte Wiederholung, ab dem
  *           2. Advent auch `haus-dezember` (kommt beim ersten Mal in der Sitzung zuerst). 24.-26.12. abwechselnd
  *           `xmas` und eins davon.
- *   karte - `karte-dorf`, `karte-werkstatt`, `musik-karte`, `karte-1..3` (20.11.: die alten wieder dazu).
+ *   karte - bis zum 1. Advent `karte-dorf`, `karte-werkstatt`, `musik-karte`; mit jedem Advent eins mehr
+ *           (`karte-1..3`, 1. bis 3. Advent) - das neue kommt beim ersten Öffnen der Sitzung zuerst.
  *   mini  - `mini-winter`, `mini-cozy`, `mini-1`, `mini-2`, je Minispiel ein anderes, in Schleife.
  *   jingle - 16 s bei großen Ereignisfenstern (`jingle()`), die Musik wird solange leiser.
  * Herkunft und Künstler: `C.MUSIK_CREDITS` (Fenster „Credits" in den Einstellungen).
@@ -20,17 +21,18 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-import * as Z from './zeit.js?v=202611201100';
+import * as Z from './zeit.js?v=202611201200';
 
 let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
-const url = (id) => `audio/${id}.m4a?v=202611201100`;
+const url = (id) => `audio/${id}.m4a?v=202611201200`;
 const HAUS = ['haus-swing', 'haus-walzer', 'haus-jazz', 'musik-haus'];   // 20.11.: die alten zwei wieder dazu
 const HAUS_DEZEMBER = 'haus-dezember';   // 20.11. (Nutzerwunsch): erst ab dem 2. Advent
 const HAUS_DEZEMBER_AB = 2;
 const XMAS = 'xmas';
-const KARTE = ['karte-dorf', 'karte-werkstatt', 'musik-karte', 'karte-1', 'karte-2', 'karte-3'];
+const KARTE = ['karte-dorf', 'karte-werkstatt', 'musik-karte'];
+const KARTE_ADVENT = ['karte-1', 'karte-2', 'karte-3'];   // kommen am 1., 2., 3. Advent dazu (20.11.: wieder als Staffel)
 const MINI = ['mini-winter', 'mini-cozy', 'mini-1', 'mini-2'];
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
 const DUCK = 0.15;        // so laut bleibt die Musik unter dem Jingle
@@ -43,7 +45,7 @@ const gehoert = new Set();   // Stücke, die in dieser Sitzung schon liefen
 const zufall = (liste, nicht) => { const l = liste.filter((x) => x !== nicht); const w = l.length ? l : liste; return w[Math.floor(Math.random() * w.length)]; };
 // 29.10.: Am 24.12. erst ab 6 Uhr (dann kommt auch das Fenster „Frohe Weihnachten!")
 const xmasTage = () => { const d = Z.jetzt(), t = Z.dezemberTag(d); return (t === 24 && d.getHours() >= 6) || t === 25 || t === 26; };
-const karteListe = () => KARTE;
+const karteListe = () => [...KARTE, ...KARTE_ADVENT.slice(0, Math.min(Z.adventKerzen(), KARTE_ADVENT.length))];
 const hausListe = () => (Z.adventKerzen() >= HAUS_DEZEMBER_AB ? [...HAUS, HAUS_DEZEMBER] : HAUS);
 let miniZuletzt = null;
 /** Welches Stück kommt in dieser Szene als Nächstes? */
@@ -55,7 +57,11 @@ function naechstes(name, jetzt) {
     if (l.includes(HAUS_DEZEMBER) && !gehoert.has(HAUS_DEZEMBER)) return HAUS_DEZEMBER;
     return zufall(l, jetzt);
   }
-  if (name === 'karte') return zufall(KARTE, jetzt);
+  if (name === 'karte') {
+    // Ein Adventsstück ist neu dabei: beim ersten Öffnen der Karte in der Sitzung kommt es zuerst
+    const l = karteListe(), neu = KARTE_ADVENT.filter((x) => l.includes(x)).pop();
+    return neu && !gehoert.has(neu) ? neu : zufall(l, jetzt);
+  }
   // Minispiele: nie zweimal hintereinander dasselbe (20.11.)
   miniZuletzt = zufall(MINI, miniZuletzt);
   return miniZuletzt;
@@ -135,8 +141,10 @@ function wechsle() {
   const alt = spuren[szene], jetzt = spuren[neu];
   szene = neu;
   if (!ctx) return;
-  // Minispiel immer von vorn mit dem nächsten Stück; die Karte macht dort weiter, wo sie war
+  // Minispiel immer von vorn mit dem nächsten Stück; die Karte macht dort weiter, wo sie war -
+  // außer ein neues Adventsstück ist dazugekommen und lief in dieser Sitzung noch nicht
   if (neu === 'mini') setze('mini', naechstes('mini'));
+  if (neu === 'karte' && jetzt) { const l = karteListe(), nn = KARTE_ADVENT.filter((x) => l.includes(x)).pop(); if (!jetzt.stueck || (nn && !gehoert.has(nn))) setze('karte', naechstes('karte', jetzt.stueck)); }
   if (alt) {
     rampe(alt.gain, 0, BLENDE);
     setTimeout(() => { if (spuren[szene] !== alt) alt.el.pause(); }, BLENDE * 1000 + 80);
