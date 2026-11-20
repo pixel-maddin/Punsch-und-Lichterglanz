@@ -1,12 +1,11 @@
 /*
  * ton.js - Geräusche (synthetisiert) und die Musik.
  *
- * MUSIK (seit 27.10.): drei Szenen mit je einer Wiedergabeliste, dazu ein Jingle.
- *   haus  - `musik-haus` (Suno, auf 4:10 gekürzt) und `haus-jazz` (auf 3:52 gekürzt) im Wechsel
- *           (27.10.: `haus-lofi` auf Wunsch wieder raus). 24.-26.12. abwechselnd `xmas` und eins davon.
- *   karte - bis zum 1. Advent `musik-karte` (Suno), danach je Advent ein Stück mehr (`karte-1..3`);
- *           das neueste kommt beim ersten Öffnen der Sitzung zuerst, danach zufällig.
- *   mini  - `mini-1`/`mini-2`, zufällig je Minispiel, in Schleife.
+ * MUSIK (seit 27.10., Stücke seit 20.11. neu von Suno): drei Szenen mit je einer Wiedergabeliste, dazu ein Jingle.
+ *   haus  - `haus-swing` und `haus-walzer` im Wechsel, ab dem 2. Advent auch `haus-dezember` (kommt beim
+ *           ersten Mal in der Sitzung zuerst). 24.-26.12. abwechselnd `xmas` und eins davon.
+ *   karte - `karte-dorf` und `karte-werkstatt` im Wechsel.
+ *   mini  - `mini-winter`/`mini-cozy`, im Wechsel je Minispiel, in Schleife.
  *   jingle - 16 s bei großen Ereignisfenstern (`jingle()`), die Musik wird solange leiser.
  * Herkunft und Künstler: `C.MUSIK_CREDITS` (Fenster „Credits" in den Einstellungen).
  * Jede Szene hat EIN Audio-Element (die Quelle wechselt am Stückende) und läuft beim nächsten Mal
@@ -20,50 +19,52 @@
  * GainNode funktioniert überall. (Dieselbe Falle wie im Rennspiel.)
  * Dateien müssen AAC sein - OPUS in einer .m4a spielt Safari/iOS nicht.
  */
-import * as Z from './zeit.js?v=202611161100';
+import * as Z from './zeit.js?v=202611201000';
 
 let ctx = null, fxGain = null, musikGain = null, busGain = null;
 let fxAn = true, musikStufe = 3;
 const MUSIK_MAX = 0.55;   // Gain bei Stufe 5 (die Dateien liegen bei -15 LUFS, recht laut)
-const url = (id) => `audio/${id}.m4a?v=202611161100`;
-const HAUS = ['musik-haus', 'haus-jazz'];
+const url = (id) => `audio/${id}.m4a?v=202611201000`;
+const HAUS = ['haus-swing', 'haus-walzer'];
+const HAUS_DEZEMBER = 'haus-dezember';   // 20.11. (Nutzerwunsch): erst ab dem 2. Advent
+const HAUS_DEZEMBER_AB = 2;
 const XMAS = 'xmas';
-const KARTE_ALT = 'musik-karte';
-const KARTE_ADVENT = ['karte-1', 'karte-2', 'karte-3'];   // 1., 2., 3. Advent
-const MINI = ['mini-1', 'mini-2'];
+const KARTE = ['karte-dorf', 'karte-werkstatt'];
+const MINI = ['mini-winter', 'mini-cozy'];
 const BLENDE = 0.45;      // s Überblendung beim Ortswechsel
 const DUCK = 0.15;        // so laut bleibt die Musik unter dem Jingle
 const spuren = {};        // szene -> { el, gain, stueck }
 let jingleEl = null;
 let szene = 'haus';       // welche Szene gerade dran ist
 let karteOffen = false, miniOffen = false, musikRuht = false;
-const gehoert = new Set();   // Kartenstücke, die in dieser Sitzung schon liefen
+const gehoert = new Set();   // Stücke, die in dieser Sitzung schon liefen
 
 const zufall = (liste, nicht) => { const l = liste.filter((x) => x !== nicht); const w = l.length ? l : liste; return w[Math.floor(Math.random() * w.length)]; };
 // 29.10.: Am 24.12. erst ab 6 Uhr (dann kommt auch das Fenster „Frohe Weihnachten!")
 const xmasTage = () => { const d = Z.jetzt(), t = Z.dezemberTag(d); return (t === 24 && d.getHours() >= 6) || t === 25 || t === 26; };
-function karteListe() {
-  const adv = Z.adventKerzen();
-  return adv < 1 ? [KARTE_ALT] : KARTE_ADVENT.slice(0, Math.min(adv, KARTE_ADVENT.length));
-}
+const karteListe = () => KARTE;
+const hausListe = () => (Z.adventKerzen() >= HAUS_DEZEMBER_AB ? [...HAUS, HAUS_DEZEMBER] : HAUS);
+let miniZuletzt = null;
 /** Welches Stück kommt in dieser Szene als Nächstes? */
 function naechstes(name, jetzt) {
   if (name === 'haus') {
-    if (xmasTage()) return jetzt === XMAS ? zufall(HAUS) : XMAS;
-    return zufall(HAUS, jetzt);
+    const l = hausListe();
+    if (xmasTage()) return jetzt === XMAS ? zufall(l) : XMAS;
+    // Das Dezember-Stück ist neu dabei: beim ersten Mal in der Sitzung kommt es zuerst
+    if (l.includes(HAUS_DEZEMBER) && !gehoert.has(HAUS_DEZEMBER)) return HAUS_DEZEMBER;
+    return zufall(l, jetzt);
   }
-  if (name === 'karte') {
-    const l = karteListe(), neuestes = l[l.length - 1];
-    return gehoert.has(neuestes) ? zufall(l, jetzt) : neuestes;
-  }
-  return zufall(MINI);
+  if (name === 'karte') return zufall(KARTE, jetzt);
+  // Minispiele: die beiden Stücke im Wechsel (20.11.; vorher zufällig, oft zweimal dasselbe)
+  miniZuletzt = zufall(MINI, miniZuletzt);
+  return miniZuletzt;
 }
 /** Stück in einer Szene setzen (von vorn). */
 function setze(name, id) {
   const s = spuren[name];
   if (!s) return;
   if (s.stueck !== id) { s.stueck = id; s.el.src = url(id); } else s.el.currentTime = 0;
-  if (name === 'karte') gehoert.add(id);
+  gehoert.add(id);
 }
 
 export function init() {
@@ -133,10 +134,8 @@ function wechsle() {
   const alt = spuren[szene], jetzt = spuren[neu];
   szene = neu;
   if (!ctx) return;
-  // Minispiel immer von vorn mit einem zufälligen Stück; Karte nur neu, wenn ihr Stück nicht
-  // (mehr) in der Liste ist (vor dem 1. Advent das alte) oder ein neues Adventsstück dazukam
+  // Minispiel immer von vorn mit dem nächsten Stück; die Karte macht dort weiter, wo sie war
   if (neu === 'mini') setze('mini', naechstes('mini'));
-  if (neu === 'karte' && jetzt) { const l = karteListe(); if (!l.includes(jetzt.stueck) || !gehoert.has(l[l.length - 1])) setze('karte', naechstes('karte', jetzt.stueck)); }
   if (alt) {
     rampe(alt.gain, 0, BLENDE);
     setTimeout(() => { if (spuren[szene] !== alt) alt.el.pause(); }, BLENDE * 1000 + 80);
@@ -165,7 +164,7 @@ export function wecken() { if (ctx && ctx.state === 'suspended') ctx.resume(); s
 export function musikZustand() {
   const s = spuren[szene];
   return s ? { szene, stueck: s.stueck, laeuft: !s.el.paused, zeit: s.el.currentTime, stufe: musikStufe, gain: musikGain.gain.value, bus: busGain.gain.value,
-    jingle: jingleEl ? !jingleEl.paused : null, karteListe: karteListe(), xmas: xmasTage(),
+    jingle: jingleEl ? !jingleEl.paused : null, karteListe: karteListe(), hausListe: hausListe(), xmas: xmasTage(),
     andere: Object.entries(spuren).filter(([n]) => n !== szene).map(([n, x]) => ({ szene: n, stueck: x.stueck, laeuft: !x.el.paused, zeit: x.el.currentTime })), ctx: ctx.state } : null;
 }
 /** Für Tests: Stückende der laufenden Szene auslösen (Spulen geht mit werkzeug/serve.ps1 nicht - kein Range). */

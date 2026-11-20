@@ -402,21 +402,19 @@ alte Dateien.
 
 ## Musik
 
-- **Am Haus** zwei Stücke im Wechsel; vom 24. (ab 6 Uhr, mit dem
-  Weihnachtsfenster) bis 26. Dezember kommt im Wechsel ein Weihnachtsstück
-  dazu.
-- **Auf der Karte** bis zum 1. Advent ein Stück, danach mit jedem Advent
-  (1. bis 3.) ein neues - das neue läuft beim ersten Öffnen zuerst.
-- **In den Minispielen** eins von zwei Stücken, zufällig.
+- **Am Haus** zwei Stücke im Wechsel, ab dem 2. Advent ein drittes (es läuft
+  beim ersten Mal zuerst); vom 24. (ab 6 Uhr, mit dem Weihnachtsfenster) bis
+  26. Dezember kommt im Wechsel ein Weihnachtsstück dazu.
+- **Auf der Karte** zwei Stücke im Wechsel.
+- **In den Minispielen** zwei Stücke, abwechselnd von Runde zu Runde.
 - **Bei großen Ereignissen** (Advent, erster Schnee, Jury, Heiligabend,
   Silvester, Finale) ein kurzer Jingle, die Musik wird solange leiser.
 
-Acht Stücke sind von [Pixabay](https://pixabay.com/music/) (Pixabay Content
-License) - von Denis-Pavlov-Music, Clavier-Music, The_Mountain,
-TheStorytellingPodcast, Top-Flow und kaazoom. Im Spiel stehen alle unter
-Menü → Einstellungen → **Credits**. Zwei Stücke (`musik-haus.m4a`,
-`musik-karte.m4a`) sind mit [Suno](https://suno.com) entstanden und werden
-nicht-kommerziell verwendet.
+Die Musik am Haus, auf der Karte und in den Minispielen ist mit
+[Suno](https://suno.com) entstanden und wird nicht-kommerziell verwendet. Das
+Weihnachtsstück und der Jingle sind von [Pixabay](https://pixabay.com/music/)
+(Pixabay Content License) - von Clavier-Music und kaazoom. Im Spiel stehen
+alle unter Menü → Einstellungen → **Credits**.
 
 ## Nutzung
 
