@@ -414,8 +414,8 @@ alte Dateien.
 Ein Teil der Musik ist mit [Suno](https://suno.com) entstanden und wird
 nicht-kommerziell verwendet, die übrigen Stücke sind von
 [Pixabay](https://pixabay.com/music/) (Pixabay Content License) - von
-Denis-Pavlov-Music, Clavier-Music, The_Mountain, TheStorytellingPodcast, Top-Flow
-und kaazoom. Im Spiel stehen alle unter Menü → Einstellungen → **Credits**.
+Denis-Pavlov-Music, JonasBlakewood, Clavier-Music, The_Mountain,
+TheStorytellingPodcast, Top-Flow und kaazoom. Im Spiel stehen alle unter Menü → Einstellungen → **Credits**.
 
 ## Nutzung
 
