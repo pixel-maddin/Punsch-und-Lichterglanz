@@ -1891,3 +1891,8 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
 #blattInhalt .laden-kopf { position: sticky; top: calc(var(--px) * -0.5); z-index: 3; background: var(--papier); padding-top: calc(var(--px) * 1); }
 #blattInhalt .laden-kopf .haus-sprung { position: static; }
 #blattInhalt .laden-kopf .laden-info { margin-top: 0; }
+/* 21.11. (2): Ladentext über dem Bild im festen Kopf des Blatts */
+#blattTabs .laden-info { margin: 0 calc(var(--px) * 2) calc(var(--px) * 2); font-size: var(--t-klein); color: var(--text3); text-align: center; line-height: 1.35; }
+#blattInhalt .laden-kopf:empty { display: none; }
+/* 21.11. (3): der Kopf deckt beim Scrollen auch den oberen Innenabstand der Liste ab (vorher schaute dort Inhalt durch) */
+#blattInhalt .laden-kopf { top: calc(var(--px) * -2); padding-top: calc(var(--px) * 2); margin-top: calc(var(--px) * -2); }
