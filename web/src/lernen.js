@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611211000';
-import * as S from './spiel.js?v=202611211000';
-import * as A from './auftraege.js?v=202611211000';
-import * as E from './erfolge.js?v=202611211000';
-import * as Z from './ziele.js?v=202611211000';
-import * as ZE from './zeit.js?v=202611211000';
-import * as KA from './karte.js?v=202611211000';
-import { zellePos } from './tresen.js?v=202611211000';
+import * as C from './config.js?v=202611211100';
+import * as S from './spiel.js?v=202611211100';
+import * as A from './auftraege.js?v=202611211100';
+import * as E from './erfolge.js?v=202611211100';
+import * as Z from './ziele.js?v=202611211100';
+import * as ZE from './zeit.js?v=202611211100';
+import * as KA from './karte.js?v=202611211100';
+import { zellePos } from './tresen.js?v=202611211100';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -391,9 +391,8 @@ function hinweise(dt) {
     // Getränk, Auftrag erfüllt …) halten das Spiel NICHT an. Sie stehen da,
     // bis die Lage vorbei ist oder ihre Zeit um ist; Antippen schließt sie.
     // Im Betatest kamen sonst ~15 Pausen in 13 Minuten.
-    // 21.11. (Nutzerwunsch): JEDE helle Blase hält das Spiel an, bis man „Weiter" tippt - auch die ruhigen.
-    // Sie laufen deshalb jetzt durch denselben Weg wie die übrigen (unten); der alte Zweig bleibt aus.
-    if (h.ruhig && false) {
+    // 21.11.: kurz alle Blasen mit Pause, am selben Tag auf Nutzerwunsch zurück - kurze Lage-Hinweise ohne Pause
+    if (h.ruhig) {
       const fertigR = h.fertig ? h.fertig() : false;
       // 28.10. (gemeldet: „manchmal zu schnell weg"): erst nach 3 s sichtbar darf die erledigte Lage sie
       // schließen, und die Zeit ist mindestens 10 s (vorher 7). `t` läuft nur, solange die Blase zu sehen ist
