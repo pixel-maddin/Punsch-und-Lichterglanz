@@ -10,8 +10,8 @@
  * Alle Funktionen nehmen das Ziel `c` als erstes Argument. Lichter, die
  * nachts einen Schein bekommen, sammelt `licht()`; `leuchten()` malt ihn.
  */
-import * as Z from './zeit.js?v=202611211500';
-import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202611211500';
+import * as Z from './zeit.js?v=202611211600';
+import { r, p, ton, mische, text as pixText, wichtelKlein, figurKlein, neueFarben, scale2x } from './pixel.js?v=202611211600';
 
 /** Pixelschrift k-fach vergrößert (für Schilder in der feinen Auflösung). */
 const _tmp = typeof document !== 'undefined' ? document.createElement('canvas') : null;
@@ -345,11 +345,13 @@ export function vignette(ziel, tab, opt = {}) {
   // Breite nach der feinen Stufe (siehe FEIN): gezeichnet wird für 220, die
   // Leinwand zeigt die Mitte davon
   const breite = feinBreite(ziel, VW), weg = Math.floor((VW - breite) / 2);
-  ziel.width = breite; ziel.height = VH;
+  // opt.schnitt (21.11., Läden): so ein Anteil der Höhe fällt oben weg - dort ist nur Himmel
+  const schnitt = Math.round(VH * (opt.schnitt || 0));
+  ziel.width = breite; ziel.height = VH - schnitt;
   feinGroesse(ziel);
   const c = ziel.getContext('2d');
   c.imageSmoothingEnabled = false;
-  c.translate(-weg, 0);
+  c.translate(-weg, -schnitt);
   neueLichter();
   // Eisbahn und Schlittenberg gibt es nur mit Schnee - ihr Bild ist immer winterlich
   const winter = Z.schnee() > 0 || tab === 'eis' || tab === 'berg' || tab === 'schnee', li = Z.licht();

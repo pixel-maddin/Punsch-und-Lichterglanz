@@ -1896,3 +1896,6 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
 #blattInhalt .laden-kopf:empty { display: none; }
 /* 21.11. (3): der Kopf deckt beim Scrollen auch den oberen Innenabstand der Liste ab (vorher schaute dort Inhalt durch) */
 #blattInhalt .laden-kopf { top: calc(var(--px) * -2); padding-top: calc(var(--px) * 2); margin-top: calc(var(--px) * -2); }
+/* 21.11. (4): Sprungleiste in den Läden flacher - mehr Platz zum Scrollen */
+#blattInhalt .laden-kopf .haus-sprung { padding: calc(var(--px) * 0.5); margin-bottom: calc(var(--px) * 1); }
+#blattInhalt .laden-kopf .hs-k { min-height: calc(var(--px) * 10); font-size: var(--t-klein); }
