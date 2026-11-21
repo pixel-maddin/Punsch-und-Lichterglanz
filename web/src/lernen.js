@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611211700';
-import * as S from './spiel.js?v=202611211700';
-import * as A from './auftraege.js?v=202611211700';
-import * as E from './erfolge.js?v=202611211700';
-import * as Z from './ziele.js?v=202611211700';
-import * as ZE from './zeit.js?v=202611211700';
-import * as KA from './karte.js?v=202611211700';
-import { zellePos } from './tresen.js?v=202611211700';
+import * as C from './config.js?v=202611211905';
+import * as S from './spiel.js?v=202611211905';
+import * as A from './auftraege.js?v=202611211905';
+import * as E from './erfolge.js?v=202611211905';
+import * as Z from './ziele.js?v=202611211905';
+import * as ZE from './zeit.js?v=202611211905';
+import * as KA from './karte.js?v=202611211905';
+import { zellePos } from './tresen.js?v=202611211905';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -229,7 +229,8 @@ const HINWEISE = [
   // Wichtel-Bestellung: ab dem Servier-Wichtel schenkt ER ein, wenn man
   // einen Gast antippt (id neu, damit auch wer den alten Ein-Tipp kannte, es erfährt)
   { id: 'bestellen2', sofort: true, wann: () => S.hat('servier') && !!S.st.tipps.wichtel_weg && S.lauf.hand.some((h) => h.vonWichtel && !(h.rest > 0)),
-    text: () => 'Siehst du den kleinen Wichtel am Tablett? Solange du am Stand bist, schenkt er für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - dann gibt es den Bonus. Sonst serviert er es nach ein paar Sekunden selbst - fertige Gläser tragen einen grünen Haken. Du kannst auch selbst einen Gast antippen, dann schenkt er für ihn ein.',
+    // 21.11. (Betatest): von 60 auf gut 30 Wörter - die Blase hält nicht an, man liest sie beim Bedienen
+    text: () => 'Siehst du den Wichtel am Tablett? Er schenkt für deine Gäste ein. Mach den Handgriff (wie die Zuckerstange) und tippe den Gast an - das gibt den Bonus. Sonst serviert er nach ein paar Sekunden selbst.',
     ziel: () => handZiel(Math.max(0, S.lauf.hand.findIndex((h) => h.vonWichtel))), fertig: () => (S.lauf.wichtelSelbst || 0) > 0 || !S.lauf.hand.some((h) => h.vonWichtel) },
   // Was es außer dem Stand gibt (09.10.): erst, wenn die Wichtel den Stand
   // tragen - dann ist Zeit dafür, und es hat Sterne für die Markt-Ware
