@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611211100';
-import * as S from './spiel.js?v=202611211100';
-import * as A from './auftraege.js?v=202611211100';
-import * as E from './erfolge.js?v=202611211100';
-import * as Z from './ziele.js?v=202611211100';
-import * as ZE from './zeit.js?v=202611211100';
-import * as KA from './karte.js?v=202611211100';
-import { zellePos } from './tresen.js?v=202611211100';
+import * as C from './config.js?v=202611211200';
+import * as S from './spiel.js?v=202611211200';
+import * as A from './auftraege.js?v=202611211200';
+import * as E from './erfolge.js?v=202611211200';
+import * as Z from './ziele.js?v=202611211200';
+import * as ZE from './zeit.js?v=202611211200';
+import * as KA from './karte.js?v=202611211200';
+import { zellePos } from './tresen.js?v=202611211200';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -489,7 +489,14 @@ function zeige(z) {
     // Blasen mit „Weiter" stehen seit 21.11. mittig (Nutzerwunsch, vorher unten über der Leiste)
     tipp.style.bottom = '';
     const hoehe = document.getElementById('huelle').clientHeight;
-    tipp.style.top = `${Math.max(8, Math.round((hoehe - tipp.offsetHeight) / 2))}px`;
+    let oben = Math.max(8, Math.round((hoehe - tipp.offsetHeight) / 2));
+    // 21.11. (gemeldet: „Hier ist dein Haus“ verdeckte den Stand): Zeigt die Blase auf etwas in der Welt,
+    // steht sie UNTER dem Zeiger - sofern sie dort noch über die Leiste passt, sonst mittig
+    if (z.ziel) {
+      const unterZeiger = zeiger.offsetTop + zeiger.offsetHeight + 10;
+      if (unterZeiger + tipp.offsetHeight < hoehe - document.getElementById('leiste').offsetHeight - 8) oben = Math.max(oben, unterZeiger);
+    }
+    tipp.style.top = `${oben}px`;
     tipp.dataset.pfeil = '';
   } else if (unten) {
     tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${H - G + 6})`;
