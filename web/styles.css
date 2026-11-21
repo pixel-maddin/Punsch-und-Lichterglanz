@@ -1886,3 +1886,8 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
 #btnAuftraege.gesperrt .badge, #btnAuftraege.gesperrt #aufBadge { display: none; }
 /* 21.11.: Einzeiler oben in den Läden */
 #blattInhalt .laden-info { margin: calc(var(--px) * 1) calc(var(--px) * 1) calc(var(--px) * 2.5); font-size: var(--t-klein); color: var(--text3); text-align: center; line-height: 1.35; }
+
+/* 21.11.: Kopf der Läden (Text + Sprungleiste) bleibt beim Scrollen oben */
+#blattInhalt .laden-kopf { position: sticky; top: calc(var(--px) * -0.5); z-index: 3; background: var(--papier); padding-top: calc(var(--px) * 1); }
+#blattInhalt .laden-kopf .haus-sprung { position: static; }
+#blattInhalt .laden-kopf .laden-info { margin-top: 0; }

@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611211200';
-import * as S from './spiel.js?v=202611211200';
-import * as A from './auftraege.js?v=202611211200';
-import * as E from './erfolge.js?v=202611211200';
-import * as Z from './ziele.js?v=202611211200';
-import * as ZE from './zeit.js?v=202611211200';
-import * as KA from './karte.js?v=202611211200';
-import { zellePos } from './tresen.js?v=202611211200';
+import * as C from './config.js?v=202611211300';
+import * as S from './spiel.js?v=202611211300';
+import * as A from './auftraege.js?v=202611211300';
+import * as E from './erfolge.js?v=202611211300';
+import * as Z from './ziele.js?v=202611211300';
+import * as ZE from './zeit.js?v=202611211300';
+import * as KA from './karte.js?v=202611211300';
+import { zellePos } from './tresen.js?v=202611211300';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -156,7 +156,7 @@ function einfuehrung() {
 // Einzelne Hinweise, je einer einmal
 // ---------------------------------------------------------------------------
 /** 21.11.: Seit dem letzten Wichtel-Kauf mindestens WICHTEL_GAESTE Gäste bedient (erst ausprobieren, dann der nächste). */
-const WICHTEL_GAESTE = 8;
+const WICHTEL_GAESTE = 3;   // 21.11.: vorher 8
 const mitNeuemWichtel = () => S.st.wichtelKaufBedient == null || S.st.stats.bedient - S.st.wichtelKaufBedient >= WICHTEL_GAESTE;
 /** Minispiele und Markt (Teil der Blase `baumarkt`, früher eigene Blase `karte_mehr`). Nennt nur, was offen ist. */
 function karteMehrText() {
@@ -180,7 +180,8 @@ const HINWEISE = [
     info: () => (S.hat('kinderpunsch') ? 'Neues Getränk: Kinderpunsch! Gut gemacht.' : 'Neues Getränk! Du hast genug Sterne für Kinderpunsch.') + ' Bis zu fünf Sorten passen in dein Angebot, und jede neue ist etwas teurer als die davor. Und mit neuen Getränken kommen auch neue Gäste an deinen Stand.',
     text: () => 'Tippe auf KARTE - im Supermarkt gibt es Kinderpunsch.',
     ziel: ladenZiel, fertig: () => S.hat('kinderpunsch'), laden: { tab: 'super', id: 'kinderpunsch' }, lang: true },
-  { id: 'laden_danach', ruhig: true, sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
+  // 21.11. (Nutzerwunsch): mit Pause und „Weiter" statt ruhig
+  { id: 'laden_danach', sofort: true, wann: () => S.hat('kinderpunsch') && S.st.tipps.laden,
     text: () => 'Prima! Kinderpunsch steht jetzt unten in deinem Angebot. Schau aufs Bläschen: Wer ihn bestellt, bekommt ihn von dort. Weitere Getränke gibt es später im Supermarkt.',
     ziel: () => zellZiel(C.PRODUKTE.indexOf(C.PRODUKT.kinderpunsch)), dauer: 9 },
   // 19.10.: Angebot (höchstens fünf Sorten) und Knopf „Haus" oben links
@@ -196,7 +197,7 @@ const HINWEISE = [
       : 'Zeit zum Schmücken! Du kannst dir jetzt deine erste Deko kaufen. Mach dein Haus schön für die Weihnachtszeit: Jedes Stück bringt ♥ Stimmung - dann kommen mehr Gäste, und sie zahlen mehr. Bis Heiligabend soll es das schönste Haus im Dorf werden!',
     text: () => 'Tippe auf KARTE - im Weihnachtsladen im Dorf wartet dein erster Türkranz.',
     ziel: ladenZiel, fertig: () => S.hat('kranz'), laden: { tab: 'markt', id: 'kranz' }, lang: true },
-  { id: 'deko_danach', ruhig: true, sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
+  { id: 'deko_danach', sofort: true, wann: () => S.hat('kranz') && S.st.tipps.deko,
     // 26.10.: nimmt den Satz aus `herz_ziel` mit auf (♥ schaltet Neues frei) - eine Blase weniger
     text: () => 'Schön! Der Kranz hängt an deiner Tür. Deko bringt ♥ Stimmung - je mehr, desto mehr Gäste, und mehr ♥ schaltet Neues frei. Mit dem Knopf „Haus“ oben links schmückst du dein Haus (Lichter, Farben, Varianten).',
     ziel: herzZiel, dauer: 9 },
@@ -302,14 +303,14 @@ const HINWEISE = [
     ziel: auftragZiel, dauer: 10 },
   // 21.11.: AUFTRÄGE geht erst mit dem letzten Startziel auf - dann EINE Blase für Aufträge, Erfolge und Album
   { id: 'auftraege_auf', sofort: true, ersetzt: ['auftraege_neu', 'erfolge'], wann: () => S.auftraegeOffen() && !Z.fertig() && !S.st.tipps.auftrag,
-    info: () => 'AUFTRÄGE ist jetzt offen! Dort warten jeden Tag drei Aufgaben mit Belohnung - der schwere bringt ein Sammelstück. Daneben die ERFOLGSWAND: Für alles, was du schaffst, hängt eine Socke am Kamin. Und im ALBUM sammelst du Gäste, Tiere und Rezepte.',
+    info: () => 'AUFTRÄGE ist jetzt offen! Dort warten jeden Tag drei Aufgaben mit Belohnung. Daneben die ERFOLGSWAND: Für alles, was du schaffst, hängt eine Socke am Kamin. Und im ALBUM sammelst du Gäste, Tiere und Rezepte.',
     text: () => 'Tippe auf AUFTRÄGE und hol dir deinen ersten Auftrag.',
     ziel: auftragZiel, fertig: () => !!S.st.tipps.auftrag },
   { id: 'auftrag', ruhig: true, ersetzt: ['auftraege_neu'], wann: () => Z.fertig() && A.abholbar() > 0,
     text: () => 'Auftrag erfüllt! Unter AUFTRÄGE wartet deine Belohnung. Jeden Tag gibt es drei neue.',
     ziel: auftragZiel, fertig: () => A.abholbar() === 0, dauer: 10 },
   { id: 'auftraege_neu', ruhig: true, ersetzt: ['auftrag'], wann: () => Z.fertig() && S.st.stats.bedient >= 25 && A.abholbar() === 0,
-    text: () => 'Neu: Unter AUFTRÄGE warten jeden Tag drei Aufgaben mit Belohnung - der schwere bringt ein Sammelstück.',
+    text: () => 'Neu: Unter AUFTRÄGE warten jeden Tag drei Aufgaben mit Belohnung.',
     ziel: auftragZiel, dauer: 7 },
   { id: 'erfolge', ruhig: true, wann: () => Z.fertig() && E.anzahl() >= 1,
     text: () => (E.anzahl() > 1 ? `Schon ${E.anzahl()} Socken hängen an der Erfolgswand!` : 'Deine erste Socke hängt an der Erfolgswand!') + ' Du findest sie unter AUFTRÄGE → Erfolge. Mit jeder Socke wird es dort weihnachtlicher.',
