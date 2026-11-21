@@ -5,31 +5,31 @@
  * Text steht im DOM, nicht im Canvas: Im hochskalierten 180-px-Bild
  * wäre er Matsch, und Tippziele müssen groß sein.
  */
-import * as C from './config.js?v=202611201600';
-import * as S from './spiel.js?v=202611201600';
-import * as Z from './zeit.js?v=202611201600';
-import * as T from './ton.js?v=202611201600';
-import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611201600';
-import { schriftBild, kannSchrift } from './schrift.js?v=202611201600';
-import { zielHaus } from './fein.js?v=202611201600';
-import * as AN from './ansicht.js?v=202611201600';
-import { zeichneWelt, ortVon, funkeln, glitzern, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611201600';
-import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611201600';
-import * as A from './auftraege.js?v=202611201600';
-import * as E from './erfolge.js?v=202611201600';
-import * as ZL from './ziele.js?v=202611201600';
-import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611201600';
-import * as KA from './karte.js?v=202611201600';
-import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611201600';
-import { barbaraZweig, barbaraGross } from './szene.js?v=202611201600';
-import * as SW from './schneeball.js?v=202611201600';
-import * as LI from './lichtung.js?v=202611201600';
-import * as MH from './minihud.js?v=202611201600';
-import * as CB from './christbaum.js?v=202611201600';
-import * as SB from './schlitten.js?v=202611201600';
-import * as EB from './schlittschuh.js?v=202611201600';
-import * as BS from './backstube.js?v=202611201600';
-import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611201600';
+import * as C from './config.js?v=202611211000';
+import * as S from './spiel.js?v=202611211000';
+import * as Z from './zeit.js?v=202611211000';
+import * as T from './ton.js?v=202611211000';
+import { icon, iconGross, wichtelKlein, r, p, figurKlein, figurGross, mische, neueFarben, hatGlyphe, scale2x, text as pixText } from './pixel.js?v=202611211000';
+import { schriftBild, kannSchrift } from './schrift.js?v=202611211000';
+import { zielHaus } from './fein.js?v=202611211000';
+import * as AN from './ansicht.js?v=202611211000';
+import { zeichneWelt, ortVon, funkeln, glitzern, ausblenden, zeichneVogelAlbum, zeichneFutterSzene, FSZ_W, FSZ_H, FSZ_DY, FSZ_CX } from './szene.js?v=202611211000';
+import { nochmal as nochmalLernen, fuehrung, laeuft as lernenLaeuft, ueberspringen } from './lernen.js?v=202611211000';
+import * as A from './auftraege.js?v=202611211000';
+import * as E from './erfolge.js?v=202611211000';
+import * as ZL from './ziele.js?v=202611211000';
+import { zeichneWand, sockeBei, socke, GESCHENK, trophaeBei, W as WAND_W, H as WAND_H } from './wand.js?v=202611211000';
+import * as KA from './karte.js?v=202611211000';
+import { zeigeRueckblick, zeigeWinterpause } from './ereignis.js?v=202611211000';
+import { barbaraZweig, barbaraGross } from './szene.js?v=202611211000';
+import * as SW from './schneeball.js?v=202611211000';
+import * as LI from './lichtung.js?v=202611211000';
+import * as MH from './minihud.js?v=202611211000';
+import * as CB from './christbaum.js?v=202611211000';
+import * as SB from './schlitten.js?v=202611211000';
+import * as EB from './schlittschuh.js?v=202611211000';
+import * as BS from './backstube.js?v=202611211000';
+import { alleSymbole, zeichneSymbol, symbolHtml as sym } from './symbole.js?v=202611211000';
 
 const $ = (s) => document.querySelector(s);
 /** Für Nutzertext in HTML: <, >, & und Anführungszeichen entschärfen. */
@@ -70,6 +70,7 @@ export function hud() {
   const ab = S.standZu() ? 0 : A.abholbar(), en = E.neuZahl() + (S.finaleBereit() ? 1 : 0);   // + goldenes Geschenk (Finale)
   const bA = $('#aufBadge'); bA.textContent = ab || ''; bA.classList.toggle('versteckt', ab === 0 && en === 0); bA.classList.toggle('punkt', ab === 0 && en > 0);
   $('#btnAuftraege').classList.toggle('lockt', ab > 0);
+  $('#btnAuftraege').classList.toggle('gesperrt', !S.auftraegeOffen());
   const b = $('#kalBadge');
   b.textContent = k; b.classList.toggle('versteckt', k === 0);
   $('#btnKalender').classList.toggle('lockt', k > 0);
@@ -282,7 +283,9 @@ function naechsterToast() {
   // 08.11. (Betatest: „Ein Brief steckt im Briefkasten“ lag in der Waldlichtung über dem Spielhinweis):
   // Während ein Minispiel läuft, warten ALLE Einblendungen - erst Start- und Ergebnisfenster lassen sie durch
   const imSpiel = panelOffen() === 'minispiel' && !fensterOffen();
-  if (toastWarteschlange.length && (imSpiel || (fensterOffen() && toastWarteschlange[0][1] !== 'hinweis'))) {
+  // 21.11. (gemeldet): auch, solange eine helle Hinweisblase offen ist - erst lesen, dann die nächste Meldung
+  const blase = !!document.querySelector('#tipp.mit-weiter:not(.versteckt)');
+  if (toastWarteschlange.length && (imSpiel || blase || (fensterOffen() && toastWarteschlange[0][1] !== 'hinweis'))) {
     $('#toast').classList.remove('zeigen');
     toastT = setTimeout(naechsterToast, 400);
     return;
@@ -870,7 +873,7 @@ const _dank = document.createElement('canvas');
 const dankBilder = new Map();
 for (const name of C.DANK_BILDER) {
   const img = new Image();
-  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611201600`;
+  img.src = `bilder/dank/${name.toLowerCase()}.png?v=202611211000`;
   dankBilder.set(name.toLowerCase(), img);
 }
 function eigenesDankesbild(kind) {
@@ -985,11 +988,19 @@ export function starteBergspiel(stufeNr = 1) {
   }, stufeNr);
 }
 
+// 21.11. (Nutzerwunsch): ein Satz oben, was es im jeweiligen Laden gibt
+const LADEN_INFO = {
+  super: 'Hier gibt es neue Getränke für deinen Stand - und Rezepte, die sie wertvoller machen.',
+  markt: 'Deko für Haus, Garten und Stand. Jedes Stück bringt ♥ Stimmung - und damit mehr Gäste.',
+  wichtel: 'Kleine Helfer für deinen Stand: Wichtel spülen, füllen nach und servieren - auch wenn du weg bist.',
+  baumarkt: 'Alles für einen größeren Stand: Töpfe, Tresen und Tablett - dazu Zaun, Tür und neue Farbe fürs Haus.',
+};
 function baueLaden() {
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
   liste.scrollTop = 0;
   zeilen = [];
+  if (LADEN_INFO[ladenTab]) liste.appendChild(el('p', 'laden-info', LADEN_INFO[ladenTab]));
   // Innerhalb jeder Gruppe in der Reihenfolge, in der die Dinge frei werden.
   // Abschnitte wie in „Haus schmücken" (11.10., einheitlich): Am Haus · Im
   // Garten · Am Stand, der Anstrich gehört zum Haus; Sprungleiste und dunkle
@@ -2743,7 +2754,7 @@ export function oeffneMenue() {
   // Schild war dort zu klein); die Sterne stehen im Menükopf nicht mehr - die zeigt ohnehin die Kopfzeile
   // 05.11.: daneben die Andenken-Sterne (einer je Jahr, das man bis Silvester gespielt hat)
   const an = S.st.andenken || 0;
-  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611201600" alt="Punsch & Lichterglanz">`;
+  $('#blattTitel').innerHTML = (an ? `<span class="andenken" title="Andenken - ein Stern für jedes geschmückte Jahr">★${an > 1 ? ' ' + an : ''}</span>` : '') + `<img class="logo-zeile" src="bilder/logo_zeile.png?v=202611211000" alt="Punsch & Lichterglanz">`;
   $('#blattTabs').classList.add('versteckt');
   const liste = $('#blattInhalt');
   liste.innerHTML = '';
@@ -3074,7 +3085,7 @@ function werkstatt() {
 // ---------------------------------------------------------------------------
 export function frageName(umbenennen = false, danach) {
   fenster(umbenennen ? 'Haus umbenennen' : 'Willkommen!', `
-    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611201600" alt="Punsch & Lichterglanz">
+    ${umbenennen ? '' : `<img class="logo-bild" src="bilder/logo.png?v=202611211000" alt="Punsch & Lichterglanz">
     <p>Der Herbst ist grau, das Haus ist kahl - und bis Weihnachten soll es das schönste im Dorf sein.</p>`}
     <label>Wie soll dein Haus heißen?<br><input type="text" id="hausName" maxlength="28" placeholder="z. B. Haus Schneeflocke" value="${esc(S.st.name || '')}"></label>`,
   [{ text: umbenennen ? 'Speichern' : 'Los geht’s', aktion: (box) => {
@@ -3498,7 +3509,7 @@ export function verdrahte() {
   document.addEventListener('visibilitychange', () => { if (document.hidden && panelOffen() === 'minispiel') MH.setzePause(true); });
   $('#miniZu').onclick = () => { T.spiele('klick'); C.MINI_SPECIAL.laeuft = null; LI.schliesse(); CB.schliesse(); SB.schliesse(); SW.schliesse(); EB.schliesse(); BS.schliesse(); };
   $('#btnKalender').onclick = () => { T.spiele('klick'); offen === 'kalender' ? schliesseBlatt() : oeffneKalender(); };
-  $('#btnAuftraege').onclick = () => { T.spiele('klick'); offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
+  $('#btnAuftraege').onclick = () => { T.spiele('klick'); if (!S.auftraegeOffen() && offen !== 'auftraege') { toast('Schließe erst die ersten Ziele ab - dann geht es hier los.', 'hinweis'); return; } offen === 'auftraege' ? schliesseBlatt() : oeffneAuftraege(E.neuZahl() > 0 && !A.abholbar() ? 'erfolge' : 'heute'); };
   // 01.11.: Der Foto-Knopf öffnet erst „Haus ansehen“ (Tageszeit wählen, Moment genießen) - von dort „Als Foto“
   $('#btnKarte').onclick = () => { T.spiele('klick'); AN.oeffne(() => karte(null, true)); };
   AN.verdrahte(() => T.spiele('klick'));

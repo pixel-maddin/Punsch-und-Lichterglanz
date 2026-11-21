@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611201600';
-import * as Z from './zeit.js?v=202611201600';
-import { neueFarben } from './pixel.js?v=202611201600';
+import * as C from './config.js?v=202611211000';
+import * as Z from './zeit.js?v=202611211000';
+import { neueFarben } from './pixel.js?v=202611211000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -454,6 +454,8 @@ let zieleAnzahl = 7;
 export function setzeZieleAnzahl(n) { zieleAnzahl = n; }
 /** Einführung und alle Startziele geschafft (oder übersprungen)? */
 export const startzieleFertig = () => st.lernen >= 99 && (st.ziel || 0) >= zieleAnzahl;
+/** 21.11.: AUFTRÄGE ist erst ab dem letzten Startziel („Hol deinen ersten Tagesauftrag ab") offen, vorher grau. */
+export const auftraegeOffen = () => !!DEMO || (st.lernen >= 99 && (st.ziel || 0) >= zieleAnzahl - 1);
 /**
  * Startziele fertig UND eine Weile Ruhe danach (C.RUHE_NACH_START): Im Moment
  * des letzten Ziels stapelten sich sonst Belohnung, Abschlussblase und die
@@ -762,6 +764,8 @@ export const ARTIKEL_LISTE = C.ARTIKEL;
 export function kaufe(id) {
   const a = ARTIKEL_MAP[id];
   if (!a) return false;
+  // 21.11.: für die Wichtel-Hinweise - der nächste kommt erst, wenn man mit dem neuen ein paar Gäste bedient hat
+  if (['spuel', 'nachfuell'].includes(id) && !hat(id)) st.wichtelKaufBedient = st.stats.bedient;
   const s = status(a);
   if (s.fertig || s.grund || s.versteckt || !s.leisten) return false;
   st.geld -= s.kosten;

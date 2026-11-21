@@ -1880,3 +1880,9 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
 
 /* 20.11.: Auf der Karte stehen die Einblendungen oben bündig mit den Knöpfen „Aa“ und ✕ (top 21) */
 #huelle.karte-offen:not(.blatt-offen) #toast { top: calc(var(--px) * 21); }
+
+/* 21.11.: AUFTRÄGE vor dem letzten Startziel grau (antippen sagt, warum) */
+#btnAuftraege.gesperrt { filter: grayscale(1) brightness(0.75); opacity: 0.7; }
+#btnAuftraege.gesperrt .badge, #btnAuftraege.gesperrt #aufBadge { display: none; }
+/* 21.11.: Einzeiler oben in den Läden */
+#blattInhalt .laden-info { margin: calc(var(--px) * 1) calc(var(--px) * 1) calc(var(--px) * 2.5); font-size: var(--t-klein); color: var(--text3); text-align: center; line-height: 1.35; }

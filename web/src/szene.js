@@ -13,11 +13,11 @@
  *
  * Alle Höhen hängen an G, der Bodenlinie (Oberkante der Tresenansicht).
  */
-import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite } from './pixel.js?v=202611201600';
-import * as Z from './zeit.js?v=202611201600';
-import * as S from './spiel.js?v=202611201600';
-import { FASSADEN } from './config.js?v=202611201600';
-import * as C from './config.js?v=202611201600';
+import { r, p, ton, mische, figurKlein, wichtelKlein, smiley, text as pixText, textBreite, hatGlyphe } from './pixel.js?v=202611211000';
+import * as Z from './zeit.js?v=202611211000';
+import * as S from './spiel.js?v=202611211000';
+import { FASSADEN } from './config.js?v=202611211000';
+import * as C from './config.js?v=202611211000';
 
 // 01.11. Neue Optik (Nutzer: „voll geschmückt am Tag nur noch Pixelbrei"): Lichterketten tagsüber aus,
 // Hintergrund im Dunst, Bodenschatten und Kontur für die Garten-Deko. Seit 01.11. Standard; ?optik=alt zeigt
@@ -2642,7 +2642,12 @@ function zeichneGeist(c, GW) {
  * dem Teil auf - nach dem Kauf sieht man so, WAS es gebracht hat, und vor
  * allem WO es hängt (Betatest 02.10.: der Türkranz ging unter).
  */
-export function funkeln(x, y, text = '') { funken.push({ x, y, text, t0: performance.now() }); }
+// 21.11. (gemeldet: langes braunes Schild nach dem Kauf der Lichterkette): „Ziel geschafft! +150 ★" in der
+// 3x5-Schrift - die kennt keine Kleinbuchstaben, es blieben Lücken. Jetzt Großbuchstaben, Unbekanntes fällt weg.
+export function funkeln(x, y, text = '') {
+  text = [...String(text).toUpperCase()].filter((ch) => hatGlyphe(ch)).join('').replace(/\s+/g, ' ').trim();
+  funken.push({ x, y, text, t0: performance.now() });
+}
 const FUNKEL_DAUER = 2400;
 function zeichneFunkeln(c, GW) {
   const jetzt = performance.now();

@@ -23,14 +23,14 @@
  * seit 30.09. JEDE Blase. Die Handlungsschritte der Einführung („tippe auf
  * die Gläser") lassen das Spiel laufen; der Gast wartet dort ohnehin geduldig.
  */
-import * as C from './config.js?v=202611201600';
-import * as S from './spiel.js?v=202611201600';
-import * as A from './auftraege.js?v=202611201600';
-import * as E from './erfolge.js?v=202611201600';
-import * as Z from './ziele.js?v=202611201600';
-import * as ZE from './zeit.js?v=202611201600';
-import * as KA from './karte.js?v=202611201600';
-import { zellePos } from './tresen.js?v=202611201600';
+import * as C from './config.js?v=202611211000';
+import * as S from './spiel.js?v=202611211000';
+import * as A from './auftraege.js?v=202611211000';
+import * as E from './erfolge.js?v=202611211000';
+import * as Z from './ziele.js?v=202611211000';
+import * as ZE from './zeit.js?v=202611211000';
+import * as KA from './karte.js?v=202611211000';
+import { zellePos } from './tresen.js?v=202611211000';
 
 const tipp = document.getElementById('tipp');
 const zeiger = document.getElementById('zeiger');
@@ -155,6 +155,9 @@ function einfuehrung() {
 // ---------------------------------------------------------------------------
 // Einzelne Hinweise, je einer einmal
 // ---------------------------------------------------------------------------
+/** 21.11.: Seit dem letzten Wichtel-Kauf mindestens WICHTEL_GAESTE Gäste bedient (erst ausprobieren, dann der nächste). */
+const WICHTEL_GAESTE = 8;
+const mitNeuemWichtel = () => S.st.wichtelKaufBedient == null || S.st.stats.bedient - S.st.wichtelKaufBedient >= WICHTEL_GAESTE;
 /** Minispiele und Markt (Teil der Blase `baumarkt`, früher eigene Blase `karte_mehr`). Nennt nur, was offen ist. */
 function karteMehrText() {
   const offen = KA.ORTE.filter((o) => o.spiel && S.miniOffen(o.spiel)).map((o) => o.name);
@@ -211,10 +214,10 @@ const HINWEISE = [
   // 20.11. (Erstspieler-Test: fünf lange Blasen in 45 s rund um die Wichtel): Nachfüll- und Servier-Wichtel
   // sind ruhige Zeiger ohne Pause - was sie tun, steht im Satz und an der Ladenzeile. Wer sie schon hat,
   // bekommt keinen. „Alle drei Wichtel" kommt danach mit normaler Pause statt sofort.
-  { id: 'w_nachfuell', ruhig: true, sofort: true, wann: () => zielDran('nachfuell', 'nachfuell') && !S.hat('nachfuell'),
+  { id: 'w_nachfuell', ruhig: true, sofort: true, wann: () => zielDran('nachfuell', 'nachfuell') && !S.hat('nachfuell') && mitNeuemWichtel(),
     text: () => 'Der nächste Helfer: Der NACHFÜLL-WICHTEL füllt leere Getränke von selbst auf. Tippe auf KARTE - er wartet im Wichtelwald.',
     ziel: ladenZiel, fertig: () => S.hat('nachfuell'), laden: { tab: 'wichtel', id: 'nachfuell' }, dauer: 16 },
-  { id: 'w_servier', ruhig: true, sofort: true, wann: () => zielDran('servier', 'servier') && !S.hat('servier'),
+  { id: 'w_servier', ruhig: true, sofort: true, wann: () => zielDran('servier', 'servier') && !S.hat('servier') && mitNeuemWichtel(),
     text: () => 'Der wichtigste Helfer: Der SERVIER-WICHTEL bedient Gäste ganz allein. Tippe auf KARTE - im Wichtelwald wartet er.',
     ziel: ladenZiel, fertig: () => S.hat('servier'), laden: { tab: 'wichtel', id: 'servier' }, dauer: 16 },
   // Abschluss der Startziele: was die Wichtel ohne dich tun, und wie es weitergeht
@@ -297,6 +300,11 @@ const HINWEISE = [
   { id: 'ruf', ruhig: true, wann: () => Z.fertig() && S.ruf().stufe >= 1,
     text: () => 'Dein Stand spricht sich herum! Jeden Tag, an dem du ein bisschen mitarbeitest, steigt sein RUF - und alle Preise mit. Wie weit du heute bist, steht unter AUFTRÄGE.',
     ziel: auftragZiel, dauer: 10 },
+  // 21.11.: AUFTRÄGE geht erst mit dem letzten Startziel auf - dann EINE Blase für Aufträge, Erfolge und Album
+  { id: 'auftraege_auf', sofort: true, ersetzt: ['auftraege_neu', 'erfolge'], wann: () => S.auftraegeOffen() && !Z.fertig() && !S.st.tipps.auftrag,
+    info: () => 'AUFTRÄGE ist jetzt offen! Dort warten jeden Tag drei Aufgaben mit Belohnung - der schwere bringt ein Sammelstück. Daneben die ERFOLGSWAND: Für alles, was du schaffst, hängt eine Socke am Kamin. Und im ALBUM sammelst du Gäste, Tiere und Rezepte.',
+    text: () => 'Tippe auf AUFTRÄGE und hol dir deinen ersten Auftrag.',
+    ziel: auftragZiel, fertig: () => !!S.st.tipps.auftrag },
   { id: 'auftrag', ruhig: true, ersetzt: ['auftraege_neu'], wann: () => Z.fertig() && A.abholbar() > 0,
     text: () => 'Auftrag erfüllt! Unter AUFTRÄGE wartet deine Belohnung. Jeden Tag gibt es drei neue.',
     ziel: auftragZiel, fertig: () => A.abholbar() === 0, dauer: 10 },
@@ -383,7 +391,9 @@ function hinweise(dt) {
     // Getränk, Auftrag erfüllt …) halten das Spiel NICHT an. Sie stehen da,
     // bis die Lage vorbei ist oder ihre Zeit um ist; Antippen schließt sie.
     // Im Betatest kamen sonst ~15 Pausen in 13 Minuten.
-    if (h.ruhig) {
+    // 21.11. (Nutzerwunsch): JEDE helle Blase hält das Spiel an, bis man „Weiter" tippt - auch die ruhigen.
+    // Sie laufen deshalb jetzt durch denselben Weg wie die übrigen (unten); der alte Zweig bleibt aus.
+    if (h.ruhig && false) {
       const fertigR = h.fertig ? h.fertig() : false;
       // 28.10. (gemeldet: „manchmal zu schnell weg"): erst nach 3 s sichtbar darf die erledigte Lage sie
       // schließen, und die Zeit ist mindestens 10 s (vorher 7). `t` läuft nur, solange die Blase zu sehen ist
@@ -477,9 +487,10 @@ function zeige(z) {
   } else zeiger.classList.add('versteckt');
   const unten = z.ziel && z.ziel.y >= G;
   if (z.weiter && !unten) {
-    // Blasen mit „Weiter" stehen seit 02.10. unten über der Leiste: Dort ist
-    // der Daumen. Das Spiel steht ohnehin, die Töpfe darf sie verdecken.
-    tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${C.LEISTE + C.LEISTE_LUFT + 5})`;
+    // Blasen mit „Weiter" stehen seit 21.11. mittig (Nutzerwunsch, vorher unten über der Leiste)
+    tipp.style.bottom = '';
+    const hoehe = document.getElementById('huelle').clientHeight;
+    tipp.style.top = `${Math.max(8, Math.round((hoehe - tipp.offsetHeight) / 2))}px`;
     tipp.dataset.pfeil = '';
   } else if (unten) {
     tipp.style.top = ''; tipp.style.bottom = `calc(var(--px) * ${H - G + 6})`;
