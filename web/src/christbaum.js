@@ -24,12 +24,12 @@
  * Drehung, das Auto federt ein, ein Gurt schnappt zu.
  * Dazu eigene Bäume aus der Baumschule (`eigen`): golden markiert, ×3 Punkte.
  */
-import * as C from './config.js?v=202611261500';
-import * as Z from './zeit.js?v=202611261500';
-import * as T from './ton.js?v=202611261500';
-import * as MH from './minihud.js?v=202611261500';
-import * as L from './licht.js?v=202611261500';
-import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202611261500';
+import * as C from './config.js?v=202611261600';
+import * as Z from './zeit.js?v=202611261600';
+import * as T from './ton.js?v=202611261600';
+import * as MH from './minihud.js?v=202611261600';
+import * as L from './licht.js?v=202611261600';
+import { r, p, ton, mische, text as pixText, textBreite, figurKlein, neueFarben } from './pixel.js?v=202611261600';
 
 const $ = (s) => document.querySelector(s);
 const W = 180;
@@ -165,7 +165,10 @@ function tippeUnten(x, y) {
   const g = spiel, a = g.auto, m = MASCHINE(), w = g.ware;
   // Netz: Tipps zählen schon, während der Baum noch fällt oder rutscht (gemerkt in `vor`)
   const amNetz = Math.abs(x - m.x) < 30 && Math.abs(y - (m.y - 8)) < 24;
-  const amBaum = w && Math.abs(x - (w.x + HOEHE[w.gr] / 2)) < HOEHE[w.gr] / 2 + 8 && Math.abs(y - w.y) < 14;
+  // 26.11. (gemeldet: schnelle Tipps nach dem Sägen zählten schon fürs Netz): Der Baum selbst zählt erst,
+  // wenn er an der Maschine liegt - vorher fällt und rutscht er quer übers Feld, und jeder Nachklapp-Tipp
+  // vom Sägen traf ihn. Vorgemerkt (`vor`) wird nur ein Tipp auf die Maschine.
+  const amBaum = w && w.phase === 'wartet' && Math.abs(x - (w.x + HOEHE[w.gr] / 2)) < HOEHE[w.gr] / 2 + 8 && Math.abs(y - w.y) < 14;
   if (g.schritt === 'netz' && w && (amNetz || amBaum) && w.netz + w.vor < NETZ) {
     if (w.phase === 'wartet') netzZug(w); else w.vor++;
     return;

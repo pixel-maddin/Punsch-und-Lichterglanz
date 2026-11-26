@@ -12,7 +12,7 @@
  * Seite (github.io), nie lokal. Offline schlägt der Aufruf still fehl - das Spiel
  * merkt davon nichts. Steht so auch auf datenschutz.html („Besucherzählung").
  */
-import { ZAEHLER } from './config.js?v=202611261500';
+import { ZAEHLER } from './config.js?v=202611261600';
 
 const AKTIV = !!ZAEHLER && typeof location !== 'undefined' && /\.github\.io$/.test(location.hostname);
 
