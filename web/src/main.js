@@ -4,26 +4,26 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611261300';
-import * as S from './spiel.js?v=202611261300';
-import * as Z from './zeit.js?v=202611261300';
-import * as T from './ton.js?v=202611261300';
-import * as LI from './lichtung.js?v=202611261300';
-import * as CB from './christbaum.js?v=202611261300';
-import * as KA from './karte.js?v=202611261300';
-import * as SB from './schlitten.js?v=202611261300';
-import * as EB from './schlittschuh.js?v=202611261300';
-import * as BS from './backstube.js?v=202611261300';
-import * as UI from './ui.js?v=202611261300';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611261300';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611261300';
-import * as Kacheln from './kacheln.js?v=202611261300';
-import * as Lernen from './lernen.js?v=202611261300';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611261300';
-import * as A from './auftraege.js?v=202611261300';
-import * as E from './erfolge.js?v=202611261300';
-import * as ZL from './ziele.js?v=202611261300';
-import * as Zaehler from './zaehler.js?v=202611261300';
+import * as C from './config.js?v=202611261500';
+import * as S from './spiel.js?v=202611261500';
+import * as Z from './zeit.js?v=202611261500';
+import * as T from './ton.js?v=202611261500';
+import * as LI from './lichtung.js?v=202611261500';
+import * as CB from './christbaum.js?v=202611261500';
+import * as KA from './karte.js?v=202611261500';
+import * as SB from './schlitten.js?v=202611261500';
+import * as EB from './schlittschuh.js?v=202611261500';
+import * as BS from './backstube.js?v=202611261500';
+import * as UI from './ui.js?v=202611261500';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611261500';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611261500';
+import * as Kacheln from './kacheln.js?v=202611261500';
+import * as Lernen from './lernen.js?v=202611261500';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611261500';
+import * as A from './auftraege.js?v=202611261500';
+import * as E from './erfolge.js?v=202611261500';
+import * as ZL from './ziele.js?v=202611261500';
+import * as Zaehler from './zaehler.js?v=202611261500';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -258,6 +258,8 @@ T.setzeMusik(S.st.ton.musik);
 // ---------------------------------------------------------------------------
 let abendErinnert = 0;
 function ankommen(erstesMal) {
+  // 26.11.: Besucherzählung - Dranbleiben (Spieltag-Meilensteine, Heiligabend), je Gerät einmal
+  { const d = Z.jetzt(); Zaehler.dranbleiben(S.st, S.spieltag() + 1, (d.getMonth() === 11 && d.getDate() >= 24) || (d.getMonth() === 0 && d.getDate() <= 6)); }
   const neueSaison = S.pruefeSaison();
   // 12.11. (Nutzerwunsch): Kein Wechsel mehr in den echten Kalender, wenn der eigene Advent vorbei ist -
   // ab dem eigenen 7.1. ist Winterpause wie im echten Kalender (vorher 30.10.: „Weihnachten kommt noch einmal")
