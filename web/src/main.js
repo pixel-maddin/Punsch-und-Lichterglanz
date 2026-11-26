@@ -4,25 +4,26 @@
  *
  * Testweg: window.__spiel (siehe unten).
  */
-import * as C from './config.js?v=202611211905';
-import * as S from './spiel.js?v=202611211905';
-import * as Z from './zeit.js?v=202611211905';
-import * as T from './ton.js?v=202611211905';
-import * as LI from './lichtung.js?v=202611211905';
-import * as CB from './christbaum.js?v=202611211905';
-import * as KA from './karte.js?v=202611211905';
-import * as SB from './schlitten.js?v=202611211905';
-import * as EB from './schlittschuh.js?v=202611211905';
-import * as BS from './backstube.js?v=202611211905';
-import * as UI from './ui.js?v=202611211905';
-import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611211905';
-import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611211905';
-import * as Kacheln from './kacheln.js?v=202611211905';
-import * as Lernen from './lernen.js?v=202611211905';
-import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611211905';
-import * as A from './auftraege.js?v=202611211905';
-import * as E from './erfolge.js?v=202611211905';
-import * as ZL from './ziele.js?v=202611211905';
+import * as C from './config.js?v=202611261200';
+import * as S from './spiel.js?v=202611261200';
+import * as Z from './zeit.js?v=202611261200';
+import * as T from './ton.js?v=202611261200';
+import * as LI from './lichtung.js?v=202611261200';
+import * as CB from './christbaum.js?v=202611261200';
+import * as KA from './karte.js?v=202611261200';
+import * as SB from './schlitten.js?v=202611261200';
+import * as EB from './schlittschuh.js?v=202611261200';
+import * as BS from './backstube.js?v=202611261200';
+import * as UI from './ui.js?v=202611261200';
+import { zeichneWelt, schlittenPos, funkeln, SCHNEEMANN_X, KATZE_X } from './szene.js?v=202611261200';
+import { zeichneTresen, treffer, trifftSchild, trifftChef } from './tresen.js?v=202611261200';
+import * as Kacheln from './kacheln.js?v=202611261200';
+import * as Lernen from './lernen.js?v=202611261200';
+import { zeigeAdvent, zeigeHeiligabend, zeigeRueckblick, zeigeErsterSchnee, zeigeWettbewerb, zeigeJuryAnsage, zeigeSilvester, zeigeWeihnachtsmorgen, zeigeWinterpause } from './ereignis.js?v=202611261200';
+import * as A from './auftraege.js?v=202611261200';
+import * as E from './erfolge.js?v=202611261200';
+import * as ZL from './ziele.js?v=202611261200';
+import * as Zaehler from './zaehler.js?v=202611261200';
 
 const cv = document.getElementById('cv');
 const c = cv.getContext('2d');
@@ -534,6 +535,7 @@ function sekundenTakt() {
     // 21.11. (Betatest): Das letzte Ziel meldet das Fenster „Wie geht es weiter?" samt Sternen - die Einblendung
     // kam sonst NACH dem Fenster und sagte dasselbe noch einmal
     if (!ZL.fertig()) UI.toast(`Ziel ${ZL.nummer() - 1} geschafft! +${ziel.lohn} Sterne`, 'neu');
+    else Zaehler.ereignis('startziele-geschafft');   // 26.11.: Besucherzählung
     UI.zielPuls();
   }
   UI.zielLeiste();
@@ -590,10 +592,12 @@ else if (!S.st.intro) {
     S.speichere();
     UI.zeigeZiel(modus, () => {
       S.st.intro = true; S.st.lernen = 0; S.setzeStartTag(); S.speichere();
+      Zaehler.ereignis(`neues-spiel-${modus}`);   // 26.11.: Besucherzählung
       setTimeout(() => ankommen(true), 100);
     });
   }));
 } else ankommen(true);
+if (!S.DEMO) Zaehler.geoeffnet();   // 26.11.: Besucherzählung (nur auf github.io)
 requestAnimationFrame(frame);
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {

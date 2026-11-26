@@ -1248,4 +1248,7 @@ export const MUSIK_CREDITS = [
   { wo: 'Bei besonderen Ereignissen', stuecke: [
     { titel: 'The Magic Of Midnight', von: 'kaazoom', seite: 'orchestral-the-magic-of-midnight-15-sec-stinger-christmas-cinematic-597243' } ] },
 ];
+// Besucherzählung (26.11., zaehler.js): GoatCounter-Code, also <code>.goatcounter.com. Leer = aus.
+export const ZAEHLER = 'punsch-lichterglanz';
+
 export const FEEDBACK = { url: 'https://docs.google.com/forms/d/e/1FAIpQLSe54k8PrZGDBAHZaaTWH2LiJfo0OlOnMgKxy0DlxTuXnf-vzw/viewform', infoFeld: 'entry.364683706' };

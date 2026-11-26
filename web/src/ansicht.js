@@ -5,10 +5,10 @@
 // Vordergrund und dem Hausnamen im Himmel. „Als Foto" gibt den Moment an die
 // Foto-Karte weiter. Bewusst KEIN Zoom: Pixelkunst wird davon nur gröber.
 // ---------------------------------------------------------------------------
-import { zeichneWelt } from './szene.js?v=202611211905';
-import { schriftBild } from './schrift.js?v=202611211905';
-import * as Z from './zeit.js?v=202611211905';
-import * as S from './spiel.js?v=202611211905';
+import { zeichneWelt } from './szene.js?v=202611261200';
+import { schriftBild } from './schrift.js?v=202611261200';
+import * as Z from './zeit.js?v=202611261200';
+import * as S from './spiel.js?v=202611261200';
 
 const $ = (s) => document.querySelector(s);
 /** Tageszeiten zur Wahl - Stunde, Minute (null = jetzt) */

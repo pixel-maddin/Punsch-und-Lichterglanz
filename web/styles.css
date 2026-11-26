@@ -1899,3 +1899,8 @@ ul.ziel li img.psym { margin-right: calc(var(--px) * 1.5); vertical-align: calc(
 /* 21.11. (4): Sprungleiste in den Läden flacher - mehr Platz zum Scrollen */
 #blattInhalt .laden-kopf .haus-sprung { padding: calc(var(--px) * 0.5); margin-bottom: calc(var(--px) * 1); }
 #blattInhalt .laden-kopf .hs-k { min-height: calc(var(--px) * 10); font-size: var(--t-klein); }
+
+/* 26.11.: Credits - wer das Spiel gemacht hat, ganz oben */
+.credits-autor { text-align: center; margin: 0 0 calc(var(--px) * 3); padding-bottom: calc(var(--px) * 2.5); border-bottom: 1px dashed var(--text3); line-height: 1.5; }
+.credits-autor b { font-size: 1.15em; }
+.credits-autor a { color: inherit; font-weight: 700; text-decoration: underline; text-decoration-thickness: 1px; }
