@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=202611271000';
-import * as S from './spiel.js?v=202611271000';
+import * as C from './config.js?v=202611271200';
+import * as S from './spiel.js?v=202611271200';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;
@@ -42,7 +42,9 @@ export const ERFOLGE = [
   { id: 'sonderAlle',  name: 'Alle Jahre wieder',      text: 'Bediene jeden besonderen Gast mindestens einmal.', ziel: SONDER.length, wert: () => SONDER.filter((t) => typ(t) > 0).length },
   { id: 'gross10',     name: 'Gruppenreise',           text: 'Schaffe 10 Großbestellungen.',                ziel: 10,   wert: () => zahl('gross') },
   { id: 'sammlung',    name: 'Sammlerglück',           text: 'Sammle alle Sammelstücke aus den schweren Aufträgen.', ziel: C.AUFTRAG_DEKO.length, wert: () => C.AUFTRAG_DEKO.filter((d) => S.st.kalDeko[d.id]).length },
-  { id: 'bedient5000', name: 'Punschlegende',          text: 'Bediene 5.000 Gäste selbst.',                 ziel: 5000, wert: () => zahl('selbst') },
+  // 27.11. (Nutzerwunsch): 5.000 → 2.500 - gemessen schafft ein Mensch mit 10 min am Tag bis Weihnachten
+  // etwa 2.000 selbst Bediente (Bot 3.000); id bleibt wegen alter Spielstände
+  { id: 'bedient5000', name: 'Punschlegende',          text: 'Bediene 2.500 Gäste selbst.',                 ziel: 2500, wert: () => zahl('selbst') },
   { id: 'herz300',     name: 'Schöne Bescherung',      text: 'Erreiche 300 ♥ Stimmung.',                    ziel: 300,  wert: () => S.stimmung() },
   { id: 'kalender',    name: 'Türchen um Türchen',     text: 'Öffne alle 24 Türchen im Adventskalender.',   ziel: 24,   wert: () => Object.keys(S.st.kalender || {}).length },
   // 25.10. (Nutzerwunsch, „61 Dinge voll ausgebaut ist zu schwer"): 50 gekaufte Dinge, jedes ab dem ersten Kauf
