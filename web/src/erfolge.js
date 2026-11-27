@@ -8,8 +8,8 @@
  *
  * Besondere Gäste werden in den Texten nicht beim Namen genannt.
  */
-import * as C from './config.js?v=202611261600';
-import * as S from './spiel.js?v=202611261600';
+import * as C from './config.js?v=202611271000';
+import * as S from './spiel.js?v=202611271000';
 
 const stats = () => S.st.stats;
 const typ = (t) => (stats().typ || {})[t] || 0;
@@ -19,10 +19,12 @@ const WICHTEL = ['spuel', 'nachfuell', 'servier'];
 
 // Reihenfolge = Platz an der Wand (oben links nach unten rechts), grob von leicht nach schwer
 export const ERFOLGE = [
-  // id bleibt 'bedient1' (alte Spielstände), das Ziel sind seit 29.09. 15 Gäste
-  { id: 'bedient1',    name: 'Die ersten Becher',      text: 'Bediene deine ersten 15 Gäste.',              ziel: 15,   wert: () => zahl('bedient') },
+  // id bleibt 'bedient1' (alte Spielstände), das Ziel sind seit 29.09. 15 Gäste.
+  // 27.11. (Nutzerwunsch): Die vier Gäste-Socken zählen nur noch SELBST Bediente (stats.selbst) - vorher
+  // zählten Wichtel und Kiste mit, und man hatte nach vier Tagen 1.900 „bediente" Gäste.
+  { id: 'bedient1',    name: 'Die ersten Becher',      text: 'Bediene deine ersten 15 Gäste selbst.',        ziel: 15,   wert: () => zahl('selbst') },
   { id: 'schwung',     name: 'In Schwung',             text: 'Erreiche vollen Schwung (40 % mehr Sterne).',            ziel: 1,    wert: () => zahl('schwungVoll') },
-  { id: 'bedient100',  name: 'Stammkundschaft',        text: 'Bediene 100 Gäste.',                          ziel: 100,  wert: () => zahl('bedient') },
+  { id: 'bedient100',  name: 'Stammkundschaft',        text: 'Bediene 100 Gäste selbst.',                   ziel: 100,  wert: () => zahl('selbst') },
   { id: 'sonder1',     name: 'Hoher Besuch',           text: 'Bediene einen besonderen Gast.',              ziel: 1,    wert: () => SONDER.reduce((a, t) => a + typ(t), 0) },
   { id: 'kinder',      name: 'Leuchtende Kinderaugen', text: 'Bediene 25 Kinder.',                          ziel: 25,   wert: () => typ('kind') },
   { id: 'omas',        name: 'Omas Liebling',          text: 'Bediene 25 Omas und Opas.',                   ziel: 25,   wert: () => typ('oma') + typ('opa') },
@@ -33,14 +35,14 @@ export const ERFOLGE = [
   { id: 'eilig',       name: 'Flinke Hände',           text: 'Bediene 25 eilige Gäste.',                    ziel: 25,   wert: () => zahl('eilig') },
   { id: 'auftraege',   name: 'Fleißbienchen',          text: 'Hole 10 Aufträge ab.',                        ziel: 10,   wert: () => zahl('auftraege') },
   { id: 'herz100',     name: 'Gemütlich',              text: 'Erreiche 100 ♥ Stimmung.',                    ziel: 100,  wert: () => S.stimmung() },
-  { id: 'bedient1000', name: 'Dorfgespräch',           text: 'Bediene 1.000 Gäste.',                        ziel: 1000, wert: () => zahl('bedient') },
+  { id: 'bedient1000', name: 'Dorfgespräch',           text: 'Bediene 1.000 Gäste selbst.',                 ziel: 1000, wert: () => zahl('selbst') },
   { id: 'serie',       name: 'Keiner geht leer aus',   text: 'Bediene 50 Gäste hintereinander, ohne dass einer weitergeht.', ziel: 50, wert: () => Math.max(zahl('serie'), zahl('serieBest')) },
   { id: 'getraenke',   name: 'Volle Karte',            text: 'Hol dir alle Getränke und Leckereien.',        ziel: C.PRODUKTE.length, wert: () => S.produkteBesessen().length },
   { id: 'nikolaus5',   name: 'Nikolaus-Freund',        text: 'Tippe den Nikolaus 5-mal an.',                ziel: 5,    wert: () => zahl('nikolaus') },
   { id: 'sonderAlle',  name: 'Alle Jahre wieder',      text: 'Bediene jeden besonderen Gast mindestens einmal.', ziel: SONDER.length, wert: () => SONDER.filter((t) => typ(t) > 0).length },
   { id: 'gross10',     name: 'Gruppenreise',           text: 'Schaffe 10 Großbestellungen.',                ziel: 10,   wert: () => zahl('gross') },
   { id: 'sammlung',    name: 'Sammlerglück',           text: 'Sammle alle Sammelstücke aus den schweren Aufträgen.', ziel: C.AUFTRAG_DEKO.length, wert: () => C.AUFTRAG_DEKO.filter((d) => S.st.kalDeko[d.id]).length },
-  { id: 'bedient5000', name: 'Punschlegende',          text: 'Bediene 5.000 Gäste.',                        ziel: 5000, wert: () => zahl('bedient') },
+  { id: 'bedient5000', name: 'Punschlegende',          text: 'Bediene 5.000 Gäste selbst.',                 ziel: 5000, wert: () => zahl('selbst') },
   { id: 'herz300',     name: 'Schöne Bescherung',      text: 'Erreiche 300 ♥ Stimmung.',                    ziel: 300,  wert: () => S.stimmung() },
   { id: 'kalender',    name: 'Türchen um Türchen',     text: 'Öffne alle 24 Türchen im Adventskalender.',   ziel: 24,   wert: () => Object.keys(S.st.kalender || {}).length },
   // 25.10. (Nutzerwunsch, „61 Dinge voll ausgebaut ist zu schwer"): 50 gekaufte Dinge, jedes ab dem ersten Kauf

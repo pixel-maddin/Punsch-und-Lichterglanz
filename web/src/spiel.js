@@ -7,9 +7,9 @@
  * Meldungen nach außen (Ton, Einblendung) gehen über `hooks`, die
  * main.js setzt - so bleibt diese Datei ohne Abhängigkeit auf UI und Ton.
  */
-import * as C from './config.js?v=202611261600';
-import * as Z from './zeit.js?v=202611261600';
-import { neueFarben } from './pixel.js?v=202611261600';
+import * as C from './config.js?v=202611271000';
+import * as Z from './zeit.js?v=202611271000';
+import { neueFarben } from './pixel.js?v=202611271000';
 
 // Vorführmodus (?demo=…, nur lokal): eigener Speicherplatz, damit Store-
 // Screenshots nie den echten Spielstand anfassen
@@ -78,6 +78,9 @@ function laden() {
       // 30.10. (Testbericht): Dieselbe Falle für `lernen` - neuerStand() trägt 0, ein alter Stand ohne die
       // Marke, der schon gespielt hat, bekam sonst die Einführung noch einmal
       if (!('lernen' in alt) && alt.intro) stand.lernen = 99;
+      // 27.11. (Nutzerwunsch): Die Gäste-Socken zählen nur noch SELBST Bediente (`stats.selbst`). Alte Stände
+      // übernehmen die Summe von `stats.produkt` - das zählt seit 17.10. genau das, je Sorte.
+      if (stand.stats && stand.stats.selbst == null) stand.stats.selbst = Object.values(stand.stats.produkt || {}).reduce((a, b) => a + b, 0);
       // 25.10. (gemeldet: „Markt in 4 Tagen", jeden Tag wieder): Wer zwischen 01.10. und 11.10.
       // geladen hat, bekam startTag 0 aus neuerStand() GESPEICHERT - die Reparatur oben greift
       // nur, wenn der Eintrag fehlt. Spieltag blieb 0, der Markt-Anker wanderte täglich mit.
@@ -1466,6 +1469,7 @@ function liefereGross(g, faktor) {
   const betrag = grund * (1 + lauf.schwung * C.SCHWUNG_PRO) * dev.geld;
   verdiene(betrag);
   st.stats.bedient++;
+  st.stats.selbst = (st.stats.selbst || 0) + 1;   // 27.11.: eine Großbestellung zählt als ein selbst bedienter Gast
   zaehleErfolg('gross');
   rufPunkt('gold');
   lauf.texte.push({ platz: g.platz, x: g.x, text: '+' + Math.round(betrag), t: 0, gross: true });
@@ -1536,6 +1540,7 @@ function zaehleBedient(g, auto, faktor, schwungVorher) {
   zaehleErfolg('serie');
   if (st.stats.serie > (st.stats.serieBest || 0)) st.stats.serieBest = st.stats.serie;
   if (auto) return;
+  st.stats.selbst = (st.stats.selbst || 0) + 1;   // 27.11.: für die Gäste-Socken (nur selbst bedient)
   // Für die Bitten der Stammgäste (17.10.): je Sorte selbst serviert, mit Handgriff, goldene
   st.stats.produkt = st.stats.produkt || {}; st.stats.produkt[g.wunsch] = (st.stats.produkt[g.wunsch] || 0) + 1;
   if (faktor > 1) { st.stats.griffProdukt = st.stats.griffProdukt || {}; st.stats.griffProdukt[g.wunsch] = (st.stats.griffProdukt[g.wunsch] || 0) + 1; }
