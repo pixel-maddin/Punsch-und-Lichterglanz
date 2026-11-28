@@ -15,12 +15,12 @@
  * wenn sich Höhe, Schnee oder Fassade ändern. Je Bild kommt nur dazu, was
  * sich bewegt (Rauch, Wasserglitzern, Tiere, Schlitten, Schneefall, Lichter).
  */
-import * as C from './config.js?v=202611271200';
-import * as S from './spiel.js?v=202611271200';
-import * as Z from './zeit.js?v=202611271200';
-import * as FEIN from './fein.js?v=202611271200';
-import * as T from './ton.js?v=202611271200';
-import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611271200';
+import * as C from './config.js?v=202611281000';
+import * as S from './spiel.js?v=202611281000';
+import * as Z from './zeit.js?v=202611281000';
+import * as FEIN from './fein.js?v=202611281000';
+import * as T from './ton.js?v=202611281000';
+import { r, p, ton, mische, wichtelKlein, text as pixText } from './pixel.js?v=202611281000';
 
 const $ = (s) => document.querySelector(s);
 
@@ -1417,7 +1417,8 @@ function nachtLichter(li, w, h, liste, orte, winter) {
     nachtKarte.width = w; nachtKarte.height = hh;
     const k = nachtKarte.getContext('2d');
     // Grundton: Tag weiß (ändert nichts), Nacht kühles Blau
-    const ziel = winter ? [78, 84, 142] : [62, 64, 122];
+    // 28.11. (Nutzerwunsch): ohne Schnee heller - die grüne Landschaft soff nachts ab (vorher 62, 64, 122)
+    const ziel = winter ? [78, 84, 142] : [98, 102, 156];
     const ton = ziel.map((z) => Math.round(255 - (255 - z) * nacht));
     k.globalCompositeOperation = 'source-over';
     k.fillStyle = `rgb(${ton.join(',')})`; k.fillRect(0, 0, w, hh);
